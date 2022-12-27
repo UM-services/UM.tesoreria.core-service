@@ -1,0 +1,37 @@
+spring-boot-migrator.log
+.rewrite-cache/
+*.xlsx
+logs/
+/target/
+/logs/
+!.mvn/wrapper/maven-wrapper.jar
+.metadata/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+/build/
+git.log.*
+app.log
+app.log.2019-09-18.0.gz app.log.2019-09-19.0.gz app.log.2019-09-19.1.gz
+app.log.2019-09-18.0.gz app.log.2019-09-19.0.gz app.log.2019-09-19.1.gz
+/bin/
+/.apt_generated_tests/

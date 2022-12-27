@@ -1,0 +1,60 @@
+app:
+  server: 10.147.20.25:3306
+  database: tesium
+  user: root
+  password: root
+  add-properties: true
+  logging: debug
+  livereload:
+    enabled: true
+    port: 35792
+  open-in-view: true
+  port: 8092
+  mail:
+    username: chequeras@um.edu.ar
+    password: 8VlfKS44o8YbOutcm2VT
+  
+server:
+  port: ${app.port}
+  
+spring:
+  main:
+    allow-circular-references: true
+  datasource:
+    url: jdbc:mysql://${app.server}/${app.database}?useSSL=false&serverTimezone=UTC
+    username: ${app.user}
+    password: ${app.password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: ${app.open-in-view}
+    hibernate:
+      ddl-auto: none
+  devtools:
+    livereload:
+      enabled: ${app.livereload.enabled}
+      port: ${app.livereload.port}
+    add-properties: ${app.add-properties}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${app.mail.username}
+    password: ${app.mail.password}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+logging:
+  level:
+    ar.edu.um.tesoreria.rest: debug
+    web: ${app.logging}
+    org:
+      hibernate:
+        SQL: ${app.logging}
