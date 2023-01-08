@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package ar.edu.um.tesoreria.rest.repository.view.impl;
 
 import java.util.ArrayList;
@@ -15,6 +18,10 @@ import org.springframework.stereotype.Repository;
 import ar.edu.um.tesoreria.rest.model.view.ProveedorSearch;
 import ar.edu.um.tesoreria.rest.repository.view.IProveedorSearchRepositoryCustom;
 
+/**
+ * @author daniel
+ *
+ */
 @Repository
 public class IProveedorSearchRepositoryCustomImpl implements IProveedorSearchRepositoryCustom {
 
@@ -24,17 +31,17 @@ public class IProveedorSearchRepositoryCustomImpl implements IProveedorSearchRep
 	@Override
 	public List<ProveedorSearch> findAllByStrings(List<String> conditions) {
 
-		CriteriaBuilder criteriabuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<ProveedorSearch> query = criteriabuilder.createQuery(ProveedorSearch.class);
-		Root<ProveedorSearch> root = query.from(ProveedorSearch.class);
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<ProveedorSearch> criteriaQuery = criteriaBuilder.createQuery(ProveedorSearch.class);
+		Root<ProveedorSearch> root = criteriaQuery.from(ProveedorSearch.class);
 
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		conditions.forEach(condition -> {
-			predicates.add(criteriabuilder.like(root.get("search"), "%" + condition + "%"));
+			predicates.add(criteriaBuilder.like(root.get("search"), "%" + condition + "%"));
 		});
-		query.select(root).where(predicates.toArray(new Predicate[predicates.size()]));
-		query.orderBy(criteriabuilder.asc(root.get("razonSocial")));
-		return entityManager.createQuery(query).setMaxResults(50).getResultList();
+		criteriaQuery.select(root).where(predicates.toArray(new Predicate[predicates.size()]));
+		criteriaQuery.orderBy(criteriaBuilder.asc(root.get("razonSocial")));
+		return entityManager.createQuery(criteriaQuery).setMaxResults(50).getResultList();
 	}
 
 }

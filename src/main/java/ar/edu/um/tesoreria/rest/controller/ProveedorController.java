@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import ar.edu.um.tesoreria.rest.exception.ProveedorNotFoundException;
 import ar.edu.um.tesoreria.rest.model.Proveedor;
 import ar.edu.um.tesoreria.rest.model.view.ProveedorSearch;
 import ar.edu.um.tesoreria.rest.service.ProveedorService;
@@ -37,24 +39,32 @@ public class ProveedorController {
 		return new ResponseEntity<List<Proveedor>>(service.findAll(), HttpStatus.OK);
 	}
 
+	@PostMapping("/search")
+	public ResponseEntity<List<ProveedorSearch>> findAllByStrings(@RequestBody List<String> conditions) {
+		return new ResponseEntity<List<ProveedorSearch>>(service.findAllByStrings(conditions), HttpStatus.OK);
+	}
+
 	@GetMapping("/{proveedorId}")
 	public ResponseEntity<Proveedor> findByProveedorId(@PathVariable Integer proveedorId) {
-		return new ResponseEntity<Proveedor>(service.findByProveedorId(proveedorId), HttpStatus.OK);
+		try {
+			return new ResponseEntity<Proveedor>(service.findByProveedorId(proveedorId), HttpStatus.OK);
+		} catch (ProveedorNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
 	}
 
 	@GetMapping("/cuit/{cuit}")
 	public ResponseEntity<Proveedor> findByCuit(@PathVariable String cuit) {
-		return new ResponseEntity<Proveedor>(service.findByCuit(cuit), HttpStatus.OK);
+		try {
+			return new ResponseEntity<Proveedor>(service.findByCuit(cuit), HttpStatus.OK);
+		} catch (ProveedorNotFoundException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
 	}
 
 	@GetMapping("/last")
 	public ResponseEntity<Proveedor> findLast() {
 		return new ResponseEntity<Proveedor>(service.findLast(), HttpStatus.OK);
-	}
-
-	@PostMapping("/search")
-	public ResponseEntity<List<ProveedorSearch>> findByStrings(@RequestBody List<String> conditions) {
-		return new ResponseEntity<List<ProveedorSearch>>(service.findByStrings(conditions), HttpStatus.OK);
 	}
 
 	@PostMapping("/")

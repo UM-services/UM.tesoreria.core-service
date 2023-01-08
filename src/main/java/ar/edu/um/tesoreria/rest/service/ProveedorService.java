@@ -25,14 +25,14 @@ public class ProveedorService {
 	private IProveedorRepository repository;
 
 	@Autowired
-	private ProveedorSearchService proveedorsearchservice;
+	private ProveedorSearchService proveedorSearchService;
 
 	public List<Proveedor> findAll() {
 		return repository.findAll();
 	}
 
-	public List<ProveedorSearch> findByStrings(List<String> conditions) {
-		return proveedorsearchservice.findAllByStrings(conditions);
+	public List<ProveedorSearch> findAllByStrings(List<String> conditions) {
+		return proveedorSearchService.findAllByStrings(conditions);
 	}
 
 	public Proveedor findByProveedorId(Integer proveedorId) {
