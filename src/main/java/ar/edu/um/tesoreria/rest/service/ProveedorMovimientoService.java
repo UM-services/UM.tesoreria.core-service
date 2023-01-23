@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoNotFoundException;
 import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
@@ -63,45 +66,55 @@ public class ProveedorMovimientoService {
 	}
 
 	public List<ProveedorMovimiento> findAllAsignables(Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta,
-			Integer geograficaId, Boolean todos) {
+			Integer geograficaId, Boolean todos) throws JsonProcessingException {
 		List<Comprobante> comprobantes = comprobanteService.findAllByTipoTransaccionId(3);
-		log.info("Comprobantes -> {}", comprobantes);
+		log.info("Comprobantes -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+				.writeValueAsString(comprobantes));
 		List<Integer> comprobanteIds = comprobantes.stream().map(c -> c.getComprobanteId())
 				.collect(Collectors.toList());
-		log.info("ComprobanteIds -> {}", comprobanteIds);
+		log.info("ComprobanteIds -> {}", JsonMapper.builder().findAndAddModules().build()
+				.writerWithDefaultPrettyPrinter().writeValueAsString(comprobanteIds));
 		List<Long> proveedorMovimientoIds = null;
 		if (geograficaId == 0) {
 			List<ProveedorMovimiento> proveedorMovimientos = repository
 					.findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndFechaAnulacionIsNull(
 							proveedorId, desde, hasta, comprobanteIds);
-			log.info("ProveedorMovimientos -> {}", proveedorMovimientos);
+			log.info("ProveedorMovimientos -> {}", JsonMapper.builder().findAndAddModules().build()
+					.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimientos));
 			proveedorMovimientoIds = proveedorMovimientos.stream().map(m -> m.getProveedorMovimientoId())
 					.collect(Collectors.toList());
-			log.info("ProveedorMovimientoIds -> {}", proveedorMovimientoIds);
+			log.info("ProveedorMovimientoIds -> {}", JsonMapper.builder().findAndAddModules().build()
+					.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimientoIds));
 		} else {
 			List<ProveedorMovimiento> proveedorMovimientos = repository
 					.findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndGeograficaIdAndFechaAnulacionIsNull(
 							proveedorId, desde, hasta, comprobanteIds, geograficaId);
-			log.info("ProveedorMovimientos -> {}", proveedorMovimientos);
+			log.info("ProveedorMovimientos -> {}", JsonMapper.builder().findAndAddModules().build()
+					.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimientos));
 			proveedorMovimientoIds = proveedorMovimientos.stream().map(m -> m.getProveedorMovimientoId())
 					.collect(Collectors.toList());
-			log.info("ProveedorMovimientoIds -> {}", proveedorMovimientoIds);
+			log.info("ProveedorMovimientoIds -> {}", JsonMapper.builder().findAndAddModules().build()
+					.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimientoIds));
 		}
 		List<ProveedorArticulo> proveedorArticulos = proveedorArticuloService
 				.findAllByProveedorMovimientoIds(proveedorMovimientoIds, true);
-		log.info("ProveedorArticulos -> {}", proveedorArticulos);
+		log.info("ProveedorArticulos -> {}", JsonMapper.builder().findAndAddModules().build()
+				.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulos));
 		if (todos) {
 			proveedorArticulos = proveedorArticulos.stream()
 					.filter(p -> p.getAsignado().compareTo(p.getPrecioFinal()) != 0).collect(Collectors.toList());
-			log.info("ProveedorArticulos (if) -> {}", proveedorArticulos);
+			log.info("ProveedorArticulos (if) -> {}", JsonMapper.builder().findAndAddModules().build()
+					.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulos));
 		}
 		proveedorMovimientoIds = proveedorArticulos.stream().map(p -> p.getProveedorMovimientoId())
 				.collect(Collectors.toList());
-		log.info("ProveedorMovimientoIds -> {}", proveedorMovimientoIds);
+		log.info("ProveedorMovimientoIds -> {}", JsonMapper.builder().findAndAddModules().build()
+				.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimientoIds));
 		List<ProveedorMovimiento> proveedorMovimientos = repository
 				.findAllByProveedorMovimientoIdIn(proveedorMovimientoIds, Sort.by("fechaComprobante").descending()
 						.and(Sort.by("prefijo").ascending()).and(Sort.by("numeroComprobante").ascending()));
-		log.info("ProveedorMovimientos -> (return) {}", proveedorMovimientos);
+		log.info("ProveedorMovimientos -> (return) {}", JsonMapper.builder().findAndAddModules().build()
+				.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimientos));
 		return proveedorMovimientos;
 	}
 

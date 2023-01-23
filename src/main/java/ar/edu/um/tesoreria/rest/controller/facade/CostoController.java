@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import ar.edu.um.tesoreria.rest.model.dto.AsignacionCosto;
 import ar.edu.um.tesoreria.rest.service.facade.CostoService;
 
@@ -30,8 +33,10 @@ public class CostoController {
 	private CostoService service;
 
 	@PostMapping("/addAsignacion")
-	public ResponseEntity<Boolean> addAsignacion(@RequestBody AsignacionCosto asignacionCosto) {
-		log.debug("AsignacionCosto - {}", asignacionCosto);
+	public ResponseEntity<Boolean> addAsignacion(@RequestBody AsignacionCosto asignacionCosto)
+			throws JsonProcessingException {
+		log.debug("AsignacionCosto - {}", JsonMapper.builder().findAndAddModules().build()
+				.writerWithDefaultPrettyPrinter().writeValueAsString(asignacionCosto));
 		return new ResponseEntity<Boolean>(service.addAsignacion(asignacionCosto), HttpStatus.OK);
 	}
 

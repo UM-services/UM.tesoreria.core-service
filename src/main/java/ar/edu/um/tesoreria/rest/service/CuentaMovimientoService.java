@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import ar.edu.um.tesoreria.rest.exception.CuentaMovimientoNotFoundException;
 import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.view.CuentaMovimientoAsiento;
@@ -56,14 +59,20 @@ public class CuentaMovimientoService {
 				Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending()));
 	}
 
-	public List<CuentaMovimientoAsiento> findAllEntregaDetalleByProveedorMovimientoId(Long proveedorMovimientoId) {
+	public List<CuentaMovimientoAsiento> findAllEntregaDetalleByProveedorMovimientoId(Long proveedorMovimientoId)
+			throws JsonProcessingException {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 		List<String> asientos = entregaService.findAllDetalleByProveedorMovimientoId(proveedorMovimientoId, false)
 				.stream().map(e -> dateTimeFormatter.format(e.getFechaContable()) + "." + e.getOrdenContable())
 				.collect(Collectors.toList());
-		log.debug("Asientos -> {}", asientos);
-		return cuentaMovimientoAsientoService.findAllByAsientoIn(asientos, Sort.by("fechaContable").ascending().and(Sort
-				.by("ordenContable").ascending().and(Sort.by("debita").descending().and(Sort.by("item").ascending()))));
+		log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+				.writeValueAsString(asientos));
+		List<CuentaMovimientoAsiento> cuentaMovimientoAsientos = cuentaMovimientoAsientoService
+				.findAllByAsientoIn(asientos, Sort.by("fechaContable").ascending().and(Sort.by("ordenContable")
+						.ascending().and(Sort.by("debita").descending().and(Sort.by("item").ascending()))));
+		log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+				.writeValueAsString(cuentaMovimientoAsientos));
+		return cuentaMovimientoAsientos;
 	}
 
 	public CuentaMovimiento findLastByFecha(OffsetDateTime fechaContable) {
@@ -78,7 +87,12 @@ public class CuentaMovimientoService {
 
 	public CuentaMovimiento add(CuentaMovimiento cuentaMovimiento) {
 		cuentaMovimiento = repository.save(cuentaMovimiento);
-		log.debug("CuentaMovimiento -> " + cuentaMovimiento);
+		try {
+			log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build()
+					.writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+		} catch (JsonProcessingException e) {
+			log.debug("Error JSON Parser");
+		}
 		return cuentaMovimiento;
 	}
 

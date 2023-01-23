@@ -25,6 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -61,11 +64,21 @@ public class CostoService {
 		try {
 			Integer item = 0;
 			AsientoInternal asiento = contableService.nextAsiento(asignacionCosto.getFecha(), null);
-			log.debug("Asiento -> {}", asiento);
+			try {
+				log.debug("Asiento -> {}", JsonMapper.builder().findAndAddModules().build()
+						.writerWithDefaultPrettyPrinter().writeValueAsString(asiento));
+			} catch (JsonProcessingException e) {
+				log.debug("JSON Error Asiento");
+			}
 			Entrega entrega = new Entrega(null, asignacionCosto.getFecha(),
 					asignacionCosto.getUbicacionArticulo().getUbicacionId(), "", "", asiento.getFechaContable(),
 					asiento.getOrdenContable(), (byte) 0, "asignacion", null);
-			log.debug("Entrega -> {}", entrega);
+			try {
+				log.debug("Entrega -> {}", JsonMapper.builder().findAndAddModules().build()
+						.writerWithDefaultPrettyPrinter().writeValueAsString(entrega));
+			} catch (JsonProcessingException e) {
+				log.debug("JSON Error Entrega");
+			}
 
 			// Asiento
 			String concepto = MessageFormat.format("{0} - {1}-{2} - Asignación de Costos",
@@ -81,7 +94,12 @@ public class CostoService {
 					asignacionCosto.getProveedorMovimiento().getProveedorMovimientoId(), null, (byte) 0, null, null,
 					null, null, null);
 			cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
-			log.debug("CuentaMovimiento -> {}", cuentaMovimiento);
+			try {
+				log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build()
+						.writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+			} catch (JsonProcessingException e) {
+				log.debug("JSON Error CuentaMovimiento");
+			}
 			item += 1;
 			cuentaMovimiento = new CuentaMovimiento(null, entrega.getFechaContable(), entrega.getOrdenContable(), item,
 					asignacionCosto.getUbicacionArticulo().getNumeroCuenta(),
@@ -92,25 +110,51 @@ public class CostoService {
 					asignacionCosto.getProveedorMovimiento().getProveedorMovimientoId(), null, (byte) 0, null, null,
 					null, null, null);
 			cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
-			log.debug("CuentaMovimiento -> {}", cuentaMovimiento);
+			try {
+				log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build()
+						.writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+			} catch (JsonProcessingException e) {
+				log.debug("JSON Error CuentaMovimiento");
+			}
 
 			entrega = entregaService.add(entrega);
-			log.debug("Entrega -> {}", entrega);
+			try {
+				log.debug("Entrega -> {}", JsonMapper.builder().findAndAddModules().build()
+						.writerWithDefaultPrettyPrinter().writeValueAsString(entrega));
+			} catch (JsonProcessingException e) {
+				log.debug("JSON Error Entrega");
+			}
 			EntregaDetalle entregaDetalle = new EntregaDetalle(null, entrega.getEntregaId(),
 					asignacionCosto.getProveedorArticulo().getArticuloId(),
 					asignacionCosto.getProveedorArticulo().getProveedorMovimientoId(),
 					asignacionCosto.getProveedorArticulo().getOrden(),
 					asignacionCosto.getProveedorArticulo().getConcepto(), asignacionCosto.getImporte(), null, null,
 					null, null);
-			log.debug("EntregaDetalle -> {}", entregaDetalle);
+			try {
+				log.debug("EntregaDetalle -> {}", JsonMapper.builder().findAndAddModules().build()
+						.writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
+			} catch (JsonProcessingException e) {
+				log.debug("JSON Error EntregaDetalle");
+			}
 			entregaDetalle = entregaDetalleService.add(entregaDetalle);
+			try {
+				log.debug("EntregaDetalle -> {}", JsonMapper.builder().findAndAddModules().build()
+						.writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
+			} catch (JsonProcessingException e) {
+				log.debug("JSON Error EntregaDetalle");
+			}
 
 			ProveedorArticulo proveedorArticulo = asignacionCosto.getProveedorArticulo();
 			proveedorArticulo.setAsignado(proveedorArticulo.getAsignado().add(asignacionCosto.getImporte()).setScale(2,
 					RoundingMode.HALF_UP));
 			proveedorArticulo = proveedorArticuloService.update(proveedorArticulo,
 					proveedorArticulo.getProveedorArticuloId());
-			log.debug("ProveedorArticulo -> {}", proveedorArticulo);
+			try {
+				log.debug("ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build()
+						.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
+			} catch (JsonProcessingException e) {
+				log.debug("JSON Error ProveedorArticulo");
+			}
 		} catch (CuentaMovimientoNotFoundException e) {
 			log.debug("Error CuentaMovimiento - {}", e.getMessage());
 			return false;

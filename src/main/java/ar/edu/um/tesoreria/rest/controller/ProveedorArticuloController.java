@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
 import ar.edu.um.tesoreria.rest.model.dto.ProveedorArticuloAsignable;
 import ar.edu.um.tesoreria.rest.service.ProveedorArticuloService;
@@ -30,7 +32,7 @@ public class ProveedorArticuloController {
 
 	@PostMapping("/movimiento/")
 	public ResponseEntity<List<ProveedorArticulo>> findAllByProveedorMovimientoIds(
-			@RequestBody ProveedorArticuloAsignable asignables) {
+			@RequestBody ProveedorArticuloAsignable asignables) throws JsonProcessingException {
 		return new ResponseEntity<List<ProveedorArticulo>>(service.findAllByProveedorMovimientoIds(
 				asignables.getProveedorMovimientoIds(), asignables.getAsignables()), HttpStatus.OK);
 	}

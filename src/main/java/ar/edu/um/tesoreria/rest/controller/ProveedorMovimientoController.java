@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoNotFoundException;
 import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
 import ar.edu.um.tesoreria.rest.service.ProveedorMovimientoService;
@@ -40,7 +42,7 @@ public class ProveedorMovimientoController {
 	public ResponseEntity<List<ProveedorMovimiento>> findAllAsignables(@PathVariable Integer proveedorId,
 			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde,
 			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta,
-			@PathVariable Integer geograficaId, @PathVariable Boolean todos) {
+			@PathVariable Integer geograficaId, @PathVariable Boolean todos) throws JsonProcessingException {
 		return new ResponseEntity<List<ProveedorMovimiento>>(
 				service.findAllAsignables(proveedorId, desde, hasta, geograficaId, todos), HttpStatus.OK);
 	}

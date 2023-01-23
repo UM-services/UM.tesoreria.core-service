@@ -72,8 +72,4 @@ public class ProveedorArticulo extends Auditable implements Serializable {
 	@JoinColumn(name = "fad_art_id", insertable = false, updatable = false)
 	private Articulo articulo;
 
-//	@OneToOne(optional = true)
-//	@JoinColumn(name = "fad_mvp_id", insertable = false, updatable = false)
-//	private ProveedorMovimiento proveedorMovimiento;
-//
 }

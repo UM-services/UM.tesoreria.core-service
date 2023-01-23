@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import ar.edu.um.tesoreria.rest.exception.EntregaNotFoundException;
 import ar.edu.um.tesoreria.rest.model.Entrega;
 import ar.edu.um.tesoreria.rest.service.EntregaService;
@@ -31,7 +33,7 @@ public class EntregaController {
 
 	@GetMapping("/detalle/{proveedorMovimientoId}")
 	public ResponseEntity<List<Entrega>> findAllDetalleByProveedorMovimientoId(
-			@PathVariable Long proveedorMovimientoId) {
+			@PathVariable Long proveedorMovimientoId) throws JsonProcessingException {
 		return new ResponseEntity<List<Entrega>>(
 				service.findAllDetalleByProveedorMovimientoId(proveedorMovimientoId, true), HttpStatus.OK);
 	}

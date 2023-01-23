@@ -26,6 +26,7 @@ import lombok.Setter;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public class Auditable {
+	
 	@CreatedDate
 	@Column(name = "created", nullable = false, updatable = false)
 	private LocalDateTime created;
@@ -33,4 +34,5 @@ public class Auditable {
 	@LastModifiedDate
 	@Column(name = "updated")
 	private LocalDateTime updated;
+	
 }
