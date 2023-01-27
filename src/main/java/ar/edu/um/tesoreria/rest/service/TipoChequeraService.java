@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.TipoChequeraNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.TipoChequeraException;
 import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import ar.edu.um.tesoreria.rest.repository.ITipoChequeraRepository;
 
@@ -53,11 +53,11 @@ public class TipoChequeraService {
 
 	public TipoChequera findByTipoChequeraId(Integer tipoChequeraId) {
 		return repository.findByTipoChequeraId(tipoChequeraId)
-				.orElseThrow(() -> new TipoChequeraNotFoundException(tipoChequeraId));
+				.orElseThrow(() -> new TipoChequeraException(tipoChequeraId));
 	}
 
 	public TipoChequera findLast() {
-		return repository.findTopByOrderByTipoChequeraIdDesc().orElseThrow(() -> new TipoChequeraNotFoundException());
+		return repository.findTopByOrderByTipoChequeraIdDesc().orElseThrow(() -> new TipoChequeraException());
 	}
 
 	public TipoChequera add(TipoChequera tipoChequera) {
@@ -75,7 +75,7 @@ public class TipoChequeraService {
 			tipochequera.setContado(newtipochequera.getContado());
 			tipochequera.setMultiple(newtipochequera.getMultiple());
 			return repository.save(tipochequera);
-		}).orElseThrow(() -> new TipoChequeraNotFoundException(tipochequeraId));
+		}).orElseThrow(() -> new TipoChequeraException(tipochequeraId));
 	}
 
 	public void delete(Integer tipoChequeraId) {
@@ -95,7 +95,7 @@ public class TipoChequeraService {
 		return repository.findById(tipochequeraId).map(tipochequera -> {
 			tipochequera.setImprimir(imprimir);
 			return repository.save(tipochequera);
-		}).orElseThrow(() -> new TipoChequeraNotFoundException(tipochequeraId));
+		}).orElseThrow(() -> new TipoChequeraException(tipochequeraId));
 	}
 
 }

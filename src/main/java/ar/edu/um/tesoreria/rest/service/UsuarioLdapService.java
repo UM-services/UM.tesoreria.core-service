@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.UsuarioLdapNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.UsuarioLdapException;
 import ar.edu.um.tesoreria.rest.model.UsuarioLdap;
 import ar.edu.um.tesoreria.rest.repository.IUsuarioLdapRepository;
 
@@ -23,7 +23,7 @@ public class UsuarioLdapService {
 	private IUsuarioLdapRepository repository;
 
 	public UsuarioLdap findByDocumento(BigDecimal documento) {
-		return repository.findFirstByDocumento(documento).orElseThrow(() -> new UsuarioLdapNotFoundException(documento));
+		return repository.findFirstByDocumento(documento).orElseThrow(() -> new UsuarioLdapException(documento));
 	}
 
 	public UsuarioLdap add(UsuarioLdap usuarioldap) {

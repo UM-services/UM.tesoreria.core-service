@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.LocalidadNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.LocalidadException;
 import ar.edu.um.tesoreria.rest.model.Localidad;
 import ar.edu.um.tesoreria.rest.service.LocalidadService;
 
@@ -44,7 +44,7 @@ public class LocalidadController {
 			return new ResponseEntity<Localidad>(
 					service.findByNombre(localidad.getFacultadId(), localidad.getProvinciaId(), localidad.getNombre()),
 					HttpStatus.OK);
-		} catch (LocalidadNotFoundException e) {
+		} catch (LocalidadException e) {
 			throw new ResponseStatusException(HttpStatus.OK, e.getMessage());
 		}
 	}
@@ -55,7 +55,7 @@ public class LocalidadController {
 		try {
 			return new ResponseEntity<Localidad>(service.findByUnique(facultadId, provinciaId, localidadId),
 					HttpStatus.OK);
-		} catch (LocalidadNotFoundException e) {
+		} catch (LocalidadException e) {
 			throw new ResponseStatusException(HttpStatus.OK, e.getMessage());
 		}
 	}
@@ -64,7 +64,7 @@ public class LocalidadController {
 	public ResponseEntity<Localidad> findLast(@PathVariable Integer facultadId, @PathVariable Integer provinciaId) {
 		try {
 			return new ResponseEntity<Localidad>(service.findLast(facultadId, provinciaId), HttpStatus.OK);
-		} catch (LocalidadNotFoundException e) {
+		} catch (LocalidadException e) {
 			throw new ResponseStatusException(HttpStatus.OK, e.getMessage());
 		}
 	}

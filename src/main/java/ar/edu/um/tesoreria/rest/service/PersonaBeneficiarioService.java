@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.PersonaBeneficiarioNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.PersonaBeneficiarioException;
 import ar.edu.um.tesoreria.rest.model.PersonaBeneficiario;
 import ar.edu.um.tesoreria.rest.repository.IPersonaBeneficiarioRepository;
 
@@ -24,7 +24,7 @@ public class PersonaBeneficiarioService {
 
 	public PersonaBeneficiario findByPersonaUniqueId(Long personaUniqueId) {
 		return repository.findByPersonaUniqueId(personaUniqueId)
-				.orElseThrow(() -> new PersonaBeneficiarioNotFoundException(personaUniqueId, true));
+				.orElseThrow(() -> new PersonaBeneficiarioException(personaUniqueId, true));
 	}
 
 	public PersonaBeneficiario add(PersonaBeneficiario personaBeneficiario) {
@@ -40,7 +40,7 @@ public class PersonaBeneficiarioService {
 					newPersonaBeneficiario.getCbu(), null);
 			personaBeneficiario = repository.save(personaBeneficiario);
 			return personaBeneficiario;
-		}).orElseThrow(() -> new PersonaBeneficiarioNotFoundException(personaBeneficiarioId));
+		}).orElseThrow(() -> new PersonaBeneficiarioException(personaBeneficiarioId));
 	}
 
 	@Transactional

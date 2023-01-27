@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.BajaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.BajaException;
 import ar.edu.um.tesoreria.rest.model.Baja;
 import ar.edu.um.tesoreria.rest.service.BajaService;
 
@@ -37,7 +37,7 @@ public class BajaController {
 		try {
 			return new ResponseEntity<Baja>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId),
 					HttpStatus.OK);
-		} catch (BajaNotFoundException e) {
+		} catch (BajaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

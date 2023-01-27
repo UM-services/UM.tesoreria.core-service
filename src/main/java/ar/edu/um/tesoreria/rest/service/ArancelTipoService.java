@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ArancelTipoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ArancelTipoException;
 import ar.edu.um.tesoreria.rest.model.ArancelTipo;
 import ar.edu.um.tesoreria.rest.model.view.ArancelTipoLectivo;
 import ar.edu.um.tesoreria.rest.repository.IArancelTipoRepository;
@@ -42,12 +42,12 @@ public class ArancelTipoService {
 
 	public ArancelTipo findByArancelTipoId(Integer arancelTipoId) {
 		return repository.findByArancelTipoId(arancelTipoId)
-				.orElseThrow(() -> new ArancelTipoNotFoundException(arancelTipoId));
+				.orElseThrow(() -> new ArancelTipoException(arancelTipoId));
 	}
 
 	public ArancelTipo findByArancelTipoIdCompleto(Integer arancelTipoIdCompleto) {
 		return repository.findByArancelTipoIdCompleto(arancelTipoIdCompleto)
-				.orElseThrow(() -> new ArancelTipoNotFoundException(arancelTipoIdCompleto));
+				.orElseThrow(() -> new ArancelTipoException(arancelTipoIdCompleto));
 	}
 
 	public ArancelTipo findLast() {
@@ -71,7 +71,7 @@ public class ArancelTipoService {
 			repository.save(arancelTipo);
 			log.debug("ArancelTipo -> " + arancelTipo.toString());
 			return arancelTipo;
-		}).orElseThrow(() -> new ArancelTipoNotFoundException(arancelTipoId));
+		}).orElseThrow(() -> new ArancelTipoException(arancelTipoId));
 	}
 
 }

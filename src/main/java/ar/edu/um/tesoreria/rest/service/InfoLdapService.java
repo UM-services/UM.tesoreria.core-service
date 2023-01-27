@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.InfoLdapNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.InfoLdapException;
 import ar.edu.um.tesoreria.rest.model.InfoLdap;
 import ar.edu.um.tesoreria.rest.repository.IInfoLdapRepository;
 
@@ -23,7 +23,7 @@ public class InfoLdapService {
 	private IInfoLdapRepository repository;
 
 	public InfoLdap findByPersonaId(BigDecimal personaId) {
-		return repository.findByPersonaId(personaId).orElseThrow(() -> new InfoLdapNotFoundException(personaId));
+		return repository.findByPersonaId(personaId).orElseThrow(() -> new InfoLdapException(personaId));
 	}
 
 }

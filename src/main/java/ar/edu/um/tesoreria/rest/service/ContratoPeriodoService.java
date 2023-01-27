@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ContratoPeriodoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ContratoPeriodoException;
 import ar.edu.um.tesoreria.rest.model.ContratoPeriodo;
 import ar.edu.um.tesoreria.rest.repository.IContratoPeriodoRepository;
 
@@ -48,12 +48,12 @@ public class ContratoPeriodoService {
 
 	public ContratoPeriodo findByContratoPeriodoId(Long contratoPeriodoId) {
 		return repository.findByContratoPeriodoId(contratoPeriodoId)
-				.orElseThrow(() -> new ContratoPeriodoNotFoundException(contratoPeriodoId));
+				.orElseThrow(() -> new ContratoPeriodoException(contratoPeriodoId));
 	}
 
 	public ContratoPeriodo findByPeriodo(Long contratoId, Integer anho, Integer mes) {
 		return repository.findByContratoIdAndAnhoAndMes(contratoId, anho, mes)
-				.orElseThrow(() -> new ContratoPeriodoNotFoundException(contratoId, anho, mes));
+				.orElseThrow(() -> new ContratoPeriodoException(contratoId, anho, mes));
 	}
 
 	public ContratoPeriodo add(ContratoPeriodo contratoPeriodo) {
@@ -69,7 +69,7 @@ public class ContratoPeriodoService {
 					newcontratoperiodo.getImporte(), newcontratoperiodo.getMarcaTemporal(), null);
 			contratoperiodo = repository.save(contratoperiodo);
 			return contratoperiodo;
-		}).orElseThrow(() -> new ContratoPeriodoNotFoundException(contratoperiodoId));
+		}).orElseThrow(() -> new ContratoPeriodoException(contratoperiodoId));
 	}
 
 	public List<ContratoPeriodo> saveAll(List<ContratoPeriodo> contratoperiodos) {

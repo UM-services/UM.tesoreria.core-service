@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ar.edu.um.tesoreria.rest.exception.ChequeraEliminadaNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ChequeraSerieControlNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.DebitoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraEliminadaException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraSerieControlException;
+import ar.edu.um.tesoreria.rest.exception.DebitoException;
 import ar.edu.um.tesoreria.rest.model.ChequeraAlternativa;
 import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
 import ar.edu.um.tesoreria.rest.model.ChequeraEliminada;
@@ -115,7 +115,7 @@ public class ChequeraService {
 					chequeraSerieId);
 			chequeraSerieControl.setEliminada((byte) 1);
 			chequeraSerieControlService.update(chequeraSerieControl, chequeraSerieControl.getChequeraSerieControlId());
-		} catch (ChequeraSerieControlNotFoundException e) {
+		} catch (ChequeraSerieControlException e) {
 			chequeraSerieControl = new ChequeraSerieControl(null, facultadId, tipoChequeraId, chequeraSerieId, (byte) 0,
 					null, null, null, (byte) 1);
 			chequeraSerieControlService.add(chequeraSerieControl);
@@ -125,7 +125,7 @@ public class ChequeraService {
 		try {
 			chequeraEliminadaService.findByUnique(chequeraserie.getFacultadId(), chequeraserie.getTipoChequeraId(),
 					chequeraserie.getChequeraSerieId());
-		} catch (ChequeraEliminadaNotFoundException e) {
+		} catch (ChequeraEliminadaException e) {
 			chequeraEliminadaService.add(new ChequeraEliminada(null, chequeraserie.getFacultadId(),
 					chequeraserie.getTipoChequeraId(), chequeraserie.getChequeraId(), chequeraserie.getPersonaId(),
 					chequeraserie.getDocumentoId(), chequeraserie.getLectivoId(), chequeraserie.getArancelTipoId(),
@@ -149,7 +149,7 @@ public class ChequeraService {
 			if (lastDebito.getFechaBaja() != null) {
 				return;
 			}
-		} catch (DebitoNotFoundException e) {
+		} catch (DebitoException e) {
 			return;
 		}
 		// Si tiene débito asociado y no está de baja extender hasta la última cuota

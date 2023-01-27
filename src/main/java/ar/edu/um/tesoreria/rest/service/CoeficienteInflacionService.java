@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.CoeficienteInflacionNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CoeficienteInflacionException;
 import ar.edu.um.tesoreria.rest.model.CoeficienteInflacion;
 import ar.edu.um.tesoreria.rest.repository.ICoeficienteInflacionRepository;
 
@@ -28,7 +28,7 @@ public class CoeficienteInflacionService {
 
 	public CoeficienteInflacion findByUnique(Integer anho, Integer mes) {
 		return repository.findByUnique(anho, mes)
-				.orElseThrow(() -> new CoeficienteInflacionNotFoundException(anho, mes));
+				.orElseThrow(() -> new CoeficienteInflacionException(anho, mes));
 	}
 
 	public CoeficienteInflacion add(CoeficienteInflacion coeficienteinflacion) {
@@ -42,6 +42,6 @@ public class CoeficienteInflacionService {
 					newcoeficienteinflacion.getMes(), newcoeficienteinflacion.getCoeficiente());
 			repository.save(coeficienteinflacion);
 			return coeficienteinflacion;
-		}).orElseThrow(() -> new CoeficienteInflacionNotFoundException(coeficienteinflacionId));
+		}).orElseThrow(() -> new CoeficienteInflacionException(coeficienteinflacionId));
 	}
 }

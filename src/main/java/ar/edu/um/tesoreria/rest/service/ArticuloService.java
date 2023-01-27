@@ -9,7 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ArticuloNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ArticuloException;
 import ar.edu.um.tesoreria.rest.model.Articulo;
 import ar.edu.um.tesoreria.rest.model.view.ArticuloKey;
 import ar.edu.um.tesoreria.rest.repository.IArticuloRepository;
@@ -44,7 +44,7 @@ public class ArticuloService {
 	}
 
 	public Articulo findByArticuloId(Long articuloId) {
-		return repository.findByArticuloId(articuloId).orElseThrow(() -> new ArticuloNotFoundException(articuloId));
+		return repository.findByArticuloId(articuloId).orElseThrow(() -> new ArticuloException(articuloId));
 	}
 
 	public Articulo add(Articulo articulo) {
@@ -58,7 +58,7 @@ public class ArticuloService {
 					newArticulo.getStockMinimo(), newArticulo.getNumeroCuenta(), newArticulo.getTipo(),
 					newArticulo.getDirecto(), newArticulo.getHabilitado(), null);
 			return repository.save(articulo);
-		}).orElseThrow(() -> new ArticuloNotFoundException(articuloId));
+		}).orElseThrow(() -> new ArticuloException(articuloId));
 	}
 
 }

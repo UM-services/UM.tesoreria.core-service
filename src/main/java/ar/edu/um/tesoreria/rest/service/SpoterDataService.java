@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.SpoterDataNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.SpoterDataException;
 import ar.edu.um.tesoreria.rest.model.SpoterData;
 import ar.edu.um.tesoreria.rest.repository.ISpoterDataRepository;
 
@@ -27,7 +27,7 @@ public class SpoterDataService {
 		return repository
 				.findTopByPersonaIdAndDocumentoIdAndFacultadIdAndGeograficaIdAndLectivoId(personaId, documentoId,
 						facultadId, geograficaId, lectivoId)
-				.orElseThrow(() -> new SpoterDataNotFoundException(personaId, documentoId, facultadId, geograficaId,
+				.orElseThrow(() -> new SpoterDataException(personaId, documentoId, facultadId, geograficaId,
 						lectivoId));
 	}
 

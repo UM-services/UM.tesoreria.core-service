@@ -18,7 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
 import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
 import ar.edu.um.tesoreria.rest.service.ProveedorMovimientoService;
 
@@ -52,7 +52,7 @@ public class ProveedorMovimientoController {
 		try {
 			return new ResponseEntity<ProveedorMovimiento>(service.findByProveedorMovimientoId(proveedorMovimientoId),
 					HttpStatus.OK);
-		} catch (ProveedorMovimientoNotFoundException e) {
+		} catch (ProveedorMovimientoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

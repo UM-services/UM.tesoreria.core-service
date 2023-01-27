@@ -12,9 +12,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.DomicilioNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.LocalidadNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ProvinciaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.DomicilioException;
+import ar.edu.um.tesoreria.rest.exception.LocalidadException;
+import ar.edu.um.tesoreria.rest.exception.ProvinciaException;
 import ar.edu.um.tesoreria.rest.extern.consumer.DomicilioFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.LocalidadFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.PersonaFacultadConsumer;
@@ -69,16 +69,16 @@ public class DomicilioService {
 	}
 
 	public Domicilio findByDomicilioId(Long domicilioId) {
-		return repository.findByDomicilioId(domicilioId).orElseThrow(() -> new DomicilioNotFoundException(domicilioId));
+		return repository.findByDomicilioId(domicilioId).orElseThrow(() -> new DomicilioException(domicilioId));
 	}
 
 	public Domicilio findByUnique(BigDecimal personaId, Integer documentoId) {
 		return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
-				.orElseThrow(() -> new DomicilioNotFoundException(personaId, documentoId));
+				.orElseThrow(() -> new DomicilioException(personaId, documentoId));
 	}
 
 	public Domicilio findFirstByPersonaId(BigDecimal personaId) {
-		return repository.findFirstByPersonaId(personaId).orElseThrow(() -> new DomicilioNotFoundException(personaId));
+		return repository.findFirstByPersonaId(personaId).orElseThrow(() -> new DomicilioException(personaId));
 	}
 
 	@Transactional
@@ -107,7 +107,7 @@ public class DomicilioService {
 				this.sincronizeFacultad(domicilio);
 
 			return domicilio;
-		}).orElseThrow(() -> new DomicilioNotFoundException(domicilioId));
+		}).orElseThrow(() -> new DomicilioException(domicilioId));
 	}
 
 	private void sincronizeFacultad(Domicilio domicilio) {
@@ -175,7 +175,7 @@ public class DomicilioService {
 						try {
 							provincia_old = provinciaService.findByUnique(domicilio.getFacultadId(),
 									domicilio.getProvinciaId());
-						} catch (ProvinciaNotFoundException e) {
+						} catch (ProvinciaException e) {
 							provincia_old = new Provincia();
 						}
 						if (provincia_old.getUniqueId() == null) {
@@ -189,7 +189,7 @@ public class DomicilioService {
 						try {
 							localidad_old = localidadService.findByUnique(domicilio.getFacultadId(),
 									domicilio.getProvinciaId(), domicilio.getLocalidadId());
-						} catch (LocalidadNotFoundException e) {
+						} catch (LocalidadException e) {
 							localidad_old = new Localidad();
 						}
 						if (localidad_old.getUniqueId() == null) {

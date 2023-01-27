@@ -48,11 +48,11 @@ import ar.edu.um.tesoreria.rest.service.LegajoService;
 import ar.edu.um.tesoreria.rest.service.PersonaService;
 import ar.edu.um.tesoreria.rest.service.TipoChequeraService;
 import lombok.extern.slf4j.Slf4j;
-import ar.edu.um.tesoreria.rest.exception.CarreraNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.FacultadNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.LectivoNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.LegajoNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.PersonaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CarreraException;
+import ar.edu.um.tesoreria.rest.exception.FacultadException;
+import ar.edu.um.tesoreria.rest.exception.LectivoException;
+import ar.edu.um.tesoreria.rest.exception.LegajoException;
+import ar.edu.um.tesoreria.rest.exception.PersonaException;
 import ar.edu.um.tesoreria.rest.model.Carrera;
 import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
@@ -122,13 +122,13 @@ public class FormulariosToPdfService {
 		Persona persona = null;
 		try {
 			persona = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
-		} catch (PersonaNotFoundException e) {
+		} catch (PersonaException e) {
 			persona = new Persona();
 		}
 		Lectivo lectivo = null;
 		try {
 			lectivo = lectivoService.findByLectivoId(serie.getLectivoId());
-		} catch (LectivoNotFoundException e) {
+		} catch (LectivoException e) {
 			lectivo = new Lectivo();
 		}
 		// Sincroniza carrera
@@ -143,14 +143,14 @@ public class FormulariosToPdfService {
 		try {
 			legajo = legajoService.findByFacultadIdAndPersonaIdAndDocumentoId(serie.getFacultadId(),
 					serie.getPersonaId(), serie.getDocumentoId());
-		} catch (LegajoNotFoundException e) {
+		} catch (LegajoException e) {
 			legajo = new Legajo();
 		}
 		Carrera carrera = null;
 		try {
 			carrera = carreraService.findByFacultadIdAndPlanIdAndCarreraId(legajo.getFacultadId(), legajo.getPlanId(),
 					legajo.getCarreraId());
-		} catch (CarreraNotFoundException e) {
+		} catch (CarreraException e) {
 			carrera = new Carrera();
 		}
 
@@ -328,7 +328,7 @@ public class FormulariosToPdfService {
 		Facultad facultad = null;
 		try {
 			facultad = facultadService.findByFacultadId(facultadId);
-		} catch (FacultadNotFoundException e) {
+		} catch (FacultadException e) {
 			facultad = new Facultad();
 		}
 		log.debug(facultad.toString());

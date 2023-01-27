@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.LocalidadNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.LocalidadException;
 import ar.edu.um.tesoreria.rest.model.Localidad;
 import ar.edu.um.tesoreria.rest.repository.ILocalidadRepository;
 
@@ -28,12 +28,12 @@ public class LocalidadService {
 
 	public Localidad findByUnique(Integer facultadId, Integer provinciaId, Integer localidadId) {
 		return repository.findByFacultadIdAndProvinciaIdAndLocalidadId(facultadId, provinciaId, localidadId)
-				.orElseThrow(() -> new LocalidadNotFoundException(facultadId, provinciaId, localidadId));
+				.orElseThrow(() -> new LocalidadException(facultadId, provinciaId, localidadId));
 	}
 
 	public Localidad findByNombre(Integer facultadId, Integer provinciaId, String nombre) {
 		return repository.findByFacultadIdAndProvinciaIdAndNombre(facultadId, provinciaId, nombre)
-				.orElseThrow(() -> new LocalidadNotFoundException(facultadId, provinciaId, nombre));
+				.orElseThrow(() -> new LocalidadException(facultadId, provinciaId, nombre));
 	}
 
 	public Localidad findLast(Integer facultadId, Integer provinciaId) {

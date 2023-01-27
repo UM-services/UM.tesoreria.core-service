@@ -10,7 +10,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.BajaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.BajaException;
 import ar.edu.um.tesoreria.rest.model.Baja;
 import ar.edu.um.tesoreria.rest.repository.IBajaRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ public class BajaService {
 	public Baja findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
 		return repository
 				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
-				.orElseThrow(() -> new BajaNotFoundException(facultadId, tipoChequeraId, chequeraSerieId));
+				.orElseThrow(() -> new BajaException(facultadId, tipoChequeraId, chequeraSerieId));
 	}
 
 	public Baja add(Baja baja) {
@@ -51,7 +51,7 @@ public class BajaService {
 			baja = repository.save(baja);
 			log.debug("Baja -> {}", baja);
 			return baja;
-		}).orElseThrow(() -> new BajaNotFoundException(bajaId));
+		}).orElseThrow(() -> new BajaException(bajaId));
 	}
 
 	@Transactional

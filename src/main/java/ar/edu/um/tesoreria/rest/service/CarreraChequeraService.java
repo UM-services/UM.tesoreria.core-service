@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.CarreraChequeraNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CarreraChequeraException;
 import ar.edu.um.tesoreria.rest.model.CarreraChequera;
 import ar.edu.um.tesoreria.rest.repository.ICarreraChequeraRepository;
 
@@ -33,7 +33,7 @@ public class CarreraChequeraService {
 		return repository
 				.findByFacultadIdAndLectivoIdAndPlanIdAndCarreraIdAndClaseChequeraIdAndCursoAndGeograficaId(facultadId, lectivoId, planId,
 						carreraId, claseChequeraId, curso, geograficaId)
-				.orElseThrow(() -> new CarreraChequeraNotFoundException(facultadId, lectivoId, planId, carreraId, curso,
+				.orElseThrow(() -> new CarreraChequeraException(facultadId, lectivoId, planId, carreraId, curso,
 						geograficaId));
 	}
 
@@ -51,7 +51,7 @@ public class CarreraChequeraService {
 					newCarreraChequera.getTipoChequeraId());
 			repository.save(carreraChequera);
 			return carreraChequera;
-		}).orElseThrow(() -> new CarreraChequeraNotFoundException(carreraChequeraId));
+		}).orElseThrow(() -> new CarreraChequeraException(carreraChequeraId));
 	}
 
 }

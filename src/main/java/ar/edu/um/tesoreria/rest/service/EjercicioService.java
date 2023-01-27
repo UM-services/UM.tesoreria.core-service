@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.EjercicioNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.EjercicioException;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
 import ar.edu.um.tesoreria.rest.repository.IEjercicioRepository;
 
@@ -28,16 +28,16 @@ public class EjercicioService {
 	}
 
 	public Ejercicio findByEjercicioId(Integer ejercicioId) {
-		return repository.findByEjercicioId(ejercicioId).orElseThrow(() -> new EjercicioNotFoundException(ejercicioId));
+		return repository.findByEjercicioId(ejercicioId).orElseThrow(() -> new EjercicioException(ejercicioId));
 	}
 
 	public Ejercicio findByFecha(OffsetDateTime fecha) {
 		return repository.findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(fecha, fecha)
-				.orElseThrow(() -> new EjercicioNotFoundException(fecha));
+				.orElseThrow(() -> new EjercicioException(fecha));
 	}
 
 	public Ejercicio findLast() {
-		return repository.findTopByOrderByEjercicioIdDesc().orElseThrow(() -> new EjercicioNotFoundException("Last"));
+		return repository.findTopByOrderByEjercicioIdDesc().orElseThrow(() -> new EjercicioException("Last"));
 	}
 
 	public Ejercicio add(Ejercicio ejercicio) {
@@ -52,7 +52,7 @@ public class EjercicioService {
 					newEjercicio.getOrdenContableBienesUso());
 			ejercicio = repository.save(ejercicio);
 			return ejercicio;
-		}).orElseThrow(() -> new EjercicioNotFoundException(ejercicioId));
+		}).orElseThrow(() -> new EjercicioException(ejercicioId));
 	}
 
 	public void delete(Integer ejercicioId) {

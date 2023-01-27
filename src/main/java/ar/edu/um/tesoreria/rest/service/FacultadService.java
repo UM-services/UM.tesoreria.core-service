@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.FacultadNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.FacultadException;
 import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.view.FacultadLectivo;
 import ar.edu.um.tesoreria.rest.model.view.FacultadLectivoSede;
@@ -67,7 +67,7 @@ public class FacultadService {
 	}
 
 	public Facultad findByFacultadId(Integer facultadId) {
-		return repository.findByFacultadId(facultadId).orElseThrow(() -> new FacultadNotFoundException(facultadId));
+		return repository.findByFacultadId(facultadId).orElseThrow(() -> new FacultadException(facultadId));
 	}
 
 }

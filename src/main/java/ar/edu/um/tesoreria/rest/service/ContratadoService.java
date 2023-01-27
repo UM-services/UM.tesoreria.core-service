@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ContratadoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ContratadoException;
 import ar.edu.um.tesoreria.rest.model.Contratado;
 import ar.edu.um.tesoreria.rest.repository.IContratadoRepository;
 
@@ -24,12 +24,12 @@ public class ContratadoService {
 
 	public Contratado findByContratadoId(Long contratadoId) {
 		return repository.findByContratadoId(contratadoId)
-				.orElseThrow(() -> new ContratadoNotFoundException(contratadoId));
+				.orElseThrow(() -> new ContratadoException(contratadoId));
 	}
 
 	public Contratado findByPersona(Long personaClave) {
 		return repository.findByPersonaClave(personaClave)
-				.orElseThrow(() -> new ContratadoNotFoundException(personaClave, true));
+				.orElseThrow(() -> new ContratadoException(personaClave, true));
 	}
 
 	public Contratado add(Contratado contratado) {

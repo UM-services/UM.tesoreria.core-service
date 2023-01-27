@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.PersonaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.PersonaException;
 import ar.edu.um.tesoreria.rest.model.Persona;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaPersona;
 import ar.edu.um.tesoreria.rest.model.view.PersonaKey;
@@ -83,7 +83,7 @@ public class PersonaController {
 	public ResponseEntity<Persona> findByUnique(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
 		try {
 			return new ResponseEntity<Persona>(service.findByUnique(personaId, documentoId), HttpStatus.OK);
-		} catch (PersonaNotFoundException e) {
+		} catch (PersonaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -92,7 +92,7 @@ public class PersonaController {
 	public ResponseEntity<Persona> findByPersonaId(@PathVariable BigDecimal personaId) {
 		try {
 			return new ResponseEntity<Persona>(service.findByPersonaId(personaId), HttpStatus.OK);
-		} catch (PersonaNotFoundException e) {
+		} catch (PersonaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -101,7 +101,7 @@ public class PersonaController {
 	public ResponseEntity<Persona> findByUniqueId(@PathVariable Long uniqueId) {
 		try {
 			return new ResponseEntity<Persona>(service.findByUniqueId(uniqueId), HttpStatus.OK);
-		} catch (PersonaNotFoundException e) {
+		} catch (PersonaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

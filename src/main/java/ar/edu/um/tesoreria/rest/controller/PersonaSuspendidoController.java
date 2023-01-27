@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.PersonaSuspendidoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.PersonaSuspendidoException;
 import ar.edu.um.tesoreria.rest.model.PersonaSuspendido;
 import ar.edu.um.tesoreria.rest.service.PersonaSuspendidoService;
 
@@ -45,7 +45,7 @@ public class PersonaSuspendidoController {
 		try {
 			return new ResponseEntity<PersonaSuspendido>(service.findByPersonaSuspendidoId(personaSuspendidoId),
 					HttpStatus.OK);
-		} catch (PersonaSuspendidoNotFoundException e) {
+		} catch (PersonaSuspendidoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -55,7 +55,7 @@ public class PersonaSuspendidoController {
 			@PathVariable Integer documentoId) {
 		try {
 			return new ResponseEntity<PersonaSuspendido>(service.findByUnique(personaId, documentoId), HttpStatus.OK);
-		} catch (PersonaSuspendidoNotFoundException e) {
+		} catch (PersonaSuspendidoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

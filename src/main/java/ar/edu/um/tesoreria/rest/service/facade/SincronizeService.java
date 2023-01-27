@@ -16,16 +16,16 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.CarreraNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.DomicilioNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.FacultadNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.InfoLdapNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.LegajoNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.MatriculaNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.PersonaNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.PlanNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.UsuarioLdapNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.view.ChequeraClaseNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CarreraException;
+import ar.edu.um.tesoreria.rest.exception.DomicilioException;
+import ar.edu.um.tesoreria.rest.exception.FacultadException;
+import ar.edu.um.tesoreria.rest.exception.InfoLdapException;
+import ar.edu.um.tesoreria.rest.exception.LegajoException;
+import ar.edu.um.tesoreria.rest.exception.MatriculaException;
+import ar.edu.um.tesoreria.rest.exception.PersonaException;
+import ar.edu.um.tesoreria.rest.exception.PlanException;
+import ar.edu.um.tesoreria.rest.exception.UsuarioLdapException;
+import ar.edu.um.tesoreria.rest.exception.view.ChequeraClaseException;
 import ar.edu.um.tesoreria.rest.extern.model.CarreraFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.InscripcionDetalleFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.InscripcionFacultad;
@@ -130,7 +130,7 @@ public class SincronizeService {
 		Facultad facultad = null;
 		try {
 			facultad = facultadService.findByFacultadId(facultadId);
-		} catch (FacultadNotFoundException e) {
+		} catch (FacultadException e) {
 			return;
 		}
 		List<Matricula> matriculas = new ArrayList<Matricula>();
@@ -143,7 +143,7 @@ public class SincronizeService {
 			UsuarioLdap usuarioldap = null;
 			try {
 				usuarioldap = usuarioLdapService.findByDocumento(inscripcion.getPersonaId());
-			} catch (UsuarioLdapNotFoundException e) {
+			} catch (UsuarioLdapException e) {
 				usuarioldap = new UsuarioLdap(null, inscripcion.getPersonaId(), "alta", "pendiente", facultad.getDsn());
 				usuarioldap = usuarioLdapService.add(usuarioldap);
 			}
@@ -154,14 +154,14 @@ public class SincronizeService {
 						.findFirstByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClaseChequeraIdIn(
 								inscripcion.getFacultadId(), inscripcion.getPersonaId(), inscripcion.getDocumentoId(),
 								inscripcion.getLectivoId(), Arrays.asList(clases));
-			} catch (ChequeraClaseNotFoundException e) {
+			} catch (ChequeraClaseException e) {
 				serie = new ChequeraClase();
 			}
 			// Verificar persona
 			Persona persona = null;
 			try {
 				persona = personaService.findByUnique(inscripcion.getPersonaId(), inscripcion.getDocumentoId());
-			} catch (PersonaNotFoundException e) {
+			} catch (PersonaException e) {
 				persona = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
 						inscripcion.getPersonaId(), inscripcion.getDocumentoId());
 				persona.setUniqueId(null);
@@ -173,7 +173,7 @@ public class SincronizeService {
 				matricula = matriculaService.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraIdIn(
 						inscripcion.getFacultadId(), inscripcion.getPersonaId(), inscripcion.getDocumentoId(),
 						inscripcion.getLectivoId(), Arrays.asList(clases));
-			} catch (MatriculaNotFoundException e) {
+			} catch (MatriculaException e) {
 				matricula = new Matricula();
 			}
 			Matricula matricula_old = (Matricula) matricula.clone();
@@ -209,14 +209,14 @@ public class SincronizeService {
 								preInscripcion.getFacultadId(), preInscripcion.getPersonaId(),
 								preInscripcion.getDocumentoId(), preInscripcion.getLectivoId() - 1,
 								Arrays.asList(clases));
-			} catch (ChequeraClaseNotFoundException e) {
+			} catch (ChequeraClaseException e) {
 				serie = new ChequeraClase();
 			}
 			// Verificar persona
 			Persona persona = null;
 			try {
 				persona = personaService.findByUnique(preInscripcion.getPersonaId(), preInscripcion.getDocumentoId());
-			} catch (PersonaNotFoundException e) {
+			} catch (PersonaException e) {
 				persona = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
 						preInscripcion.getPersonaId(), preInscripcion.getDocumentoId());
 				persona.setUniqueId(null);
@@ -228,7 +228,7 @@ public class SincronizeService {
 				matricula = matriculaService.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraId(
 						preInscripcion.getFacultadId(), preInscripcion.getPersonaId(), preInscripcion.getDocumentoId(),
 						preInscripcion.getLectivoId(), 1);
-			} catch (MatriculaNotFoundException e) {
+			} catch (MatriculaException e) {
 				matricula = new Matricula();
 			}
 			Matricula matricula_old = (Matricula) matricula.clone();
@@ -260,7 +260,7 @@ public class SincronizeService {
 			InfoLdap usuario = null;
 			try {
 				usuario = infoLdapService.findByPersonaId(serie.getPersonaId());
-			} catch (InfoLdapNotFoundException e) {
+			} catch (InfoLdapException e) {
 				usuario = new InfoLdap();
 			}
 			if (usuario.getPersonaId() != null) {
@@ -268,7 +268,7 @@ public class SincronizeService {
 				try {
 					domicilio = domicilioService.findFirstByPersonaId(serie.getPersonaId());
 
-				} catch (DomicilioNotFoundException e) {
+				} catch (DomicilioException e) {
 					domicilio = new Domicilio();
 				}
 				domicilio.setEmailInstitucional(usuario.getEmailInstitucional());
@@ -288,7 +288,7 @@ public class SincronizeService {
 		Facultad facultad = null;
 		try {
 			facultad = facultadService.findByFacultadId(facultadId);
-		} catch (FacultadNotFoundException e) {
+		} catch (FacultadException e) {
 			return;
 		}
 		LegajoFacultad legajoFacultad = null;
@@ -318,7 +318,7 @@ public class SincronizeService {
 		Plan plan = null;
 		try {
 			plan = planService.findByFacultadIdAndPlanId(planFacultad.getFacultadId(), planFacultad.getPlanId());
-		} catch (PlanNotFoundException e) {
+		} catch (PlanException e) {
 			plan = new Plan(null, planFacultad.getFacultadId(), planFacultad.getPlanId(), planFacultad.getNombre(),
 					planFacultad.getFecha(), planFacultad.getPublicar());
 			planService.add(plan);
@@ -327,7 +327,7 @@ public class SincronizeService {
 		try {
 			carrera = carreraService.findByFacultadIdAndPlanIdAndCarreraId(carreraFacultad.getFacultadId(),
 					carreraFacultad.getPlanId(), carreraFacultad.getCarreraId());
-		} catch (CarreraNotFoundException e) {
+		} catch (CarreraException e) {
 			carrera = new Carrera(null, carreraFacultad.getFacultadId(), carreraFacultad.getPlanId(),
 					carreraFacultad.getCarreraId(), carreraFacultad.getNombre(), carreraFacultad.getIniciales(),
 					carreraFacultad.getTitulo(), carreraFacultad.getTrabajofinal(), carreraFacultad.getResolucion(),
@@ -345,7 +345,7 @@ public class SincronizeService {
 					&& legajoFacultad.getCarreraId() == legajo.getCarreraId()) {
 				update = false;
 			}
-		} catch (LegajoNotFoundException e) {
+		} catch (LegajoException e) {
 			log.debug("Sin legajo");
 		}
 		if (legajoFacultad.getLectivoId() == 0) {
@@ -365,7 +365,7 @@ public class SincronizeService {
 		Facultad facultad = null;
 		try {
 			facultad = facultadService.findByFacultadId(facultadId);
-		} catch (FacultadNotFoundException e) {
+		} catch (FacultadException e) {
 			return;
 		}
 		List<PlanFacultad> planesFacultad = planFacultadConsumer.findAll(facultad.getApiserver(),

@@ -6,7 +6,7 @@ package ar.edu.um.tesoreria.rest.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.SetupNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.SetupException;
 import ar.edu.um.tesoreria.rest.model.Setup;
 import ar.edu.um.tesoreria.rest.repository.ISetupRepository;
 
@@ -21,7 +21,7 @@ public class SetupService {
 	private ISetupRepository repository;
 
 	public Setup findLast() {
-		return repository.findTopByOrderBySetupIdDesc().orElseThrow(() -> new SetupNotFoundException());
+		return repository.findTopByOrderBySetupIdDesc().orElseThrow(() -> new SetupException());
 	}
 
 }

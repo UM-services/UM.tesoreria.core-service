@@ -33,7 +33,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ar.edu.um.tesoreria.rest.exception.EjercicioNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.EjercicioException;
 import ar.edu.um.tesoreria.rest.extern.consumer.BajaFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.CarreraFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.InscripcionFacultadConsumer;
@@ -511,7 +511,7 @@ public class SheetService {
 		Ejercicio ejercicio = null;
 		try {
 			ejercicio = ejercicioService.findByEjercicioId(ejercicioId);
-		} catch (EjercicioNotFoundException e) {
+		} catch (EjercicioException e) {
 			ejercicio = new Ejercicio();
 		}
 		Integer fila = -1;
@@ -601,7 +601,7 @@ public class SheetService {
 		Lectivo lectivo = null;
 		try {
 			lectivo = lectivoService.findByLectivoId(lectivoId);
-		} catch (EjercicioNotFoundException e) {
+		} catch (EjercicioException e) {
 			lectivo = new Lectivo();
 		}
 
@@ -780,7 +780,7 @@ public class SheetService {
 		Lectivo lectivo = null;
 		try {
 			lectivo = lectivoService.findByLectivoId(lectivoId);
-		} catch (EjercicioNotFoundException e) {
+		} catch (EjercicioException e) {
 			lectivo = new Lectivo();
 		}
 
@@ -996,7 +996,7 @@ public class SheetService {
 		Lectivo lectivo = null;
 		try {
 			lectivo = lectivoService.findByLectivoId(lectivoId);
-		} catch (EjercicioNotFoundException e) {
+		} catch (EjercicioException e) {
 			lectivo = new Lectivo();
 		}
 
@@ -1121,7 +1121,7 @@ public class SheetService {
 		Lectivo lectivo = null;
 		try {
 			lectivo = lectivoService.findByLectivoId(lectivoId);
-		} catch (EjercicioNotFoundException e) {
+		} catch (EjercicioException e) {
 			lectivo = new Lectivo();
 		}
 

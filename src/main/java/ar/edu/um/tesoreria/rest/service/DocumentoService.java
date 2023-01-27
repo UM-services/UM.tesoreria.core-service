@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.DocumentoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.DocumentoException;
 import ar.edu.um.tesoreria.rest.model.Documento;
 import ar.edu.um.tesoreria.rest.repository.IDocumentoRepository;
 
@@ -27,7 +27,7 @@ public class DocumentoService {
 	}
 
 	public Documento findByDocumentoId(Integer documentoId) {
-		return repository.findByDocumentoId(documentoId).orElseThrow(() -> new DocumentoNotFoundException(documentoId));
+		return repository.findByDocumentoId(documentoId).orElseThrow(() -> new DocumentoException(documentoId));
 	}
 
 }

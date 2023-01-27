@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.TipoChequeraNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.TipoChequeraException;
 import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import ar.edu.um.tesoreria.rest.service.TipoChequeraService;
 
@@ -57,7 +57,7 @@ public class TipoChequeraController {
 	public ResponseEntity<TipoChequera> findByTipoChequeraId(@PathVariable Integer tipoChequeraId) {
 		try {
 			return new ResponseEntity<TipoChequera>(service.findByTipoChequeraId(tipoChequeraId), HttpStatus.OK);
-		} catch (TipoChequeraNotFoundException e) {
+		} catch (TipoChequeraException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -66,7 +66,7 @@ public class TipoChequeraController {
 	public ResponseEntity<TipoChequera> findLast() {
 		try {
 			return new ResponseEntity<TipoChequera>(service.findLast(), HttpStatus.OK);
-		} catch (TipoChequeraNotFoundException e) {
+		} catch (TipoChequeraException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

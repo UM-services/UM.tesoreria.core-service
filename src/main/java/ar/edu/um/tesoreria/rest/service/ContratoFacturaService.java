@@ -13,7 +13,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ContratoFacturaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ContratoFacturaException;
 import ar.edu.um.tesoreria.rest.model.Contrato;
 import ar.edu.um.tesoreria.rest.model.ContratoFactura;
 import ar.edu.um.tesoreria.rest.repository.IContratoFacturaRepository;
@@ -59,7 +59,7 @@ public class ContratoFacturaService {
 
 	public ContratoFactura findByContratofacturaId(Long contratofacturaId) {
 		return repository.findByContratofacturaId(contratofacturaId)
-				.orElseThrow(() -> new ContratoFacturaNotFoundException(contratofacturaId));
+				.orElseThrow(() -> new ContratoFacturaException(contratofacturaId));
 	}
 
 	public ContratoFactura findLastByPersona(BigDecimal personaId, Integer documentoId) {
@@ -67,7 +67,7 @@ public class ContratoFacturaService {
 		List<Long> contratoIds = contratos.stream().map(contrato -> contrato.getContratoId())
 				.collect(Collectors.toList());
 		return repository.findFirstByContratoIdInAndCbuNotOrderByFechaDesc(contratoIds, "")
-				.orElseThrow(() -> new ContratoFacturaNotFoundException(personaId, documentoId));
+				.orElseThrow(() -> new ContratoFacturaException(personaId, documentoId));
 	}
 
 	public ContratoFactura add(ContratoFactura contratofactura) {
@@ -85,7 +85,7 @@ public class ContratoFacturaService {
 					newcontratofactura.getEnvio(), newcontratofactura.getCbu());
 			contratofactura = repository.save(contratofactura);
 			return contratofactura;
-		}).orElseThrow(() -> new ContratoFacturaNotFoundException(contratofacturaId));
+		}).orElseThrow(() -> new ContratoFacturaException(contratofacturaId));
 	}
 
 	public List<ContratoFactura> saveAll(List<ContratoFactura> facturas) {

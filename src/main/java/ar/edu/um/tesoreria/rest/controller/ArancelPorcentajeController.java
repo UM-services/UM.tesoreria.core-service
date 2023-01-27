@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.ArancelPorcentajeNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ArancelPorcentajeException;
 import ar.edu.um.tesoreria.rest.model.ArancelPorcentaje;
 import ar.edu.um.tesoreria.rest.service.ArancelPorcentajeService;
 
@@ -44,7 +44,7 @@ public class ArancelPorcentajeController {
 		try {
 			return new ResponseEntity<ArancelPorcentaje>(service.findByUnique(aranceltipoId, productoId),
 					HttpStatus.OK);
-		} catch (ArancelPorcentajeNotFoundException e) {
+		} catch (ArancelPorcentajeException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

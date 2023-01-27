@@ -16,7 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import ar.edu.um.tesoreria.rest.exception.EntregaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.EntregaException;
 import ar.edu.um.tesoreria.rest.model.Entrega;
 import ar.edu.um.tesoreria.rest.service.EntregaService;
 
@@ -42,7 +42,7 @@ public class EntregaController {
 	public ResponseEntity<Entrega> findByEntregaId(@PathVariable Long entregaId) {
 		try {
 			return new ResponseEntity<Entrega>(service.findByEntregaId(entregaId), HttpStatus.OK);
-		} catch (EntregaNotFoundException e) {
+		} catch (EntregaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

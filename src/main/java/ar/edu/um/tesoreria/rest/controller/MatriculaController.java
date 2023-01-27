@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.MatriculaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.MatriculaException;
 import ar.edu.um.tesoreria.rest.model.Matricula;
 import ar.edu.um.tesoreria.rest.service.MatriculaService;
 
@@ -43,7 +43,7 @@ public class MatriculaController {
 	public ResponseEntity<Matricula> findByMatriculaId(@PathVariable Long matriculaId) {
 		try {
 			return new ResponseEntity<Matricula>(service.findByMatriculaId(matriculaId), HttpStatus.OK);
-		} catch (MatriculaNotFoundException e) {
+		} catch (MatriculaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -55,7 +55,7 @@ public class MatriculaController {
 			return new ResponseEntity<Matricula>(
 					service.findByUnique(facultadId, personaId, documentoId, lectivoId, clasechequeraId),
 					HttpStatus.OK);
-		} catch (MatriculaNotFoundException e) {
+		} catch (MatriculaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

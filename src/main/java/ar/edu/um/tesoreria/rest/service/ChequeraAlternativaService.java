@@ -10,7 +10,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ChequeraAlternativaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraAlternativaException;
 import ar.edu.um.tesoreria.rest.model.ChequeraAlternativa;
 import ar.edu.um.tesoreria.rest.repository.IChequeraAlternativaRepository;
 
@@ -35,7 +35,7 @@ public class ChequeraAlternativaService {
 		return repository
 				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaId(facultadId,
 						tipochequeraId, chequeraserieId, productoId, alternativaId)
-				.orElseThrow(() -> new ChequeraAlternativaNotFoundException(facultadId, tipochequeraId, chequeraserieId,
+				.orElseThrow(() -> new ChequeraAlternativaException(facultadId, tipochequeraId, chequeraserieId,
 						productoId, alternativaId));
 	}
 

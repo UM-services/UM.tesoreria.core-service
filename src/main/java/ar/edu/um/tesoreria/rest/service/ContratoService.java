@@ -12,7 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ContratoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ContratoException;
 import ar.edu.um.tesoreria.rest.model.Contrato;
 import ar.edu.um.tesoreria.rest.repository.IContratoRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +49,7 @@ public class ContratoService {
 	}
 
 	public Contrato findByContratoId(Long contratoId) {
-		return repository.findByContratoId(contratoId).orElseThrow(() -> new ContratoNotFoundException(contratoId));
+		return repository.findByContratoId(contratoId).orElseThrow(() -> new ContratoException(contratoId));
 	}
 
 	public Contrato add(Contrato contrato) {
@@ -70,7 +70,7 @@ public class ContratoService {
 					newContrato.getAjuste(), null, null, null);
 			contrato = repository.save(contrato);
 			return contrato;
-		}).orElseThrow(() -> new ContratoNotFoundException(contratoId));
+		}).orElseThrow(() -> new ContratoException(contratoId));
 	}
 
 	public List<Contrato> saveAll(List<Contrato> contratos) {

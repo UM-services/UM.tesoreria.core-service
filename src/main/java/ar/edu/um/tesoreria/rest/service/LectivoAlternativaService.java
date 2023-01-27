@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.LectivoAlternativaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.LectivoAlternativaException;
 import ar.edu.um.tesoreria.rest.model.LectivoAlternativa;
 import ar.edu.um.tesoreria.rest.repository.ILectivoAlternativaRepository;
 
@@ -33,7 +33,7 @@ public class LectivoAlternativaService {
 		return repository
 				.findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaId(facultadId, lectivoId,
 						tipoChequeraId, productoId, alternativaId)
-				.orElseThrow(() -> new LectivoAlternativaNotFoundException(facultadId, lectivoId, tipoChequeraId,
+				.orElseThrow(() -> new LectivoAlternativaException(facultadId, lectivoId, tipoChequeraId,
 						productoId, alternativaId));
 	}
 

@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ProveedorNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorException;
 import ar.edu.um.tesoreria.rest.model.Proveedor;
 import ar.edu.um.tesoreria.rest.model.view.ProveedorSearch;
 import ar.edu.um.tesoreria.rest.repository.IProveedorRepository;
@@ -36,15 +36,15 @@ public class ProveedorService {
 	}
 
 	public Proveedor findByProveedorId(Integer proveedorId) {
-		return repository.findByProveedorId(proveedorId).orElseThrow(() -> new ProveedorNotFoundException(proveedorId));
+		return repository.findByProveedorId(proveedorId).orElseThrow(() -> new ProveedorException(proveedorId));
 	}
 
 	public Proveedor findByCuit(String cuit) {
-		return repository.findTopByCuit(cuit).orElseThrow(() -> new ProveedorNotFoundException(cuit));
+		return repository.findTopByCuit(cuit).orElseThrow(() -> new ProveedorException(cuit));
 	}
 
 	public Proveedor findLast() {
-		return repository.findTopByOrderByProveedorIdDesc().orElseThrow(() -> new ProveedorNotFoundException());
+		return repository.findTopByOrderByProveedorIdDesc().orElseThrow(() -> new ProveedorException());
 	}
 
 	public Proveedor add(Proveedor proveedor) {
@@ -61,7 +61,7 @@ public class ProveedorService {
 					newProveedor.getHabilitado(), null);
 			repository.save(proveedor);
 			return proveedor;
-		}).orElseThrow(() -> new ProveedorNotFoundException(proveedorId));
+		}).orElseThrow(() -> new ProveedorException(proveedorId));
 	}
 
 	public void delete(Integer proveedorId) {

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.view.OrdenPagoEntregadoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.view.OrdenPagoEntregadoException;
 import ar.edu.um.tesoreria.rest.model.view.OrdenPagoEntregado;
 import ar.edu.um.tesoreria.rest.service.view.OrdenPagoEntregadoService;
 
@@ -31,7 +31,7 @@ public class OrdenPagoEntregadoController {
 	public ResponseEntity<OrdenPagoEntregado> findByOrdenPagoId(@PathVariable Long ordenPagoId) {
 		try {
 			return new ResponseEntity<OrdenPagoEntregado>(service.findByOrdenPagoId(ordenPagoId), HttpStatus.OK);
-		} catch (OrdenPagoEntregadoNotFoundException e) {
+		} catch (OrdenPagoEntregadoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

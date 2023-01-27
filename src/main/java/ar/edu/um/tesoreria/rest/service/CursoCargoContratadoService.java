@@ -10,7 +10,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.CursoCargoContratadoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CursoCargoContratadoException;
 import ar.edu.um.tesoreria.rest.model.CursoCargoContratado;
 import ar.edu.um.tesoreria.rest.repository.ICursoCargoContratadoRepository;
 
@@ -43,12 +43,12 @@ public class CursoCargoContratadoService {
 
 	public CursoCargoContratado findByCursoCargo(Long cursoCargoContratadoId) {
 		return repository.findByCursoCargoContratadoId(cursoCargoContratadoId)
-				.orElseThrow(() -> new CursoCargoContratadoNotFoundException(cursoCargoContratadoId));
+				.orElseThrow(() -> new CursoCargoContratadoException(cursoCargoContratadoId));
 	}
 
 	public CursoCargoContratado findByContratado(Long cursoId, Integer anho, Integer mes, Long contratadoId) {
 		return repository.findByCursoIdAndAnhoAndMesAndContratadoId(cursoId, anho, mes, contratadoId)
-				.orElseThrow(() -> new CursoCargoContratadoNotFoundException(cursoId, anho, mes, contratadoId));
+				.orElseThrow(() -> new CursoCargoContratadoException(cursoId, anho, mes, contratadoId));
 	}
 
 	public CursoCargoContratado add(CursoCargoContratado cursoCargoContratado) {
@@ -67,7 +67,7 @@ public class CursoCargoContratadoService {
 					newCursoCargoContratado.getCursoCargoNovedadId(), newCursoCargoContratado.getAcreditado(), null);
 			cursoCargoContratado = repository.save(cursoCargoContratado);
 			return cursoCargoContratado;
-		}).orElseThrow(() -> new CursoCargoContratadoNotFoundException(cursoCargoContratadoId));
+		}).orElseThrow(() -> new CursoCargoContratadoException(cursoCargoContratadoId));
 	}
 
 	@Transactional

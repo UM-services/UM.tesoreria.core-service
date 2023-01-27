@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.ChequeraCuotaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraCuotaException;
 import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaChequera;
 import ar.edu.um.tesoreria.rest.service.ChequeraCuotaService;
@@ -44,7 +44,7 @@ public class ChequeraCuotaController {
 	public ResponseEntity<ChequeraCuota> findByChequeraCuotaId(@PathVariable Long chequeraCuotaId) {
 		try {
 			return new ResponseEntity<ChequeraCuota>(service.findByChequeraCuotaId(chequeraCuotaId), HttpStatus.OK);
-		} catch (ChequeraCuotaNotFoundException e) {
+		} catch (ChequeraCuotaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -56,7 +56,7 @@ public class ChequeraCuotaController {
 		try {
 			return new ResponseEntity<ChequeraCuota>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId,
 					productoId, alternativaId, cuotaId), HttpStatus.OK);
-		} catch (ChequeraCuotaNotFoundException e) {
+		} catch (ChequeraCuotaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

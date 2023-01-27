@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.ArticuloNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ArticuloException;
 import ar.edu.um.tesoreria.rest.model.Articulo;
 import ar.edu.um.tesoreria.rest.model.view.ArticuloKey;
 import ar.edu.um.tesoreria.rest.service.ArticuloService;
@@ -47,7 +47,7 @@ public class ArticuloController {
 	public ResponseEntity<Articulo> findByArticuloId(@PathVariable Long articuloId) {
 		try {
 			return new ResponseEntity<Articulo>(service.findByArticuloId(articuloId), HttpStatus.OK);
-		} catch (ArticuloNotFoundException e) {
+		} catch (ArticuloException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -56,7 +56,7 @@ public class ArticuloController {
 	public ResponseEntity<Articulo> articuloNew() {
 		try {
 			return new ResponseEntity<Articulo>(service.articuloNew(), HttpStatus.OK);
-		} catch (ArticuloNotFoundException e) {
+		} catch (ArticuloException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

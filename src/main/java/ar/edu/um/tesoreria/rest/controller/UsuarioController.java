@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.UsuarioNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.UsuarioException;
 import ar.edu.um.tesoreria.rest.model.Usuario;
 import ar.edu.um.tesoreria.rest.service.UsuarioService;
 
@@ -34,7 +34,7 @@ public class UsuarioController {
 	public ResponseEntity<Usuario> findByUsuarioId(@PathVariable String usuarioId) {
 		try {
 			return new ResponseEntity<Usuario>(service.findByUsuarioId(usuarioId), HttpStatus.OK);
-		} catch (UsuarioNotFoundException e) {
+		} catch (UsuarioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -53,7 +53,7 @@ public class UsuarioController {
 	public ResponseEntity<Usuario> findByPassword(@RequestBody Usuario usuario) {
 		try {
 			return new ResponseEntity<Usuario>(service.findByPassword(usuario.getPassword()), HttpStatus.OK);
-		} catch (UsuarioNotFoundException e) {
+		} catch (UsuarioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -62,7 +62,7 @@ public class UsuarioController {
 	public ResponseEntity<Usuario> updateLastLog(@PathVariable String usuarioId) {
 		try {
 			return new ResponseEntity<Usuario>(service.updateLastLog(usuarioId), HttpStatus.OK);
-		} catch (UsuarioNotFoundException e) {
+		} catch (UsuarioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.DebitoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.DebitoException;
 import ar.edu.um.tesoreria.rest.model.Debito;
 import ar.edu.um.tesoreria.rest.service.DebitoService;
 
@@ -119,7 +119,7 @@ public class DebitoController {
 		try {
 			return new ResponseEntity<Debito>(service.findByCuota(facultadId, tipoChequeraId, chequeraSerieId,
 					productoId, alternativaId, cuotaId, debitoTipoId), HttpStatus.OK);
-		} catch (DebitoNotFoundException e) {
+		} catch (DebitoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -132,7 +132,7 @@ public class DebitoController {
 			return new ResponseEntity<Debito>(
 					service.findLastByChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId),
 					HttpStatus.OK);
-		} catch (DebitoNotFoundException e) {
+		} catch (DebitoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -141,7 +141,7 @@ public class DebitoController {
 	public ResponseEntity<Debito> findLastActiveByCbu(@PathVariable String cbu1, @PathVariable String cbu2) {
 		try {
 			return new ResponseEntity<Debito>(service.findLastActiveByCbu(cbu1, cbu2), HttpStatus.OK);
-		} catch (DebitoNotFoundException e) {
+		} catch (DebitoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -150,7 +150,7 @@ public class DebitoController {
 	public ResponseEntity<Debito> findByDebitoId(@PathVariable Long debitoId) {
 		try {
 			return new ResponseEntity<Debito>(service.findByDebitoId(debitoId), HttpStatus.OK);
-		} catch (DebitoNotFoundException e) {
+		} catch (DebitoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

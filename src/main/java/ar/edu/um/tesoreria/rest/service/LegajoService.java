@@ -9,7 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.LegajoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.LegajoException;
 import ar.edu.um.tesoreria.rest.model.Legajo;
 import ar.edu.um.tesoreria.rest.repository.ILegajoRepository;
 
@@ -26,7 +26,7 @@ public class LegajoService {
 	public Legajo findByFacultadIdAndPersonaIdAndDocumentoId(Integer facultadId, BigDecimal personaId,
 			Integer documentoId) {
 		return repository.findByFacultadIdAndPersonaIdAndDocumentoId(facultadId, personaId, documentoId)
-				.orElseThrow(() -> new LegajoNotFoundException(facultadId, personaId, documentoId));
+				.orElseThrow(() -> new LegajoException(facultadId, personaId, documentoId));
 	}
 
 	public List<Legajo> saveAll(List<Legajo> legajos) {

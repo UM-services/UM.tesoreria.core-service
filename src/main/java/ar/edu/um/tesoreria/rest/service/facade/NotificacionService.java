@@ -18,10 +18,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.DomicilioNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.FacultadNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ProveedorNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.DomicilioException;
+import ar.edu.um.tesoreria.rest.exception.FacultadException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorException;
 import ar.edu.um.tesoreria.rest.extern.consumer.AlumnoExamenFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.NotificacionFacultadConsumer;
 import ar.edu.um.tesoreria.rest.model.Comprobante;
@@ -113,7 +113,7 @@ public class NotificacionService {
 					}
 				}
 			}
-		} catch (FacultadNotFoundException e) {
+		} catch (FacultadException e) {
 			log.debug("ERROR: Sin Facultad");
 		}
 	}
@@ -125,7 +125,7 @@ public class NotificacionService {
 		try {
 			domicilio = domicilioService.findByUnique(personaSuspendido.getPersonaId(),
 					personaSuspendido.getDocumentoId());
-		} catch (DomicilioNotFoundException e) {
+		} catch (DomicilioException e) {
 			return "ERROR: Sin correos para ENVIAR";
 		}
 
@@ -188,13 +188,13 @@ public class NotificacionService {
 		ProveedorMovimiento proveedorMovimiento = null;
 		try {
 			proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
-		} catch (ProveedorMovimientoNotFoundException e) {
+		} catch (ProveedorMovimientoException e) {
 			return "ERROR: No Existe Orden de Pago";
 		}
 		Proveedor proveedor = null;
 		try {
 			proveedor = proveedorService.findByProveedorId(proveedorMovimiento.getProveedorId());
-		} catch (ProveedorNotFoundException e) {
+		} catch (ProveedorException e) {
 			return "ERROR: No Existe Proveedor";
 		}
 

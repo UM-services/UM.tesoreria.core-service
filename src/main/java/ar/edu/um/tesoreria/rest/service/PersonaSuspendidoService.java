@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ar.edu.um.tesoreria.rest.exception.PersonaSuspendidoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.PersonaSuspendidoException;
 import ar.edu.um.tesoreria.rest.model.PersonaSuspendido;
 import ar.edu.um.tesoreria.rest.repository.IPeriodoSuspendidoRepository;
 
@@ -30,12 +30,12 @@ public class PersonaSuspendidoService {
 
 	public PersonaSuspendido findByPersonaSuspendidoId(Long personaSuspendidoId) {
 		return repository.findByPersonaSuspendidoId(personaSuspendidoId)
-				.orElseThrow(() -> new PersonaSuspendidoNotFoundException(personaSuspendidoId));
+				.orElseThrow(() -> new PersonaSuspendidoException(personaSuspendidoId));
 	}
 
 	public PersonaSuspendido findByUnique(BigDecimal personaId, Integer documentoId) {
 		return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
-				.orElseThrow(() -> new PersonaSuspendidoNotFoundException(personaId, documentoId));
+				.orElseThrow(() -> new PersonaSuspendidoException(personaId, documentoId));
 	}
 
 	public PersonaSuspendido add(PersonaSuspendido personaSuspendido) {
@@ -50,7 +50,7 @@ public class PersonaSuspendidoService {
 					newPersonaSuspendido.getGeograficaId(), newPersonaSuspendido.getNotificado());
 			personaSuspendido = repository.save(personaSuspendido);
 			return personaSuspendido;
-		}).orElseThrow(() -> new PersonaSuspendidoNotFoundException(personaSuspendidoId));
+		}).orElseThrow(() -> new PersonaSuspendidoException(personaSuspendidoId));
 	}
 
 	@Transactional

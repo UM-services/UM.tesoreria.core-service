@@ -9,7 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ValorMovimientoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ValorMovimientoException;
 import ar.edu.um.tesoreria.rest.model.ValorMovimiento;
 import ar.edu.um.tesoreria.rest.repository.IValorMovimientoRepository;
 
@@ -29,12 +29,12 @@ public class ValorMovimientoService {
 
 	public ValorMovimiento findByNumero(Integer valorId, Long numero) {
 		return repository.findByValorIdAndNumero(valorId, numero)
-				.orElseThrow(() -> new ValorMovimientoNotFoundException(valorId, numero));
+				.orElseThrow(() -> new ValorMovimientoException(valorId, numero));
 	}
 
 	public ValorMovimiento findFirstByContable(OffsetDateTime fechaContable, Integer ordenContable) {
 		return repository.findFirstByFechaContableAndOrdenContable(fechaContable, ordenContable)
-				.orElseThrow(() -> new ValorMovimientoNotFoundException(fechaContable, ordenContable));
+				.orElseThrow(() -> new ValorMovimientoException(fechaContable, ordenContable));
 	}
 
 }

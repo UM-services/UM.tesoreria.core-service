@@ -12,7 +12,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.CoeficienteInflacionNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CoeficienteInflacionException;
 import ar.edu.um.tesoreria.rest.model.CoeficienteInflacion;
 import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
@@ -71,7 +71,7 @@ public class AsientoInflacionService {
 			CoeficienteInflacion coeficienteinflacion = null;
 			try {
 				coeficienteinflacion = coeficienteInflacionService.findByUnique(periodo.getAnho(), periodo.getMes());
-			} catch (CoeficienteInflacionNotFoundException e) {
+			} catch (CoeficienteInflacionException e) {
 				coeficienteinflacion = new CoeficienteInflacion(null, periodo.getAnho(), periodo.getMes(),
 						BigDecimal.ONE);
 			}
@@ -193,7 +193,7 @@ public class AsientoInflacionService {
 			CoeficienteInflacion coeficienteinflacion = null;
 			try {
 				coeficienteinflacion = coeficienteInflacionService.findByUnique(periodo.getAnho(), periodo.getMes());
-			} catch (CoeficienteInflacionNotFoundException e) {
+			} catch (CoeficienteInflacionException e) {
 				coeficienteinflacion = new CoeficienteInflacion(null, periodo.getAnho(), periodo.getMes(),
 						BigDecimal.ONE);
 			}

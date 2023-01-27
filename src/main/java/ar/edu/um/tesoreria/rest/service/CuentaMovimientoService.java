@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
-import ar.edu.um.tesoreria.rest.exception.CuentaMovimientoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CuentaMovimientoException;
 import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.view.CuentaMovimientoAsiento;
 import ar.edu.um.tesoreria.rest.repository.ICuentaMovimientoRepository;
@@ -82,7 +82,7 @@ public class CuentaMovimientoService {
 
 	public CuentaMovimiento findByCuentaMovimientoId(Long cuentaMovimientoId) {
 		return repository.findByCuentaMovimientoId(cuentaMovimientoId)
-				.orElseThrow(() -> new CuentaMovimientoNotFoundException(cuentaMovimientoId));
+				.orElseThrow(() -> new CuentaMovimientoException(cuentaMovimientoId));
 	}
 
 	public CuentaMovimiento add(CuentaMovimiento cuentaMovimiento) {

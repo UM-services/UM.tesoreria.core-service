@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.ChequeraPagoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraPagoException;
 import ar.edu.um.tesoreria.rest.model.ChequeraPago;
 import ar.edu.um.tesoreria.rest.service.ChequeraPagoService;
 
@@ -33,7 +33,7 @@ public class ChequeraPagoController {
 	public ResponseEntity<ChequeraPago> findByChequeraPagoId(@PathVariable Long chequeraPagoId) {
 		try {
 			return new ResponseEntity<ChequeraPago>(service.findByChequeraPagoId(chequeraPagoId), HttpStatus.OK);
-		} catch (ChequeraPagoNotFoundException e) {
+		} catch (ChequeraPagoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

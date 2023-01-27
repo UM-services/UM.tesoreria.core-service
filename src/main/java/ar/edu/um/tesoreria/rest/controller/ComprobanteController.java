@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.ComprobanteNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ComprobanteException;
 import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.service.ComprobanteService;
 
@@ -38,7 +38,7 @@ public class ComprobanteController {
 	public ResponseEntity<Comprobante> findByComprobanteId(@PathVariable Integer comprobanteId) {
 		try {
 			return new ResponseEntity<Comprobante>(service.findByComprobanteId(comprobanteId), HttpStatus.OK);
-		} catch (ComprobanteNotFoundException e) {
+		} catch (ComprobanteException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

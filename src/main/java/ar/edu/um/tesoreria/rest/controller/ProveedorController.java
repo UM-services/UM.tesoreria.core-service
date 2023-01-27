@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.ProveedorNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorException;
 import ar.edu.um.tesoreria.rest.model.Proveedor;
 import ar.edu.um.tesoreria.rest.model.view.ProveedorSearch;
 import ar.edu.um.tesoreria.rest.service.ProveedorService;
@@ -48,7 +48,7 @@ public class ProveedorController {
 	public ResponseEntity<Proveedor> findByProveedorId(@PathVariable Integer proveedorId) {
 		try {
 			return new ResponseEntity<Proveedor>(service.findByProveedorId(proveedorId), HttpStatus.OK);
-		} catch (ProveedorNotFoundException e) {
+		} catch (ProveedorException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -57,7 +57,7 @@ public class ProveedorController {
 	public ResponseEntity<Proveedor> findByCuit(@PathVariable String cuit) {
 		try {
 			return new ResponseEntity<Proveedor>(service.findByCuit(cuit), HttpStatus.OK);
-		} catch (ProveedorNotFoundException e) {
+		} catch (ProveedorException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

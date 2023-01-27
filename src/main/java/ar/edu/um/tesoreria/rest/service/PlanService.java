@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.PlanNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.PlanException;
 import ar.edu.um.tesoreria.rest.model.Plan;
 import ar.edu.um.tesoreria.rest.repository.IPlanRepository;
 
@@ -32,7 +32,7 @@ public class PlanService {
 
 	public Plan findByFacultadIdAndPlanId(Integer facultadId, Integer planId) {
 		return repository.findByFacultadIdAndPlanId(facultadId, planId)
-				.orElseThrow(() -> new PlanNotFoundException(facultadId, planId));
+				.orElseThrow(() -> new PlanException(facultadId, planId));
 	}
 
 	public Plan add(Plan plan) {

@@ -14,10 +14,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.AsientoNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.CuentaMovimientoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.AsientoException;
+import ar.edu.um.tesoreria.rest.exception.CuentaMovimientoException;
 import ar.edu.um.tesoreria.rest.exception.EjercicioBloqueadoException;
-import ar.edu.um.tesoreria.rest.exception.EjercicioNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.EjercicioException;
 import ar.edu.um.tesoreria.rest.model.Asiento;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
@@ -88,7 +88,7 @@ public class ContableService {
 			if (hasta.isAfter(fechaFinal)) {
 				ejercicio = null;
 			}
-		} catch (EjercicioNotFoundException e) {
+		} catch (EjercicioException e) {
 		}
 		return ejercicio;
 	}
@@ -170,10 +170,10 @@ public class ContableService {
 					ordenContable, 0, 2)) {
 				cuentaMovimientoService.deleteByCuentaMovimientoId(cuentaMovimiento.getCuentaMovimientoId());
 			}
-		} catch (AsientoNotFoundException e) {
+		} catch (AsientoException e) {
 			log.debug("Error Asiento {}", e.getMessage());
 			return false;
-		} catch (CuentaMovimientoNotFoundException e) {
+		} catch (CuentaMovimientoException e) {
 			log.debug("Error CuentaMovimiento {}", e.getMessage());
 			return false;
 		} catch (EjercicioBloqueadoException e) {

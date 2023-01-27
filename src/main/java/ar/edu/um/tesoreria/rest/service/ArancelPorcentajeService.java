@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ArancelPorcentajeNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ArancelPorcentajeException;
 import ar.edu.um.tesoreria.rest.model.ArancelPorcentaje;
 import ar.edu.um.tesoreria.rest.repository.IArancelPorcentajeRepository;
 
@@ -28,7 +28,7 @@ public class ArancelPorcentajeService {
 
 	public ArancelPorcentaje findByUnique(Integer aranceltipoId, Integer productoId) {
 		return repository.findByAranceltipoIdAndProductoId(aranceltipoId, productoId)
-				.orElseThrow(() -> new ArancelPorcentajeNotFoundException(aranceltipoId, productoId));
+				.orElseThrow(() -> new ArancelPorcentajeException(aranceltipoId, productoId));
 	}
 
 	public ArancelPorcentaje add(ArancelPorcentaje arancelporcentaje) {
@@ -42,6 +42,6 @@ public class ArancelPorcentajeService {
 					newarancelporcentaje.getAranceltipoId(), newarancelporcentaje.getProductoId(),
 					newarancelporcentaje.getPorcentaje());
 			return repository.save(arancelporcentaje);
-		}).orElseThrow(() -> new ArancelPorcentajeNotFoundException(arancelporcentajeId));
+		}).orElseThrow(() -> new ArancelPorcentajeException(arancelporcentajeId));
 	}
 }

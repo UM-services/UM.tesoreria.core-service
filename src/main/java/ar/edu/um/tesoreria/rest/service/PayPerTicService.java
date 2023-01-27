@@ -11,7 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.PayPerTicNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.PayPerTicException;
 import ar.edu.um.tesoreria.rest.model.PayPerTic;
 import ar.edu.um.tesoreria.rest.repository.IPayPerTicRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class PayPerTicService {
 	}
 
 	public PayPerTic findByPayperticId(String payperticId) {
-		return repository.findByPayperticId(payperticId).orElseThrow(() -> new PayPerTicNotFoundException(payperticId));
+		return repository.findByPayperticId(payperticId).orElseThrow(() -> new PayPerTicException(payperticId));
 	}
 
 	public PayPerTic update(PayPerTic newpaypertic, String payperticId) {
@@ -59,7 +59,7 @@ public class PayPerTicService {
 			repository.save(paypertic);
 			log.debug("PayperTIC -> " + paypertic);
 			return paypertic;
-		}).orElseThrow(() -> new PayPerTicNotFoundException(payperticId));
+		}).orElseThrow(() -> new PayPerTicException(payperticId));
 	}
 
 	@Transactional

@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.CarreraNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CarreraException;
 import ar.edu.um.tesoreria.rest.model.Carrera;
 import ar.edu.um.tesoreria.rest.repository.ICarreraRepository;
 
@@ -32,7 +32,7 @@ public class CarreraService {
 
 	public Carrera findByFacultadIdAndPlanIdAndCarreraId(Integer facultadId, Integer planId, Integer carreraId) {
 		return repository.findByFacultadIdAndPlanIdAndCarreraId(facultadId, planId, carreraId)
-				.orElseThrow(() -> new CarreraNotFoundException(facultadId, planId, carreraId));
+				.orElseThrow(() -> new CarreraException(facultadId, planId, carreraId));
 	}
 
 	public Carrera add(Carrera carrera) {

@@ -10,7 +10,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ChequeraPagoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraPagoException;
 import ar.edu.um.tesoreria.rest.model.ChequeraPago;
 import ar.edu.um.tesoreria.rest.repository.IChequeraPagoRepository;
 
@@ -31,7 +31,7 @@ public class ChequeraPagoService {
 
 	public ChequeraPago findByChequeraPagoId(Long chequeraPagoId) {
 		return repository.findByChequeraPagoId(chequeraPagoId)
-				.orElseThrow(() -> new ChequeraPagoNotFoundException(chequeraPagoId));
+				.orElseThrow(() -> new ChequeraPagoException(chequeraPagoId));
 	}
 
 	@Transactional

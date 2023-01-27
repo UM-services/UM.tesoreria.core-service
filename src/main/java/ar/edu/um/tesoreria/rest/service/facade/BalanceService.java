@@ -25,9 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ProveedorValorNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ValorMovimientoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorValorException;
+import ar.edu.um.tesoreria.rest.exception.ValorMovimientoException;
 import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
@@ -268,11 +268,11 @@ public class BalanceService {
 				this.setCellString(row, 8, valor.getConcepto(), style_normal);
 				this.setCellLong(row, 9, valorMovimiento.getNumero(), style_normal);
 				this.setCellBigDecimal(row, 10, valorMovimiento.getImporte(), style_normal);
-			} catch (ValorMovimientoNotFoundException e) {
+			} catch (ValorMovimientoException e) {
 				log.debug("Sin Valor");
-			} catch (ProveedorValorNotFoundException e) {
+			} catch (ProveedorValorException e) {
 				log.debug("Sin Pago");
-			} catch (ProveedorMovimientoNotFoundException e) {
+			} catch (ProveedorMovimientoException e) {
 				log.debug("Sin Orden Pago");
 			} catch (ValorNotFoundExcepcion e) {
 				log.debug("Sin Tipo");

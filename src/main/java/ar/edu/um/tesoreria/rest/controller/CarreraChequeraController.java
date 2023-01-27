@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.CarreraChequeraNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CarreraChequeraException;
 import ar.edu.um.tesoreria.rest.model.CarreraChequera;
 import ar.edu.um.tesoreria.rest.service.CarreraChequeraService;
 
@@ -49,7 +49,7 @@ public class CarreraChequeraController {
 		try {
 			return new ResponseEntity<CarreraChequera>(service.findByUnique(facultadId, lectivoId, planId, carreraId,
 					claseChequeraId, curso, geograficaId), HttpStatus.OK);
-		} catch (CarreraChequeraNotFoundException e) {
+		} catch (CarreraChequeraException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

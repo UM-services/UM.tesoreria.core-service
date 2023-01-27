@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.LectivoTotalNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.LectivoTotalException;
 import ar.edu.um.tesoreria.rest.model.LectivoTotal;
 import ar.edu.um.tesoreria.rest.repository.ILectivoTotalRepository;
 
@@ -40,7 +40,7 @@ public class LectivoTotalService {
 				.findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoId(facultadId, lectivoId, tipoChequeraId,
 						productoId)
 				.orElseThrow(
-						() -> new LectivoTotalNotFoundException(facultadId, lectivoId, tipoChequeraId, productoId));
+						() -> new LectivoTotalException(facultadId, lectivoId, tipoChequeraId, productoId));
 	}
 
 }

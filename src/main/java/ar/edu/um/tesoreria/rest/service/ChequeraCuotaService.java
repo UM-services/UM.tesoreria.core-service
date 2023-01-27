@@ -19,11 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ChequeraCuotaNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ChequeraSerieNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.FacultadNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.LectivoNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.TipoChequeraNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraCuotaException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraSerieException;
+import ar.edu.um.tesoreria.rest.exception.FacultadException;
+import ar.edu.um.tesoreria.rest.exception.LectivoException;
+import ar.edu.um.tesoreria.rest.exception.TipoChequeraException;
 import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
 import ar.edu.um.tesoreria.rest.model.ChequeraPago;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
@@ -80,7 +80,7 @@ public class ChequeraCuotaService {
 
 	public ChequeraCuota findByChequeraCuotaId(Long chequeraCuotaId) {
 		return repository.findByChequeraCuotaId(chequeraCuotaId)
-				.orElseThrow(() -> new ChequeraCuotaNotFoundException(chequeraCuotaId));
+				.orElseThrow(() -> new ChequeraCuotaException(chequeraCuotaId));
 	}
 
 	public ChequeraCuota findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
@@ -88,7 +88,7 @@ public class ChequeraCuotaService {
 		return repository
 				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(facultadId,
 						tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId)
-				.orElseThrow(() -> new ChequeraCuotaNotFoundException(facultadId, tipoChequeraId, chequeraSerieId,
+				.orElseThrow(() -> new ChequeraCuotaException(facultadId, tipoChequeraId, chequeraSerieId,
 						productoId, alternativaId, cuotaId));
 	}
 
@@ -109,7 +109,7 @@ public class ChequeraCuotaService {
 		ChequeraSerie serie = null;
 		try {
 			serie = chequeraSerieService.findByUnique(facultadId, tipochequeraId, chequeraserieId);
-		} catch (ChequeraSerieNotFoundException e) {
+		} catch (ChequeraSerieException e) {
 			return new DeudaChequera(BigDecimal.ZERO, 0, facultadId, "", tipochequeraId, "", chequeraserieId, 0, "", 1,
 					BigDecimal.ZERO, new BigDecimal(1000000), 1000, null);
 		}
@@ -146,7 +146,7 @@ public class ChequeraCuotaService {
 		ChequeraSerie serie = null;
 		try {
 			serie = chequeraSerieService.findByUnique(facultadId, tipochequeraId, chequeraserieId);
-		} catch (ChequeraSerieNotFoundException e) {
+		} catch (ChequeraSerieException e) {
 			return new DeudaChequera(BigDecimal.ZERO, 0, facultadId, "", tipochequeraId, "", chequeraserieId, 0, "", 1,
 					BigDecimal.ZERO, new BigDecimal(1000000), 1000, null);
 		}
@@ -177,19 +177,19 @@ public class ChequeraCuotaService {
 		Facultad facultad = null;
 		try {
 			facultad = facultadService.findByFacultadId(facultadId);
-		} catch (FacultadNotFoundException e) {
+		} catch (FacultadException e) {
 			facultad = new Facultad();
 		}
 		TipoChequera tipo = null;
 		try {
 			tipo = tipoChequeraService.findByTipoChequeraId(tipochequeraId);
-		} catch (TipoChequeraNotFoundException e) {
+		} catch (TipoChequeraException e) {
 			tipo = new TipoChequera();
 		}
 		Lectivo lectivo = null;
 		try {
 			lectivo = lectivoService.findByLectivoId(serie.getLectivoId());
-		} catch (LectivoNotFoundException e) {
+		} catch (LectivoException e) {
 			lectivo = new Lectivo();
 		}
 		return new DeudaChequera(serie.getPersonaId(), serie.getDocumentoId(), facultadId, facultad.getNombre(),

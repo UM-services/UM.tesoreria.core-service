@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ProductoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ProductoException;
 import ar.edu.um.tesoreria.rest.model.Producto;
 import ar.edu.um.tesoreria.rest.model.view.ProductoTipoChequera;
 import ar.edu.um.tesoreria.rest.repository.IProductoRepository;
@@ -36,7 +36,7 @@ public class ProductoService {
 	}
 
 	public Producto findByProductoId(Integer productoId) {
-		return repository.findByProductoId(productoId).orElseThrow(() -> new ProductoNotFoundException(productoId));
+		return repository.findByProductoId(productoId).orElseThrow(() -> new ProductoException(productoId));
 	}
 
 }

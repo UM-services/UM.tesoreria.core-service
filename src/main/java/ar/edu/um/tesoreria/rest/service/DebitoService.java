@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ar.edu.um.tesoreria.rest.exception.DebitoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.DebitoException;
 import ar.edu.um.tesoreria.rest.model.Debito;
 import ar.edu.um.tesoreria.rest.repository.IDebitoRepository;
 
@@ -108,7 +108,7 @@ public class DebitoService {
 		return repository
 				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdAndDebitoTipoId(
 						facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, debitoTipoId)
-				.orElseThrow(() -> new DebitoNotFoundException(facultadId, tipoChequeraId, chequeraSerieId, productoId,
+				.orElseThrow(() -> new DebitoException(facultadId, tipoChequeraId, chequeraSerieId, productoId,
 						alternativaId, cuotaId, debitoTipoId));
 	}
 
@@ -118,17 +118,17 @@ public class DebitoService {
 				.findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdOrderByFechaVencimientoDesc(
 						facultadId, tipoChequeraId, chequeraSerieId, alternativaId)
 				.orElseThrow(
-						() -> new DebitoNotFoundException(facultadId, tipoChequeraId, chequeraSerieId, alternativaId));
+						() -> new DebitoException(facultadId, tipoChequeraId, chequeraSerieId, alternativaId));
 
 	}
 
 	public Debito findLastActiveByCbu(String cbu1, String cbu2) {
 		return repository.findTop1ByCbuStartingWithAndCbuEndingWithAndFechaBajaIsNullOrderByDebitoIdDesc(cbu1, cbu2)
-				.orElseThrow(() -> new DebitoNotFoundException(cbu1, cbu2));
+				.orElseThrow(() -> new DebitoException(cbu1, cbu2));
 	}
 
 	public Debito findByDebitoId(Long debitoId) {
-		return repository.findByDebitoId(debitoId).orElseThrow(() -> new DebitoNotFoundException(debitoId));
+		return repository.findByDebitoId(debitoId).orElseThrow(() -> new DebitoException(debitoId));
 	}
 
 	public Debito add(Debito debito) {
@@ -146,7 +146,7 @@ public class DebitoService {
 					newDebito.getRechazado(), newDebito.getMotivoRechazo(), newDebito.getArchivoBancoId(), null, null);
 			debito = repository.save(debito);
 			return debito;
-		}).orElseThrow(() -> new DebitoNotFoundException(debitoId));
+		}).orElseThrow(() -> new DebitoException(debitoId));
 	}
 
 	@Transactional

@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.MateriaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.MateriaException;
 import ar.edu.um.tesoreria.rest.model.Materia;
 import ar.edu.um.tesoreria.rest.repository.IMateriaRepository;
 
@@ -32,7 +32,7 @@ public class MateriaService {
 
 	public Materia findByUnique(Integer facultadId, Integer planId, String materiaId) {
 		return repository.findByFacultadIdAndPlanIdAndMateriaId(facultadId, planId, materiaId)
-				.orElseThrow(() -> new MateriaNotFoundException(facultadId, planId, materiaId));
+				.orElseThrow(() -> new MateriaException(facultadId, planId, materiaId));
 	}
 
 }

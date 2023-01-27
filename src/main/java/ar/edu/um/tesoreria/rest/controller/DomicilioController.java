@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.DomicilioNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.DomicilioException;
 import ar.edu.um.tesoreria.rest.model.Domicilio;
 import ar.edu.um.tesoreria.rest.model.view.DomicilioKey;
 import ar.edu.um.tesoreria.rest.service.DomicilioService;
@@ -38,7 +38,7 @@ public class DomicilioController {
 	public ResponseEntity<Domicilio> findByDomicilioId(@PathVariable Long domicilioId) {
 		try {
 			return new ResponseEntity<Domicilio>(service.findByDomicilioId(domicilioId), HttpStatus.OK);
-		} catch (DomicilioNotFoundException e) {
+		} catch (DomicilioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -48,7 +48,7 @@ public class DomicilioController {
 			@PathVariable Integer documentoId) {
 		try {
 			return new ResponseEntity<Domicilio>(service.findByUnique(personaId, documentoId), HttpStatus.OK);
-		} catch (DomicilioNotFoundException e) {
+		} catch (DomicilioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

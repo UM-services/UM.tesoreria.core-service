@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.GeograficaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.GeograficaException;
 import ar.edu.um.tesoreria.rest.model.Geografica;
 import ar.edu.um.tesoreria.rest.model.view.GeograficaLectivo;
 import ar.edu.um.tesoreria.rest.repository.IGeograficaRepository;
@@ -35,7 +35,7 @@ public class GeograficaService {
 	}
 
 	public Geografica findByGeograficaId(Integer geograficaId) {
-		return repository.findByGeograficaId(geograficaId).orElseThrow(() -> new GeograficaNotFoundException(geograficaId));
+		return repository.findByGeograficaId(geograficaId).orElseThrow(() -> new GeograficaException(geograficaId));
 	}
 
 }

@@ -3,11 +3,11 @@
  */
 package ar.edu.um.tesoreria.rest.service.facade;
 
-import ar.edu.um.tesoreria.rest.exception.CuentaMovimientoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CuentaMovimientoException;
 import ar.edu.um.tesoreria.rest.exception.EjercicioBloqueadoException;
-import ar.edu.um.tesoreria.rest.exception.EntregaNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ProveedorArticuloNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.EntregaException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorArticuloException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
 import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Entrega;
 import ar.edu.um.tesoreria.rest.model.EntregaDetalle;
@@ -144,27 +144,34 @@ public class CostoService {
 				log.debug("JSON Error EntregaDetalle");
 			}
 
-			ProveedorArticulo proveedorArticulo = asignacionCosto.getProveedorArticulo();
+			ProveedorArticulo proveedorArticulo = proveedorArticuloService
+					.findByProveedorArticuloId(asignacionCosto.getProveedorArticulo().getProveedorArticuloId());
+			try {
+				log.debug("ProveedorArticulo before asignado -> {}", JsonMapper.builder().findAndAddModules().build()
+						.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
+			} catch (JsonProcessingException e) {
+				log.debug("JSON Error ProveedorArticulo");
+			}
 			proveedorArticulo.setAsignado(proveedorArticulo.getAsignado().add(asignacionCosto.getImporte()).setScale(2,
 					RoundingMode.HALF_UP));
 			proveedorArticulo = proveedorArticuloService.update(proveedorArticulo,
 					proveedorArticulo.getProveedorArticuloId());
 			try {
-				log.debug("ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build()
+				log.debug("ProveedorArticulo after asignado -> {}", JsonMapper.builder().findAndAddModules().build()
 						.writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
 			} catch (JsonProcessingException e) {
 				log.debug("JSON Error ProveedorArticulo");
 			}
-		} catch (CuentaMovimientoNotFoundException e) {
+		} catch (CuentaMovimientoException e) {
 			log.debug("Error CuentaMovimiento - {}", e.getMessage());
 			return false;
-		} catch (EntregaNotFoundException e) {
+		} catch (EntregaException e) {
 			log.debug("Error Entrega - {}", e.getMessage());
 			return false;
 		} catch (EntregaDetalleNotFoundException e) {
 			log.debug("Error EntregaDetalle - {}", e.getMessage());
 			return false;
-		} catch (ProveedorArticuloNotFoundException e) {
+		} catch (ProveedorArticuloException e) {
 			log.debug("Error EntregaDetalle - {}", e.getMessage());
 			return false;
 		}
@@ -197,10 +204,10 @@ public class CostoService {
 		} catch (EntregaDetalleNotFoundException e) {
 			log.debug("Error EntregaDetalle : {}", e.getMessage());
 			return false;
-		} catch (ProveedorArticuloNotFoundException e) {
+		} catch (ProveedorArticuloException e) {
 			log.debug("Error ProveedorArticulo : {}", e.getMessage());
 			return false;
-		} catch (EntregaNotFoundException e) {
+		} catch (EntregaException e) {
 			log.debug("Error Entrega : {}", e.getMessage());
 			return false;
 		}
@@ -223,10 +230,10 @@ public class CostoService {
 					}
 				}
 			}
-		} catch (ProveedorMovimientoNotFoundException e) {
+		} catch (ProveedorMovimientoException e) {
 			log.debug("Error ProveedorMovimiento - {}", e.getMessage());
 			return false;
-		} catch (ProveedorArticuloNotFoundException e) {
+		} catch (ProveedorArticuloException e) {
 			log.debug("Error ProveedorArtiulo - {}", e.getMessage());
 			return false;
 		} catch (Exception e) {

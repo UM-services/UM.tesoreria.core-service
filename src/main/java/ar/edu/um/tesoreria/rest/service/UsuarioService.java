@@ -7,7 +7,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.UsuarioNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.UsuarioException;
 import ar.edu.um.tesoreria.rest.model.Usuario;
 import ar.edu.um.tesoreria.rest.repository.IUsuarioRepository;
 import ar.edu.um.tesoreria.rest.util.Tool;
@@ -23,12 +23,12 @@ public class UsuarioService {
 	private IUsuarioRepository repository;
 
 	public Usuario findByUsuarioId(String usuarioId) {
-		return repository.findByUsuarioId(usuarioId).orElseThrow(() -> new UsuarioNotFoundException(usuarioId));
+		return repository.findByUsuarioId(usuarioId).orElseThrow(() -> new UsuarioException(usuarioId));
 	}
 
 	public Usuario findByPassword(String password) {
 		return repository.findByPassword(DigestUtils.sha256Hex(password))
-				.orElseThrow(() -> new UsuarioNotFoundException());
+				.orElseThrow(() -> new UsuarioException());
 	}
 
 	public Usuario add(Usuario usuario) {
@@ -45,7 +45,7 @@ public class UsuarioService {
 					Tool.hourAbsoluteArgentina(), newUsuario.getAutoId());
 			usuario = repository.save(usuario);
 			return usuario;
-		}).orElseThrow(() -> new UsuarioNotFoundException(usuarioId));
+		}).orElseThrow(() -> new UsuarioException(usuarioId));
 	}
 
 	public Usuario updateLastLog(String usuarioId) {
@@ -55,7 +55,7 @@ public class UsuarioService {
 					usuario.getEliminaChequera(), Tool.hourAbsoluteArgentina(), usuario.getAutoId());
 			usuario = repository.save(usuario);
 			return usuario;
-		}).orElseThrow(() -> new UsuarioNotFoundException(usuarioId));
+		}).orElseThrow(() -> new UsuarioException(usuarioId));
 	}
 
 }

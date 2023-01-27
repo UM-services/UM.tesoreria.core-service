@@ -20,12 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.transaction.annotation.Transactional;
 
-import ar.edu.um.tesoreria.rest.exception.CarreraChequeraNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ChequeraSerieControlNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.DomicilioNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.LegajoNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.PersonaNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.SpoterDataNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CarreraChequeraException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraSerieControlException;
+import ar.edu.um.tesoreria.rest.exception.DomicilioException;
+import ar.edu.um.tesoreria.rest.exception.LegajoException;
+import ar.edu.um.tesoreria.rest.exception.PersonaException;
+import ar.edu.um.tesoreria.rest.exception.SpoterDataException;
 import ar.edu.um.tesoreria.rest.model.CarreraChequera;
 import ar.edu.um.tesoreria.rest.model.ChequeraAlternativa;
 import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
@@ -150,7 +150,7 @@ public class MailChequeraService {
 					this.sendChequera(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(),
 							data.getAlternativaId(), false, false),
 					data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId());
-		} catch (SpoterDataNotFoundException e) {
+		} catch (SpoterDataException e) {
 
 		}
 		// Determina curso
@@ -164,7 +164,7 @@ public class MailChequeraService {
 					spoterData.getPlanId(), spoterData.getCarreraId(), 1, curso.getCursoId(),
 					spoterData.getGeograficaId());
 			log.debug("CarreraChequera -> {}", carreraChequera);
-		} catch (CarreraChequeraNotFoundException e) {
+		} catch (CarreraChequeraException e) {
 			return new SpoterDataResponse(false, "SIN Tipo Chequera ASIGNADA", null, null, null);
 		}
 
@@ -191,13 +191,13 @@ public class MailChequeraService {
 			CarreraChequera carreraChequera) {
 		try {
 			personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
-		} catch (PersonaNotFoundException e) {
+		} catch (PersonaException e) {
 			personaService.add(new Persona(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
 					spoterData.getApellido(), spoterData.getNombre(), "", (byte) 0, "", "", ""));
 		}
 		try {
 			domicilioService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
-		} catch (DomicilioNotFoundException e) {
+		} catch (DomicilioException e) {
 			domicilioService.add(new Domicilio(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
 					Tool.hourAbsoluteArgentina(), "", "", "", "", "", spoterData.getCelular(), "", "",
 					spoterData.getFacultadId(), null, null, spoterData.getEmailPersonal(), "", ""), false);
@@ -210,14 +210,14 @@ public class MailChequeraService {
 			chequeraSerieControl = chequeraSerieControlService.findLastByTipoChequera(carreraChequera.getFacultadId(),
 					carreraChequera.getTipoChequeraId());
 			chequeraSerieId = 1L + chequeraSerieControl.getChequeraSerieId();
-		} catch (ChequeraSerieControlNotFoundException e) {
+		} catch (ChequeraSerieControlException e) {
 
 		}
 		// Llenar Legajo tesorería
 		try {
 			legajoService.findByFacultadIdAndPersonaIdAndDocumentoId(spoterData.getFacultadId(),
 					spoterData.getPersonaId(), spoterData.getDocumentoId());
-		} catch (LegajoNotFoundException e) {
+		} catch (LegajoException e) {
 			legajoService.add(new Legajo(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
 					spoterData.getFacultadId(), 0L, Tool.dateAbsoluteArgentina(), lectivoId, spoterData.getPlanId(),
 					spoterData.getCarreraId(), (byte) 1, spoterData.getGeograficaId(), "", (byte) 0));
@@ -287,7 +287,7 @@ public class MailChequeraService {
 		Domicilio domicilio = null;
 		try {
 			domicilio = domicilioService.findByUnique(personaId, documentoId);
-		} catch (DomicilioNotFoundException e) {
+		} catch (DomicilioException e) {
 			return "ERROR: Sin correos para ENVIAR";
 		}
 
@@ -341,7 +341,7 @@ public class MailChequeraService {
 		Domicilio domicilio = null;
 		try {
 			domicilio = domicilioService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
-		} catch (DomicilioNotFoundException e) {
+		} catch (DomicilioException e) {
 			return "ERROR: Sin correos para ENVIAR";
 		}
 

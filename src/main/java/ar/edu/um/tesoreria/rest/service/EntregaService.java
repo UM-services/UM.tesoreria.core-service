@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
-import ar.edu.um.tesoreria.rest.exception.EntregaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.EntregaException;
 import ar.edu.um.tesoreria.rest.model.Entrega;
 import ar.edu.um.tesoreria.rest.repository.IEntregaRepository;
 
@@ -53,7 +53,7 @@ public class EntregaService {
 	}
 
 	public Entrega findByEntregaId(Long entregaId) {
-		return repository.findByEntregaId(entregaId).orElseThrow(() -> new EntregaNotFoundException(entregaId));
+		return repository.findByEntregaId(entregaId).orElseThrow(() -> new EntregaException(entregaId));
 	}
 
 	public Entrega add(Entrega entrega) {

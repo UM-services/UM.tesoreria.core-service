@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.view.TipoChequeraSedeNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.view.TipoChequeraSedeException;
 import ar.edu.um.tesoreria.rest.model.view.TipoChequeraSede;
 import ar.edu.um.tesoreria.rest.repository.view.ITipoChequeraSedeRepository;
 import ar.edu.um.tesoreria.rest.service.ChequeraSerieService;
@@ -68,6 +68,6 @@ public class TipoChequeraSedeService {
 
 	public TipoChequeraSede findByTipoChequeraId(Integer tipoChequeraId) {
 		return repository.findByTipoChequeraId(tipoChequeraId)
-				.orElseThrow(() -> new TipoChequeraSedeNotFoundException(tipoChequeraId));
+				.orElseThrow(() -> new TipoChequeraSedeException(tipoChequeraId));
 	}
 }

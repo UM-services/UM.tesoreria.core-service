@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.LectivoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.LectivoException;
 import ar.edu.um.tesoreria.rest.model.Lectivo;
 import ar.edu.um.tesoreria.rest.repository.ILectivoRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -50,15 +50,15 @@ public class LectivoService {
 
 	public Lectivo findByFecha(OffsetDateTime fecha) {
 		return repository.findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(fecha, fecha)
-				.orElseThrow(() -> new LectivoNotFoundException(fecha));
+				.orElseThrow(() -> new LectivoException(fecha));
 	}
 
 	public Lectivo findByLectivoId(Integer lectivoId) {
-		return repository.findByLectivoId(lectivoId).orElseThrow(() -> new LectivoNotFoundException(lectivoId));
+		return repository.findByLectivoId(lectivoId).orElseThrow(() -> new LectivoException(lectivoId));
 	}
 
 	public Lectivo findLast() {
-		return repository.findTopByOrderByLectivoIdDesc().orElseThrow(() -> new LectivoNotFoundException());
+		return repository.findTopByOrderByLectivoIdDesc().orElseThrow(() -> new LectivoException());
 	}
 
 	public Lectivo add(Lectivo lectivo) {

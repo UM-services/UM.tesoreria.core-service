@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.LectivoTotalImputacionNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.LectivoTotalImputacionException;
 import ar.edu.um.tesoreria.rest.model.LectivoTotalImputacion;
 import ar.edu.um.tesoreria.rest.repository.ILectivoTotalImputacionRepository;
 
@@ -31,7 +31,7 @@ public class LectivoTotalImputacionService {
 		return repository
 				.findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoId(facultadId, lectivoId, tipoChequeraId,
 						productoId)
-				.orElseThrow(() -> new LectivoTotalImputacionNotFoundException(facultadId, lectivoId, tipoChequeraId,
+				.orElseThrow(() -> new LectivoTotalImputacionException(facultadId, lectivoId, tipoChequeraId,
 						productoId));
 	}
 
@@ -49,7 +49,7 @@ public class LectivoTotalImputacionService {
 					newLectivoTotalImputacion.getCuenta());
 			repository.save(lectivoTotalImputacion);
 			return lectivoTotalImputacion;
-		}).orElseThrow(() -> new LectivoTotalImputacionNotFoundException(lectivoTotalImputacionId));
+		}).orElseThrow(() -> new LectivoTotalImputacionException(lectivoTotalImputacionId));
 	}
 
 }

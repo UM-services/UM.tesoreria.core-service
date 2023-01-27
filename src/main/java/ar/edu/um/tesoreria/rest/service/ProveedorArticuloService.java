@@ -3,7 +3,7 @@
  */
 package ar.edu.um.tesoreria.rest.service;
 
-import ar.edu.um.tesoreria.rest.exception.ProveedorArticuloNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorArticuloException;
 import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
 import ar.edu.um.tesoreria.rest.repository.IProveedorArticuloRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +49,11 @@ public class ProveedorArticuloService {
 		return repository.findAllByProveedorMovimientoIdOrderByOrden(proveedorMovimientoId);
 	}
 
+	public ProveedorArticulo findByProveedorArticuloId(Long proveedorArticuloId) {
+		return repository.findByProveedorArticuloId(proveedorArticuloId)
+				.orElseThrow(() -> new ProveedorArticuloException(proveedorArticuloId));
+	}
+
 	public ProveedorArticulo update(ProveedorArticulo newProveedorArticulo, Long proveedorArticuloId) {
 		return repository.findByProveedorArticuloId(proveedorArticuloId).map(proveedorArticulo -> {
 			proveedorArticulo = new ProveedorArticulo(proveedorArticuloId,
@@ -59,7 +64,7 @@ public class ProveedorArticuloService {
 					newProveedorArticulo.getAsignado(), null);
 			proveedorArticulo = repository.save(proveedorArticulo);
 			return proveedorArticulo;
-		}).orElseThrow(() -> new ProveedorArticuloNotFoundException(proveedorArticuloId));
+		}).orElseThrow(() -> new ProveedorArticuloException(proveedorArticuloId));
 	}
 
 }

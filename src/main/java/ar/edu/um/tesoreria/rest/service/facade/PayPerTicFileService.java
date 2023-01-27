@@ -28,11 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ChequeraAlternativaNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.ChequeraSerieNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.DomicilioNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.PayPerTicNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.PersonaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraAlternativaException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraSerieException;
+import ar.edu.um.tesoreria.rest.exception.DomicilioException;
+import ar.edu.um.tesoreria.rest.exception.PayPerTicException;
+import ar.edu.um.tesoreria.rest.exception.PersonaException;
 import ar.edu.um.tesoreria.rest.model.ChequeraAlternativa;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.Domicilio;
@@ -122,14 +122,14 @@ public class PayPerTicFileService {
 			try {
 				chequeraSerie = chequeraSerieService.findByUnique(cuota.getFacultadId(), cuota.getTipoChequeraId(),
 						cuota.getChequeraSerieId());
-			} catch (ChequeraSerieNotFoundException e) {
+			} catch (ChequeraSerieException e) {
 				chequeraSerie = new ChequeraSerie();
 			}
 
 			Persona persona = null;
 			try {
 				persona = personaService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId());
-			} catch (PersonaNotFoundException e) {
+			} catch (PersonaException e) {
 				persona = new Persona();
 			}
 
@@ -146,7 +146,7 @@ public class PayPerTicFileService {
 					chequeraAlternativa = chequeraAlternativaService.findByUnique(cuota.getFacultadId(),
 							cuota.getTipoChequeraId(), cuota.getChequeraSerieId(), cuota.getProductoId(),
 							cuota.getAlternativaId());
-				} catch (ChequeraAlternativaNotFoundException e) {
+				} catch (ChequeraAlternativaException e) {
 					chequeraAlternativa = new ChequeraAlternativa();
 				}
 				String concept_description = chequeraAlternativa.getTitulo() + ": " + cuota.getCuotaId() + " Periodo: "
@@ -173,7 +173,7 @@ public class PayPerTicFileService {
 				Domicilio domicilio = null;
 				try {
 					domicilio = domicilioService.findByUnique(persona.getPersonaId(), persona.getDocumentoId());
-				} catch (DomicilioNotFoundException e) {
+				} catch (DomicilioException e) {
 					domicilio = new Domicilio();
 				}
 				String payer_email = domicilio.getEmailPersonal();
@@ -244,7 +244,7 @@ public class PayPerTicFileService {
 						PayPerTic rendicion = null;
 						try {
 							rendicion = payPerTicService.findByPayperticId(payperticId);
-						} catch (PayPerTicNotFoundException e) {
+						} catch (PayPerTicException e) {
 							rendicion = new PayPerTic();
 						}
 						rendicion.setPayperticId(payperticId);

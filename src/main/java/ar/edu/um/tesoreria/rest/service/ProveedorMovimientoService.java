@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
-import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
 import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
 import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
@@ -120,7 +120,7 @@ public class ProveedorMovimientoService {
 
 	public ProveedorMovimiento findByProveedorMovimientoId(Long proveedorMovimientoId) {
 		return repository.findByProveedorMovimientoId(proveedorMovimientoId)
-				.orElseThrow(() -> new ProveedorMovimientoNotFoundException(proveedorMovimientoId));
+				.orElseThrow(() -> new ProveedorMovimientoException(proveedorMovimientoId));
 	}
 
 }

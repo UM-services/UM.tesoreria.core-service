@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.PersonaBeneficiarioNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.PersonaBeneficiarioException;
 import ar.edu.um.tesoreria.rest.model.PersonaBeneficiario;
 import ar.edu.um.tesoreria.rest.service.PersonaBeneficiarioService;
 
@@ -35,7 +35,7 @@ public class PersonaBeneficiarioController {
 	public ResponseEntity<PersonaBeneficiario> findByPersonaUniqueId(@PathVariable Long personaUniqueId) {
 		try {
 			return new ResponseEntity<PersonaBeneficiario>(service.findByPersonaUniqueId(personaUniqueId), HttpStatus.OK);
-		} catch (PersonaBeneficiarioNotFoundException e) {
+		} catch (PersonaBeneficiarioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

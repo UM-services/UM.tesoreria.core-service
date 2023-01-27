@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.CursoNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CursoException;
 import ar.edu.um.tesoreria.rest.model.Curso;
 import ar.edu.um.tesoreria.rest.service.CursoService;
 
@@ -31,7 +31,7 @@ public class CursoController {
 	public ResponseEntity<Curso> findTopByClaseChequeraId(@PathVariable Integer claseChequeraId) {
 		try {
 			return new ResponseEntity<Curso>(service.findTopByClaseChequera(claseChequeraId), HttpStatus.OK);
-		} catch (CursoNotFoundException e) {
+		} catch (CursoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.exception.CuentaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CuentaException;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.model.view.CuentaSearch;
 import ar.edu.um.tesoreria.rest.service.CuentaService;
@@ -60,7 +60,7 @@ public class CuentaController {
 	public ResponseEntity<Cuenta> findByCuenta(@PathVariable BigDecimal numeroCuenta) {
 		try {
 			return new ResponseEntity<Cuenta>(service.findByNumeroCuenta(numeroCuenta), HttpStatus.OK);
-		} catch (CuentaNotFoundException e) {
+		} catch (CuentaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
@@ -69,7 +69,7 @@ public class CuentaController {
 	public ResponseEntity<Cuenta> findByCuentaContableId(@PathVariable Long cuentaContableId) {
 		try {
 			return new ResponseEntity<Cuenta>(service.findByCuentaContableId(cuentaContableId), HttpStatus.OK);
-		} catch (CuentaNotFoundException e) {
+		} catch (CuentaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}

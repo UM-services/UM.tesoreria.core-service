@@ -6,7 +6,7 @@ package ar.edu.um.tesoreria.rest.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ChequeraSerieControlNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraSerieControlException;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerieControl;
 import ar.edu.um.tesoreria.rest.repository.IChequeraSerieControlRepository;
 
@@ -22,14 +22,14 @@ public class ChequeraSerieControlService {
 
 	public ChequeraSerieControl findLastByTipoChequera(Integer facultadId, Integer tipoChequeraId) {
 		return repository.findTopByFacultadIdAndTipoChequeraIdOrderByChequeraSerieIdDesc(facultadId, tipoChequeraId)
-				.orElseThrow(() -> new ChequeraSerieControlNotFoundException(facultadId, tipoChequeraId));
+				.orElseThrow(() -> new ChequeraSerieControlException(facultadId, tipoChequeraId));
 	}
 
 	public ChequeraSerieControl findByUnique(Integer facultadId, Integer tipochequeraId, Long chequeraserieId) {
 		return repository
 				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipochequeraId, chequeraserieId)
 				.orElseThrow(
-						() -> new ChequeraSerieControlNotFoundException(facultadId, tipochequeraId, chequeraserieId));
+						() -> new ChequeraSerieControlException(facultadId, tipochequeraId, chequeraserieId));
 	}
 
 	public ChequeraSerieControl update(ChequeraSerieControl newChequeraSerieControl, Long chequeraSerieControlId) {
@@ -41,7 +41,7 @@ public class ChequeraSerieControlService {
 					newChequeraSerieControl.getChequeraSerieIdNueva(), newChequeraSerieControl.getEliminada());
 			repository.save(chequeraSerieControl);
 			return chequeraSerieControl;
-		}).orElseThrow(() -> new ChequeraSerieControlNotFoundException(chequeraSerieControlId));
+		}).orElseThrow(() -> new ChequeraSerieControlException(chequeraSerieControlId));
 	}
 
 	public ChequeraSerieControl add(ChequeraSerieControl chequeraSerieControl) {

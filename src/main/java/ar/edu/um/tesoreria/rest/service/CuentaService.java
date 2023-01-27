@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.CuentaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.CuentaException;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.model.view.CuentaSearch;
 import ar.edu.um.tesoreria.rest.repository.ICuentaRepository;
@@ -62,12 +62,12 @@ public class CuentaService {
 	}
 
 	public Cuenta findByNumeroCuenta(BigDecimal numeroCuenta) {
-		return repository.findByNumeroCuenta(numeroCuenta).orElseThrow(() -> new CuentaNotFoundException(numeroCuenta));
+		return repository.findByNumeroCuenta(numeroCuenta).orElseThrow(() -> new CuentaException(numeroCuenta));
 	}
 
 	public Cuenta findByCuentaContableId(Long cuentaContableId) {
 		return repository.findByCuentaContableId(cuentaContableId)
-				.orElseThrow(() -> new CuentaNotFoundException(cuentaContableId));
+				.orElseThrow(() -> new CuentaException(cuentaContableId));
 	}
 
 	public Cuenta add(Cuenta cuenta) {
@@ -85,7 +85,7 @@ public class CuentaService {
 					newCuenta.getCuentaContableId(), null);
 			cuenta = repository.save(cuenta);
 			return cuenta;
-		}).orElseThrow(() -> new CuentaNotFoundException(numeroCuenta));
+		}).orElseThrow(() -> new CuentaException(numeroCuenta));
 	}
 
 	@Transactional

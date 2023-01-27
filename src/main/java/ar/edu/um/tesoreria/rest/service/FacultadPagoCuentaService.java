@@ -6,7 +6,7 @@ package ar.edu.um.tesoreria.rest.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.FacultadPagoCuentaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.FacultadPagoCuentaException;
 import ar.edu.um.tesoreria.rest.model.FacultadPagoCuenta;
 import ar.edu.um.tesoreria.rest.repository.IFacultadPagoCuentaRepository;
 
@@ -22,7 +22,7 @@ public class FacultadPagoCuentaService {
 
 	public FacultadPagoCuenta findByUnique(Integer facultadId, Integer tipoPagoId) {
 		return repository.findByFacultadIdAndTipoPagoId(facultadId, tipoPagoId)
-				.orElseThrow(() -> new FacultadPagoCuentaNotFoundException(facultadId, tipoPagoId));
+				.orElseThrow(() -> new FacultadPagoCuentaException(facultadId, tipoPagoId));
 	}
 
 }

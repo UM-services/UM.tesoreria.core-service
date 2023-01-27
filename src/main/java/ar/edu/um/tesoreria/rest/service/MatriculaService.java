@@ -18,8 +18,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import ar.edu.um.tesoreria.rest.exception.MatriculaNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.view.ChequeraClaseNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.MatriculaException;
+import ar.edu.um.tesoreria.rest.exception.view.ChequeraClaseException;
 import ar.edu.um.tesoreria.rest.extern.model.BajaFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.CarreraFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.InscripcionFacultad;
@@ -71,7 +71,7 @@ public class MatriculaService {
 	}
 
 	public Matricula findByMatriculaId(Long matriculaId) {
-		return repository.findByMatriculaId(matriculaId).orElseThrow(() -> new MatriculaNotFoundException(matriculaId));
+		return repository.findByMatriculaId(matriculaId).orElseThrow(() -> new MatriculaException(matriculaId));
 	}
 
 	public Matricula findByUnique(Integer facultadId, BigDecimal personaId, Integer documentoId, Integer lectivoId,
@@ -79,14 +79,14 @@ public class MatriculaService {
 		return repository
 				.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraId(facultadId, personaId,
 						documentoId, lectivoId, clasechequeraId)
-				.orElseThrow(() -> new MatriculaNotFoundException(facultadId, personaId, documentoId, lectivoId,
+				.orElseThrow(() -> new MatriculaException(facultadId, personaId, documentoId, lectivoId,
 						clasechequeraId));
 	}
 
 	public Matricula findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraIdIn(Integer facultadId,
 			BigDecimal personaId, Integer documentoId, Integer lectivoId, List<Integer> clases) {
 		return repository.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraIdIn(facultadId,
-				personaId, documentoId, lectivoId, clases).orElseThrow(() -> new MatriculaNotFoundException());
+				personaId, documentoId, lectivoId, clases).orElseThrow(() -> new MatriculaException());
 	}
 
 	public Matricula findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraId(Integer facultadId,
@@ -94,7 +94,7 @@ public class MatriculaService {
 		return repository
 				.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraId(facultadId, personaId,
 						documentoId, lectivoId, clasechequeraId)
-				.orElseThrow(() -> new MatriculaNotFoundException(facultadId, personaId, documentoId, lectivoId,
+				.orElseThrow(() -> new MatriculaException(facultadId, personaId, documentoId, lectivoId,
 						clasechequeraId));
 	}
 
@@ -116,7 +116,7 @@ public class MatriculaService {
 					newmatricula.getClasechequeraId());
 			repository.save(matricula);
 			return matricula;
-		}).orElseThrow(() -> new MatriculaNotFoundException(matriculaId));
+		}).orElseThrow(() -> new MatriculaException(matriculaId));
 	}
 
 	@Transactional
@@ -254,7 +254,7 @@ public class MatriculaService {
 									unicas++;
 									repository.deleteByMatriculaId(matricula.getMatriculaId());
 									continue;
-								} catch (ChequeraClaseNotFoundException e) {
+								} catch (ChequeraClaseException e) {
 									log.debug(e.getMessage());
 								}
 							}

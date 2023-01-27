@@ -16,8 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.exception.ChequeraSerieNotFoundException;
-import ar.edu.um.tesoreria.rest.exception.PersonaNotFoundException;
+import ar.edu.um.tesoreria.rest.exception.ChequeraSerieException;
+import ar.edu.um.tesoreria.rest.exception.PersonaException;
 import ar.edu.um.tesoreria.rest.extern.consumer.InscripcionFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.LegajoFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.PreInscripcionFacultadConsumer;
@@ -72,11 +72,11 @@ public class PersonaService {
 
 	public Persona findByUnique(BigDecimal personaId, Integer documentoId) {
 		return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
-				.orElseThrow(() -> new PersonaNotFoundException(personaId, documentoId));
+				.orElseThrow(() -> new PersonaException(personaId, documentoId));
 	}
 
 	public Persona findByPersonaId(BigDecimal personaId) {
-		return repository.findTopByPersonaId(personaId).orElseThrow(() -> new PersonaNotFoundException(personaId));
+		return repository.findTopByPersonaId(personaId).orElseThrow(() -> new PersonaException(personaId));
 	}
 
 	public List<Persona> findAllSantander() {
@@ -134,7 +134,7 @@ public class PersonaService {
 							inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
 				}
 				add = false;
-			} catch (ChequeraSerieNotFoundException e) {
+			} catch (ChequeraSerieException e) {
 				log.debug("Sin chequera");
 			}
 			// Verifica los alumnos de intercambio
@@ -185,7 +185,7 @@ public class PersonaService {
 								inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId,
 								geograficaId, carreraChequera.getTipoChequeraId());
 				add = false;
-			} catch (ChequeraSerieNotFoundException e) {
+			} catch (ChequeraSerieException e) {
 				log.debug("Sin chequera");
 			}
 			// Verifica los alumnos de intercambio
@@ -227,7 +227,7 @@ public class PersonaService {
 								preinscripto.getPersonaId(), preinscripto.getDocumentoId(), facultadId, lectivoId - 1,
 								geograficaId);
 				add = false;
-			} catch (ChequeraSerieNotFoundException e) {
+			} catch (ChequeraSerieException e) {
 				log.debug("Sin chequera");
 			}
 			// Agrega el alumno
@@ -262,7 +262,7 @@ public class PersonaService {
 	}
 
 	public Persona findByUniqueId(Long uniqueId) {
-		return repository.findByUniqueId(uniqueId).orElseThrow(() -> new PersonaNotFoundException(uniqueId));
+		return repository.findByUniqueId(uniqueId).orElseThrow(() -> new PersonaException(uniqueId));
 	}
 
 	public Persona add(Persona persona) {
@@ -277,7 +277,7 @@ public class PersonaService {
 					newpersona.getCuit(), newpersona.getCbu(), newpersona.getPassword());
 			repository.save(persona);
 			return persona;
-		}).orElseThrow(() -> new PersonaNotFoundException(uniqueId));
+		}).orElseThrow(() -> new PersonaException(uniqueId));
 	}
 
 }
