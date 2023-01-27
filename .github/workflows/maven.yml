@@ -32,7 +32,7 @@ jobs:
     - uses: mr-smithers-excellent/docker-build-push@v5
       name: Build & push Docker image
       env:
-        VERSION: 1.0.1
+        VERSION: 1.0.2
       with:
         image: dqmdz/um.tesoreria
         tags: ${VERSION}, latest, "${GITHUB_REF#refs/heads/}.$(git rev-parse --short ${GITHUB_SHA})"
