@@ -63,7 +63,8 @@ public class CuentaMovimientoService {
 			throws JsonProcessingException {
 		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 		List<String> asientos = entregaService.findAllDetalleByProveedorMovimientoId(proveedorMovimientoId, false)
-				.stream().map(e -> dateTimeFormatter.format(e.getFechaContable()) + "." + e.getOrdenContable())
+				.stream()
+				.map(e -> dateTimeFormatter.format(e.getFechaContable().plusDays(1)) + "." + e.getOrdenContable())
 				.collect(Collectors.toList());
 		log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
 				.writeValueAsString(asientos));

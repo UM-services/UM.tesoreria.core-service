@@ -56,7 +56,7 @@ public class CuentaMovimientoAsiento extends Auditable implements Serializable {
 	private Integer comprobanteId;
 	private String concepto;
 	private BigDecimal importe = BigDecimal.ZERO;
-	private Long proveedorId;
+	private Integer proveedorId;
 	private Integer numeroAnulado = 0;
 	private Integer version = 0;
 	private Long proveedorMovimientoId;
