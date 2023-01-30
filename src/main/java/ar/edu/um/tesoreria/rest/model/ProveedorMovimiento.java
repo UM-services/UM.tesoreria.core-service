@@ -10,6 +10,7 @@ import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -117,8 +118,8 @@ public class ProveedorMovimiento extends Auditable implements Serializable {
 	@OneToOne(optional = true)
 	@JoinColumn(name = "geograficaId", insertable = false, updatable = false)
 	private Geografica geografica;
-	
-	@OneToMany()
+
+	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "fad_mvp_id", insertable = false, updatable = false)
 	private List<ProveedorArticulo> proveedorArticulos;
 
