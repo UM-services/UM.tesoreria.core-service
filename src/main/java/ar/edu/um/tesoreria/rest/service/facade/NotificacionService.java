@@ -35,6 +35,7 @@ import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
 import ar.edu.um.tesoreria.rest.model.ProveedorValor;
 import ar.edu.um.tesoreria.rest.model.Valor;
 import ar.edu.um.tesoreria.rest.model.ValorMovimiento;
+import ar.edu.um.tesoreria.rest.model.dto.ProveedorMovimientoDTO;
 import ar.edu.um.tesoreria.rest.service.ComprobanteService;
 import ar.edu.um.tesoreria.rest.service.DomicilioService;
 import ar.edu.um.tesoreria.rest.service.FacultadService;
@@ -185,7 +186,7 @@ public class NotificacionService {
 	public String notifyPagoProveedor(Long proveedorMovimientoId) throws MessagingException {
 		String data = "";
 
-		ProveedorMovimiento proveedorMovimiento = null;
+		ProveedorMovimientoDTO proveedorMovimiento = null;
 		try {
 			proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
 		} catch (ProveedorMovimientoException e) {

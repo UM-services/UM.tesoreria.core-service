@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+
+    tesoreria:
+        build: .
+        ports:
+            - 8092:8092
+        environment:
+            APP_SERVER: 10.147.20.25:3306
+            APP_DATABASE: tesium
+            APP_USER: root
+            APP_PASSWORD: root
+            APP_PORT: 8092
+            APP_ADD-PROPERTIES: "false"
+            APP_LOGGING: "debug"
+            APP_LIVERELOAD_ENABLED: "true"
+            APP_LIVERELOAD_PORT: 35792
+            APP_OPEN-IN-VIEW: "false"
+            APP_MAIL_USERNAME: envios@um.edu.ar
+            APP_MAIL_PASSWORD: 4Siby2KPwWIStCyX9gLB

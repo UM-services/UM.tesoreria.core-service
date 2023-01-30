@@ -32,10 +32,10 @@ import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
-import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
 import ar.edu.um.tesoreria.rest.model.ProveedorValor;
 import ar.edu.um.tesoreria.rest.model.Valor;
 import ar.edu.um.tesoreria.rest.model.ValorMovimiento;
+import ar.edu.um.tesoreria.rest.model.dto.ProveedorMovimientoDTO;
 import ar.edu.um.tesoreria.rest.repository.ValorNotFoundExcepcion;
 import ar.edu.um.tesoreria.rest.service.ComprobanteService;
 import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;
@@ -259,7 +259,7 @@ public class BalanceService {
 						.findFirstByContable(movimiento.getFechaContable(), movimiento.getOrdenContable());
 				ProveedorValor proveedorValor = proveedorValorService
 						.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
-				ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService
+				ProveedorMovimientoDTO proveedorMovimiento = proveedorMovimientoService
 						.findByProveedorMovimientoId(proveedorValor.getProveedorMovimientoId());
 				Valor valor = valorService.findByValorId(valorMovimiento.getValorId());
 				this.setCellString(row, 7,
