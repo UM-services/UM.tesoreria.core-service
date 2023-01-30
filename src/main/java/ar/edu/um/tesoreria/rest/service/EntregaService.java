@@ -52,6 +52,24 @@ public class EntregaService {
 		return entregas;
 	}
 
+	public List<Entrega> findAllDetalleByProveedorMovimientoIds(List<Long> proveedorMovimientoIds,
+			Boolean soloActivas) throws JsonProcessingException {
+		List<Long> entregaIds = entregaDetalleService.findAllByProveedorMovimientoIds(proveedorMovimientoIds).stream()
+				.map(d -> d.getEntregaId()).collect(Collectors.toList());
+		if (soloActivas) {
+			List<Entrega> entregas = repository.findAllByEntregaIdInAndAnulada(entregaIds, (byte) 0,
+					Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending()));
+			log.info("Entregas -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+					.writeValueAsString(entregas));
+			return entregas;
+		}
+		List<Entrega> entregas = repository.findAllByEntregaIdIn(entregaIds,
+				Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending()));
+		log.info("Entregas -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+				.writeValueAsString(entregas));
+		return entregas;
+	}
+
 	public Entrega findByEntregaId(Long entregaId) {
 		return repository.findByEntregaId(entregaId).orElseThrow(() -> new EntregaException(entregaId));
 	}
@@ -65,4 +83,5 @@ public class EntregaService {
 	public void deleteByEntregaId(Long entregaId) {
 		repository.deleteByEntregaId(entregaId);
 	}
+
 }

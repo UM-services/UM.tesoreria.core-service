@@ -28,6 +28,10 @@ public class EntregaDetalleService {
 		return repository.findAllByProveedorMovimientoIdOrderByOrden(proveedorMovimientoId);
 	}
 
+	public List<EntregaDetalle> findAllByProveedorMovimientoIds(List<Long> proveedorMovimientoIds) {
+		return repository.findAllByProveedorMovimientoIdInOrderByOrden(proveedorMovimientoIds);
+	}
+
 	public List<EntregaDetalle> findAllByEntregaId(Long entregaId) {
 		return repository.findAllByEntregaIdOrderByOrden(entregaId);
 	}

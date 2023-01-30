@@ -76,6 +76,23 @@ public class CuentaMovimientoService {
 		return cuentaMovimientoAsientos;
 	}
 
+	public List<CuentaMovimientoAsiento> findAllEntregaDetalleByProveedorMovimientoIds(
+			List<Long> proveedorMovimientoIds) throws JsonProcessingException {
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		List<String> asientos = entregaService.findAllDetalleByProveedorMovimientoIds(proveedorMovimientoIds, false)
+				.stream()
+				.map(e -> dateTimeFormatter.format(e.getFechaContable().plusDays(1)) + "." + e.getOrdenContable())
+				.collect(Collectors.toList());
+		log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+				.writeValueAsString(asientos));
+		List<CuentaMovimientoAsiento> cuentaMovimientoAsientos = cuentaMovimientoAsientoService
+				.findAllByAsientoIn(asientos, Sort.by("fechaContable").ascending().and(Sort.by("ordenContable")
+						.ascending().and(Sort.by("debita").descending().and(Sort.by("item").ascending()))));
+		log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+				.writeValueAsString(cuentaMovimientoAsientos));
+		return cuentaMovimientoAsientos;
+	}
+
 	public CuentaMovimiento findLastByFecha(OffsetDateTime fechaContable) {
 		return repository.findTopByFechaContableOrderByOrdenContableDesc(fechaContable)
 				.orElseGet(() -> new CuentaMovimiento());
