@@ -32,11 +32,11 @@ jobs:
     - uses: mr-smithers-excellent/docker-build-push@v5
       name: Build & push Docker image
       env:
-        VERSION: 1.1.6
+        VERSION: 1.1.7
       with:
         image: dqmdz/um.tesoreria
         tags: ${VERSION}, latest, "${GITHUB_REF#refs/heads/}.$(git rev-parse --short ${GITHUB_SHA})"
         registry: docker.io
-        dockerfile: Dockerfile
+        dockerfile: Dockerfile.github
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
