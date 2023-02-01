@@ -3,6 +3,8 @@
  */
 package ar.edu.um.tesoreria.rest.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +16,7 @@ import ar.edu.um.tesoreria.rest.model.Ubicacion;
  */
 @Repository
 public interface IUbicacionRepository extends JpaRepository<Ubicacion, Integer> {
+
+	public List<Ubicacion> findAllByDependenciaIdNotNull();
 
 }

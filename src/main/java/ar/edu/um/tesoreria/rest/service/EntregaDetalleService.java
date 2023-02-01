@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.model.EntregaDetalle;
-import ar.edu.um.tesoreria.rest.repository.EntregaDetalleNotFoundException;
+import ar.edu.um.tesoreria.rest.repository.EntregaDetalleException;
 import ar.edu.um.tesoreria.rest.repository.IEntregaDetalleRepository;
 
 /**
@@ -38,7 +38,7 @@ public class EntregaDetalleService {
 
 	public EntregaDetalle findByEntregaDetalleId(Long entregaDetalleId) {
 		return repository.findByEntregaDetalleId(entregaDetalleId)
-				.orElseThrow(() -> new EntregaDetalleNotFoundException(entregaDetalleId));
+				.orElseThrow(() -> new EntregaDetalleException(entregaDetalleId));
 	}
 
 	public EntregaDetalle add(EntregaDetalle entregaDetalle) {

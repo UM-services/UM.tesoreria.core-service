@@ -15,7 +15,7 @@ import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
 import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
 import ar.edu.um.tesoreria.rest.model.dto.AsignacionCosto;
 import ar.edu.um.tesoreria.rest.model.internal.AsientoInternal;
-import ar.edu.um.tesoreria.rest.repository.EntregaDetalleNotFoundException;
+import ar.edu.um.tesoreria.rest.repository.EntregaDetalleException;
 import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;
 import ar.edu.um.tesoreria.rest.service.EntregaDetalleService;
 import ar.edu.um.tesoreria.rest.service.EntregaService;
@@ -168,7 +168,7 @@ public class CostoService {
 		} catch (EntregaException e) {
 			log.debug("Error Entrega - {}", e.getMessage());
 			return false;
-		} catch (EntregaDetalleNotFoundException e) {
+		} catch (EntregaDetalleException e) {
 			log.debug("Error EntregaDetalle - {}", e.getMessage());
 			return false;
 		} catch (ProveedorArticuloException e) {
@@ -182,26 +182,56 @@ public class CostoService {
 	public Boolean deleteDesignacion(Long entregaId) {
 
 		try {
+			Entrega entrega = null;
 			for (EntregaDetalle entregaDetalle : entregaDetalleService.findAllByEntregaId(entregaId)) {
+				try {
+					log.debug("EntregaDetalle in deleteDesignacion -> {}", JsonMapper.builder().findAndAddModules()
+							.build().writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
+				} catch (JsonProcessingException e) {
+					log.debug("Cannot show EntregaDetalle in deleteDesignacion");
+				}
+				entrega = entregaDetalle.getEntrega();
+				try {
+					log.debug("Entrega in deleteDesignacion -> {}", JsonMapper.builder().findAndAddModules().build()
+							.writerWithDefaultPrettyPrinter().writeValueAsString(entrega));
+				} catch (JsonProcessingException e) {
+					log.debug("Cannot show Entrega in deleteDesignacion");
+				}
 				if (entregaDetalle.getProveedorArticulo() != null) {
 					ProveedorArticulo proveedorArticulo = entregaDetalle.getProveedorArticulo();
+					try {
+						log.debug("ProveedorArticulo before in deleteDesignacion -> {}",
+								JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+										.writeValueAsString(proveedorArticulo));
+					} catch (JsonProcessingException e) {
+						log.debug("Cannot show ProveedorArticulo before in deleteDesignacion");
+					}
 					proveedorArticulo.setAsignado(proveedorArticulo.getAsignado().subtract(entregaDetalle.getCantidad())
 							.setScale(2, RoundingMode.HALF_UP));
 					if (proveedorArticulo.getAsignado().compareTo(BigDecimal.ZERO) < 0) {
 						proveedorArticulo.setAsignado(BigDecimal.ZERO);
-						proveedorArticulo = proveedorArticuloService.update(proveedorArticulo,
-								proveedorArticulo.getProveedorArticuloId());
+					}
+					proveedorArticulo = proveedorArticuloService.update(proveedorArticulo,
+							proveedorArticulo.getProveedorArticuloId());
+					try {
+						log.debug("ProveedorArticulo after in deleteDesignacion -> {}",
+								JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+										.writeValueAsString(proveedorArticulo));
+					} catch (JsonProcessingException e) {
+						log.debug("Cannot show ProveedorArticulo after in deleteDesignacion");
 					}
 				}
 				entregaDetalleService.deleteByEntregaDetalleId(entregaDetalle.getEntregaDetalleId());
+				log.debug("EntregaDetalle in deleteDesignacion deleted");
 			}
-			Entrega entrega = entregaService.findByEntregaId(entregaId);
 			entregaService.deleteByEntregaId(entregaId);
+			log.debug("Entrega in deleteDesignacion deleted");
 			contableService.deleteAsiento(entrega.getFechaContable(), entrega.getOrdenContable());
+			log.debug("Asiento in deleteDesignacion deleted");
 		} catch (EjercicioBloqueadoException e) {
 			log.debug("Error Ejercicio : {}", e.getMessage());
 			return false;
-		} catch (EntregaDetalleNotFoundException e) {
+		} catch (EntregaDetalleException e) {
 			log.debug("Error EntregaDetalle : {}", e.getMessage());
 			return false;
 		} catch (ProveedorArticuloException e) {

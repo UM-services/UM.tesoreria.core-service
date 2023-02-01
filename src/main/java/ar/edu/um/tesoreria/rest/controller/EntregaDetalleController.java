@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.model.EntregaDetalle;
-import ar.edu.um.tesoreria.rest.repository.EntregaDetalleNotFoundException;
+import ar.edu.um.tesoreria.rest.repository.EntregaDetalleException;
 import ar.edu.um.tesoreria.rest.service.EntregaDetalleService;
 
 /**
@@ -49,7 +49,7 @@ public class EntregaDetalleController {
 	public ResponseEntity<EntregaDetalle> findByEntregaDetalleId(@PathVariable Long entregaDetalleId) {
 		try {
 			return new ResponseEntity<EntregaDetalle>(service.findByEntregaDetalleId(entregaDetalleId), HttpStatus.OK);
-		} catch (EntregaDetalleNotFoundException e) {
+		} catch (EntregaDetalleException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
