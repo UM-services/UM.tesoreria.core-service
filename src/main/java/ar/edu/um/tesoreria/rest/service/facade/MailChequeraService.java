@@ -202,19 +202,18 @@ public class MailChequeraService {
 		}
 
 		// Enviar chequera
-//		String message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
-//				chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false);
-//		// Registrar SpoterData
-//		spoterData.setLectivoId(lectivoId);
-//		spoterData.setStatus(message.equals("Envío de Correo Ok!!") ? (byte) 1 : (byte) 0);
-//		spoterData.setMessage(message);
-//		spoterData.setTipoChequeraId(chequeraSerie.getTipoChequeraId());
-//		spoterData.setChequeraSerieId(chequeraSerie.getChequeraSerieId());
-//		spoterData.setAlternativaId(chequeraSerie.getAlternativaId());
-//		spoterData = spoterDataService.add(spoterData);
-//		return new SpoterDataResponse(spoterData.getStatus() == (byte) 1 ? true : false, spoterData.getMessage(),
-//				spoterData.getFacultadId(), spoterData.getTipoChequeraId(), spoterData.getChequeraSerieId());
-		return null;
+		String message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
+				chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false);
+		// Registrar SpoterData
+		spoterData.setLectivoId(lectivoId);
+		spoterData.setStatus(message.equals("Envío de Correo Ok!!") ? (byte) 1 : (byte) 0);
+		spoterData.setMessage(message);
+		spoterData.setTipoChequeraId(chequeraSerie.getTipoChequeraId());
+		spoterData.setChequeraSerieId(chequeraSerie.getChequeraSerieId());
+		spoterData.setAlternativaId(chequeraSerie.getAlternativaId());
+		spoterData = spoterDataService.add(spoterData);
+		return new SpoterDataResponse(spoterData.getStatus() == (byte) 1 ? true : false, spoterData.getMessage(),
+				spoterData.getFacultadId(), spoterData.getTipoChequeraId(), spoterData.getChequeraSerieId());
 	}
 
 	@Transactional
