@@ -32,6 +32,11 @@ public class GeograficaController {
 		return new ResponseEntity<List<Geografica>>(service.findAll(), HttpStatus.OK);
 	}
 
+	@GetMapping("/sede/{geograficaId}")
+	public ResponseEntity<List<Geografica>> findAllBySede(@PathVariable Integer geograficaId) {
+		return new ResponseEntity<List<Geografica>>(service.findAllBySede(geograficaId), HttpStatus.OK);
+	}
+
 	@GetMapping("/lectivo/{lectivoId}")
 	public ResponseEntity<List<GeograficaLectivo>> findAllByLectivoId(@PathVariable Integer lectivoId) {
 		return new ResponseEntity<List<GeograficaLectivo>>(service.findAllByLectivoId(lectivoId), HttpStatus.OK);

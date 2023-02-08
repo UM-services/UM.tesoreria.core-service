@@ -121,9 +121,9 @@ public class ContableService {
 		return Arrays.asList(saldoDeudor, saldoAcreedor);
 	}
 
-	public List<BigDecimal> saldoPeriodo(BigDecimal cuenta, OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
+	public List<BigDecimal> saldoPeriodo(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
 		List<CuentaMovimiento> saldos = cuentaMovimientoService
-				.findAllByCuentaAndFechaContableBetweenAndApertura(cuenta, desde, hasta, apertura);
+				.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, apertura);
 		BigDecimal saldoDeudor = saldos.stream().filter(total -> total.getDebita() == 1)
 				.map(total -> total.getImporte()).reduce(BigDecimal.ZERO, BigDecimal::add);
 		BigDecimal saldoAcreedor = saldos.stream().filter(total -> total.getDebita() == 0)

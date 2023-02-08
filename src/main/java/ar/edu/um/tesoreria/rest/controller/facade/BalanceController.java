@@ -51,11 +51,11 @@ public class BalanceController {
 				.contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
 	}
 
-	@GetMapping("/mayor/{cuenta}/{desde}/{hasta}")
-	public ResponseEntity<Resource> makeMayor(@PathVariable BigDecimal cuenta,
+	@GetMapping("/mayor/{numeroCuenta}/{desde}/{hasta}")
+	public ResponseEntity<Resource> makeMayor(@PathVariable BigDecimal numeroCuenta,
 			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime desde,
 			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) throws FileNotFoundException {
-		String filename = service.makeMayor(cuenta, desde, hasta);
+		String filename = service.makeMayor(numeroCuenta, desde, hasta);
 		File file = new File(filename);
 		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 		HttpHeaders headers = new HttpHeaders();

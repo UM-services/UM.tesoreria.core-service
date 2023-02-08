@@ -20,7 +20,7 @@ import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
  */
 public interface ICuentaMovimientoRepository extends JpaRepository<CuentaMovimiento, Long> {
 
-	public List<CuentaMovimiento> findAllByCuentaAndFechaContableBetweenAndApertura(BigDecimal cuenta,
+	public List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta,
 			OffsetDateTime desde, OffsetDateTime hasta, Byte apertura, Sort sort);
 
 	public List<CuentaMovimiento> findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(

@@ -3,6 +3,7 @@
  */
 package ar.edu.um.tesoreria.rest.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +17,8 @@ import ar.edu.um.tesoreria.rest.model.Geografica;
  */
 @Repository
 public interface IGeograficaRepository extends JpaRepository<Geografica, Integer> {
+
+	public List<Geografica> findAllByGeograficaId(Integer geograficaId);
 
 	public Optional<Geografica> findByGeograficaId(Integer geograficaId);
 

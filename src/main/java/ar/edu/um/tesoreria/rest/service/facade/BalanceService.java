@@ -238,7 +238,7 @@ public class BalanceService {
 		this.setCellString(row, 10, "Importe", style_bold);
 
 		for (CuentaMovimiento movimiento : cuentaMovimientoService
-				.findAllByCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, (byte) 0)) {
+				.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, (byte) 0)) {
 			row = sheet.createRow(++fila);
 			this.setCellString(row, 0,
 					format.format(movimiento.getFechaContable().withOffsetSameInstant(ZoneOffset.UTC)), style_normal);

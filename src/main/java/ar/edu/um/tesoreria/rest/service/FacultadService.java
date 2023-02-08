@@ -27,7 +27,7 @@ import ar.edu.um.tesoreria.rest.repository.view.IFacultadPersonaRepository;
  */
 @Service
 public class FacultadService {
-	
+
 	@Autowired
 	private IFacultadRepository repository;
 
@@ -46,8 +46,7 @@ public class FacultadService {
 
 	public List<Facultad> findFacultades() {
 		Integer[] facultades = { 1, 2, 3, 4, 5, 14, 15 };
-//		Integer[] facultades = { 14 };
-		return repository.findAllById(Arrays.asList(facultades));
+		return repository.findAllByFacultadIdIn(Arrays.asList(facultades));
 	}
 
 	public List<FacultadLectivo> findAllByLectivoId(Integer lectivoId) {

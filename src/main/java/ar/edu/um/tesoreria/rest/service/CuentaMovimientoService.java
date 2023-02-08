@@ -53,9 +53,9 @@ public class CuentaMovimientoService {
 				itemDesde, Sort.by("debita").descending().and(Sort.by("item").ascending()));
 	}
 
-	public List<CuentaMovimiento> findAllByCuentaAndFechaContableBetweenAndApertura(BigDecimal cuenta,
+	public List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta,
 			OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
-		return repository.findAllByCuentaAndFechaContableBetweenAndApertura(cuenta, desde, hasta, apertura,
+		return repository.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, apertura,
 				Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending()));
 	}
 
