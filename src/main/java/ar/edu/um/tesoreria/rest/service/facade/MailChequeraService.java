@@ -189,6 +189,7 @@ public class MailChequeraService {
 				log.debug("CarreraChequera -> error");
 			}
 		} catch (CarreraChequeraException e) {
+			log.debug(e.getMessage());
 			return new SpoterDataResponse(false, "SIN Tipo Chequera ASIGNADA", null, null, null);
 		}
 
