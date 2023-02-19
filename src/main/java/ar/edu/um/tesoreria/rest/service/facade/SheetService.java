@@ -862,7 +862,7 @@ public class SheetService {
 			TipoChequera tipoChequera = tipos.get(chequera.getTipoChequeraId());
 			ArancelTipo arancelTipo = aranceles.get(chequera.getArancelTipoId());
 			CarreraKey carrera = null;
-			PersonaKey persona = null;
+			PersonaKey persona = new PersonaKey();
 			Boolean show = false;
 			if (personas.containsKey(chequera.getPersonaKey())) {
 				persona = personas.get(chequera.getPersonaKey());
@@ -909,7 +909,7 @@ public class SheetService {
 			TipoChequera tipoChequera = tipos.get(chequera.getTipoChequeraId());
 			ArancelTipo arancelTipo = aranceles.get(chequera.getArancelTipoId());
 			CarreraKey carrera = null;
-			PersonaKey persona = null;
+			PersonaKey persona = new PersonaKey();
 			Boolean show = false;
 			if (personas.containsKey(chequera.getPersonaKey())) {
 				persona = personas.get(chequera.getPersonaKey());
