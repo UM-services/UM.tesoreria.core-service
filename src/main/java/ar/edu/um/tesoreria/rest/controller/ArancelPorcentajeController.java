@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.ArancelPorcentajeException;
-import ar.edu.um.tesoreria.rest.model.ArancelPorcentaje;
+import ar.edu.um.tesoreria.rest.model.kotlin.ArancelPorcentaje;
 import ar.edu.um.tesoreria.rest.service.ArancelPorcentajeService;
 
 /**

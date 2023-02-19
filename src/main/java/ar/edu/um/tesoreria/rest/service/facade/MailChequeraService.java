@@ -144,6 +144,16 @@ public class MailChequeraService {
 		// Determina lectivoId
 		Lectivo lectivo = null;
 		Integer lectivoId = (lectivo = lectivoService.findByFecha(Tool.dateAbsoluteArgentina())).getLectivoId();
+		
+		// debe eliminarse al inicio del ciclo lectivo 2023
+		if (spoterData.getFacultadId() == 14) {
+			lectivoId = 34;
+			lectivo = lectivoService.findByLectivoId(lectivoId);
+		}
+		
+		//
+		
+		
 		try {
 			log.debug("Lectivo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(lectivo));

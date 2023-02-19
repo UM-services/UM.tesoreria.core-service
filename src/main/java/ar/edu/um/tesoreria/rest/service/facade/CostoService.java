@@ -14,7 +14,7 @@ import ar.edu.um.tesoreria.rest.model.EntregaDetalle;
 import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
 import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
 import ar.edu.um.tesoreria.rest.model.dto.AsignacionCosto;
-import ar.edu.um.tesoreria.rest.model.internal.AsientoInternal;
+import ar.edu.um.tesoreria.rest.model.kotlin.internal.AsientoInternal;
 import ar.edu.um.tesoreria.rest.repository.EntregaDetalleException;
 import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;
 import ar.edu.um.tesoreria.rest.service.EntregaDetalleService;
@@ -182,7 +182,7 @@ public class CostoService {
 	public Boolean deleteDesignacion(Long entregaId) {
 
 		try {
-			Entrega entrega = null;
+			Entrega entrega = new Entrega();
 			for (EntregaDetalle entregaDetalle : entregaDetalleService.findAllByEntregaId(entregaId)) {
 				try {
 					log.debug("EntregaDetalle in deleteDesignacion -> {}", JsonMapper.builder().findAndAddModules()

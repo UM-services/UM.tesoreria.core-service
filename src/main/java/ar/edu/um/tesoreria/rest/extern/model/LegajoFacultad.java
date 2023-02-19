@@ -24,16 +24,17 @@ public class LegajoFacultad implements Serializable {
 	 */
 	private static final long serialVersionUID = 4563166998420069077L;
 
-	private BigDecimal personaId;
-	private Integer documentoId;
-	private Integer facultadId;
-	private Long legajoId;
-	private Integer geograficaId;
-	private Long numeroLegajo;
-	private Integer lectivoId;
-	private OffsetDateTime fecha;
-	private Integer planId;
-	private Integer carreraId;
-	private String contrasenha;
-	private Byte intercambio;
+	private BigDecimal personaId = null;
+	private Integer documentoId = null;
+	private Integer facultadId = null;
+	private Long legajoId = null;
+	private Integer geograficaId = null;
+	private Long numeroLegajo = null;
+	private Integer lectivoId = null;
+	private OffsetDateTime fecha = null;
+	private Integer planId = null;
+	private Integer carreraId = null;
+	private String contrasenha = "";
+	private Byte intercambio = 0;
+	
 }

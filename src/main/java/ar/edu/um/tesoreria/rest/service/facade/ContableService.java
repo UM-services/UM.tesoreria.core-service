@@ -22,7 +22,7 @@ import ar.edu.um.tesoreria.rest.model.Asiento;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
-import ar.edu.um.tesoreria.rest.model.internal.AsientoInternal;
+import ar.edu.um.tesoreria.rest.model.kotlin.internal.AsientoInternal;
 import ar.edu.um.tesoreria.rest.service.AsientoService;
 import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;
 import ar.edu.um.tesoreria.rest.service.CuentaService;

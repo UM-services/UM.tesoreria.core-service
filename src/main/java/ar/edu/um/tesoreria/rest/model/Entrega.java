@@ -39,14 +39,14 @@ public class Entrega extends Auditable implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "noe_id")
-	private Long entregaId;
+	private Long entregaId = null;
 
 	@Column(name = "noe_fecha")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-	private OffsetDateTime fecha;
+	private OffsetDateTime fecha = null;
 
 	@Column(name = "noe_ubi_id")
-	private Integer ubicacionId;
+	private Integer ubicacionId = null;
 
 	@Column(name = "noe_recibe")
 	private String recibe = "";
@@ -56,19 +56,19 @@ public class Entrega extends Auditable implements Serializable {
 
 	@Column(name = "noe_mco_fecha")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-	private OffsetDateTime fechaContable;
+	private OffsetDateTime fechaContable = null;
 
 	@Column(name = "noe_mco_nrocomp")
-	private Integer ordenContable;
+	private Integer ordenContable = 0;
 
 	@Column(name = "noe_anulada")
 	private Byte anulada = 0;
 
 	@Column(name = "noe_tipo")
-	private String tipo;
+	private String tipo = "";
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "noe_ubi_id", insertable = false, updatable = false)
-	private Ubicacion ubicacion;
-	
+	private Ubicacion ubicacion = null;
+
 }

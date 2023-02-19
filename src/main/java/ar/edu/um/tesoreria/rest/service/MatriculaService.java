@@ -172,7 +172,7 @@ public class MatriculaService {
 //				Verifica si el alumno es de intercambio
 				String url = "http://" + facultad.getApiserver() + ":" + facultad.getApiport() + "/legajo/persona/"
 						+ matricula.getPersonaId() + "/" + matricula.getDocumentoId() + "/" + matricula.getFacultadId();
-				LegajoFacultad legajo = null;
+				LegajoFacultad legajo = new LegajoFacultad();
 				try {
 					legajo = restTemplate.getForObject(url, LegajoFacultad.class);
 				} catch (HttpClientErrorException | HttpServerErrorException httpClientOrServerExc) {

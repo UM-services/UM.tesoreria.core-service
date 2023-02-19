@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -36,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PagarFileService {
 
 	@Autowired
-	private ChequeraCuotaDeudaService chequeracuotadeudaservice;
+	private ChequeraCuotaDeudaService chequeraCuotaDeudaService;
 
 	@Autowired
 	private Environment env;
@@ -46,16 +47,16 @@ public class PagarFileService {
 		String outputFilename = path + "PAGAR.zip";
 
 		List<Character> meses = List.of('1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C');
-		Integer cantidad_lote = 5000;
-		Integer total_registros = chequeracuotadeudaservice.findAllByRango(desde, hasta, null).size();
+		Integer cantidadLote = 5000;
+		Integer totalRegistros = chequeraCuotaDeudaService.findAllByRango(desde, hasta, null).size();
 		ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(new File(outputFilename)));
 
-		for (Integer lote = 0; lote < (total_registros / cantidad_lote) + 1; lote++) {
+		for (Integer lote = 0; lote < (totalRegistros / cantidadLote) + 1; lote++) {
 			String filename = path + "PFXG" + lote + meses.get(desde.getMonthValue() - 1)
 					+ new DecimalFormat("00").format(OffsetDateTime.now().getDayOfMonth());
-			String filename_control = path + "CFXG" + lote + meses.get(desde.getMonthValue() - 1)
+			String filenameControl = path + "CFXG" + lote + meses.get(desde.getMonthValue() - 1)
 					+ new DecimalFormat("00").format(OffsetDateTime.now().getDayOfMonth());
-			log.debug("Filename -> {} Control -> {}", filename, filename_control);
+			log.debug("Filename -> {} Control -> {}", filename, filenameControl);
 			BufferedWriter out = new BufferedWriter(new FileWriter(filename));
 			// Registro inicial REFRESH
 			String line = "HRFACTURACION";
@@ -67,14 +68,14 @@ public class PagarFileService {
 			out.write(line);
 			out.write("\r\n");
 			// Identificador de deuda
-			Integer cantidad_registros = 0;
-			BigDecimal total_vencimiento1 = BigDecimal.ZERO;
-			BigDecimal total_vencimiento2 = BigDecimal.ZERO;
-			BigDecimal total_vencimiento3 = BigDecimal.ZERO;
-			OffsetDateTime last_date = null;
-			for (ChequeraCuotaDeuda deuda : chequeracuotadeudaservice.findAllByRango(desde, hasta,
-					PageRequest.of(lote, cantidad_lote))) {
-				cantidad_registros++;
+			Integer cantidadRegistros = 0;
+			BigDecimal totalVencimiento1 = BigDecimal.ZERO;
+			BigDecimal totalVencimiento2 = BigDecimal.ZERO;
+			BigDecimal totalVencimiento3 = BigDecimal.ZERO;
+			OffsetDateTime lastDate = OffsetDateTime.of(1960, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+			for (ChequeraCuotaDeuda deuda : chequeraCuotaDeudaService.findAllByRango(desde, hasta,
+					PageRequest.of(lote, cantidadLote))) {
+				cantidadRegistros++;
 				// Identificador de Deuda
 				line = new DecimalFormat("00").format(deuda.getAlternativaId());
 				line += deuda.getProductoId();
@@ -102,24 +103,24 @@ public class PagarFileService {
 				line += String.format("%1$" + 50 + "s", "");
 				out.write(line);
 				out.write("\r\n");
-				total_vencimiento1 = total_vencimiento1.add(deuda.getImporte1());
-				total_vencimiento2 = total_vencimiento2.add(deuda.getImporte2());
-				total_vencimiento3 = total_vencimiento3.add(deuda.getImporte3());
-				if (last_date == null || deuda.getVencimiento3().plusHours(3).isAfter(last_date)) {
-					last_date = deuda.getVencimiento3().plusHours(3);
+				totalVencimiento1 = totalVencimiento1.add(deuda.getImporte1());
+				totalVencimiento2 = totalVencimiento2.add(deuda.getImporte2());
+				totalVencimiento3 = totalVencimiento3.add(deuda.getImporte3());
+				if (lastDate == null || deuda.getVencimiento3().plusHours(3).isAfter(lastDate)) {
+					lastDate = deuda.getVencimiento3().plusHours(3);
 				}
 			}
 			// Registro final
 			line = "TRFACTURACION";
-			line += new DecimalFormat("00000000").format(cantidad_registros + 2);
-			line += new DecimalFormat("000000000000000000").format(total_vencimiento1.multiply(new BigDecimal(100)));
-			line += new DecimalFormat("000000000000000000").format(total_vencimiento2.multiply(new BigDecimal(100)));
-			line += new DecimalFormat("000000000000000000").format(total_vencimiento3.multiply(new BigDecimal(100)));
+			line += new DecimalFormat("00000000").format(cantidadRegistros + 2);
+			line += new DecimalFormat("000000000000000000").format(totalVencimiento1.multiply(new BigDecimal(100)));
+			line += new DecimalFormat("000000000000000000").format(totalVencimiento2.multiply(new BigDecimal(100)));
+			line += new DecimalFormat("000000000000000000").format(totalVencimiento3.multiply(new BigDecimal(100)));
 			line += String.format("%1$" + 56 + "s", "");
 			out.write(line);
 			out.write("\r\n");
 			out.close();
-			BufferedWriter out_control = new BufferedWriter(new FileWriter(filename_control));
+			BufferedWriter outControl = new BufferedWriter(new FileWriter(filenameControl));
 			// Registro inicial CONTROL
 			line = "HRPASCTRL";
 			line += fecha.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
@@ -127,30 +128,30 @@ public class PagarFileService {
 			// Debo extraer sólo el nombre del archivo
 			File file = new File(filename);
 			line += file.getName();
-			line += new DecimalFormat("0000000000").format((cantidad_registros + 2) * 133);
+			line += new DecimalFormat("0000000000").format((cantidadRegistros + 2) * 133);
 			line += String.format("%1$" + 37 + "s", "");
-			out_control.write(line);
-			out_control.write("\r\n");
+			outControl.write(line);
+			outControl.write("\r\n");
 			// Registro datos CONTROL
 			line = "LOTES";
 			line += new DecimalFormat("00000").format(lote);
-			line += new DecimalFormat("00000000").format(cantidad_registros + 2);
-			line += new DecimalFormat("000000000000000000").format(total_vencimiento1.multiply(new BigDecimal(100)));
-			line += new DecimalFormat("000000000000000000").format(total_vencimiento2.multiply(new BigDecimal(100)));
-			line += new DecimalFormat("000000000000000000").format(total_vencimiento3.multiply(new BigDecimal(100)));
+			line += new DecimalFormat("00000000").format(cantidadRegistros + 2);
+			line += new DecimalFormat("000000000000000000").format(totalVencimiento1.multiply(new BigDecimal(100)));
+			line += new DecimalFormat("000000000000000000").format(totalVencimiento2.multiply(new BigDecimal(100)));
+			line += new DecimalFormat("000000000000000000").format(totalVencimiento3.multiply(new BigDecimal(100)));
 			line += String.format("%1$" + 3 + "s", "");
-			out_control.write(line);
-			out_control.write("\r\n");
+			outControl.write(line);
+			outControl.write("\r\n");
 			// Registro final CONTROL
 			line = "FINAL";
-			line += new DecimalFormat("00000000").format(cantidad_registros + 2);
-			line += new DecimalFormat("000000000000000000").format(total_vencimiento1.multiply(new BigDecimal(100)));
-			line += new DecimalFormat("000000000000000000").format(total_vencimiento2.multiply(new BigDecimal(100)));
-			line += new DecimalFormat("000000000000000000").format(total_vencimiento3.multiply(new BigDecimal(100)));
-			line += last_date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-			out_control.write(line);
-			out_control.write("\r\n");
-			out_control.close();
+			line += new DecimalFormat("00000000").format(cantidadRegistros + 2);
+			line += new DecimalFormat("000000000000000000").format(totalVencimiento1.multiply(new BigDecimal(100)));
+			line += new DecimalFormat("000000000000000000").format(totalVencimiento2.multiply(new BigDecimal(100)));
+			line += new DecimalFormat("000000000000000000").format(totalVencimiento3.multiply(new BigDecimal(100)));
+			line += lastDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+			outControl.write(line);
+			outControl.write("\r\n");
+			outControl.close();
 
 			byte[] buffer = new byte[1024];
 			log.debug("Deflating {} ...", filename);
@@ -163,13 +164,13 @@ public class PagarFileService {
 			fileInputStream.close();
 			zipOutputStream.closeEntry();
 
-			log.debug("Deflating {} ...", filename_control);
-			zipOutputStream.putNextEntry(new ZipEntry(new File(filename_control).getName()));
-			fileInputStream = new FileInputStream(filename_control);
+			log.debug("Deflating {} ...", filenameControl);
+			zipOutputStream.putNextEntry(new ZipEntry(new File(filenameControl).getName()));
+			fileInputStream = new FileInputStream(filenameControl);
 			while ((len = fileInputStream.read(buffer)) > 0) {
 				zipOutputStream.write(buffer, 0, len);
 			}
-			fileInputStream.close();	
+			fileInputStream.close();
 			zipOutputStream.closeEntry();
 		}
 		zipOutputStream.close();

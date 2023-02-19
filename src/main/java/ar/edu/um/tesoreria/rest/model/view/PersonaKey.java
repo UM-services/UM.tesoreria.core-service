@@ -38,16 +38,16 @@ public class PersonaKey extends Auditable implements Serializable {
 	private static final long serialVersionUID = -1113380310482594229L;
 
 	@Id
-	private String unified;
+	private String unified = null;
 
 	@Column(name = "clave")
-	private Long uniqueId;
+	private Long uniqueId = null;
 
 	@Column(name = "per_id")
-	private BigDecimal personaId;
+	private BigDecimal personaId = null;
 
 	@Column(name = "per_doc_id")
-	private Integer documentoId;
+	private Integer documentoId = null;
 
 	@Column(name = "Per_Apellido")
 	private String apellido = "";
@@ -68,9 +68,9 @@ public class PersonaKey extends Auditable implements Serializable {
 	private String cbu = "";
 
 	@Column(name = "per_contrasenha")
-	private String password;
+	private String password = "";
 
-	private String search;
+	private String search = "";
 
 	@Transient
 	private Boolean mark_facultad = false;
