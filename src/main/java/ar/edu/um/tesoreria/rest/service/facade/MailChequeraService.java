@@ -144,16 +144,15 @@ public class MailChequeraService {
 		// Determina lectivoId
 		Lectivo lectivo = null;
 		Integer lectivoId = (lectivo = lectivoService.findByFecha(Tool.dateAbsoluteArgentina())).getLectivoId();
-		
+
 		// debe eliminarse al inicio del ciclo lectivo 2023
 		if (spoterData.getFacultadId() == 14) {
 			lectivoId = 34;
 			lectivo = lectivoService.findByLectivoId(lectivoId);
 		}
-		
+
 		//
-		
-		
+
 		try {
 			log.debug("Lectivo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
 					.writeValueAsString(lectivo));
@@ -213,8 +212,9 @@ public class MailChequeraService {
 		}
 
 		// Enviar chequera
-		String message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
-				chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false);
+		String message = "";
+//		message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
+//				chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false);
 		// Registrar SpoterData
 		spoterData.setLectivoId(lectivoId);
 		spoterData.setStatus(message.equals("Envío de Correo Ok!!") ? (byte) 1 : (byte) 0);
@@ -323,9 +323,15 @@ public class MailChequeraService {
 		Integer offset = 0;
 		for (LectivoCuota lectivoCuota : lectivoCuotaService.findAllByTipo(chequeraSerie.getFacultadId(),
 				chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(), chequeraSerie.getAlternativaId())) {
-			OffsetDateTime vencimiento1 = Tool.dateAbsoluteArgentina().plusDays(7 + 30 * offset);
-			OffsetDateTime vencimiento2 = Tool.dateAbsoluteArgentina().plusDays(20 + 30 * offset);
-			OffsetDateTime vencimiento3 = Tool.dateAbsoluteArgentina().plusDays(40 + 30 * offset);
+			OffsetDateTime vencimiento1 = lectivoCuota.getVencimiento1();
+			OffsetDateTime vencimiento2 = lectivoCuota.getVencimiento2();
+			OffsetDateTime vencimiento3 = lectivoCuota.getVencimiento3();
+			if (OffsetDateTime.now().isAfter(vencimiento1)) {
+				vencimiento1 = Tool.dateAbsoluteArgentina().plusDays(7 + 30 * offset);
+				vencimiento2 = Tool.dateAbsoluteArgentina().plusDays(20 + 30 * offset);
+				vencimiento3 = Tool.dateAbsoluteArgentina().plusDays(40 + 30 * offset);
+				offset++;
+			}
 			ChequeraCuota chequeraCuota = new ChequeraCuota(null, chequeraSerie.getFacultadId(),
 					chequeraSerie.getTipoChequeraId(), chequeraSerie.getChequeraSerieId(), lectivoCuota.getProductoId(),
 					lectivoCuota.getAlternativaId(), lectivoCuota.getCuotaId(), lectivoCuota.getMes(),
@@ -335,7 +341,6 @@ public class MailChequeraService {
 					(byte) 0, (byte) 0, 0, null);
 			chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
 			chequeraCuotas.add(chequeraCuota);
-			offset++;
 		}
 		chequeraCuotas = chequeraCuotaService.saveAll(chequeraCuotas);
 		try {
