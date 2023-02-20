@@ -213,8 +213,8 @@ public class MailChequeraService {
 
 		// Enviar chequera
 		String message = "";
-//		message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
-//				chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false);
+		message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
+				chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false);
 		// Registrar SpoterData
 		spoterData.setLectivoId(lectivoId);
 		spoterData.setStatus(message.equals("Envío de Correo Ok!!") ? (byte) 1 : (byte) 0);
