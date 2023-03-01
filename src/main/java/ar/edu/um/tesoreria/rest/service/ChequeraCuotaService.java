@@ -64,10 +64,17 @@ public class ChequeraCuotaService {
 	private LectivoService lectivoService;
 
 	public List<ChequeraCuota> findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(
-			Integer facultadId, Integer tipochequeraId, Long chequeraserieId, Integer alternativaId) {
+			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
 		return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId,
-				tipochequeraId, chequeraserieId, alternativaId, Sort.by("vencimiento1").ascending()
+				tipoChequeraId, chequeraSerieId, alternativaId, Sort.by("vencimiento1").ascending()
 						.and(Sort.by("productoId").ascending().and(Sort.by("cuotaId").ascending())));
+	}
+
+	public List<ChequeraCuota> findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaIdConImporte(
+			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
+		return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndImporte1GreaterThan(
+				facultadId, tipoChequeraId, chequeraSerieId, alternativaId, BigDecimal.ZERO, Sort.by("vencimiento1")
+						.ascending().and(Sort.by("productoId").ascending().and(Sort.by("cuotaId").ascending())));
 	}
 
 	public List<ChequeraCuota> findAllDebidas(Integer facultadId, Integer tipochequeraId, Long chequeraserieId,
@@ -88,8 +95,8 @@ public class ChequeraCuotaService {
 		return repository
 				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(facultadId,
 						tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId)
-				.orElseThrow(() -> new ChequeraCuotaException(facultadId, tipoChequeraId, chequeraSerieId,
-						productoId, alternativaId, cuotaId));
+				.orElseThrow(() -> new ChequeraCuotaException(facultadId, tipoChequeraId, chequeraSerieId, productoId,
+						alternativaId, cuotaId));
 	}
 
 	@Transactional

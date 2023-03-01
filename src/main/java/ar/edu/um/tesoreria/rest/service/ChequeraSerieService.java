@@ -152,8 +152,7 @@ public class ChequeraSerieService {
 	}
 
 	public ChequeraSerie findByChequeraId(Long chequeraId) {
-		return repository.findByChequeraId(chequeraId)
-				.orElseThrow(() -> new ChequeraSerieException(chequeraId));
+		return repository.findByChequeraId(chequeraId).orElseThrow(() -> new ChequeraSerieException(chequeraId));
 	}
 
 	public ChequeraSerie findByChequeraIdExtended(Long chequeraId) {
@@ -198,8 +197,8 @@ public class ChequeraSerieService {
 		return repository
 				.findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(personaId, documentoId,
 						facultadId, lectivoId, geograficaId)
-				.orElseThrow(() -> new ChequeraSerieException(personaId, documentoId, facultadId, lectivoId,
-						geograficaId));
+				.orElseThrow(
+						() -> new ChequeraSerieException(personaId, documentoId, facultadId, lectivoId, geograficaId));
 	}
 
 	public ChequeraSerie findGradoByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
@@ -209,8 +208,8 @@ public class ChequeraSerieService {
 						personaId, documentoId, facultadId, lectivoId, geograficaId,
 						tipoChequeraService.findAllByClaseChequera(2).stream().map(tipo -> tipo.getTipoChequeraId())
 								.collect(Collectors.toList()))
-				.orElseThrow(() -> new ChequeraSerieException(personaId, documentoId, facultadId, lectivoId,
-						geograficaId));
+				.orElseThrow(
+						() -> new ChequeraSerieException(personaId, documentoId, facultadId, lectivoId, geograficaId));
 	}
 
 	public ChequeraSerie findPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
@@ -220,8 +219,15 @@ public class ChequeraSerieService {
 						personaId, documentoId, facultadId, lectivoId, geograficaId,
 						tipoChequeraService.findAllByClaseChequera(1).stream().map(tipo -> tipo.getTipoChequeraId())
 								.collect(Collectors.toList()))
-				.orElseThrow(() -> new ChequeraSerieException(personaId, documentoId, facultadId, lectivoId,
-						geograficaId));
+				.orElseThrow(
+						() -> new ChequeraSerieException(personaId, documentoId, facultadId, lectivoId, geograficaId));
+	}
+
+	public ChequeraSerie findLastPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadId(BigDecimal personaId,
+			Integer documentoId, Integer facultadId) {
+		return repository.findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdInOrderByLectivoIdDesc(
+				personaId, documentoId, facultadId, tipoChequeraService.findAllByClaseChequera(1).stream()
+						.map(tipo -> tipo.getTipoChequeraId()).collect(Collectors.toList()));
 	}
 
 	public ChequeraSerie setPayPerTic(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Byte flag) {

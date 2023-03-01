@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,16 @@ import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerieControl;
 import ar.edu.um.tesoreria.rest.model.ChequeraTotal;
 import ar.edu.um.tesoreria.rest.model.Debito;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.ArancelTipoDTO;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.ChequeraCuotaDTO;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.ChequeraSerieDTO;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.FacultadDTO;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.GeograficaDTO;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.LectivoDTO;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.PersonaDTO;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.PreuniversitarioData;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.ProductoDTO;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.TipoChequeraDTO;
 import ar.edu.um.tesoreria.rest.service.ChequeraAlternativaService;
 import ar.edu.um.tesoreria.rest.service.ChequeraCuotaService;
 import ar.edu.um.tesoreria.rest.service.ChequeraEliminadaService;
@@ -79,6 +90,9 @@ public class ChequeraService {
 
 	@Autowired
 	private DebitoService debitoService;
+
+	@Autowired
+	private ModelMapper modelMapper;
 
 	@Transactional
 	public void deleteByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, String usuarioId) {
@@ -205,6 +219,32 @@ public class ChequeraService {
 					cuota.getVencimiento3(), cuota.getImporte3(), serie.getUsuarioId()));
 		}
 		detalles = chequeraImpresionDetalleService.saveAll(detalles);
+	}
+
+	public PreuniversitarioData findLastPreData(Integer facultadId, BigDecimal personaId, Integer documentoId) {
+		ChequeraSerie chequeraSerie = chequeraSerieService
+				.findLastPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadId(personaId, documentoId, facultadId);
+		List<ChequeraCuota> chequeraCuotas = chequeraCuotaService
+				.findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaIdConImporte(
+						chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
+						chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId());
+		FacultadDTO facultadDTO = modelMapper.map(chequeraSerie.getFacultad(), FacultadDTO.class);
+		TipoChequeraDTO tipoChequeraDTO = modelMapper.map(chequeraSerie.getTipoChequera(), TipoChequeraDTO.class);
+		PersonaDTO personaDTO = modelMapper.map(chequeraSerie.getPersona(), PersonaDTO.class);
+		LectivoDTO lectivoDTO = modelMapper.map(chequeraSerie.getLectivo(), LectivoDTO.class);
+		ArancelTipoDTO arancelTipoDTO = modelMapper.map(chequeraSerie.getArancelTipo(), ArancelTipoDTO.class);
+		GeograficaDTO geograficaDTO = modelMapper.map(chequeraSerie.getGeografica(), GeograficaDTO.class);
+		List<ChequeraCuotaDTO> chequeraCuotaDTOs = chequeraCuotas.stream()
+				.map(cuota -> new ChequeraCuotaDTO(cuota.getCuotaId(), cuota.getMes(), cuota.getAnho(),
+						cuota.getVencimiento1(), cuota.getImporte1(), cuota.getVencimiento2(), cuota.getImporte2(),
+						cuota.getVencimiento3(), cuota.getImporte3(), cuota.getPagado(),
+						modelMapper.map(cuota.getProducto(), ProductoDTO.class)))
+				.collect(Collectors.toList());
+		ChequeraSerieDTO chequeraSerieDTO = new ChequeraSerieDTO(chequeraSerie.getChequeraSerieId(),
+				chequeraSerie.getFecha(), chequeraSerie.getObservaciones(), chequeraSerie.getAlternativaId(),
+				facultadDTO, tipoChequeraDTO, personaDTO, lectivoDTO, arancelTipoDTO, geograficaDTO, chequeraCuotaDTOs);
+
+		return new PreuniversitarioData(chequeraSerieDTO);
 	}
 
 }

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.um.tesoreria.rest.model.SpoterData;
 import ar.edu.um.tesoreria.rest.model.dto.SpoterDataResponse;
+import ar.edu.um.tesoreria.rest.model.kotlin.dto.PreuniversitarioData;
 import ar.edu.um.tesoreria.rest.service.facade.ChequeraService;
 import ar.edu.um.tesoreria.rest.service.facade.FormulariosToPdfService;
 import ar.edu.um.tesoreria.rest.service.facade.MailChequeraService;
@@ -57,8 +58,8 @@ public class ChequeraController {
 
 	@GetMapping("/sendChequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{copiaInformes}")
 	public ResponseEntity<String> sendChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
-			@PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId, @PathVariable Boolean copiaInformes)
-			throws MessagingException {
+			@PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
+			@PathVariable Boolean copiaInformes) throws MessagingException {
 		return new ResponseEntity<String>(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
 				alternativaId, copiaInformes, true), HttpStatus.OK);
 	}
@@ -108,6 +109,13 @@ public class ChequeraController {
 			return new ResponseEntity<SpoterDataResponse>(
 					new SpoterDataResponse(false, e.getMessage(), null, null, null), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@GetMapping("/lastPre/{facultadId}/{personaId}/{documentoId}")
+	public ResponseEntity<PreuniversitarioData> lastPreData(@PathVariable Integer facultadId,
+			@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
+		return new ResponseEntity<PreuniversitarioData>(service.findLastPreData(facultadId, personaId, documentoId),
+				HttpStatus.OK);
 	}
 
 }
