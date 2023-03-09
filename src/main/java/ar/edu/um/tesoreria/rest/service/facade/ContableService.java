@@ -127,7 +127,7 @@ public class ContableService {
                 }
             }
         }
-        cuentaMovimientoService.add(new CuentaMovimiento(null, fechaContable, ordenContable, 0, null, (byte) 0, null, "", BigDecimal.ZERO, null, 0, 0, null, null, (byte) 0, null, null, null, null, null, null, null));
+        //cuentaMovimientoService.add(new CuentaMovimiento(null, fechaContable, ordenContable, 0, null, (byte) 0, null, "", BigDecimal.ZERO, null, 0, 0, null, null, (byte) 0, null, null, null, null, null, null, null));
         return new AsientoInternal(fechaContable, ordenContable, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
