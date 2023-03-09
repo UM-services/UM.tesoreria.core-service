@@ -82,9 +82,6 @@ public class CuentaMovimientoService {
         } catch (JsonProcessingException e) {
             log.debug("Error JSON Parser");
         }
-        if (cuentaMovimiento.getItem() > 0) {
-            this.depurateAsiento(cuentaMovimiento.getFechaContable(), cuentaMovimiento.getOrdenContable());
-        }
         return cuentaMovimiento;
     }
 
@@ -96,11 +93,6 @@ public class CuentaMovimientoService {
     @Transactional
     public void deleteByCuentaMovimientoId(Long cuentaMovimientoId) {
         repository.deleteByCuentaMovimientoId(cuentaMovimientoId);
-    }
-
-    @Transactional
-    public void depurateAsiento(OffsetDateTime fechaContable, Integer ordenContable) {
-        repository.deleteByFechaContableAndOrdenContableAndItem(fechaContable, ordenContable, 0);
     }
 
 }
