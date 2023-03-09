@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author daniel
- *
  */
 @Service
 @Slf4j
@@ -39,76 +38,53 @@ public class CuentaMovimientoService {
     @Resource
     private CuentaMovimientoAsientoService cuentaMovimientoAsientoService;
 
-    public List<CuentaMovimiento> findAllByAsiento(OffsetDateTime fechaContable, Integer ordenContable,
-                                                   Integer itemDesde, Integer debita) {
+    public List<CuentaMovimiento> findAllByAsiento(OffsetDateTime fechaContable, Integer ordenContable, Integer itemDesde, Integer debita) {
         if (debita < 2) {
-            return repository.findAllByFechaContableAndOrdenContableAndDebitaAndItemGreaterThanEqual(fechaContable,
-                    ordenContable, debita.byteValue(), itemDesde,
-                    Sort.by("debita").descending().and(Sort.by("item").ascending()));
+            return repository.findAllByFechaContableAndOrdenContableAndDebitaAndItemGreaterThanEqual(fechaContable, ordenContable, debita.byteValue(), itemDesde, Sort.by("debita").descending().and(Sort.by("item").ascending()));
         }
-        return repository.findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(fechaContable, ordenContable,
-                itemDesde, Sort.by("debita").descending().and(Sort.by("item").ascending()));
+        return repository.findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(fechaContable, ordenContable, itemDesde, Sort.by("debita").descending().and(Sort.by("item").ascending()));
     }
 
-    public List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta,
-                                                                                          OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
-        return repository.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, apertura,
-                Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending()));
+    public List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
+        return repository.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, apertura, Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending()));
     }
 
-    public List<CuentaMovimientoAsiento> findAllEntregaDetalleByProveedorMovimientoId(Long proveedorMovimientoId)
-            throws JsonProcessingException {
+    public List<CuentaMovimientoAsiento> findAllEntregaDetalleByProveedorMovimientoId(Long proveedorMovimientoId) throws JsonProcessingException {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        List<String> asientos = entregaService.findAllDetalleByProveedorMovimientoId(proveedorMovimientoId, false)
-                .stream()
-                .map(e -> dateTimeFormatter.format(e.getFechaContable().plusDays(1)) + "." + e.getOrdenContable())
-                .collect(Collectors.toList());
-        log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
-                .writeValueAsString(asientos));
-        List<CuentaMovimientoAsiento> cuentaMovimientoAsientos = cuentaMovimientoAsientoService
-                .findAllByAsientoIn(asientos, Sort.by("fechaContable").ascending().and(Sort.by("ordenContable")
-                        .ascending().and(Sort.by("debita").descending().and(Sort.by("item").ascending()))));
-        log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
-                .writeValueAsString(cuentaMovimientoAsientos));
+        List<String> asientos = entregaService.findAllDetalleByProveedorMovimientoId(proveedorMovimientoId, false).stream().map(e -> dateTimeFormatter.format(e.getFechaContable().plusDays(1)) + "." + e.getOrdenContable()).collect(Collectors.toList());
+        log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asientos));
+        List<CuentaMovimientoAsiento> cuentaMovimientoAsientos = cuentaMovimientoAsientoService.findAllByAsientoIn(asientos, Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending().and(Sort.by("debita").descending().and(Sort.by("item").ascending()))));
+        log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimientoAsientos));
         return cuentaMovimientoAsientos;
     }
 
-    public List<CuentaMovimientoAsiento> findAllEntregaDetalleByProveedorMovimientoIds(
-            List<Long> proveedorMovimientoIds) throws JsonProcessingException {
+    public List<CuentaMovimientoAsiento> findAllEntregaDetalleByProveedorMovimientoIds(List<Long> proveedorMovimientoIds) throws JsonProcessingException {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-        List<String> asientos = entregaService.findAllDetalleByProveedorMovimientoIds(proveedorMovimientoIds, false)
-                .stream()
-                .map(e -> dateTimeFormatter.format(e.getFechaContable().plusDays(1)) + "." + e.getOrdenContable())
-                .collect(Collectors.toList());
-        log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
-                .writeValueAsString(asientos));
-        List<CuentaMovimientoAsiento> cuentaMovimientoAsientos = cuentaMovimientoAsientoService
-                .findAllByAsientoIn(asientos, Sort.by("fechaContable").ascending().and(Sort.by("ordenContable")
-                        .ascending().and(Sort.by("debita").descending().and(Sort.by("item").ascending()))));
-        log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
-                .writeValueAsString(cuentaMovimientoAsientos));
+        List<String> asientos = entregaService.findAllDetalleByProveedorMovimientoIds(proveedorMovimientoIds, false).stream().map(e -> dateTimeFormatter.format(e.getFechaContable().plusDays(1)) + "." + e.getOrdenContable()).collect(Collectors.toList());
+        log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asientos));
+        List<CuentaMovimientoAsiento> cuentaMovimientoAsientos = cuentaMovimientoAsientoService.findAllByAsientoIn(asientos, Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending().and(Sort.by("debita").descending().and(Sort.by("item").ascending()))));
+        log.debug("Asientos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimientoAsientos));
         return cuentaMovimientoAsientos;
     }
 
     public CuentaMovimiento findLastByFecha(OffsetDateTime fechaContable) {
-        return repository.findTopByFechaContableOrderByOrdenContableDesc(fechaContable)
-                .orElseGet(() -> new CuentaMovimiento());
+        return repository.findTopByFechaContableOrderByOrdenContableDesc(fechaContable).orElseGet(() -> new CuentaMovimiento());
     }
 
     public CuentaMovimiento findByCuentaMovimientoId(Long cuentaMovimientoId) {
-        return repository.findByCuentaMovimientoId(cuentaMovimientoId)
-                .orElseThrow(() -> new CuentaMovimientoException(cuentaMovimientoId));
+        return repository.findByCuentaMovimientoId(cuentaMovimientoId).orElseThrow(() -> new CuentaMovimientoException(cuentaMovimientoId));
     }
 
     public CuentaMovimiento add(CuentaMovimiento cuentaMovimiento) {
         cuentaMovimiento = repository.save(cuentaMovimiento);
         try {
-            log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build()
-                    .writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+            log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
         } catch (JsonProcessingException e) {
             log.debug("Error JSON Parser");
         }
-        this.depurateAsiento(cuentaMovimiento.getFechaContable(), cuentaMovimiento.getOrdenContable());
+        if (cuentaMovimiento.getItem() > 0) {
+            this.depurateAsiento(cuentaMovimiento.getFechaContable(), cuentaMovimiento.getOrdenContable());
+        }
         return cuentaMovimiento;
     }
 
