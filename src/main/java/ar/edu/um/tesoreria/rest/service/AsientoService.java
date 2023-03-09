@@ -32,4 +32,9 @@ public class AsientoService {
 		repository.deleteByAsientoId(asientoId);
 	}
 
+	@Transactional
+	public Asiento add(Asiento asiento) {
+		return repository.save(asiento);
+	}
+
 }

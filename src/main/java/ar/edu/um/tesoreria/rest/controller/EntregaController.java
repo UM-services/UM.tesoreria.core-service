@@ -5,7 +5,8 @@ package ar.edu.um.tesoreria.rest.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import ar.edu.um.tesoreria.rest.model.kotlin.Entrega;
+import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ar.edu.um.tesoreria.rest.exception.EntregaException;
-import ar.edu.um.tesoreria.rest.model.Entrega;
 import ar.edu.um.tesoreria.rest.service.EntregaService;
 
 /**
@@ -30,7 +30,7 @@ import ar.edu.um.tesoreria.rest.service.EntregaService;
 @RequestMapping("/entrega")
 public class EntregaController {
 
-	@Autowired
+	@Resource
 	private EntregaService service;
 
 	@GetMapping("/detalle/{proveedorMovimientoId}")

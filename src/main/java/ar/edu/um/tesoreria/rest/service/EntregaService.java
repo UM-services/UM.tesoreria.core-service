@@ -6,10 +6,11 @@ package ar.edu.um.tesoreria.rest.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.model.kotlin.Entrega;
+import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import ar.edu.um.tesoreria.rest.exception.EntregaException;
-import ar.edu.um.tesoreria.rest.model.Entrega;
 import ar.edu.um.tesoreria.rest.repository.IEntregaRepository;
 
 /**
@@ -28,10 +28,10 @@ import ar.edu.um.tesoreria.rest.repository.IEntregaRepository;
 @Slf4j
 public class EntregaService {
 
-	@Autowired
+	@Resource
 	private IEntregaRepository repository;
 
-	@Autowired
+	@Resource
 	private EntregaDetalleService entregaDetalleService;
 
 	public List<Entrega> findAllDetalleByProveedorMovimientoId(Long proveedorMovimientoId, Boolean soloActivas)

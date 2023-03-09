@@ -8,6 +8,9 @@ import jakarta.persistence.GeneratedValue
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.GenerationType
 import java.time.OffsetDateTime
+import jakarta.persistence.OneToOne
+import jakarta.persistence.JoinColumn
+import ar.edu.um.tesoreria.rest.model.kotlin.Track
 
 @Entity
 @Table(
@@ -32,6 +35,12 @@ data class Asiento(
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
 	var fechaContra: OffsetDateTime? = null,
 
-	var ordenContra: Int? = null
+	var ordenContra: Int? = null,
+	var trackId: Long? = null,
+
+	@OneToOne(optional = true)
+	@JoinColumn(name = "trackId", insertable = false, updatable = false)
+	var track: Track? = null
+
 
 ) : Auditable()

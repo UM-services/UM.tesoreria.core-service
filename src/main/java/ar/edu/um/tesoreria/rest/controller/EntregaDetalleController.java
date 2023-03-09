@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.edu.um.tesoreria.rest.model.EntregaDetalle;
+import ar.edu.um.tesoreria.rest.model.kotlin.EntregaDetalle;
 import ar.edu.um.tesoreria.rest.repository.EntregaDetalleException;
 import ar.edu.um.tesoreria.rest.service.EntregaDetalleService;
 
