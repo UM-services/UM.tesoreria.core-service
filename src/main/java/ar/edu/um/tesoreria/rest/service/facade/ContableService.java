@@ -129,18 +129,6 @@ public class ContableService {
                 }
             }
         }
-        cuentaMovimiento = new CuentaMovimiento(null, fechaContable, ordenContable, 0, null, (byte) 0, null, "", BigDecimal.ZERO, null, 0, 0, null, null, (byte) 0, null, null, null, null, null, null, null);
-        try {
-            log.info("CuentaMovimiento nextAsiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-        } catch (JsonProcessingException e) {
-            log.debug("JSON Error CuentaMovimiento");
-        }
-        cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
-        try {
-            log.info("CuentaMovimiento nextAsiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-        } catch (JsonProcessingException e) {
-            log.debug("JSON Error CuentaMovimiento");
-        }
         return new AsientoInternal(fechaContable, ordenContable, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 

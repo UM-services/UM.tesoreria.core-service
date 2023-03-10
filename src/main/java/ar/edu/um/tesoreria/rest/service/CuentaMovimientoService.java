@@ -77,14 +77,6 @@ public class CuentaMovimientoService {
 
     public CuentaMovimiento add(CuentaMovimiento cuentaMovimiento) {
         cuentaMovimiento = repository.save(cuentaMovimiento);
-        try {
-            log.info("CuentaMovimiento add -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-        } catch (JsonProcessingException e) {
-            log.debug("Error JSON Parser");
-        }
-        if (cuentaMovimiento.getItem() > 0) {
-            depurateAsiento(cuentaMovimiento.getFechaContable(), cuentaMovimiento.getOrdenContable());
-        }
         return cuentaMovimiento;
     }
 
@@ -96,11 +88,6 @@ public class CuentaMovimientoService {
     @Transactional
     public void deleteByCuentaMovimientoId(Long cuentaMovimientoId) {
         repository.deleteByCuentaMovimientoId(cuentaMovimientoId);
-    }
-
-    @Transactional
-    public void depurateAsiento(OffsetDateTime fechaContable, Integer ordenContable) {
-        repository.deleteByFechaContableAndOrdenContableAndItem(fechaContable, ordenContable, 0);
     }
 
 }
