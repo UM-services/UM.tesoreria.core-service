@@ -40,5 +40,5 @@ public interface ICuentaMovimientoRepository extends JpaRepository<CuentaMovimie
 	public void deleteByCuentaMovimientoId(Long cuentaMovimientoId);
 
 	@Modifying
-    void deleteByFechaContableAndOrdenContableAndItem(OffsetDateTime fechaContable, Integer ordenContable, Integer item);
+    public void deleteByFechaContableAndOrdenContableAndItem(OffsetDateTime fechaContable, Integer ordenContable, Integer item);
 }

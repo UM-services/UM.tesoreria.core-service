@@ -16,6 +16,8 @@ import ar.edu.um.tesoreria.rest.service.AsientoService;
 import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;
 import ar.edu.um.tesoreria.rest.service.CuentaService;
 import ar.edu.um.tesoreria.rest.service.EjercicioService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,7 +129,12 @@ public class ContableService {
                 }
             }
         }
-        //cuentaMovimientoService.add(new CuentaMovimiento(null, fechaContable, ordenContable, 0, null, (byte) 0, null, "", BigDecimal.ZERO, null, 0, 0, null, null, (byte) 0, null, null, null, null, null, null, null));
+        cuentaMovimiento = cuentaMovimientoService.add(new CuentaMovimiento(null, fechaContable, ordenContable, 0, null, (byte) 0, null, "", BigDecimal.ZERO, null, 0, 0, null, null, (byte) 0, null, null, null, null, null, null, null));
+        try {
+            log.info("CuentaMovimiento nextAsiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+        } catch (JsonProcessingException e) {
+            log.debug("JSON Error CuentaMovimiento");
+        }
         return new AsientoInternal(fechaContable, ordenContable, BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
