@@ -1,4 +1,4 @@
-package ar.edu.um.tesoreria.rest.model
+package ar.edu.um.tesoreria.rest.model.kotlin
 
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
@@ -26,13 +26,13 @@ data class Persona(
 	var documentoId: Int? = null,
 
 	@Column(name = "Per_Apellido")
-	var apellido: String = "",
+	var apellido: String? = null,
 
 	@Column(name = "Per_Nombre")
-	var nombre: String = "",
+	var nombre: String? = null,
 
 	@Column(name = "per_sexo")
-	var sexo: String = "",
+	var sexo: String? = null,
 
 	@Column(name = "per_primero")
 	var primero: Byte = 0,

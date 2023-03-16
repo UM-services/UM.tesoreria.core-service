@@ -45,7 +45,7 @@ import ar.edu.um.tesoreria.rest.model.LectivoCuota;
 import ar.edu.um.tesoreria.rest.model.LectivoTotal;
 import ar.edu.um.tesoreria.rest.model.Legajo;
 import ar.edu.um.tesoreria.rest.model.MailSender;
-import ar.edu.um.tesoreria.rest.model.Persona;
+import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 import ar.edu.um.tesoreria.rest.model.SpoterData;
 import ar.edu.um.tesoreria.rest.model.dto.SpoterDataResponse;
 import ar.edu.um.tesoreria.rest.service.CarreraChequeraService;

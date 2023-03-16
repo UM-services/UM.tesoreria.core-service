@@ -46,7 +46,7 @@ import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.InfoLdap;
 import ar.edu.um.tesoreria.rest.model.Legajo;
 import ar.edu.um.tesoreria.rest.model.Matricula;
-import ar.edu.um.tesoreria.rest.model.Persona;
+import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 import ar.edu.um.tesoreria.rest.model.Plan;
 import ar.edu.um.tesoreria.rest.model.UsuarioLdap;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraClase;

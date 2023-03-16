@@ -27,7 +27,7 @@ import ar.edu.um.tesoreria.rest.extern.model.PreInscripcionFacultad;
 import ar.edu.um.tesoreria.rest.model.CarreraChequera;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.Facultad;
-import ar.edu.um.tesoreria.rest.model.Persona;
+import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaChequera;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaPersona;
 import ar.edu.um.tesoreria.rest.model.view.PersonaKey;

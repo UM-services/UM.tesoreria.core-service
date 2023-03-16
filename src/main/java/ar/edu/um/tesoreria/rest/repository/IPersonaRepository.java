@@ -9,7 +9,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import ar.edu.um.tesoreria.rest.model.Persona;
+import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 
 /**
  * @author daniel

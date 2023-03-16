@@ -37,7 +37,7 @@ import ar.edu.um.tesoreria.rest.model.ChequeraAlternativa;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.Domicilio;
 import ar.edu.um.tesoreria.rest.model.PayPerTic;
-import ar.edu.um.tesoreria.rest.model.Persona;
+import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 import ar.edu.um.tesoreria.rest.model.view.CuotaDeudaPayPerTic;
 import ar.edu.um.tesoreria.rest.service.ChequeraAlternativaService;
 import ar.edu.um.tesoreria.rest.service.ChequeraSerieService;

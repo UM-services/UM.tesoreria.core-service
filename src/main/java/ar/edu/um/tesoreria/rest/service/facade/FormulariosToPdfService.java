@@ -36,7 +36,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
 import ar.edu.um.tesoreria.rest.model.Legajo;
-import ar.edu.um.tesoreria.rest.model.Persona;
+import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import ar.edu.um.tesoreria.rest.service.CarreraService;
 import ar.edu.um.tesoreria.rest.service.ChequeraCuotaService;
