@@ -6,7 +6,7 @@ package ar.edu.um.tesoreria.rest.service;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ArancelTipoService {
 
-	@Autowired
+	@Resource
 	private IArancelTipoRepository repository;
 
-	@Autowired
+	@Resource
 	private IArancelTipoLectivoRepository arancelTipoLectivoRepository;
 
 	public List<ArancelTipo> findAll() {
@@ -36,8 +36,8 @@ public class ArancelTipoService {
 	}
 
 	public List<ArancelTipoLectivo> findAllByLectivoId(Integer lectivoId) {
-		Integer[] lectivos = { lectivoId, lectivoId - 1 };
-		return arancelTipoLectivoRepository.findAllByLectivoIdIn(Arrays.asList(lectivos));
+		Integer[] lectivoIds = { lectivoId, lectivoId - 1 };
+		return arancelTipoLectivoRepository.findAllByLectivoIdIn(Arrays.asList(lectivoIds));
 	}
 
 	public ArancelTipo findByArancelTipoId(Integer arancelTipoId) {
@@ -60,7 +60,7 @@ public class ArancelTipoService {
 
 	public ArancelTipo add(ArancelTipo arancelTipo) {
 		arancelTipo = repository.save(arancelTipo);
-		log.debug("ArancelTipo -> " + arancelTipo.toString());
+		log.debug("ArancelTipo -> " + arancelTipo);
 		return arancelTipo;
 	}
 
@@ -69,7 +69,7 @@ public class ArancelTipoService {
 			arancelTipo = new ArancelTipo(newArancelTipo.getArancelTipoId(), newArancelTipo.getDescripcion(),
 					newArancelTipo.getMedioArancel(), newArancelTipo.getArancelTipoIdCompleto());
 			repository.save(arancelTipo);
-			log.debug("ArancelTipo -> " + arancelTipo.toString());
+			log.debug("ArancelTipo -> " + arancelTipo);
 			return arancelTipo;
 		}).orElseThrow(() -> new ArancelTipoException(arancelTipoId));
 	}
