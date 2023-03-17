@@ -6,6 +6,7 @@ package ar.edu.um.tesoreria.rest.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.PersonaException;
-import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaPersona;
 import ar.edu.um.tesoreria.rest.model.view.PersonaKey;
 import ar.edu.um.tesoreria.rest.service.PersonaService;
