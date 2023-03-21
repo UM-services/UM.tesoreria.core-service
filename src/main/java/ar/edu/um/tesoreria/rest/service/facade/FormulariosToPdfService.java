@@ -169,7 +169,7 @@ public class FormulariosToPdfService {
 			PdfPTable table = new PdfPTable(columnHeader);
 			table.setWidthPercentage(100);
 
-			Image medios = Image.getInstance("medios.png");
+			// Image medios = Image.getInstance("medios.png");
 			Image image = null;
 			if (facultadId == 15)
 				image = Image.getInstance("marca_etec.png");
@@ -310,7 +310,7 @@ public class FormulariosToPdfService {
 					document.add(table);
 				}
 			}
-			document.add(medios);
+			// document.add(medios);
 
 			document.add(new Paragraph(" "));
 

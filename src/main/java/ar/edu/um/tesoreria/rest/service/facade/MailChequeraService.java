@@ -220,8 +220,8 @@ public class MailChequeraService {
 	}
 
 	@Transactional
-	private ChequeraSerie makeChequeraSpoter(SpoterData spoterData, Integer lectivoId, Curso curso,
-			CarreraChequera carreraChequera) {
+	public ChequeraSerie makeChequeraSpoter(SpoterData spoterData, Integer lectivoId, Curso curso,
+									 CarreraChequera carreraChequera) {
 		try {
 			personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
 		} catch (PersonaException e) {
