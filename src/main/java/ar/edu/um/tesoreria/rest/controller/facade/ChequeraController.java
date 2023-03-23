@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.um.tesoreria.rest.model.SpoterData;
-import ar.edu.um.tesoreria.rest.model.dto.SpoterDataResponse;
+import ar.edu.um.tesoreria.rest.kotlin.model.dto.SpoterDataResponse;
 import ar.edu.um.tesoreria.rest.service.facade.ChequeraService;
 import ar.edu.um.tesoreria.rest.service.facade.FormulariosToPdfService;
 import ar.edu.um.tesoreria.rest.service.facade.MailChequeraService;
@@ -107,7 +107,7 @@ public class ChequeraController {
 					HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<SpoterDataResponse>(
-					new SpoterDataResponse(false, e.getMessage(), null, null, null), HttpStatus.INTERNAL_SERVER_ERROR);
+					new SpoterDataResponse(false, e.getMessage(), null, null, null, null), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

@@ -1,4 +1,4 @@
-package ar.edu.um.tesoreria.rest.model.dto
+package ar.edu.um.tesoreria.rest.kotlin.model.dto
 
 data class SpoterDataResponse(
 
@@ -6,6 +6,7 @@ data class SpoterDataResponse(
 	var message: String = "",
 	var facultadId: Int? = null,
 	var tipoChequeraId: Int? = null,
-	var chequeraSerieId: Long? = null
+	var chequeraSerieId: Long? = null,
+	var chequeraSerie: ChequeraSerieDTO? = null
 
 )
