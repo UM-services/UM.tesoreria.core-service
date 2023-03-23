@@ -4,7 +4,7 @@
 package ar.edu.um.tesoreria.rest.service;
 
 import ar.edu.um.tesoreria.rest.exception.CuentaMovimientoException;
-import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
+import ar.edu.um.tesoreria.rest.kotlin.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.view.CuentaMovimientoAsiento;
 import ar.edu.um.tesoreria.rest.repository.ICuentaMovimientoRepository;
 import ar.edu.um.tesoreria.rest.service.view.CuentaMovimientoAsientoService;

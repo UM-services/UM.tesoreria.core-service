@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.dto.PreuniversitarioData;
 import jakarta.mail.MessagingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.um.tesoreria.rest.model.SpoterData;
 import ar.edu.um.tesoreria.rest.model.dto.SpoterDataResponse;
-import ar.edu.um.tesoreria.rest.model.kotlin.dto.PreuniversitarioData;
 import ar.edu.um.tesoreria.rest.service.facade.ChequeraService;
 import ar.edu.um.tesoreria.rest.service.facade.FormulariosToPdfService;
 import ar.edu.um.tesoreria.rest.service.facade.MailChequeraService;
@@ -113,7 +113,7 @@ public class ChequeraController {
 
 	@GetMapping("/lastPre/{facultadId}/{personaId}/{documentoId}")
 	public ResponseEntity<PreuniversitarioData> lastPreData(@PathVariable Integer facultadId,
-			@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
+															@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
 		return new ResponseEntity<PreuniversitarioData>(service.findLastPreData(facultadId, personaId, documentoId),
 				HttpStatus.OK);
 	}

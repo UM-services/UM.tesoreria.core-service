@@ -1,4 +1,4 @@
-package ar.edu.um.tesoreria.rest.model.kotlin
+package ar.edu.um.tesoreria.rest.kotlin.model
 
 import jakarta.persistence.Entity
 import jakarta.persistence.Table

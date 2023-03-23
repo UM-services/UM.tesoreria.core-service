@@ -1,5 +1,6 @@
-package ar.edu.um.tesoreria.rest.model
+package ar.edu.um.tesoreria.rest.kotlin.model
 
+import ar.edu.um.tesoreria.rest.model.Auditable
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
@@ -10,7 +11,6 @@ import jakarta.persistence.GenerationType
 import java.time.OffsetDateTime
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
-import ar.edu.um.tesoreria.rest.model.kotlin.Track
 
 @Entity
 @Table(

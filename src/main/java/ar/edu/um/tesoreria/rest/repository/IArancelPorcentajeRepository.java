@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import ar.edu.um.tesoreria.rest.model.kotlin.ArancelPorcentaje;
+import ar.edu.um.tesoreria.rest.kotlin.model.ArancelPorcentaje;
 
 /**
  * @author daniel

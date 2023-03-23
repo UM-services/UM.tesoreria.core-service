@@ -30,7 +30,7 @@ import ar.edu.um.tesoreria.rest.exception.ProveedorValorException;
 import ar.edu.um.tesoreria.rest.exception.ValorMovimientoException;
 import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
-import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
+import ar.edu.um.tesoreria.rest.kotlin.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
 import ar.edu.um.tesoreria.rest.model.ProveedorValor;
 import ar.edu.um.tesoreria.rest.model.Valor;

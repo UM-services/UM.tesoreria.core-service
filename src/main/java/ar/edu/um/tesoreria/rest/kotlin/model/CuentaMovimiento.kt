@@ -1,5 +1,10 @@
-package ar.edu.um.tesoreria.rest.model
+package ar.edu.um.tesoreria.rest.kotlin.model
 
+import ar.edu.um.tesoreria.rest.model.Auditable
+import ar.edu.um.tesoreria.rest.model.Comprobante
+import ar.edu.um.tesoreria.rest.model.Cuenta
+import ar.edu.um.tesoreria.rest.model.Proveedor
+import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
@@ -12,7 +17,6 @@ import java.time.OffsetDateTime
 import java.math.BigDecimal
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
-import ar.edu.um.tesoreria.rest.model.kotlin.Track
 
 @Entity
 @Table(

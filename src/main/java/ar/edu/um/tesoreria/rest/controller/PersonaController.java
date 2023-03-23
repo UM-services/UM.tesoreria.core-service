@@ -6,7 +6,7 @@ package ar.edu.um.tesoreria.rest.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
-import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
+import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

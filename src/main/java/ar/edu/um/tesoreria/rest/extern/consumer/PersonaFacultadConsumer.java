@@ -5,11 +5,10 @@ package ar.edu.um.tesoreria.rest.extern.consumer;
 
 import java.math.BigDecimal;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 
 /**
  * @author daniel

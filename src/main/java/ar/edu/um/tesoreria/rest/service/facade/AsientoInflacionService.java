@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.CoeficienteInflacionException;
 import ar.edu.um.tesoreria.rest.model.CoeficienteInflacion;
-import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
+import ar.edu.um.tesoreria.rest.kotlin.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
 import ar.edu.um.tesoreria.rest.model.view.CuentaMensual;
 import ar.edu.um.tesoreria.rest.service.CoeficienteInflacionService;

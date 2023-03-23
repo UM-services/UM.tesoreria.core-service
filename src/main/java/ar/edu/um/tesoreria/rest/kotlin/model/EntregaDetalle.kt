@@ -1,4 +1,4 @@
-package ar.edu.um.tesoreria.rest.model.kotlin
+package ar.edu.um.tesoreria.rest.kotlin.model
 
 import ar.edu.um.tesoreria.rest.model.Articulo
 import ar.edu.um.tesoreria.rest.model.Auditable

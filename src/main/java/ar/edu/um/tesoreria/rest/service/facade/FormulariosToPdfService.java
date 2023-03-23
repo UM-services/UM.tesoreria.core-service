@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.env.Environment;
@@ -36,7 +37,6 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
 import ar.edu.um.tesoreria.rest.model.Legajo;
-import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import ar.edu.um.tesoreria.rest.service.CarreraService;
 import ar.edu.um.tesoreria.rest.service.ChequeraCuotaService;

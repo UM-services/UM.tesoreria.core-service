@@ -62,7 +62,7 @@ import ar.edu.um.tesoreria.rest.model.Baja;
 import ar.edu.um.tesoreria.rest.model.Carrera;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.ContratoPeriodo;
-import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
+import ar.edu.um.tesoreria.rest.kotlin.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
 import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.Geografica;

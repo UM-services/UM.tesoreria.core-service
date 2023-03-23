@@ -19,7 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ar.edu.um.tesoreria.rest.exception.EntregaException;
-import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
+import ar.edu.um.tesoreria.rest.kotlin.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.view.CuentaMovimientoAsiento;
 import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;
 

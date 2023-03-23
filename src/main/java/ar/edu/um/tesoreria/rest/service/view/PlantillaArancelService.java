@@ -10,7 +10,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.model.kotlin.ArancelPorcentaje;
+import ar.edu.um.tesoreria.rest.kotlin.model.ArancelPorcentaje;
 import ar.edu.um.tesoreria.rest.model.LectivoCuota;
 import ar.edu.um.tesoreria.rest.model.dto.PlantillaArancel;
 import ar.edu.um.tesoreria.rest.repository.IArancelPorcentajeRepository;

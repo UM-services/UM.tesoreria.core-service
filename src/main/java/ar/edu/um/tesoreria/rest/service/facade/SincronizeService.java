@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,6 @@ import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.InfoLdap;
 import ar.edu.um.tesoreria.rest.model.Legajo;
 import ar.edu.um.tesoreria.rest.model.Matricula;
-import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
 import ar.edu.um.tesoreria.rest.model.Plan;
 import ar.edu.um.tesoreria.rest.model.UsuarioLdap;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraClase;

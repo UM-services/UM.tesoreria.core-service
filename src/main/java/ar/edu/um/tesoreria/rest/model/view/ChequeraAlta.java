@@ -26,7 +26,7 @@ import ar.edu.um.tesoreria.rest.model.Domicilio;
 import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.Geografica;
 import ar.edu.um.tesoreria.rest.model.Lectivo;
-import ar.edu.um.tesoreria.rest.model.kotlin.Persona;
+import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

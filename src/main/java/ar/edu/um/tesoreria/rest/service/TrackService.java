@@ -7,7 +7,7 @@ import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.model.kotlin.Track;
+import ar.edu.um.tesoreria.rest.kotlin.model.Track;
 import ar.edu.um.tesoreria.rest.repository.ITrackRepository;
 
 /**

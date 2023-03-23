@@ -1,4 +1,4 @@
-package ar.edu.um.tesoreria.rest.model.kotlin.internal
+package ar.edu.um.tesoreria.rest.kotlin.model.internal
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.OffsetDateTime

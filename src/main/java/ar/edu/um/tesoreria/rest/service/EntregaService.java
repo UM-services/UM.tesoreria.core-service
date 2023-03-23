@@ -6,7 +6,7 @@ package ar.edu.um.tesoreria.rest.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import ar.edu.um.tesoreria.rest.model.kotlin.Entrega;
+import ar.edu.um.tesoreria.rest.kotlin.model.Entrega;
 import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;

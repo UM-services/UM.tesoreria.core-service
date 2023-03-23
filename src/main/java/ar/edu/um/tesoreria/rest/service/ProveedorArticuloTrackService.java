@@ -1,6 +1,6 @@
 package ar.edu.um.tesoreria.rest.service;
 
-import ar.edu.um.tesoreria.rest.model.kotlin.ProveedorArticuloTrack;
+import ar.edu.um.tesoreria.rest.kotlin.model.ProveedorArticuloTrack;
 import ar.edu.um.tesoreria.rest.repository.IProveedorArticuloTrackRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;

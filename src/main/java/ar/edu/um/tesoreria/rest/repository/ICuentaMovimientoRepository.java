@@ -8,11 +8,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.CuentaMovimiento;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
-
-import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
 
 /**
  * @author daniel
@@ -21,7 +20,7 @@ import ar.edu.um.tesoreria.rest.model.CuentaMovimiento;
 public interface ICuentaMovimientoRepository extends JpaRepository<CuentaMovimiento, Long> {
 
 	public List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta,
-			OffsetDateTime desde, OffsetDateTime hasta, Byte apertura, Sort sort);
+																						  OffsetDateTime desde, OffsetDateTime hasta, Byte apertura, Sort sort);
 
 	public List<CuentaMovimiento> findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(
 			OffsetDateTime fechaContable, Integer ordenContable, Integer item, Sort sort);
