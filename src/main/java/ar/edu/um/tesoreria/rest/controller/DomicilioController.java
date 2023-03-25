@@ -6,6 +6,7 @@ package ar.edu.um.tesoreria.rest.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Domicilio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.DomicilioException;
-import ar.edu.um.tesoreria.rest.model.Domicilio;
 import ar.edu.um.tesoreria.rest.model.view.DomicilioKey;
 import ar.edu.um.tesoreria.rest.service.DomicilioService;
 

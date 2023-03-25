@@ -10,6 +10,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Domicilio;
 import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
 import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
@@ -41,7 +42,6 @@ import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerieControl;
 import ar.edu.um.tesoreria.rest.model.ChequeraTotal;
 import ar.edu.um.tesoreria.rest.model.Curso;
-import ar.edu.um.tesoreria.rest.model.Domicilio;
 import ar.edu.um.tesoreria.rest.model.LectivoAlternativa;
 import ar.edu.um.tesoreria.rest.model.LectivoCuota;
 import ar.edu.um.tesoreria.rest.model.LectivoTotal;
@@ -144,7 +144,7 @@ public class MailChequeraService {
         return mono.block();
     }
 
-    public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData) throws MessagingException {
+    public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData, Boolean updateMailPersonal, Boolean responseSinEnvio) throws MessagingException {
         // Determina lectivoId
         Lectivo lectivo = null;
         Integer lectivoId = (lectivo = lectivoService.findByFecha(Tool.dateAbsoluteArgentina())).getLectivoId();
@@ -154,6 +154,21 @@ public class MailChequeraService {
                     .writeValueAsString(lectivo));
         } catch (JsonProcessingException e1) {
             log.debug("Lectivo -> error");
+        }
+        if (updateMailPersonal) {
+            try {
+                Domicilio domicilio = domicilioService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
+                domicilio.setEmailInstitucional(spoterData.getEmailPersonal());
+                domicilio = domicilioService.update(domicilio, domicilio.getDomicilioId(), true);
+                try {
+                    log.debug("Domicilio -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(domicilio));
+                } catch (JsonProcessingException e1) {
+                    log.debug("Domicilio -> error");
+                }
+            } catch (DomicilioException e) {
+                log.debug("Persona SIN Domicilio para Actualizar");
+            }
         }
         // Verifica si ya existe chequera asociada
         try {
@@ -166,10 +181,11 @@ public class MailChequeraService {
                 log.debug("SpoterData previo -> error");
             }
             ChequeraSerieDTO chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerieService.findByUnique(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId()));
-            return new SpoterDataResponse(true,
-                    this.sendChequera(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(),
-                            data.getAlternativaId(), false, false),
-                    data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), chequeraSerieDTO);
+            String messageSender = "Response Sin Envío";
+            if (!responseSinEnvio) {
+                messageSender = this.sendChequera(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), data.getAlternativaId(), false, false);
+            }
+            return new SpoterDataResponse(true, messageSender, data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), chequeraSerieDTO);
         } catch (SpoterDataException e) {
 
         }

@@ -95,6 +95,9 @@ public class ChequeraService {
     @Autowired
     private ProductoService productoService;
 
+    @Autowired
+    private DomicilioService domicilioService;
+
     @Transactional
     public void deleteByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, String usuarioId) {
 
@@ -241,6 +244,8 @@ public class ChequeraService {
         TipoChequeraDTO tipoChequeraDTO = modelMapper.map(tipoChequeraService.findByTipoChequeraId(chequeraSerie.getTipoChequeraId()), TipoChequeraDTO.class);
         log.debug("Leyendo Persona");
         PersonaDTO personaDTO = modelMapper.map(personaService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId()), PersonaDTO.class);
+        log.debug("Leyendo Domicilio");
+        DomicilioDTO domicilioDTO = modelMapper.map(domicilioService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId()), DomicilioDTO.class);
         log.debug("Leyendo Lectivo");
         LectivoDTO lectivoDTO = modelMapper.map(lectivoService.findByLectivoId(chequeraSerie.getLectivoId()), LectivoDTO.class);
         log.debug("Leyendo ArancelTipo");
@@ -257,7 +262,7 @@ public class ChequeraService {
         log.debug("Formando ChequeraSerieDTO");
         ChequeraSerieDTO chequeraSerieDTO = new ChequeraSerieDTO(chequeraSerie.getChequeraSerieId(),
                 chequeraSerie.getFecha(), chequeraSerie.getObservaciones(), chequeraSerie.getAlternativaId(),
-                facultadDTO, tipoChequeraDTO, personaDTO, lectivoDTO, arancelTipoDTO, geograficaDTO, chequeraCuotaDTOs);
+                facultadDTO, tipoChequeraDTO, personaDTO, domicilioDTO, lectivoDTO, arancelTipoDTO, geograficaDTO, chequeraCuotaDTOs);
         return chequeraSerieDTO;
     }
 

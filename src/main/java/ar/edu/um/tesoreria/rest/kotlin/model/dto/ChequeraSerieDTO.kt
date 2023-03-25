@@ -13,6 +13,7 @@ data class ChequeraSerieDTO(
 	var facultad: FacultadDTO? = null,
 	var tipoChequera: TipoChequeraDTO? = null,
 	var persona: PersonaDTO? = null,
+	var mails: DomicilioDTO? = null,
 	var lectivo: LectivoDTO? = null,
 	var arancelTipo: ArancelTipoDTO? = null,
 	var geografica: GeograficaDTO? = null,

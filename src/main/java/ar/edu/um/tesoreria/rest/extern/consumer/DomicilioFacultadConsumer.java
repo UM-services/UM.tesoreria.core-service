@@ -5,10 +5,9 @@ package ar.edu.um.tesoreria.rest.extern.consumer;
 
 import java.math.BigDecimal;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Domicilio;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import ar.edu.um.tesoreria.rest.model.Domicilio;
 
 /**
  * @author daniel

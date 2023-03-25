@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
+import ar.edu.um.tesoreria.rest.kotlin.model.Domicilio;
 import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -26,7 +27,6 @@ import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
 import ar.edu.um.tesoreria.rest.exception.ProveedorException;
 import ar.edu.um.tesoreria.rest.extern.consumer.AlumnoExamenFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.NotificacionFacultadConsumer;
-import ar.edu.um.tesoreria.rest.model.Domicilio;
 import ar.edu.um.tesoreria.rest.model.NotificacionExamen;
 import ar.edu.um.tesoreria.rest.model.PersonaSuspendido;
 import ar.edu.um.tesoreria.rest.model.Proveedor;

@@ -10,6 +10,7 @@ import ar.edu.um.tesoreria.rest.extern.consumer.DomicilioFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.LocalidadFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.PersonaFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.ProvinciaFacultadConsumer;
+import ar.edu.um.tesoreria.rest.kotlin.model.Domicilio;
 import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import ar.edu.um.tesoreria.rest.model.*;
