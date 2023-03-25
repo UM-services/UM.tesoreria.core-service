@@ -8,6 +8,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
+import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +28,6 @@ import ar.edu.um.tesoreria.rest.extern.model.InscripcionFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.LegajoFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.PreInscripcionFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.TituloEntregaFacultad;
-import ar.edu.um.tesoreria.rest.model.Facultad;
-import ar.edu.um.tesoreria.rest.model.Lectivo;
 import ar.edu.um.tesoreria.rest.model.Matricula;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraClase;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraCuotaPersona;

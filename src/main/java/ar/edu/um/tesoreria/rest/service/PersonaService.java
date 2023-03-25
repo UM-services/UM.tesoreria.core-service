@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -27,7 +28,6 @@ import ar.edu.um.tesoreria.rest.extern.model.LegajoFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.PreInscripcionFacultad;
 import ar.edu.um.tesoreria.rest.model.CarreraChequera;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
-import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaChequera;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaPersona;
 import ar.edu.um.tesoreria.rest.model.view.PersonaKey;

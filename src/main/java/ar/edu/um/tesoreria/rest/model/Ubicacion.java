@@ -5,6 +5,7 @@ package ar.edu.um.tesoreria.rest.model;
 
 import java.io.Serializable;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Dependencia;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;

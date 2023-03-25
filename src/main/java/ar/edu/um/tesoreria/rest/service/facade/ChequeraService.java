@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import ar.edu.um.tesoreria.rest.kotlin.model.dto.*;
+import ar.edu.um.tesoreria.rest.service.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,17 +28,6 @@ import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerieControl;
 import ar.edu.um.tesoreria.rest.model.ChequeraTotal;
 import ar.edu.um.tesoreria.rest.model.Debito;
-import ar.edu.um.tesoreria.rest.service.ChequeraAlternativaService;
-import ar.edu.um.tesoreria.rest.service.ChequeraCuotaService;
-import ar.edu.um.tesoreria.rest.service.ChequeraEliminadaService;
-import ar.edu.um.tesoreria.rest.service.ChequeraImpresionCabeceraService;
-import ar.edu.um.tesoreria.rest.service.ChequeraImpresionDetalleService;
-import ar.edu.um.tesoreria.rest.service.ChequeraPagoAsientoService;
-import ar.edu.um.tesoreria.rest.service.ChequeraPagoService;
-import ar.edu.um.tesoreria.rest.service.ChequeraSerieControlService;
-import ar.edu.um.tesoreria.rest.service.ChequeraSerieService;
-import ar.edu.um.tesoreria.rest.service.ChequeraTotalService;
-import ar.edu.um.tesoreria.rest.service.DebitoService;
 import ar.edu.um.tesoreria.rest.util.Tool;
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,6 +73,27 @@ public class ChequeraService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private FacultadService facultadService;
+
+    @Autowired
+    private TipoChequeraService tipoChequeraService;
+
+    @Autowired
+    private PersonaService personaService;
+
+    @Autowired
+    private LectivoService lectivoService;
+
+    @Autowired
+    private ArancelTipoService arancelTipoService;
+
+    @Autowired
+    private GeograficaService geograficaService;
+
+    @Autowired
+    private ProductoService productoService;
 
     @Transactional
     public void deleteByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, String usuarioId) {
@@ -219,22 +230,31 @@ public class ChequeraService {
     }
 
     public ChequeraSerieDTO constructChequeraDataDTO(ChequeraSerie chequeraSerie) {
+        log.debug("Leyendo Cuotas");
         List<ChequeraCuota> chequeraCuotas = chequeraCuotaService
                 .findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaIdConImporte(
                         chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
                         chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId());
-        FacultadDTO facultadDTO = modelMapper.map(chequeraSerie.getFacultad(), FacultadDTO.class);
-        TipoChequeraDTO tipoChequeraDTO = modelMapper.map(chequeraSerie.getTipoChequera(), TipoChequeraDTO.class);
-        PersonaDTO personaDTO = modelMapper.map(chequeraSerie.getPersona(), PersonaDTO.class);
-        LectivoDTO lectivoDTO = modelMapper.map(chequeraSerie.getLectivo(), LectivoDTO.class);
-        ArancelTipoDTO arancelTipoDTO = modelMapper.map(chequeraSerie.getArancelTipo(), ArancelTipoDTO.class);
-        GeograficaDTO geograficaDTO = modelMapper.map(chequeraSerie.getGeografica(), GeograficaDTO.class);
+        log.debug("Leyendo Facultad");
+        FacultadDTO facultadDTO = modelMapper.map(facultadService.findByFacultadId(chequeraSerie.getFacultadId()), FacultadDTO.class);
+        log.debug("Leyendo TipoChequera");
+        TipoChequeraDTO tipoChequeraDTO = modelMapper.map(tipoChequeraService.findByTipoChequeraId(chequeraSerie.getTipoChequeraId()), TipoChequeraDTO.class);
+        log.debug("Leyendo Persona");
+        PersonaDTO personaDTO = modelMapper.map(personaService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId()), PersonaDTO.class);
+        log.debug("Leyendo Lectivo");
+        LectivoDTO lectivoDTO = modelMapper.map(lectivoService.findByLectivoId(chequeraSerie.getLectivoId()), LectivoDTO.class);
+        log.debug("Leyendo ArancelTipo");
+        ArancelTipoDTO arancelTipoDTO = modelMapper.map(arancelTipoService.findByArancelTipoId(chequeraSerie.getArancelTipoId()), ArancelTipoDTO.class);
+        log.debug("Leyendo Geografica");
+        GeograficaDTO geograficaDTO = modelMapper.map(geograficaService.findByGeograficaId(chequeraSerie.getGeograficaId()), GeograficaDTO.class);
+        log.debug("Leyendo ChequeraCuota");
         List<ChequeraCuotaDTO> chequeraCuotaDTOs = chequeraCuotas.stream()
                 .map(cuota -> new ChequeraCuotaDTO(cuota.getCuotaId(), cuota.getMes(), cuota.getAnho(),
                         cuota.getVencimiento1(), cuota.getImporte1(), cuota.getVencimiento2(), cuota.getImporte2(),
                         cuota.getVencimiento3(), cuota.getImporte3(), cuota.getPagado(),
-                        modelMapper.map(cuota.getProducto(), ProductoDTO.class)))
+                        modelMapper.map(productoService.findByProductoId(cuota.getProductoId()), ProductoDTO.class)))
                 .collect(Collectors.toList());
+        log.debug("Formando ChequeraSerieDTO");
         ChequeraSerieDTO chequeraSerieDTO = new ChequeraSerieDTO(chequeraSerie.getChequeraSerieId(),
                 chequeraSerie.getFecha(), chequeraSerie.getObservaciones(), chequeraSerie.getAlternativaId(),
                 facultadDTO, tipoChequeraDTO, personaDTO, lectivoDTO, arancelTipoDTO, geograficaDTO, chequeraCuotaDTOs);

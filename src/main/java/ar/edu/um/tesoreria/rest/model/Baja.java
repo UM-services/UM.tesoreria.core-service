@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
+import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

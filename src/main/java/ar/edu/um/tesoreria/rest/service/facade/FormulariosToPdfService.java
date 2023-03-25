@@ -10,6 +10,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
+import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -56,8 +58,6 @@ import ar.edu.um.tesoreria.rest.exception.PersonaException;
 import ar.edu.um.tesoreria.rest.model.Carrera;
 import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
-import ar.edu.um.tesoreria.rest.model.Facultad;
-import ar.edu.um.tesoreria.rest.model.Lectivo;
 import ar.edu.um.tesoreria.rest.model.LectivoAlternativa;
 
 @Service

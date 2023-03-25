@@ -7,12 +7,12 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.FacultadException;
-import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.view.FacultadLectivo;
 import ar.edu.um.tesoreria.rest.model.view.FacultadLectivoSede;
 import ar.edu.um.tesoreria.rest.model.view.FacultadPersona;

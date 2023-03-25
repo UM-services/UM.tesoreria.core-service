@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
+import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -17,9 +19,7 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.Immutable;
 
 import ar.edu.um.tesoreria.rest.model.ArancelTipo;
-import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.Geografica;
-import ar.edu.um.tesoreria.rest.model.Lectivo;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import lombok.AllArgsConstructor;

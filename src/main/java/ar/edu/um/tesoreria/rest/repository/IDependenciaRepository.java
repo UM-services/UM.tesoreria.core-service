@@ -3,10 +3,9 @@
  */
 package ar.edu.um.tesoreria.rest.repository;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Dependencia;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import ar.edu.um.tesoreria.rest.model.Dependencia;
 
 /**
  * @author daniel

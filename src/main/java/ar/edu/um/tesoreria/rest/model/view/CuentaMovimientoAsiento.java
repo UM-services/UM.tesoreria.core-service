@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -18,7 +19,6 @@ import org.hibernate.annotations.Immutable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import ar.edu.um.tesoreria.rest.model.Auditable;
-import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.model.Proveedor;
 import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;

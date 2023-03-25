@@ -7,10 +7,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import ar.edu.um.tesoreria.rest.model.Articulo;
-import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
 import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
 import ar.edu.um.tesoreria.rest.model.UbicacionArticulo;

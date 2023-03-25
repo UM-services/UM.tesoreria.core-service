@@ -8,9 +8,9 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.Geografica;
 import ar.edu.um.tesoreria.rest.model.Proveedor;
 import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;

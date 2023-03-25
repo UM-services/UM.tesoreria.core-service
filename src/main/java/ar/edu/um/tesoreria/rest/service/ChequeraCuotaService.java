@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
+import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +30,6 @@ import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
 import ar.edu.um.tesoreria.rest.model.ChequeraPago;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.ChequeraTotal;
-import ar.edu.um.tesoreria.rest.model.Facultad;
-import ar.edu.um.tesoreria.rest.model.Lectivo;
 import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaChequera;
 import ar.edu.um.tesoreria.rest.repository.IChequeraCuotaRepository;

@@ -10,6 +10,8 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
+import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import ar.edu.um.tesoreria.rest.kotlin.model.dto.ChequeraSerieDTO;
 import jakarta.mail.MessagingException;
@@ -40,8 +42,6 @@ import ar.edu.um.tesoreria.rest.model.ChequeraSerieControl;
 import ar.edu.um.tesoreria.rest.model.ChequeraTotal;
 import ar.edu.um.tesoreria.rest.model.Curso;
 import ar.edu.um.tesoreria.rest.model.Domicilio;
-import ar.edu.um.tesoreria.rest.model.Facultad;
-import ar.edu.um.tesoreria.rest.model.Lectivo;
 import ar.edu.um.tesoreria.rest.model.LectivoAlternativa;
 import ar.edu.um.tesoreria.rest.model.LectivoCuota;
 import ar.edu.um.tesoreria.rest.model.LectivoTotal;
@@ -159,13 +159,13 @@ public class MailChequeraService {
         try {
             SpoterData data = spoterDataService.findExistentRequest(spoterData.getPersonaId(),
                     spoterData.getDocumentoId(), spoterData.getFacultadId(), spoterData.getGeograficaId(), lectivoId);
-            ChequeraSerieDTO chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerieService.findByUnique(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId()));
             try {
                 log.debug("SpoterData previo -> {}", JsonMapper.builder().findAndAddModules().build()
                         .writerWithDefaultPrettyPrinter().writeValueAsString(data));
             } catch (JsonProcessingException e) {
                 log.debug("SpoterData previo -> error");
             }
+            ChequeraSerieDTO chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerieService.findByUnique(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId()));
             return new SpoterDataResponse(true,
                     this.sendChequera(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(),
                             data.getAlternativaId(), false, false),
@@ -220,8 +220,22 @@ public class MailChequeraService {
         spoterData.setChequeraSerieId(chequeraSerie.getChequeraSerieId());
         spoterData.setAlternativaId(chequeraSerie.getAlternativaId());
         spoterData = spoterDataService.add(spoterData);
+        try {
+            log.debug("SpoterData -> {}", JsonMapper.builder().findAndAddModules().build()
+                    .writerWithDefaultPrettyPrinter().writeValueAsString(spoterData));
+        } catch (JsonProcessingException e) {
+            log.debug("SpoterData -> error");
+        }
+        log.debug("Construyendo chequeraDTO");
+        ChequeraSerieDTO chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerie);
+        try {
+            log.debug("ChequeraSerieDTO -> {}", JsonMapper.builder().findAndAddModules().build()
+                    .writerWithDefaultPrettyPrinter().writeValueAsString(chequeraSerieDTO));
+        } catch (JsonProcessingException e) {
+            log.debug("ChequeraSerieDTO -> error");
+        }
         return new SpoterDataResponse(spoterData.getStatus() == (byte) 1, spoterData.getMessage(),
-                spoterData.getFacultadId(), spoterData.getTipoChequeraId(), spoterData.getChequeraSerieId(), chequeraService.constructChequeraDataDTO(chequeraSerie));
+                spoterData.getFacultadId(), spoterData.getTipoChequeraId(), spoterData.getChequeraSerieId(), chequeraSerieDTO);
     }
 
     @Transactional

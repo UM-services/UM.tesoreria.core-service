@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
-import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
 import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
 import ar.edu.um.tesoreria.rest.model.dto.ProveedorMovimientoDTO;

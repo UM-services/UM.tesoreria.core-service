@@ -6,8 +6,8 @@ package ar.edu.um.tesoreria.rest.model.dto;
 import java.io.Serializable;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.Articulo;
-import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.Ubicacion;
 import ar.edu.um.tesoreria.rest.model.UbicacionArticulo;
 import lombok.AllArgsConstructor;

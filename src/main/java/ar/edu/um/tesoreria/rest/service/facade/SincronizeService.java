@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import jakarta.transaction.Transactional;
 
@@ -43,7 +44,6 @@ import ar.edu.um.tesoreria.rest.extern.consumer.PreInscripcionFacultadConsumer;
 import ar.edu.um.tesoreria.rest.model.Carrera;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.Domicilio;
-import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.InfoLdap;
 import ar.edu.um.tesoreria.rest.model.Legajo;
 import ar.edu.um.tesoreria.rest.model.Matricula;

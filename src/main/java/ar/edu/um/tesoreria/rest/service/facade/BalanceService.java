@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -28,7 +29,6 @@ import org.springframework.stereotype.Service;
 import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
 import ar.edu.um.tesoreria.rest.exception.ProveedorValorException;
 import ar.edu.um.tesoreria.rest.exception.ValorMovimientoException;
-import ar.edu.um.tesoreria.rest.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.kotlin.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;

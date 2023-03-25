@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
+import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,9 +24,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import ar.edu.um.tesoreria.rest.model.ArancelTipo;
 import ar.edu.um.tesoreria.rest.model.Auditable;
-import ar.edu.um.tesoreria.rest.model.Facultad;
 import ar.edu.um.tesoreria.rest.model.Geografica;
-import ar.edu.um.tesoreria.rest.model.Lectivo;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import lombok.AllArgsConstructor;
