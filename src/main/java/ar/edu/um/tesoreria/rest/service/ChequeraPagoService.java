@@ -5,13 +5,13 @@ package ar.edu.um.tesoreria.rest.service;
 
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.ChequeraPago;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.ChequeraPagoException;
-import ar.edu.um.tesoreria.rest.model.ChequeraPago;
 import ar.edu.um.tesoreria.rest.repository.IChequeraPagoRepository;
 
 /**

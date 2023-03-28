@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.ChequeraPago;
 import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
 import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import jakarta.transaction.Transactional;
@@ -27,7 +28,6 @@ import ar.edu.um.tesoreria.rest.exception.FacultadException;
 import ar.edu.um.tesoreria.rest.exception.LectivoException;
 import ar.edu.um.tesoreria.rest.exception.TipoChequeraException;
 import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
-import ar.edu.um.tesoreria.rest.model.ChequeraPago;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.ChequeraTotal;
 import ar.edu.um.tesoreria.rest.model.TipoChequera;

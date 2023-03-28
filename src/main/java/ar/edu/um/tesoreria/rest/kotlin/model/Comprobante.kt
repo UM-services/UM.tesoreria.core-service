@@ -35,6 +35,10 @@ data class Comprobante(
     @Column(name = "tco_diasvigencia")
     var diasVigencia: Long = 0,
 
-    var facturacionElectronica: Byte = 0
+    var facturacionElectronica: Byte = 0,
 
-) : Auditable()
+    var tipoAfip: Int? = null,
+
+    var puntoVenta: Int? = null,
+
+    ) : Auditable()

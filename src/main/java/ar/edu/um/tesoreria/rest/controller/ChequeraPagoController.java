@@ -3,6 +3,7 @@
  */
 package ar.edu.um.tesoreria.rest.controller;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.ChequeraPago;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.ChequeraPagoException;
-import ar.edu.um.tesoreria.rest.model.ChequeraPago;
 import ar.edu.um.tesoreria.rest.service.ChequeraPagoService;
 
 /**
