@@ -3,6 +3,7 @@
  */
 package ar.edu.um.tesoreria.rest.repository;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,8 @@ public interface IChequeraPagoRepository extends JpaRepository<ChequeraPago, Lon
 
 	public List<ChequeraPago> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId,
 			Integer tipoChequeraId, Long chequeraSerieId);
+
+	public List<ChequeraPago> findAllByFechaAndTipoPagoIdGreaterThan(OffsetDateTime fechaPago, Integer tipoPagoId);
 
 	public Optional<ChequeraPago> findByChequeraPagoId(Long chequeraPagoId);
 
