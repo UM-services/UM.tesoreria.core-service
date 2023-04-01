@@ -5,6 +5,7 @@ package ar.edu.um.tesoreria.rest.controller;
 
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.ChequeraCuota;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.ChequeraCuotaException;
-import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaChequera;
 import ar.edu.um.tesoreria.rest.service.ChequeraCuotaService;
 
@@ -32,8 +32,8 @@ public class ChequeraCuotaController {
 
 	@GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
 	public ResponseEntity<List<ChequeraCuota>> findAllByChequera(@PathVariable Integer facultadId,
-			@PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId,
-			@PathVariable Integer alternativaId) {
+																 @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId,
+																 @PathVariable Integer alternativaId) {
 		return new ResponseEntity<List<ChequeraCuota>>(
 				service.findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(facultadId,
 						tipoChequeraId, chequeraSerieId, alternativaId),

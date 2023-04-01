@@ -6,6 +6,7 @@ package ar.edu.um.tesoreria.rest.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.TipoChequera;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.TipoChequeraException;
-import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import ar.edu.um.tesoreria.rest.repository.ITipoChequeraRepository;
 
 /**

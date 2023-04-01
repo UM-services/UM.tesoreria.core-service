@@ -10,10 +10,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
-import ar.edu.um.tesoreria.rest.kotlin.model.Domicilio;
-import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
-import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
-import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
+import ar.edu.um.tesoreria.rest.kotlin.model.*;
 import ar.edu.um.tesoreria.rest.kotlin.model.dto.ChequeraSerieDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -37,8 +34,6 @@ import ar.edu.um.tesoreria.rest.exception.PersonaException;
 import ar.edu.um.tesoreria.rest.exception.SpoterDataException;
 import ar.edu.um.tesoreria.rest.model.CarreraChequera;
 import ar.edu.um.tesoreria.rest.model.ChequeraAlternativa;
-import ar.edu.um.tesoreria.rest.model.ChequeraCuota;
-import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.ChequeraSerieControl;
 import ar.edu.um.tesoreria.rest.model.ChequeraTotal;
 import ar.edu.um.tesoreria.rest.model.Curso;
@@ -365,7 +360,7 @@ public class MailChequeraService {
                     lectivoCuota.getAnho(), chequeraSerie.getArancelTipoId(), vencimiento1, lectivoCuota.getImporte1(),
                     lectivoCuota.getImporte1(), vencimiento2, lectivoCuota.getImporte2(), lectivoCuota.getImporte2(),
                     vencimiento3, lectivoCuota.getImporte3(), lectivoCuota.getImporte3(), "", "", (byte) 0, (byte) 0,
-                    (byte) 0, (byte) 0, 0, null);
+                    (byte) 0, (byte) 0, 0, null, null, null, null);
             chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
             chequeraCuotas.add(chequeraCuota);
         }

@@ -1,7 +1,14 @@
 package ar.edu.um.tesoreria.rest.kotlin.model
 
+import ar.edu.um.tesoreria.rest.model.Auditable
 import com.fasterxml.jackson.annotation.JsonFormat
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -66,4 +73,4 @@ data class Domicilio(
     @Column(name = "dom_laboral")
     var laboral: String = "",
 
-    )
+    ) : Auditable()

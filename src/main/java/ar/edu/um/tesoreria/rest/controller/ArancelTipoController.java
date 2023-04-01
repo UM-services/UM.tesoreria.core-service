@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ar.edu.um.tesoreria.rest.model.ArancelTipo;
+import ar.edu.um.tesoreria.rest.kotlin.model.ArancelTipo;
 import ar.edu.um.tesoreria.rest.model.view.ArancelTipoLectivo;
 import ar.edu.um.tesoreria.rest.service.ArancelTipoService;
 

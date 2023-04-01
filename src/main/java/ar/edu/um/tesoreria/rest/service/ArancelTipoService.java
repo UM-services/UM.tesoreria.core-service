@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.ArancelTipoException;
-import ar.edu.um.tesoreria.rest.model.ArancelTipo;
+import ar.edu.um.tesoreria.rest.kotlin.model.ArancelTipo;
 import ar.edu.um.tesoreria.rest.model.view.ArancelTipoLectivo;
 import ar.edu.um.tesoreria.rest.repository.IArancelTipoRepository;
 import ar.edu.um.tesoreria.rest.repository.view.IArancelTipoLectivoRepository;

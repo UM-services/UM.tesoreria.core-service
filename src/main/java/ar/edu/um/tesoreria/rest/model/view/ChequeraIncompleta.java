@@ -7,9 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-import ar.edu.um.tesoreria.rest.kotlin.model.Domicilio;
-import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
-import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
+import ar.edu.um.tesoreria.rest.kotlin.model.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -21,10 +19,8 @@ import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import ar.edu.um.tesoreria.rest.model.ArancelTipo;
+import ar.edu.um.tesoreria.rest.kotlin.model.ArancelTipo;
 import ar.edu.um.tesoreria.rest.model.Geografica;
-import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
-import ar.edu.um.tesoreria.rest.model.TipoChequera;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -6,12 +6,11 @@ package ar.edu.um.tesoreria.rest.repository;
 import java.util.List;
 import java.util.Optional;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.TipoChequera;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
-
-import ar.edu.um.tesoreria.rest.model.TipoChequera;
 
 /**
  * @author daniel

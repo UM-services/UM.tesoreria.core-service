@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.kotlin.model.Domicilio;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -35,7 +36,6 @@ import ar.edu.um.tesoreria.rest.exception.DomicilioException;
 import ar.edu.um.tesoreria.rest.exception.PayPerTicException;
 import ar.edu.um.tesoreria.rest.exception.PersonaException;
 import ar.edu.um.tesoreria.rest.model.ChequeraAlternativa;
-import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.PayPerTic;
 import ar.edu.um.tesoreria.rest.kotlin.model.Persona;
 import ar.edu.um.tesoreria.rest.model.view.CuotaDeudaPayPerTic;

@@ -4,6 +4,8 @@ import ar.edu.um.tesoreria.rest.model.Auditable
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 
 @Entity
@@ -36,9 +38,12 @@ data class Comprobante(
     var diasVigencia: Long = 0,
 
     var facturacionElectronica: Byte = 0,
-
-    var tipoAfip: Int? = null,
-
+    var comprobanteAfipId: Int? = null,
     var puntoVenta: Int? = null,
+    var letraComprobante: String? = null,
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "comprobanteAfipId", insertable = false, updatable = false)
+    var comprobanteAfip: ComprobanteAfip? = null,
 
     ) : Auditable()

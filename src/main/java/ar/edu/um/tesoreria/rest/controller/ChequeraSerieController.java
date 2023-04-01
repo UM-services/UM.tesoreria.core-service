@@ -6,6 +6,7 @@ package ar.edu.um.tesoreria.rest.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.ChequeraSerie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ar.edu.um.tesoreria.rest.model.ChequeraSerie;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraAlta;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraIncompleta;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraKey;
@@ -36,7 +36,7 @@ public class ChequeraSerieController {
 
 	@GetMapping("/persona/{personaId}/{documentoId}")
 	public ResponseEntity<List<ChequeraSerie>> findAllByPersona(@PathVariable BigDecimal personaId,
-			@PathVariable Integer documentoId) {
+																@PathVariable Integer documentoId) {
 		return new ResponseEntity<List<ChequeraSerie>>(service.findAllByPersona(personaId, documentoId), HttpStatus.OK);
 	}
 

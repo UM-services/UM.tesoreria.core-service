@@ -6,6 +6,8 @@ package ar.edu.um.tesoreria.rest.model;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.ChequeraSerie;
+import ar.edu.um.tesoreria.rest.kotlin.model.Producto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
