@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
+import ar.edu.um.tesoreria.rest.kotlin.model.ProveedorArticulo;
+import ar.edu.um.tesoreria.rest.kotlin.model.ProveedorMovimiento;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -18,9 +21,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
-import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
-import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
-import ar.edu.um.tesoreria.rest.model.dto.ProveedorMovimientoDTO;
 import ar.edu.um.tesoreria.rest.repository.IProveedorMovimientoRepository;
 
 /**
@@ -43,7 +43,7 @@ public class ProveedorMovimientoService {
 	private ModelMapper modelMapper;
 
 	public List<ProveedorMovimiento> findAllByComprobanteIdAndFechaComprobanteBetween(Integer comprobanteId,
-			OffsetDateTime fechaInicio, OffsetDateTime fechaFinal) {
+																					  OffsetDateTime fechaInicio, OffsetDateTime fechaFinal) {
 		return repository.findAllByComprobanteIdAndFechaComprobanteBetween(comprobanteId, fechaInicio, fechaFinal);
 	}
 
@@ -51,7 +51,7 @@ public class ProveedorMovimientoService {
 		return repository.findAllByProveedorMovimientoIdIn(proveedorMovimientoIds, null);
 	}
 
-	public List<ProveedorMovimientoDTO> findAllEliminables(Integer ejercicioId) {
+	public List<ProveedorMovimiento> findAllEliminables(Integer ejercicioId) {
 		List<ProveedorMovimiento> anuladas = repository.findAllByComprobanteIdAndPrefijoAndFechaAnulacionNotNull(6,
 				ejercicioId);
 		List<ProveedorMovimiento> sueldosPendientes = repository
@@ -59,10 +59,7 @@ public class ProveedorMovimientoService {
 						6, ejercicioId, BigDecimal.ZERO, "Personal", "Sueldos");
 		List<ProveedorMovimiento> proveedorMovimientos = Stream.concat(anuladas.stream(), sueldosPendientes.stream())
 				.collect(Collectors.toList());
-		List<ProveedorMovimientoDTO> proveedorMovimientoDTOs = proveedorMovimientos.stream()
-				.map(proveedorMovimiento -> modelMapper.map(proveedorMovimiento, ProveedorMovimientoDTO.class))
-				.collect(Collectors.toList());
-		return proveedorMovimientoDTOs;
+		return proveedorMovimientos;
 	}
 
 	public List<ProveedorMovimiento> findAllByProveedorId(Integer proveedorId, Integer geograficaId) {
@@ -72,8 +69,8 @@ public class ProveedorMovimientoService {
 		return repository.findAllByProveedorIdAndGeograficaId(proveedorId, geograficaId);
 	}
 
-	public List<ProveedorMovimientoDTO> findAllAsignables(Integer proveedorId, OffsetDateTime desde,
-			OffsetDateTime hasta, Integer geograficaId, Boolean todos) throws JsonProcessingException {
+	public List<ProveedorMovimiento> findAllAsignables(Integer proveedorId, OffsetDateTime desde,
+													   OffsetDateTime hasta, Integer geograficaId, Boolean todos) throws JsonProcessingException {
 		List<Comprobante> comprobantes = comprobanteService.findAllByTipoTransaccionId(3);
 		List<Integer> comprobanteIds = comprobantes.stream().map(c -> c.getComprobanteId())
 				.collect(Collectors.toList());
@@ -102,16 +99,25 @@ public class ProveedorMovimientoService {
 		List<ProveedorMovimiento> proveedorMovimientos = repository
 				.findAllByProveedorMovimientoIdIn(proveedorMovimientoIds, Sort.by("fechaComprobante").descending()
 						.and(Sort.by("prefijo").ascending()).and(Sort.by("numeroComprobante").ascending()));
-		List<ProveedorMovimientoDTO> proveedorMovimientoDTOs = proveedorMovimientos.stream()
-				.map(proveedorMovimiento -> modelMapper.map(proveedorMovimiento, ProveedorMovimientoDTO.class))
-				.collect(Collectors.toList());
-		return proveedorMovimientoDTOs;
+		return proveedorMovimientos;
 	}
 
-	public ProveedorMovimientoDTO findByProveedorMovimientoId(Long proveedorMovimientoId) {
+	public ProveedorMovimiento findByProveedorMovimientoId(Long proveedorMovimientoId) {
 		ProveedorMovimiento proveedorMovimiento = repository.findByProveedorMovimientoId(proveedorMovimientoId)
 				.orElseThrow(() -> new ProveedorMovimientoException(proveedorMovimientoId));
-		return modelMapper.map(proveedorMovimiento, ProveedorMovimientoDTO.class);
+		return proveedorMovimiento;
 	}
 
+	public ProveedorMovimiento update(ProveedorMovimiento newProveedorMovimiento, Long proveedorMovimientoId) {
+		return repository.findByProveedorMovimientoId(proveedorMovimientoId).map(proveedorMovimiento -> {
+			proveedorMovimiento = new ProveedorMovimiento(proveedorMovimientoId, newProveedorMovimiento.getProveedorId(), newProveedorMovimiento.getNombreBeneficiario(), newProveedorMovimiento.getComprobanteId(), newProveedorMovimiento.getFechaComprobante(), newProveedorMovimiento.getFechaVencimiento(), newProveedorMovimiento.getPrefijo(), newProveedorMovimiento.getNumeroComprobante(), newProveedorMovimiento.getNetoSinDescuento(), newProveedorMovimiento.getDescuento(), newProveedorMovimiento.getNeto(), newProveedorMovimiento.getImporte(), newProveedorMovimiento.getCancelado(), newProveedorMovimiento.getFechaContable(), newProveedorMovimiento.getOrdenContable(), newProveedorMovimiento.getConcepto(), newProveedorMovimiento.getFechaAnulacion(), newProveedorMovimiento.getConCargo(), newProveedorMovimiento.getSolicitaFactura(), newProveedorMovimiento.getGeograficaId(), null, null, null, null);
+			proveedorMovimiento = repository.save(proveedorMovimiento);
+			return proveedorMovimiento;
+		}).orElseThrow(() -> new ProveedorMovimientoException(proveedorMovimientoId));
+	}
+
+	@Transactional
+    public void deleteByProveedorMovimientoId(Long proveedorMovimientoId) {
+		repository.deleteByProveedorMovimientoId(proveedorMovimientoId);
+    }
 }

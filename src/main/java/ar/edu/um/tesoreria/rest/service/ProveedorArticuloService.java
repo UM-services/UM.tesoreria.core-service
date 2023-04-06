@@ -4,9 +4,10 @@
 package ar.edu.um.tesoreria.rest.service;
 
 import ar.edu.um.tesoreria.rest.exception.ProveedorArticuloException;
-import ar.edu.um.tesoreria.rest.model.ProveedorArticulo;
+import ar.edu.um.tesoreria.rest.kotlin.model.ProveedorArticulo;
 import ar.edu.um.tesoreria.rest.repository.IProveedorArticuloRepository;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +26,7 @@ public class ProveedorArticuloService {
 	private IProveedorArticuloRepository repository;
 
 	public List<ProveedorArticulo> findAllByProveedorMovimientoIds(List<Long> proveedorMovimientoIds,
-			Boolean asignables) throws JsonProcessingException {
+																   Boolean asignables) throws JsonProcessingException {
 		List<ProveedorArticulo> proveedorArticulos = null;
 		if (asignables) {
 			proveedorArticulos = repository
@@ -62,4 +63,8 @@ public class ProveedorArticuloService {
 		}).orElseThrow(() -> new ProveedorArticuloException(proveedorArticuloId));
 	}
 
+	@Transactional
+    public void deleteByProveedorArticuloId(Long proveedorArticuloId) {
+		repository.deleteByProveedorArticuloId(proveedorArticuloId);
+    }
 }

@@ -3,7 +3,6 @@ package ar.edu.um.tesoreria.rest.kotlin.model
 import ar.edu.um.tesoreria.rest.model.Auditable
 import ar.edu.um.tesoreria.rest.model.Cuenta
 import ar.edu.um.tesoreria.rest.model.Proveedor
-import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint

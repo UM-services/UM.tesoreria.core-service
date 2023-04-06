@@ -15,6 +15,10 @@ public class ValorMovimientoException extends RuntimeException {
 	 */
 	private static final long serialVersionUID = 2951741465384684841L;
 
+	public ValorMovimientoException(Long valorMovimientoId) {
+		super("Cannot find ValorMovimiento " + valorMovimientoId);
+	}
+
 	public ValorMovimientoException(Integer valorId, Long numero) {
 		super("Cannot find ValorMovimiento " + valorId + " / " + numero);
 	}

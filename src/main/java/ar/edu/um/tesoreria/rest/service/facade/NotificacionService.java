@@ -10,9 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
-import ar.edu.um.tesoreria.rest.kotlin.model.Domicilio;
-import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
+import ar.edu.um.tesoreria.rest.kotlin.model.*;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
@@ -30,12 +28,7 @@ import ar.edu.um.tesoreria.rest.extern.consumer.NotificacionFacultadConsumer;
 import ar.edu.um.tesoreria.rest.model.NotificacionExamen;
 import ar.edu.um.tesoreria.rest.model.PersonaSuspendido;
 import ar.edu.um.tesoreria.rest.model.Proveedor;
-import ar.edu.um.tesoreria.rest.model.ProveedorComprobante;
-import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
-import ar.edu.um.tesoreria.rest.model.ProveedorValor;
 import ar.edu.um.tesoreria.rest.model.Valor;
-import ar.edu.um.tesoreria.rest.model.ValorMovimiento;
-import ar.edu.um.tesoreria.rest.model.dto.ProveedorMovimientoDTO;
 import ar.edu.um.tesoreria.rest.service.ComprobanteService;
 import ar.edu.um.tesoreria.rest.service.DomicilioService;
 import ar.edu.um.tesoreria.rest.service.FacultadService;
@@ -186,7 +179,7 @@ public class NotificacionService {
 	public String notifyPagoProveedor(Long proveedorMovimientoId) throws MessagingException {
 		String data = "";
 
-		ProveedorMovimientoDTO proveedorMovimiento = null;
+		ProveedorMovimiento proveedorMovimiento = null;
 		try {
 			proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
 		} catch (ProveedorMovimientoException e) {
@@ -215,7 +208,7 @@ public class NotificacionService {
 				.collect(Collectors.toMap(Comprobante::getComprobanteId, comprobante -> comprobante));
 
 		// Datos de valores
-		List<ProveedorValor> proveedorValors = proveedorValorService.findAllByOrdenPagoId(proveedorMovimientoId);
+		List<ProveedorValor> proveedorValors = proveedorValorService.findAllByProveedorMovimientoId(proveedorMovimientoId);
 		List<Long> valorMovimientoIds = proveedorValors.stream().map(valor -> valor.getValorMovimientoId())
 				.collect(Collectors.toList());
 		Map<Long, ValorMovimiento> valorMovimientos = valorMovimientoService

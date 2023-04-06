@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
+import ar.edu.um.tesoreria.rest.kotlin.model.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -30,12 +30,8 @@ import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
 import ar.edu.um.tesoreria.rest.exception.ProveedorValorException;
 import ar.edu.um.tesoreria.rest.exception.ValorMovimientoException;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
-import ar.edu.um.tesoreria.rest.kotlin.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
-import ar.edu.um.tesoreria.rest.model.ProveedorValor;
 import ar.edu.um.tesoreria.rest.model.Valor;
-import ar.edu.um.tesoreria.rest.model.ValorMovimiento;
-import ar.edu.um.tesoreria.rest.model.dto.ProveedorMovimientoDTO;
 import ar.edu.um.tesoreria.rest.repository.ValorNotFoundExcepcion;
 import ar.edu.um.tesoreria.rest.service.ComprobanteService;
 import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;
@@ -259,7 +255,7 @@ public class BalanceService {
 						.findFirstByContable(movimiento.getFechaContable(), movimiento.getOrdenContable());
 				ProveedorValor proveedorValor = proveedorValorService
 						.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
-				ProveedorMovimientoDTO proveedorMovimiento = proveedorMovimientoService
+				ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService
 						.findByProveedorMovimientoId(proveedorValor.getProveedorMovimientoId());
 				Valor valor = valorService.findByValorId(valorMovimiento.getValorId());
 				this.setCellString(row, 7,

@@ -1,9 +1,13 @@
 package ar.edu.um.tesoreria.rest.kotlin.model
 
 import ar.edu.um.tesoreria.rest.model.Auditable
-import ar.edu.um.tesoreria.rest.model.ProveedorArticulo
-import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 import java.math.BigDecimal
 
 @Entity

@@ -2,8 +2,6 @@ package ar.edu.um.tesoreria.rest.kotlin.model
 
 import ar.edu.um.tesoreria.rest.model.Articulo
 import ar.edu.um.tesoreria.rest.model.Auditable
-import ar.edu.um.tesoreria.rest.model.ProveedorArticulo
-import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint

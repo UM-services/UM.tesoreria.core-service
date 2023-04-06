@@ -8,11 +8,11 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.ProveedorMovimiento;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
-
-import ar.edu.um.tesoreria.rest.model.ProveedorMovimiento;
 
 /**
  * @author daniel
@@ -45,5 +45,8 @@ public interface IProveedorMovimientoRepository extends JpaRepository<ProveedorM
 	public List<ProveedorMovimiento> findAllByProveedorIdAndGeograficaId(Integer proveedorId, Integer geograficaId);
 
 	public Optional<ProveedorMovimiento> findByProveedorMovimientoId(Long proveedorMovimientoId);
+
+	@Modifying
+    public void deleteByProveedorMovimientoId(Long proveedorMovimientoId);
 
 }
