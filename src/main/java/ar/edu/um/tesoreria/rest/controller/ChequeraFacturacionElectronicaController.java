@@ -16,7 +16,7 @@ public class ChequeraFacturacionElectronicaController {
     @Autowired
     private ChequeraFacturacionElectronicaService service;
 
-    @GetMapping("/{chequeraId}")
+    @GetMapping("/chequera/{chequeraId}")
     public ResponseEntity<ChequeraFacturacionElectronica> findByChequeraId(@PathVariable Long chequeraId) {
         try {
             return new ResponseEntity<ChequeraFacturacionElectronica>(service.findByChequeraId(chequeraId), HttpStatus.OK);
