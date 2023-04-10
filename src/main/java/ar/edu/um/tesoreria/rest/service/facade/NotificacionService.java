@@ -28,7 +28,6 @@ import ar.edu.um.tesoreria.rest.extern.consumer.NotificacionFacultadConsumer;
 import ar.edu.um.tesoreria.rest.model.NotificacionExamen;
 import ar.edu.um.tesoreria.rest.model.PersonaSuspendido;
 import ar.edu.um.tesoreria.rest.model.Proveedor;
-import ar.edu.um.tesoreria.rest.model.Valor;
 import ar.edu.um.tesoreria.rest.service.ComprobanteService;
 import ar.edu.um.tesoreria.rest.service.DomicilioService;
 import ar.edu.um.tesoreria.rest.service.FacultadService;

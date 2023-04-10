@@ -1,5 +1,6 @@
 package ar.edu.um.tesoreria.rest.kotlin.model
 
+import ar.edu.um.tesoreria.rest.model.Auditable
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.text.MessageFormat
@@ -38,9 +39,9 @@ data class Persona(
     var cbu: String = "",
 
     @Column(name = "per_contrasenha")
-    var password: String? = null
+    var password: String? = null,
 
-) {
+    ) : Auditable() {
 
     fun getApellidoNombre(): String =
         MessageFormat.format("{0}, {1}", apellido, nombre)
