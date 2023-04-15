@@ -1,25 +1,24 @@
-package ar.edu.um.tesoreria.rest.kotlin.model
+package ar.edu.um.tesoreria.rest.kotlin.model.view
 
-import ar.edu.um.tesoreria.rest.model.Auditable
+import ar.edu.um.tesoreria.rest.kotlin.model.ArancelTipo
+import ar.edu.um.tesoreria.rest.kotlin.model.Facultad
+import ar.edu.um.tesoreria.rest.kotlin.model.Producto
+import ar.edu.um.tesoreria.rest.kotlin.model.TipoChequera
 import com.fasterxml.jackson.annotation.JsonFormat
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToOne
-import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
+import jakarta.persistence.*
+import org.hibernate.annotations.Immutable
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
 @Entity
-@Table(uniqueConstraints = [UniqueConstraint(columnNames = ["chc_fac_id", "chc_tch_id", "chc_chs_id", "chc_pro_id", "chc_alt_id", "chc_cuo_id"])])
-data class ChequeraCuota(
+@Table(
+    name = "vw_chequera_cuota_deuda",
+    uniqueConstraints = [UniqueConstraint(columnNames = ["chc_fac_id", "chc_tch_id", "chc_chs_id", "chc_pro_id", "chc_alt_id", "chc_cuo_id"])]
+)
+@Immutable
+data class ChequeraCuotaDeuda(
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chc_id")
     var chequeraCuotaId: Long? = null,
 
@@ -47,7 +46,7 @@ data class ChequeraCuota(
     @Column(name = "chc_anio")
     var anho: Int = 0,
 
-    var arancelTipoId: Int? = null,
+    var arancelTipoId: Long? = null,
 
     @Column(name = "chc_1er_vencimiento")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
@@ -94,8 +93,6 @@ data class ChequeraCuota(
     @Column(name = "chc_manual")
     var manual: Byte = 0,
 
-    var compensada: Byte = 0,
-
     @Column(name = "chc_tra_id")
     var tramoId: Int = 0,
 
@@ -115,10 +112,4 @@ data class ChequeraCuota(
     @JoinColumn(name = "arancelTipoId", insertable = false, updatable = false)
     var arancelTipo: ArancelTipo? = null,
 
-    ) : Auditable() {
-    fun cuotaKey(): String {
-        return (this.facultadId.toString() + "." + this.tipoChequeraId + "." + this.chequeraSerieId + "." + this.productoId + "."
-                + this.alternativaId + "." + this.cuotaId)
-    }
-
-}
+    )

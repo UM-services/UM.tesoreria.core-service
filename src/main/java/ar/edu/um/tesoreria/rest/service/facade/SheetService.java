@@ -59,7 +59,6 @@ import ar.edu.um.tesoreria.rest.extern.model.view.PreunivCarreraFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.view.PreunivMatricResumenFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.view.PreunivResumenFacultad;
 import ar.edu.um.tesoreria.rest.kotlin.model.ArancelTipo;
-import ar.edu.um.tesoreria.rest.model.Baja;
 import ar.edu.um.tesoreria.rest.model.Carrera;
 import ar.edu.um.tesoreria.rest.model.ContratoPeriodo;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;

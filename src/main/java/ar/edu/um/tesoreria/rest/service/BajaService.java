@@ -3,6 +3,7 @@
  */
 package ar.edu.um.tesoreria.rest.service;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Baja;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.BajaException;
-import ar.edu.um.tesoreria.rest.model.Baja;
 import ar.edu.um.tesoreria.rest.repository.IBajaRepository;
 import lombok.extern.slf4j.Slf4j;
 

@@ -3,6 +3,7 @@
  */
 package ar.edu.um.tesoreria.rest.controller;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Baja;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.BajaException;
-import ar.edu.um.tesoreria.rest.model.Baja;
 import ar.edu.um.tesoreria.rest.service.BajaService;
 
 /**
@@ -33,7 +33,7 @@ public class BajaController {
 
 	@GetMapping("/unique/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
 	public ResponseEntity<Baja> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
-			@PathVariable Long chequeraSerieId) {
+											 @PathVariable Long chequeraSerieId) {
 		try {
 			return new ResponseEntity<Baja>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId),
 					HttpStatus.OK);

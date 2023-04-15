@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.view.ChequeraCuotaDeuda;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import ar.edu.um.tesoreria.rest.model.view.ChequeraCuotaDeuda;
 import ar.edu.um.tesoreria.rest.service.view.ChequeraCuotaDeudaService;
 import ar.edu.um.tesoreria.rest.util.Tool;
 import lombok.extern.slf4j.Slf4j;
