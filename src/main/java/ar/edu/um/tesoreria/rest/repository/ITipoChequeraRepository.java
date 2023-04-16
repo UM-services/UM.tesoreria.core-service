@@ -27,6 +27,8 @@ public interface ITipoChequeraRepository extends JpaRepository<TipoChequera, Int
 
 	public List<TipoChequera> findAllByClaseChequeraId(Integer claseChequeraId);
 
+	public List<TipoChequera> findAllByClaseChequeraIdIn(List<Integer> claseChequeraIds);
+
 	public Optional<TipoChequera> findTopByOrderByTipoChequeraIdDesc();
 
 	public Optional<TipoChequera> findByTipoChequeraId(Integer tipoChequeraId);

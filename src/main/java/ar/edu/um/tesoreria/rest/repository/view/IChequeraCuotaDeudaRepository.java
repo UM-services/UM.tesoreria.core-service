@@ -21,4 +21,5 @@ public interface IChequeraCuotaDeudaRepository extends JpaRepository<ChequeraCuo
 	public List<ChequeraCuotaDeuda> findAllByVencimiento1Between(OffsetDateTime desde, OffsetDateTime hasta,
 			Pageable pageable);
 
+    public List<ChequeraCuotaDeuda> findAllByTipoChequeraIdInAndVencimiento1Between(List<Integer> tipoChequeraIds, OffsetDateTime desde, OffsetDateTime hasta);
 }

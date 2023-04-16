@@ -34,7 +34,7 @@ public class TipoChequeraService {
 	}
 
 	public List<TipoChequera> findAllAsignable(Integer facultadId, Integer lectivoId, Integer geograficaId,
-			Integer claseChequeraId) {
+											   Integer claseChequeraId) {
 		List<Integer> tipoChequeraIds = lectivoTotalService.findAllByLectivo(facultadId, lectivoId).stream()
 				.map(total -> total.getTipoChequeraId()).distinct().collect(Collectors.toList());
 		return repository.findAllByTipoChequeraIdInAndGeograficaIdAndClaseChequeraId(tipoChequeraIds, geograficaId,
@@ -51,6 +51,10 @@ public class TipoChequeraService {
 		return repository.findAllByClaseChequeraId(claseChequeraId);
 	}
 
+	public List<TipoChequera> findAllByClaseChequeraIds(List<Integer> claseChequeraIds) {
+		return repository.findAllByClaseChequeraIdIn(claseChequeraIds);
+	}
+
 	public TipoChequera findByTipoChequeraId(Integer tipoChequeraId) {
 		return repository.findByTipoChequeraId(tipoChequeraId)
 				.orElseThrow(() -> new TipoChequeraException(tipoChequeraId));
@@ -65,17 +69,11 @@ public class TipoChequeraService {
 		return tipoChequera;
 	}
 
-	public TipoChequera update(TipoChequera newtipochequera, Integer tipochequeraId) {
-		return repository.findById(tipochequeraId).map(tipochequera -> {
-			tipochequera.setNombre(newtipochequera.getNombre());
-			tipochequera.setPrefijo(newtipochequera.getPrefijo());
-			tipochequera.setGeograficaId(newtipochequera.getGeograficaId());
-			tipochequera.setClaseChequeraId(newtipochequera.getClaseChequeraId());
-			tipochequera.setImprimir(newtipochequera.getImprimir());
-			tipochequera.setContado(newtipochequera.getContado());
-			tipochequera.setMultiple(newtipochequera.getMultiple());
-			return repository.save(tipochequera);
-		}).orElseThrow(() -> new TipoChequeraException(tipochequeraId));
+	public TipoChequera update(TipoChequera newTipoChequera, Integer tipoChequeraId) {
+		return repository.findByTipoChequeraId(tipoChequeraId).map(tipoChequera -> {
+			tipoChequera = new TipoChequera(tipoChequeraId, newTipoChequera.getNombre(), newTipoChequera.getPrefijo(), newTipoChequera.getGeograficaId(), newTipoChequera.getClaseChequeraId(), newTipoChequera.getImprimir(), newTipoChequera.getContado(), newTipoChequera.getMultiple(), null, null);
+			return repository.save(tipoChequera);
+		}).orElseThrow(() -> new TipoChequeraException(tipoChequeraId));
 	}
 
 	public void delete(Integer tipoChequeraId) {
@@ -92,7 +90,7 @@ public class TipoChequeraService {
 	}
 
 	public TipoChequera mark(Integer tipochequeraId, Byte imprimir) {
-		return repository.findById(tipochequeraId).map(tipochequera -> {
+		return repository.findByTipoChequeraId(tipochequeraId).map(tipochequera -> {
 			tipochequera.setImprimir(imprimir);
 			return repository.save(tipochequera);
 		}).orElseThrow(() -> new TipoChequeraException(tipochequeraId));

@@ -24,4 +24,8 @@ public class ClaseChequeraService {
 	public List<ClaseChequera> findAll() {
 		return repository.findAll();
 	}
+
+    public List<ClaseChequera> findAllByPosgrado() {
+		return repository.findALlByPosgrado((byte) 1);
+    }
 }
