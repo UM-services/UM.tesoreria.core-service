@@ -38,6 +38,11 @@ public class ChequeraPagoController {
         return new ResponseEntity<List<ChequeraPago>>(service.pendientesFactura(fechaPago), HttpStatus.OK);
     }
 
+    @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
+    public ResponseEntity<List<ChequeraPago>> findAllByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
+        return new ResponseEntity<List<ChequeraPago>>(service.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId), HttpStatus.OK);
+    }
+
     @GetMapping("/{chequeraPagoId}")
     public ResponseEntity<ChequeraPago> findByChequeraPagoId(@PathVariable Long chequeraPagoId) {
         try {
