@@ -35,4 +35,9 @@ public class ChequeraFacturacionElectronicaController {
         return new ResponseEntity<ChequeraFacturacionElectronica>(service.update(chequeraFacturacionElectronica, chequeraFacturacionElectronicaId), HttpStatus.OK);
     }
 
+    @DeleteMapping("/{chequeraFacturacionElectronicaId}")
+    public ResponseEntity<Void> deleteByChequeraFacturacionElectronicaId(@PathVariable Long chequeraFacturacionElectronicaId) {
+        service.deleteByChequeraFacturacionElectronicaId(chequeraFacturacionElectronicaId);
+        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+    }
 }

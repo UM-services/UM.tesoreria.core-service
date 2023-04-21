@@ -51,6 +51,8 @@ public interface IChequeraSerieRepository extends JpaRepository<ChequeraSerie, L
 	public List<ChequeraSerie> findAllByFacultadIdAndLectivoIdAndGeograficaIdAndPersonaIdIn(Integer facultadId,
 			Integer lectivoId, Integer geograficaId, List<BigDecimal> personaIds);
 
+	public List<ChequeraSerie> findAllByPersonaIdAndDocumentoIdAndLectivoId(BigDecimal personaId, Integer documentoId, Integer lectivoId);
+
 	public Optional<ChequeraSerie> findFirstByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoId(Integer facultadId,
 			BigDecimal personaId, Integer documentoId, Integer lectivoId);
 
