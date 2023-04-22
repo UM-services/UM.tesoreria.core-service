@@ -73,6 +73,14 @@ data class ChequeraPago(
     @Column(name = "chp_tpa_id")
     var tipoPagoId: Int? = null,
 
+    @OneToOne(optional = true)
+    @JoinColumn(name = "chp_tpa_id", insertable = false, updatable = false)
+    var tipoPago: TipoPago? = null,
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "chp_pro_id", insertable = false, updatable = false)
+    var producto: Producto? = null,
+
     ) : Auditable() {
 
     fun getCuotaKey(): String {

@@ -67,7 +67,6 @@ import ar.edu.um.tesoreria.rest.model.IngresoAsiento;
 import ar.edu.um.tesoreria.rest.model.Legajo;
 import ar.edu.um.tesoreria.rest.model.PersonaSuspendido;
 import ar.edu.um.tesoreria.rest.model.Plan;
-import ar.edu.um.tesoreria.rest.model.TipoPago;
 import ar.edu.um.tesoreria.rest.model.dto.DeudaChequera;
 import ar.edu.um.tesoreria.rest.model.view.CarreraKey;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraPreuniv;
