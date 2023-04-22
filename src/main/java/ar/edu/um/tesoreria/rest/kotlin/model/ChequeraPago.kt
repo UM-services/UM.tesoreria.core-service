@@ -81,6 +81,17 @@ data class ChequeraPago(
     @JoinColumn(name = "chp_pro_id", insertable = false, updatable = false)
     var producto: Producto? = null,
 
+    @OneToOne(optional = true)
+    @JoinColumns(
+        JoinColumn(name = "chp_fac_id", referencedColumnName = "chc_fac_id", insertable = false, updatable = false),
+        JoinColumn(name = "chp_tch_id", referencedColumnName = "chc_tch_id", insertable = false, updatable = false),
+        JoinColumn(name = "chp_chs_id", referencedColumnName = "chc_chs_id", insertable = false, updatable = false),
+        JoinColumn(name = "chp_alt_id", referencedColumnName = "chc_alt_id", insertable = false, updatable = false),
+        JoinColumn(name = "chp_pro_id", referencedColumnName = "chc_pro_id", insertable = false, updatable = false),
+        JoinColumn(name = "chp_cuo_id", referencedColumnName = "chc_cuo_id", insertable = false, updatable = false),
+    )
+    var chequeraCuota: ChequeraCuota? = null,
+
     ) : Auditable() {
 
     fun getCuotaKey(): String {
