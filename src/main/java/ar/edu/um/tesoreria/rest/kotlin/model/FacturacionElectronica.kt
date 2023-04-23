@@ -24,7 +24,7 @@ data class FacturacionElectronica(
     var comprobanteId: Int? = null,
     var numeroComprobante: Long = 0,
     var personaId: BigDecimal? = null,
-    var tipoDocumento: Int? = null,
+    var tipoDocumento: String? = null,
     var apellido: String? = null,
     var nombre: String? = null,
     var cuit: String? = null,
