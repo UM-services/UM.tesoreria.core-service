@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import ar.edu.um.tesoreria.rest.kotlin.model.ChequeraPago;
@@ -40,7 +41,7 @@ public class ChequeraPagoService {
     public List<ChequeraPago> pendientesFactura(OffsetDateTime fechaPago) {
         List<ChequeraPago> pagos = repository.findAllByFechaAndTipoPagoIdGreaterThan(fechaPago, 2);
         List<Long> pagoIds = pagos.stream().map(pago -> pago.getChequeraPagoId()).collect(Collectors.toList());
-        Map<Long, FacturacionElectronica> electronicas = facturacionElectronicaService.findAllByChequeraPagoIds(pagoIds).stream().collect(Collectors.toMap(FacturacionElectronica::getChequeraPagoId, pago -> pago));
+        Map<Long, FacturacionElectronica> electronicas = facturacionElectronicaService.findAllByChequeraPagoIds(pagoIds).stream().collect(Collectors.toMap(FacturacionElectronica::getChequeraPagoId, Function.identity(), (pago, replacement) -> pago));
         List<ChequeraPago> chequeraPagos = new ArrayList<ChequeraPago>();
         for (ChequeraPago pago : pagos) {
             if (!electronicas.containsKey(pago.getChequeraPagoId())) {
