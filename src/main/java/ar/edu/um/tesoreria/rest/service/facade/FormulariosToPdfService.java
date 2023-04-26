@@ -52,7 +52,6 @@ import ar.edu.um.tesoreria.rest.exception.FacultadException;
 import ar.edu.um.tesoreria.rest.exception.LectivoException;
 import ar.edu.um.tesoreria.rest.exception.LegajoException;
 import ar.edu.um.tesoreria.rest.exception.PersonaException;
-import ar.edu.um.tesoreria.rest.model.Carrera;
 import ar.edu.um.tesoreria.rest.model.LectivoAlternativa;
 
 @Service

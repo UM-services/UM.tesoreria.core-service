@@ -3,11 +3,11 @@
  */
 package ar.edu.um.tesoreria.rest.service;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.ChequeraEliminada;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.ChequeraEliminadaException;
-import ar.edu.um.tesoreria.rest.model.ChequeraEliminada;
 import ar.edu.um.tesoreria.rest.repository.IChequeraEliminadaRepository;
 
 /**

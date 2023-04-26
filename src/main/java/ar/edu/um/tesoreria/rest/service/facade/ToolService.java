@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 public class ToolService {
 
 	public Boolean mailvalidate(String mail) {
+
+		if (mail.toLowerCase().contains("ñ")) {
+			return false;
+		}
 		try {
 			InternetAddress address = new InternetAddress(mail);
 			address.validate();
