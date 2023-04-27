@@ -23,7 +23,7 @@ public class ChequeraFacturacionElectronicaService {
 
     public ChequeraFacturacionElectronica update(ChequeraFacturacionElectronica newChequeraFacturacionElectronica, Long chequeraFacturacionElectronicaId) {
         return repository.findByChequeraFacturacionElectronicaId(chequeraFacturacionElectronicaId).map(chequeraFacturacionElectronica -> {
-            chequeraFacturacionElectronica = new ChequeraFacturacionElectronica(chequeraFacturacionElectronicaId, newChequeraFacturacionElectronica.getChequeraId(), newChequeraFacturacionElectronica.getCuit(), newChequeraFacturacionElectronica.getRazonSocial(), newChequeraFacturacionElectronica.getDomicilio(), newChequeraFacturacionElectronica.getEmail());
+            chequeraFacturacionElectronica = new ChequeraFacturacionElectronica(chequeraFacturacionElectronicaId, newChequeraFacturacionElectronica.getChequeraId(), newChequeraFacturacionElectronica.getCuit(), newChequeraFacturacionElectronica.getCondicionIva(), newChequeraFacturacionElectronica.getRazonSocial(), newChequeraFacturacionElectronica.getDomicilio(), newChequeraFacturacionElectronica.getEmail());
             chequeraFacturacionElectronica = repository.save(chequeraFacturacionElectronica);
             return chequeraFacturacionElectronica;
         }).orElseThrow(() -> new ChequeraFacturacionElectronicaException(chequeraFacturacionElectronicaId));

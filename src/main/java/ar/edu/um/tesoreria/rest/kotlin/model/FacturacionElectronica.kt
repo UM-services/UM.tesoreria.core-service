@@ -28,6 +28,7 @@ data class FacturacionElectronica(
     var apellido: String? = null,
     var nombre: String? = null,
     var cuit: String? = null,
+    var condicionIva: String = "",
     var importe: BigDecimal = BigDecimal.ZERO,
     var cae: String? = null,
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")

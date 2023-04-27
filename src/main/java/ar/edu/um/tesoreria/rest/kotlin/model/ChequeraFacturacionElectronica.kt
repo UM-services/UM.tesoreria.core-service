@@ -20,5 +20,6 @@ data class ChequeraFacturacionElectronica(
     var razonSocial: String = "",
     var domicilio: String = "",
     var email: String = "",
+    var condicionIva: String = "",
 
     ) : Auditable()
