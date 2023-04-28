@@ -326,8 +326,8 @@ public class SincronizeService {
 		} catch (CarreraException e) {
 			carrera = new Carrera(null, carreraFacultad.getFacultadId(), carreraFacultad.getPlanId(),
 					carreraFacultad.getCarreraId(), carreraFacultad.getNombre(), carreraFacultad.getIniciales(),
-					carreraFacultad.getTitulo(), carreraFacultad.getTrabajofinal(), carreraFacultad.getResolucion(),
-					carreraFacultad.getChequeraunica(), carreraFacultad.getBloqueId(),
+					carreraFacultad.getTitulo(), carreraFacultad.getTrabajoFinal(), carreraFacultad.getResolucion(),
+					carreraFacultad.getChequeraUnica(), carreraFacultad.getBloqueId(),
 					carreraFacultad.getObligatorias(), carreraFacultad.getOptativas(), carreraFacultad.getVigente());
 			carreraService.add(carrera);
 		}
@@ -393,15 +393,15 @@ public class SincronizeService {
 				Carrera carrera = carreras.get(carreraFacultad.getCarreraKey());
 				carrera = new Carrera(carrera.getUniqueId(), carreraFacultad.getFacultadId(),
 						carreraFacultad.getPlanId(), carreraFacultad.getCarreraId(), carreraFacultad.getNombre(),
-						carreraFacultad.getIniciales(), carreraFacultad.getTitulo(), carreraFacultad.getTrabajofinal(),
-						carreraFacultad.getResolucion(), carreraFacultad.getChequeraunica(),
+						carreraFacultad.getIniciales(), carreraFacultad.getTitulo(), carreraFacultad.getTrabajoFinal(),
+						carreraFacultad.getResolucion(), carreraFacultad.getChequeraUnica(),
 						carreraFacultad.getBloqueId(), carreraFacultad.getObligatorias(),
 						carreraFacultad.getOptativas(), carreraFacultad.getVigente());
 			} else {
 				Carrera carrera = new Carrera(null, carreraFacultad.getFacultadId(), carreraFacultad.getPlanId(),
 						carreraFacultad.getCarreraId(), carreraFacultad.getNombre(), carreraFacultad.getIniciales(),
-						carreraFacultad.getTitulo(), carreraFacultad.getTrabajofinal(), carreraFacultad.getResolucion(),
-						carreraFacultad.getChequeraunica(), carreraFacultad.getBloqueId(),
+						carreraFacultad.getTitulo(), carreraFacultad.getTrabajoFinal(), carreraFacultad.getResolucion(),
+						carreraFacultad.getChequeraUnica(), carreraFacultad.getBloqueId(),
 						carreraFacultad.getObligatorias(), carreraFacultad.getOptativas(),
 						carreraFacultad.getVigente());
 				carreras.put(carrera.getCarreraKey(), carrera);

@@ -245,7 +245,7 @@ public class MatriculaService {
 									+ inscripcion.getFacultadId() + "/" + inscripcion.getPlanId() + "/"
 									+ inscripcion.getCarreraId();
 							CarreraFacultad carrera = restTemplate.getForObject(url, CarreraFacultad.class);
-							if (carrera.getChequeraunica() == 1) {
+							if (carrera.getChequeraUnica() == 1) {
 								try {
 									ChequeraClase chequera = chequeraclaseservice.findChequeraGradoUnica(
 											matricula.getFacultadId(), matricula.getPersonaId(),

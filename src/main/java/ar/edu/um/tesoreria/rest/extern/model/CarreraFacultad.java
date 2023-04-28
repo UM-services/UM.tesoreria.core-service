@@ -29,9 +29,9 @@ public class CarreraFacultad implements Serializable {
 	private String nombre;
 	private String iniciales;
 	private String titulo;
-	private Byte trabajofinal;
+	private Byte trabajoFinal;
 	private String resolucion;
-	private Byte chequeraunica;
+	private Byte chequeraUnica;
 	private Integer bloqueId;
 	private Integer obligatorias;
 	private Integer optativas;
