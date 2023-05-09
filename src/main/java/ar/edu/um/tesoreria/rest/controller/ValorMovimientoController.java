@@ -28,6 +28,15 @@ public class ValorMovimientoController {
 
 	@Autowired
 	private ValorMovimientoService service;
+
+	@GetMapping("/{valorMovimientoId}")
+	public ResponseEntity<ValorMovimiento> findByValorMovimientoId(@PathVariable Long valorMovimientoId) {
+		try {
+			return new ResponseEntity<ValorMovimiento>(service.findByValorMovimientoId(valorMovimientoId), HttpStatus.OK);
+		} catch (ValorMovimientoException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+	}
 	
 	@GetMapping("/numero/{valorId}/{numero}")
 	public ResponseEntity<ValorMovimiento> findByNumero(@PathVariable Integer valorId, @PathVariable Long numero) {
