@@ -13,8 +13,8 @@ public class ProveedorValorException extends RuntimeException {
 	 */
 	private static final long serialVersionUID = -498043410710406519L;
 
-	public ProveedorValorException(Long valormovimientoID) {
-		super("Cannot find ProveedorValor with ValorMovimiento " + valormovimientoID);
+	public ProveedorValorException(Long valormovimientoId) {
+		super("Cannot find ProveedorValor with ValorMovimiento " + valormovimientoId);
 	}
 
 	public ProveedorValorException() {

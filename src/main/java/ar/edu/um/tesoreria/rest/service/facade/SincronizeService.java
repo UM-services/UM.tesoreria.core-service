@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.extern.model.kotlin.*;
 import ar.edu.um.tesoreria.rest.kotlin.model.*;
 import jakarta.transaction.Transactional;
 
@@ -27,12 +28,6 @@ import ar.edu.um.tesoreria.rest.exception.PersonaException;
 import ar.edu.um.tesoreria.rest.exception.PlanException;
 import ar.edu.um.tesoreria.rest.exception.UsuarioLdapException;
 import ar.edu.um.tesoreria.rest.exception.view.ChequeraClaseException;
-import ar.edu.um.tesoreria.rest.extern.model.CarreraFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.InscripcionDetalleFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.InscripcionFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.LegajoFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.PlanFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.PreInscripcionFacultad;
 import ar.edu.um.tesoreria.rest.extern.consumer.CarreraFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.InscripcionDetalleFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.InscripcionFacultadConsumer;

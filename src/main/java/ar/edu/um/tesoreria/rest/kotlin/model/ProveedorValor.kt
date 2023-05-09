@@ -1,13 +1,8 @@
 package ar.edu.um.tesoreria.rest.kotlin.model
 
 import ar.edu.um.tesoreria.rest.model.Auditable
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
+import ar.edu.um.tesoreria.rest.model.Geografica
+import jakarta.persistence.*
 
 
 @Entity
@@ -26,9 +21,17 @@ data class ProveedorValor(
     var proveedorMovimientoId: Long? = null,
 
     @Column(name = "opv_orden")
-    var orden: Int? = null,
+    var orden: Int = 0,
 
     @Column(name = "opv_val_id")
     var valorMovimientoId: Long? = null,
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "opv_val_id", referencedColumnName = "val_id", insertable = false, updatable = false)
+    var valorMovimiento: ValorMovimiento? = null,
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "opv_orp_id", referencedColumnName = "mvp_id", insertable = false, updatable = false)
+    var proveedorMovimiento: ProveedorMovimiento? = null,
 
     ) : Auditable()

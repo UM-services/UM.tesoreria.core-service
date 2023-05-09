@@ -3,6 +3,7 @@
  */
 package ar.edu.um.tesoreria.rest.exception;
 
+import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 
 /**
@@ -25,6 +26,10 @@ public class ValorMovimientoException extends RuntimeException {
 
 	public ValorMovimientoException(OffsetDateTime fechacontable, Integer ordencontable) {
 		super("Cannot find ValorMovimiento " + fechacontable + " / " + ordencontable);
+	}
+
+	public ValorMovimientoException(Integer valorId, Long numero, Long bancariaId) {
+		super(MessageFormat.format("Cannot find ValorMovimiento {0}/{1}/{2}", valorId, numero, bancariaId));
 	}
 
 }

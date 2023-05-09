@@ -4,6 +4,7 @@
 package ar.edu.um.tesoreria.rest.repository;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 import ar.edu.um.tesoreria.rest.kotlin.model.Asiento;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,7 +19,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IAsientoRepository extends JpaRepository<Asiento, Long> {
 
-	public Asiento findByFechaAndOrden(OffsetDateTime fecha, Integer orden);
+	public Optional<Asiento> findByFechaAndOrden(OffsetDateTime fecha, Integer orden);
+
+	public Optional<Asiento> findByAsientoId(Long asientoId);
 
 	@Modifying
 	public void deleteByAsientoId(Long asientoId);

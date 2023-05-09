@@ -1,10 +1,8 @@
 package ar.edu.um.tesoreria.rest.kotlin.model
 
 import ar.edu.um.tesoreria.rest.model.Auditable
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import ar.edu.um.tesoreria.rest.model.Cuenta
+import jakarta.persistence.*
 import java.math.BigDecimal
 
 @Entity
@@ -31,5 +29,9 @@ data class Valor(
 
     @Column(name = "tiv_cuenta")
     var numeroCuenta: BigDecimal? = null,
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "tiv_cuenta", insertable = false, updatable = false)
+    var cuenta: Cuenta? = null,
 
     ) : Auditable()

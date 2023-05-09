@@ -5,11 +5,11 @@ package ar.edu.um.tesoreria.rest.service;
 
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Documento;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.DocumentoException;
-import ar.edu.um.tesoreria.rest.model.Documento;
 import ar.edu.um.tesoreria.rest.repository.IDocumentoRepository;
 
 /**

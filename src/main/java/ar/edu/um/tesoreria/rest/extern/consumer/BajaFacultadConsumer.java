@@ -6,12 +6,12 @@ package ar.edu.um.tesoreria.rest.extern.consumer;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 
+import ar.edu.um.tesoreria.rest.extern.model.kotlin.BajaFacultad;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import ar.edu.um.tesoreria.rest.extern.exception.BajaFacultadNotFoundException;
-import ar.edu.um.tesoreria.rest.extern.model.BajaFacultad;
 import reactor.core.publisher.Mono;
 
 /**
@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 public class BajaFacultadConsumer {
 
 	public BajaFacultad findByUnique(String server, Long port, Integer facultadId, BigDecimal personaId,
-			Integer documentoId, Integer lectivoId) {
+									 Integer documentoId, Integer lectivoId) {
 		String baseUrl = MessageFormat.format("http://{0}:{1,number,#}/baja", server, port);
 		WebClient webClient = WebClient.builder().baseUrl(baseUrl).build();
 		String request = MessageFormat.format("/unique/{0}/{1,number,#}/{2}/{3}", facultadId, personaId, documentoId,

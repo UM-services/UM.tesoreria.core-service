@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import ar.edu.um.tesoreria.rest.extern.model.kotlin.*;
 import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
 import ar.edu.um.tesoreria.rest.kotlin.model.Lectivo;
 import jakarta.transaction.Transactional;
@@ -22,12 +23,6 @@ import org.springframework.web.client.RestTemplate;
 
 import ar.edu.um.tesoreria.rest.exception.MatriculaException;
 import ar.edu.um.tesoreria.rest.exception.view.ChequeraClaseException;
-import ar.edu.um.tesoreria.rest.extern.model.BajaFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.CarreraFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.InscripcionFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.LegajoFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.PreInscripcionFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.TituloEntregaFacultad;
 import ar.edu.um.tesoreria.rest.model.Matricula;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraClase;
 import ar.edu.um.tesoreria.rest.model.view.ChequeraCuotaPersona;

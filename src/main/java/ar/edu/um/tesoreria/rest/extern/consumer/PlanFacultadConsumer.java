@@ -6,10 +6,9 @@ package ar.edu.um.tesoreria.rest.extern.consumer;
 import java.util.Arrays;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.extern.model.kotlin.PlanFacultad;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import ar.edu.um.tesoreria.rest.extern.model.PlanFacultad;
 
 /**
  * @author daniel

@@ -30,6 +30,10 @@ public class ComprobanteService {
 		return repository.findAllByTipoTransaccionId(tipoTransaccionId);
 	}
 
+	public Comprobante findByTipoTransaccionId(Integer tipoTransaccionId) {
+		return repository.findFirstByTipoTransaccionId(tipoTransaccionId).orElseThrow(() -> new ComprobanteException());
+	}
+
 	public Comprobante findByComprobanteId(Integer comprobanteId) {
 		return repository.findByComprobanteId(comprobanteId)
 				.orElseThrow(() -> new ComprobanteException(comprobanteId));

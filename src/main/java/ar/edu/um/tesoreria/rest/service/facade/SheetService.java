@@ -18,6 +18,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import ar.edu.um.tesoreria.rest.extern.model.kotlin.*;
 import ar.edu.um.tesoreria.rest.kotlin.model.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -47,11 +48,6 @@ import ar.edu.um.tesoreria.rest.extern.consumer.view.PreunivCarreraFacultadConsu
 import ar.edu.um.tesoreria.rest.extern.consumer.view.PreunivMatricResumenFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.consumer.view.PreunivResumenFacultadConsumer;
 import ar.edu.um.tesoreria.rest.extern.exception.BajaFacultadNotFoundException;
-import ar.edu.um.tesoreria.rest.extern.model.BajaFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.CarreraFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.InscripcionFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.PlanFacultad;
-import ar.edu.um.tesoreria.rest.extern.model.PreTurnoFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.view.InscriptoCursoFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.view.LegajoKeyFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.view.PersonaKeyFacultad;

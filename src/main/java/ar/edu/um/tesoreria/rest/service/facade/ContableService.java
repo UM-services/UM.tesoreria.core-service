@@ -7,23 +7,26 @@ import ar.edu.um.tesoreria.rest.exception.AsientoException;
 import ar.edu.um.tesoreria.rest.exception.CuentaMovimientoException;
 import ar.edu.um.tesoreria.rest.exception.EjercicioBloqueadoException;
 import ar.edu.um.tesoreria.rest.exception.EjercicioException;
+import ar.edu.um.tesoreria.rest.exception.facade.ContableException;
 import ar.edu.um.tesoreria.rest.kotlin.model.Asiento;
+import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.kotlin.model.CuentaMovimiento;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
 import ar.edu.um.tesoreria.rest.kotlin.model.internal.AsientoInternal;
-import ar.edu.um.tesoreria.rest.service.AsientoService;
-import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;
-import ar.edu.um.tesoreria.rest.service.CuentaService;
-import ar.edu.um.tesoreria.rest.service.EjercicioService;
+import ar.edu.um.tesoreria.rest.service.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -45,6 +48,9 @@ public class ContableService {
 
     @Autowired
     private CuentaMovimientoService cuentaMovimientoService;
+
+    @Autowired
+    private ComprobanteService comprobanteService;
 
     public static Boolean isSaldoDeudor(BigDecimal cuenta) {
         List<Integer> digitos = List.of(1, 4);
@@ -149,7 +155,7 @@ public class ContableService {
                 asientoService.deleteByAsientoId(asiento.getAsientoId());
             }
 
-            for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService.findAllByAsiento(fechaContable, ordenContable, 0, 2)) {
+            for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService.findAllByAsiento(fechaContable, ordenContable, item, 2)) {
                 cuentaMovimientoService.deleteByCuentaMovimientoId(cuentaMovimiento.getCuentaMovimientoId());
             }
         } catch (AsientoException e) {
@@ -166,4 +172,102 @@ public class ContableService {
         return true;
     }
 
+    @Transactional
+    public void contraAsiento(OffsetDateTime fechaContable, Integer ordenContable, AsientoInternal asientoInternalContra) {
+        if (tieneContraAsiento(fechaContable, ordenContable)) {
+            throw new ContableException(fechaContable, ordenContable);
+        }
+
+        Comprobante comprobante = comprobanteService.findByTipoTransaccionId(99);
+
+        if (comprobante == null) {
+            throw new ContableException(fechaContable, ordenContable);
+        }
+
+        List<CuentaMovimiento> cuentaMovimientos = cuentaMovimientoService.findAllByAsiento(fechaContable, ordenContable, 0, 2);
+        AsientoInternal mem = nextAsiento(asientoInternalContra.getFechaContable(), null);
+        asientoInternalContra.setOrdenContable(mem.getOrdenContable());
+
+        Asiento asiento = null;
+        try {
+            asiento = asientoService.findByAsiento(fechaContable, ordenContable);
+            asiento.setFechaContra(asientoInternalContra.getFechaContable());
+            asiento.setOrdenContra(asientoInternalContra.getOrdenContable());
+            asiento = asientoService.update(asiento, asiento.getAsientoId());
+        } catch (AsientoException e) {
+            asiento = new Asiento(null, fechaContable, ordenContable, "contraasiento", asientoInternalContra.getFechaContable(), asientoInternalContra.getOrdenContable(), null, null);
+            asiento = asientoService.add(asiento);
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String vinculo = MessageFormat.format("Contraasiento de ASIENTO {0} - {1}", fechaContable.format(formatter), ordenContable);
+        asiento = new Asiento(null, asientoInternalContra.getFechaContable(), asientoInternalContra.getOrdenContable(), vinculo, null, null, null, null);
+        asiento = asientoService.add(asiento);
+
+        for (CuentaMovimiento cuentaMovimiento : cuentaMovimientos) {
+            cuentaMovimiento.setCuentaMovimientoId(null);
+            cuentaMovimiento.setFechaContable(asientoInternalContra.getFechaContable());
+            cuentaMovimiento.setOrdenContable(asientoInternalContra.getOrdenContable());
+            cuentaMovimiento.setDebita((byte) (1 - cuentaMovimiento.getDebita()));
+            cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
+        }
+    }
+
+    private Boolean tieneContraAsiento(OffsetDateTime fechaContable, Integer ordenContable) {
+        try {
+            Asiento asiento = asientoService.findByAsiento(fechaContable, ordenContable);
+            if (asiento.getFechaContra() != null) {
+                return true;
+            }
+        } catch (AsientoException e) {
+        }
+        return false;
+    }
+
+    @Transactional
+    public void saveAsiento(OffsetDateTime fechaContable, Integer ordenContable, Long proveedorMovimientoId, String vinculo, List<CuentaMovimiento> cuentaMovimientos) {
+        Ejercicio ejercicio = ejercicioService.findByFecha(fechaContable);
+        if (ejercicio.getBloqueado() == 1) {
+            throw new EjercicioBloqueadoException(fechaContable);
+        }
+        Integer item = 0;
+
+        Asiento asiento = new Asiento(null, fechaContable, ordenContable, vinculo, null, null, null, null);
+        try {
+            log.debug("Asiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asiento));
+        } catch (JsonProcessingException e) {
+            log.debug("Asiento=JsonException");
+        }
+        asiento = asientoService.add(asiento);
+        try {
+            log.debug("Asiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asiento));
+        } catch (JsonProcessingException e) {
+            log.debug("Asiento=JsonException");
+        }
+
+        for (CuentaMovimiento cuentaMovimiento : cuentaMovimientos) {
+            try {
+                log.debug("CuentaMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+            } catch (JsonProcessingException e) {
+                log.debug("CuentaMovimiento=JsonException");
+            }
+            cuentaMovimiento.setFechaContable(fechaContable);
+            cuentaMovimiento.setOrdenContable(ordenContable);
+            cuentaMovimiento.setItem(++item);
+            cuentaMovimiento.setProveedorMovimientoId(proveedorMovimientoId);
+            try {
+                log.debug("CuentaMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+            } catch (JsonProcessingException e) {
+                log.debug("CuentaMovimiento=JsonException");
+            }
+            cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
+            try {
+                log.debug("CuentaMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+            } catch (JsonProcessingException e) {
+                log.debug("CuentaMovimiento=JsonException");
+            }
+        }
+        deleteAsientoDesde(fechaContable, ordenContable, item + 1);
+
+    }
 }

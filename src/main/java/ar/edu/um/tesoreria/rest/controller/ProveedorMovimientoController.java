@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package ar.edu.um.tesoreria.rest.controller;
 
@@ -27,33 +27,44 @@ import ar.edu.um.tesoreria.rest.service.ProveedorMovimientoService;
  *
  */
 @RestController
-@RequestMapping("/proveedormovimiento")
+@RequestMapping("/proveedorMovimiento")
 public class ProveedorMovimientoController {
 
-	@Autowired
-	private ProveedorMovimientoService service;
+    @Autowired
+    private ProveedorMovimientoService service;
 
-	@GetMapping("/eliminables/{ejercicioId}")
-	public ResponseEntity<List<ProveedorMovimiento>> findAllEliminables(@PathVariable Integer ejercicioId) {
-		return new ResponseEntity<List<ProveedorMovimiento>>(service.findAllEliminables(ejercicioId), HttpStatus.OK);
-	}
+    @GetMapping("/eliminables/{ejercicioId}")
+    public ResponseEntity<List<ProveedorMovimiento>> findAllEliminables(@PathVariable Integer ejercicioId) {
+        return new ResponseEntity<List<ProveedorMovimiento>>(service.findAllEliminables(ejercicioId), HttpStatus.OK);
+    }
 
-	@GetMapping("/asignables/{proveedorId}/{desde}/{hasta}/{geograficaId}/{todos}")
-	public ResponseEntity<List<ProveedorMovimiento>> findAllAsignables(@PathVariable Integer proveedorId,
-			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde,
-			@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta,
-			@PathVariable Integer geograficaId, @PathVariable Boolean todos) throws JsonProcessingException {
-		return new ResponseEntity<List<ProveedorMovimiento>>(
-				service.findAllAsignables(proveedorId, desde, hasta, geograficaId, todos), HttpStatus.OK);
-	}
+    @GetMapping("/asignables/{proveedorId}/{desde}/{hasta}/{geograficaId}/{todos}")
+    public ResponseEntity<List<ProveedorMovimiento>> findAllAsignables(@PathVariable Integer proveedorId,
+                                                                       @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde,
+                                                                       @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta,
+                                                                       @PathVariable Integer geograficaId, @PathVariable Boolean todos) throws JsonProcessingException {
+        return new ResponseEntity<List<ProveedorMovimiento>>(
+                service.findAllAsignables(proveedorId, desde, hasta, geograficaId, todos), HttpStatus.OK);
+    }
 
-	@GetMapping("/{proveedorMovimientoId}")
-	public ResponseEntity<ProveedorMovimiento> findByProveedorMovimientoId(@PathVariable Long proveedorMovimientoId) {
-		try {
-			return new ResponseEntity<ProveedorMovimiento>(service.findByProveedorMovimientoId(proveedorMovimientoId),
-					HttpStatus.OK);
-		} catch (ProveedorMovimientoException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-	}
+    @GetMapping("/{proveedorMovimientoId}")
+    public ResponseEntity<ProveedorMovimiento> findByProveedorMovimientoId(@PathVariable Long proveedorMovimientoId) {
+        try {
+            return new ResponseEntity<ProveedorMovimiento>(service.findByProveedorMovimientoId(proveedorMovimientoId),
+                    HttpStatus.OK);
+        } catch (ProveedorMovimientoException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping("/ordenPago/{prefijo}/{numeroComprobante}")
+    public ResponseEntity<ProveedorMovimiento> findByOrdenPago(@PathVariable Integer prefijo, @PathVariable Long numeroComprobante) {
+        try {
+            return new ResponseEntity<ProveedorMovimiento>(service.findByOrdenPago(prefijo, numeroComprobante),
+                    HttpStatus.OK);
+        } catch (ProveedorMovimientoException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
 }

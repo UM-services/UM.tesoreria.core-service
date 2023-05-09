@@ -14,23 +14,30 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.um.tesoreria.rest.service.ProveedorValorService;
 
+import java.util.List;
+
 /**
  * @author daniel
  *
  */
 @RestController
-@RequestMapping("/proveedorvalor")
+@RequestMapping("/proveedorValor")
 public class ProveedorValorController {
 
 	@Autowired
 	private ProveedorValorService service;
 
-	@GetMapping("/{proveedorValorId}")
-	public ResponseEntity<ProveedorValor> findById(@PathVariable Long proveedorValorId) {
-		return new ResponseEntity<ProveedorValor>(service.findByProveedorvalorId(proveedorValorId), HttpStatus.OK);
+	@GetMapping("/proveedorMovimiento/{proveedorMovimientoId}")
+	public ResponseEntity<List<ProveedorValor>> findAllByProveedorMovimientoId(@PathVariable Long proveedorMovimientoId) {
+		return new ResponseEntity<List<ProveedorValor>>(service.findAllByProveedorMovimientoId(proveedorMovimientoId), HttpStatus.OK);
 	}
 
-	@GetMapping("/valormovimiento/{valorMovimientoId}")
+	@GetMapping("/{proveedorValorId}")
+	public ResponseEntity<ProveedorValor> findByProveedorValorId(@PathVariable Long proveedorValorId) {
+		return new ResponseEntity<ProveedorValor>(service.findByProveedorValorId(proveedorValorId), HttpStatus.OK);
+	}
+
+	@GetMapping("/valorMovimiento/{valorMovimientoId}")
 	public ResponseEntity<ProveedorValor> findByValorMovimientoId(@PathVariable Long valorMovimientoId) {
 		return new ResponseEntity<ProveedorValor>(service.findByValorMovimientoId(valorMovimientoId), HttpStatus.OK);
 	}

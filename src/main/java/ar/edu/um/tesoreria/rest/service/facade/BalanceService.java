@@ -31,7 +31,7 @@ import ar.edu.um.tesoreria.rest.exception.ProveedorValorException;
 import ar.edu.um.tesoreria.rest.exception.ValorMovimientoException;
 import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.model.Ejercicio;
-import ar.edu.um.tesoreria.rest.repository.ValorNotFoundExcepcion;
+import ar.edu.um.tesoreria.rest.exception.ValorException;
 import ar.edu.um.tesoreria.rest.service.ComprobanteService;
 import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;
 import ar.edu.um.tesoreria.rest.service.CuentaService;
@@ -269,7 +269,7 @@ public class BalanceService {
 				log.debug("Sin Pago");
 			} catch (ProveedorMovimientoException e) {
 				log.debug("Sin Orden Pago");
-			} catch (ValorNotFoundExcepcion e) {
+			} catch (ValorException e) {
 				log.debug("Sin Tipo");
 			}
 		}

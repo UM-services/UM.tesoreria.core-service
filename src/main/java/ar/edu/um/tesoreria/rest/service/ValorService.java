@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.repository.IValorRepository;
-import ar.edu.um.tesoreria.rest.repository.ValorNotFoundExcepcion;
+import ar.edu.um.tesoreria.rest.exception.ValorException;
 
 /**
  * @author daniel
@@ -27,7 +27,7 @@ public class ValorService {
 	}
 
 	public Valor findByValorId(Integer valorId) {
-		return repository.findByValorId(valorId).orElseThrow(() -> new ValorNotFoundExcepcion(valorId));
+		return repository.findByValorId(valorId).orElseThrow(() -> new ValorException(valorId));
 	}
 
 }

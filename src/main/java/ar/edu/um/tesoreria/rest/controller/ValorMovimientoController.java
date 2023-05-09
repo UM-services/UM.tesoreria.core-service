@@ -3,6 +3,7 @@
  */
 package ar.edu.um.tesoreria.rest.controller;
 
+import ar.edu.um.tesoreria.rest.exception.ValorMovimientoException;
 import ar.edu.um.tesoreria.rest.kotlin.model.ValorMovimiento;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,20 +14,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ar.edu.um.tesoreria.rest.service.ValorMovimientoService;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
 
 /**
  * @author daniel
  *
  */
 @RestController
-@RequestMapping("/valormovimiento")
+@RequestMapping("/valorMovimiento")
 public class ValorMovimientoController {
+
 	@Autowired
 	private ValorMovimientoService service;
 	
-	@GetMapping("/numero/{valorID}/{numero}")
-	public ResponseEntity<ValorMovimiento> findByNumero(@PathVariable Integer valorID, @PathVariable Long numero) {
-		return new ResponseEntity<ValorMovimiento>(service.findByNumero(valorID, numero), HttpStatus.OK);
+	@GetMapping("/numero/{valorId}/{numero}")
+	public ResponseEntity<ValorMovimiento> findByNumero(@PathVariable Integer valorId, @PathVariable Long numero) {
+		try {
+			return new ResponseEntity<ValorMovimiento>(service.findByNumero(valorId, numero), HttpStatus.OK);
+		} catch (ValorMovimientoException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+	}
+
+	@GetMapping("/banco/{valorId}/{numero}/{bancariaId}")
+	public ResponseEntity<ValorMovimiento> findByBanco(@PathVariable Integer valorId, @PathVariable Long numero, @PathVariable Long bancariaId) {
+		try {
+			return new ResponseEntity<ValorMovimiento>(service.findByBanco(valorId, numero, bancariaId), HttpStatus.OK);
+		} catch (ValorMovimientoException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
 	}
 
 }

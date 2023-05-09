@@ -2,12 +2,7 @@ package ar.edu.um.tesoreria.rest.kotlin.model
 
 import ar.edu.um.tesoreria.rest.model.Auditable
 import com.fasterxml.jackson.annotation.JsonFormat
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -31,7 +26,7 @@ data class ValorMovimiento(
     var numero: Long = 0L,
 
     @Column(name = "val_cuentaorigen")
-    var cuentaOrigen: Long? = null,
+    var bancariaIdOrigen: Long? = null,
 
     @Column(name = "val_fechaefectivizacion")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
@@ -66,5 +61,13 @@ data class ValorMovimiento(
 
     @Column(name = "val_letras")
     var letras: String = "",
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "val_tiv_id", referencedColumnName = "tiv_id", insertable = false, updatable = false)
+    var valor: Valor? = null,
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "val_cuentaorigen", referencedColumnName = "cub_id", insertable = false, updatable = false)
+    var bancaria: Bancaria? = null,
 
     ) : Auditable()
