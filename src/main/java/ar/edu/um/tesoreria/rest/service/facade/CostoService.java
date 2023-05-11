@@ -256,4 +256,15 @@ public class CostoService {
         return true;
     }
 
+    @Transactional
+    public void recalcularAsignado(Long proveedorArticuloId) {
+        ProveedorArticulo proveedorArticulo = proveedorArticuloService.findByProveedorArticuloId(proveedorArticuloId);
+        BigDecimal asignado = BigDecimal.ZERO;
+        for (EntregaDetalle entregaDetalle : entregaDetalleService.findAllByProveedorMovimientoIdAndOrden(proveedorArticulo.getProveedorMovimientoId(), proveedorArticulo.getOrden())) {
+            asignado = asignado.add(entregaDetalle.getCantidad()).setScale(2, RoundingMode.HALF_UP);
+        }
+        proveedorArticulo.setAsignado(asignado);
+        proveedorArticulo = proveedorArticuloService.update(proveedorArticulo, proveedorArticuloId);
+    }
+
 }

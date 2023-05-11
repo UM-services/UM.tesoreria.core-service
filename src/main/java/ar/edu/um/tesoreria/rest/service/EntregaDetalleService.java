@@ -36,6 +36,10 @@ public class EntregaDetalleService {
 		return repository.findAllByEntregaIdOrderByOrden(entregaId);
 	}
 
+	public List<EntregaDetalle> findAllByProveedorMovimientoIdAndOrden(Long proveedorMovimientoId, Integer orden) {
+		return repository.findAllByProveedorMovimientoIdAndOrden(proveedorMovimientoId, orden);
+	}
+
 	public EntregaDetalle findByEntregaDetalleId(Long entregaDetalleId) {
 		return repository.findByEntregaDetalleId(entregaDetalleId)
 				.orElseThrow(() -> new EntregaDetalleException(entregaDetalleId));

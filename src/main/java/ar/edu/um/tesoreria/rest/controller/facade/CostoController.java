@@ -42,4 +42,11 @@ public class CostoController {
         return new ResponseEntity<Boolean>(service.depurarGastosProveedor(proveedorId, geograficaId), HttpStatus.OK);
     }
 
+    @GetMapping("/recalcularAsignado/{proveedorArticuloId}")
+    public ResponseEntity<Void> recalcularAsignado(@PathVariable Long proveedorArticuloId) {
+        log.debug("Recalcular Asignado {}", proveedorArticuloId);
+        service.recalcularAsignado(proveedorArticuloId);
+        return new ResponseEntity<Void>(HttpStatus.OK);
+    }
+
 }

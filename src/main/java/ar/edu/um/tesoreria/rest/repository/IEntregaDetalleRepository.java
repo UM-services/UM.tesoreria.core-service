@@ -24,6 +24,8 @@ public interface IEntregaDetalleRepository extends JpaRepository<EntregaDetalle,
 
 	public List<EntregaDetalle> findAllByEntregaIdOrderByOrden(Long entregaId);
 
+	public List<EntregaDetalle> findAllByProveedorMovimientoIdAndOrden(Long proveedorMovimientoId, Integer orden);
+
 	public Optional<EntregaDetalle> findByEntregaDetalleId(Long entregaDetalleId);
 
 	@Modifying
