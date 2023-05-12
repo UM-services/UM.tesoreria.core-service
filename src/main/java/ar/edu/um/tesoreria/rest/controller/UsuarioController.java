@@ -3,6 +3,7 @@
  */
 package ar.edu.um.tesoreria.rest.controller;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.UsuarioException;
-import ar.edu.um.tesoreria.rest.model.Usuario;
 import ar.edu.um.tesoreria.rest.service.UsuarioService;
 
 /**
@@ -30,10 +30,10 @@ public class UsuarioController {
 	@Autowired
 	private UsuarioService service;
 
-	@GetMapping("/usuario/{usuarioId}")
-	public ResponseEntity<Usuario> findByUsuarioId(@PathVariable String usuarioId) {
+	@GetMapping("/usuario/{login}")
+	public ResponseEntity<Usuario> findByLogin(@PathVariable String login) {
 		try {
-			return new ResponseEntity<Usuario>(service.findByUsuarioId(usuarioId), HttpStatus.OK);
+			return new ResponseEntity<Usuario>(service.findByLogin(login), HttpStatus.OK);
 		} catch (UsuarioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -44,9 +44,9 @@ public class UsuarioController {
 		return new ResponseEntity<Usuario>(service.add(usuario), HttpStatus.OK);
 	}
 
-	@PutMapping("/usuario/{usuarioId}")
-	public ResponseEntity<Usuario> update(@RequestBody Usuario usuario, @PathVariable String usuarioId) {
-		return new ResponseEntity<Usuario>(service.update(usuario, usuarioId), HttpStatus.OK);
+	@PutMapping("/usuario/{userId}")
+	public ResponseEntity<Usuario> update(@RequestBody Usuario usuario, @PathVariable Long userId) {
+		return new ResponseEntity<Usuario>(service.update(usuario, userId), HttpStatus.OK);
 	}
 
 	@PutMapping("/password")
@@ -58,10 +58,10 @@ public class UsuarioController {
 		}
 	}
 
-	@GetMapping("/lastLog/{usuarioId}")
-	public ResponseEntity<Usuario> updateLastLog(@PathVariable String usuarioId) {
+	@GetMapping("/lastLog/{userId}")
+	public ResponseEntity<Usuario> updateLastLog(@PathVariable Long userId) {
 		try {
-			return new ResponseEntity<Usuario>(service.updateLastLog(usuarioId), HttpStatus.OK);
+			return new ResponseEntity<Usuario>(service.updateLastLog(userId), HttpStatus.OK);
 		} catch (UsuarioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}

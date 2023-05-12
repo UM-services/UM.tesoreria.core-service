@@ -4,21 +4,23 @@
 package ar.edu.um.tesoreria.rest.repository;
 
 import java.util.Optional;
+import java.util.stream.DoubleStream;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import ar.edu.um.tesoreria.rest.model.Usuario;
 
 /**
  * @author daniel
  *
  */
 @Repository
-public interface IUsuarioRepository extends JpaRepository<Usuario, String> {
+public interface IUsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	public Optional<Usuario> findByPassword(String password);
 
-	public Optional<Usuario> findByUsuarioId(String usuarioId);
+	public Optional<Usuario> findByLogin(String login);
+
+	public Optional<Usuario> findByUserId(Long userId);
 
 }

@@ -15,8 +15,12 @@ public class UsuarioException extends RuntimeException {
 		super("Cannot find Usuario by Password");
 	}
 
-	public UsuarioException(String usuarioId) {
-		super("Cannot find Usuario " + usuarioId);
+	public UsuarioException(String login) {
+		super("Cannot find Usuario " + login);
+	}
+
+	public UsuarioException(Long userId) {
+		super("Cannot find Usuario + " + userId);
 	}
 
 }
