@@ -5,11 +5,10 @@ package ar.edu.um.tesoreria.rest.repository;
 
 import java.util.Optional;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Contratado;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
-
-import ar.edu.um.tesoreria.rest.model.Contratado;
 
 /**
  * @author daniel

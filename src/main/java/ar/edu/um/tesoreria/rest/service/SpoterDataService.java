@@ -5,11 +5,11 @@ package ar.edu.um.tesoreria.rest.service;
 
 import java.math.BigDecimal;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.SpoterData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.SpoterDataException;
-import ar.edu.um.tesoreria.rest.model.SpoterData;
 import ar.edu.um.tesoreria.rest.repository.ISpoterDataRepository;
 
 /**
@@ -23,7 +23,7 @@ public class SpoterDataService {
 	private ISpoterDataRepository repository;
 
 	public SpoterData findExistentRequest(BigDecimal personaId, Integer documentoId, Integer facultadId,
-			Integer geograficaId, Integer lectivoId) {
+										  Integer geograficaId, Integer lectivoId) {
 		return repository
 				.findTopByPersonaIdAndDocumentoIdAndFacultadIdAndGeograficaIdAndLectivoId(personaId, documentoId,
 						facultadId, geograficaId, lectivoId)

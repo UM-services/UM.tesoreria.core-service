@@ -1,5 +1,7 @@
-package ar.edu.um.tesoreria.rest.model
+package ar.edu.um.tesoreria.rest.kotlin.model
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Cuenta
+import ar.edu.um.tesoreria.rest.model.Auditable
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import jakarta.persistence.Id
@@ -7,6 +9,7 @@ import jakarta.persistence.Column
 import java.math.BigDecimal
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import org.hibernate.Hibernate
 
 @Entity
 @Table(name = "articulos")

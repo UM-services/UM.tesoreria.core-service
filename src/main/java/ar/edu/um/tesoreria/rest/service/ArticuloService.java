@@ -6,11 +6,11 @@ package ar.edu.um.tesoreria.rest.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Articulo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.ArticuloException;
-import ar.edu.um.tesoreria.rest.model.Articulo;
 import ar.edu.um.tesoreria.rest.model.view.ArticuloKey;
 import ar.edu.um.tesoreria.rest.repository.IArticuloRepository;
 import ar.edu.um.tesoreria.rest.service.view.ArticuloKeyService;

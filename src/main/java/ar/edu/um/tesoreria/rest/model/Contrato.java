@@ -7,7 +7,9 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Contratado;
 import ar.edu.um.tesoreria.rest.kotlin.model.Facultad;
+import ar.edu.um.tesoreria.rest.kotlin.model.Geografica;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

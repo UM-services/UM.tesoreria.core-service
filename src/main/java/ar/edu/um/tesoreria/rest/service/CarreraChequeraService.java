@@ -5,11 +5,11 @@ package ar.edu.um.tesoreria.rest.service;
 
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.CarreraChequera;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.CarreraChequeraException;
-import ar.edu.um.tesoreria.rest.model.CarreraChequera;
 import ar.edu.um.tesoreria.rest.repository.ICarreraChequeraRepository;
 
 /**
@@ -23,7 +23,7 @@ public class CarreraChequeraService {
 	private ICarreraChequeraRepository repository;
 
 	public List<CarreraChequera> findAllByFacultadIdAndLectivoIdAndGeograficaIdAndClaseChequeraIdAndCurso(Integer facultadId,
-			Integer lectivoId, Integer geograficaId, Integer claseChequeraId, Integer curso) {
+																										  Integer lectivoId, Integer geograficaId, Integer claseChequeraId, Integer curso) {
 		return repository.findAllByFacultadIdAndLectivoIdAndGeograficaIdAndClaseChequeraIdAndCurso(facultadId,
 				lectivoId, geograficaId, claseChequeraId, curso);
 	}

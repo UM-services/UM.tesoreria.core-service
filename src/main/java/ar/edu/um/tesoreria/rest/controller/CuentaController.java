@@ -6,6 +6,7 @@ package ar.edu.um.tesoreria.rest.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Cuenta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.CuentaException;
-import ar.edu.um.tesoreria.rest.model.Cuenta;
 import ar.edu.um.tesoreria.rest.model.view.CuentaSearch;
 import ar.edu.um.tesoreria.rest.service.CuentaService;
 

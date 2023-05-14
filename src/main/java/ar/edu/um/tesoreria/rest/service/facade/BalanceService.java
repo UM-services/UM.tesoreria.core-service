@@ -29,8 +29,6 @@ import org.springframework.stereotype.Service;
 import ar.edu.um.tesoreria.rest.exception.ProveedorMovimientoException;
 import ar.edu.um.tesoreria.rest.exception.ProveedorValorException;
 import ar.edu.um.tesoreria.rest.exception.ValorMovimientoException;
-import ar.edu.um.tesoreria.rest.model.Cuenta;
-import ar.edu.um.tesoreria.rest.model.Ejercicio;
 import ar.edu.um.tesoreria.rest.exception.ValorException;
 import ar.edu.um.tesoreria.rest.service.ComprobanteService;
 import ar.edu.um.tesoreria.rest.service.CuentaMovimientoService;

@@ -56,8 +56,6 @@ import ar.edu.um.tesoreria.rest.extern.model.view.PreunivMatricResumenFacultad;
 import ar.edu.um.tesoreria.rest.extern.model.view.PreunivResumenFacultad;
 import ar.edu.um.tesoreria.rest.kotlin.model.ArancelTipo;
 import ar.edu.um.tesoreria.rest.model.ContratoPeriodo;
-import ar.edu.um.tesoreria.rest.model.Ejercicio;
-import ar.edu.um.tesoreria.rest.model.Geografica;
 import ar.edu.um.tesoreria.rest.model.IngresoAsiento;
 import ar.edu.um.tesoreria.rest.model.Legajo;
 import ar.edu.um.tesoreria.rest.model.PersonaSuspendido;

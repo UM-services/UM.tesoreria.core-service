@@ -5,6 +5,7 @@ package ar.edu.um.tesoreria.rest.controller;
 
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.CarreraChequera;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.CarreraChequeraException;
-import ar.edu.um.tesoreria.rest.model.CarreraChequera;
 import ar.edu.um.tesoreria.rest.service.CarreraChequeraService;
 
 /**
@@ -34,8 +34,8 @@ public class CarreraChequeraController {
 
 	@GetMapping("/curso/{facultadId}/{lectivoId}/{geograficaId}/{claseChequeraId}/{curso}")
 	public ResponseEntity<List<CarreraChequera>> findAllByCurso(@PathVariable Integer facultadId,
-			@PathVariable Integer lectivoId, @PathVariable Integer geograficaId, @PathVariable Integer claseChequeraId,
-			@PathVariable Integer curso) {
+																@PathVariable Integer lectivoId, @PathVariable Integer geograficaId, @PathVariable Integer claseChequeraId,
+																@PathVariable Integer curso) {
 		return new ResponseEntity<List<CarreraChequera>>(
 				service.findAllByFacultadIdAndLectivoIdAndGeograficaIdAndClaseChequeraIdAndCurso(facultadId, lectivoId,
 						geograficaId, claseChequeraId, curso),

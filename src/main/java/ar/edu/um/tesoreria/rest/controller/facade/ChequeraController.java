@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.SpoterData;
 import ar.edu.um.tesoreria.rest.kotlin.model.dto.PreuniversitarioData;
 import jakarta.mail.MessagingException;
 
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ar.edu.um.tesoreria.rest.model.SpoterData;
 import ar.edu.um.tesoreria.rest.kotlin.model.dto.SpoterDataResponse;
 import ar.edu.um.tesoreria.rest.service.facade.ChequeraService;
 import ar.edu.um.tesoreria.rest.service.facade.FormulariosToPdfService;

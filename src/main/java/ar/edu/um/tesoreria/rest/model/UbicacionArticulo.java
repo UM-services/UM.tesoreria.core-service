@@ -6,6 +6,9 @@ package ar.edu.um.tesoreria.rest.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Articulo;
+import ar.edu.um.tesoreria.rest.kotlin.model.Cuenta;
+import ar.edu.um.tesoreria.rest.kotlin.model.Ubicacion;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

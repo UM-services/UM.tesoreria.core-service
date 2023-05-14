@@ -1,7 +1,6 @@
 package ar.edu.um.tesoreria.rest.kotlin.model
 
 import ar.edu.um.tesoreria.rest.model.Auditable
-import ar.edu.um.tesoreria.rest.model.Geografica
 import jakarta.persistence.*
 
 @Entity

@@ -7,12 +7,12 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Articulo;
 import ar.edu.um.tesoreria.rest.kotlin.model.Comprobante;
 import ar.edu.um.tesoreria.rest.kotlin.model.ProveedorArticulo;
 import ar.edu.um.tesoreria.rest.kotlin.model.ProveedorMovimiento;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import ar.edu.um.tesoreria.rest.model.Articulo;
 import ar.edu.um.tesoreria.rest.model.UbicacionArticulo;
 import lombok.AllArgsConstructor;
 import lombok.Data;

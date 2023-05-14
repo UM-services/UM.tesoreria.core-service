@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import ar.edu.um.tesoreria.rest.kotlin.model.ArancelTipo;
 import ar.edu.um.tesoreria.rest.model.Auditable;
-import ar.edu.um.tesoreria.rest.model.Geografica;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

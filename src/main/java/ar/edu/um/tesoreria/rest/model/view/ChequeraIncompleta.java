@@ -20,7 +20,6 @@ import org.hibernate.annotations.Immutable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import ar.edu.um.tesoreria.rest.kotlin.model.ArancelTipo;
-import ar.edu.um.tesoreria.rest.model.Geografica;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

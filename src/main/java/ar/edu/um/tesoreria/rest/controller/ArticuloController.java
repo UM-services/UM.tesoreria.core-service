@@ -5,6 +5,7 @@ package ar.edu.um.tesoreria.rest.controller;
 
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Articulo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import ar.edu.um.tesoreria.rest.exception.ArticuloException;
-import ar.edu.um.tesoreria.rest.model.Articulo;
 import ar.edu.um.tesoreria.rest.model.view.ArticuloKey;
 import ar.edu.um.tesoreria.rest.service.ArticuloService;
 

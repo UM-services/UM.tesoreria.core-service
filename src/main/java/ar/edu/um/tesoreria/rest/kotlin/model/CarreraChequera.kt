@@ -1,5 +1,6 @@
-package ar.edu.um.tesoreria.rest.model
+package ar.edu.um.tesoreria.rest.kotlin.model
 
+import ar.edu.um.tesoreria.rest.model.Auditable
 import jakarta.persistence.Id
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType

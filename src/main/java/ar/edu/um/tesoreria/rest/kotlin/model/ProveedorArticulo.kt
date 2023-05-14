@@ -1,6 +1,5 @@
 package ar.edu.um.tesoreria.rest.kotlin.model
 
-import ar.edu.um.tesoreria.rest.model.Articulo
 import ar.edu.um.tesoreria.rest.model.Auditable
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

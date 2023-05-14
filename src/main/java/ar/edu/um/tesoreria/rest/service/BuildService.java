@@ -3,11 +3,11 @@
  */
 package ar.edu.um.tesoreria.rest.service;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Build;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.BuildException;
-import ar.edu.um.tesoreria.rest.model.Build;
 import ar.edu.um.tesoreria.rest.repository.IBuildRepository;
 import lombok.extern.slf4j.Slf4j;
 

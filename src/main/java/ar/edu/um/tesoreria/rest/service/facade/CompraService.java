@@ -5,8 +5,6 @@ import ar.edu.um.tesoreria.rest.exception.ProveedorValorException;
 import ar.edu.um.tesoreria.rest.exception.facade.ContableException;
 import ar.edu.um.tesoreria.rest.kotlin.model.*;
 import ar.edu.um.tesoreria.rest.kotlin.model.internal.AsientoInternal;
-import ar.edu.um.tesoreria.rest.model.Cuenta;
-import ar.edu.um.tesoreria.rest.model.Ejercicio;
 import ar.edu.um.tesoreria.rest.model.Proveedor;
 import ar.edu.um.tesoreria.rest.service.*;
 import ar.edu.um.tesoreria.rest.util.Tool;

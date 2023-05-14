@@ -6,12 +6,12 @@ package ar.edu.um.tesoreria.rest.service;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import ar.edu.um.tesoreria.rest.kotlin.model.Ejercicio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import ar.edu.um.tesoreria.rest.exception.EjercicioException;
-import ar.edu.um.tesoreria.rest.model.Ejercicio;
 import ar.edu.um.tesoreria.rest.repository.IEjercicioRepository;
 
 /**
