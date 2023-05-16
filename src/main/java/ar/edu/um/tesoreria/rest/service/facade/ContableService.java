@@ -146,7 +146,12 @@ public class ContableService {
                 throw new EjercicioBloqueadoException(fechaContable);
             }
 
-            Asiento asiento = asientoService.findByAsiento(fechaContable, ordenContable);
+            Asiento asiento = null;
+            try {
+                asiento = asientoService.findByAsiento(fechaContable, ordenContable);
+            } catch (AsientoException e) {
+
+            }
             if (asiento != null) {
                 asientoService.deleteByAsientoId(asiento.getAsientoId());
             }
