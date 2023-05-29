@@ -1,4 +1,4 @@
-FROM maven:3.8.7-eclipse-temurin-17-alpine as build
+FROM maven:3.9.2-eclipse-temurin-17-alpine as build
 ENV HOME=/usr/app
 RUN mkdir -p $HOME
 WORKDIR $HOME

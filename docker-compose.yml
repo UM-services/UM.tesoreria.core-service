@@ -15,14 +15,6 @@ services:
             - MYSQL_ROOT_PASSWORD=root
             - TZ=America/Argentina/Mendoza
 
-    phpmyadmin:
-        image: phpmyadmin
-        restart: always
-        ports:
-            - 8292:80
-        environment:
-            - PMA_HOST=mysql
-
     tesoreria:
         build: .
         ports:
