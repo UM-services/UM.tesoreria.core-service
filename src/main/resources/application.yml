@@ -1,5 +1,5 @@
 app:
-  server: 10.147.20.20:3306
+  server: 127.0.0.1:3306
   database: tesium
   user: root
   password: root
