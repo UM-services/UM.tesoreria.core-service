@@ -2,15 +2,7 @@ package um.tesoreria.rest.kotlin.model
 
 import um.tesoreria.rest.model.Auditable
 import com.fasterxml.jackson.annotation.JsonFormat
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToOne
-import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
+import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -115,7 +107,7 @@ data class ChequeraCuota(
     @JoinColumn(name = "arancelTipoId", insertable = false, updatable = false)
     var arancelTipo: ArancelTipo? = null,
 
-    ) : Auditable() {
+) : Auditable() {
     fun cuotaKey(): String {
         return (this.facultadId.toString() + "." + this.tipoChequeraId + "." + this.chequeraSerieId + "." + this.productoId + "."
                 + this.alternativaId + "." + this.cuotaId)

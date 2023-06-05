@@ -53,7 +53,7 @@ spring:
 
 logging:
   level:
-    ar.edu.um.tesoreria.rest: debug
+    um.tesoreria.rest: debug
     web: ${app.logging}
     org:
       hibernate:

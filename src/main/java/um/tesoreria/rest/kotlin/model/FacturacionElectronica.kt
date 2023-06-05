@@ -31,8 +31,10 @@ data class FacturacionElectronica(
     var condicionIva: String = "",
     var importe: BigDecimal = BigDecimal.ZERO,
     var cae: String? = null,
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
     var fechaRecibo: OffsetDateTime? = null,
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
     var fechaVencimientoCae: OffsetDateTime? = null,
     var enviada: Byte = 0,
@@ -44,6 +46,6 @@ data class FacturacionElectronica(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "comprobanteId", insertable = false, updatable = false)
-    var comprobante: Comprobante? = null,
+    var comprobante: Comprobante? = null
 
-    ) : Auditable()
+) : Auditable()

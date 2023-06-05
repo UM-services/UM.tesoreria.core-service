@@ -6,11 +6,13 @@ package um.tesoreria.rest.controller.facade;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -178,6 +180,20 @@ public class SheetController {
 		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=contratados.xlsx");
+		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+		headers.add("Pragma", "no-cache");
+		headers.add("Expires", "0");
+		return ResponseEntity.ok().headers(headers).contentLength(file.length())
+				.contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+	}
+
+	@GetMapping("/generateLibroIva/{fechaDesde}/{fechaHasta}")
+	public ResponseEntity<Resource> generateLibroIva(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaDesde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaHasta) throws FileNotFoundException {
+		String filename = service.generateLibroIva(fechaDesde, fechaHasta);
+		File file = new File(filename);
+		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=libro.xlsx");
 		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
 		headers.add("Pragma", "no-cache");
 		headers.add("Expires", "0");

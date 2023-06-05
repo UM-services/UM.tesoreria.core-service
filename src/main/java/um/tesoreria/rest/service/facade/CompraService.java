@@ -148,25 +148,45 @@ public class CompraService {
 
     @Transactional
     public void deleteValor(Long valorMovimientoId) {
+        log.debug("Iniciando");
         ValorMovimiento valorMovimiento = valorMovimientoService.findByValorMovimientoId(valorMovimientoId);
+        try {
+            log.debug("ValorMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valorMovimiento));
+        } catch (JsonProcessingException e) {
+            log.debug("Sin Valor Movimiento");
+        }
         OffsetDateTime fechaContable = valorMovimiento.getFechaContable();
         Integer ordenContable = valorMovimiento.getOrdenContable();
 
         for (ProveedorValor proveedorValor : proveedorValorService.findAllByValorMovimientoId(valorMovimientoId)) {
+            try {
+                log.debug("ProveedorValor={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorValor));
+            } catch (JsonProcessingException e) {
+                log.debug("Sin Proveedor Valor");
+            }
             proveedorValorService.deleteByProveedorValorId(proveedorValor.getProveedorValorId());
+            log.debug("Eliminado Proveedor Valor");
         }
 
         try {
             BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimientoId);
+            try {
+                log.debug("BancoMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(bancoMovimiento));
+            } catch (JsonProcessingException e) {
+                log.debug("Sin Banco Movimiento");
+            }
             bancoMovimientoService.deleteByBancoMovimientoId(bancoMovimiento.getBancoMovimientoId());
+            log.debug("BancoMovimiento eliminado");
         } catch (BancoMovimientoException e) {
 
         }
 
         valorMovimientoService.deleteByValorMovimientoId(valorMovimientoId);
+        log.debug("ValorMovimiento eliminado");
 
         if (fechaContable != null) {
             contableService.deleteAsiento(fechaContable, ordenContable);
+            log.debug("Asiento contable eliminado");
         }
 
     }

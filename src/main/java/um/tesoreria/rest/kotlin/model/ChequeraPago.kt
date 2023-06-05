@@ -90,9 +90,9 @@ data class ChequeraPago(
         JoinColumn(name = "chp_pro_id", referencedColumnName = "chc_pro_id", insertable = false, updatable = false),
         JoinColumn(name = "chp_cuo_id", referencedColumnName = "chc_cuo_id", insertable = false, updatable = false),
     )
-    var chequeraCuota: ChequeraCuota? = null,
+    var chequeraCuota: ChequeraCuota? = null
 
-    ) : Auditable() {
+) : Auditable() {
 
     fun getCuotaKey(): String {
         return (this.facultadId.toString() + "." + this.tipoChequeraId + "." + this.chequeraSerieId + "." + this.productoId + "."

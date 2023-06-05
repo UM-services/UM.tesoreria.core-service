@@ -141,8 +141,15 @@ public class ContableService {
     public Boolean deleteAsientoDesde(OffsetDateTime fechaContable, Integer ordenContable, Integer item) {
 
         try {
+            log.debug("FechaContable={}", fechaContable);
             Ejercicio ejercicio = ejercicioService.findByFecha(fechaContable);
+            try {
+                log.debug("Ejercicio={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(ejercicio));
+            } catch (JsonProcessingException e) {
+                log.debug("Sin Ejercicio");
+            }
             if (ejercicio.getBloqueado() == 1) {
+                log.debug("Ejercicio bloqueado");
                 throw new EjercicioBloqueadoException(fechaContable);
             }
 
