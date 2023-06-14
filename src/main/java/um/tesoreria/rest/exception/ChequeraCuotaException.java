@@ -25,4 +25,8 @@ public class ChequeraCuotaException extends RuntimeException {
 				chequeraSerieId, productoId, alternativaId, cuotaId));
 	}
 
+    public ChequeraCuotaException(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
+		super(MessageFormat.format("Cannot find ChequeraCuota {0}/{1}/{2}/{3}", facultadId, tipoChequeraId,
+				chequeraSerieId, alternativaId));
+    }
 }

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.rest.repository;
+package um.tesoreria.rest.exception;
 
 import java.text.MessageFormat;
 

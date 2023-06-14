@@ -6,7 +6,7 @@ package um.tesoreria.rest.service.facade;
 import um.tesoreria.rest.kotlin.model.*;
 import um.tesoreria.rest.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.rest.model.dto.AsignacionCosto;
-import um.tesoreria.rest.repository.EntregaDetalleException;
+import um.tesoreria.rest.exception.EntregaDetalleException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Resource;
@@ -14,8 +14,6 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.rest.exception.*;
-import um.tesoreria.rest.model.dto.AsignacionCosto;
-import um.tesoreria.rest.repository.EntregaDetalleException;
 import um.tesoreria.rest.service.*;
 
 import java.math.BigDecimal;

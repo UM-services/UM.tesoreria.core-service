@@ -14,6 +14,8 @@ services:
         environment:
             - MYSQL_ROOT_PASSWORD=root
             - TZ=America/Argentina/Mendoza
+        networks:
+            - tesoreria
 
 #    tesoreria:
 #        build: .
@@ -34,3 +36,23 @@ services:
 #            APP_OPEN-IN-VIEW: "false"
 #            APP_MAIL_USERNAME: envios@um.edu.ar
 #            APP_MAIL_PASSWORD: 4Siby2KPwWIStCyX9gLB
+#        networks:
+#            - tesoreria
+
+    cloudbeaver:
+        image: dbeaver/cloudbeaver:latest
+        restart: always
+        ports:
+            - '8978:8978'
+        volumes:
+            - cloudbeaver:/opt/cloudbeaver/workspace
+        networks:
+            - tesoreria
+
+
+volumes:
+    data:
+    cloudbeaver:
+
+networks:
+    tesoreria:

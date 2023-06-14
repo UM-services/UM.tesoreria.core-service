@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.rest.kotlin.model.EntregaDetalle;
-import um.tesoreria.rest.repository.EntregaDetalleException;
-import um.tesoreria.rest.repository.IEntregaDetalleRepository;
-import um.tesoreria.rest.repository.EntregaDetalleException;
+import um.tesoreria.rest.exception.EntregaDetalleException;
 import um.tesoreria.rest.repository.IEntregaDetalleRepository;
 
 /**

@@ -71,7 +71,7 @@ public class ChequeraCuotaController {
                                                       @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId, @PathVariable Integer productoId,
                                                       @PathVariable Integer alternativaId, @PathVariable Integer cuotaId) {
         try {
-            return new ResponseEntity<ChequeraCuota>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId,
+            return new ResponseEntity<>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId,
                     productoId, alternativaId, cuotaId), HttpStatus.OK);
         } catch (ChequeraCuotaException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

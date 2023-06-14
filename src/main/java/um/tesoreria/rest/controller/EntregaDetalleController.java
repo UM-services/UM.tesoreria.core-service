@@ -17,9 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.rest.kotlin.model.EntregaDetalle;
-import um.tesoreria.rest.repository.EntregaDetalleException;
+import um.tesoreria.rest.exception.EntregaDetalleException;
 import um.tesoreria.rest.service.EntregaDetalleService;
-import um.tesoreria.rest.repository.EntregaDetalleException;
 
 /**
  * @author daniel
