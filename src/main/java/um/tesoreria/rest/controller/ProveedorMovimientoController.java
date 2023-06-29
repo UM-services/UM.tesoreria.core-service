@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import um.tesoreria.rest.exception.ProveedorMovimientoException;
 import um.tesoreria.rest.service.ProveedorMovimientoService;
-import um.tesoreria.rest.kotlin.model.ProveedorMovimiento;
 
 /**
  * @author daniel
@@ -61,8 +60,17 @@ public class ProveedorMovimientoController {
     @GetMapping("/ordenPago/{prefijo}/{numeroComprobante}")
     public ResponseEntity<ProveedorMovimiento> findByOrdenPago(@PathVariable Integer prefijo, @PathVariable Long numeroComprobante) {
         try {
-            return new ResponseEntity<ProveedorMovimiento>(service.findByOrdenPago(prefijo, numeroComprobante),
+            return new ResponseEntity<>(service.findByOrdenPago(prefijo, numeroComprobante),
                     HttpStatus.OK);
+        } catch (ProveedorMovimientoException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping("/lastOrdenPago/{prefijo}")
+    public ResponseEntity<ProveedorMovimiento> findLastOrdenPago(@PathVariable Integer prefijo) {
+        try {
+            return new ResponseEntity<>(service.findLastOrdenPago(prefijo), HttpStatus.OK);
         } catch (ProveedorMovimientoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }

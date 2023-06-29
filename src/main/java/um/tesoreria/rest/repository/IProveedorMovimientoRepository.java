@@ -46,7 +46,7 @@ public interface IProveedorMovimientoRepository extends JpaRepository<ProveedorM
 
 	public Optional<ProveedorMovimiento> findByProveedorMovimientoId(Long proveedorMovimientoId);
 
-	public Optional<ProveedorMovimiento> findByPrefijoAndNumeroComprobante(Integer prefijo, Long numeroComprobante);
+	public Optional<ProveedorMovimiento> findByPrefijoAndNumeroComprobanteAndComprobanteIdIn(Integer prefijo, Long numeroComprobante, List<Integer> comprobanteIds);
 
 	@Modifying
     public void deleteByProveedorMovimientoId(Long proveedorMovimientoId);

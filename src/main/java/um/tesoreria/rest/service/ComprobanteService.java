@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.rest.service;
 
@@ -21,24 +21,32 @@ import um.tesoreria.rest.repository.IComprobanteRepository;
 @Service
 public class ComprobanteService {
 
-	@Autowired
-	private IComprobanteRepository repository;
+    @Autowired
+    private IComprobanteRepository repository;
 
-	public List<Comprobante> findAll() {
-		return repository.findAll();
-	}
+    public List<Comprobante> findAll() {
+        return repository.findAll();
+    }
 
-	public List<Comprobante> findAllByTipoTransaccionId(Integer tipoTransaccionId) {
-		return repository.findAllByTipoTransaccionId(tipoTransaccionId);
-	}
+    public List<Comprobante> findAllByOrdenPago() {
+        return repository.findAllByOrdenPago((byte) 1);
+    }
 
-	public Comprobante findByTipoTransaccionId(Integer tipoTransaccionId) {
-		return repository.findFirstByTipoTransaccionId(tipoTransaccionId).orElseThrow(() -> new ComprobanteException());
-	}
+    public List<Comprobante> findAllByTipoTransaccionId(Integer tipoTransaccionId) {
+        return repository.findAllByTipoTransaccionId(tipoTransaccionId);
+    }
 
-	public Comprobante findByComprobanteId(Integer comprobanteId) {
-		return repository.findByComprobanteId(comprobanteId)
-				.orElseThrow(() -> new ComprobanteException(comprobanteId));
-	}
+    public List<Comprobante> findAllByOrdenPagoAndTipoTransaccionId(Integer tipoTransaccionId) {
+        return repository.findAllByOrdenPagoAndTipoTransaccionId((byte) 1, tipoTransaccionId);
+    }
+
+    public Comprobante findByTipoTransaccionId(Integer tipoTransaccionId) {
+        return repository.findFirstByTipoTransaccionId(tipoTransaccionId).orElseThrow(() -> new ComprobanteException());
+    }
+
+    public Comprobante findByComprobanteId(Integer comprobanteId) {
+        return repository.findByComprobanteId(comprobanteId)
+                .orElseThrow(() -> new ComprobanteException(comprobanteId));
+    }
 
 }

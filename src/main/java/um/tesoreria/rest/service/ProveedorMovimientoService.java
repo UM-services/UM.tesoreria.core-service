@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -20,10 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import um.tesoreria.rest.exception.ProveedorMovimientoException;
 import um.tesoreria.rest.kotlin.model.Comprobante;
 import um.tesoreria.rest.repository.IProveedorMovimientoRepository;
-import um.tesoreria.rest.exception.ProveedorMovimientoException;
 import um.tesoreria.rest.kotlin.model.ProveedorArticulo;
 import um.tesoreria.rest.kotlin.model.ProveedorMovimiento;
-import um.tesoreria.rest.repository.IProveedorMovimientoRepository;
 
 /**
  * @author daniel
@@ -31,6 +28,8 @@ import um.tesoreria.rest.repository.IProveedorMovimientoRepository;
  */
 @Service
 public class ProveedorMovimientoService {
+
+    private final Integer TT_PAGOS = 4;
 
     @Autowired
     private IProveedorMovimientoRepository repository;
@@ -40,9 +39,6 @@ public class ProveedorMovimientoService {
 
     @Autowired
     private ProveedorArticuloService proveedorArticuloService;
-
-    @Autowired
-    private ModelMapper modelMapper;
 
     public List<ProveedorMovimiento> findAllByComprobanteIdAndFechaComprobanteBetween(Integer comprobanteId,
                                                                                       OffsetDateTime fechaInicio, OffsetDateTime fechaFinal) {
@@ -111,8 +107,16 @@ public class ProveedorMovimientoService {
     }
 
     public ProveedorMovimiento findByOrdenPago(Integer prefijo, Long numeroComprobante) {
-        ProveedorMovimiento proveedorMovimiento = repository.findByPrefijoAndNumeroComprobante(prefijo, numeroComprobante).orElseThrow(() -> new ProveedorMovimientoException(prefijo, numeroComprobante));
+        List<Integer> comprobanteIds = comprobanteService.findAllByOrdenPago().stream().map(comprobante -> comprobante.getComprobanteId()).collect(Collectors.toList());
+        ProveedorMovimiento proveedorMovimiento = repository.findByPrefijoAndNumeroComprobanteAndComprobanteIdIn(prefijo, numeroComprobante, comprobanteIds).orElseThrow(() -> new ProveedorMovimientoException(prefijo, numeroComprobante));
         return proveedorMovimiento;
+    }
+
+    public ProveedorMovimiento findLastOrdenPago(Integer prefijo) {
+//        List<Integer> comprobanteIds = comprobanteService.findAllByOrdenPagoAndTipoTransaccionId(TT_PAGOS).stream().map(comprobante -> comprobante.getComprobanteId()).collect(Collectors.toList());
+
+        // TODO
+        return null;
     }
 
     public ProveedorMovimiento update(ProveedorMovimiento newProveedorMovimiento, Long proveedorMovimientoId) {

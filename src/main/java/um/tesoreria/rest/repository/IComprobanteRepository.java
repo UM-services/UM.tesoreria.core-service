@@ -19,6 +19,10 @@ public interface IComprobanteRepository extends JpaRepository<Comprobante, Integ
 
 	public List<Comprobante> findAllByTipoTransaccionId(Integer tipoTransaccionId);
 
+	public List<Comprobante> findAllByOrdenPago(Byte ordenPago);
+
+	public List<Comprobante> findAllByOrdenPagoAndTipoTransaccionId(byte b, Integer tipoTransaccionId);
+
 	public Optional<Comprobante> findFirstByTipoTransaccionId(Integer tipoTransaccionId);
 
 	public Optional<Comprobante> findByComprobanteId(Integer comprobanteId);
