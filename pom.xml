@@ -13,7 +13,7 @@
     <artifactId>um.tesoreria.rest</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>um.tesoreria.rest</name>
-    <description>Spring Boot Tesoreria</description>
+    <description>Tesoreria API REST</description>
     <properties>
         <java.version>17</java.version>
         <kotlin.version>1.8.21</kotlin.version>
@@ -209,18 +209,6 @@
                         <phase>test-compile</phase>
                         <goals>
                             <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <version>8.2.1</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>

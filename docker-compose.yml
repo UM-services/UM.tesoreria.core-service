@@ -4,8 +4,8 @@ services:
 
     mysql:
         image: dqmdz/mysql:5.7
-        ports:
-            - "3306:3306"
+#        ports:
+#            - "3306:3306"
         volumes:
             - ./data:/var/lib/mysql
             - /etc/localtime:/etc/localtime:ro
@@ -20,6 +20,7 @@ services:
     tesoreria:
         build:
             context: .
+            dockerfile: Dockerfile.local
         ports:
             - "8092:8092"
         depends_on:

@@ -108,15 +108,12 @@ public class ProveedorMovimientoService {
 
     public ProveedorMovimiento findByOrdenPago(Integer prefijo, Long numeroComprobante) {
         List<Integer> comprobanteIds = comprobanteService.findAllByOrdenPago().stream().map(comprobante -> comprobante.getComprobanteId()).collect(Collectors.toList());
-        ProveedorMovimiento proveedorMovimiento = repository.findByPrefijoAndNumeroComprobanteAndComprobanteIdIn(prefijo, numeroComprobante, comprobanteIds).orElseThrow(() -> new ProveedorMovimientoException(prefijo, numeroComprobante));
-        return proveedorMovimiento;
+        return repository.findByPrefijoAndNumeroComprobanteAndComprobanteIdIn(prefijo, numeroComprobante, comprobanteIds).orElseThrow(() -> new ProveedorMovimientoException(prefijo, numeroComprobante));
     }
 
     public ProveedorMovimiento findLastOrdenPago(Integer prefijo) {
-//        List<Integer> comprobanteIds = comprobanteService.findAllByOrdenPagoAndTipoTransaccionId(TT_PAGOS).stream().map(comprobante -> comprobante.getComprobanteId()).collect(Collectors.toList());
-
-        // TODO
-        return null;
+        List<Integer> comprobanteIds = comprobanteService.findAllByOrdenPagoAndTipoTransaccionId(TT_PAGOS).stream().map(comprobante -> comprobante.getComprobanteId()).collect(Collectors.toList());
+        return repository.findTopByPrefijoAndComprobanteIdInOrderByNumeroComprobanteDesc(prefijo, comprobanteIds).orElseThrow(() -> new ProveedorMovimientoException(prefijo));
     }
 
     public ProveedorMovimiento update(ProveedorMovimiento newProveedorMovimiento, Long proveedorMovimientoId) {

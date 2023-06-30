@@ -23,4 +23,7 @@ public class ProveedorMovimientoException extends RuntimeException {
 		super(MessageFormat.format("Cannot find ProveedorMovimiento - OrdenPago {0}/{1}", prefijo, numeroComprobante));
 	}
 
+    public ProveedorMovimientoException(Integer prefijo) {
+		super("Cannot find ProveedorMovimiento prefijo=" + prefijo);
+    }
 }
