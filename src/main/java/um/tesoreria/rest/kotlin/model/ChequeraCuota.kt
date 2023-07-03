@@ -15,6 +15,8 @@ data class ChequeraCuota(
     @Column(name = "chc_id")
     var chequeraCuotaId: Long? = null,
 
+    var chequeraId: Long? = null,
+
     @Column(name = "chc_fac_id")
     var facultadId: Int? = null,
 
@@ -106,6 +108,10 @@ data class ChequeraCuota(
     @OneToOne(optional = true)
     @JoinColumn(name = "arancelTipoId", insertable = false, updatable = false)
     var arancelTipo: ArancelTipo? = null,
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "chequeraId", referencedColumnName = "clave", insertable = false, updatable = false)
+    var chequeraSerie: ChequeraSerie? = null
 
 ) : Auditable() {
     fun cuotaKey(): String {

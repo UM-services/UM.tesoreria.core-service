@@ -235,7 +235,7 @@ public class ChequeraService {
     public ChequeraSerieDTO constructChequeraDataDTO(ChequeraSerie chequeraSerie) {
         log.debug("Leyendo Cuotas");
         List<ChequeraCuota> chequeraCuotas = chequeraCuotaService
-                .findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaIdConImporte(
+                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdConImporte(
                         chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
                         chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId());
         log.debug("Leyendo Facultad");

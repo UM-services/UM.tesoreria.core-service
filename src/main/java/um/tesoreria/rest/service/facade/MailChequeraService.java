@@ -351,13 +351,13 @@ public class MailChequeraService {
                 vencimiento3 = Tool.dateAbsoluteArgentina().plusDays(40 + 30L * offset);
                 offset++;
             }
-            ChequeraCuota chequeraCuota = new ChequeraCuota(null, chequeraSerie.getFacultadId(),
+            ChequeraCuota chequeraCuota = new ChequeraCuota(null, chequeraSerie.getChequeraId(), chequeraSerie.getFacultadId(),
                     chequeraSerie.getTipoChequeraId(), chequeraSerie.getChequeraSerieId(), lectivoCuota.getProductoId(),
                     lectivoCuota.getAlternativaId(), lectivoCuota.getCuotaId(), lectivoCuota.getMes(),
                     lectivoCuota.getAnho(), chequeraSerie.getArancelTipoId(), vencimiento1, lectivoCuota.getImporte1(),
                     lectivoCuota.getImporte1(), vencimiento2, lectivoCuota.getImporte2(), lectivoCuota.getImporte2(),
                     vencimiento3, lectivoCuota.getImporte3(), lectivoCuota.getImporte3(), "", "", (byte) 0, (byte) 0,
-                    (byte) 0, (byte) 0, 0, null, null, null, null);
+                    (byte) 0, (byte) 0, 0, null, null, null, null, null);
             chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
             chequeraCuotas.add(chequeraCuota);
         }

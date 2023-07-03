@@ -3,10 +3,7 @@ package um.tesoreria.rest.kotlin.model.view
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
 import org.hibernate.annotations.Immutable
-import um.tesoreria.rest.kotlin.model.ArancelTipo
-import um.tesoreria.rest.kotlin.model.Facultad
-import um.tesoreria.rest.kotlin.model.Producto
-import um.tesoreria.rest.kotlin.model.TipoChequera
+import um.tesoreria.rest.kotlin.model.*
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -21,6 +18,8 @@ data class ChequeraCuotaDeuda(
     @Id
     @Column(name = "chc_id")
     var chequeraCuotaId: Long? = null,
+
+    var chequeraId: Long? = null,
 
     @Column(name = "chc_fac_id")
     var facultadId: Int? = null,
@@ -112,4 +111,12 @@ data class ChequeraCuotaDeuda(
     @JoinColumn(name = "arancelTipoId", insertable = false, updatable = false)
     var arancelTipo: ArancelTipo? = null,
 
-    )
+    @OneToOne(optional = true)
+    @JoinColumn(name = "chequeraId", referencedColumnName = "clave", insertable = false, updatable = false)
+    var chequeraSerie: ChequeraSerie? = null,
+
+    @OneToOne
+    @JoinColumn(name = "chc_id", insertable = false, updatable = false)
+    var chequeraCuota: ChequeraCuota? = null
+
+)

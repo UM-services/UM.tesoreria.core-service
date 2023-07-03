@@ -41,26 +41,31 @@ public class ChequeraCuotaController {
     public ResponseEntity<List<ChequeraCuota>> findAllByChequera(@PathVariable Integer facultadId,
                                                                  @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId,
                                                                  @PathVariable Integer alternativaId) {
-        return new ResponseEntity<List<ChequeraCuota>>(
+        return new ResponseEntity<>(
                 service.findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(facultadId,
                         tipoChequeraId, chequeraSerieId, alternativaId),
                 HttpStatus.OK);
     }
 
+    @GetMapping("/inconsistencias/{desde}/{hasta}")
+        public ResponseEntity<List<ChequeraCuota>> findAllInconsistencias(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
+        return new ResponseEntity<>(service.findAllInconsistencias(desde, hasta), HttpStatus.OK);
+    }
+
     @GetMapping("/deudaRango/{desde}/{hasta}")
     public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
-        return new ResponseEntity<List<ChequeraCuotaDeuda>>(chequeraCuotaDeudaService.findAllByRango(desde, hasta, null), HttpStatus.OK);
+        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllByRango(desde, hasta, null), HttpStatus.OK);
     }
 
     @GetMapping("/deudaPosgradoRango/{desde}/{hasta}")
     public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaPosgradoRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
-        return new ResponseEntity<List<ChequeraCuotaDeuda>>(chequeraCuotaDeudaService.findAllPosgradoByRango(desde, hasta), HttpStatus.OK);
+        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllPosgradoByRango(desde, hasta), HttpStatus.OK);
     }
 
     @GetMapping("/{chequeraCuotaId}")
     public ResponseEntity<ChequeraCuota> findByChequeraCuotaId(@PathVariable Long chequeraCuotaId) {
         try {
-            return new ResponseEntity<ChequeraCuota>(service.findByChequeraCuotaId(chequeraCuotaId), HttpStatus.OK);
+            return new ResponseEntity<>(service.findByChequeraCuotaId(chequeraCuotaId), HttpStatus.OK);
         } catch (ChequeraCuotaException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -81,7 +86,7 @@ public class ChequeraCuotaController {
     @GetMapping("/deuda/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<DeudaChequera> calculateDeuda(@PathVariable Integer facultadId,
                                                         @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
-        return new ResponseEntity<DeudaChequera>(service.calculateDeuda(facultadId, tipoChequeraId, chequeraSerieId),
+        return new ResponseEntity<>(service.calculateDeuda(facultadId, tipoChequeraId, chequeraSerieId),
                 HttpStatus.OK);
     }
 

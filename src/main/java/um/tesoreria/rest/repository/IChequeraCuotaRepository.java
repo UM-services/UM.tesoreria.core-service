@@ -19,9 +19,11 @@ import um.tesoreria.rest.kotlin.model.ChequeraCuota;
  */
 public interface IChequeraCuotaRepository extends JpaRepository<ChequeraCuota, Long> {
 
-	public List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndImporte1GreaterThan(
-			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer pagado,
-			Integer baja, BigDecimal importe);
+//	public List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndImporte1GreaterThan(
+//			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer pagado,
+//			Integer baja, BigDecimal importe);
+
+	public List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId);
 
 	public List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Sort sort);
