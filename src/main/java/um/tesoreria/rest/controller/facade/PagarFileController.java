@@ -34,11 +34,11 @@ public class PagarFileController {
 	@Autowired
 	private PagarFileService service;
 
-	@GetMapping("/generate/{desde}/{hasta}")
+	@GetMapping("/generate/{desde}/{hasta}/{reduced}")
 	public ResponseEntity<Resource> generateFiles(
 			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime desde,
-			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) throws IOException {
-		String filename = service.generateFiles(desde, hasta);
+			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta, Boolean reduced) throws IOException {
+		String filename = service.generateFiles(desde, hasta, reduced);
 		File file = new File(filename);
 		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 		HttpHeaders headers = new HttpHeaders();

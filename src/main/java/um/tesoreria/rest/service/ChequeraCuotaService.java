@@ -111,9 +111,9 @@ public class ChequeraCuotaService {
                 }).toList();
     }
 
-    public List<ChequeraCuota> findAllInconsistencias(OffsetDateTime desde, OffsetDateTime hasta) {
+    public List<ChequeraCuota> findAllInconsistencias(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced) {
         List<ChequeraCuota> chequeraCuotas = new ArrayList<>();
-        for (ChequeraCuota chequeraCuota : chequeraCuotaDeudaService.findAllByRango(desde, hasta, null).stream().map(cuotaDeuda -> cuotaDeuda.getChequeraCuota()).toList()) {
+        for (ChequeraCuota chequeraCuota : chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null).stream().map(cuotaDeuda -> cuotaDeuda.getChequeraCuota()).toList()) {
             if (chequeraCuota.getVencimiento1().isAfter(chequeraCuota.getVencimiento2())) {
                 chequeraCuotas.add(chequeraCuota);
                 continue;

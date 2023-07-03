@@ -40,12 +40,15 @@ public class ChequeraCuotaDeudaService {
     @Autowired
     private ChequeraCuotaService chequeraCuotaService;
 
-    public List<ChequeraCuotaDeuda> findAllByRango(OffsetDateTime desde, OffsetDateTime hasta, Pageable pageable) {
+    public List<ChequeraCuotaDeuda> findAllByRango(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced, Pageable pageable) {
         return repository.findAllByVencimiento1Between(Tool.firstTime(desde), Tool.lastTime(hasta), pageable).stream().map(cuotaDeuda -> {
             if (cuotaDeuda.getChequeraId() == null) {
                 ChequeraCuota chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(cuotaDeuda.getChequeraCuotaId());
                 cuotaDeuda.setChequeraId(chequeraCuota.getChequeraId());
                 cuotaDeuda.setChequeraSerie(chequeraCuota.getChequeraSerie());
+            }
+            if (reduced) {
+                cuotaDeuda.setChequeraSerieId(null);
             }
             return cuotaDeuda;
         }).toList();

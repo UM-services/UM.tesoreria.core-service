@@ -49,12 +49,12 @@ public class ChequeraCuotaController {
 
     @GetMapping("/inconsistencias/{desde}/{hasta}")
         public ResponseEntity<List<ChequeraCuota>> findAllInconsistencias(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
-        return new ResponseEntity<>(service.findAllInconsistencias(desde, hasta), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAllInconsistencias(desde, hasta, false), HttpStatus.OK);
     }
 
-    @GetMapping("/deudaRango/{desde}/{hasta}")
-    public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
-        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllByRango(desde, hasta, null), HttpStatus.OK);
+    @GetMapping("/deudaRango/{desde}/{hasta}/{reduced}")
+    public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta, @PathVariable Boolean reduced) {
+        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null), HttpStatus.OK);
     }
 
     @GetMapping("/deudaPosgradoRango/{desde}/{hasta}")
