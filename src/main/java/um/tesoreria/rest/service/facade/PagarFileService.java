@@ -42,13 +42,13 @@ public class PagarFileService {
     @Autowired
     private Environment env;
 
-    public String generateFiles(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced) throws IOException {
+    public String generateFiles(OffsetDateTime desde, OffsetDateTime hasta) throws IOException {
         String path = env.getProperty("path.files");
         String outputFilename = path + "PAGAR.zip";
 
         List<Character> meses = List.of('1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C');
         Integer cantidadLote = 5000;
-        Integer totalRegistros = chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null).size();
+        Integer totalRegistros = chequeraCuotaDeudaService.findAllByRango(desde, hasta, false, null).size();
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(new File(outputFilename)));
 
         for (Integer lote = 0; lote < (totalRegistros / cantidadLote) + 1; lote++) {
@@ -73,7 +73,7 @@ public class PagarFileService {
             BigDecimal totalVencimiento2 = BigDecimal.ZERO;
             BigDecimal totalVencimiento3 = BigDecimal.ZERO;
             OffsetDateTime lastDate = OffsetDateTime.of(1960, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
-            for (ChequeraCuotaDeuda deuda : chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, PageRequest.of(lote, cantidadLote))) {
+            for (ChequeraCuotaDeuda deuda : chequeraCuotaDeudaService.findAllByRango(desde, hasta, true, PageRequest.of(lote, cantidadLote))) {
                 cantidadRegistros++;
                 // Identificador de Deuda
                 line = new DecimalFormat("00").format(deuda.getAlternativaId());

@@ -1,6 +1,7 @@
 package um.tesoreria.rest.kotlin.model.view
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import org.hibernate.annotations.Immutable
 import um.tesoreria.rest.kotlin.model.*
@@ -105,6 +106,7 @@ data class ChequeraCuotaDeuda(
 
     @OneToOne
     @JoinColumn(name = "chc_id", insertable = false, updatable = false)
+    @JsonIgnore
     var chequeraCuota: ChequeraCuota? = null
 
 )

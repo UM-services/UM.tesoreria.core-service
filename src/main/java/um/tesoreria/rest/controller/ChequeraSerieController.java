@@ -40,46 +40,46 @@ public class ChequeraSerieController {
     @GetMapping("/persona/{personaId}/{documentoId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByPersona(@PathVariable BigDecimal personaId,
                                                                 @PathVariable Integer documentoId) {
-        return new ResponseEntity<List<ChequeraSerie>>(service.findAllByPersona(personaId, documentoId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAllByPersona(personaId, documentoId), HttpStatus.OK);
     }
 
     @GetMapping("/personaextended/{personaId}/{documentoId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByPersonaExtended(@PathVariable BigDecimal personaId,
                                                                         @PathVariable Integer documentoId) {
-        return new ResponseEntity<List<ChequeraSerie>>(service.findAllByPersonaExtended(personaId, documentoId),
+        return new ResponseEntity<>(service.findAllByPersonaExtended(personaId, documentoId),
                 HttpStatus.OK);
     }
 
     @GetMapping("/facultad/{personaId}/{documentoId}/{facultadId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByFacultad(@PathVariable BigDecimal personaId,
                                                                  @PathVariable Integer documentoId, @PathVariable Integer facultadId) {
-        return new ResponseEntity<List<ChequeraSerie>>(service.findAllByFacultad(personaId, documentoId, facultadId),
+        return new ResponseEntity<>(service.findAllByFacultad(personaId, documentoId, facultadId),
                 HttpStatus.OK);
     }
 
     @GetMapping("/facultadextended/{personaId}/{documentoId}/{facultadId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByFacultadExtended(@PathVariable BigDecimal personaId,
                                                                          @PathVariable Integer documentoId, @PathVariable Integer facultadId) {
-        return new ResponseEntity<List<ChequeraSerie>>(
+        return new ResponseEntity<>(
                 service.findAllByFacultadExtended(personaId, documentoId, facultadId), HttpStatus.OK);
     }
 
     @GetMapping("/personaLectivo/{personaId}/{documentoId}/{lectivoId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByPersonaLectivo(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId, @PathVariable Integer lectivoId) {
-        return new ResponseEntity<List<ChequeraSerie>>(service.findAllByPersonaLectivo(personaId, documentoId, lectivoId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAllByPersonaLectivo(personaId, documentoId, lectivoId), HttpStatus.OK);
     }
 
     @GetMapping("/incompletas/{lectivoId}/{facultadId}/{geograficaId}")
     public ResponseEntity<List<ChequeraIncompleta>> findAllIncompletas(@PathVariable Integer lectivoId,
                                                                        @PathVariable Integer facultadId, @PathVariable Integer geograficaId) {
-        return new ResponseEntity<List<ChequeraIncompleta>>(
+        return new ResponseEntity<>(
                 service.findAllIncompletas(lectivoId, facultadId, geograficaId), HttpStatus.OK);
     }
 
     @GetMapping("/altas/{lectivoId}/{facultadId}/{geograficaId}")
     public ResponseEntity<List<ChequeraSerieAlta>> findAllAltas(@PathVariable Integer lectivoId,
                                                                 @PathVariable Integer facultadId, @PathVariable Integer geograficaId) {
-        return new ResponseEntity<List<ChequeraSerieAlta>>(service.findAllAltas(lectivoId, facultadId, geograficaId),
+        return new ResponseEntity<>(service.findAllAltas(lectivoId, facultadId, geograficaId),
                 HttpStatus.OK);
     }
 
@@ -93,7 +93,7 @@ public class ChequeraSerieController {
     @GetMapping("/bynumber/{facultadId}/{chequeraserieId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByNumber(@PathVariable Integer facultadId,
                                                                @PathVariable Long chequeraserieId) {
-        return new ResponseEntity<List<ChequeraSerie>>(service.findAllByNumber(facultadId, chequeraserieId),
+        return new ResponseEntity<>(service.findAllByNumber(facultadId, chequeraserieId),
                 HttpStatus.OK);
     }
 
@@ -101,56 +101,56 @@ public class ChequeraSerieController {
     public ResponseEntity<List<ChequeraSerie>> findAllByDocumentos(@PathVariable Integer facultadId,
                                                                    @PathVariable Integer lectivoId, @PathVariable Integer geograficaId,
                                                                    @RequestBody List<BigDecimal> personaIds) {
-        return new ResponseEntity<List<ChequeraSerie>>(
+        return new ResponseEntity<>(
                 service.findAllByDocumentos(facultadId, lectivoId, geograficaId, personaIds), HttpStatus.OK);
     }
 
     @GetMapping("/cbu/{cbu}/{debitoTipoId}")
     public ResponseEntity<List<ChequeraKey>> findAllByCbu(@PathVariable String cbu,
                                                           @PathVariable Integer debitoTipoId) {
-        return new ResponseEntity<List<ChequeraKey>>(service.findAllByCbu(cbu, debitoTipoId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAllByCbu(cbu, debitoTipoId), HttpStatus.OK);
     }
 
     @GetMapping("/visa/{numeroTarjeta}/{debitoTipoId}")
     public ResponseEntity<List<ChequeraKey>> findAllByVisa(@PathVariable String numeroTarjeta,
                                                            @PathVariable Integer debitoTipoId) {
-        return new ResponseEntity<List<ChequeraKey>>(service.findAllByVisa(numeroTarjeta, debitoTipoId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAllByVisa(numeroTarjeta, debitoTipoId), HttpStatus.OK);
     }
 
     @GetMapping("/{chequeraId}")
     public ResponseEntity<ChequeraSerie> findByChequeraId(@PathVariable Long chequeraId) {
-        return new ResponseEntity<ChequeraSerie>(service.findByChequeraId(chequeraId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findByChequeraId(chequeraId), HttpStatus.OK);
     }
 
     @GetMapping("/extended/{chequeraId}")
     public ResponseEntity<ChequeraSerie> findByChequeraIdExtended(@PathVariable Long chequeraId) {
-        return new ResponseEntity<ChequeraSerie>(service.findByChequeraIdExtended(chequeraId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findByChequeraIdExtended(chequeraId), HttpStatus.OK);
     }
 
     @GetMapping("/unique/{facultadId}/{tipochequeraId}/{chequeraserieId}")
     public ResponseEntity<ChequeraSerie> findByUnique(@PathVariable Integer facultadId,
                                                       @PathVariable Integer tipochequeraId, @PathVariable Long chequeraserieId) {
-        return new ResponseEntity<ChequeraSerie>(service.findByUnique(facultadId, tipochequeraId, chequeraserieId),
+        return new ResponseEntity<>(service.findByUnique(facultadId, tipochequeraId, chequeraserieId),
                 HttpStatus.OK);
     }
 
     @GetMapping("/uniqueextended/{facultadId}/{tipochequeraId}/{chequeraserieId}")
     public ResponseEntity<ChequeraSerie> findByUniqueExtended(@PathVariable Integer facultadId,
                                                               @PathVariable Integer tipochequeraId, @PathVariable Long chequeraserieId) {
-        return new ResponseEntity<ChequeraSerie>(
+        return new ResponseEntity<>(
                 service.findByUniqueExtended(facultadId, tipochequeraId, chequeraserieId), HttpStatus.OK);
     }
 
     @GetMapping("/setpaypertic/{facultadId}/{tipochequeraId}/{chequeraserieId}/{flag}")
     public ResponseEntity<ChequeraSerie> setPayPerTic(@PathVariable Integer facultadId,
                                                       @PathVariable Integer tipochequeraId, @PathVariable Long chequeraserieId, @PathVariable Byte flag) {
-        return new ResponseEntity<ChequeraSerie>(
+        return new ResponseEntity<>(
                 service.setPayPerTic(facultadId, tipochequeraId, chequeraserieId, flag), HttpStatus.OK);
     }
 
     @PutMapping("/{chequeraId}")
     public ResponseEntity<ChequeraSerie> update(@RequestBody ChequeraSerie chequeraserie,
                                                 @PathVariable Long chequeraId) {
-        return new ResponseEntity<ChequeraSerie>(service.update(chequeraserie, chequeraId), HttpStatus.OK);
+        return new ResponseEntity<>(service.update(chequeraserie, chequeraId), HttpStatus.OK);
     }
 }

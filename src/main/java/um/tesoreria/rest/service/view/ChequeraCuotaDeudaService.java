@@ -48,7 +48,8 @@ public class ChequeraCuotaDeudaService {
                 cuotaDeuda.setChequeraSerie(chequeraCuota.getChequeraSerie());
             }
             if (reduced) {
-                cuotaDeuda.setChequeraSerieId(null);
+                cuotaDeuda.setChequeraSerie(null);
+                cuotaDeuda.setProducto(null);
             }
             return cuotaDeuda;
         }).toList();
