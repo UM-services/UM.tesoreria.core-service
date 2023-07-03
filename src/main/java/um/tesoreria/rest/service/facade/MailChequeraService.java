@@ -357,7 +357,7 @@ public class MailChequeraService {
                     lectivoCuota.getAnho(), chequeraSerie.getArancelTipoId(), vencimiento1, lectivoCuota.getImporte1(),
                     lectivoCuota.getImporte1(), vencimiento2, lectivoCuota.getImporte2(), lectivoCuota.getImporte2(),
                     vencimiento3, lectivoCuota.getImporte3(), lectivoCuota.getImporte3(), "", "", (byte) 0, (byte) 0,
-                    (byte) 0, (byte) 0, 0, null, null, null, null, null);
+                    (byte) 0, (byte) 0, 0, null, null);
             chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
             chequeraCuotas.add(chequeraCuota);
         }

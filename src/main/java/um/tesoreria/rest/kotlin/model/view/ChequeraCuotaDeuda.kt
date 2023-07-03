@@ -100,18 +100,6 @@ data class ChequeraCuotaDeuda(
     var producto: Producto? = null,
 
     @OneToOne(optional = true)
-    @JoinColumn(name = "chc_fac_id", insertable = false, updatable = false)
-    var facultad: Facultad? = null,
-
-    @OneToOne(optional = true)
-    @JoinColumn(name = "chc_tch_id", insertable = false, updatable = false)
-    var tipoChequera: TipoChequera? = null,
-
-    @OneToOne(optional = true)
-    @JoinColumn(name = "arancelTipoId", insertable = false, updatable = false)
-    var arancelTipo: ArancelTipo? = null,
-
-    @OneToOne(optional = true)
     @JoinColumn(name = "chequeraId", referencedColumnName = "clave", insertable = false, updatable = false)
     var chequeraSerie: ChequeraSerie? = null,
 
