@@ -26,19 +26,21 @@ services:
 #        depends_on:
 #            - mysql
 #        restart: always
+#        volumes:
+#            - .:/app
 #        environment:
-#            APP_SERVER: mysql:3306
-#            APP_DATABASE: tesium
-#            APP_USER: root
-#            APP_PASSWORD: root
-#            APP_PORT: 8092
-#            APP_ADD-PROPERTIES: "false"
-#            APP_LOGGING: "debug"
-#            APP_LIVERELOAD_ENABLED: "true"
-#            APP_LIVERELOAD_PORT: 35792
-#            APP_OPEN-IN-VIEW: "false"
-#            APP_MAIL_USERNAME: envios@um.edu.ar
-#            APP_MAIL_PASSWORD: 4Siby2KPwWIStCyX9gLB
+#            - APP_SERVER=mysql:3306
+#            - APP_DATABASE=tesium
+#            - APP_USER=root
+#            - APP_PASSWORD=root
+#            - APP_PORT=8092
+#            - APP_ADD-PROPERTIES=false
+#            - APP_LOGGING=debug
+#            - APP_LIVERELOAD_ENABLED=true
+#            - APP_LIVERELOAD_PORT=35792
+#            - APP_OPEN-IN-VIEW=false
+#            - APP_MAIL_USERNAME=envios@um.edu.ar
+#            - APP_MAIL_PASSWORD=4Siby2KPwWIStCyX9gLB
 #        networks:
 #            - tesoreria
 
@@ -50,14 +52,14 @@ services:
         ports:
             - '18978:8978'
         volumes:
-            - cloudbeaver:/opt/cloudbeaver/workspace
+            - ./cloudbeaver:/opt/cloudbeaver/workspace
         networks:
             - tesoreria
-
 
 volumes:
     data:
     cloudbeaver:
+#    tesoreria:
 
 networks:
     tesoreria:
