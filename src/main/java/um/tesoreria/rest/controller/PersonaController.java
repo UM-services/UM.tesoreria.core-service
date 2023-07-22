@@ -39,13 +39,13 @@ public class PersonaController {
 
 	@GetMapping("/santander")
 	public ResponseEntity<List<Persona>> findAllSantander() {
-		return new ResponseEntity<List<Persona>>(service.findAllSantander(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAllSantander(), HttpStatus.OK);
 	}
 
 	@GetMapping("/inscriptossinchequera/{facultadId}/{lectivoId}/{geograficaId}/{curso}")
 	public ResponseEntity<List<PersonaKey>> findAllInscriptosSinChequera(@PathVariable Integer facultadId,
 			@PathVariable Integer lectivoId, @PathVariable Integer geograficaId, @PathVariable Integer curso) {
-		return new ResponseEntity<List<PersonaKey>>(
+		return new ResponseEntity<>(
 				service.findAllInscriptosSinChequera(facultadId, lectivoId, geograficaId, curso), HttpStatus.OK);
 	}
 
@@ -53,38 +53,38 @@ public class PersonaController {
 	public ResponseEntity<List<PersonaKey>> findAllInscriptosSinChequeraDefault(@PathVariable Integer facultadId,
 			@PathVariable Integer lectivoId, @PathVariable Integer geograficaId, @PathVariable Integer claseChequeraId,
 			@PathVariable Integer curso) {
-		return new ResponseEntity<List<PersonaKey>>(service.findAllInscriptosSinChequeraDefault(facultadId, lectivoId,
+		return new ResponseEntity<>(service.findAllInscriptosSinChequeraDefault(facultadId, lectivoId,
 				geograficaId, claseChequeraId, curso), HttpStatus.OK);
 	}
 
 	@GetMapping("/preinscriptossinchequera/{facultadId}/{lectivoId}/{geograficaId}")
 	public ResponseEntity<List<PersonaKey>> findAllPreInscriptosSinChequera(@PathVariable Integer facultadId,
 			@PathVariable Integer lectivoId, @PathVariable Integer geograficaId) {
-		return new ResponseEntity<List<PersonaKey>>(
+		return new ResponseEntity<>(
 				service.findAllPreInscriptosSinChequera(facultadId, lectivoId, geograficaId), HttpStatus.OK);
 	}
 
 	@GetMapping("/deudoreslectivo/{facultadId}/{lectivoId}/{geograficaId}/{cuotas}")
 	public ResponseEntity<List<PersonaKey>> findAllDeudorByLectivoId(@PathVariable Integer facultadId,
 			@PathVariable Integer lectivoId, @PathVariable Integer geograficaId, @PathVariable Integer cuotas) {
-		return new ResponseEntity<List<PersonaKey>>(
+		return new ResponseEntity<>(
 				service.findAllDeudorByLectivoId(facultadId, lectivoId, geograficaId, cuotas), HttpStatus.OK);
 	}
 
 	@PostMapping("/unifieds")
 	public ResponseEntity<List<PersonaKey>> findByUnifieds(@RequestBody List<String> unifieds) {
-		return new ResponseEntity<List<PersonaKey>>(service.findByUnifieds(unifieds), HttpStatus.OK);
+		return new ResponseEntity<>(service.findByUnifieds(unifieds), HttpStatus.OK);
 	}
 
 	@PostMapping("/search")
 	public ResponseEntity<List<PersonaKey>> findByStrings(@RequestBody List<String> conditions) {
-		return new ResponseEntity<List<PersonaKey>>(service.findByStrings(conditions), HttpStatus.OK);
+		return new ResponseEntity<>(service.findByStrings(conditions), HttpStatus.OK);
 	}
 
 	@GetMapping("/unique/{personaId}/{documentoId}")
 	public ResponseEntity<Persona> findByUnique(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
 		try {
-			return new ResponseEntity<Persona>(service.findByUnique(personaId, documentoId), HttpStatus.OK);
+			return new ResponseEntity<>(service.findByUnique(personaId, documentoId), HttpStatus.OK);
 		} catch (PersonaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -93,7 +93,7 @@ public class PersonaController {
 	@GetMapping("/bypersonaId/{personaId}")
 	public ResponseEntity<Persona> findByPersonaId(@PathVariable BigDecimal personaId) {
 		try {
-			return new ResponseEntity<Persona>(service.findByPersonaId(personaId), HttpStatus.OK);
+			return new ResponseEntity<>(service.findByPersonaId(personaId), HttpStatus.OK);
 		} catch (PersonaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -102,7 +102,7 @@ public class PersonaController {
 	@GetMapping("/{uniqueId}")
 	public ResponseEntity<Persona> findByUniqueId(@PathVariable Long uniqueId) {
 		try {
-			return new ResponseEntity<Persona>(service.findByUniqueId(uniqueId), HttpStatus.OK);
+			return new ResponseEntity<>(service.findByUniqueId(uniqueId), HttpStatus.OK);
 		} catch (PersonaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -111,23 +111,23 @@ public class PersonaController {
 	@GetMapping("/deuda/{personaId}/{documentoId}")
 	public ResponseEntity<DeudaPersona> deudaByPersona(@PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId) {
-		return new ResponseEntity<DeudaPersona>(service.deudaByPersona(personaId, documentoId), HttpStatus.OK);
+		return new ResponseEntity<>(service.deudaByPersona(personaId, documentoId), HttpStatus.OK);
 	}
 
 	@GetMapping("/deudaextended/{personaId}/{documentoId}")
 	public ResponseEntity<DeudaPersona> deudaByPersonaExtended(@PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId) {
-		return new ResponseEntity<DeudaPersona>(service.deudaByPersonaExtended(personaId, documentoId), HttpStatus.OK);
+		return new ResponseEntity<>(service.deudaByPersonaExtended(personaId, documentoId), HttpStatus.OK);
 	}
 
 	@PostMapping("/")
 	public ResponseEntity<Persona> add(@RequestBody Persona persona) {
-		return new ResponseEntity<Persona>(service.add(persona), HttpStatus.OK);
+		return new ResponseEntity<>(service.add(persona), HttpStatus.OK);
 	}
 
 	@PutMapping("/{uniqueId}")
 	public ResponseEntity<Persona> update(@RequestBody Persona persona, @PathVariable Long uniqueId) {
-		return new ResponseEntity<Persona>(service.update(persona, uniqueId), HttpStatus.OK);
+		return new ResponseEntity<>(service.update(persona, uniqueId), HttpStatus.OK);
 	}
 
 }
