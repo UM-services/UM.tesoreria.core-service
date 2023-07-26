@@ -6,15 +6,12 @@ package um.tesoreria.rest.controller;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import org.springframework.web.bind.annotation.*;
 import um.tesoreria.rest.kotlin.model.ProveedorMovimiento;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -35,7 +32,7 @@ public class ProveedorMovimientoController {
 
     @GetMapping("/eliminables/{ejercicioId}")
     public ResponseEntity<List<ProveedorMovimiento>> findAllEliminables(@PathVariable Integer ejercicioId) {
-        return new ResponseEntity<List<ProveedorMovimiento>>(service.findAllEliminables(ejercicioId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAllEliminables(ejercicioId), HttpStatus.OK);
     }
 
     @GetMapping("/asignables/{proveedorId}/{desde}/{hasta}/{geograficaId}/{todos}")
@@ -43,14 +40,14 @@ public class ProveedorMovimientoController {
                                                                        @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde,
                                                                        @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta,
                                                                        @PathVariable Integer geograficaId, @PathVariable Boolean todos) throws JsonProcessingException {
-        return new ResponseEntity<List<ProveedorMovimiento>>(
+        return new ResponseEntity<>(
                 service.findAllAsignables(proveedorId, desde, hasta, geograficaId, todos), HttpStatus.OK);
     }
 
     @GetMapping("/{proveedorMovimientoId}")
     public ResponseEntity<ProveedorMovimiento> findByProveedorMovimientoId(@PathVariable Long proveedorMovimientoId) {
         try {
-            return new ResponseEntity<ProveedorMovimiento>(service.findByProveedorMovimientoId(proveedorMovimientoId),
+            return new ResponseEntity<>(service.findByProveedorMovimientoId(proveedorMovimientoId),
                     HttpStatus.OK);
         } catch (ProveedorMovimientoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -74,6 +71,11 @@ public class ProveedorMovimientoController {
         } catch (ProveedorMovimientoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    @PostMapping("/")
+    public ResponseEntity<ProveedorMovimiento> add(@RequestBody ProveedorMovimiento proveedorMovimiento) {
+        return new ResponseEntity<>(service.add(proveedorMovimiento), HttpStatus.OK);
     }
 
 }

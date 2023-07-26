@@ -129,4 +129,7 @@ public class ProveedorMovimientoService {
         repository.deleteByProveedorMovimientoId(proveedorMovimientoId);
     }
 
+    public ProveedorMovimiento add(ProveedorMovimiento proveedorMovimiento) {
+        return repository.save(proveedorMovimiento);
+    }
 }

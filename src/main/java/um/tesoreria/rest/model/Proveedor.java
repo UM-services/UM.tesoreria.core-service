@@ -76,6 +76,8 @@ public class Proveedor extends Auditable implements Serializable {
 
 	@Column(name = "prv_habilitado")
 	private Byte habilitado = 0;
+
+	private String cbu = "";
 	
 	@OneToOne(optional = true)
 	@JoinColumn(name = "prv_cuenta", insertable = false, updatable = false)

@@ -36,18 +36,18 @@ public class ProveedorController {
 
 	@GetMapping("/")
 	public ResponseEntity<List<Proveedor>> findAll() {
-		return new ResponseEntity<List<Proveedor>>(service.findAll(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 
 	@PostMapping("/search")
 	public ResponseEntity<List<ProveedorSearch>> findAllByStrings(@RequestBody List<String> conditions) {
-		return new ResponseEntity<List<ProveedorSearch>>(service.findAllByStrings(conditions), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAllByStrings(conditions), HttpStatus.OK);
 	}
 
 	@GetMapping("/{proveedorId}")
 	public ResponseEntity<Proveedor> findByProveedorId(@PathVariable Integer proveedorId) {
 		try {
-			return new ResponseEntity<Proveedor>(service.findByProveedorId(proveedorId), HttpStatus.OK);
+			return new ResponseEntity<>(service.findByProveedorId(proveedorId), HttpStatus.OK);
 		} catch (ProveedorException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -56,7 +56,7 @@ public class ProveedorController {
 	@GetMapping("/cuit/{cuit}")
 	public ResponseEntity<Proveedor> findByCuit(@PathVariable String cuit) {
 		try {
-			return new ResponseEntity<Proveedor>(service.findByCuit(cuit), HttpStatus.OK);
+			return new ResponseEntity<>(service.findByCuit(cuit), HttpStatus.OK);
 		} catch (ProveedorException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -64,23 +64,23 @@ public class ProveedorController {
 
 	@GetMapping("/last")
 	public ResponseEntity<Proveedor> findLast() {
-		return new ResponseEntity<Proveedor>(service.findLast(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findLast(), HttpStatus.OK);
 	}
 
 	@PostMapping("/")
 	public ResponseEntity<Proveedor> add(@RequestBody Proveedor proveedor) {
-		return new ResponseEntity<Proveedor>(service.add(proveedor), HttpStatus.OK);
+		return new ResponseEntity<>(service.add(proveedor), HttpStatus.OK);
 	}
 
 	@PutMapping("/{proveedorId}")
 	public ResponseEntity<Proveedor> update(@RequestBody Proveedor proveedor, @PathVariable Integer proveedorId) {
-		return new ResponseEntity<Proveedor>(service.update(proveedor, proveedorId), HttpStatus.OK);
+		return new ResponseEntity<>(service.update(proveedor, proveedorId), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{proveedorId}")
 	public ResponseEntity<Void> delete(@PathVariable Integer proveedorId) {
 		service.delete(proveedorId);
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 }

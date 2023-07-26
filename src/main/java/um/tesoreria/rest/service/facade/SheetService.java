@@ -54,11 +54,7 @@ import um.tesoreria.rest.extern.model.view.PreunivCarreraFacultad;
 import um.tesoreria.rest.extern.model.view.PreunivMatricResumenFacultad;
 import um.tesoreria.rest.extern.model.view.PreunivResumenFacultad;
 import um.tesoreria.rest.kotlin.model.*;
-import um.tesoreria.rest.model.ContratoPeriodo;
-import um.tesoreria.rest.model.IngresoAsiento;
-import um.tesoreria.rest.model.Legajo;
-import um.tesoreria.rest.model.PersonaSuspendido;
-import um.tesoreria.rest.model.Plan;
+import um.tesoreria.rest.model.*;
 import um.tesoreria.rest.model.dto.DeudaChequera;
 import um.tesoreria.rest.model.view.CarreraKey;
 import um.tesoreria.rest.model.view.ChequeraPreuniv;
@@ -222,6 +218,9 @@ public class SheetService {
 
     @Autowired
     private FacturacionElectronicaService facturacionElectronicaService;
+
+    @Autowired
+    private ProveedorService proveedorService;
 
     public String generateIngresos(Integer anho, Integer mes) {
         String path = env.getProperty("path.files");
@@ -1496,6 +1495,81 @@ public class SheetService {
             this.setCellString(row, 13, chequeraSerie.getGeografica().getNombre(), styleNormal);
             this.setCellString(row, 14, chequeraSerie.getTipoChequera().getNombre(), styleNormal);
             this.setCellString(row, 15, String.valueOf(facturacionElectronica.getChequeraPago().getChequeraCuota().getMes()) + "/" + String.valueOf(facturacionElectronica.getChequeraPago().getChequeraCuota().getAnho()), styleNormal);
+        }
+
+        for (Integer column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
+            sheet.autoSizeColumn(column);
+
+        try {
+            File file = new File(filename);
+            FileOutputStream output = new FileOutputStream(file);
+            book.write(output);
+            output.flush();
+            output.close();
+            book.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return filename;
+    }
+
+    public String generateProveedores() {
+        String path = env.getProperty("path.files");
+
+        String filename = path + "proveedores.xlsx";
+
+        Workbook book = new XSSFWorkbook();
+        CellStyle styleNormal = book.createCellStyle();
+        Font fontNormal = book.createFont();
+        fontNormal.setBold(false);
+        styleNormal.setFont(fontNormal);
+
+        CellStyle styleBold = book.createCellStyle();
+        Font fontBold = book.createFont();
+        fontBold.setBold(true);
+        styleBold.setFont(fontBold);
+
+        CellStyle styleDate = book.createCellStyle();
+        styleDate.setDataFormat(book.getCreationHelper().createDataFormat().getFormat("dd-MM-yyyy"));
+
+        Sheet sheet = book.createSheet("Proveedores");
+        Row row = null;
+
+        Integer fila = -1;
+        row = sheet.createRow(++fila);
+        this.setCellString(row, 0, "#", styleBold);
+        this.setCellString(row, 1, "CUIT", styleBold);
+        this.setCellString(row, 2, "Nombre Fantasía", styleBold);
+        this.setCellString(row, 3, "Razón Social", styleBold);
+        this.setCellString(row, 4, "Orden Cheque", styleBold);
+        this.setCellString(row, 5, "Domicilio", styleBold);
+        this.setCellString(row, 6, "Teléfono", styleBold);
+        this.setCellString(row, 7, "Fax", styleBold);
+        this.setCellString(row, 8, "Celular", styleBold);
+        this.setCellString(row, 9, "e-mail", styleBold);
+        this.setCellString(row, 10, "e-mail interno", styleBold);
+        this.setCellString(row, 11, "Cuenta Contable", styleBold);
+        this.setCellString(row, 12, "Cuenta Contable", styleBold);
+        this.setCellString(row, 13, "Habilitado", styleBold);
+        this.setCellString(row, 14, "CBU", styleBold);
+
+        for (Proveedor proveedor : proveedorService.findAll()) {
+            row = sheet.createRow(++fila);
+            this.setCellInteger(row, 0, proveedor.getProveedorId(), styleNormal);
+            this.setCellString(row, 1, proveedor.getCuit(), styleNormal);
+            this.setCellString(row, 2, proveedor.getNombreFantasia(), styleNormal);
+            this.setCellString(row, 3, proveedor.getRazonSocial(), styleNormal);
+            this.setCellString(row, 4, proveedor.getOrdenCheque(), styleNormal);
+            this.setCellString(row, 5, proveedor.getDomicilio(), styleNormal);
+            this.setCellString(row, 6, proveedor.getTelefono(), styleNormal);
+            this.setCellString(row, 7, proveedor.getFax(), styleNormal);
+            this.setCellString(row, 8, proveedor.getCelular(), styleNormal);
+            this.setCellString(row, 9, proveedor.getEmail(), styleNormal);
+            this.setCellString(row, 10, proveedor.getEmailInterno(), styleNormal);
+            this.setCellBigDecimal(row, 11, proveedor.getNumeroCuenta(), styleNormal);
+            this.setCellString(row, 12, proveedor.getCuenta().getNombre(), styleNormal);
+            this.setCellString(row, 13, proveedor.getHabilitado() == 1 ? "Si" : "No", styleNormal);
+            this.setCellString(row, 14, proveedor.getCbu(), styleNormal);
         }
 
         for (Integer column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)

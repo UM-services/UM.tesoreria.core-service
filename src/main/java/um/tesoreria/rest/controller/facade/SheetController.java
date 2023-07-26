@@ -201,4 +201,18 @@ public class SheetController {
 				.contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
 	}
 
+	@GetMapping("/generateProveedores")
+	public ResponseEntity<Resource> generateProveedores() throws FileNotFoundException {
+		String filename = service.generateProveedores();
+		File file = new File(filename);
+		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=proveedores.xlsx");
+		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+		headers.add("Pragma", "no-cache");
+		headers.add("Expires", "0");
+		return ResponseEntity.ok().headers(headers).contentLength(file.length())
+				.contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+	}
+
 }

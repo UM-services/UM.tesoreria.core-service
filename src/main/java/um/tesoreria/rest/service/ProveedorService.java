@@ -60,7 +60,7 @@ public class ProveedorService {
 					newProveedor.getRazonSocial(), newProveedor.getOrdenCheque(), newProveedor.getDomicilio(),
 					newProveedor.getTelefono(), newProveedor.getFax(), newProveedor.getCelular(),
 					newProveedor.getEmail(), newProveedor.getEmailInterno(), newProveedor.getNumeroCuenta(),
-					newProveedor.getHabilitado(), null);
+					newProveedor.getHabilitado(), newProveedor.getCbu(), null);
 			repository.save(proveedor);
 			return proveedor;
 		}).orElseThrow(() -> new ProveedorException(proveedorId));

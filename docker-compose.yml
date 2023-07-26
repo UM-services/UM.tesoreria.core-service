@@ -59,7 +59,7 @@ services:
 volumes:
     data:
     cloudbeaver:
-#    tesoreria:
+    tesoreria:
 
 networks:
     tesoreria:
