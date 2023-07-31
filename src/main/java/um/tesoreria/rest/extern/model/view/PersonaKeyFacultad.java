@@ -23,9 +23,6 @@ import lombok.NoArgsConstructor;
  *
  */
 @Data
-@Entity
-@Table(name = "vw_persona_key")
-@Immutable
 @NoArgsConstructor
 @AllArgsConstructor
 public class PersonaKeyFacultad implements Serializable {

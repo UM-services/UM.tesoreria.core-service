@@ -16,7 +16,6 @@ import org.hibernate.annotations.Immutable;
 
 import um.tesoreria.rest.model.view.pk.FacultadLectivoSedePk;
 import lombok.Data;
-import um.tesoreria.rest.model.view.pk.FacultadLectivoSedePk;
 
 /**
  * @author daniel

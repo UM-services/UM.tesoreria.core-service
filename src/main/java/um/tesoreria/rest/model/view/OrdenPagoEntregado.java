@@ -36,4 +36,5 @@ public class OrdenPagoEntregado implements Serializable {
 	private Long ordenPagoId;
 	
 	private BigDecimal entregado;
+
 }

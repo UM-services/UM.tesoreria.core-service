@@ -17,7 +17,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import um.tesoreria.rest.model.view.pk.TipoPagoFechaPk;
 import lombok.Data;
-import um.tesoreria.rest.model.view.pk.TipoPagoFechaPk;
 
 /**
  * @author daniel

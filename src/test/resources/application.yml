@@ -1,6 +1,6 @@
 app:
   server: 127.0.0.1:3306
-  database: tesium-test
+  database: tesium_test
   user: root
   password: root
   add-properties: true

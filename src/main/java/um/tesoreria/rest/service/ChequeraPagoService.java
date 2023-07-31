@@ -24,7 +24,6 @@ import um.tesoreria.rest.repository.IChequeraPagoRepository;
 
 /**
  * @author daniel
- *
  */
 @Service
 public class ChequeraPagoService {
@@ -35,12 +34,28 @@ public class ChequeraPagoService {
     @Autowired
     private FacturacionElectronicaService facturacionElectronicaService;
 
-    public List<ChequeraPago> findAllByChequera(Integer facultadId, Integer tipochequeraId, Long chequeraserieId) {
-        return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipochequeraId,
-                chequeraserieId);
+    @Autowired
+    private ChequeraCuotaService chequeraCuotaService;
+
+    @Transactional
+    public List<ChequeraPago> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+        repository.saveAll(repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId).stream().map(pago -> {
+            if (pago.getChequeraCuotaId() == null) {
+                pago.setChequeraCuotaId(chequeraCuotaService.findByUnique(pago.getFacultadId(), pago.getTipoChequeraId(), pago.getChequeraSerieId(), pago.getProductoId(), pago.getAlternativaId(), pago.getCuotaId()).getChequeraCuotaId());
+            }
+            return pago;
+        }).toList());
+        return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
     }
 
+    @Transactional
     public List<ChequeraPago> pendientesFactura(OffsetDateTime fechaPago) {
+        repository.saveAll(repository.findAllByFechaAndTipoPagoIdGreaterThan(fechaPago, 2).stream().map(pago -> {
+            if (pago.getChequeraCuotaId() == null) {
+                pago.setChequeraCuotaId(chequeraCuotaService.findByUnique(pago.getFacultadId(), pago.getTipoChequeraId(), pago.getChequeraSerieId(), pago.getProductoId(), pago.getAlternativaId(), pago.getCuotaId()).getChequeraCuotaId());
+            }
+            return pago;
+        }).toList());
         List<ChequeraPago> pagos = repository.findAllByFechaAndTipoPagoIdGreaterThan(fechaPago, 2);
         List<Long> pagoIds = pagos.stream().map(pago -> pago.getChequeraPagoId()).collect(Collectors.toList());
         Map<Long, FacturacionElectronica> electronicas = facturacionElectronicaService.findAllByChequeraPagoIds(pagoIds).stream().collect(Collectors.toMap(FacturacionElectronica::getChequeraPagoId, Function.identity(), (pago, replacement) -> pago));
@@ -54,18 +69,24 @@ public class ChequeraPagoService {
     }
 
     public ChequeraPago findByChequeraPagoId(Long chequeraPagoId) {
-        return repository.findByChequeraPagoId(chequeraPagoId)
-                .orElseThrow(() -> new ChequeraPagoException(chequeraPagoId));
+        ChequeraPago chequeraPago = null;
+        chequeraPago = repository.findByChequeraPagoId(chequeraPagoId).orElseThrow(() -> new ChequeraPagoException(chequeraPagoId));
+        if (chequeraPago.getChequeraCuotaId() == null) {
+            chequeraPago.setChequeraCuotaId(chequeraCuotaService.findByUnique(chequeraPago.getFacultadId(), chequeraPago.getTipoChequeraId(), chequeraPago.getChequeraSerieId(), chequeraPago.getProductoId(), chequeraPago.getAlternativaId(), chequeraPago.getCuotaId()).getChequeraCuotaId());
+            chequeraPago = repository.save(chequeraPago);
+        }
+        return chequeraPago;
     }
 
     @Transactional
-    public void deleteAllByFacultadIdAndTipochequeraIdAndChequeraserieId(Integer facultadId, Integer tipochequeraId,
-                                                                         Long chequeraserieId) {
-        repository.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipochequeraId,
-                chequeraserieId);
+    public void deleteAllByFacultadIdAndTipochequeraIdAndChequeraserieId(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+        repository.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
     }
 
     public ChequeraPago add(ChequeraPago chequeraPago) {
+        if (chequeraPago.getChequeraCuotaId() == null) {
+            chequeraPago.setChequeraCuotaId(chequeraCuotaService.findByUnique(chequeraPago.getFacultadId(), chequeraPago.getTipoChequeraId(), chequeraPago.getChequeraSerieId(), chequeraPago.getProductoId(), chequeraPago.getAlternativaId(), chequeraPago.getCuotaId()).getChequeraCuotaId());
+        }
         chequeraPago = repository.save(chequeraPago);
         return chequeraPago;
     }

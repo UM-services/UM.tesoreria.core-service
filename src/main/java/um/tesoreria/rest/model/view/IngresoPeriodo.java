@@ -17,7 +17,6 @@ import um.tesoreria.rest.model.view.pk.IngresoPeriodoPk;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import um.tesoreria.rest.model.view.pk.IngresoPeriodoPk;
 
 /**
  * @author daniel

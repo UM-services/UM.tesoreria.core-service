@@ -15,7 +15,6 @@ import org.hibernate.annotations.Immutable;
 
 import um.tesoreria.rest.model.view.pk.TipoChequeraLectivoSedePk;
 import lombok.Data;
-import um.tesoreria.rest.model.view.pk.TipoChequeraLectivoSedePk;
 
 /**
  * @author daniel
