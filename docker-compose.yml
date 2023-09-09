@@ -4,8 +4,8 @@ services:
 
     mysql:
         image: dqmdz/mysql:5.7
-#        ports:
-#            - "3306:3306"
+        ports:
+            - "3306:3306"
         volumes:
             - ./data:/var/lib/mysql
             - /etc/localtime:/etc/localtime:ro
@@ -17,32 +17,32 @@ services:
         networks:
             - tesoreria
 
-    tesoreria:
-        build:
-            context: .
-            dockerfile: Dockerfile.local
-        ports:
-            - "8092:8092"
-        depends_on:
-            - mysql
-        restart: always
-        volumes:
-            - .:/app
-        environment:
-            - APP_SERVER=mysql:3306
-            - APP_DATABASE=tesium
-            - APP_USER=root
-            - APP_PASSWORD=root
-            - APP_PORT=8092
-            - APP_ADD-PROPERTIES=false
-            - APP_LOGGING=debug
-            - APP_LIVERELOAD_ENABLED=true
-            - APP_LIVERELOAD_PORT=35792
-            - APP_OPEN-IN-VIEW=false
-            - APP_MAIL_USERNAME=envios@um.edu.ar
-            - APP_MAIL_PASSWORD=4Siby2KPwWIStCyX9gLB
-        networks:
-            - tesoreria
+#    tesoreria:
+#        build:
+#            context: .
+#            dockerfile: Dockerfile.local
+#        ports:
+#            - "8092:8092"
+#        depends_on:
+#            - mysql
+#        restart: always
+#        volumes:
+#            - .:/app
+#        environment:
+#            - APP_SERVER=mysql:3306
+#            - APP_DATABASE=tesium
+#            - APP_USER=root
+#            - APP_PASSWORD=root
+#            - APP_PORT=8092
+#            - APP_ADD-PROPERTIES=false
+#            - APP_LOGGING=debug
+#            - APP_LIVERELOAD_ENABLED=true
+#            - APP_LIVERELOAD_PORT=35792
+#            - APP_OPEN-IN-VIEW=false
+#            - APP_MAIL_USERNAME=envios@um.edu.ar
+#            - APP_MAIL_PASSWORD=4Siby2KPwWIStCyX9gLB
+#        networks:
+#            - tesoreria
 
     cloudbeaver:
         image: dbeaver/cloudbeaver:latest
