@@ -22,5 +22,6 @@ data class ClaseChequera(
     var posgrado: Byte = 0,
     var curso: Byte = 0,
     var secundario: Byte = 0,
+    var titulo: Byte = 0
 
-    ) : Auditable()
+) : Auditable()

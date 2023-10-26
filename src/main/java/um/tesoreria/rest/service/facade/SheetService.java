@@ -18,6 +18,7 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -88,159 +89,168 @@ import um.tesoreria.rest.service.view.IngresoPeriodoService;
 import um.tesoreria.rest.service.view.LegajoKeyService;
 import um.tesoreria.rest.service.view.PersonaKeyService;
 import um.tesoreria.rest.service.view.TipoPagoFechaService;
-import um.tesoreria.rest.exception.EjercicioException;
 import um.tesoreria.rest.model.Legajo;
 import um.tesoreria.rest.model.PersonaSuspendido;
 import um.tesoreria.rest.model.Plan;
-import um.tesoreria.rest.model.view.ChequeraPreuniv;
 import um.tesoreria.rest.service.*;
 
 /**
  * @author daniel
- *
  */
 @Service
+@Slf4j
 public class SheetService {
 
-    @Autowired
-    private FacultadService facultadService;
+    private final FacultadService facultadService;
+
+    private final TipoPagoService tipoPagoService;
+
+    private final GeograficaService geograficaService;
+
+    private final IngresoPeriodoService ingresoPeriodoService;
+
+    private final ChequeraSerieService chequeraSerieService;
+
+    private final PersonaKeyService personaKeyService;
+
+    private final ArancelTipoService arancelTipoService;
+
+    private final ChequeraCuotaService chequeraCuotaService;
+
+    private final LegajoKeyService legajoKeyService;
+
+    private final CarreraKeyService carreraKeyService;
+
+    private final DomicilioKeyService domicilioKeyService;
+
+    private final EjercicioService ejercicioService;
+
+    private final ProveedorMovimientoService proveedorMovimientoService;
+
+    private final SincronizeService sincronizeService;
+
+    private final LectivoService lectivoService;
+
+    private final PlanService planService;
+
+    private final CarreraService carreraService;
+
+    private final ChequeraPreunivService chequeraPreunivService;
+
+    private final TipoChequeraService tipoChequeraService;
+
+    private final PreunivResumenFacultadConsumer preunivResumenFacultadConsumer;
+
+    private final PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer;
+
+    private final PreTurnoFacultadConsumer preTurnoFacultadConsumer;
+
+    private final PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer;
+
+    private final PersonaKeyFacultadConsumer personaKeyFacultadConsumer;
+
+    private final LegajoKeyFacultadConsumer legajoKeyFacultadConsumer;
+
+    private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
+
+    private final CarreraFacultadConsumer carreraFacultadConsumer;
+
+    private final PlanFacultadConsumer planFacultadConsumer;
+
+    private final InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer;
+
+    private final TipoPagoFechaService tipoPagoFechaService;
+
+    private final IngresoAsientoService ingresoAsientoService;
+
+    private final CuentaMovimientoService cuentaMovimientoService;
+
+    private final Environment environment;
+
+    private final PersonaSuspendidoService personaSuspendidoService;
+
+    private final ContratoPeriodoService contratoPeriodoService;
+
+    private final BajaService bajaService;
+
+    private final BajaFacultadConsumer bajaFacultadConsumer;
+
+    private final LegajoService legajoService;
+
+    private final FacturacionElectronicaService facturacionElectronicaService;
+
+    private final ProveedorService proveedorService;
 
     @Autowired
-    private TipoPagoService tipoPagoService;
-
-    @Autowired
-    private GeograficaService geograficaService;
-
-    @Autowired
-    private IngresoPeriodoService ingresoPeriodoService;
-
-    @Autowired
-    private ChequeraSerieService chequeraSerieService;
-
-    @Autowired
-    private PersonaKeyService personaKeyService;
-
-    @Autowired
-    private ArancelTipoService arancelTipoService;
-
-    @Autowired
-    private ChequeraCuotaService chequeraCuotaService;
-
-    @Autowired
-    private LegajoKeyService legajoKeyService;
-
-    @Autowired
-    private CarreraKeyService carreraKeyService;
-
-    @Autowired
-    private DomicilioKeyService domicilioKeyService;
-
-    @Autowired
-    private EjercicioService ejercicioService;
-
-    @Autowired
-    private ProveedorMovimientoService proveedorMovimientoService;
-
-    @Autowired
-    private SincronizeService sincronizeService;
-
-    @Autowired
-    private LectivoService lectivoService;
-
-    @Autowired
-    private PlanService planService;
-
-    @Autowired
-    private CarreraService carreraService;
-
-    @Autowired
-    private ChequeraPreunivService chequeraPreunivService;
-
-    @Autowired
-    private TipoChequeraService tipoChequeraService;
-
-    @Autowired
-    private PreunivResumenFacultadConsumer preunivResumenFacultadConsumer;
-
-    @Autowired
-    private PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer;
-
-    @Autowired
-    private PreTurnoFacultadConsumer preTurnoFacultadConsumer;
-
-    @Autowired
-    private PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer;
-
-    @Autowired
-    private PersonaKeyFacultadConsumer personaKeyFacultadConsumer;
-
-    @Autowired
-    private LegajoKeyFacultadConsumer legajoKeyFacultadConsumer;
-
-    @Autowired
-    private InscripcionFacultadConsumer inscripcionFacultadConsumer;
-
-    @Autowired
-    private CarreraFacultadConsumer carreraFacultadConsumer;
-
-    @Autowired
-    private PlanFacultadConsumer planFacultadConsumer;
-
-    @Autowired
-    private InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer;
-
-    @Autowired
-    private TipoPagoFechaService tipoPagoFechaService;
-
-    @Autowired
-    private IngresoAsientoService ingresoAsientoService;
-
-    @Autowired
-    private CuentaMovimientoService cuentaMovimientoService;
-
-    @Autowired
-    private Environment env;
-
-    @Autowired
-    private PersonaSuspendidoService personaSuspendidoService;
-
-    @Autowired
-    private ContratoPeriodoService contratoPeriodoService;
-
-    @Autowired
-    private BajaService bajaService;
-
-    @Autowired
-    private BajaFacultadConsumer bajaFacultadConsumer;
-
-    @Autowired
-    private LegajoService legajoService;
-
-    @Autowired
-    private FacturacionElectronicaService facturacionElectronicaService;
-
-    @Autowired
-    private ProveedorService proveedorService;
+    public SheetService(FacultadService facultadService, TipoPagoService tipoPagoService, GeograficaService geograficaService,
+                        IngresoPeriodoService ingresoPeriodoService, ChequeraSerieService chequeraSerieService,
+                        PersonaKeyService personaKeyService, ArancelTipoService arancelTipoService, ChequeraCuotaService chequeraCuotaService,
+                        LegajoKeyService legajoKeyService, CarreraKeyService carreraKeyService, DomicilioKeyService domicilioKeyService,
+                        EjercicioService ejercicioService, ProveedorMovimientoService proveedorMovimientoService, SincronizeService sincronizeService,
+                        LectivoService lectivoService, PlanService planService, CarreraService carreraService, ChequeraPreunivService chequeraPreunivService,
+                        TipoChequeraService tipoChequeraService, PreunivResumenFacultadConsumer preunivResumenFacultadConsumer,
+                        PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer, PreTurnoFacultadConsumer preTurnoFacultadConsumer,
+                        PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer, PersonaKeyFacultadConsumer personaKeyFacultadConsumer,
+                        LegajoKeyFacultadConsumer legajoKeyFacultadConsumer, InscripcionFacultadConsumer inscripcionFacultadConsumer,
+                        CarreraFacultadConsumer carreraFacultadConsumer, PlanFacultadConsumer planFacultadConsumer, InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer,
+                        TipoPagoFechaService tipoPagoFechaService, IngresoAsientoService ingresoAsientoService, CuentaMovimientoService cuentaMovimientoService,
+                        PersonaSuspendidoService personaSuspendidoService, ContratoPeriodoService contratoPeriodoService, BajaService bajaService,
+                        BajaFacultadConsumer bajaFacultadConsumer, LegajoService legajoService, FacturacionElectronicaService facturacionElectronicaService,
+                        ProveedorService proveedorService, Environment environment) {
+        this.facultadService = facultadService;
+        this.tipoPagoService = tipoPagoService;
+        this.geograficaService = geograficaService;
+        this.ingresoPeriodoService = ingresoPeriodoService;
+        this.chequeraSerieService = chequeraSerieService;
+        this.personaKeyService = personaKeyService;
+        this.arancelTipoService = arancelTipoService;
+        this.chequeraCuotaService = chequeraCuotaService;
+        this.legajoKeyService = legajoKeyService;
+        this.carreraKeyService = carreraKeyService;
+        this.domicilioKeyService = domicilioKeyService;
+        this.ejercicioService = ejercicioService;
+        this.proveedorMovimientoService = proveedorMovimientoService;
+        this.sincronizeService = sincronizeService;
+        this.lectivoService = lectivoService;
+        this.planService = planService;
+        this.carreraService = carreraService;
+        this.chequeraPreunivService = chequeraPreunivService;
+        this.tipoChequeraService = tipoChequeraService;
+        this.preunivResumenFacultadConsumer = preunivResumenFacultadConsumer;
+        this.preunivMatricResumenFacultadConsumer = preunivMatricResumenFacultadConsumer;
+        this.preTurnoFacultadConsumer = preTurnoFacultadConsumer;
+        this.preunivCarreraFacultadConsumer = preunivCarreraFacultadConsumer;
+        this.personaKeyFacultadConsumer = personaKeyFacultadConsumer;
+        this.legajoKeyFacultadConsumer = legajoKeyFacultadConsumer;
+        this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;
+        this.carreraFacultadConsumer = carreraFacultadConsumer;
+        this.planFacultadConsumer = planFacultadConsumer;
+        this.inscriptoCursoFacultadConsumer = inscriptoCursoFacultadConsumer;
+        this.tipoPagoFechaService = tipoPagoFechaService;
+        this.ingresoAsientoService = ingresoAsientoService;
+        this.cuentaMovimientoService = cuentaMovimientoService;
+        this.personaSuspendidoService = personaSuspendidoService;
+        this.contratoPeriodoService = contratoPeriodoService;
+        this.bajaService = bajaService;
+        this.bajaFacultadConsumer = bajaFacultadConsumer;
+        this.legajoService = legajoService;
+        this.facturacionElectronicaService = facturacionElectronicaService;
+        this.proveedorService = proveedorService;
+        this.environment = environment;
+    }
 
     public String generateIngresos(Integer anho, Integer mes) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "ingresos" + anho + String.format("%02d", mes) + ".xlsx";
 
-        Workbook book = new XSSFWorkbook();
-        CellStyle styleNormal = book.createCellStyle();
-        Font fontNormal = book.createFont();
-        fontNormal.setBold(false);
-        styleNormal.setFont(fontNormal);
+        Workbook book = null;
+        CellStyle styleNormal = null;
+        CellStyle styleBold = null;
+        Sheet sheet = makeWorkbook(book, styleNormal, styleBold, "Ingresos");
 
-        CellStyle styleBold = book.createCellStyle();
-        Font fontBold = book.createFont();
-        fontBold.setBold(true);
-        styleBold.setFont(fontBold);
-
-        Sheet sheet = book.createSheet("Ingresos");
         Row row = null;
-        Integer fila = 0;
+        int fila = 0;
         row = sheet.createRow(fila);
         this.setCellString(row, 0, "#Facultad", styleBold);
         this.setCellString(row, 1, "Facultad", styleBold);
@@ -277,7 +287,7 @@ public class SheetService {
             this.setCellBigDecimal(row, 8, ingresoperiodo.getTotal(), styleNormal);
         }
 
-        for (Integer column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -288,7 +298,7 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error escribiendo ingresos");
         }
         return filename;
     }
@@ -296,7 +306,7 @@ public class SheetService {
     public String generateDeuda(Integer facultadId, Integer lectivoId, Boolean soloDeudores,
                                 List<Integer> tipoChequeraIds) {
 
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
         String filename = path + "deuda." + facultadId + "." + lectivoId + ".xlsx";
 
         Workbook book = new XSSFWorkbook();
@@ -323,7 +333,7 @@ public class SheetService {
 
         Sheet sheet = book.createSheet("Deuda");
         Row row = null;
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 1, "Facultad", styleNormal);
         this.setCellString(row, 2, facultad.getNombre(), styleBold);
@@ -352,7 +362,7 @@ public class SheetService {
                 .collect(Collectors.toMap(CarreraKey::getUnified, carrera -> carrera));
         Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream()
                 .collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
-        List<Legajo> legajosUpdate = new ArrayList<Legajo>();
+        List<Legajo> legajosUpdate = new ArrayList<>();
 
         for (Integer tipochequeraId : tipoChequeraIds) {
             TipoChequera tipoChequera = new TipoChequera();
@@ -369,10 +379,10 @@ public class SheetService {
                     .toMap(ChequeraSerie::getPersonaKey, Function.identity(), (chequera, replacement) -> chequera));
             Map<Long, Baja> bajas = bajaService
                     .findAllByChequeraIdIn(
-                            chequeraList.stream().map(c -> c.getChequeraId()).collect(Collectors.toList()))
+                            chequeraList.stream().map(ChequeraSerie::getChequeraId).collect(Collectors.toList()))
                     .stream()
                     .collect(Collectors.toMap(Baja::getChequeraId, Function.identity(), (baja, replacement) -> baja));
-            List<String> keys = new ArrayList<String>(chequeras.keySet());
+            List<String> keys = new ArrayList<>(chequeras.keySet());
             Map<String, LegajoKey> legajos = legajoKeyService.findAllByFacultadIdAndUnifiedIn(facultadId, keys).stream()
                     .collect(Collectors.toMap(LegajoKey::getUnified, Function.identity(),
                             (legajo, replacement) -> legajo));
@@ -389,7 +399,7 @@ public class SheetService {
                 ChequeraSerie chequeraSerie = chequeras.get(persona.getUnified());
                 DeudaChequera deudaChequera = chequeraCuotaService.calculateDeuda(facultadId, tipochequeraId,
                         chequeraSerie.getChequeraSerieId());
-                Boolean show = true;
+                boolean show = true;
                 if (soloDeudores) {
                     if (deudaChequera.getDeuda().compareTo(BigDecimal.ZERO) == 0) {
                         show = false;
@@ -437,7 +447,7 @@ public class SheetService {
                         bajaFacultad = bajaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
                                 facultadId, persona.getPersonaId(), persona.getDocumentoId(), lectivoId);
                     } catch (BajaFacultadNotFoundException e) {
-
+                        log.debug("Error buscando facultad en otro servicio");
                     }
                     if (bajaFacultad != null) {
                         this.setCellOffsetDateTime(row, 5,
@@ -462,9 +472,9 @@ public class SheetService {
             }
         }
         // Actualiza los legajos de la tesorería
-        legajosUpdate = legajoService.saveAll(legajosUpdate);
+        legajoService.saveAll(legajosUpdate);
 
-        for (Integer column = 0; column < sheet.getRow(2).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(2).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -475,13 +485,13 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando deuda");
         }
         return filename;
     }
 
     public String generateEjercicioOp(Integer ejercicioId) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "listaop." + ejercicioId + ".xlsx";
 
@@ -507,7 +517,7 @@ public class SheetService {
         } catch (EjercicioException e) {
             ejercicio = new Ejercicio();
         }
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 2, ejercicio.getNombre(), styleBold);
         row = sheet.createRow(++fila);
@@ -526,9 +536,9 @@ public class SheetService {
                 .collect(Collectors.toMap(ProveedorMovimiento::getNumeroComprobante, movimiento -> movimiento));
         Map<Integer, Geografica> geograficas = geograficaService.findAll().stream()
                 .collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
-        Long orden_minimo = ordenes.stream().mapToLong(movimiento -> movimiento.getNumeroComprobante()).min()
+        long orden_minimo = ordenes.stream().mapToLong(ProveedorMovimiento::getNumeroComprobante).min()
                 .orElseThrow(NoSuchElementException::new);
-        Long orden_maximo = ordenes.stream().mapToLong(movimiento -> movimiento.getNumeroComprobante()).max()
+        long orden_maximo = ordenes.stream().mapToLong(ProveedorMovimiento::getNumeroComprobante).max()
                 .orElseThrow(NoSuchElementException::new);
 
         for (Long orden_number = orden_minimo; orden_number <= orden_maximo; orden_number++) {
@@ -554,7 +564,7 @@ public class SheetService {
             }
         }
 
-        for (Integer column = 0; column < sheet.getRow(1).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(1).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -565,13 +575,13 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error  en la generación de deuda");
         }
         return filename;
     }
 
     public String generateEficienciaPre(Integer facultadId, Integer lectivoId) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "eficienciapre." + facultadId + "." + lectivoId + ".xlsx";
 
@@ -600,7 +610,7 @@ public class SheetService {
 
         Facultad facultad = facultadService.findByFacultadId(facultadId);
 
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 0, lectivo.getNombre(), styleBold);
         row = sheet.createRow(++fila);
@@ -682,7 +692,7 @@ public class SheetService {
             }
             this.setCellInteger(row, 4, resumen.getCantidad(), styleNormal);
             this.setCellInteger(row, 5, chequerasPreInscriptos.size(), styleNormal);
-            Integer sinChequera = resumen.getCantidad() - chequerasPreInscriptos.size();
+            int sinChequera = resumen.getCantidad() - chequerasPreInscriptos.size();
             this.setCellInteger(row, 6, 0, styleNormal);
             if (matriculas.containsKey(resumen.getKey())) {
                 PreunivMatricResumenFacultad matricula = matriculas.get(resumen.getKey());
@@ -697,7 +707,7 @@ public class SheetService {
             this.setCellBigDecimal(row, 7, deuda, styleNormal);
             // Lista los alumnos sin chequera
             if (sinChequera > 0) {
-                List<String> keys = new ArrayList<String>();
+                List<String> keys = new ArrayList<>();
                 for (String key : keysFacultad)
                     if (!chequerasPreInscriptos.containsKey(key))
                         keys.add(key);
@@ -733,7 +743,7 @@ public class SheetService {
             this.setCellBigDecimal(row, 4, deuda, styleNormal);
         }
 
-        for (Integer column = 0; column < sheet.getRow(1).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(1).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -744,13 +754,13 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando eficiencia pre");
         }
         return filename;
     }
 
     public String generateComparativoPre(Integer facultadId, Integer lectivoId) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "comparativopre." + facultadId + "." + lectivoId + ".xlsx";
 
@@ -779,7 +789,7 @@ public class SheetService {
 
         Facultad facultad = facultadService.findByFacultadId(facultadId);
 
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 0, "Facultad", styleNormal);
         this.setCellString(row, 1, facultad.getNombre(), styleBold);
@@ -815,7 +825,7 @@ public class SheetService {
                 .findAllByFacultadIdAndLectivoId(facultad.getFacultadId(), lectivoId - 1).stream()
                 .collect(Collectors.toMap(ChequeraPreuniv::getPersonaKey, Function.identity(),
                         (chequera, replacement) -> chequera));
-        List<String> keys = new ArrayList<String>(chequeras.keySet());
+        List<String> keys = new ArrayList<>(chequeras.keySet());
         Map<String, PersonaKey> personas = personaKeyService.findAllByUnifiedIn(keys, null).stream()
                 .collect(Collectors.toMap(PersonaKey::getUnified, persona -> persona));
         Map<String, LegajoKey> legajos = legajoKeyService
@@ -949,7 +959,7 @@ public class SheetService {
             }
         }
 
-        for (Integer column = 0; column < sheet.getRow(3).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(3).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -960,13 +970,13 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando comparativo Pre");
         }
         return filename;
     }
 
     public String generateMatriculados(Integer facultadId, Integer lectivoId) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "matriculados." + facultadId + "." + lectivoId + ".xlsx";
 
@@ -995,7 +1005,7 @@ public class SheetService {
 
         Facultad facultad = facultadService.findByFacultadId(facultadId);
 
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 0, "Facultad", styleNormal);
         this.setCellString(row, 1, facultad.getNombre(), styleBold);
@@ -1017,7 +1027,7 @@ public class SheetService {
 
         List<InscripcionFacultad> inscriptos = inscripcionFacultadConsumer.findAllByLectivo(facultad.getApiserver(),
                 facultad.getApiport(), facultadId, lectivoId);
-        List<String> unifieds = inscriptos.stream().map(inscripto -> inscripto.getPersonaKey())
+        List<String> unifieds = inscriptos.stream().map(InscripcionFacultad::getPersonaKey)
                 .collect(Collectors.toList());
         Map<String, PersonaKeyFacultad> personas = personaKeyFacultadConsumer
                 .findAllByUnifieds(facultad.getApiserver(), facultad.getApiport(), unifieds).stream().collect(Collectors
@@ -1074,7 +1084,7 @@ public class SheetService {
             }
         }
 
-        for (Integer column = 0; column < sheet.getRow(2).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(2).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -1085,13 +1095,13 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando matriculados");
         }
         return filename;
     }
 
     public String generateInscriptoCurso(Integer lectivoId) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "inscriptos." + lectivoId + ".xlsx";
 
@@ -1121,7 +1131,7 @@ public class SheetService {
         Map<Integer, Geografica> geograficas = geograficaService.findAll().stream()
                 .collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
 
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 0, lectivo.getNombre(), styleBold);
         row = sheet.createRow(++fila);
@@ -1161,7 +1171,7 @@ public class SheetService {
             }
         }
 
-        for (Integer column = 0; column < sheet.getRow(1).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(1).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -1172,13 +1182,13 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando Inscripto Curso");
         }
         return filename;
     }
 
     public String generateEjercicioIngreso(Integer ejercicioId) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "ingresos." + (ejercicioId + 2011) + ".xlsx";
 
@@ -1206,7 +1216,7 @@ public class SheetService {
         Sheet sheet = book.createSheet("Ingresos");
         Row row = null;
 
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 0, "Fecha", styleBold);
         this.setCellString(row, 1, "Pago", styleBold);
@@ -1245,12 +1255,12 @@ public class SheetService {
                         this.setCellBigDecimal(row, 4, haber, style_normal_red);
                     }
                 } catch (Exception e) {
-
+                    log.debug("Error cargando asiento ingreso");
                 }
             }
         }
 
-        for (Integer column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -1261,14 +1271,14 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando Ejercicio Ingreso");
         }
         return filename;
     }
 
     @Transactional
     public String generateSuspendido(Integer facultadId, Integer geograficaId) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "suspendidos." + facultadId + "." + geograficaId + ".xlsx";
 
@@ -1296,7 +1306,7 @@ public class SheetService {
         Sheet sheet = book.createSheet("Suspendidos");
         Row row = null;
 
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 0, "Documento", styleBold);
         this.setCellString(row, 1, "Apellido, Nombre", styleBold);
@@ -1306,7 +1316,7 @@ public class SheetService {
         this.setCellString(row, 5, "Móvil", styleBold);
 
         List<PersonaSuspendido> suspendidos = personaSuspendidoService.findAllBySede(facultadId, geograficaId);
-        List<String> keys = suspendidos.stream().map(suspendido -> suspendido.personaKey())
+        List<String> keys = suspendidos.stream().map(PersonaSuspendido::personaKey)
                 .collect(Collectors.toList());
         Map<String, PersonaKey> personas = personaKeyService.findAllByUnifiedIn(keys, null).stream().collect(
                 Collectors.toMap(PersonaKey::getUnified, Function.identity(), (persona, replacement) -> persona));
@@ -1333,7 +1343,7 @@ public class SheetService {
                 this.setCellString(row, 5, domicilio.getMovil(), styleNormal);
             }
             // Lista la deuda
-            Boolean deudor = false;
+            boolean deudor = false;
             for (ChequeraSerie serie : chequeraSerieService.findAllByPersona(suspendido.getPersonaId(),
                     suspendido.getDocumentoId())) {
                 DeudaChequera deuda = chequeraCuotaService.calculateDeuda(serie.getFacultadId(),
@@ -1357,7 +1367,7 @@ public class SheetService {
             ++fila;
         }
 
-        for (Integer column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -1368,13 +1378,13 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando Suspendidos");
         }
         return filename;
     }
 
     public String generateContratados(Integer anho, Integer mes) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "contratados." + anho + "." + mes + ".xlsx";
 
@@ -1395,7 +1405,7 @@ public class SheetService {
         Sheet sheet = book.createSheet("Contratados");
         Row row = null;
 
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 0, "Documento", styleBold);
         this.setCellString(row, 1, "Apellido, Nombre", styleBold);
@@ -1419,7 +1429,7 @@ public class SheetService {
             this.setCellOffsetDateTime(row, 6, contratoPeriodo.getContrato().getHasta(), styleDate);
         }
 
-        for (Integer column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -1430,13 +1440,13 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando Contratados");
         }
         return filename;
     }
 
     public String generateLibroIva(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta) {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "libro." + fechaDesde + "." + fechaHasta + ".xlsx";
 
@@ -1457,7 +1467,7 @@ public class SheetService {
         Sheet sheet = book.createSheet("Facturados");
         Row row = null;
 
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 0, "Fecha Recibo", styleBold);
         this.setCellString(row, 1, "Comprobante", styleBold);
@@ -1494,10 +1504,10 @@ public class SheetService {
             this.setCellString(row, 12, chequeraSerie.getFacultad().getNombre(), styleNormal);
             this.setCellString(row, 13, chequeraSerie.getGeografica().getNombre(), styleNormal);
             this.setCellString(row, 14, chequeraSerie.getTipoChequera().getNombre(), styleNormal);
-            this.setCellString(row, 15, String.valueOf(facturacionElectronica.getChequeraPago().getChequeraCuota().getMes()) + "/" + String.valueOf(facturacionElectronica.getChequeraPago().getChequeraCuota().getAnho()), styleNormal);
+            this.setCellString(row, 15, facturacionElectronica.getChequeraPago().getChequeraCuota().getMes() + "/" + facturacionElectronica.getChequeraPago().getChequeraCuota().getAnho(), styleNormal);
         }
 
-        for (Integer column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -1508,13 +1518,13 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando Libro Iva");
         }
         return filename;
     }
 
     public String generateProveedores() {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
 
         String filename = path + "proveedores.xlsx";
 
@@ -1535,7 +1545,7 @@ public class SheetService {
         Sheet sheet = book.createSheet("Proveedores");
         Row row = null;
 
-        Integer fila = -1;
+        int fila = -1;
         row = sheet.createRow(++fila);
         this.setCellString(row, 0, "#", styleBold);
         this.setCellString(row, 1, "CUIT", styleBold);
@@ -1572,7 +1582,7 @@ public class SheetService {
             this.setCellString(row, 14, proveedor.getCbu(), styleNormal);
         }
 
-        for (Integer column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
+        for (int column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
             sheet.autoSizeColumn(column);
 
         try {
@@ -1583,7 +1593,7 @@ public class SheetService {
             output.close();
             book.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Error generando proveedores");
         }
         return filename;
     }
@@ -1626,6 +1636,21 @@ public class SheetService {
         Cell cell = row.createCell(column);
         cell.setCellValue(value);
         cell.setCellStyle(style);
+    }
+
+    private Sheet makeWorkbook(Workbook book, CellStyle styleNormal, CellStyle styleBold, String sheetName) {
+        book = new XSSFWorkbook();
+        styleNormal = book.createCellStyle();
+        Font fontNormal = book.createFont();
+        fontNormal.setBold(false);
+        styleNormal.setFont(fontNormal);
+
+        styleBold = book.createCellStyle();
+        Font fontBold = book.createFont();
+        fontBold.setBold(true);
+        styleBold.setFont(fontBold);
+
+        return book.createSheet(sheetName);
     }
 
 }

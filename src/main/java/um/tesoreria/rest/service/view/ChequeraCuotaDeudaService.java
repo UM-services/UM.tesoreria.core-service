@@ -4,41 +4,44 @@
 package um.tesoreria.rest.service.view;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import um.tesoreria.rest.kotlin.model.ChequeraCuota;
+import um.tesoreria.rest.kotlin.model.ClaseChequera;
+import um.tesoreria.rest.kotlin.model.TipoChequera;
 import um.tesoreria.rest.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.rest.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.rest.repository.view.IChequeraCuotaDeudaRepository;
 import um.tesoreria.rest.util.Tool;
-import um.tesoreria.rest.repository.view.IChequeraCuotaDeudaRepository;
 import um.tesoreria.rest.service.ClaseChequeraService;
 import um.tesoreria.rest.service.TipoChequeraService;
 
 /**
  * @author daniel
- *
  */
 @Service
 public class ChequeraCuotaDeudaService {
 
-    @Autowired
-    private IChequeraCuotaDeudaRepository repository;
+    private final IChequeraCuotaDeudaRepository repository;
+
+    private final ClaseChequeraService claseChequeraService;
+
+    private final TipoChequeraService tipoChequeraService;
+
+    private final ChequeraCuotaService chequeraCuotaService;
 
     @Autowired
-    private ClaseChequeraService claseChequeraService;
-
-    @Autowired
-    private TipoChequeraService tipoChequeraService;
-
-    @Autowired
-    private ChequeraCuotaService chequeraCuotaService;
+    public ChequeraCuotaDeudaService(IChequeraCuotaDeudaRepository repository, ClaseChequeraService claseChequeraService, TipoChequeraService tipoChequeraService, ChequeraCuotaService chequeraCuotaService) {
+        this.repository = repository;
+        this.claseChequeraService = claseChequeraService;
+        this.tipoChequeraService = tipoChequeraService;
+        this.chequeraCuotaService = chequeraCuotaService;
+    }
 
     public List<ChequeraCuotaDeuda> findAllByRango(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced, Pageable pageable) {
         return repository.findAllByVencimiento1Between(Tool.firstTime(desde), Tool.lastTime(hasta), pageable).stream().map(cuotaDeuda -> {
@@ -56,8 +59,19 @@ public class ChequeraCuotaDeudaService {
     }
 
     public List<ChequeraCuotaDeuda> findAllPosgradoByRango(OffsetDateTime desde, OffsetDateTime hasta) {
-        List<Integer> claseChequeraIds = claseChequeraService.findAllByPosgrado().stream().map(claseChequera -> claseChequera.getClaseChequeraId()).collect(Collectors.toList());
-        List<Integer> tipoChequeraIds = tipoChequeraService.findAllByClaseChequeraIds(claseChequeraIds).stream().map(tipoChequera -> tipoChequera.getTipoChequeraId()).collect(Collectors.toList());
+        List<Integer> claseChequeraIds = claseChequeraService.findAllByPosgrado().stream().map(ClaseChequera::getClaseChequeraId).toList();
+        return findAllByFilter(claseChequeraIds, desde, hasta);
+    }
+
+    public List<ChequeraCuotaDeuda> findAllMacroByRango(OffsetDateTime desde, OffsetDateTime hasta) {
+        List<Integer> claseChequeraIds = new ArrayList<>(claseChequeraService.findAllByPosgrado().stream().map(ClaseChequera::getClaseChequeraId).toList());
+        claseChequeraIds.addAll(claseChequeraService.findAllByCurso().stream().map(ClaseChequera::getClaseChequeraId).toList());
+        claseChequeraIds.addAll(claseChequeraService.findAllByTitulo().stream().map(ClaseChequera::getClaseChequeraId).toList());
+        return findAllByFilter(claseChequeraIds, desde, hasta);
+    }
+
+    private List<ChequeraCuotaDeuda> findAllByFilter(List<Integer> claseChequeraIds, OffsetDateTime desde, OffsetDateTime hasta) {
+        List<Integer> tipoChequeraIds = tipoChequeraService.findAllByClaseChequeraIds(claseChequeraIds).stream().map(TipoChequera::getTipoChequeraId).toList();
         return repository.findAllByTipoChequeraIdInAndVencimiento1Between(tipoChequeraIds, Tool.firstTime(desde), Tool.lastTime(hasta)).stream().map(cuotaDeuda -> {
             if (cuotaDeuda.getChequeraId() == null) {
                 ChequeraCuota chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(cuotaDeuda.getChequeraCuotaId());

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.rest.repository;
 
@@ -11,11 +11,14 @@ import java.util.List;
 
 /**
  * @author daniel
- *
  */
 @Repository
 public interface IClaseChequeraRepository extends JpaRepository<ClaseChequera, Integer> {
 
-    public List<ClaseChequera> findALlByPosgrado(Byte posgrado);
+    public List<ClaseChequera> findAllByPosgrado(Byte posgrado);
+
+    public List<ClaseChequera> findAllByCurso(Byte curso);
+
+    public List<ClaseChequera> findAllByTitulo(Byte titulo);
 
 }

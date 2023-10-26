@@ -30,23 +30,27 @@ import java.util.List;
 @RequestMapping("/chequerapago")
 public class ChequeraPagoController {
 
+    private final ChequeraPagoService service;
+
     @Autowired
-    private ChequeraPagoService service;
+    public ChequeraPagoController(ChequeraPagoService service) {
+        this.service = service;
+    }
 
     @GetMapping("/pendientesFactura/{fechaPago}")
     public ResponseEntity<List<ChequeraPago>> pendientesFactura(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaPago) {
-        return new ResponseEntity<List<ChequeraPago>>(service.pendientesFactura(fechaPago), HttpStatus.OK);
+        return new ResponseEntity<>(service.pendientesFactura(fechaPago), HttpStatus.OK);
     }
 
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<List<ChequeraPago>> findAllByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
-        return new ResponseEntity<List<ChequeraPago>>(service.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId), HttpStatus.OK);
     }
 
     @GetMapping("/{chequeraPagoId}")
     public ResponseEntity<ChequeraPago> findByChequeraPagoId(@PathVariable Long chequeraPagoId) {
         try {
-            return new ResponseEntity<ChequeraPago>(service.findByChequeraPagoId(chequeraPagoId), HttpStatus.OK);
+            return new ResponseEntity<>(service.findByChequeraPagoId(chequeraPagoId), HttpStatus.OK);
         } catch (ChequeraPagoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -54,7 +58,7 @@ public class ChequeraPagoController {
 
     @PostMapping("/")
     public ResponseEntity<ChequeraPago> add(@RequestBody ChequeraPago chequeraPago) {
-        return new ResponseEntity<ChequeraPago>(service.add(chequeraPago), HttpStatus.OK);
+        return new ResponseEntity<>(service.add(chequeraPago), HttpStatus.OK);
     }
 
 }

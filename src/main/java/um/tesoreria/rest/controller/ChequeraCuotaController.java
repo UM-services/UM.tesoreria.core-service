@@ -31,11 +31,15 @@ import um.tesoreria.rest.service.ChequeraCuotaService;
 @RequestMapping("/chequeraCuota")
 public class ChequeraCuotaController {
 
-    @Autowired
-    public ChequeraCuotaService service;
+    public final ChequeraCuotaService service;
+
+    private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
 
     @Autowired
-    private ChequeraCuotaDeudaService chequeraCuotaDeudaService;
+    public ChequeraCuotaController(ChequeraCuotaService service, ChequeraCuotaDeudaService chequeraCuotaDeudaService) {
+        this.service = service;
+        this.chequeraCuotaDeudaService = chequeraCuotaDeudaService;
+    }
 
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
     public ResponseEntity<List<ChequeraCuota>> findAllByChequera(@PathVariable Integer facultadId,
@@ -60,6 +64,11 @@ public class ChequeraCuotaController {
     @GetMapping("/deudaPosgradoRango/{desde}/{hasta}")
     public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaPosgradoRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
         return new ResponseEntity<>(chequeraCuotaDeudaService.findAllPosgradoByRango(desde, hasta), HttpStatus.OK);
+    }
+
+    @GetMapping("/deudaMacroRango/{desde}/{hasta}")
+    public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaMacroRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
+        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllMacroByRango(desde, hasta), HttpStatus.OK);
     }
 
     @GetMapping("/{chequeraCuotaId}")

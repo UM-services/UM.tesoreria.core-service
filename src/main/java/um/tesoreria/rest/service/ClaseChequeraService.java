@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.rest.service;
 
@@ -14,19 +14,27 @@ import um.tesoreria.rest.repository.IClaseChequeraRepository;
 
 /**
  * @author daniel
- *
  */
 @Service
 public class ClaseChequeraService {
 
-	@Autowired
-	private IClaseChequeraRepository repository;
+    @Autowired
+    private IClaseChequeraRepository repository;
 
-	public List<ClaseChequera> findAll() {
-		return repository.findAll();
-	}
+    public List<ClaseChequera> findAll() {
+        return repository.findAll();
+    }
 
     public List<ClaseChequera> findAllByPosgrado() {
-		return repository.findALlByPosgrado((byte) 1);
+        return repository.findAllByPosgrado((byte) 1);
     }
+
+    public List<ClaseChequera> findAllByCurso() {
+        return repository.findAllByCurso((byte) 1);
+    }
+
+    public List<ClaseChequera> findAllByTitulo() {
+        return repository.findAllByTitulo((byte) 1);
+    }
+
 }

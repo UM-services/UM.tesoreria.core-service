@@ -49,7 +49,7 @@ public class PagarFileService {
         List<Character> meses = List.of('1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C');
         Integer cantidadLote = 5000;
         Integer totalRegistros = chequeraCuotaDeudaService.findAllByRango(desde, hasta, false, null).size();
-        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(new File(outputFilename)));
+        ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(outputFilename));
 
         for (Integer lote = 0; lote < (totalRegistros / cantidadLote) + 1; lote++) {
             String filename = path + "PFXG" + lote + meses.get(desde.getMonthValue() - 1)
