@@ -17,9 +17,9 @@ import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import um.tesoreria.rest.kotlin.model.Auditable;
 import um.tesoreria.rest.kotlin.model.Comprobante;
 import um.tesoreria.rest.kotlin.model.Cuenta;
-import um.tesoreria.rest.model.Auditable;
 import um.tesoreria.rest.model.Proveedor;
 import lombok.AllArgsConstructor;
 import lombok.Data;

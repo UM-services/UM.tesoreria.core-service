@@ -15,6 +15,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import um.tesoreria.rest.kotlin.model.Auditable;
 import um.tesoreria.rest.model.view.ContratadoPersona;
 import lombok.AllArgsConstructor;
 import lombok.Data;

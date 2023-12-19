@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import um.tesoreria.rest.kotlin.model.Auditable;
 import um.tesoreria.rest.kotlin.model.Contratado;
 import um.tesoreria.rest.kotlin.model.Facultad;
 import um.tesoreria.rest.kotlin.model.Geografica;

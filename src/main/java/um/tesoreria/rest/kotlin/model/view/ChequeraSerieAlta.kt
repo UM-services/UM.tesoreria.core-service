@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
 import org.hibernate.annotations.Immutable
 import um.tesoreria.rest.kotlin.model.*
-import um.tesoreria.rest.model.Auditable
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 

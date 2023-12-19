@@ -21,6 +21,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import um.tesoreria.rest.kotlin.model.Articulo;
+import um.tesoreria.rest.kotlin.model.Auditable;
 import um.tesoreria.rest.kotlin.model.Cuenta;
 import um.tesoreria.rest.kotlin.model.Ubicacion;
 

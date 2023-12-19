@@ -17,11 +17,11 @@ import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import um.tesoreria.rest.model.Auditable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import um.tesoreria.rest.kotlin.model.Auditable;
 
 /**
  * @author daniel

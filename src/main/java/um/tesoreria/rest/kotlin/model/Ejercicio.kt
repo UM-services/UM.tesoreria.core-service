@@ -1,6 +1,5 @@
 package um.tesoreria.rest.kotlin.model
 
-import um.tesoreria.rest.model.Auditable
 import um.tesoreria.rest.util.Tool
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.Column

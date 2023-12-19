@@ -1,6 +1,5 @@
 package um.tesoreria.rest.kotlin.model
 
-import um.tesoreria.rest.model.Auditable
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType

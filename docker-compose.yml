@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
 
-    mysql:
+    tesoreria.mysql:
         image: dqmdz/mysql:5.7
         ports:
             - "3306:3306"
@@ -17,49 +17,52 @@ services:
         networks:
             - tesoreria
 
-#    tesoreria:
-#        build:
-#            context: .
-#            dockerfile: Dockerfile.local
-#        ports:
-#            - "8092:8092"
-#        depends_on:
-#            - mysql
-#        restart: always
+    tesoreria.app:
+        build:
+            context: .
+            dockerfile: Dockerfile.local
+        develop:
+            watch:
+                - action: rebuild
+                  path: ./src
+        ports:
+            - "8092:8092"
+        depends_on:
+            - tesoreria.mysql
+        restart: always
 #        volumes:
 #            - .:/app
-#        environment:
-#            - APP_SERVER=mysql:3306
-#            - APP_DATABASE=tesium
-#            - APP_USER=root
-#            - APP_PASSWORD=root
-#            - APP_PORT=8092
-#            - APP_ADD-PROPERTIES=false
-#            - APP_LOGGING=debug
-#            - APP_LIVERELOAD_ENABLED=true
-#            - APP_LIVERELOAD_PORT=35792
-#            - APP_OPEN-IN-VIEW=false
-#            - APP_MAIL_USERNAME=envios@um.edu.ar
-#            - APP_MAIL_PASSWORD=4Siby2KPwWIStCyX9gLB
-#        networks:
-#            - tesoreria
+        environment:
+            APP_SERVER: "tesoreria.mysql:3306"
+            APP_DATABASE: tesium
+            APP_USER: root
+            APP_PASSWORD: root
+            APP_PORT: 8092
+            APP_ADD-PROPERTIES: "false"
+            APP_LOGGING: "debug"
+            APP_LIVERELOAD_ENABLED: "true"
+            APP_LIVERELOAD_PORT: 35791
+            APP_OPEN-IN-VIEW: "false"
+            APP_MAIL_USERNAME: envios@um.edu.ar
+            APP_MAIL_PASSWORD: 4Siby2KPwWIStCyX9gLB
+        networks:
+            - tesoreria
 
-    cloudbeaver:
+    tesoreria.cloudbeaver:
         image: dbeaver/cloudbeaver:latest
         restart: always
         depends_on:
-            - mysql
+            - tesoreria.mysql
         ports:
-            - '18978:8978'
+            - '38978:8978'
         volumes:
             - ./cloudbeaver:/opt/cloudbeaver/workspace
         networks:
             - tesoreria
 
 volumes:
-    data:
-    cloudbeaver:
-    tesoreria:
+    tesoreria.cloudbeaver:
+    tesoreria.mysql:
 
 networks:
     tesoreria:

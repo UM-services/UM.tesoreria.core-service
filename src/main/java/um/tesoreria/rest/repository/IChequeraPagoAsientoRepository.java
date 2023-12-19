@@ -5,8 +5,7 @@ package um.tesoreria.rest.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
-
-import um.tesoreria.rest.model.ChequeraPagoAsiento;
+import um.tesoreria.rest.kotlin.model.ChequeraPagoAsiento;
 
 /**
  * @author daniel

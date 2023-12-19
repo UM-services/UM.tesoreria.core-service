@@ -100,13 +100,12 @@ public class ChequeraController {
     }
 
     @PostMapping("/spoter/{updateMailPersonal}/{responseSinEnvio}")
-    public ResponseEntity<SpoterDataResponse> sendChequeraPreSpoter(@RequestBody SpoterData spoterData, @PathVariable Boolean updateMailPersonal, @PathVariable Boolean responseSinEnvio)
-            throws MessagingException {
+    public ResponseEntity<SpoterDataResponse> sendChequeraPreSpoter(@RequestBody SpoterData spoterData, @PathVariable Boolean updateMailPersonal, @PathVariable Boolean responseSinEnvio) {
         try {
-            return new ResponseEntity<SpoterDataResponse>(mailChequeraService.sendChequeraPreSpoter(spoterData, updateMailPersonal, responseSinEnvio),
+            return new ResponseEntity<>(mailChequeraService.sendChequeraPreSpoter(spoterData, updateMailPersonal, responseSinEnvio),
                     HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<SpoterDataResponse>(
+            return new ResponseEntity<>(
                     new SpoterDataResponse(false, e.getMessage(), null, null, null, null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

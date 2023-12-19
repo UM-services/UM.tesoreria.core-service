@@ -12,11 +12,11 @@ import jakarta.persistence.Table;
 
 import org.hibernate.annotations.Immutable;
 
-import um.tesoreria.rest.model.Auditable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import um.tesoreria.rest.kotlin.model.Auditable;
 
 /**
  * @author daniel
