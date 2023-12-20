@@ -24,6 +24,7 @@ import um.tesoreria.rest.kotlin.model.view.ChequeraSerieAlta;
 import um.tesoreria.rest.kotlin.model.view.ChequeraSerieAltaFull;
 import um.tesoreria.rest.model.view.ChequeraIncompleta;
 import um.tesoreria.rest.model.view.ChequeraKey;
+import um.tesoreria.rest.service.ChequeraCuotaService;
 import um.tesoreria.rest.service.ChequeraSerieService;
 
 /**
@@ -34,8 +35,15 @@ import um.tesoreria.rest.service.ChequeraSerieService;
 @RequestMapping("/chequeraserie")
 public class ChequeraSerieController {
 
+    private final ChequeraSerieService service;
+
+    private final ChequeraCuotaService chequeraCuotaService;
+
     @Autowired
-    private ChequeraSerieService service;
+    public ChequeraSerieController(ChequeraSerieService service, ChequeraCuotaService chequeraCuotaService) {
+        this.service = service;
+        this.chequeraCuotaService = chequeraCuotaService;
+    }
 
     @GetMapping("/persona/{personaId}/{documentoId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByPersona(@PathVariable BigDecimal personaId,
@@ -46,7 +54,7 @@ public class ChequeraSerieController {
     @GetMapping("/personaextended/{personaId}/{documentoId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByPersonaExtended(@PathVariable BigDecimal personaId,
                                                                         @PathVariable Integer documentoId) {
-        return new ResponseEntity<>(service.findAllByPersonaExtended(personaId, documentoId),
+        return new ResponseEntity<>(service.findAllByPersonaExtended(personaId, documentoId, chequeraCuotaService),
                 HttpStatus.OK);
     }
 
@@ -61,7 +69,7 @@ public class ChequeraSerieController {
     public ResponseEntity<List<ChequeraSerie>> findAllByFacultadExtended(@PathVariable BigDecimal personaId,
                                                                          @PathVariable Integer documentoId, @PathVariable Integer facultadId) {
         return new ResponseEntity<>(
-                service.findAllByFacultadExtended(personaId, documentoId, facultadId), HttpStatus.OK);
+                service.findAllByFacultadExtended(personaId, documentoId, facultadId, chequeraCuotaService), HttpStatus.OK);
     }
 
     @GetMapping("/personaLectivo/{personaId}/{documentoId}/{lectivoId}")
@@ -86,7 +94,7 @@ public class ChequeraSerieController {
     @GetMapping("/altasFull/{lectivoId}/{facultadId}/{geograficaId}/{tipoChequeraId}/{fechaDesdePrimerVencimiento}")
     public ResponseEntity<List<ChequeraSerieAltaFull>> findAllAltasFull(@PathVariable Integer lectivoId,
                                                                         @PathVariable Integer facultadId, @PathVariable Integer geograficaId, @PathVariable Integer tipoChequeraId, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaDesdePrimerVencimiento) {
-        return new ResponseEntity<>(service.findAllAltasFull(lectivoId, facultadId, geograficaId, tipoChequeraId, fechaDesdePrimerVencimiento),
+        return new ResponseEntity<>(service.findAllAltasFull(lectivoId, facultadId, geograficaId, tipoChequeraId, fechaDesdePrimerVencimiento, chequeraCuotaService),
                 HttpStatus.OK);
     }
 
@@ -124,7 +132,7 @@ public class ChequeraSerieController {
 
     @GetMapping("/extended/{chequeraId}")
     public ResponseEntity<ChequeraSerie> findByChequeraIdExtended(@PathVariable Long chequeraId) {
-        return new ResponseEntity<>(service.findByChequeraIdExtended(chequeraId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findByChequeraIdExtended(chequeraId, chequeraCuotaService), HttpStatus.OK);
     }
 
     @GetMapping("/unique/{facultadId}/{tipochequeraId}/{chequeraserieId}")
@@ -138,7 +146,7 @@ public class ChequeraSerieController {
     public ResponseEntity<ChequeraSerie> findByUniqueExtended(@PathVariable Integer facultadId,
                                                               @PathVariable Integer tipochequeraId, @PathVariable Long chequeraserieId) {
         return new ResponseEntity<>(
-                service.findByUniqueExtended(facultadId, tipochequeraId, chequeraserieId), HttpStatus.OK);
+                service.findByUniqueExtended(facultadId, tipochequeraId, chequeraserieId, chequeraCuotaService), HttpStatus.OK);
     }
 
     @GetMapping("/setpaypertic/{facultadId}/{tipochequeraId}/{chequeraserieId}/{flag}")

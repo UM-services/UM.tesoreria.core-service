@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import um.tesoreria.rest.service.MatriculaService;
 import um.tesoreria.rest.service.facade.SincronizeService;
 
 /**
@@ -23,13 +24,20 @@ import um.tesoreria.rest.service.facade.SincronizeService;
 @RequestMapping("/sincronize")
 public class SincronizeController {
 
+	private final SincronizeService service;
+
+	private final MatriculaService matriculaService;
+
 	@Autowired
-	private SincronizeService service;
+	public SincronizeController(SincronizeService service, MatriculaService matriculaService) {
+		this.service = service;
+		this.matriculaService = matriculaService;
+	}
 
 	@GetMapping("/matricula/{lectivoId}/{facultadId}")
 	public ResponseEntity<Void> sincronizeMatricula(@PathVariable Integer lectivoId, @PathVariable Integer facultadId)
 			throws CloneNotSupportedException {
-		service.sincronizeMatricula(lectivoId, facultadId);
+		service.sincronizeMatricula(lectivoId, facultadId, matriculaService);
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
 

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -26,43 +27,49 @@ import um.tesoreria.rest.exception.FacultadException;
 import um.tesoreria.rest.exception.LectivoException;
 import um.tesoreria.rest.exception.TipoChequeraException;
 import um.tesoreria.rest.kotlin.model.*;
+import um.tesoreria.rest.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.rest.model.ChequeraTotal;
 import um.tesoreria.rest.model.dto.DeudaChequera;
 import um.tesoreria.rest.repository.IChequeraCuotaRepository;
 import um.tesoreria.rest.service.view.ChequeraCuotaDeudaService;
 import um.tesoreria.rest.util.Tool;
-import um.tesoreria.rest.exception.*;
-import um.tesoreria.rest.repository.IChequeraCuotaRepository;
 
 /**
  * @author daniel
  */
 @Service
+@Slf4j
 public class ChequeraCuotaService {
 
-    @Autowired
-    private IChequeraCuotaRepository repository;
+    private final IChequeraCuotaRepository repository;
+
+    private final ChequeraSerieService chequeraSerieService;
+
+    private final ChequeraPagoService chequeraPagoService;
+
+    private final ChequeraTotalService chequeraTotalService;
+
+    private final FacultadService facultadService;
+
+    private final TipoChequeraService tipoChequeraService;
+
+    private final LectivoService lectivoService;
+
+    private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
 
     @Autowired
-    private ChequeraSerieService chequeraSerieService;
-
-    @Autowired
-    private ChequeraPagoService chequeraPagoService;
-
-    @Autowired
-    private ChequeraTotalService chequeraTotalService;
-
-    @Autowired
-    private FacultadService facultadService;
-
-    @Autowired
-    private TipoChequeraService tipoChequeraService;
-
-    @Autowired
-    private LectivoService lectivoService;
-
-    @Autowired
-    private ChequeraCuotaDeudaService chequeraCuotaDeudaService;
+    public ChequeraCuotaService(IChequeraCuotaRepository repository, ChequeraSerieService chequeraSerieService, ChequeraPagoService chequeraPagoService,
+                                ChequeraTotalService chequeraTotalService, FacultadService facultadService, TipoChequeraService tipoChequeraService,
+                                LectivoService lectivoService, ChequeraCuotaDeudaService chequeraCuotaDeudaService) {
+        this.repository = repository;
+        this.chequeraSerieService = chequeraSerieService;
+        this.chequeraPagoService = chequeraPagoService;
+        this.chequeraTotalService = chequeraTotalService;
+        this.facultadService = facultadService;
+        this.tipoChequeraService = tipoChequeraService;
+        this.lectivoService = lectivoService;
+        this.chequeraCuotaDeudaService = chequeraCuotaDeudaService;
+    }
 
     @Transactional
     public List<ChequeraCuota> findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(
@@ -113,7 +120,7 @@ public class ChequeraCuotaService {
 
     public List<ChequeraCuota> findAllInconsistencias(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced) {
         List<ChequeraCuota> chequeraCuotas = new ArrayList<>();
-        for (ChequeraCuota chequeraCuota : chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null).stream().map(cuotaDeuda -> cuotaDeuda.getChequeraCuota()).toList()) {
+        for (ChequeraCuota chequeraCuota : chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null, this).stream().map(ChequeraCuotaDeuda::getChequeraCuota).toList()) {
             if (chequeraCuota.getVencimiento1().isAfter(chequeraCuota.getVencimiento2())) {
                 chequeraCuotas.add(chequeraCuota);
                 continue;
@@ -208,7 +215,7 @@ public class ChequeraCuotaService {
                     BigDecimal.ZERO, new BigDecimal(1000000), 1000, null);
         }
         Map<String, ChequeraPago> pagos = chequeraPagoService
-                .findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId).stream()
+                .findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, this).stream()
                 .collect(Collectors.toMap(ChequeraPago::getCuotaKey, Function.identity(), (pago, replacement) -> pago));
         BigDecimal deuda = BigDecimal.ZERO;
         Integer cantidad = 0;
@@ -245,7 +252,7 @@ public class ChequeraCuotaService {
                     BigDecimal.ZERO, new BigDecimal(1000000), 1000, null);
         }
         Map<String, ChequeraPago> pagos = chequeraPagoService
-                .findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId).stream()
+                .findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, this).stream()
                 .collect(Collectors.toMap(ChequeraPago::getCuotaKey, Function.identity(), (pago, replacement) -> pago));
         BigDecimal deuda = BigDecimal.ZERO;
         Integer cantidad = 0;
@@ -313,7 +320,11 @@ public class ChequeraCuotaService {
         // Mes
         codigoBarras += new DecimalFormat("00").format(chequeraCuota.getMes());
         // Año
-        codigoBarras += new DecimalFormat("00").format(chequeraCuota.getAnho() - 2000);
+        int anho = chequeraCuota.getAnho();
+        if (anho > 2000) {
+            anho -= 2000;
+        }
+        codigoBarras += new DecimalFormat("00").format(anho);
         // Cuota ID
         codigoBarras += new DecimalFormat("00").format(chequeraCuota.getCuotaId());
         // 1er Importe
@@ -328,16 +339,30 @@ public class ChequeraCuotaService {
         // Año 1er Vencimiento
         codigoBarras += new DecimalFormat("0000").format(vencimiento1.getYear());
         // Dif 2do Importe
+        BigDecimal diferenciaImporte1 = chequeraCuota.getImporte2().subtract(chequeraCuota.getImporte1()).setScale(0, RoundingMode.HALF_UP);
+        if (diferenciaImporte1.compareTo(BigDecimal.ZERO) < 0) {
+            log.debug("chequera_cuota_service.calculate_codigo_barras.diferencia_importe_1 < 0");
+        }
         codigoBarras += new DecimalFormat("00000")
-                .format(chequeraCuota.getImporte2().subtract(chequeraCuota.getImporte1()).setScale(0));
+                .format(diferenciaImporte1);
         // Dif 2do Vencimiento
         Long diferencia1 = ChronoUnit.DAYS.between(vencimiento1.toLocalDate(), vencimiento2.toLocalDate());
+        if (diferencia1 < 0) {
+            log.debug("chequera_cuota_service.calculate_codigo_barras.diferencia_1 < 0");
+        }
         codigoBarras += new DecimalFormat("000").format(diferencia1);
         // Dif 3er Importe
+        BigDecimal diferenciaImporte2 = chequeraCuota.getImporte3().subtract(chequeraCuota.getImporte2()).setScale(0, RoundingMode.HALF_UP);
+        if (diferenciaImporte2.compareTo(BigDecimal.ZERO) < 0) {
+            log.debug("chequera_cuota_service.calculate_codigo_barras.diferencia_importe_2 < 0");
+        }
         codigoBarras += new DecimalFormat("00000")
-                .format(chequeraCuota.getImporte3().subtract(chequeraCuota.getImporte2()).setScale(0));
+                .format(diferenciaImporte2);
         // Dif 3er Vencimiento
         Long diferencia2 = ChronoUnit.DAYS.between(vencimiento2.toLocalDate(), vencimiento3.toLocalDate());
+        if (diferencia2 < 0) {
+            log.debug("chequera_cuota_service.calculate_codigo_barras.diferencia2 < 0");
+        }
         codigoBarras += new DecimalFormat("000").format(diferencia2);
         // Codigo Verificador
         codigoBarras += Tool.calculateVerificadorRapiPago(codigoBarras);

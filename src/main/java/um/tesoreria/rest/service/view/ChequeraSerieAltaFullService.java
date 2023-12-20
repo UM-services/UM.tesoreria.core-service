@@ -1,7 +1,5 @@
 package um.tesoreria.rest.service.view;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,13 +17,14 @@ import java.util.List;
 @Slf4j
 public class ChequeraSerieAltaFullService {
 
-    @Autowired
-    private ChequeraSerieAltaFullRepository repository;
+    private final ChequeraSerieAltaFullRepository repository;
 
     @Autowired
-    private ChequeraCuotaService chequeraCuotaService;
+    public ChequeraSerieAltaFullService(ChequeraSerieAltaFullRepository repository) {
+        this.repository = repository;
+    }
 
-    public List<ChequeraSerieAltaFull> findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(Integer lectivoId, Integer facultadId, Integer geograficaId, Integer tipoChequeraId, OffsetDateTime fechaDesdePrimerVencimiento) {
+    public List<ChequeraSerieAltaFull> findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(Integer lectivoId, Integer facultadId, Integer geograficaId, Integer tipoChequeraId, OffsetDateTime fechaDesdePrimerVencimiento, ChequeraCuotaService chequeraCuotaService) {
         List<ChequeraSerieAltaFull> chequeras = new ArrayList<>();
         for (ChequeraSerieAltaFull chequeraSerieAltaFull : repository.findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(lectivoId, facultadId, geograficaId, tipoChequeraId)) {
             log.debug(chequeraSerieAltaFull.getPersona().getApellidoNombre());

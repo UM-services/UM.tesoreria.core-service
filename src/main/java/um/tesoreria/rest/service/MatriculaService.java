@@ -131,7 +131,7 @@ public class MatriculaService {
 			log.debug("Sincronizando Matriculas");
 			for (Facultad facultad : facultadService.findFacultades()) {
 				log.debug("Sincronizando Facultad -> " + facultad);
-				sincronizeservice.sincronizeMatricula(lectivo_actual.getLectivoId(), facultad.getFacultadId());
+				sincronizeservice.sincronizeMatricula(lectivo_actual.getLectivoId(), facultad.getFacultadId(), this);
 			}
 			depurate(lectivo_actual.getLectivoId());
 		}

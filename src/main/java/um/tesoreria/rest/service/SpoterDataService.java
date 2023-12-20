@@ -5,6 +5,7 @@ package um.tesoreria.rest.service;
 
 import java.math.BigDecimal;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +18,21 @@ import um.tesoreria.rest.kotlin.model.SpoterData;
  *
  */
 @Service
+@Slf4j
 public class SpoterDataService {
 
-	@Autowired
-	private ISpoterDataRepository repository;
+	private final ISpoterDataRepository repository;
 
-	public SpoterData findExistentRequest(BigDecimal personaId, Integer documentoId, Integer facultadId,
-                                          Integer geograficaId, Integer lectivoId) {
+	@Autowired
+	public SpoterDataService(ISpoterDataRepository repository) {
+		this.repository = repository;
+	}
+
+	public SpoterData findOne(BigDecimal personaId, Integer documentoId, Integer facultadId,
+													Integer geograficaId, Integer lectivoId) {
+		log.info("Recovering Spoter: {}/{}/{}/{}/{}", personaId, documentoId, facultadId, geograficaId, lectivoId);
 		return repository
-				.findTopByPersonaIdAndDocumentoIdAndFacultadIdAndGeograficaIdAndLectivoId(personaId, documentoId,
+				.findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndGeograficaIdAndLectivoId(personaId, documentoId,
 						facultadId, geograficaId, lectivoId)
 				.orElseThrow(() -> new SpoterDataException(personaId, documentoId, facultadId, geograficaId,
 						lectivoId));

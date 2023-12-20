@@ -25,13 +25,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.rest.exception.SpoterDataException;
 import um.tesoreria.rest.kotlin.model.dto.PreuniversitarioData;
 import um.tesoreria.rest.kotlin.model.dto.SpoterDataResponse;
+import um.tesoreria.rest.service.SpoterDataService;
 import um.tesoreria.rest.service.facade.ChequeraService;
 import um.tesoreria.rest.service.facade.FormulariosToPdfService;
 import um.tesoreria.rest.service.facade.MailChequeraService;
 import um.tesoreria.rest.kotlin.model.SpoterData;
-import um.tesoreria.rest.service.facade.MailChequeraService;
 
 /**
  * @author daniel
@@ -40,27 +42,34 @@ import um.tesoreria.rest.service.facade.MailChequeraService;
 @RequestMapping("/chequera")
 public class ChequeraController {
 
-    @Autowired
-    private ChequeraService service;
+    private final ChequeraService service;
+
+    private final MailChequeraService mailChequeraService;
+
+    private final FormulariosToPdfService formularioToPdfService;
+
+    private final SpoterDataService spoterDataService;
 
     @Autowired
-    private MailChequeraService mailChequeraService;
-
-    @Autowired
-    private FormulariosToPdfService formularioToPdfService;
+    public ChequeraController(ChequeraService service, MailChequeraService mailChequeraService, FormulariosToPdfService formularioToPdfService, SpoterDataService spoterDataService) {
+        this.service = service;
+        this.mailChequeraService = mailChequeraService;
+        this.formularioToPdfService = formularioToPdfService;
+        this.spoterDataService = spoterDataService;
+    }
 
     @DeleteMapping("/delete/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{usuarioId}")
     public ResponseEntity<Void> deleteByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
                                                  @PathVariable Long chequeraSerieId, @PathVariable String usuarioId) {
         service.deleteByChequera(facultadId, tipoChequeraId, chequeraSerieId, usuarioId);
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/sendChequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{copiaInformes}")
     public ResponseEntity<String> sendChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
                                                @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
                                                @PathVariable Boolean copiaInformes) throws MessagingException {
-        return new ResponseEntity<String>(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
+        return new ResponseEntity<>(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
                 alternativaId, copiaInformes, true), HttpStatus.OK);
     }
 
@@ -90,13 +99,13 @@ public class ChequeraController {
     public ResponseEntity<Void> extendDebito(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
                                              @PathVariable Long chequeraSerieId) {
         service.extendDebito(facultadId, tipoChequeraId, chequeraSerieId);
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/track/{chequeraId}")
     public ResponseEntity<Void> track(@PathVariable Long chequeraId) {
         service.track(chequeraId);
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping("/spoter/{updateMailPersonal}/{responseSinEnvio}")
@@ -110,10 +119,19 @@ public class ChequeraController {
         }
     }
 
+    @GetMapping("/spoter/{personaId}/{documentoId}/{facultadId}/{geograficaId}/{lectivoId}")
+    public ResponseEntity<SpoterData> findOne(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId, @PathVariable Integer facultadId, @PathVariable Integer geograficaId, @PathVariable Integer lectivoId) {
+        try {
+            return new ResponseEntity<>(spoterDataService.findOne(personaId, documentoId, facultadId, geograficaId, lectivoId), HttpStatus.OK);
+        } catch (SpoterDataException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
     @GetMapping("/lastPre/{facultadId}/{personaId}/{documentoId}")
     public ResponseEntity<PreuniversitarioData> lastPreData(@PathVariable Integer facultadId,
                                                             @PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
-        return new ResponseEntity<PreuniversitarioData>(service.findLastPreData(facultadId, personaId, documentoId),
+        return new ResponseEntity<>(service.findLastPreData(facultadId, personaId, documentoId),
                 HttpStatus.OK);
     }
 

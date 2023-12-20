@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.rest.exception.ChequeraPagoException;
+import um.tesoreria.rest.service.ChequeraCuotaService;
 import um.tesoreria.rest.service.ChequeraPagoService;
 
 import java.time.OffsetDateTime;
@@ -24,7 +25,6 @@ import java.util.List;
 
 /**
  * @author daniel
- *
  */
 @RestController
 @RequestMapping("/chequerapago")
@@ -32,25 +32,28 @@ public class ChequeraPagoController {
 
     private final ChequeraPagoService service;
 
+    private final ChequeraCuotaService chequeraCuotaService;
+
     @Autowired
-    public ChequeraPagoController(ChequeraPagoService service) {
+    public ChequeraPagoController(ChequeraPagoService service, ChequeraCuotaService chequeraCuotaService) {
         this.service = service;
+        this.chequeraCuotaService = chequeraCuotaService;
     }
 
     @GetMapping("/pendientesFactura/{fechaPago}")
     public ResponseEntity<List<ChequeraPago>> pendientesFactura(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaPago) {
-        return new ResponseEntity<>(service.pendientesFactura(fechaPago), HttpStatus.OK);
+        return new ResponseEntity<>(service.pendientesFactura(fechaPago, chequeraCuotaService), HttpStatus.OK);
     }
 
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<List<ChequeraPago>> findAllByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
-        return new ResponseEntity<>(service.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId), HttpStatus.OK);
+        return new ResponseEntity<>(service.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService), HttpStatus.OK);
     }
 
     @GetMapping("/{chequeraPagoId}")
     public ResponseEntity<ChequeraPago> findByChequeraPagoId(@PathVariable Long chequeraPagoId) {
         try {
-            return new ResponseEntity<>(service.findByChequeraPagoId(chequeraPagoId), HttpStatus.OK);
+            return new ResponseEntity<>(service.findByChequeraPagoId(chequeraPagoId, chequeraCuotaService), HttpStatus.OK);
         } catch (ChequeraPagoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -58,7 +61,7 @@ public class ChequeraPagoController {
 
     @PostMapping("/")
     public ResponseEntity<ChequeraPago> add(@RequestBody ChequeraPago chequeraPago) {
-        return new ResponseEntity<>(service.add(chequeraPago), HttpStatus.OK);
+        return new ResponseEntity<>(service.add(chequeraPago, chequeraCuotaService), HttpStatus.OK);
     }
 
 }

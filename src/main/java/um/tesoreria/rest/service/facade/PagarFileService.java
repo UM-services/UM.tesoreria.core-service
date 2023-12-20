@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.rest.kotlin.model.view.ChequeraCuotaDeuda;
+import um.tesoreria.rest.service.ChequeraCuotaService;
 import um.tesoreria.rest.service.view.ChequeraCuotaDeudaService;
 import um.tesoreria.rest.util.Tool;
 import lombok.extern.slf4j.Slf4j;
@@ -36,19 +37,26 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PagarFileService {
 
-    @Autowired
-    private ChequeraCuotaDeudaService chequeraCuotaDeudaService;
+    private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
+
+    private final Environment environment;
+
+    private final ChequeraCuotaService chequeraCuotaService;
 
     @Autowired
-    private Environment env;
+    public PagarFileService(ChequeraCuotaDeudaService chequeraCuotaDeudaService, Environment environment, ChequeraCuotaService chequeraCuotaService) {
+        this.chequeraCuotaDeudaService = chequeraCuotaDeudaService;
+        this.environment = environment;
+        this.chequeraCuotaService = chequeraCuotaService;
+    }
 
     public String generateFiles(OffsetDateTime desde, OffsetDateTime hasta) throws IOException {
-        String path = env.getProperty("path.files");
+        String path = environment.getProperty("path.files");
         String outputFilename = path + "PAGAR.zip";
 
         List<Character> meses = List.of('1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C');
         Integer cantidadLote = 5000;
-        Integer totalRegistros = chequeraCuotaDeudaService.findAllByRango(desde, hasta, false, null).size();
+        Integer totalRegistros = chequeraCuotaDeudaService.findAllByRango(desde, hasta, false, null, chequeraCuotaService).size();
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(outputFilename));
 
         for (Integer lote = 0; lote < (totalRegistros / cantidadLote) + 1; lote++) {
@@ -73,7 +81,7 @@ public class PagarFileService {
             BigDecimal totalVencimiento2 = BigDecimal.ZERO;
             BigDecimal totalVencimiento3 = BigDecimal.ZERO;
             OffsetDateTime lastDate = OffsetDateTime.of(1960, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
-            for (ChequeraCuotaDeuda deuda : chequeraCuotaDeudaService.findAllByRango(desde, hasta, true, PageRequest.of(lote, cantidadLote))) {
+            for (ChequeraCuotaDeuda deuda : chequeraCuotaDeudaService.findAllByRango(desde, hasta, true, PageRequest.of(lote, cantidadLote), chequeraCuotaService)) {
                 cantidadRegistros++;
                 // Identificador de Deuda
                 line = new DecimalFormat("00").format(deuda.getAlternativaId());

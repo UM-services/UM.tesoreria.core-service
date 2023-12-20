@@ -17,7 +17,7 @@ import um.tesoreria.rest.kotlin.model.SpoterData;
 @Repository
 public interface ISpoterDataRepository extends JpaRepository<SpoterData, Long> {
 
-	public Optional<SpoterData> findTopByPersonaIdAndDocumentoIdAndFacultadIdAndGeograficaIdAndLectivoId(
+	public Optional<SpoterData> findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndGeograficaIdAndLectivoId(
 			BigDecimal personaId, Integer documentoId, Integer facultadId, Integer geograficaId, Integer lectivoId);
 
 }

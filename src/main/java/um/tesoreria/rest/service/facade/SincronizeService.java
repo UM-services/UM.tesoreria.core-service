@@ -53,13 +53,6 @@ import um.tesoreria.rest.service.PlanService;
 import um.tesoreria.rest.service.UsuarioLdapService;
 import um.tesoreria.rest.service.view.ChequeraClaseService;
 import lombok.extern.slf4j.Slf4j;
-import um.tesoreria.rest.exception.*;
-import um.tesoreria.rest.exception.view.ChequeraClaseException;
-import um.tesoreria.rest.model.InfoLdap;
-import um.tesoreria.rest.model.Legajo;
-import um.tesoreria.rest.model.Matricula;
-import um.tesoreria.rest.model.Plan;
-import um.tesoreria.rest.service.*;
 
 /**
  * @author daniel
@@ -77,9 +70,6 @@ public class SincronizeService {
 
 	@Autowired
 	private UsuarioLdapService usuarioLdapService;
-
-	@Autowired
-	private MatriculaService matriculaService;
 
 	@Autowired
 	private ChequeraSerieService chequeraSerieService;
@@ -124,14 +114,14 @@ public class SincronizeService {
 	private CarreraFacultadConsumer carreraFacultadConsumer;
 
 	@Transactional
-	public void sincronizeMatricula(Integer lectivoId, Integer facultadId) throws CloneNotSupportedException {
+	public void sincronizeMatricula(Integer lectivoId, Integer facultadId, MatriculaService matriculaService) throws CloneNotSupportedException {
 		Facultad facultad = null;
 		try {
 			facultad = facultadService.findByFacultadId(facultadId);
 		} catch (FacultadException e) {
 			return;
 		}
-		List<Matricula> matriculas = new ArrayList<Matricula>();
+		List<Matricula> matriculas = new ArrayList<>();
 		for (InscripcionFacultad inscripcion : inscripcionFacultadConsumer.findAllByLectivo(facultad.getApiserver(),
 				facultad.getApiport(), facultadId, lectivoId)) {
 			List<InscripcionDetalleFacultad> detalles = inscripcionDetalleFacultadConsumer.findAllByPersona(
@@ -247,7 +237,7 @@ public class SincronizeService {
 			if (!matricula_old.equals(matricula))
 				matriculas.add(matricula);
 		}
-		if (matriculas.size() > 0) {
+		if (!matriculas.isEmpty()) {
 			matriculas = matriculaService.saveAll(matriculas);
 		}
 	}
@@ -409,7 +399,7 @@ public class SincronizeService {
 				carreras.put(carrera.getCarreraKey(), carrera);
 			}
 		}
-		carreraService.saveAll(new ArrayList<Carrera>(carreras.values()));
+		carreraService.saveAll(new ArrayList<>(carreras.values()));
 	}
 
 }

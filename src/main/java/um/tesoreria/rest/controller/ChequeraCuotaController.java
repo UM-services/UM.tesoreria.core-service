@@ -58,17 +58,17 @@ public class ChequeraCuotaController {
 
     @GetMapping("/deudaRango/{desde}/{hasta}/{reduced}")
     public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta, @PathVariable Boolean reduced) {
-        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null), HttpStatus.OK);
+        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null, service), HttpStatus.OK);
     }
 
     @GetMapping("/deudaPosgradoRango/{desde}/{hasta}")
     public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaPosgradoRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
-        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllPosgradoByRango(desde, hasta), HttpStatus.OK);
+        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllPosgradoByRango(desde, hasta, service), HttpStatus.OK);
     }
 
     @GetMapping("/deudaMacroRango/{desde}/{hasta}")
     public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaMacroRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
-        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllMacroByRango(desde, hasta), HttpStatus.OK);
+        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllMacroByRango(desde, hasta, service), HttpStatus.OK);
     }
 
     @GetMapping("/{chequeraCuotaId}")

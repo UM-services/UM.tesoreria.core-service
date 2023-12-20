@@ -16,8 +16,10 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.rest.exception.ChequeraSerieException;
 import um.tesoreria.rest.kotlin.model.ChequeraSerie;
+import um.tesoreria.rest.kotlin.model.TipoChequera;
 import um.tesoreria.rest.kotlin.model.view.ChequeraSerieAlta;
 import um.tesoreria.rest.kotlin.model.view.ChequeraSerieAltaFull;
+import um.tesoreria.rest.model.Debito;
 import um.tesoreria.rest.model.dto.DeudaChequera;
 import um.tesoreria.rest.model.view.ChequeraIncompleta;
 import um.tesoreria.rest.model.view.ChequeraKey;
@@ -36,35 +38,39 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ChequeraSerieService {
 
-	@Autowired
-	private IChequeraSerieRepository repository;
+	private final IChequeraSerieRepository repository;
+
+	private final ChequeraIncompletaService chequeraIncompletaService;
+
+	private final ChequeraSerieAltaService chequeraSerieAltaService;
+
+	private final ChequeraSerieAltaFullService chequeraSerieAltaFullService;
+
+	private final TipoChequeraService tipoChequeraService;
+
+	private final DebitoService debitoService;
+
+	private final ChequeraKeyService chequeraKeyService;
 
 	@Autowired
-	private ChequeraIncompletaService chequeraIncompletaService;
+	public ChequeraSerieService(IChequeraSerieRepository repository, ChequeraIncompletaService chequeraIncompletaService, ChequeraSerieAltaService chequeraSerieAltaService,
+								ChequeraSerieAltaFullService chequeraSerieAltaFullService, TipoChequeraService tipoChequeraService,
+								DebitoService debitoService, ChequeraKeyService chequeraKeyService) {
+		this.repository = repository;
+		this.chequeraIncompletaService = chequeraIncompletaService;
+		this.chequeraSerieAltaService = chequeraSerieAltaService;
+		this.chequeraSerieAltaFullService = chequeraSerieAltaFullService;
+		this.tipoChequeraService = tipoChequeraService;
+		this.debitoService = debitoService;
+		this.chequeraKeyService = chequeraKeyService;
 
-	@Autowired
-	private ChequeraSerieAltaService chequeraSerieAltaService;
-
-	@Autowired
-	private ChequeraSerieAltaFullService chequeraSerieAltaFullService;
-
-	@Autowired
-	private ChequeraCuotaService chequeraCuotaService;
-
-	@Autowired
-	private TipoChequeraService tipoChequeraService;
-
-	@Autowired
-	private DebitoService debitoService;
-
-	@Autowired
-	private ChequeraKeyService chequeraKeyService;
+	}
 
 	public List<ChequeraSerie> findAllByPersona(BigDecimal personaId, Integer documentoId) {
 		return repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, Sort.by("lectivoId").descending());
 	}
 
-	public List<ChequeraSerie> findAllByPersonaExtended(BigDecimal personaId, Integer documentoId) {
+	public List<ChequeraSerie> findAllByPersonaExtended(BigDecimal personaId, Integer documentoId, ChequeraCuotaService chequeraCuotaService) {
 		List<ChequeraSerie> chequeras = repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
 				Sort.by("lectivoId").descending());
 		for (ChequeraSerie chequera : chequeras) {
@@ -126,7 +132,7 @@ public class ChequeraSerieService {
 	}
 
 	public List<ChequeraSerie> findAllByFacultadExtended(BigDecimal personaId, Integer documentoId,
-			Integer facultadId) {
+			Integer facultadId, ChequeraCuotaService chequeraCuotaService) {
 		List<ChequeraSerie> chequeras = repository.findAllByPersonaIdAndDocumentoIdAndFacultadId(personaId, documentoId,
 				facultadId);
 		for (ChequeraSerie chequera : chequeras) {
@@ -151,25 +157,25 @@ public class ChequeraSerieService {
 		return chequeraSerieAltaService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId, facultadId, geograficaId);
 	}
 
-	public List<ChequeraSerieAltaFull> findAllAltasFull(Integer lectivoId, Integer facultadId, Integer geograficaId, Integer tipoChequeraId, OffsetDateTime fechaDesdePrimerVencimiento) {
-		return chequeraSerieAltaFullService.findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(lectivoId, facultadId, geograficaId, tipoChequeraId, fechaDesdePrimerVencimiento);
+	public List<ChequeraSerieAltaFull> findAllAltasFull(Integer lectivoId, Integer facultadId, Integer geograficaId, Integer tipoChequeraId, OffsetDateTime fechaDesdePrimerVencimiento, ChequeraCuotaService chequeraCuotaService) {
+		return chequeraSerieAltaFullService.findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(lectivoId, facultadId, geograficaId, tipoChequeraId, fechaDesdePrimerVencimiento, chequeraCuotaService);
 	}
 
 	public List<ChequeraKey> findAllByCbu(String cbu, Integer debitoTipoId) {
 		return chequeraKeyService.findAllByChequeraKey(debitoService.findAllByCbu(cbu, debitoTipoId).stream()
-				.map(debito -> debito.chequeraKey()).collect(Collectors.toList()));
+				.map(Debito::chequeraKey).collect(Collectors.toList()));
 	}
 
 	public List<ChequeraKey> findAllByVisa(String numeroTarjeta, Integer debitoTipoId) {
 		return chequeraKeyService.findAllByChequeraKey(debitoService.findAllByVisa(numeroTarjeta, debitoTipoId).stream()
-				.map(debito -> debito.chequeraKey()).collect(Collectors.toList()));
+				.map(Debito::chequeraKey).collect(Collectors.toList()));
 	}
 
 	public ChequeraSerie findByChequeraId(Long chequeraId) {
 		return repository.findByChequeraId(chequeraId).orElseThrow(() -> new ChequeraSerieException(chequeraId));
 	}
 
-	public ChequeraSerie findByChequeraIdExtended(Long chequeraId) {
+	public ChequeraSerie findByChequeraIdExtended(Long chequeraId, ChequeraCuotaService chequeraCuotaService) {
 		ChequeraSerie chequera = repository.findByChequeraId(chequeraId)
 				.orElseThrow(() -> new ChequeraSerieException(chequeraId));
 		DeudaChequera deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
@@ -185,7 +191,7 @@ public class ChequeraSerieService {
 				.orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
 	}
 
-	public ChequeraSerie findByUniqueExtended(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+	public ChequeraSerie findByUniqueExtended(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, ChequeraCuotaService chequeraCuotaService) {
 		ChequeraSerie chequera = repository
 				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
 				.orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
@@ -220,7 +226,7 @@ public class ChequeraSerieService {
 		return repository
 				.findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaIdAndTipoChequeraIdIn(
 						personaId, documentoId, facultadId, lectivoId, geograficaId,
-						tipoChequeraService.findAllByClaseChequera(2).stream().map(tipo -> tipo.getTipoChequeraId())
+						tipoChequeraService.findAllByClaseChequera(2).stream().map(TipoChequera::getTipoChequeraId)
 								.collect(Collectors.toList()))
 				.orElseThrow(
 						() -> new ChequeraSerieException(personaId, documentoId, facultadId, lectivoId, geograficaId));
@@ -231,7 +237,7 @@ public class ChequeraSerieService {
 		return repository
 				.findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaIdAndTipoChequeraIdIn(
 						personaId, documentoId, facultadId, lectivoId, geograficaId,
-						tipoChequeraService.findAllByClaseChequera(1).stream().map(tipo -> tipo.getTipoChequeraId())
+						tipoChequeraService.findAllByClaseChequera(1).stream().map(TipoChequera::getTipoChequeraId)
 								.collect(Collectors.toList()))
 				.orElseThrow(
 						() -> new ChequeraSerieException(personaId, documentoId, facultadId, lectivoId, geograficaId));
@@ -241,7 +247,7 @@ public class ChequeraSerieService {
 			Integer documentoId, Integer facultadId) {
 		return repository.findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdInOrderByLectivoIdDesc(
 				personaId, documentoId, facultadId, tipoChequeraService.findAllByClaseChequera(1).stream()
-						.map(tipo -> tipo.getTipoChequeraId()).collect(Collectors.toList()));
+						.map(TipoChequera::getTipoChequeraId).collect(Collectors.toList()));
 	}
 
 	public ChequeraSerie setPayPerTic(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Byte flag) {
