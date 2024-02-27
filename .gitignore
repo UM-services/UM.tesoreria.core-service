@@ -9,6 +9,7 @@ cloudbeaver/
 /logs/
 !.mvn/wrapper/maven-wrapper.jar
 .metadata/
+.vscode/
 
 ### STS ###
 .apt_generated

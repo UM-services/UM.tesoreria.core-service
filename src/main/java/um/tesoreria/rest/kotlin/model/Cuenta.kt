@@ -48,7 +48,6 @@ data class Cuenta(
 
     var visible: Byte = 0,
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     var cuentaContableId: Long? = null,
 
