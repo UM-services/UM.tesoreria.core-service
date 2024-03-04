@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.rest.exception.ChequeraSerieException;
 import um.tesoreria.rest.exception.SpoterDataException;
 import um.tesoreria.rest.kotlin.model.dto.PreuniversitarioData;
 import um.tesoreria.rest.kotlin.model.dto.SpoterDataResponse;
@@ -131,8 +132,11 @@ public class ChequeraController {
     @GetMapping("/lastPre/{facultadId}/{personaId}/{documentoId}")
     public ResponseEntity<PreuniversitarioData> lastPreData(@PathVariable Integer facultadId,
                                                             @PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
-        return new ResponseEntity<>(service.findLastPreData(facultadId, personaId, documentoId),
-                HttpStatus.OK);
+        try {
+            return ResponseEntity.ok(service.findLastPreData(facultadId, personaId, documentoId));
+        } catch (ChequeraSerieException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
 }
