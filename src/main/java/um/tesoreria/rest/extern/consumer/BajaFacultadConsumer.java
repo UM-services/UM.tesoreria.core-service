@@ -12,7 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import um.tesoreria.rest.extern.exception.BajaFacultadNotFoundException;
 import reactor.core.publisher.Mono;
-import um.tesoreria.rest.extern.exception.BajaFacultadNotFoundException;
 import um.tesoreria.rest.extern.model.kotlin.BajaFacultad;
 
 /**

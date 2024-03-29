@@ -4,6 +4,10 @@ services:
 
     tesoreria.mysql:
         image: dqmdz/mysql:5.7
+        ulimits:
+            nofile: # Fix memory leak issue on some systems when LimitCORE=infinity (containerd)
+                soft: 1048576
+                hard: 1048576
         ports:
             - "3306:3306"
         volumes:
@@ -21,10 +25,6 @@ services:
 #        build:
 #            context: .
 #            dockerfile: Dockerfile.local
-#        develop:
-#            watch:
-#                - action: rebuild
-#                  path: ./src
 #        ports:
 #            - "8092:8092"
 #        depends_on:
@@ -48,20 +48,20 @@ services:
 #        networks:
 #            - tesoreria
 
-    tesoreria.cloudbeaver:
-        image: dbeaver/cloudbeaver:latest
-        restart: always
-        depends_on:
-            - tesoreria.mysql
-        ports:
-            - '38978:8978'
-        volumes:
-            - ./cloudbeaver:/opt/cloudbeaver/workspace
-        networks:
-            - tesoreria
+#    tesoreria.cloudbeaver:
+#        image: dbeaver/cloudbeaver:latest
+#        restart: always
+#        depends_on:
+#            - tesoreria.mysql
+#        ports:
+#            - '38978:8978'
+#        volumes:
+#            - ./cloudbeaver:/opt/cloudbeaver/workspace
+#        networks:
+#            - tesoreria
 
 volumes:
-    tesoreria.cloudbeaver:
+#    tesoreria.cloudbeaver:
     tesoreria.mysql:
 
 networks:
