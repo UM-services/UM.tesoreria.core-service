@@ -10,13 +10,13 @@
         <!-- lookup parent from repository -->
     </parent>
     <groupId>ar.edu</groupId>
-    <artifactId>um.tesoreria.rest</artifactId>
+    <artifactId>um.tesoreria.core-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>um.tesoreria.rest</name>
+    <name>um.tesoreria.core-service</name>
     <description>Tesoreria API REST</description>
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>1.9.22</kotlin.version>
+        <kotlin.version>1.9.23</kotlin.version>
     </properties>
     <dependencies>
         <dependency>

@@ -54,7 +54,7 @@ spring:
 
 logging:
   level:
-    um.tesoreria.rest: debug
+    um.tesoreria.core: debug
     web: ${app.logging}
     org:
       hibernate:
