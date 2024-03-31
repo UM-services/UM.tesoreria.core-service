@@ -1,0 +1,48 @@
+/**
+ * 
+ */
+package um.tesoreria.core.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import um.tesoreria.core.exception.CarreraException;
+import um.tesoreria.core.kotlin.model.Carrera;
+import um.tesoreria.core.repository.ICarreraRepository;
+
+/**
+ * @author daniel
+ *
+ */
+@Service
+public class CarreraService {
+
+	@Autowired
+	private ICarreraRepository repository;
+
+	public List<Carrera> findAll() {
+		return repository.findAll();
+	}
+
+	public List<Carrera> findAllByFacultadId(Integer facultadId) {
+		return repository.findAllByFacultadId(facultadId);
+	}
+
+	public Carrera findByFacultadIdAndPlanIdAndCarreraId(Integer facultadId, Integer planId, Integer carreraId) {
+		return repository.findByFacultadIdAndPlanIdAndCarreraId(facultadId, planId, carreraId)
+				.orElseThrow(() -> new CarreraException(facultadId, planId, carreraId));
+	}
+
+	public Carrera add(Carrera carrera) {
+		repository.save(carrera);
+		return carrera;
+	}
+
+	public List<Carrera> saveAll(List<Carrera> carreras) {
+		carreras = repository.saveAll(carreras);
+		return carreras;
+	}
+
+}
