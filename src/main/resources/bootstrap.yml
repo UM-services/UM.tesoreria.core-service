@@ -7,20 +7,20 @@ app:
   user: root
   password: root
   add-properties: true
-  logging: debug
   livereload:
     enabled: true
     port: 35792
   open-in-view: true
-  port: 8092
   mail:
     username: chequeras@um.edu.ar
     password: 8VlfKS44o8YbOutcm2VT
   
-server:
-  port: ${app.port}
-  
 spring:
+  application:
+    name: core-service
+  cloud:
+    config:
+      uri: http://localhost:8888
   datasource:
     url: jdbc:mysql://${app.server}/${app.database}?useSSL=false&serverTimezone=UTC
     username: ${app.user}
@@ -51,11 +51,3 @@ spring:
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
-
-logging:
-  level:
-    um.tesoreria.core: debug
-    web: ${app.logging}
-    org:
-      hibernate:
-        SQL: ${app.logging}
