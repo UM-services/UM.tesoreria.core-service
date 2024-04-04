@@ -146,6 +146,23 @@ public class MailChequeraService {
         return mono.block();
     }
 
+    public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId,
+                               Boolean copiaInformes, Boolean incluyeMatricula) throws MessagingException {
+        MailSender javaMailSender = mailSenderService.findSender();
+        log.debug("mail_chequera_service.send_chequera.javaMailSender={}", javaMailSender);
+        String url = MessageFormat.format("http://{0}:{1}", javaMailSender.getIpAddress(), javaMailSender.getPort().toString());
+        log.debug("mail_chequera_service.send_chequera.url={}", url);
+        WebClient webClient = WebClient.builder().baseUrl(url + "/chequera").build();
+        String uri = MessageFormat.format("/sendCuota/{0}/{1}/{2}/{3}/{4}/{5}/{6}/{7}", facultadId.toString(),
+                tipoChequeraId.toString(), chequeraSerieId.toString(), alternativaId.toString(), productoId.toString(), cuotaId.toString(),
+                copiaInformes ? "true" : "false", incluyeMatricula ? "true" : "false");
+        log.debug("mail_chequera_service.send_cuota.uri={}", uri);
+        Mono<String> mono = webClient.get()
+                .uri(uri)
+                .retrieve().bodyToMono(String.class);
+        return mono.block();
+    }
+
     public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData, Boolean updateMailPersonal, Boolean responseSinEnvio) throws MessagingException {
         // Determina lectivoId
         Lectivo lectivo = null;
