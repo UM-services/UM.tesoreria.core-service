@@ -74,6 +74,15 @@ public class ChequeraController {
                 alternativaId, copiaInformes, true), HttpStatus.OK);
     }
 
+    @GetMapping("/sendCuota/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{productoId}/{cuotaId}/{copiaInformes}")
+    public ResponseEntity<String> sendCuota(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
+                                            @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
+                                            @PathVariable Integer productoId, @PathVariable Integer cuotaId,
+                                            @PathVariable Boolean copiaInformes) throws MessagingException {
+        return new ResponseEntity<>(mailChequeraService.sendCuota(facultadId, tipoChequeraId, chequeraSerieId,
+                alternativaId, productoId, cuotaId, copiaInformes, true), HttpStatus.OK);
+    }
+
     @GetMapping("/notificaDeudor/{personaId}/{documentoId}")
     public String notificaDeudor(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId)
             throws MessagingException {
@@ -89,6 +98,23 @@ public class ChequeraController {
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=chequera.pdf");
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        return ResponseEntity.ok().headers(headers).contentLength(file.length())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+    }
+
+    @GetMapping("/generateCuotaPdf/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{productoId}/{cuotaId}")
+    public ResponseEntity<Resource> generateCuotaPdf(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
+                                                     @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
+                                                     @PathVariable Integer productoId, @PathVariable Integer cuotaId) throws FileNotFoundException {
+        String filename = formularioToPdfService.generateCuotaPdf(facultadId, tipoChequeraId, chequeraSerieId,
+                alternativaId, productoId, cuotaId);
+        File file = new File(filename);
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=cuota.pdf");
         headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
         headers.add("Pragma", "no-cache");
         headers.add("Expires", "0");
