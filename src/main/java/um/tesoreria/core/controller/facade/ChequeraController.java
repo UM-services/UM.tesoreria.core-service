@@ -70,7 +70,7 @@ public class ChequeraController {
     public ResponseEntity<String> sendChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
                                                @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
                                                @PathVariable Boolean copiaInformes) throws MessagingException {
-        return new ResponseEntity<>(service.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
+        return new ResponseEntity<>(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
                 alternativaId, copiaInformes, true), HttpStatus.OK);
     }
 
@@ -79,7 +79,7 @@ public class ChequeraController {
                                             @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
                                             @PathVariable Integer productoId, @PathVariable Integer cuotaId,
                                             @PathVariable Boolean copiaInformes) throws MessagingException {
-        return new ResponseEntity<>(service.sendCuota(facultadId, tipoChequeraId, chequeraSerieId,
+        return new ResponseEntity<>(mailChequeraService.sendCuota(facultadId, tipoChequeraId, chequeraSerieId,
                 alternativaId, productoId, cuotaId, copiaInformes, true), HttpStatus.OK);
     }
 
