@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import jakarta.mail.MessagingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,65 +34,77 @@ import um.tesoreria.core.service.*;
 @Slf4j
 public class ChequeraService {
 
-    @Autowired
-    private ChequeraEliminadaService chequeraEliminadaService;
+    private final ChequeraEliminadaService chequeraEliminadaService;
+
+    private final ChequeraPagoAsientoService chequeraPagoAsientoService;
+
+    private final ChequeraPagoService chequeraPagoService;
+
+    private final ChequeraCuotaService chequeraCuotaService;
+
+    private final ChequeraAlternativaService chequeraAlternativaService;
+
+    private final ChequeraTotalService chequeraTotalService;
+
+    private final ChequeraSerieService chequeraSerieService;
+
+    private final ChequeraSerieControlService chequeraSerieControlService;
+
+    private final ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
+
+    private final ChequeraImpresionDetalleService chequeraImpresionDetalleService;
+
+    private final DebitoService debitoService;
+
+    private final ModelMapper modelMapper;
+
+    private final FacultadService facultadService;
+
+    private final TipoChequeraService tipoChequeraService;
+
+    private final PersonaService personaService;
+
+    private final LectivoService lectivoService;
+
+    private final ArancelTipoService arancelTipoService;
+
+    private final GeograficaService geograficaService;
+
+    private final ProductoService productoService;
+
+    private final DomicilioService domicilioService;
+
+    private final MailChequeraService mailChequeraService;
 
     @Autowired
-    private ChequeraPagoAsientoService chequeraPagoAsientoService;
-
-    @Autowired
-    private ChequeraPagoService chequeraPagoService;
-
-    @Autowired
-    private ChequeraCuotaService chequeraCuotaService;
-
-    @Autowired
-    private ChequeraAlternativaService chequeraAlternativaService;
-
-    @Autowired
-    private ChequeraTotalService chequeraTotalService;
-
-    @Autowired
-    private ChequeraSerieService chequeraSerieService;
-
-    @Autowired
-    private ChequeraSerieControlService chequeraSerieControlService;
-
-    @Autowired
-    private ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
-
-    @Autowired
-    private ChequeraImpresionDetalleService chequeraImpresionDetalleService;
-
-    @Autowired
-    private DebitoService debitoService;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
-    @Autowired
-    private FacultadService facultadService;
-
-    @Autowired
-    private TipoChequeraService tipoChequeraService;
-
-    @Autowired
-    private PersonaService personaService;
-
-    @Autowired
-    private LectivoService lectivoService;
-
-    @Autowired
-    private ArancelTipoService arancelTipoService;
-
-    @Autowired
-    private GeograficaService geograficaService;
-
-    @Autowired
-    private ProductoService productoService;
-
-    @Autowired
-    private DomicilioService domicilioService;
+    public ChequeraService(ChequeraEliminadaService chequeraEliminadaService, ChequeraPagoAsientoService chequeraPagoAsientoService, ChequeraPagoService chequeraPagoService,
+                           ChequeraCuotaService chequeraCuotaService, ChequeraAlternativaService chequeraAlternativaService, ChequeraTotalService chequeraTotalService,
+                           ChequeraSerieService chequeraSerieService, ChequeraSerieControlService chequeraSerieControlService, ChequeraImpresionCabeceraService chequeraImpresionCabeceraService,
+                           ChequeraImpresionDetalleService chequeraImpresionDetalleService, DebitoService debitoService, ModelMapper modelMapper, FacultadService facultadService,
+                           TipoChequeraService tipoChequeraService, PersonaService personaService, LectivoService lectivoService, ArancelTipoService arancelTipoService, GeograficaService geograficaService,
+                           ProductoService productoService, DomicilioService domicilioService, MailChequeraService mailChequeraService) {
+        this.chequeraEliminadaService = chequeraEliminadaService;
+        this.chequeraPagoService = chequeraPagoService;
+        this.chequeraPagoAsientoService = chequeraPagoAsientoService;
+        this.chequeraCuotaService = chequeraCuotaService;
+        this.chequeraAlternativaService = chequeraAlternativaService;
+        this.chequeraTotalService = chequeraTotalService;
+        this.chequeraSerieService = chequeraSerieService;
+        this.chequeraSerieControlService = chequeraSerieControlService;
+        this.chequeraImpresionCabeceraService = chequeraImpresionCabeceraService;
+        this.chequeraImpresionDetalleService = chequeraImpresionDetalleService;
+        this.debitoService = debitoService;
+        this.modelMapper = modelMapper;
+        this.facultadService = facultadService;
+        this.tipoChequeraService = tipoChequeraService;
+        this.personaService = personaService;
+        this.lectivoService = lectivoService;
+        this.arancelTipoService = arancelTipoService;
+        this.geograficaService = geograficaService;
+        this.productoService = productoService;
+        this.domicilioService = domicilioService;
+        this.mailChequeraService = mailChequeraService;
+    }
 
     @Transactional
     public void deleteByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, String usuarioId) {
@@ -170,7 +183,7 @@ public class ChequeraService {
                 .findAllByAlternativa(facultadId, tipoChequeraId, chequeraSerieId, serie.getAlternativaId(),
                         lastDebito.getDebitoTipoId())
                 .stream().collect(Collectors.toMap(Debito::cuotaKey, debito -> debito));
-        List<Debito> newDebitos = new ArrayList<Debito>();
+        List<Debito> newDebitos = new ArrayList<>();
         for (ChequeraCuota cuota : chequeraCuotaService
                 .findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(facultadId, tipoChequeraId,
                         chequeraSerieId, serie.getAlternativaId())) {
@@ -259,6 +272,24 @@ public class ChequeraService {
                 chequeraSerie.getFecha(), chequeraSerie.getObservaciones(), chequeraSerie.getAlternativaId(),
                 facultadDTO, tipoChequeraDTO, personaDTO, domicilioDTO, lectivoDTO, arancelTipoDTO, geograficaDTO, chequeraCuotaDTOs);
         return chequeraSerieDTO;
+    }
+
+    public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Boolean copiaInformes, boolean b) throws MessagingException {
+        var chequeraCuotas = chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdConImporte(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
+        for (var chequeraCuota : chequeraCuotas) {
+            chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
+        }
+        chequeraCuotas = chequeraCuotaService.saveAll(chequeraCuotas);
+        return mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
+                alternativaId, copiaInformes, true);
+    }
+
+    public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId, Boolean copiaInformes, boolean b) throws MessagingException {
+        ChequeraCuota chequeraCuota = chequeraCuotaService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
+        chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
+        chequeraCuota = chequeraCuotaService.update(chequeraCuota, chequeraCuota.getChequeraCuotaId());
+        return mailChequeraService.sendCuota(facultadId, tipoChequeraId, chequeraSerieId,
+                alternativaId, productoId, cuotaId, copiaInformes, true);
     }
 
 }
