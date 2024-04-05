@@ -74,15 +74,13 @@ public class ChequeraService {
 
     private final DomicilioService domicilioService;
 
-    private final MailChequeraService mailChequeraService;
-
     @Autowired
     public ChequeraService(ChequeraEliminadaService chequeraEliminadaService, ChequeraPagoAsientoService chequeraPagoAsientoService, ChequeraPagoService chequeraPagoService,
                            ChequeraCuotaService chequeraCuotaService, ChequeraAlternativaService chequeraAlternativaService, ChequeraTotalService chequeraTotalService,
                            ChequeraSerieService chequeraSerieService, ChequeraSerieControlService chequeraSerieControlService, ChequeraImpresionCabeceraService chequeraImpresionCabeceraService,
                            ChequeraImpresionDetalleService chequeraImpresionDetalleService, DebitoService debitoService, ModelMapper modelMapper, FacultadService facultadService,
                            TipoChequeraService tipoChequeraService, PersonaService personaService, LectivoService lectivoService, ArancelTipoService arancelTipoService, GeograficaService geograficaService,
-                           ProductoService productoService, DomicilioService domicilioService, MailChequeraService mailChequeraService) {
+                           ProductoService productoService, DomicilioService domicilioService) {
         this.chequeraEliminadaService = chequeraEliminadaService;
         this.chequeraPagoService = chequeraPagoService;
         this.chequeraPagoAsientoService = chequeraPagoAsientoService;
@@ -103,7 +101,6 @@ public class ChequeraService {
         this.geograficaService = geograficaService;
         this.productoService = productoService;
         this.domicilioService = domicilioService;
-        this.mailChequeraService = mailChequeraService;
     }
 
     @Transactional
