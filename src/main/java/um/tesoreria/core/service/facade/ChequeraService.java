@@ -274,22 +274,4 @@ public class ChequeraService {
         return chequeraSerieDTO;
     }
 
-    public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Boolean copiaInformes, boolean b) throws MessagingException {
-//        var chequeraCuotas = chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdConImporte(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
-//        for (var chequeraCuota : chequeraCuotas) {
-//            chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
-//        }
-//        chequeraCuotas = chequeraCuotaService.saveAll(chequeraCuotas);
-        return mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
-                alternativaId, copiaInformes, true);
-    }
-
-    public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId, Boolean copiaInformes, boolean b) throws MessagingException {
-//        ChequeraCuota chequeraCuota = chequeraCuotaService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
-//        chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
-//        chequeraCuota = chequeraCuotaService.update(chequeraCuota, chequeraCuota.getChequeraCuotaId());
-        return mailChequeraService.sendCuota(facultadId, tipoChequeraId, chequeraSerieId,
-                alternativaId, productoId, cuotaId, copiaInformes, true);
-    }
-
 }
