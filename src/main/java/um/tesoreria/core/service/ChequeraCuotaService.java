@@ -194,6 +194,42 @@ public class ChequeraCuotaService {
     }
 
     @Transactional
+    public ChequeraCuota update(ChequeraCuota newChequeraCuota, Long chequeraCuotaId) {
+        return repository.findByChequeraCuotaId(chequeraCuotaId).map(chequeraCuota -> {
+            chequeraCuota = ChequeraCuota.Builder
+                    .chequeraCuotaId(chequeraCuotaId)
+                    .chequeraId(newChequeraCuota.getChequeraId())
+                    .facultadId(newChequeraCuota.getFacultadId())
+                    .tipoChequeraId(newChequeraCuota.getTipoChequeraId())
+                    .chequeraSerieId(newChequeraCuota.getChequeraSerieId())
+                    .productoId(newChequeraCuota.getProductoId())
+                    .alternativaId(newChequeraCuota.getAlternativaId())
+                    .cuotaId(newChequeraCuota.getCuotaId())
+                    .mes(newChequeraCuota.getMes())
+                    .anho(newChequeraCuota.getAnho())
+                    .arancelTipoId(newChequeraCuota.getArancelTipoId())
+                    .vencimiento1(newChequeraCuota.getVencimiento1())
+                    .importe1(newChequeraCuota.getImporte1())
+                    .importe1Original(newChequeraCuota.getImporte1Original())
+                    .vencimiento2(newChequeraCuota.getVencimiento2())
+                    .importe2(newChequeraCuota.getImporte2())
+                    .importe2Original(newChequeraCuota.getImporte2Original())
+                    .vencimiento3(newChequeraCuota.getVencimiento3())
+                    .importe3(newChequeraCuota.getImporte3())
+                    .importe3Original(newChequeraCuota.getImporte3Original())
+                    .codigoBarras(newChequeraCuota.getCodigoBarras())
+                    .i2Of5(newChequeraCuota.getI2Of5())
+                    .pagado(newChequeraCuota.getPagado())
+                    .baja(newChequeraCuota.getBaja())
+                    .manual(newChequeraCuota.getManual())
+                    .compensada(newChequeraCuota.getCompensada())
+                    .tramoId(newChequeraCuota.getTramoId())
+                    .build();
+            return repository.save(chequeraCuota);
+        }).orElseThrow(() -> new ChequeraCuotaException(chequeraCuotaId));
+    }
+
+    @Transactional
     public List<ChequeraCuota> saveAll(List<ChequeraCuota> chequeraCuotas) {
         chequeraCuotas = repository.saveAll(chequeraCuotas);
         return chequeraCuotas;
