@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -69,6 +71,19 @@ public class ChequeraCuotaService {
         this.tipoChequeraService = tipoChequeraService;
         this.lectivoService = lectivoService;
         this.chequeraCuotaDeudaService = chequeraCuotaDeudaService;
+    }
+
+    @Transactional
+    public List<ChequeraCuota> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+        ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        repository.saveAll(repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId).stream().map(cuota -> {
+            cuota.setChequeraId(chequeraSerie.getChequeraId());
+            return cuota;
+        }).toList());
+        return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId).stream().map(cuota -> {
+            cuota.setChequeraSerie(chequeraSerie);
+            return cuota;
+        }).toList();
     }
 
     @Transactional
@@ -193,44 +208,20 @@ public class ChequeraCuotaService {
         return chequeraCuota;
     }
 
-//    public ChequeraCuota update(ChequeraCuota newChequeraCuota, Long chequeraCuotaId) {
-//        return repository.findByChequeraCuotaId(chequeraCuotaId).map(chequeraCuota -> {
-//            chequeraCuota = ChequeraCuota.Builder
-//                    .chequeraCuotaId(chequeraCuotaId)
-//                    .chequeraId(newChequeraCuota.getChequeraId())
-//                    .facultadId(newChequeraCuota.getFacultadId())
-//                    .tipoChequeraId(newChequeraCuota.getTipoChequeraId())
-//                    .chequeraSerieId(newChequeraCuota.getChequeraSerieId())
-//                    .productoId(newChequeraCuota.getProductoId())
-//                    .alternativaId(newChequeraCuota.getAlternativaId())
-//                    .cuotaId(newChequeraCuota.getCuotaId())
-//                    .mes(newChequeraCuota.getMes())
-//                    .anho(newChequeraCuota.getAnho())
-//                    .arancelTipoId(newChequeraCuota.getArancelTipoId())
-//                    .vencimiento1(newChequeraCuota.getVencimiento1())
-//                    .importe1(newChequeraCuota.getImporte1())
-//                    .importe1Original(newChequeraCuota.getImporte1Original())
-//                    .vencimiento2(newChequeraCuota.getVencimiento2())
-//                    .importe2(newChequeraCuota.getImporte2())
-//                    .importe2Original(newChequeraCuota.getImporte2Original())
-//                    .vencimiento3(newChequeraCuota.getVencimiento3())
-//                    .importe3(newChequeraCuota.getImporte3())
-//                    .importe3Original(newChequeraCuota.getImporte3Original())
-//                    .codigoBarras(newChequeraCuota.getCodigoBarras())
-//                    .i2Of5(newChequeraCuota.getI2Of5())
-//                    .pagado(newChequeraCuota.getPagado())
-//                    .baja(newChequeraCuota.getBaja())
-//                    .manual(newChequeraCuota.getManual())
-//                    .compensada(newChequeraCuota.getCompensada())
-//                    .tramoId(newChequeraCuota.getTramoId())
-//                    .build();
-//            return repository.save(chequeraCuota);
-//        }).orElseThrow(() -> new ChequeraCuotaException(chequeraCuotaId));
-//    }
-
     @Transactional
     public List<ChequeraCuota> saveAll(List<ChequeraCuota> chequeraCuotas) {
         chequeraCuotas = repository.saveAll(chequeraCuotas);
+        return chequeraCuotas;
+    }
+
+    public List<ChequeraCuota> updateBarras(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+        var chequeraCuotas = this.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
+        for (var chequeraCuota : chequeraCuotas) {
+            if (chequeraCuota.getBaja() == 0 && chequeraCuota.getPagado() == 0 && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) > 0) {
+                chequeraCuota.setCodigoBarras(this.calculateCodigoBarras(chequeraCuota));
+            }
+        }
+        chequeraCuotas = this.saveAll(chequeraCuotas);
         return chequeraCuotas;
     }
 
@@ -369,6 +360,7 @@ public class ChequeraCuotaService {
         OffsetDateTime vencimiento3 = chequeraCuota.getVencimiento3().plusHours(3);
         // Dia 1er Vencimiento
         codigoBarras += new DecimalFormat("00").format(vencimiento1.getDayOfMonth());
+        log.info("Vencimiento1 -> {}", vencimiento1);
         // Mes 1er Vencimiento
         codigoBarras += new DecimalFormat("00").format(vencimiento1.getMonthValue());
         // Año 1er Vencimiento
