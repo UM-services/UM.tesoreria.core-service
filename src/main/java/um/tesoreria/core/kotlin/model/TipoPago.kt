@@ -14,6 +14,6 @@ data class TipoPago(
     var tipoPagoId: Int? = null,
 
     @Column(name = "tpa_nombre")
-    var nombre: String = "",
+    var nombre: String = ""
 
-    ) : Auditable()
+) : Auditable()

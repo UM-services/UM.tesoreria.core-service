@@ -112,9 +112,9 @@ data class ChequeraSerie(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chs_geo_id", insertable = false, updatable = false)
-    var geografica: Geografica? = null,
+    var geografica: Geografica? = null
 
-    ) : Auditable() {
+) : Auditable() {
     fun getPersonaKey(): String {
         return this.personaId.toString() + "." + this.documentoId
     }

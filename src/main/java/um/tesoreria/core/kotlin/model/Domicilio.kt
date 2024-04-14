@@ -70,6 +70,6 @@ data class Domicilio(
     var emailInstitucional: String = "",
 
     @Column(name = "dom_laboral")
-    var laboral: String = "",
+    var laboral: String = ""
 
-    ) : Auditable()
+) : Auditable()

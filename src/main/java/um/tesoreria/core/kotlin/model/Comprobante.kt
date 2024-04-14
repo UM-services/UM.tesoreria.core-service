@@ -43,6 +43,6 @@ data class Comprobante(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "comprobanteAfipId", insertable = false, updatable = false)
-    var comprobanteAfip: ComprobanteAfip? = null,
+    var comprobanteAfip: ComprobanteAfip? = null
 
-    ) : Auditable()
+) : Auditable()

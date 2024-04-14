@@ -68,4 +68,5 @@ public class EjercicioController {
 		service.delete(ejercicioId);
 		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 	}
+
 }
