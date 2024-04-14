@@ -11,6 +11,6 @@ data class ComprobanteAfip(
     @Id
     var comprobanteAfipId: Int? = null,
     var nombre: String = "",
-    var label: String = "",
+    var label: String = ""
 
 ) : Auditable()

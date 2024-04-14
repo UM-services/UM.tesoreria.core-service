@@ -47,4 +47,51 @@ data class FacturacionElectronica(
     @JoinColumn(name = "comprobanteId", insertable = false, updatable = false)
     var comprobante: Comprobante? = null
 
-) : Auditable()
+) : Auditable() {
+
+    class Builder {
+        var facturacionElectronicaId: Long? = null
+        var chequeraPagoId: Long? = null
+        var comprobanteId: Int? = null
+        var numeroComprobante: Long = 0
+        var personaId: BigDecimal? = null
+        var tipoDocumento: String? = null
+        var apellido: String? = null
+        var nombre: String? = null
+        var cuit: String? = null
+        var condicionIva: String = ""
+        var importe: BigDecimal = BigDecimal.ZERO
+        var cae: String? = null
+        var fechaRecibo: OffsetDateTime? = null
+        var fechaVencimientoCae: OffsetDateTime? = null
+        var enviada: Byte = 0
+        var retries: Int = 0
+        var chequeraPago: ChequeraPago? = null
+        var comprobante: Comprobante? = null
+
+        fun facturacionElectronicaId(facturacionElectronicaId: Long?) = apply { this.facturacionElectronicaId = facturacionElectronicaId }
+        fun chequeraPagoId(chequeraPagoId: Long?) = apply { this.chequeraPagoId = chequeraPagoId }
+        fun comprobanteId(chequeraPagoId: Long?) = apply { this.comprobanteId = comprobanteId }
+        fun numeroComprobante(numeroComprobante: Long) = apply { this.numeroComprobante = numeroComprobante }
+        fun personaId(personaId: BigDecimal?) = apply { this.personaId = personaId }
+        fun tipoDocumento(tipoDocumento: String?) = apply { this.tipoDocumento = tipoDocumento }
+        fun apellido(apellido: String?) = apply { this.apellido = apellido }
+        fun nombre(nombre: String?) = apply { this.nombre = nombre }
+        fun cuit(cuit: String?) = apply { this.cuit = cuit }
+        fun condicionIva(condicionIva: String) = apply { this.condicionIva = condicionIva }
+        fun importe(importe: BigDecimal) = apply { this.importe = importe }
+        fun cae(cae: String?) = apply { this.cae = cae }
+        fun fechaRecibo(fechaRecibo: OffsetDateTime?) = apply { this.fechaRecibo = fechaRecibo }
+        fun fechaVencimientoCae(fechaVencimientoCae: OffsetDateTime?) = apply { this.fechaVencimientoCae = fechaVencimientoCae }
+        fun enviada(enviada: Byte) = apply { this.enviada = enviada }
+        fun retries(retries: Int) = apply { this.retries = retries }
+        fun chequeraPago(chequeraPago: ChequeraPago?) = apply { this.chequeraPago = chequeraPago }
+        fun comprobante(comprobante: Comprobante?) = apply { this.comprobante = comprobante }
+
+        fun build() = FacturacionElectronica(
+            facturacionElectronicaId, chequeraPagoId, comprobanteId, numeroComprobante, personaId, tipoDocumento, apellido, nombre, cuit,
+            condicionIva, importe, cae, fechaRecibo, fechaVencimientoCae, enviada, retries, chequeraPago, comprobante
+        )
+    }
+
+}

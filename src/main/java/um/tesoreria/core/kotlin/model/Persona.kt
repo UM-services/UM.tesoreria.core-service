@@ -44,9 +44,9 @@ data class Persona(
     var cbu: String = "",
 
     @Column(name = "per_contrasenha")
-    var password: String? = null,
+    var password: String? = null
 
-    ) : Auditable() {
+) : Auditable() {
 
     fun getApellidoNombre(): String =
         MessageFormat.format("{0}, {1}", apellido, nombre)

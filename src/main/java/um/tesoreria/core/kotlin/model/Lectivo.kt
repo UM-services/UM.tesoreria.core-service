@@ -15,7 +15,6 @@ data class Lectivo(
     var lectivoId: Int? = null,
 
     @Column(name = "lec_nombre")
-
     var nombre: String = "",
 
     @Column(name = "lec_inicio")

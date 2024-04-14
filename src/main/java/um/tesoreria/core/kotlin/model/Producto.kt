@@ -14,6 +14,6 @@ data class Producto(
     var productoId: Int? = null,
 
     @Column(name = "pro_nombre")
-    var nombre: String = "",
+    var nombre: String = ""
 
-    ) : Auditable()
+) : Auditable()

@@ -42,6 +42,6 @@ data class TipoChequera(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "tch_cch_id", insertable = false, updatable = false)
-    var claseChequera: ClaseChequera? = null,
+    var claseChequera: ClaseChequera? = null
 
-    ) : Auditable()
+) : Auditable()
