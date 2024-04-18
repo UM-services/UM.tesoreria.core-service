@@ -16,6 +16,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IUbicacionRepository extends JpaRepository<Ubicacion, Integer> {
 
-	public List<Ubicacion> findAllByDependenciaIdNotNull();
+	List<Ubicacion> findAllByDependenciaIdNotNull();
 
 }
