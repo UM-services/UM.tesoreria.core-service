@@ -24,20 +24,24 @@ import um.tesoreria.core.service.UbicacionService;
 @RequestMapping("/ubicacion")
 public class UbicacionController {
 
+	private final UbicacionService service;
+
 	@Autowired
-	private UbicacionService service;
+	public UbicacionController(UbicacionService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/")
 	public ResponseEntity<List<Ubicacion>> findAll() {
-		return new ResponseEntity<List<Ubicacion>>(service.findAll(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 
 	@GetMapping("/sede/{geograficaId}")
 	public ResponseEntity<List<Ubicacion>> findAllBySede(@PathVariable Integer geograficaId) {
 		if (geograficaId == 0) {
-			return new ResponseEntity<List<Ubicacion>>(service.findAll(), HttpStatus.OK);
+			return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 		}
-		return new ResponseEntity<List<Ubicacion>>(service.findAllBySede(geograficaId), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAllBySede(geograficaId), HttpStatus.OK);
 	}
 
 }

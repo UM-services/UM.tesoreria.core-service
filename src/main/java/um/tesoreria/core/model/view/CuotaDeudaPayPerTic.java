@@ -7,11 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import org.hibernate.annotations.Immutable;
 
@@ -53,20 +49,28 @@ public class CuotaDeudaPayPerTic implements Serializable {
 	private OffsetDateTime vencimiento1;
 
 	private BigDecimal importe1 = BigDecimal.ZERO;
+
+	@Column(name = "importe1_original")
 	private BigDecimal importe1Original = BigDecimal.ZERO;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
 	private OffsetDateTime vencimiento2;
 
 	private BigDecimal importe2 = BigDecimal.ZERO;
+
+	@Column(name = "importe2_original")
 	private BigDecimal importe2Original;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
 	private OffsetDateTime vencimiento3;
 
 	private BigDecimal importe3 = BigDecimal.ZERO;
+
+	@Column(name = "importe3_original")
 	private BigDecimal importe3Original = BigDecimal.ZERO;
 	private String codigoBarras;
+
+	@Column(name = "i2_of5")
 	private String i2Of5;
 	private Byte pagado;
 	private Byte baja;

@@ -156,11 +156,11 @@ public class PayPerTicFileService {
 				this.setCellString(row, 4, currency_id, style_normal);
 				Double amount = cuota.getImporte1().doubleValue();
 				this.setCellDouble(row, 5, amount, style_normal);
-				OffsetDateTime due_date = cuota.getVencimiento1().plusHours(3);
+				OffsetDateTime due_date = Tool.lastTime(cuota.getVencimiento1());
 				this.setCellString(row, 6, due_date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
 						style_normal);
-				OffsetDateTime last_due_date = cuota.getVencimiento2().plusHours(3);
-				last_due_date = last_due_date.plusDays(10);
+				OffsetDateTime last_due_date = cuota.getVencimiento2();
+				last_due_date = Tool.lastTime(last_due_date.plusDays(10));
 				this.setCellString(row, 7, last_due_date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
 						style_normal);
 

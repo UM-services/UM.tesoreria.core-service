@@ -19,8 +19,12 @@ import um.tesoreria.core.repository.IUbicacionRepository;
 @Service
 public class UbicacionService {
 
+	private final IUbicacionRepository repository;
+
 	@Autowired
-	private IUbicacionRepository repository;
+	public UbicacionService(IUbicacionRepository repository) {
+		this.repository = repository;
+	}
 
 	public List<Ubicacion> findAll() {
 		return repository.findAll();
