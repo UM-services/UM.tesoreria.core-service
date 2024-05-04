@@ -9,7 +9,7 @@ services:
         ports:
             - "3306:3306"
         volumes:
-            - ./data:/var/lib/mysql
+            - ${LOCAL_VOLUMES}/um/data:/var/lib/mysql
             - /etc/localtime:/etc/localtime:ro
             - /etc/timezone:/etc/timezone:ro
         restart: always
