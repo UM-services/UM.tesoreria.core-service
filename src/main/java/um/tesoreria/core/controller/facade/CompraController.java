@@ -1,5 +1,6 @@
 package um.tesoreria.core.controller.facade;
 
+import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.kotlin.model.ValorMovimiento;
 import um.tesoreria.core.service.facade.CompraService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/compra")
+@Slf4j
 public class CompraController {
 
     @Autowired
@@ -64,8 +66,10 @@ public class CompraController {
     public ResponseEntity<Boolean> anulateOPago(@PathVariable Long proveedorMovimientoId) {
         try {
             service.anulateOPago(proveedorMovimientoId);
-            return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+            log.debug("Anulated OrdenPago -> {}", proveedorMovimientoId);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e) {
+            log.debug("ERROR Anulating OrdenPago -> {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
     }

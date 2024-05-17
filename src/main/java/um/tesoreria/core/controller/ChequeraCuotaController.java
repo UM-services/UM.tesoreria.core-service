@@ -59,6 +59,7 @@ public class ChequeraCuotaController {
     @GetMapping("/deudaRango/{desde}/{hasta}/{reduced}")
     public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta, @PathVariable Boolean reduced) {
         return new ResponseEntity<>(chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null, service), HttpStatus.OK);
+//        return new ResponseEntity<>(chequeraCuotaDeudaService.findQuinterosByRango(desde, hasta, reduced, null, service), HttpStatus.OK);
     }
 
     @GetMapping("/deudaPosgradoRango/{desde}/{hasta}")
