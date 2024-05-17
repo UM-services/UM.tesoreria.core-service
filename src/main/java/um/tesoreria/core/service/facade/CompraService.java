@@ -26,35 +26,41 @@ import java.util.List;
 @Slf4j
 public class CompraService {
 
-    @Autowired
-    private ProveedorPagoService proveedorPagoService;
+    private final ProveedorPagoService proveedorPagoService;
+
+    private final ProveedorMovimientoService proveedorMovimientoService;
+
+    private final ProveedorValorService proveedorValorService;
+
+    private final ProveedorArticuloService proveedorArticuloService;
+
+    private final ValorMovimientoService valorMovimientoService;
+
+    private final BancoMovimientoService bancoMovimientoService;
+
+    private final ContableService contableService;
+
+    private final EjercicioService ejercicioService;
+
+    private final ValorService valorService;
+
+    private final BancariaService bancariaService;
 
     @Autowired
-    private ProveedorMovimientoService proveedorMovimientoService;
-
-    @Autowired
-    private ProveedorValorService proveedorValorService;
-
-    @Autowired
-    private ProveedorArticuloService proveedorArticuloService;
-
-    @Autowired
-    private ValorMovimientoService valorMovimientoService;
-
-    @Autowired
-    private BancoMovimientoService bancoMovimientoService;
-
-    @Autowired
-    private ContableService contableService;
-
-    @Autowired
-    private EjercicioService ejercicioService;
-
-    @Autowired
-    private ValorService valorService;
-
-    @Autowired
-    private BancariaService bancariaService;
+    public CompraService(ProveedorPagoService proveedorPagoService, ProveedorMovimientoService proveedorMovimientoService, ProveedorValorService proveedorValorService,
+                         ProveedorArticuloService proveedorArticuloService, ValorMovimientoService valorMovimientoService, BancoMovimientoService bancoMovimientoService,
+                         ContableService contableService, EjercicioService ejercicioService, ValorService valorService, BancariaService bancariaService) {
+        this.proveedorPagoService = proveedorPagoService;
+        this.proveedorMovimientoService = proveedorMovimientoService;
+        this.proveedorValorService = proveedorValorService;
+        this.proveedorArticuloService = proveedorArticuloService;
+        this.valorMovimientoService = valorMovimientoService;
+        this.bancoMovimientoService = bancoMovimientoService;
+        this.contableService = contableService;
+        this.ejercicioService = ejercicioService;
+        this.valorService = valorService;
+        this.bancariaService = bancariaService;
+    }
 
     @Transactional
     public void deleteComprobante(Long proveedorMovimientoId) {
@@ -110,21 +116,34 @@ public class CompraService {
 
         // Para el caso que el ejercicio no esté bloqueado
         if (ejercicio.getBloqueado() == 0) {
+            log.debug("Ejercicio no bloqueado");
             valorMovimiento.setFechaContable(null);
             valorMovimiento.setOrdenContable(null);
             valorMovimiento = valorMovimientoService.update(valorMovimiento, valorMovimiento.getValorMovimientoId());
+            try {
+                log.debug("... ValorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valorMovimiento));
+            } catch (JsonProcessingException e) {
+                log.debug("... sin ValorMovimiento -> {}", e.getMessage());
+            }
 
             if (fechaContable != null) {
                 contableService.deleteAsiento(fechaContable, ordenContable);
+                log.debug("... asiento eliminado");
             }
 
-            BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
-
-            if (bancoMovimiento.getBancoMovimientoId() != null) {
+            try {
+                BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
                 bancoMovimiento.setAnulado((byte) 1);
                 bancoMovimiento.setFechaContable(null);
                 bancoMovimiento.setOrdenContable(0);
                 bancoMovimiento = bancoMovimientoService.update(bancoMovimiento, bancoMovimiento.getBancoMovimientoId());
+                try {
+                    log.debug("... BancoMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(bancoMovimiento));
+                } catch (JsonProcessingException e) {
+                    log.debug("... sin BancoMovimiento -> {}", e.getMessage());
+                }
+            } catch (BancoMovimientoException e) {
+                log.debug("... sin BancoMovimiento -> {}", e.getMessage());
             }
         }
 
@@ -137,11 +156,17 @@ public class CompraService {
             valorMovimiento.setOrdenContableAnulacion(asientoInternal.getOrdenContable());
             valorMovimiento = valorMovimientoService.update(valorMovimiento, valorMovimiento.getValorMovimientoId());
 
-            BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
-
-            if (bancoMovimiento.getBancoMovimientoId() != null) {
+            try {
+                BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
                 bancoMovimiento.setAnulado((byte) 1);
                 bancoMovimiento = bancoMovimientoService.update(bancoMovimiento, bancoMovimiento.getBancoMovimientoId());
+                try {
+                    log.debug("... BancoMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(bancoMovimiento));
+                } catch (JsonProcessingException e) {
+                    log.debug("... sin BancoMovimiento -> {}", e.getMessage());
+                }
+            } catch (BancoMovimientoException e) {
+                log.debug("... sin BancoMovimiento -> {}", e.getMessage());
             }
         }
     }
@@ -197,8 +222,18 @@ public class CompraService {
 
         proveedorMovimiento.setFechaAnulacion(Tool.dateAbsoluteArgentina());
         proveedorMovimiento = proveedorMovimientoService.update(proveedorMovimiento, proveedorMovimientoId);
+        try {
+            log.debug("ProveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
+        } catch (JsonProcessingException e) {
+            log.debug("Sin Proveedor Movimiento");
+        }
 
         for (ValorMovimiento valorMovimiento : valorMovimientoService.findAllByOrdenPago(proveedorMovimientoId)) {
+            try {
+                log.debug("anulating ValorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valorMovimiento));
+            } catch (JsonProcessingException e) {
+                log.debug("Sin ValorMovimiento");
+            }
             anulateValor(valorMovimiento.getValorMovimientoId(), Tool.dateAbsoluteArgentina());
         }
     }
