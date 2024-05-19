@@ -26,7 +26,8 @@ public class CompraController {
     public ResponseEntity<Boolean> deleteComprobante(@PathVariable Long proveedorMovimientoId) {
         try {
             service.deleteComprobante(proveedorMovimientoId);
-            return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+            log.debug("Anulated Comprobante -> {}", proveedorMovimientoId);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
