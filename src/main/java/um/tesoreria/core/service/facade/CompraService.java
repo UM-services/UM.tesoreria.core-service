@@ -66,6 +66,11 @@ public class CompraService {
     public void deleteComprobante(Long proveedorMovimientoId) {
         // Eliminar Aplicacion
         for (ProveedorPago proveedorPago : proveedorPagoService.findAllByPago(proveedorMovimientoId)) {
+            try {
+                log.debug("Eliminando ProveedorPago -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorPago));
+            } catch (JsonProcessingException e) {
+                log.debug("Sin ProveedorPago -> {}", e.getMessage());
+            }
             ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorPago.getProveedorMovimientoIdFactura());
             BigDecimal cancelado = proveedorMovimiento.getCancelado();
             cancelado = cancelado.subtract(proveedorPago.getImporteAplicado()).setScale(2, RoundingMode.HALF_UP);
@@ -75,32 +80,49 @@ public class CompraService {
         }
         // Eliminar Valores
         for (ProveedorValor proveedorValor : proveedorValorService.findAllByProveedorMovimientoId(proveedorMovimientoId)) {
+            try {
+                log.debug("Eliminando ProveedorValor -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorValor));
+            } catch (JsonProcessingException e) {
+                log.debug("Sin ProveedorValor -> {}", e.getMessage());
+            }
             ValorMovimiento valorMovimiento = valorMovimientoService.findByValorMovimientoId(proveedorValor.getValorMovimientoId());
             if (valorMovimiento.getFechaContable() != null) {
+                log.debug("Eliminando Asiento Contable valorMovimiento -> {}/{}", valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable());
                 if (!contableService.deleteAsiento(valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable())) {
                     throw new ContableException(valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable());
                 }
             }
-            BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
-            if (bancoMovimiento != null) {
+            try {
+                BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
                 bancoMovimientoService.deleteByBancoMovimientoId(bancoMovimiento.getBancoMovimientoId());
+            } catch (BancoMovimientoException e) {
+                log.debug("Sin BancoMovimiento -> {}", e.getMessage());
             }
             proveedorValorService.deleteByProveedorValorId(proveedorValor.getProveedorValorId());
+            log.debug("ProveedorValor eliminado");
             valorMovimientoService.deleteByValorMovimientoId(valorMovimiento.getValorMovimientoId());
+            log.debug("ValorMovimiento eliminado");
         }
         // Eliminar Artículos
         for (ProveedorArticulo proveedorArticulo : proveedorArticuloService.findAllByProveedorMovimientoId(proveedorMovimientoId, false)) {
+            try {
+                log.debug("Eliminando ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
+            } catch (JsonProcessingException e) {
+                log.debug("Sin ProveedorArticulo -> {}", e.getMessage());
+            }
             proveedorArticuloService.deleteByProveedorArticuloId(proveedorArticulo.getProveedorArticuloId());
         }
         // Eliminar Asiento
         ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
         if (proveedorMovimiento.getFechaContable() != null) {
+            log.debug("Eliminando Asiento Contable proveedorMovimiento -> {}/{}", proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable());
             if (!contableService.deleteAsiento(proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable())) {
                 throw new ContableException(proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable());
             }
         }
         // Eliminar Comprobante
         proveedorMovimientoService.deleteByProveedorMovimientoId(proveedorMovimiento.getProveedorMovimientoId());
+        log.debug("ProveedorMovimiento eliminado");
     }
 
     @Transactional
