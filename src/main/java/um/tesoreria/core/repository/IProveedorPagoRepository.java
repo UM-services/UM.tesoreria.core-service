@@ -10,9 +10,11 @@ import java.util.List;
 @Repository
 public interface IProveedorPagoRepository extends JpaRepository<ProveedorPago, Long> {
 
-    public List<ProveedorPago> findAllByProveedorMovimientoIdPago(Long proveedorMovimientoId);
+    List<ProveedorPago> findAllByProveedorMovimientoIdPago(Long proveedorMovimientoId);
+
+    List<ProveedorPago> findAllByProveedorMovimientoIdFactura(Long proveedorMovimientoId);
 
     @Modifying
-    public void deleteByProveedorPagoId(Long proveedorPagoId);
+    void deleteByProveedorPagoId(Long proveedorPagoId);
 
 }

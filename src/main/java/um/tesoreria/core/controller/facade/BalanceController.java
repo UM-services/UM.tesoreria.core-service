@@ -32,8 +32,12 @@ import um.tesoreria.core.service.facade.BalanceService;
 @RequestMapping("/balance")
 public class BalanceController {
 
+	private final BalanceService service;
+
 	@Autowired
-	private BalanceService service;
+	public BalanceController(BalanceService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/sumasysaldos/{desde}/{hasta}")
 	public ResponseEntity<Resource> makeSumasSaldos2(

@@ -11,15 +11,25 @@ import java.util.List;
 @Service
 public class ProveedorPagoService {
 
+    private final IProveedorPagoRepository repository;
+
     @Autowired
-    private IProveedorPagoRepository repository;
+    public ProveedorPagoService(IProveedorPagoRepository repository) {
+        this.repository = repository;
+    }
 
     public List<ProveedorPago> findAllByPago(Long proveedorMovimientoId) {
         return repository.findAllByProveedorMovimientoIdPago(proveedorMovimientoId);
+    }
+
+    public List<ProveedorPago> findAllByFactura(Long proveedorMovimientoId) {
+        return repository.findAllByProveedorMovimientoIdFactura(proveedorMovimientoId);
     }
 
     @Transactional
     public void delete(Long proveedorPagoId) {
         repository.deleteByProveedorPagoId(proveedorPagoId);
     }
+
+
 }

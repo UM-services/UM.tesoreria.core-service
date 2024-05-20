@@ -18,6 +18,8 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -514,6 +516,11 @@ public class SheetService {
         Ejercicio ejercicio = null;
         try {
             ejercicio = ejercicioService.findByEjercicioId(ejercicioId);
+            try {
+                log.debug("Ejercicio -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(ejercicio));
+            } catch (JsonProcessingException e) {
+                log.debug("Sin Ejercicio");
+            }
         } catch (EjercicioException e) {
             ejercicio = new Ejercicio();
         }
@@ -533,9 +540,9 @@ public class SheetService {
         List<ProveedorMovimiento> ordenes = proveedorMovimientoService.findAllByComprobanteIdAndFechaComprobanteBetween(
                 6, ejercicio.getFechaInicio(), ejercicio.getFechaFinal());
         Map<Long, ProveedorMovimiento> ordenes_map = ordenes.stream()
-                .collect(Collectors.toMap(ProveedorMovimiento::getNumeroComprobante, movimiento -> movimiento));
+                .collect(Collectors.toMap(ProveedorMovimiento::getNumeroComprobante, Function.identity(), (movimiento, replacement) -> movimiento));
         Map<Integer, Geografica> geograficas = geograficaService.findAll().stream()
-                .collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
+                .collect(Collectors.toMap(Geografica::getGeograficaId, Function.identity(), (geografica, replacement) -> geografica));
         long orden_minimo = ordenes.stream().mapToLong(ProveedorMovimiento::getNumeroComprobante).min()
                 .orElseThrow(NoSuchElementException::new);
         long orden_maximo = ordenes.stream().mapToLong(ProveedorMovimiento::getNumeroComprobante).max()

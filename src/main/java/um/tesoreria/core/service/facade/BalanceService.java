@@ -12,8 +12,11 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -30,13 +33,7 @@ import um.tesoreria.core.exception.ProveedorValorException;
 import um.tesoreria.core.exception.ValorMovimientoException;
 import um.tesoreria.core.exception.ValorException;
 import um.tesoreria.core.kotlin.model.*;
-import um.tesoreria.core.service.ComprobanteService;
-import um.tesoreria.core.service.CuentaMovimientoService;
-import um.tesoreria.core.service.CuentaService;
-import um.tesoreria.core.service.ProveedorMovimientoService;
-import um.tesoreria.core.service.ProveedorValorService;
-import um.tesoreria.core.service.ValorMovimientoService;
-import um.tesoreria.core.service.ValorService;
+import um.tesoreria.core.service.*;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -73,6 +70,8 @@ public class BalanceService {
 
 	@Autowired
 	private ValorService valorService;
+    @Autowired
+    private ProveedorPagoService proveedorPagoService;
 
 	public String makeSumasSaldos(OffsetDateTime desde, OffsetDateTime hasta) {
 		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
@@ -176,7 +175,7 @@ public class BalanceService {
 
 		Cuenta cuenta = cuentaService.findByNumeroCuenta(numeroCuenta);
 		Map<Integer, Comprobante> comprobantes = comprobanteService.findAll().stream()
-				.collect(Collectors.toMap(Comprobante::getComprobanteId, comprobante -> comprobante));
+				.collect(Collectors.toMap(Comprobante::getComprobanteId, Function.identity(), (comprobante, replacement) -> comprobante));
 
 		String path = env.getProperty("path.files");
 
@@ -209,26 +208,27 @@ public class BalanceService {
 		BigDecimal saldo = BigDecimal.ZERO;
 
 		row = sheet.createRow(++fila);
-		this.setCellString(row, 3, "Inicial", style_bold);
+		this.setCellString(row, 4, "Inicial", style_bold);
 		List<BigDecimal> iniciales = contabilidadService.saldoInicial(numeroCuenta, ejercicio, desde);
-		this.setCellBigDecimal(row, 4, iniciales.get(0), style_normal);
-		this.setCellBigDecimal(row, 5, iniciales.get(1), style_normal);
+		this.setCellBigDecimal(row, 5, iniciales.get(0), style_normal);
+		this.setCellBigDecimal(row, 6, iniciales.get(1), style_normal);
 		saldo = saldo.add(iniciales.get(0)).setScale(2, RoundingMode.HALF_UP);
 		saldo = saldo.subtract(iniciales.get(1)).setScale(2, RoundingMode.HALF_UP);
-		this.setCellBigDecimal(row, 6, saldo, style_normal);
+		this.setCellBigDecimal(row, 7, saldo, style_normal);
 
 		row = sheet.createRow(++fila);
 		this.setCellString(row, 0, "Fecha", style_bold);
 		this.setCellString(row, 1, "Asiento", style_bold);
 		this.setCellString(row, 2, "Comprobante", style_bold);
 		this.setCellString(row, 3, "Concepto", style_bold);
-		this.setCellString(row, 4, "Debe", style_bold);
-		this.setCellString(row, 5, "Haber", style_bold);
-		this.setCellString(row, 6, "Saldo", style_bold);
-		this.setCellString(row, 7, "Orden Pago", style_bold);
-		this.setCellString(row, 8, "Valor", style_bold);
-		this.setCellString(row, 9, "Numero", style_bold);
-		this.setCellString(row, 10, "Importe", style_bold);
+		this.setCellString(row, 4, "Orden Pago/Pago", style_bold);
+		this.setCellString(row, 5, "Debe", style_bold);
+		this.setCellString(row, 6, "Haber", style_bold);
+		this.setCellString(row, 7, "Saldo", style_bold);
+		this.setCellString(row, 8, "Orden Pago", style_bold);
+		this.setCellString(row, 9, "Valor", style_bold);
+		this.setCellString(row, 10, "Numero", style_bold);
+		this.setCellString(row, 11, "Importe", style_bold);
 
 		for (CuentaMovimiento movimiento : cuentaMovimientoService
 				.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, (byte) 0)) {
@@ -239,14 +239,34 @@ public class BalanceService {
 			Comprobante comprobante = comprobantes.get(movimiento.getComprobanteId());
 			this.setCellString(row, 2, comprobante.getDescripcion(), style_normal);
 			this.setCellString(row, 3, movimiento.getConcepto(), style_normal);
+
+			// busqueda de la OP
+			ProveedorPago proveedorPago = proveedorPagoService.findAllByFactura(movimiento.getProveedorMovimientoId()).stream().findFirst().orElse(null);
+            try {
+                log.debug("proveedorPago -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorPago));
+            } catch (JsonProcessingException e) {
+                log.debug("Sin proveedorPago");
+            }
+			if (proveedorPago != null) {
+				ProveedorMovimiento proveedorMovimientoOP = proveedorMovimientoService.findByProveedorMovimientoId(proveedorPago.getProveedorMovimientoIdPago());
+                try {
+                    log.debug("proveedorMovimientoOP -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimientoOP));
+                } catch (JsonProcessingException e) {
+                    log.debug("Sin proveedorMovimientoOP");
+                }
+				String ordenPago = proveedorMovimientoOP.getComprobante().getDescripcion() + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
+				this.setCellString(row, 4, ordenPago, style_normal);
+            }
+            //
+
 			if (movimiento.getDebita() == 1) {
-				this.setCellBigDecimal(row, 4, movimiento.getImporte(), style_normal);
+				this.setCellBigDecimal(row, 5, movimiento.getImporte(), style_normal);
 				saldo = saldo.add(movimiento.getImporte()).setScale(2, RoundingMode.HALF_UP);
 			} else {
-				this.setCellBigDecimal(row, 5, movimiento.getImporte(), style_normal);
+				this.setCellBigDecimal(row, 6, movimiento.getImporte(), style_normal);
 				saldo = saldo.subtract(movimiento.getImporte()).setScale(2, RoundingMode.HALF_UP);
 			}
-			this.setCellBigDecimal(row, 6, saldo, style_normal);
+			this.setCellBigDecimal(row, 7, saldo, style_normal);
 			try {
 				ValorMovimiento valorMovimiento = valorMovimientoService
 						.findFirstByContable(movimiento.getFechaContable(), movimiento.getOrdenContable());
@@ -255,12 +275,12 @@ public class BalanceService {
 				ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService
 						.findByProveedorMovimientoId(proveedorValor.getProveedorMovimientoId());
 				Valor valor = valorService.findByValorId(valorMovimiento.getValorId());
-				this.setCellString(row, 7,
+				this.setCellString(row, 8,
 						proveedorMovimiento.getPrefijo() + "/" + proveedorMovimiento.getNumeroComprobante(),
 						style_normal);
-				this.setCellString(row, 8, valor.getConcepto(), style_normal);
-				this.setCellLong(row, 9, valorMovimiento.getNumero(), style_normal);
-				this.setCellBigDecimal(row, 10, valorMovimiento.getImporte(), style_normal);
+				this.setCellString(row, 9, valor.getConcepto(), style_normal);
+				this.setCellLong(row, 10, valorMovimiento.getNumero(), style_normal);
+				this.setCellBigDecimal(row, 11, valorMovimiento.getImporte(), style_normal);
 			} catch (ValorMovimientoException e) {
 				log.debug("Sin Valor");
 			} catch (ProveedorValorException e) {
