@@ -207,41 +207,69 @@ public class BalanceService {
 
 		BigDecimal saldo = BigDecimal.ZERO;
 
+		int columnaFecha = 0;
+		int columnaAsiento = 1;
+		int columnaComprobante = 2;
+		int columnaProveedor = 3;
+		int columnaConcepto = 4;
+		int columnaOrdenPago = 5;
+		int columnaBeneficiario = 6;
+		int columnaDebe = 7;
+		int columnaHaber = 8;
+		int columnaSaldo = 9;
+		int columnaOrdenPagoValor = 10;
+		int columnaValor = 11;
+		int columnaNumero = 12;
+		int columnaImporte = 13;
+
 		row = sheet.createRow(++fila);
-		this.setCellString(row, 4, "Inicial", style_bold);
+		this.setCellString(row, columnaOrdenPago, "Inicial", style_bold);
 		List<BigDecimal> iniciales = contabilidadService.saldoInicial(numeroCuenta, ejercicio, desde);
-		this.setCellBigDecimal(row, 5, iniciales.get(0), style_normal);
-		this.setCellBigDecimal(row, 6, iniciales.get(1), style_normal);
+		this.setCellBigDecimal(row, columnaDebe, iniciales.get(0), style_normal);
+		this.setCellBigDecimal(row, columnaHaber, iniciales.get(1), style_normal);
 		saldo = saldo.add(iniciales.get(0)).setScale(2, RoundingMode.HALF_UP);
 		saldo = saldo.subtract(iniciales.get(1)).setScale(2, RoundingMode.HALF_UP);
-		this.setCellBigDecimal(row, 7, saldo, style_normal);
+		this.setCellBigDecimal(row, columnaSaldo, saldo, style_normal);
 
 		row = sheet.createRow(++fila);
-		this.setCellString(row, 0, "Fecha", style_bold);
-		this.setCellString(row, 1, "Asiento", style_bold);
-		this.setCellString(row, 2, "Comprobante", style_bold);
-		this.setCellString(row, 3, "Concepto", style_bold);
-		this.setCellString(row, 4, "Orden Pago/Pago", style_bold);
-		this.setCellString(row, 5, "Debe", style_bold);
-		this.setCellString(row, 6, "Haber", style_bold);
-		this.setCellString(row, 7, "Saldo", style_bold);
-		this.setCellString(row, 8, "Orden Pago", style_bold);
-		this.setCellString(row, 9, "Valor", style_bold);
-		this.setCellString(row, 10, "Numero", style_bold);
-		this.setCellString(row, 11, "Importe", style_bold);
+		this.setCellString(row, columnaFecha, "Fecha", style_bold);
+		this.setCellString(row, columnaAsiento, "Asiento", style_bold);
+		this.setCellString(row, columnaComprobante, "Comprobante", style_bold);
+		this.setCellString(row, columnaProveedor, "Proveedor", style_bold);
+		this.setCellString(row, columnaConcepto, "Concepto", style_bold);
+		this.setCellString(row, columnaOrdenPago, "Orden Pago / Pago", style_bold);
+		this.setCellString(row, columnaBeneficiario, "Beneficiario", style_bold);
+		this.setCellString(row, columnaDebe, "Debe", style_bold);
+		this.setCellString(row, columnaHaber, "Haber", style_bold);
+		this.setCellString(row, columnaSaldo, "Saldo", style_bold);
+		this.setCellString(row, columnaOrdenPagoValor, "Orden Pago", style_bold);
+		this.setCellString(row, columnaValor, "Valor", style_bold);
+		this.setCellString(row, columnaNumero, "Numero", style_bold);
+		this.setCellString(row, columnaImporte, "Importe", style_bold);
 
-		for (CuentaMovimiento movimiento : cuentaMovimientoService
+		for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService
 				.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, (byte) 0)) {
-			row = sheet.createRow(++fila);
-			this.setCellString(row, 0,
-					format.format(movimiento.getFechaContable().withOffsetSameInstant(ZoneOffset.UTC)), style_normal);
-			this.setCellInteger(row, 1, movimiento.getOrdenContable(), style_normal);
-			Comprobante comprobante = comprobantes.get(movimiento.getComprobanteId());
-			this.setCellString(row, 2, comprobante.getDescripcion(), style_normal);
-			this.setCellString(row, 3, movimiento.getConcepto(), style_normal);
+            try {
+                log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+            } catch (JsonProcessingException e) {
+                log.error(e.getMessage());
+            }
+            row = sheet.createRow(++fila);
+			this.setCellString(row, columnaFecha,
+					format.format(cuentaMovimiento.getFechaContable().withOffsetSameInstant(ZoneOffset.UTC)), style_normal);
+			this.setCellInteger(row, columnaAsiento, cuentaMovimiento.getOrdenContable(), style_normal);
+			Comprobante comprobante = comprobantes.get(cuentaMovimiento.getComprobanteId());
+			this.setCellString(row, columnaComprobante, comprobante.getDescripcion(), style_normal);
+
+			// proveedor de la operacion
+			if (cuentaMovimiento.getProveedorId() != null && cuentaMovimiento.getProveedorId() != 0) {
+				this.setCellString(row, columnaProveedor, cuentaMovimiento.getProveedor().getRazonSocial(), style_normal);
+			}
+
+			this.setCellString(row, columnaConcepto, cuentaMovimiento.getConcepto(), style_normal);
 
 			// busqueda de la OP
-			ProveedorPago proveedorPago = proveedorPagoService.findAllByFactura(movimiento.getProveedorMovimientoId()).stream().findFirst().orElse(null);
+			ProveedorPago proveedorPago = proveedorPagoService.findAllByFactura(cuentaMovimiento.getProveedorMovimientoId()).stream().findFirst().orElse(null);
             try {
                 log.debug("proveedorPago -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorPago));
             } catch (JsonProcessingException e) {
@@ -255,32 +283,33 @@ public class BalanceService {
                     log.debug("Sin proveedorMovimientoOP");
                 }
 				String ordenPago = proveedorMovimientoOP.getComprobante().getDescripcion() + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
-				this.setCellString(row, 4, ordenPago, style_normal);
+				this.setCellString(row, columnaOrdenPago, ordenPago, style_normal);
+				this.setCellString(row, columnaBeneficiario, proveedorMovimientoOP.getNombreBeneficiario(), style_normal);
             }
             //
 
-			if (movimiento.getDebita() == 1) {
-				this.setCellBigDecimal(row, 5, movimiento.getImporte(), style_normal);
-				saldo = saldo.add(movimiento.getImporte()).setScale(2, RoundingMode.HALF_UP);
+			if (cuentaMovimiento.getDebita() == 1) {
+				this.setCellBigDecimal(row, columnaDebe, cuentaMovimiento.getImporte(), style_normal);
+				saldo = saldo.add(cuentaMovimiento.getImporte()).setScale(2, RoundingMode.HALF_UP);
 			} else {
-				this.setCellBigDecimal(row, 6, movimiento.getImporte(), style_normal);
-				saldo = saldo.subtract(movimiento.getImporte()).setScale(2, RoundingMode.HALF_UP);
+				this.setCellBigDecimal(row, columnaHaber, cuentaMovimiento.getImporte(), style_normal);
+				saldo = saldo.subtract(cuentaMovimiento.getImporte()).setScale(2, RoundingMode.HALF_UP);
 			}
-			this.setCellBigDecimal(row, 7, saldo, style_normal);
+			this.setCellBigDecimal(row, columnaSaldo, saldo, style_normal);
 			try {
 				ValorMovimiento valorMovimiento = valorMovimientoService
-						.findFirstByContable(movimiento.getFechaContable(), movimiento.getOrdenContable());
+						.findFirstByContable(cuentaMovimiento.getFechaContable(), cuentaMovimiento.getOrdenContable());
 				ProveedorValor proveedorValor = proveedorValorService
 						.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
 				ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService
 						.findByProveedorMovimientoId(proveedorValor.getProveedorMovimientoId());
 				Valor valor = valorService.findByValorId(valorMovimiento.getValorId());
-				this.setCellString(row, 8,
+				this.setCellString(row, columnaOrdenPagoValor,
 						proveedorMovimiento.getPrefijo() + "/" + proveedorMovimiento.getNumeroComprobante(),
 						style_normal);
-				this.setCellString(row, 9, valor.getConcepto(), style_normal);
-				this.setCellLong(row, 10, valorMovimiento.getNumero(), style_normal);
-				this.setCellBigDecimal(row, 11, valorMovimiento.getImporte(), style_normal);
+				this.setCellString(row, columnaValor, valor.getConcepto(), style_normal);
+				this.setCellLong(row, columnaNumero, valorMovimiento.getNumero(), style_normal);
+				this.setCellBigDecimal(row, columnaImporte, valorMovimiento.getImporte(), style_normal);
 			} catch (ValorMovimientoException e) {
 				log.debug("Sin Valor");
 			} catch (ProveedorValorException e) {

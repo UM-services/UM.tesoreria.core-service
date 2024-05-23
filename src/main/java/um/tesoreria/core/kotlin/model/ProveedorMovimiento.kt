@@ -98,6 +98,6 @@ data class ProveedorMovimiento(
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "fad_mvp_id", insertable = false, updatable = false)
-    var proveedorArticulos: List<ProveedorArticulo>? = null,
+    var proveedorArticulos: List<ProveedorArticulo>? = null
 
-    ) : Auditable()
+) : Auditable()
