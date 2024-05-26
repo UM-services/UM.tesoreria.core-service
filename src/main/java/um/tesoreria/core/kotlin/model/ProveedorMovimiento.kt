@@ -17,7 +17,7 @@ import java.time.OffsetDateTime
 
 @Entity
 @Table(name = "movprov")
-data class ProveedorMovimiento(
+data class ProveedorMovimiento @JvmOverloads constructor(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -98,6 +98,10 @@ data class ProveedorMovimiento(
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "fad_mvp_id", insertable = false, updatable = false)
-    var proveedorArticulos: List<ProveedorArticulo>? = null
+    var proveedorArticulos: List<ProveedorArticulo>? = null,
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "opc_mvp_id", insertable = false, updatable = false)
+    var ordenPagos: List<ProveedorPago>? = null
 
 ) : Auditable()

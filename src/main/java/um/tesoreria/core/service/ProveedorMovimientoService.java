@@ -31,14 +31,18 @@ public class ProveedorMovimientoService {
 
     private final Integer TT_PAGOS = 4;
 
-    @Autowired
-    private IProveedorMovimientoRepository repository;
+    private final IProveedorMovimientoRepository repository;
+
+    private final ComprobanteService comprobanteService;
+
+    private final ProveedorArticuloService proveedorArticuloService;
 
     @Autowired
-    private ComprobanteService comprobanteService;
-
-    @Autowired
-    private ProveedorArticuloService proveedorArticuloService;
+    public ProveedorMovimientoService(IProveedorMovimientoRepository repository, ComprobanteService comprobanteService, ProveedorArticuloService proveedorArticuloService) {
+        this.repository = repository;
+        this.comprobanteService = comprobanteService;
+        this.proveedorArticuloService = proveedorArticuloService;
+    }
 
     public List<ProveedorMovimiento> findAllByComprobanteIdAndFechaComprobanteBetween(Integer comprobanteId,
                                                                                       OffsetDateTime fechaInicio, OffsetDateTime fechaFinal) {
@@ -55,9 +59,8 @@ public class ProveedorMovimientoService {
         List<ProveedorMovimiento> sueldosPendientes = repository
                 .findAllByComprobanteIdAndPrefijoAndNetoSinDescuentoAndNombreBeneficiarioStartingWithAndConceptoStartingWith(
                         6, ejercicioId, BigDecimal.ZERO, "Personal", "Sueldos");
-        List<ProveedorMovimiento> proveedorMovimientos = Stream.concat(anuladas.stream(), sueldosPendientes.stream())
+        return Stream.concat(anuladas.stream(), sueldosPendientes.stream())
                 .collect(Collectors.toList());
-        return proveedorMovimientos;
     }
 
     public List<ProveedorMovimiento> findAllByProveedorId(Integer proveedorId, Integer geograficaId) {
@@ -70,49 +73,50 @@ public class ProveedorMovimientoService {
     public List<ProveedorMovimiento> findAllAsignables(Integer proveedorId, OffsetDateTime desde,
                                                        OffsetDateTime hasta, Integer geograficaId, Boolean todos) throws JsonProcessingException {
         List<Comprobante> comprobantes = comprobanteService.findAllByTipoTransaccionId(3);
-        List<Integer> comprobanteIds = comprobantes.stream().map(c -> c.getComprobanteId())
+        List<Integer> comprobanteIds = comprobantes.stream().map(Comprobante::getComprobanteId)
                 .collect(Collectors.toList());
         List<Long> proveedorMovimientoIds = null;
         if (geograficaId == 0) {
             List<ProveedorMovimiento> proveedorMovimientos = repository
                     .findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndFechaAnulacionIsNull(
                             proveedorId, desde, hasta, comprobanteIds);
-            proveedorMovimientoIds = proveedorMovimientos.stream().map(m -> m.getProveedorMovimientoId())
+            proveedorMovimientoIds = proveedorMovimientos.stream().map(ProveedorMovimiento::getProveedorMovimientoId)
                     .collect(Collectors.toList());
         } else {
             List<ProveedorMovimiento> proveedorMovimientos = repository
                     .findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndGeograficaIdAndFechaAnulacionIsNull(
                             proveedorId, desde, hasta, comprobanteIds, geograficaId);
-            proveedorMovimientoIds = proveedorMovimientos.stream().map(m -> m.getProveedorMovimientoId())
+            proveedorMovimientoIds = proveedorMovimientos.stream().map(ProveedorMovimiento::getProveedorMovimientoId)
                     .collect(Collectors.toList());
         }
         List<ProveedorArticulo> proveedorArticulos = proveedorArticuloService
                 .findAllByProveedorMovimientoIds(proveedorMovimientoIds, true);
         if (todos) {
             proveedorArticulos = proveedorArticulos.stream()
-                    .filter(p -> p.getAsignado().compareTo(p.getPrecioFinal()) != 0).collect(Collectors.toList());
+                    .filter(p -> p.getAsignado().compareTo(p.getPrecioFinal()) != 0).toList();
         }
-        proveedorMovimientoIds = proveedorArticulos.stream().map(p -> p.getProveedorMovimientoId())
+        proveedorMovimientoIds = proveedorArticulos.stream().map(ProveedorArticulo::getProveedorMovimientoId)
                 .collect(Collectors.toList());
-        List<ProveedorMovimiento> proveedorMovimientos = repository
+        return repository
                 .findAllByProveedorMovimientoIdIn(proveedorMovimientoIds, Sort.by("fechaComprobante").descending()
                         .and(Sort.by("prefijo").ascending()).and(Sort.by("numeroComprobante").ascending()));
-        return proveedorMovimientos;
     }
 
+    public List<ProveedorMovimiento> findAllByNotOrdenPagoBetweenAndNotAnulado(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta) {
+        return repository.findAllByFechaComprobanteBetweenAndFechaAnulacionIsNullAndComprobanteIdNotOrderByNombreBeneficiario(fechaDesde, fechaHasta, 6);
+    }
     public ProveedorMovimiento findByProveedorMovimientoId(Long proveedorMovimientoId) {
-        ProveedorMovimiento proveedorMovimiento = repository.findByProveedorMovimientoId(proveedorMovimientoId)
+        return repository.findByProveedorMovimientoId(proveedorMovimientoId)
                 .orElseThrow(() -> new ProveedorMovimientoException(proveedorMovimientoId));
-        return proveedorMovimiento;
     }
 
     public ProveedorMovimiento findByOrdenPago(Integer prefijo, Long numeroComprobante) {
-        List<Integer> comprobanteIds = comprobanteService.findAllByOrdenPago().stream().map(comprobante -> comprobante.getComprobanteId()).collect(Collectors.toList());
+        List<Integer> comprobanteIds = comprobanteService.findAllByOrdenPago().stream().map(Comprobante::getComprobanteId).collect(Collectors.toList());
         return repository.findByPrefijoAndNumeroComprobanteAndComprobanteIdIn(prefijo, numeroComprobante, comprobanteIds).orElseThrow(() -> new ProveedorMovimientoException(prefijo, numeroComprobante));
     }
 
     public ProveedorMovimiento findLastOrdenPago(Integer prefijo) {
-        List<Integer> comprobanteIds = comprobanteService.findAllByOrdenPagoAndTipoTransaccionId(TT_PAGOS).stream().map(comprobante -> comprobante.getComprobanteId()).collect(Collectors.toList());
+        List<Integer> comprobanteIds = comprobanteService.findAllByOrdenPagoAndTipoTransaccionId(TT_PAGOS).stream().map(Comprobante::getComprobanteId).collect(Collectors.toList());
         return repository.findTopByPrefijoAndComprobanteIdInOrderByNumeroComprobanteDesc(prefijo, comprobanteIds).orElseThrow(() -> new ProveedorMovimientoException(prefijo));
     }
 
@@ -132,4 +136,5 @@ public class ProveedorMovimientoService {
     public ProveedorMovimiento add(ProveedorMovimiento proveedorMovimiento) {
         return repository.save(proveedorMovimiento);
     }
+
 }

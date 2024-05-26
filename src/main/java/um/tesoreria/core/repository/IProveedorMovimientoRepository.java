@@ -21,36 +21,38 @@ import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
 @Repository
 public interface IProveedorMovimientoRepository extends JpaRepository<ProveedorMovimiento, Long> {
 
-	public List<ProveedorMovimiento> findAllByComprobanteIdAndFechaComprobanteBetween(Integer comprobanteId,
+	List<ProveedorMovimiento> findAllByComprobanteIdAndFechaComprobanteBetween(Integer comprobanteId,
 			OffsetDateTime fechaInicio, OffsetDateTime fechaFinal);
 
-	public List<ProveedorMovimiento> findAllByProveedorMovimientoIdIn(List<Long> proveedorMovimientoIds, Sort sort);
+	List<ProveedorMovimiento> findAllByProveedorMovimientoIdIn(List<Long> proveedorMovimientoIds, Sort sort);
 
-	public List<ProveedorMovimiento> findAllByComprobanteIdAndPrefijoAndFechaAnulacionNotNull(Integer comprobanteId,
+	List<ProveedorMovimiento> findAllByComprobanteIdAndPrefijoAndFechaAnulacionNotNull(Integer comprobanteId,
 			Integer prefijo);
 
-	public List<ProveedorMovimiento> findAllByComprobanteIdAndPrefijoAndNetoSinDescuentoAndNombreBeneficiarioStartingWithAndConceptoStartingWith(
+	List<ProveedorMovimiento> findAllByComprobanteIdAndPrefijoAndNetoSinDescuentoAndNombreBeneficiarioStartingWithAndConceptoStartingWith(
 			Integer comprobanteId, Integer prefijo, BigDecimal netoSinDescuento, String nombreBeneficiario,
 			String concepto);
 
-	public List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndFechaAnulacionIsNull(
+	List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndFechaAnulacionIsNull(
 			Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta, List<Integer> comprobanteIds);
 
-	public List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndGeograficaIdAndFechaAnulacionIsNull(
+	List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndGeograficaIdAndFechaAnulacionIsNull(
 			Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta, List<Integer> comprobanteIds,
 			Integer geograficaId);
 
-	public List<ProveedorMovimiento> findAllByProveedorId(Integer proveedorId);
+	List<ProveedorMovimiento> findAllByProveedorId(Integer proveedorId);
 
-	public List<ProveedorMovimiento> findAllByProveedorIdAndGeograficaId(Integer proveedorId, Integer geograficaId);
+	List<ProveedorMovimiento> findAllByProveedorIdAndGeograficaId(Integer proveedorId, Integer geograficaId);
 
-	public Optional<ProveedorMovimiento> findByProveedorMovimientoId(Long proveedorMovimientoId);
+	List<ProveedorMovimiento> findAllByFechaComprobanteBetweenAndFechaAnulacionIsNullAndComprobanteIdNotOrderByNombreBeneficiario(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta, Integer comprobanteId);
 
-	public Optional<ProveedorMovimiento> findByPrefijoAndNumeroComprobanteAndComprobanteIdIn(Integer prefijo, Long numeroComprobante, List<Integer> comprobanteIds);
+	Optional<ProveedorMovimiento> findByProveedorMovimientoId(Long proveedorMovimientoId);
 
-	public Optional<ProveedorMovimiento> findTopByPrefijoAndComprobanteIdInOrderByNumeroComprobanteDesc(Integer prefijo, List<Integer> comprobanteIds);
+	Optional<ProveedorMovimiento> findByPrefijoAndNumeroComprobanteAndComprobanteIdIn(Integer prefijo, Long numeroComprobante, List<Integer> comprobanteIds);
+
+	Optional<ProveedorMovimiento> findTopByPrefijoAndComprobanteIdInOrderByNumeroComprobanteDesc(Integer prefijo, List<Integer> comprobanteIds);
 
 	@Modifying
-    public void deleteByProveedorMovimientoId(Long proveedorMovimientoId);
+    void deleteByProveedorMovimientoId(Long proveedorMovimientoId);
 
 }

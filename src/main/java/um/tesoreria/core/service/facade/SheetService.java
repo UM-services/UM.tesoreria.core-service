@@ -10,6 +10,7 @@ import java.math.RoundingMode;
 import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -1601,6 +1602,94 @@ public class SheetService {
             book.close();
         } catch (Exception e) {
             log.debug("Error generando proveedores");
+        }
+        return filename;
+    }
+
+    public String generateFacturasPendientes(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta) {
+        String path = environment.getProperty("path.files");
+
+        String filename = path + "pendientes.xlsx";
+
+        Workbook book = new XSSFWorkbook();
+        CellStyle styleNormal = book.createCellStyle();
+        Font fontNormal = book.createFont();
+        fontNormal.setBold(false);
+        styleNormal.setFont(fontNormal);
+
+        CellStyle styleBold = book.createCellStyle();
+        Font fontBold = book.createFont();
+        fontBold.setBold(true);
+        styleBold.setFont(fontBold);
+
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+        Sheet sheet = book.createSheet("Pendientes");
+        Row row = null;
+
+        int fila = -1;
+        row = sheet.createRow(++fila);
+        this.setCellString(row, 0, "Facturas Pendientes", styleBold);
+        row = sheet.createRow(++fila);
+        this.setCellString(row, 0, "Periodo", styleBold);
+        this.setCellString(row, 1, format.format(fechaDesde.withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
+        this.setCellString(row, 2, format.format(fechaHasta.withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
+
+        int columnaRazonSocial = 0;
+        int columnaCUIT = 1;
+        int columnaFechaComprobante = 2;
+        int columnaTipoComprobante = 3;
+        int columnaComprobantePrefijo = 4;
+        int columnaComprobanteNumero = 5;
+        int columnaImporte = 6;
+        int columnaCancedado = 7;
+        int columnaSaldo = 8;
+        row = sheet.createRow(++fila);
+        this.setCellString(row, columnaRazonSocial, "Razón Social", styleBold);
+        this.setCellString(row, columnaCUIT, "CUIT", styleBold);
+        this.setCellString(row, columnaFechaComprobante, "Fecha Comprobante", styleBold);
+        this.setCellString(row, columnaTipoComprobante, "Tipo Comprobante", styleBold);
+        this.setCellString(row, columnaComprobantePrefijo, "Prefijo", styleBold);
+        this.setCellString(row, columnaComprobanteNumero, "Numero", styleBold);
+        this.setCellString(row, columnaImporte, "Importe", styleBold);
+        this.setCellString(row, columnaCancedado, "Cancelado", styleBold);
+        this.setCellString(row, columnaSaldo, "Saldo al " + format.format(fechaHasta.withOffsetSameInstant(ZoneOffset.UTC)), styleBold);
+
+        for (ProveedorMovimiento proveedorMovimiento : proveedorMovimientoService.findAllByNotOrdenPagoBetweenAndNotAnulado(fechaDesde, fechaHasta)) {
+            try {
+                log.debug("proveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
+            } catch (JsonProcessingException e) {
+                log.debug("sin proveedorMovimiento");
+            }
+            BigDecimal importe = proveedorMovimiento.getImporte();
+            BigDecimal cancelado = new BigDecimal(proveedorMovimiento.getOrdenPagos().stream().filter(pago -> !pago.getFechaPago().isAfter(fechaHasta)).mapToDouble(pago -> pago.getImporteAplicado().doubleValue()).sum());
+            BigDecimal saldo = importe.subtract(cancelado).setScale(2, RoundingMode.HALF_UP);
+            if (saldo.compareTo(BigDecimal.ZERO) != 0) {
+                row = sheet.createRow(++fila);
+                this.setCellString(row, columnaRazonSocial, proveedorMovimiento.getProveedor().getRazonSocial(), styleNormal);
+                this.setCellString(row, columnaCUIT, proveedorMovimiento.getProveedor().getCuit(), styleNormal);
+                this.setCellString(row, columnaFechaComprobante, format.format(proveedorMovimiento.getFechaComprobante().withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
+                this.setCellString(row, columnaTipoComprobante, proveedorMovimiento.getComprobante().getDescripcion(), styleNormal);
+                this.setCellInteger(row, columnaComprobantePrefijo, proveedorMovimiento.getPrefijo(), styleNormal);
+                this.setCellLong(row, columnaComprobanteNumero, proveedorMovimiento.getNumeroComprobante(), styleNormal);
+                this.setCellBigDecimal(row, columnaImporte, importe, styleNormal);
+                this.setCellBigDecimal(row, columnaCancedado, cancelado, styleNormal);
+                this.setCellBigDecimal(row, columnaSaldo, saldo, styleNormal);
+            }
+        }
+
+        for (int column = 0; column < sheet.getRow(2).getPhysicalNumberOfCells(); column++)
+            sheet.autoSizeColumn(column);
+
+        try {
+            File file = new File(filename);
+            FileOutputStream output = new FileOutputStream(file);
+            book.write(output);
+            output.flush();
+            output.close();
+            book.close();
+        } catch (Exception e) {
+            log.debug("Error generando pendientes");
         }
         return filename;
     }

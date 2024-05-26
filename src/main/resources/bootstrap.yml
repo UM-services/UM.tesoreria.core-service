@@ -3,7 +3,7 @@ app:
 #  server: 192.168.1.3:3306
 #  user: dquinteros
 #  password: aeqq2004
-  server: 127.0.0.1:3306
+  server: 10.147.20.20:3306
   user: root
   password: root
   add-properties: true
@@ -11,6 +11,7 @@ app:
     enabled: true
     port: 35792
   open-in-view: true
+  logging: debug
   mail:
     username: chequeras@um.edu.ar
     password: 8VlfKS44o8YbOutcm2VT
