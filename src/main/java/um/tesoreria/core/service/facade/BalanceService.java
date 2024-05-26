@@ -276,7 +276,7 @@ public class BalanceService {
                 log.debug("Sin proveedorPago");
             }
 			if (proveedorPago != null) {
-				ProveedorMovimiento proveedorMovimientoOP = proveedorMovimientoService.findByProveedorMovimientoId(proveedorPago.getProveedorMovimientoIdPago());
+				ProveedorMovimiento proveedorMovimientoOP = proveedorPago.getOrdenPago();
                 try {
                     log.debug("proveedorMovimientoOP -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimientoOP));
                 } catch (JsonProcessingException e) {

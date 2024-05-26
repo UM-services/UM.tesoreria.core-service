@@ -107,6 +107,9 @@ public class SheetController {
         return generateFile(service.generateProveedores(), "proveedores.xlsx");
     }
 
-
+    @GetMapping("/generateFacturasPendientes/{fechaDesde}/{fechaHasta}")
+    public ResponseEntity<Resource> generateFacturasPendientes(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaDesde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaHasta) throws FileNotFoundException {
+        return generateFile(service.generateFacturasPendientes(fechaDesde, fechaHasta), "pendientes.xlsx");
+    }
 
 }
