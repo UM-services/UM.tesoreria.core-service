@@ -21,12 +21,20 @@ import um.tesoreria.core.repository.ICursoCargoContratadoRepository;
 @Service
 public class CursoCargoContratadoService {
 
+	private final ICursoCargoContratadoRepository repository;
+
 	@Autowired
-	private ICursoCargoContratadoRepository repository;
+	public CursoCargoContratadoService(ICursoCargoContratadoRepository repository) {
+		this.repository = repository;
+	}
 
 	public List<CursoCargoContratado> findAllByContratado(Long contratadoId, Integer anho, Integer mes,
 			Long contratoId) {
 		return repository.findAllByContratadoIdAndAnhoAndMesAndContratoId(contratadoId, anho, mes, contratoId);
+	}
+
+	public List<CursoCargoContratado> findAllByCursosContratado(Long contratadoId, Integer anho, Integer mes) {
+		return repository.findAllByContratadoIdAndAnhoAndMes(contratadoId, anho, mes);
 	}
 
 	public List<CursoCargoContratado> findAllByCurso(Long cursoId, Integer anho, Integer mes) {
