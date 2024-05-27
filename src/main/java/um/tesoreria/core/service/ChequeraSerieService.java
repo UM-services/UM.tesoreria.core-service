@@ -279,7 +279,7 @@ public class ChequeraSerieService {
                             newChequeraSerie.getAlternativaId(), newChequeraSerie.getAlgoPagado(),
                             newChequeraSerie.getTipoImpresionId(), newChequeraSerie.getFlagPayperTic(),
                             newChequeraSerie.getUsuarioId(), newChequeraSerie.getEnviado(),
-                            newChequeraSerie.getRetenida(), 0, BigDecimal.ZERO, null, null, null, null, null, null,
+                            newChequeraSerie.getRetenida(), newChequeraSerie.getVersion(), 0, BigDecimal.ZERO, null, null, null, null, null, null,
                             null);
                     chequeraSerie = repository.save(chequeraSerie);
                     log.debug("ChequeraSerie -> " + chequeraSerie);

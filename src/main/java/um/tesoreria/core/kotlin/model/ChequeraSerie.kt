@@ -69,6 +69,7 @@ data class ChequeraSerie(
     var usuarioId: String? = null,
     var enviado: Byte = 0,
     var retenida: Byte = 0,
+    var version: Long? = null,
 
     @Transient
     var cuotasDeuda: Int = 0,

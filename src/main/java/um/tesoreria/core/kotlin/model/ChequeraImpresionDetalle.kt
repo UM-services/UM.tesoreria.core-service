@@ -48,5 +48,6 @@ data class ChequeraImpresionDetalle(
     var importe3: BigDecimal = BigDecimal.ZERO,
 
     var usuarioId: String? = null,
+    var version: Long? = null
 
-    ) : Auditable()
+) : Auditable()

@@ -31,5 +31,6 @@ data class ChequeraImpresionCabecera(
     var aranceltipoId: Int? = null,
     var alternativaId: Int? = null,
     var usuarioId: String? = null,
+    var version: Long? = null
 
-    ) : Auditable()
+) : Auditable()
