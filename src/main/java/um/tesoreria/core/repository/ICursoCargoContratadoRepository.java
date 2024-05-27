@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.core.repository;
 
@@ -19,24 +19,26 @@ import um.tesoreria.core.model.CursoCargoContratado;
 @Repository
 public interface ICursoCargoContratadoRepository extends JpaRepository<CursoCargoContratado, Long> {
 
-	public List<CursoCargoContratado> findAllByContratadoIdAndAnhoAndMesAndContratoId(Long contratadoId, Integer anho,
-			Integer mes, Long contratoId);
+    List<CursoCargoContratado> findAllByContratadoIdAndAnhoAndMesAndContratoId(Long contratadoId, Integer anho,
+                                                                               Integer mes, Long contratoId);
 
-	public List<CursoCargoContratado> findAllByCursoIdAndAnhoAndMes(Long cursoId, Integer anho, Integer mes);
+    List<CursoCargoContratado> findAllByContratadoIdAndAnhoAndMes(Long contratadoId, Integer anho, Integer mes);
 
-	public List<CursoCargoContratado> findAllByCursoIdAndContratoId(Long cursoId, Long contratoId);
+    List<CursoCargoContratado> findAllByCursoIdAndAnhoAndMes(Long cursoId, Integer anho, Integer mes);
 
-	public List<CursoCargoContratado> findAllByAnhoAndMes(Integer anho, Integer mes);
+    List<CursoCargoContratado> findAllByCursoIdAndContratoId(Long cursoId, Long contratoId);
 
-	public Optional<CursoCargoContratado> findByCursoCargoContratadoId(Long cursoCargoContratadoId);
+    List<CursoCargoContratado> findAllByAnhoAndMes(Integer anho, Integer mes);
 
-	public Optional<CursoCargoContratado> findByCursoIdAndAnhoAndMesAndContratadoId(Long cursoId, Integer anho,
-			Integer mes, Long contratadoId);
+    Optional<CursoCargoContratado> findByCursoCargoContratadoId(Long cursoCargoContratadoId);
 
-	@Modifying
-	public void deleteByCursoCargoContratadoId(Long cursoCargoContratadoId);
+    Optional<CursoCargoContratado> findByCursoIdAndAnhoAndMesAndContratadoId(Long cursoId, Integer anho,
+                                                                             Integer mes, Long contratadoId);
 
-	@Modifying
-	public void deleteAllByCursoIdAndContratoIdAndContratadoId(Long cursoId, Long contratoId, Long contratadoId);
+    @Modifying
+    void deleteByCursoCargoContratadoId(Long cursoCargoContratadoId);
+
+    @Modifying
+    void deleteAllByCursoIdAndContratoIdAndContratadoId(Long cursoId, Long contratoId, Long contratadoId);
 
 }

@@ -16,11 +16,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import um.tesoreria.core.kotlin.model.Auditable;
-import um.tesoreria.core.model.view.ContratadoPersona;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.kotlin.model.view.ContratadoPersona;
 
 /**
  * @author daniel

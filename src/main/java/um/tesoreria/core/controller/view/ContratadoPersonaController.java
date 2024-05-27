@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import um.tesoreria.core.model.view.ContratadoPersona;
+import um.tesoreria.core.kotlin.model.view.ContratadoPersona;
 import um.tesoreria.core.service.view.ContratadoPersonaService;
 
 /**
@@ -28,6 +28,6 @@ public class ContratadoPersonaController {
 
 	@GetMapping("/")
 	public ResponseEntity<List<ContratadoPersona>> findAll() {
-		return new ResponseEntity<List<ContratadoPersona>>(service.findAll(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 }
