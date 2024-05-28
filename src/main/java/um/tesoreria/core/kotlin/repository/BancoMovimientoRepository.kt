@@ -6,7 +6,7 @@ import um.tesoreria.core.kotlin.model.BancoMovimiento
 import java.time.OffsetDateTime
 import java.util.Optional
 
-interface IBancoMovimientoRepository : JpaRepository<BancoMovimiento, Long> {
+interface BancoMovimientoRepository : JpaRepository<BancoMovimiento, Long> {
 
     fun findByBancoMovimientoId(bancoMovimientoId: Long?): Optional<BancoMovimiento?>?
 

@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import um.tesoreria.core.kotlin.model.Comprobante;
 import um.tesoreria.core.kotlin.model.Modulo;
 import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
-import um.tesoreria.core.kotlin.repository.IModuloRepository;
+import um.tesoreria.core.kotlin.repository.ModuloRepository;
 import um.tesoreria.core.repository.IComprobanteRepository;
 import um.tesoreria.core.repository.IProveedorMovimientoRepository;
 
@@ -29,7 +29,7 @@ class ProveedorMovimientoControllerTest {
     private IComprobanteRepository comprobanteRepository;
 
     @Autowired
-    private IModuloRepository moduloRepository;
+    private ModuloRepository moduloRepository;
 
     @Autowired
     private ProveedorMovimientoController controller;

@@ -4,7 +4,7 @@ import um.tesoreria.core.exception.BancariaException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.kotlin.model.Bancaria;
-import um.tesoreria.core.kotlin.repository.IBancariaRepository;
+import um.tesoreria.core.kotlin.repository.BancariaRepository;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 public class BancariaService {
 
     @Autowired
-    private IBancariaRepository repository;
+    private BancariaRepository repository;
 
     public List<Bancaria> findAll() {
         return repository.findAll();

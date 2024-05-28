@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ValorMovimientoException;
 import um.tesoreria.core.kotlin.model.ProveedorValor;
 import um.tesoreria.core.kotlin.model.ValorMovimiento;
-import um.tesoreria.core.kotlin.repository.IValorMovimientoRepository;
+import um.tesoreria.core.kotlin.repository.ValorMovimientoRepository;
 
 /**
  * @author daniel
@@ -24,7 +24,7 @@ import um.tesoreria.core.kotlin.repository.IValorMovimientoRepository;
 public class ValorMovimientoService {
 
     @Autowired
-    private IValorMovimientoRepository repository;
+    private ValorMovimientoRepository repository;
 
     @Autowired
     private ProveedorValorService proveedorValorService;

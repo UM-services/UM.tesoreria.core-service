@@ -7,7 +7,7 @@ import um.tesoreria.core.kotlin.model.ValorMovimiento
 import java.time.OffsetDateTime
 import java.util.Optional
 
-interface IValorMovimientoRepository : JpaRepository<ValorMovimiento, Long> {
+interface ValorMovimientoRepository : JpaRepository<ValorMovimiento, Long> {
 
     fun findAllByValorMovimientoIdIn(valorMovimientoIds: List<Long?>?): List<ValorMovimiento?>?
 

@@ -62,6 +62,11 @@ public class ChequeraCuotaController {
 //        return new ResponseEntity<>(chequeraCuotaDeudaService.findQuinterosByRango(desde, hasta, reduced, null, service), HttpStatus.OK);
     }
 
+    @GetMapping("/deudaRango/grupo/{grupo}/{desde}/{hasta}/{reduced}")
+    public ResponseEntity<List<ChequeraCuotaDeuda>> findAllGrupoDeudaRango(@PathVariable Integer grupo, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta, @PathVariable Boolean reduced) {
+        return new ResponseEntity<>(chequeraCuotaDeudaService.findAllByGrupoRango(grupo, desde, hasta, reduced, null, service), HttpStatus.OK);
+    }
+
     @GetMapping("/deudaPosgradoRango/{desde}/{hasta}")
     public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaPosgradoRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta) {
         return new ResponseEntity<>(chequeraCuotaDeudaService.findAllPosgradoByRango(desde, hasta, service), HttpStatus.OK);
