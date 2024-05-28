@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.kotlin.model.BancoMovimiento;
-import um.tesoreria.core.kotlin.repository.IBancoMovimientoRepository;
+import um.tesoreria.core.kotlin.repository.BancoMovimientoRepository;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -16,7 +16,7 @@ import java.time.OffsetDateTime;
 public class BancoMovimientoService {
 
     @Autowired
-    private IBancoMovimientoRepository repository;
+    private BancoMovimientoRepository repository;
 
     public BancoMovimiento findByValorMovimientoId(Long valorMovimientoId) {
         return repository.findByValorMovimientoId(valorMovimientoId).orElseThrow(() -> new BancoMovimientoException());

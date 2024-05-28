@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository
 import um.tesoreria.core.kotlin.model.Modulo
 
 @Repository
-interface IModuloRepository : JpaRepository<Modulo, Int> {
+interface ModuloRepository : JpaRepository<Modulo, Int> {
 
 }
