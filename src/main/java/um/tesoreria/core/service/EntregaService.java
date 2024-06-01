@@ -79,6 +79,24 @@ public class EntregaService {
 		return entrega;
 	}
 
+	public Entrega update(Entrega newEntrega, Long entregaId) {
+		return repository.findByEntregaId(entregaId).map(entrega -> {
+			entrega = new Entrega.Builder()
+					.entregaId(entregaId)
+					.fecha(newEntrega.getFecha())
+					.ubicacionId(newEntrega.getUbicacionId())
+					.recibe(newEntrega.getRecibe())
+					.observacion(newEntrega.getObservacion())
+					.fechaContable(newEntrega.getFechaContable())
+					.ordenContable(newEntrega.getOrdenContable())
+					.anulada(newEntrega.getAnulada())
+					.tipo(newEntrega.getTipo())
+					.trackId(newEntrega.getTrackId())
+					.build();
+			return repository.save(entrega);
+		}).orElseThrow(() -> new EntregaException(entregaId));
+	}
+
 	@Transactional
 	public void deleteByEntregaId(Long entregaId) {
 		repository.deleteByEntregaId(entregaId);

@@ -52,6 +52,6 @@ data class ProveedorArticulo(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "fad_art_id", insertable = false, updatable = false)
-    var articulo: Articulo? = null,
+    var articulo: Articulo? = null
 
-    ) : Auditable()
+) : Auditable()

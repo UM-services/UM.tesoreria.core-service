@@ -27,32 +27,35 @@ import java.text.MessageFormat;
 @Slf4j
 public class CostoService {
 
-    @Resource
-    private TrackService trackService;
+    private final TrackService trackService;
 
-    @Resource
-    private AsientoService asientoService;
+    private final AsientoService asientoService;
 
-    @Resource
-    private ContableService contableService;
+    private final ContabilidadService contabilidadService;
 
-    @Resource
-    private EntregaService entregaService;
+    private final EntregaService entregaService;
 
-    @Resource
-    private EntregaDetalleService entregaDetalleService;
+    private final EntregaDetalleService entregaDetalleService;
 
-    @Resource
-    private CuentaMovimientoService cuentaMovimientoService;
+    private final CuentaMovimientoService cuentaMovimientoService;
 
-    @Resource
-    private ProveedorArticuloService proveedorArticuloService;
+    private final ProveedorArticuloService proveedorArticuloService;
 
-    @Resource
-    private ProveedorMovimientoService proveedorMovimientoService;
+    private final ProveedorMovimientoService proveedorMovimientoService;
 
-    @Resource
-    private ProveedorArticuloTrackService proveedorArticuloTrackService;
+    private final ProveedorArticuloTrackService proveedorArticuloTrackService;
+
+    public CostoService(TrackService trackService, AsientoService asientoService, ContabilidadService contabilidadService, EntregaService entregaService, EntregaDetalleService entregaDetalleService, CuentaMovimientoService cuentaMovimientoService, ProveedorArticuloService proveedorArticuloService, ProveedorMovimientoService proveedorMovimientoService, ProveedorArticuloTrackService proveedorArticuloTrackService) {
+        this.trackService = trackService;
+        this.asientoService = asientoService;
+        this.contabilidadService = contabilidadService;
+        this.entregaService = entregaService;
+        this.entregaDetalleService = entregaDetalleService;
+        this.cuentaMovimientoService = cuentaMovimientoService;
+        this.proveedorArticuloService = proveedorArticuloService;
+        this.proveedorMovimientoService = proveedorMovimientoService;
+        this.proveedorArticuloTrackService = proveedorArticuloTrackService;
+    }
 
     @Transactional
     public Boolean addAsignacion(AsignacionCosto asignacionCosto) {
@@ -67,7 +70,7 @@ public class CostoService {
             }
 
             Integer item = 0;
-            AsientoInternal asientoInternal = contableService.nextAsiento(asignacionCosto.getFecha(), null);
+            AsientoInternal asientoInternal = contabilidadService.nextAsiento(asignacionCosto.getFecha(), null);
             try {
                 log.debug("Asiento Internal -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asientoInternal));
             } catch (JsonProcessingException e) {
@@ -212,7 +215,7 @@ public class CostoService {
             }
             entregaService.deleteByEntregaId(entregaId);
             log.debug("Entrega in deleteDesignacion deleted");
-            contableService.deleteAsiento(entrega.getFechaContable(), entrega.getOrdenContable());
+            contabilidadService.deleteAsiento(entrega.getFechaContable(), entrega.getOrdenContable());
             log.debug("Asiento in deleteDesignacion deleted");
             trackService.deleteByTrackId(trackId);
         } catch (EjercicioBloqueadoException e) {

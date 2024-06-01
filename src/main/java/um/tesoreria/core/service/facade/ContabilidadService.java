@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.service.facade;
 
+import um.tesoreria.core.controller.EntregaDetalleController;
 import um.tesoreria.core.exception.AsientoException;
 import um.tesoreria.core.exception.CuentaMovimientoException;
 import um.tesoreria.core.exception.EjercicioBloqueadoException;
@@ -12,7 +13,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
@@ -31,22 +31,33 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class ContableService {
+public class ContabilidadService {
 
-    @Autowired
-    private AsientoService asientoService;
+    private final AsientoService asientoService;
 
-    @Autowired
-    private CuentaService cuentaService;
+    private final CuentaService cuentaService;
 
-    @Autowired
-    private EjercicioService ejercicioService;
+    private final EjercicioService ejercicioService;
 
-    @Autowired
-    private CuentaMovimientoService cuentaMovimientoService;
+    private final CuentaMovimientoService cuentaMovimientoService;
 
-    @Autowired
-    private ComprobanteService comprobanteService;
+    private final ComprobanteService comprobanteService;
+
+    private final ProveedorMovimientoService proveedorMovimientoService;
+
+    private final EntregaDetalleService entregaDetalleService;
+    private final EntregaService entregaService;
+
+    public ContabilidadService(AsientoService asientoService, CuentaService cuentaService, EjercicioService ejercicioService, CuentaMovimientoService cuentaMovimientoService, ComprobanteService comprobanteService, ProveedorMovimientoService proveedorMovimientoService, EntregaDetalleService entregaDetalleService, EntregaService entregaService) {
+        this.asientoService = asientoService;
+        this.cuentaService = cuentaService;
+        this.ejercicioService = ejercicioService;
+        this.cuentaMovimientoService = cuentaMovimientoService;
+        this.comprobanteService = comprobanteService;
+        this.proveedorMovimientoService = proveedorMovimientoService;
+        this.entregaDetalleService = entregaDetalleService;
+        this.entregaService = entregaService;
+    }
 
     public static Boolean isSaldoDeudor(BigDecimal cuenta) {
         List<Integer> digitos = List.of(1, 4);
@@ -277,5 +288,67 @@ public class ContableService {
         }
         deleteAsientoDesde(fechaContable, ordenContable, item + 1);
 
+    }
+
+    @Transactional
+    public Boolean ajusteAsientoCosto(Long proveedorMovimientoIdFactura) {
+        ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoIdFactura);
+        try {
+            log.debug("ProveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
+        } catch (JsonProcessingException e) {
+            log.debug("ProveedorMovimiento -> error");
+        }
+        if (proveedorMovimiento.getFechaComprobante().isBefore(OffsetDateTime.of(2023, 3, 1, 0, 0, 0, 0, ZoneOffset.UTC))) {
+            log.debug("Movimiento previo al 01/03/2023");
+            return false;
+        }
+        for (ProveedorArticulo proveedorArticulo : proveedorMovimiento.getProveedorArticulos()) {
+            try {
+                log.debug("ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
+            } catch (JsonProcessingException e) {
+                log.debug("ProveedorArticulo -> error");
+            }
+
+            for (EntregaDetalle entregaDetalle : entregaDetalleService.findAllByProveedorArticuloId(proveedorArticulo.getProveedorArticuloId())) {
+                try {
+                    log.debug("EntregaDetalle -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
+                } catch (JsonProcessingException e) {
+                    log.debug("EntregaDetalle -> error");
+                }
+                if (entregaDetalle.getEntrega().getFechaContable().compareTo(proveedorMovimiento.getFechaComprobante()) == 0) {
+                    log.debug("Fecha de comprobante y de asiento de asignación de costos iguales");
+                    return false;
+                }
+                OffsetDateTime sourceDate = entregaDetalle.getEntrega().getFechaContable();
+                OffsetDateTime targetDate = proveedorMovimiento.getFechaComprobante();
+                Integer sourceNumber = entregaDetalle.getEntrega().getOrdenContable();
+                var next = this.nextAsiento(targetDate, null);
+                Integer targetNumber = next.getOrdenContable();
+                // Anulando relación con el asiento
+                log.debug("Anulando relación con el asiento");
+                var entrega = entregaDetalle.getEntrega();
+                entrega.setFechaContable(null);
+                entrega.setOrdenContable(0);
+                entrega = entregaService.update(entrega, entrega.getEntregaId());
+                // Actualizando el asiento
+                for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService.findAllByAsiento(sourceDate, sourceNumber, 0, 2)) {
+                    try {
+                        log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+                    } catch (JsonProcessingException e) {
+                        log.debug("CuentaMovimiento -> error");
+                    }
+                    log.debug("Actualizando el asiento");
+                    cuentaMovimiento.setFechaContable(targetDate);
+                    cuentaMovimiento.setOrdenContable(targetNumber);
+                    cuentaMovimiento = cuentaMovimientoService.update(cuentaMovimiento, cuentaMovimiento.getCuentaMovimientoId());
+                }
+                // Actualizando relación con el asiento
+                log.debug("Actualizando relación con el asiento");
+                entrega.setFechaContable(targetDate);
+                entrega.setOrdenContable(targetNumber);
+                entrega = entregaService.update(entrega, entrega.getEntregaId());
+            }
+        }
+        return true;
     }
 }

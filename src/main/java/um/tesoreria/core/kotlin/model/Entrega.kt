@@ -12,9 +12,8 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
 
 @Entity
-@Table
-data class Entrega(
-
+data class Entrega (
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "noe_id")
@@ -45,7 +44,7 @@ data class Entrega(
 
 	@Column(name = "noe_tipo")
 	var tipo: String = "",
-	
+
 	var trackId: Long? = null,
 
 	@OneToOne(optional = true)
@@ -56,4 +55,52 @@ data class Entrega(
 	@JoinColumn(name = "trackId", insertable = false, updatable = false)
 	var track: Track? = null
 
-) : Auditable()
+) : Auditable() {
+
+	companion object {
+		fun builder() = Builder()
+	}
+
+	class Builder {
+		private var entregaId: Long? = null
+		private var fecha: OffsetDateTime? = null
+		private var ubicacionId: Int? = null
+		private var recibe: String = ""
+		private var observacion: String = ""
+		private var fechaContable: OffsetDateTime? = null
+		private var ordenContable: Int = 0
+		private var anulada: Byte = 0
+		private var tipo: String = ""
+		private var trackId: Long? = null
+		private var ubicacion: Ubicacion? = null
+		private var track: Track? = null
+
+		fun entregaId(entregaId: Long?) = apply { this.entregaId = entregaId }
+		fun fecha(fecha: OffsetDateTime?) = apply { this.fecha = fecha }
+		fun ubicacionId(ubicacionId: Int?) = apply { this.ubicacionId = ubicacionId }
+		fun recibe(recibe: String) = apply { this.recibe = recibe }
+		fun observacion(observacion: String) = apply { this.observacion = observacion }
+		fun fechaContable(fechaContable: OffsetDateTime?) = apply { this.fechaContable = fechaContable }
+		fun ordenContable(ordenContable: Int) = apply { this.ordenContable = ordenContable }
+		fun anulada(anulada: Byte) = apply { this.anulada = anulada }
+		fun tipo(tipo: String) = apply { this.tipo = tipo }
+		fun trackId(trackId: Long?) = apply { this.trackId = trackId }
+		fun ubicacion(ubicacion: Ubicacion?) = apply { this.ubicacion = ubicacion }
+		fun track(track: Track?) = apply { this.track = track }
+
+		fun build() = Entrega(
+			entregaId,
+			fecha,
+			ubicacionId,
+			recibe,
+			observacion,
+			fechaContable,
+			ordenContable,
+			anulada,
+			tipo,
+			trackId,
+			ubicacion,
+			track
+		)
+	}
+}

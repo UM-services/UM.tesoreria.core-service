@@ -51,7 +51,7 @@ public class BalanceService {
 	private CuentaService cuentaService;
 
 	@Autowired
-	private ContableService contabilidadService;
+	private ContabilidadService contabilidadService;
 
 	@Autowired
 	private CuentaMovimientoService cuentaMovimientoService;

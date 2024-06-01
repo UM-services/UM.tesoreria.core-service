@@ -38,7 +38,7 @@ public class CompraService {
 
     private final BancoMovimientoService bancoMovimientoService;
 
-    private final ContableService contableService;
+    private final ContabilidadService contabilidadService;
 
     private final EjercicioService ejercicioService;
 
@@ -49,14 +49,14 @@ public class CompraService {
     @Autowired
     public CompraService(ProveedorPagoService proveedorPagoService, ProveedorMovimientoService proveedorMovimientoService, ProveedorValorService proveedorValorService,
                          ProveedorArticuloService proveedorArticuloService, ValorMovimientoService valorMovimientoService, BancoMovimientoService bancoMovimientoService,
-                         ContableService contableService, EjercicioService ejercicioService, ValorService valorService, BancariaService bancariaService) {
+                         ContabilidadService contabilidadService, EjercicioService ejercicioService, ValorService valorService, BancariaService bancariaService) {
         this.proveedorPagoService = proveedorPagoService;
         this.proveedorMovimientoService = proveedorMovimientoService;
         this.proveedorValorService = proveedorValorService;
         this.proveedorArticuloService = proveedorArticuloService;
         this.valorMovimientoService = valorMovimientoService;
         this.bancoMovimientoService = bancoMovimientoService;
-        this.contableService = contableService;
+        this.contabilidadService = contabilidadService;
         this.ejercicioService = ejercicioService;
         this.valorService = valorService;
         this.bancariaService = bancariaService;
@@ -88,7 +88,7 @@ public class CompraService {
             ValorMovimiento valorMovimiento = valorMovimientoService.findByValorMovimientoId(proveedorValor.getValorMovimientoId());
             if (valorMovimiento.getFechaContable() != null) {
                 log.debug("Eliminando Asiento Contable valorMovimiento -> {}/{}", valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable());
-                if (!contableService.deleteAsiento(valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable())) {
+                if (!contabilidadService.deleteAsiento(valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable())) {
                     throw new ContableException(valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable());
                 }
             }
@@ -116,7 +116,7 @@ public class CompraService {
         ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
         if (proveedorMovimiento.getFechaContable() != null) {
             log.debug("Eliminando Asiento Contable proveedorMovimiento -> {}/{}", proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable());
-            if (!contableService.deleteAsiento(proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable())) {
+            if (!contabilidadService.deleteAsiento(proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable())) {
                 throw new ContableException(proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable());
             }
         }
@@ -149,7 +149,7 @@ public class CompraService {
             }
 
             if (fechaContable != null) {
-                contableService.deleteAsiento(fechaContable, ordenContable);
+                contabilidadService.deleteAsiento(fechaContable, ordenContable);
                 log.debug("... asiento eliminado");
             }
 
@@ -172,7 +172,7 @@ public class CompraService {
         // Para el caso que el ejercicio ya esté bloqueado
         if (ejercicio.getBloqueado() == 1) {
             AsientoInternal asientoInternal = new AsientoInternal(fechaContableAnulacion, 0, BigDecimal.ZERO, BigDecimal.ZERO);
-            contableService.contraAsiento(valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable(), asientoInternal);
+            contabilidadService.contraAsiento(valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable(), asientoInternal);
 
             valorMovimiento.setFechaContableAnulacion(asientoInternal.getFechaContable());
             valorMovimiento.setOrdenContableAnulacion(asientoInternal.getOrdenContable());
@@ -232,7 +232,7 @@ public class CompraService {
         log.debug("ValorMovimiento eliminado");
 
         if (fechaContable != null) {
-            contableService.deleteAsiento(fechaContable, ordenContable);
+            contabilidadService.deleteAsiento(fechaContable, ordenContable);
             log.debug("Asiento contable eliminado");
         }
 
@@ -300,7 +300,7 @@ public class CompraService {
             // Inicializa asiento
             List<CuentaMovimiento> cuentaMovimientos = new ArrayList<CuentaMovimiento>();
             // Buscar asiento
-            AsientoInternal asientoInternal = contableService.nextAsiento(valorMovimiento.getFechaEmision(), null);
+            AsientoInternal asientoInternal = contabilidadService.nextAsiento(valorMovimiento.getFechaEmision(), null);
             try {
                 log.debug("AsientoInternal={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asientoInternal));
             } catch (JsonProcessingException e) {
@@ -348,7 +348,7 @@ public class CompraService {
             }
 
             // Guarda asiento por asiento
-            contableService.saveAsiento(fechaContable, ordenContable, proveedorMovimientoId, concepto, cuentaMovimientos);
+            contabilidadService.saveAsiento(fechaContable, ordenContable, proveedorMovimientoId, concepto, cuentaMovimientos);
 
             // Graba valores
             valorMovimiento.setFechaContable(fechaContable);
