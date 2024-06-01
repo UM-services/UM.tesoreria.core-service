@@ -76,8 +76,31 @@ public class CuentaMovimientoService {
     }
 
     public CuentaMovimiento add(CuentaMovimiento cuentaMovimiento) {
-        cuentaMovimiento = repository.save(cuentaMovimiento);
-        return cuentaMovimiento;
+        return repository.save(cuentaMovimiento);
+    }
+
+    public CuentaMovimiento update(CuentaMovimiento newCuentaMovimiento, Long cuentaMovimientoId) {
+        return repository.findByCuentaMovimientoId(cuentaMovimientoId).map(cuentaMovimiento -> {
+            cuentaMovimiento = new CuentaMovimiento.Builder()
+                    .cuentaMovimientoId(cuentaMovimientoId)
+                    .fechaContable(newCuentaMovimiento.getFechaContable())
+                    .ordenContable(newCuentaMovimiento.getOrdenContable())
+                    .item(newCuentaMovimiento.getItem())
+                    .numeroCuenta(newCuentaMovimiento.getNumeroCuenta())
+                    .debita(newCuentaMovimiento.getDebita())
+                    .comprobanteId(newCuentaMovimiento.getComprobanteId())
+                    .concepto(newCuentaMovimiento.getConcepto())
+                    .importe(newCuentaMovimiento.getImporte())
+                    .proveedorId(newCuentaMovimiento.getProveedorId())
+                    .numeroAnulado(newCuentaMovimiento.getNumeroAnulado())
+                    .version(newCuentaMovimiento.getVersion())
+                    .proveedorMovimientoId(newCuentaMovimiento.getProveedorMovimientoId())
+                    .proveedorMovimientoIdOrdenPago(newCuentaMovimiento.getProveedorMovimientoIdOrdenPago())
+                    .apertura(newCuentaMovimiento.getApertura())
+                    .trackId(newCuentaMovimiento.getTrackId())
+                    .build();
+            return repository.save(cuentaMovimiento);
+        }).orElseThrow(() -> new CuentaMovimientoException(cuentaMovimientoId));
     }
 
     @Transactional

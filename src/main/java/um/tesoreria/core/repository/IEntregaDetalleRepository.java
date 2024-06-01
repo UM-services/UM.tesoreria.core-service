@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.core.repository;
 
@@ -18,17 +18,19 @@ import um.tesoreria.core.kotlin.model.EntregaDetalle;
 @Repository
 public interface IEntregaDetalleRepository extends JpaRepository<EntregaDetalle, Long> {
 
-	public List<EntregaDetalle> findAllByProveedorMovimientoIdOrderByOrden(Long proveedorMovimientoId);
+    List<EntregaDetalle> findAllByProveedorMovimientoIdOrderByOrden(Long proveedorMovimientoId);
 
-	public List<EntregaDetalle> findAllByProveedorMovimientoIdInOrderByOrden(List<Long> proveedorMovimientoIds);
+    List<EntregaDetalle> findAllByProveedorMovimientoIdInOrderByOrden(List<Long> proveedorMovimientoIds);
 
-	public List<EntregaDetalle> findAllByEntregaIdOrderByOrden(Long entregaId);
+    List<EntregaDetalle> findAllByEntregaIdOrderByOrden(Long entregaId);
 
-	public List<EntregaDetalle> findAllByProveedorMovimientoIdAndOrden(Long proveedorMovimientoId, Integer orden);
+    List<EntregaDetalle> findAllByProveedorMovimientoIdAndOrden(Long proveedorMovimientoId, Integer orden);
 
-	public Optional<EntregaDetalle> findByEntregaDetalleId(Long entregaDetalleId);
+    List<EntregaDetalle> findAllByProveedorArticuloId(Long proveedorArticuloId);
 
-	@Modifying
-	public void deleteByEntregaDetalleId(Long entregaDetalleId);
+    Optional<EntregaDetalle> findByEntregaDetalleId(Long entregaDetalleId);
+
+    @Modifying
+    void deleteByEntregaDetalleId(Long entregaDetalleId);
 
 }
