@@ -35,9 +35,6 @@ public class AsignacionCosto implements Serializable {
 	private Comprobante comprobante;
 	private UbicacionArticulo ubicacionArticulo;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-	private OffsetDateTime fecha;
-
 	private BigDecimal importe;
 
 }

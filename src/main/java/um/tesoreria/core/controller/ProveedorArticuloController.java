@@ -33,7 +33,7 @@ public class ProveedorArticuloController {
 	@PostMapping("/movimiento/")
 	public ResponseEntity<List<ProveedorArticulo>> findAllByProveedorMovimientoIds(
 			@RequestBody ProveedorArticuloAsignable asignables) throws JsonProcessingException {
-		return new ResponseEntity<List<ProveedorArticulo>>(service.findAllByProveedorMovimientoIds(
+		return new ResponseEntity<>(service.findAllByProveedorMovimientoIds(
 				asignables.getProveedorMovimientoIds(), asignables.getAsignables()), HttpStatus.OK);
 	}
 

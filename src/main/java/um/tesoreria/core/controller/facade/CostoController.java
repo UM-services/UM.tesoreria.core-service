@@ -27,26 +27,26 @@ public class CostoController {
     @PostMapping("/addAsignacion")
     public ResponseEntity<Boolean> addAsignacion(@RequestBody AsignacionCosto asignacionCosto) throws JsonProcessingException {
         log.debug("AsignacionCosto - {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asignacionCosto));
-        return new ResponseEntity<Boolean>(service.addAsignacion(asignacionCosto), HttpStatus.OK);
+        return new ResponseEntity<>(service.addAsignacion(asignacionCosto), HttpStatus.OK);
     }
 
     @GetMapping("/deleteDesignacion/{entregaId}")
     public ResponseEntity<Boolean> deleteAsignacion(@PathVariable Long entregaId) {
         log.debug("DeleteDesignacion - {}", entregaId);
-        return new ResponseEntity<Boolean>(service.deleteDesignacion(entregaId), HttpStatus.OK);
+        return new ResponseEntity<>(service.deleteDesignacion(entregaId), HttpStatus.OK);
     }
 
     @GetMapping("/depurarGastosProveedor/{proveedorId}/{geograficaId}")
     public ResponseEntity<Boolean> depurarGastosProveedor(@PathVariable Integer proveedorId, @PathVariable Integer geograficaId) {
         log.debug("DepurarGastosProveedor - {}/{}", proveedorId, geograficaId);
-        return new ResponseEntity<Boolean>(service.depurarGastosProveedor(proveedorId, geograficaId), HttpStatus.OK);
+        return new ResponseEntity<>(service.depurarGastosProveedor(proveedorId, geograficaId), HttpStatus.OK);
     }
 
     @GetMapping("/recalcularAsignado/{proveedorArticuloId}")
     public ResponseEntity<Void> recalcularAsignado(@PathVariable Long proveedorArticuloId) {
         log.debug("Recalcular Asignado {}", proveedorArticuloId);
         service.recalcularAsignado(proveedorArticuloId);
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
