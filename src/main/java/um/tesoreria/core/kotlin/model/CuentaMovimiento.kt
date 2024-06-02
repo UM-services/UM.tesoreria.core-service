@@ -21,7 +21,7 @@ import jakarta.persistence.JoinColumn
         UniqueConstraint(columnNames = ["mco_fecha", "mco_nrocomp", "mco_item"])
     ]
 )
-data class CuentaMovimiento(
+data class  CuentaMovimiento(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

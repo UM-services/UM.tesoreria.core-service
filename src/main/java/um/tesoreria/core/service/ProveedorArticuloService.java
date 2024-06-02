@@ -3,6 +3,8 @@
  */
 package um.tesoreria.core.service;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.ProveedorArticuloException;
 import um.tesoreria.core.repository.IProveedorArticuloRepository;
 
@@ -20,13 +22,18 @@ import java.util.List;
  * @author daniel
  */
 @Service
+@Slf4j
 public class ProveedorArticuloService {
 
+	private final IProveedorArticuloRepository repository;
+
 	@Autowired
-	private IProveedorArticuloRepository repository;
+	public ProveedorArticuloService(IProveedorArticuloRepository repository) {
+		this.repository = repository;
+	}
 
 	public List<ProveedorArticulo> findAllByProveedorMovimientoIds(List<Long> proveedorMovimientoIds,
-                                                                   Boolean asignables) throws JsonProcessingException {
+                                                                   Boolean asignables) {
 		List<ProveedorArticulo> proveedorArticulos = null;
 		if (asignables) {
 			proveedorArticulos = repository
@@ -34,7 +41,12 @@ public class ProveedorArticuloService {
 		} else {
 			proveedorArticulos = repository.findAllByProveedorMovimientoIdInOrderByOrden(proveedorMovimientoIds);
 		}
-		return proveedorArticulos;
+        try {
+            log.debug("ProveedorArticulos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulos));
+        } catch (JsonProcessingException e) {
+            log.debug("ProveedorArticulos -> error: {}", e.getMessage());
+        }
+        return proveedorArticulos;
 	}
 
 	public List<ProveedorArticulo> findAllByProveedorMovimientoId(Long proveedorMovimientoId, Boolean asignables) {

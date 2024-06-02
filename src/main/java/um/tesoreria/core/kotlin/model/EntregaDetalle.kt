@@ -67,4 +67,58 @@ data class EntregaDetalle @JvmOverloads constructor(
     @JoinColumn(name = "trackId", insertable = false, updatable = false)
     var track: Track? = null
 
-) : Auditable()
+) : Auditable() {
+
+    companion object {
+        fun builder() = Builder()
+    }
+
+    class Builder {
+        private var entregaDetalleId: Long? = null
+        private var entregaId: Long? = null
+        private var articuloId: Long? = null
+        private var proveedorMovimientoId: Long? = null
+        private var orden: Int = 0
+        private var concepto: String = ""
+        private var cantidad: BigDecimal = BigDecimal.ZERO
+        private var trackId: Long? = null
+        private var proveedorArticuloId: Long? = null
+        private var entrega: Entrega? = null
+        private var articulo: Articulo? = null
+        private var proveedorMovimiento: ProveedorMovimiento? = null
+        private var proveedorArticulo: ProveedorArticulo? = null
+        private var track: Track? = null
+
+        fun entregaDetalleId(entregaDetalleId: Long?) = apply { this.entregaDetalleId = entregaDetalleId }
+        fun entregaId(id: Long?) = apply { this.entregaId = id }
+        fun articuloId(id: Long?) = apply { this.articuloId = id }
+        fun proveedorMovimientoId(id: Long?) = apply { this.proveedorMovimientoId = id }
+        fun orden(orden: Int) = apply { this.orden = orden }
+        fun concepto(concepto: String) = apply { this.concepto = concepto }
+        fun cantidad(cantidad: BigDecimal) = apply { this.cantidad = cantidad }
+        fun trackId(id: Long?) = apply { this.trackId = id }
+        fun proveedorArticuloId(id: Long?) = apply { this.proveedorArticuloId = id }
+        fun entrega(entrega: Entrega?) = apply { this.entrega = entrega }
+        fun articulo(articulo: Articulo?) = apply { this.articulo = articulo }
+        fun proveedorMovimiento(proveedorMovimiento: ProveedorMovimiento?) = apply { this.proveedorMovimiento = proveedorMovimiento }
+        fun proveedorArticulo(proveedorArticulo: ProveedorArticulo?) = apply { this.proveedorArticulo = proveedorArticulo }
+        fun track(track: Track?) = apply { this.track = track }
+
+        fun build() = EntregaDetalle(
+            entregaDetalleId,
+            entregaId,
+            articuloId,
+            proveedorMovimientoId,
+            orden,
+            concepto,
+            cantidad,
+            trackId,
+            proveedorArticuloId,
+            entrega,
+            articulo,
+            proveedorMovimiento,
+            proveedorArticulo,
+            track
+        )
+    }
+}
