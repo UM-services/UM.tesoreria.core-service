@@ -137,4 +137,9 @@ public class ProveedorMovimientoService {
         return repository.save(proveedorMovimiento);
     }
 
+    // Revisar antes de usar
+    public List<Long> findDistinctProveedorMovimientoIdsForCostAdjustment() {
+        return repository.findDistinctProveedorMovimientoIdsForCostAdjustment();
+    }
+
 }

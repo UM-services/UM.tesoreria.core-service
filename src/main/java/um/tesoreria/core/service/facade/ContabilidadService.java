@@ -292,61 +292,71 @@ public class ContabilidadService {
 
     @Transactional
     public Boolean ajusteAsientoCosto(Long proveedorMovimientoIdFactura) {
-        ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoIdFactura);
-        try {
-            log.debug("ProveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
-        } catch (JsonProcessingException e) {
-            log.debug("ProveedorMovimiento -> error");
-        }
-        if (proveedorMovimiento.getFechaComprobante().isBefore(OffsetDateTime.of(2023, 3, 1, 0, 0, 0, 0, ZoneOffset.UTC))) {
-            log.debug("Movimiento previo al 01/03/2023");
-            return false;
-        }
-        for (ProveedorArticulo proveedorArticulo : proveedorMovimiento.getProveedorArticulos()) {
-            try {
-                log.debug("ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
-            } catch (JsonProcessingException e) {
-                log.debug("ProveedorArticulo -> error");
-            }
 
-            for (EntregaDetalle entregaDetalle : entregaDetalleService.findAllByProveedorArticuloId(proveedorArticulo.getProveedorArticuloId())) {
+        List<Long> proveedorMovimientoIds = proveedorMovimientoService.findDistinctProveedorMovimientoIdsForCostAdjustment();
+        log.debug("proveedorMovimientoIds -> {}", proveedorMovimientoIds);
+
+        for (Long proveedorMovimientoId : proveedorMovimientoIds) {
+
+//            ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoIdFactura);
+            ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
+            try {
+                log.debug("ProveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
+            } catch (JsonProcessingException e) {
+                log.debug("ProveedorMovimiento -> error");
+            }
+            if (proveedorMovimiento.getFechaComprobante().isBefore(OffsetDateTime.of(2023, 3, 1, 0, 0, 0, 0, ZoneOffset.UTC))) {
+                log.debug("Movimiento previo al 01/03/2023");
+                continue;
+//                return false;
+            }
+            for (ProveedorArticulo proveedorArticulo : proveedorMovimiento.getProveedorArticulos()) {
                 try {
-                    log.debug("EntregaDetalle -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
+                    log.debug("ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
                 } catch (JsonProcessingException e) {
-                    log.debug("EntregaDetalle -> error");
+                    log.debug("ProveedorArticulo -> error");
                 }
-                if (entregaDetalle.getEntrega().getFechaContable().compareTo(proveedorMovimiento.getFechaComprobante()) == 0) {
-                    log.debug("Fecha de comprobante y de asiento de asignación de costos iguales");
-                    return false;
-                }
-                OffsetDateTime sourceDate = entregaDetalle.getEntrega().getFechaContable();
-                OffsetDateTime targetDate = proveedorMovimiento.getFechaComprobante();
-                Integer sourceNumber = entregaDetalle.getEntrega().getOrdenContable();
-                var next = this.nextAsiento(targetDate, null);
-                Integer targetNumber = next.getOrdenContable();
-                // Anulando relación con el asiento
-                log.debug("Anulando relación con el asiento");
-                var entrega = entregaDetalle.getEntrega();
-                entrega.setFechaContable(null);
-                entrega.setOrdenContable(0);
-                entrega = entregaService.update(entrega, entrega.getEntregaId());
-                // Actualizando el asiento
-                for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService.findAllByAsiento(sourceDate, sourceNumber, 0, 2)) {
+
+                for (EntregaDetalle entregaDetalle : entregaDetalleService.findAllByProveedorArticuloId(proveedorArticulo.getProveedorArticuloId())) {
                     try {
-                        log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+                        log.debug("EntregaDetalle -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
                     } catch (JsonProcessingException e) {
-                        log.debug("CuentaMovimiento -> error");
+                        log.debug("EntregaDetalle -> error");
                     }
-                    log.debug("Actualizando el asiento");
-                    cuentaMovimiento.setFechaContable(targetDate);
-                    cuentaMovimiento.setOrdenContable(targetNumber);
-                    cuentaMovimiento = cuentaMovimientoService.update(cuentaMovimiento, cuentaMovimiento.getCuentaMovimientoId());
+                    if (entregaDetalle.getEntrega().getFechaContable().compareTo(proveedorMovimiento.getFechaComprobante()) == 0) {
+                        log.debug("Fecha de comprobante y de asiento de asignación de costos iguales");
+                        continue;
+//                        return false;
+                    }
+                    OffsetDateTime sourceDate = entregaDetalle.getEntrega().getFechaContable();
+                    OffsetDateTime targetDate = proveedorMovimiento.getFechaComprobante();
+                    Integer sourceNumber = entregaDetalle.getEntrega().getOrdenContable();
+                    var next = this.nextAsiento(targetDate, null);
+                    Integer targetNumber = next.getOrdenContable();
+                    // Anulando relación con el asiento
+                    log.debug("Anulando relación con el asiento");
+                    var entrega = entregaDetalle.getEntrega();
+                    entrega.setFechaContable(null);
+                    entrega.setOrdenContable(0);
+                    entrega = entregaService.update(entrega, entrega.getEntregaId());
+                    // Actualizando el asiento
+                    for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService.findAllByAsiento(sourceDate, sourceNumber, 0, 2)) {
+                        try {
+                            log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
+                        } catch (JsonProcessingException e) {
+                            log.debug("CuentaMovimiento -> error");
+                        }
+                        log.debug("Actualizando el asiento");
+                        cuentaMovimiento.setFechaContable(targetDate);
+                        cuentaMovimiento.setOrdenContable(targetNumber);
+                        cuentaMovimiento = cuentaMovimientoService.update(cuentaMovimiento, cuentaMovimiento.getCuentaMovimientoId());
+                    }
+                    // Actualizando relación con el asiento
+                    log.debug("Actualizando relación con el asiento");
+                    entrega.setFechaContable(targetDate);
+                    entrega.setOrdenContable(targetNumber);
+                    entrega = entregaService.update(entrega, entrega.getEntregaId());
                 }
-                // Actualizando relación con el asiento
-                log.debug("Actualizando relación con el asiento");
-                entrega.setFechaContable(targetDate);
-                entrega.setOrdenContable(targetNumber);
-                entrega = entregaService.update(entrega, entrega.getEntregaId());
             }
         }
         return true;
