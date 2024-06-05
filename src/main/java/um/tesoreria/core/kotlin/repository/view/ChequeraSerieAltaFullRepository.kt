@@ -6,6 +6,7 @@ import um.tesoreria.core.kotlin.model.view.ChequeraSerieAltaFull
 
 @Repository
 interface ChequeraSerieAltaFullRepository : JpaRepository<ChequeraSerieAltaFull, Long> {
+
     fun findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(lectivoId: Int, facultadId: Int, geograficaId: Int, tipoChequeraId: Int): List<ChequeraSerieAltaFull>
 
 }

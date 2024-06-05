@@ -58,6 +58,7 @@ import um.tesoreria.core.extern.model.view.PreunivCarreraFacultad;
 import um.tesoreria.core.extern.model.view.PreunivMatricResumenFacultad;
 import um.tesoreria.core.extern.model.view.PreunivResumenFacultad;
 import um.tesoreria.core.kotlin.model.*;
+import um.tesoreria.core.kotlin.model.view.FacturaPendiente;
 import um.tesoreria.core.model.*;
 import um.tesoreria.core.model.dto.DeudaChequera;
 import um.tesoreria.core.model.view.CarreraKey;
@@ -85,13 +86,7 @@ import um.tesoreria.core.service.PlanService;
 import um.tesoreria.core.service.ProveedorMovimientoService;
 import um.tesoreria.core.service.TipoChequeraService;
 import um.tesoreria.core.service.TipoPagoService;
-import um.tesoreria.core.service.view.CarreraKeyService;
-import um.tesoreria.core.service.view.ChequeraPreunivService;
-import um.tesoreria.core.service.view.DomicilioKeyService;
-import um.tesoreria.core.service.view.IngresoPeriodoService;
-import um.tesoreria.core.service.view.LegajoKeyService;
-import um.tesoreria.core.service.view.PersonaKeyService;
-import um.tesoreria.core.service.view.TipoPagoFechaService;
+import um.tesoreria.core.service.view.*;
 import um.tesoreria.core.model.Legajo;
 import um.tesoreria.core.model.PersonaSuspendido;
 import um.tesoreria.core.model.Plan;
@@ -184,22 +179,10 @@ public class SheetService {
 
     private final ProveedorService proveedorService;
 
+    private final FacturaPendienteService facturaPendienteService;
+
     @Autowired
-    public SheetService(FacultadService facultadService, TipoPagoService tipoPagoService, GeograficaService geograficaService,
-                        IngresoPeriodoService ingresoPeriodoService, ChequeraSerieService chequeraSerieService,
-                        PersonaKeyService personaKeyService, ArancelTipoService arancelTipoService, ChequeraCuotaService chequeraCuotaService,
-                        LegajoKeyService legajoKeyService, CarreraKeyService carreraKeyService, DomicilioKeyService domicilioKeyService,
-                        EjercicioService ejercicioService, ProveedorMovimientoService proveedorMovimientoService, SincronizeService sincronizeService,
-                        LectivoService lectivoService, PlanService planService, CarreraService carreraService, ChequeraPreunivService chequeraPreunivService,
-                        TipoChequeraService tipoChequeraService, PreunivResumenFacultadConsumer preunivResumenFacultadConsumer,
-                        PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer, PreTurnoFacultadConsumer preTurnoFacultadConsumer,
-                        PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer, PersonaKeyFacultadConsumer personaKeyFacultadConsumer,
-                        LegajoKeyFacultadConsumer legajoKeyFacultadConsumer, InscripcionFacultadConsumer inscripcionFacultadConsumer,
-                        CarreraFacultadConsumer carreraFacultadConsumer, PlanFacultadConsumer planFacultadConsumer, InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer,
-                        TipoPagoFechaService tipoPagoFechaService, IngresoAsientoService ingresoAsientoService, CuentaMovimientoService cuentaMovimientoService,
-                        PersonaSuspendidoService personaSuspendidoService, ContratoPeriodoService contratoPeriodoService, BajaService bajaService,
-                        BajaFacultadConsumer bajaFacultadConsumer, LegajoService legajoService, FacturacionElectronicaService facturacionElectronicaService,
-                        ProveedorService proveedorService, Environment environment) {
+    public SheetService(FacultadService facultadService, TipoPagoService tipoPagoService, GeograficaService geograficaService, IngresoPeriodoService ingresoPeriodoService, ChequeraSerieService chequeraSerieService, PersonaKeyService personaKeyService, ArancelTipoService arancelTipoService, ChequeraCuotaService chequeraCuotaService, LegajoKeyService legajoKeyService, CarreraKeyService carreraKeyService, DomicilioKeyService domicilioKeyService, EjercicioService ejercicioService, ProveedorMovimientoService proveedorMovimientoService, SincronizeService sincronizeService, LectivoService lectivoService, PlanService planService, CarreraService carreraService, ChequeraPreunivService chequeraPreunivService, TipoChequeraService tipoChequeraService, PreunivResumenFacultadConsumer preunivResumenFacultadConsumer, PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer, PreTurnoFacultadConsumer preTurnoFacultadConsumer, PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer, PersonaKeyFacultadConsumer personaKeyFacultadConsumer, LegajoKeyFacultadConsumer legajoKeyFacultadConsumer, InscripcionFacultadConsumer inscripcionFacultadConsumer, CarreraFacultadConsumer carreraFacultadConsumer, PlanFacultadConsumer planFacultadConsumer, InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer, TipoPagoFechaService tipoPagoFechaService, IngresoAsientoService ingresoAsientoService, CuentaMovimientoService cuentaMovimientoService, PersonaSuspendidoService personaSuspendidoService, ContratoPeriodoService contratoPeriodoService, BajaService bajaService, BajaFacultadConsumer bajaFacultadConsumer, LegajoService legajoService, FacturacionElectronicaService facturacionElectronicaService, ProveedorService proveedorService, Environment environment, FacturaPendienteService facturaPendienteService) {
         this.facultadService = facultadService;
         this.tipoPagoService = tipoPagoService;
         this.geograficaService = geograficaService;
@@ -240,6 +223,7 @@ public class SheetService {
         this.facturacionElectronicaService = facturacionElectronicaService;
         this.proveedorService = proveedorService;
         this.environment = environment;
+        this.facturaPendienteService = facturaPendienteService;
     }
 
     public String generateIngresos(Integer anho, Integer mes) {
@@ -265,14 +249,11 @@ public class SheetService {
         this.setCellString(row, 7, "Cantidad", styleBold);
         this.setCellString(row, 8, "Total", styleBold);
 
-        Map<Integer, Facultad> facultades = facultadService.findAll().stream()
-                .collect(Collectors.toMap(Facultad::getFacultadId, facultad -> facultad));
+        Map<Integer, Facultad> facultades = facultadService.findAll().stream().collect(Collectors.toMap(Facultad::getFacultadId, facultad -> facultad));
 
-        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream()
-                .collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
+        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
 
-        Map<Integer, TipoPago> tipos = tipoPagoService.findAll().stream()
-                .collect(Collectors.toMap(TipoPago::getTipoPagoId, tipoPago -> tipoPago));
+        Map<Integer, TipoPago> tipos = tipoPagoService.findAll().stream().collect(Collectors.toMap(TipoPago::getTipoPagoId, tipoPago -> tipoPago));
 
         for (IngresoPeriodo ingresoperiodo : ingresoPeriodoService.findAllByPeriodo(anho, mes)) {
             Facultad facultad = facultades.get(ingresoperiodo.getFacultadId());
@@ -306,8 +287,7 @@ public class SheetService {
         return filename;
     }
 
-    public String generateDeuda(Integer facultadId, Integer lectivoId, Boolean soloDeudores,
-                                List<Integer> tipoChequeraIds) {
+    public String generateDeuda(Integer facultadId, Integer lectivoId, Boolean soloDeudores, List<Integer> tipoChequeraIds) {
 
         String path = environment.getProperty("path.files");
         String filename = path + "deuda." + facultadId + "." + lectivoId + ".xlsx";
@@ -329,8 +309,7 @@ public class SheetService {
 
         Facultad facultad = facultadService.findByFacultadId(facultadId);
         Lectivo lectivo = lectivoService.findByLectivoId(lectivoId);
-        Map<Integer, Lectivo> lectivos = lectivoService.findAll().stream()
-                .collect(Collectors.toMap(Lectivo::getLectivoId, ciclo -> ciclo));
+        Map<Integer, Lectivo> lectivos = lectivoService.findAll().stream().collect(Collectors.toMap(Lectivo::getLectivoId, ciclo -> ciclo));
         // Sincroniza Carreras
         sincronizeService.sincronizeCarrera(facultadId);
 
@@ -361,10 +340,8 @@ public class SheetService {
         this.setCellString(row, 14, "Personal", styleBold);
         this.setCellString(row, 15, "Institucional", styleBold);
 
-        Map<String, CarreraKey> carreras = carreraKeyService.findAllByFacultadId(facultadId).stream()
-                .collect(Collectors.toMap(CarreraKey::getUnified, carrera -> carrera));
-        Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream()
-                .collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
+        Map<String, CarreraKey> carreras = carreraKeyService.findAllByFacultadId(facultadId).stream().collect(Collectors.toMap(CarreraKey::getUnified, carrera -> carrera));
+        Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream().collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
         List<Legajo> legajosUpdate = new ArrayList<>();
 
         for (Integer tipochequeraId : tipoChequeraIds) {
@@ -376,32 +353,17 @@ public class SheetService {
                     geografica = tipoChequera.getGeografica();
                 }
             }
-            List<ChequeraSerie> chequeraList = chequeraSerieService
-                    .findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipochequeraId);
-            Map<String, ChequeraSerie> chequeras = chequeraList.stream().collect(Collectors
-                    .toMap(ChequeraSerie::getPersonaKey, Function.identity(), (chequera, replacement) -> chequera));
-            Map<Long, Baja> bajas = bajaService
-                    .findAllByChequeraIdIn(
-                            chequeraList.stream().map(ChequeraSerie::getChequeraId).collect(Collectors.toList()))
-                    .stream()
-                    .collect(Collectors.toMap(Baja::getChequeraId, Function.identity(), (baja, replacement) -> baja));
+            List<ChequeraSerie> chequeraList = chequeraSerieService.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipochequeraId);
+            Map<String, ChequeraSerie> chequeras = chequeraList.stream().collect(Collectors.toMap(ChequeraSerie::getPersonaKey, Function.identity(), (chequera, replacement) -> chequera));
+            Map<Long, Baja> bajas = bajaService.findAllByChequeraIdIn(chequeraList.stream().map(ChequeraSerie::getChequeraId).collect(Collectors.toList())).stream().collect(Collectors.toMap(Baja::getChequeraId, Function.identity(), (baja, replacement) -> baja));
             List<String> keys = new ArrayList<>(chequeras.keySet());
-            Map<String, LegajoKey> legajos = legajoKeyService.findAllByFacultadIdAndUnifiedIn(facultadId, keys).stream()
-                    .collect(Collectors.toMap(LegajoKey::getUnified, Function.identity(),
-                            (legajo, replacement) -> legajo));
-            Map<String, LegajoKeyFacultad> legajosFacultad = legajoKeyFacultadConsumer
-                    .findAllByFacultadAndKeys(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(),
-                            keys)
-                    .stream().collect(Collectors.toMap(LegajoKeyFacultad::getPersonakey, Function.identity(),
-                            (legajo, replacement) -> legajo));
-            Map<String, DomicilioKey> domicilios = domicilioKeyService.findAllByUnifiedIn(keys).stream()
-                    .collect(Collectors.toMap(DomicilioKey::getUnified, domicilio -> domicilio));
+            Map<String, LegajoKey> legajos = legajoKeyService.findAllByFacultadIdAndUnifiedIn(facultadId, keys).stream().collect(Collectors.toMap(LegajoKey::getUnified, Function.identity(), (legajo, replacement) -> legajo));
+            Map<String, LegajoKeyFacultad> legajosFacultad = legajoKeyFacultadConsumer.findAllByFacultadAndKeys(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), keys).stream().collect(Collectors.toMap(LegajoKeyFacultad::getPersonakey, Function.identity(), (legajo, replacement) -> legajo));
+            Map<String, DomicilioKey> domicilios = domicilioKeyService.findAllByUnifiedIn(keys).stream().collect(Collectors.toMap(DomicilioKey::getUnified, domicilio -> domicilio));
 
-            for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys,
-                    Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()))) {
+            for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()))) {
                 ChequeraSerie chequeraSerie = chequeras.get(persona.getUnified());
-                DeudaChequera deudaChequera = chequeraCuotaService.calculateDeuda(facultadId, tipochequeraId,
-                        chequeraSerie.getChequeraSerieId());
+                DeudaChequera deudaChequera = chequeraCuotaService.calculateDeuda(facultadId, tipochequeraId, chequeraSerie.getChequeraSerieId());
                 boolean show = true;
                 if (soloDeudores) {
                     if (deudaChequera.getDeuda().compareTo(BigDecimal.ZERO) == 0) {
@@ -420,18 +382,12 @@ public class SheetService {
                         if (!lectivos.containsKey(lectivoIdAdd)) {
                             lectivoIdAdd = lectivoId;
                         }
-                        legajosUpdate.add(legajo = new Legajo(legajoId, legajoFacultad.getPersonaId(),
-                                legajoFacultad.getDocumentoId(), legajoFacultad.getFacultadId(),
-                                legajoFacultad.getNumerolegajo(), legajoFacultad.getFecha(), lectivoIdAdd,
-                                legajoFacultad.getPlanId(), legajoFacultad.getCarreraId(), (byte) 1,
-                                legajoFacultad.getGeograficaId(), legajoFacultad.getContrasenha(),
-                                legajoFacultad.getIntercambio()));
+                        legajosUpdate.add(legajo = new Legajo(legajoId, legajoFacultad.getPersonaId(), legajoFacultad.getDocumentoId(), legajoFacultad.getFacultadId(), legajoFacultad.getNumerolegajo(), legajoFacultad.getFecha(), lectivoIdAdd, legajoFacultad.getPlanId(), legajoFacultad.getCarreraId(), (byte) 1, legajoFacultad.getGeograficaId(), legajoFacultad.getContrasenha(), legajoFacultad.getIntercambio()));
                     }
                     ArancelTipo arancelTipo = chequeraSerie.getArancelTipo();
                     CarreraKey carrera = null;
                     if (legajo != null)
-                        carrera = carreras
-                                .get(legajo.getFacultadId() + "." + legajo.getPlanId() + "." + legajo.getCarreraId());
+                        carrera = carreras.get(legajo.getFacultadId() + "." + legajo.getPlanId() + "." + legajo.getCarreraId());
                     DomicilioKey domicilio = domicilios.get(persona.getUnified());
                     row = sheet.createRow(++fila);
                     this.setCellInteger(row, 0, fila - 2, styleNormal);
@@ -441,26 +397,22 @@ public class SheetService {
                     // Baja Tsoreria
                     if (bajas.containsKey(chequeraSerie.getChequeraId())) {
                         Baja baja = bajas.get(chequeraSerie.getChequeraId());
-                        this.setCellOffsetDateTime(row, 4, baja.getFecha().withOffsetSameInstant(ZoneOffset.UTC),
-                                styleDate);
+                        this.setCellOffsetDateTime(row, 4, baja.getFecha().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
                     }
                     // Baja Facultad
                     BajaFacultad bajaFacultad = null;
                     try {
-                        bajaFacultad = bajaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
-                                facultadId, persona.getPersonaId(), persona.getDocumentoId(), lectivoId);
+                        bajaFacultad = bajaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(), facultadId, persona.getPersonaId(), persona.getDocumentoId(), lectivoId);
                     } catch (BajaFacultadNotFoundException e) {
                         log.debug("Error buscando facultad en otro servicio");
                     }
                     if (bajaFacultad != null) {
-                        this.setCellOffsetDateTime(row, 5,
-                                bajaFacultad.getFecha().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
+                        this.setCellOffsetDateTime(row, 5, bajaFacultad.getFecha().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
                     }
                     this.setCellString(row, 6, geografica.getNombre(), styleNormal);
                     this.setCellString(row, 7, tipoChequera.getNombre(), styleNormal);
                     this.setCellString(row, 8, arancelTipo.getDescripcion(), styleNormal);
-                    this.setCellOffsetDateTime(row, 9, chequeraSerie.getFecha().withOffsetSameInstant(ZoneOffset.UTC),
-                            styleDate);
+                    this.setCellOffsetDateTime(row, 9, chequeraSerie.getFecha().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
                     this.setCellBigDecimal(row, 10, deudaChequera.getDeuda(), styleNormal);
                     this.setCellInteger(row, 11, deudaChequera.getCuotas(), styleNormal);
                     if (carrera != null) {
@@ -538,16 +490,11 @@ public class SheetService {
         this.setCellString(row, 6, "Fecha Anulación", styleBold);
         this.setCellString(row, 7, "Sede", styleBold);
 
-        List<ProveedorMovimiento> ordenes = proveedorMovimientoService.findAllByComprobanteIdAndFechaComprobanteBetween(
-                6, ejercicio.getFechaInicio(), ejercicio.getFechaFinal());
-        Map<Long, ProveedorMovimiento> ordenes_map = ordenes.stream()
-                .collect(Collectors.toMap(ProveedorMovimiento::getNumeroComprobante, Function.identity(), (movimiento, replacement) -> movimiento));
-        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream()
-                .collect(Collectors.toMap(Geografica::getGeograficaId, Function.identity(), (geografica, replacement) -> geografica));
-        long orden_minimo = ordenes.stream().mapToLong(ProveedorMovimiento::getNumeroComprobante).min()
-                .orElseThrow(NoSuchElementException::new);
-        long orden_maximo = ordenes.stream().mapToLong(ProveedorMovimiento::getNumeroComprobante).max()
-                .orElseThrow(NoSuchElementException::new);
+        List<ProveedorMovimiento> ordenes = proveedorMovimientoService.findAllByComprobanteIdAndFechaComprobanteBetween(6, ejercicio.getFechaInicio(), ejercicio.getFechaFinal());
+        Map<Long, ProveedorMovimiento> ordenes_map = ordenes.stream().collect(Collectors.toMap(ProveedorMovimiento::getNumeroComprobante, Function.identity(), (movimiento, replacement) -> movimiento));
+        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, Function.identity(), (geografica, replacement) -> geografica));
+        long orden_minimo = ordenes.stream().mapToLong(ProveedorMovimiento::getNumeroComprobante).min().orElseThrow(NoSuchElementException::new);
+        long orden_maximo = ordenes.stream().mapToLong(ProveedorMovimiento::getNumeroComprobante).max().orElseThrow(NoSuchElementException::new);
 
         for (Long orden_number = orden_minimo; orden_number <= orden_maximo; orden_number++) {
             ProveedorMovimiento movimiento = null;
@@ -631,42 +578,25 @@ public class SheetService {
         this.setCellString(row, 6, "Matriculados", styleBold);
         this.setCellString(row, 7, "Deuda", styleBold);
 
-        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream()
-                .collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
+        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
 
         // Matriculados
-        Map<String, PreunivMatricResumenFacultad> matriculas = preunivMatricResumenFacultadConsumer
-                .findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId)
-                .stream().collect(Collectors.toMap(PreunivMatricResumenFacultad::getKey, matricula -> matricula));
+        Map<String, PreunivMatricResumenFacultad> matriculas = preunivMatricResumenFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId).stream().collect(Collectors.toMap(PreunivMatricResumenFacultad::getKey, matricula -> matricula));
         // Turnos
-        Map<String, PreTurnoFacultad> turnos = preTurnoFacultadConsumer
-                .findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId)
-                .stream().collect(Collectors.toMap(PreTurnoFacultad::getKey, turno -> turno));
+        Map<String, PreTurnoFacultad> turnos = preTurnoFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId).stream().collect(Collectors.toMap(PreTurnoFacultad::getKey, turno -> turno));
         // Sincronizar carreras
         sincronizeService.sincronizeCarrera(facultad.getFacultadId());
 
-        Map<String, Plan> planes = planService.findAllByFacultadId(facultad.getFacultadId()).stream()
-                .collect(Collectors.toMap(Plan::getPlanKey, plan -> plan));
-        Map<String, Carrera> carreras = carreraService.findAllByFacultadId(facultad.getFacultadId()).stream()
-                .collect(Collectors.toMap(Carrera::getCarreraKey, carrera -> carrera));
+        Map<String, Plan> planes = planService.findAllByFacultadId(facultad.getFacultadId()).stream().collect(Collectors.toMap(Plan::getPlanKey, plan -> plan));
+        Map<String, Carrera> carreras = carreraService.findAllByFacultadId(facultad.getFacultadId()).stream().collect(Collectors.toMap(Carrera::getCarreraKey, carrera -> carrera));
 
-        Map<String, ChequeraPreuniv> chequerasPre = chequeraPreunivService
-                .findAllByFacultadIdAndLectivoId(facultadId, lectivoId - 1).stream().collect(Collectors
-                        .toMap(ChequeraPreuniv::getPersonaKey, Function.identity(), (existing, chequera) -> chequera));
+        Map<String, ChequeraPreuniv> chequerasPre = chequeraPreunivService.findAllByFacultadIdAndLectivoId(facultadId, lectivoId - 1).stream().collect(Collectors.toMap(ChequeraPreuniv::getPersonaKey, Function.identity(), (existing, chequera) -> chequera));
 
-        for (PreunivResumenFacultad resumen : preunivResumenFacultadConsumer.findAllByLectivo(facultad.getApiserver(),
-                facultad.getApiport(), facultad.getFacultadId(), lectivoId)) {
+        for (PreunivResumenFacultad resumen : preunivResumenFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId)) {
             // Recupera lista de alumnos inscriptos en el turno
-            List<PreunivCarreraFacultad> preInscriptosCarrera = preunivCarreraFacultadConsumer.findAllByCarrera(
-                    facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId, resumen.getGeograficaId(),
-                    resumen.getTurnoId(), resumen.getPlanId(), resumen.getCarreraId());
-            List<String> keysFacultad = preInscriptosCarrera.stream()
-                    .map(pre -> pre.getPersonaId() + "." + pre.getDocumentoId()).collect(Collectors.toList());
-            Map<String, ChequeraPreuniv> chequerasPreInscriptos = chequeraPreunivService
-                    .findAllByFacultadIdAndLectivoIdAndGeograficaIdAndPersonakeyIn(resumen.getFacultadId(),
-                            resumen.getLectivoId() - 1, resumen.getGeograficaId(), keysFacultad)
-                    .stream().collect(Collectors.toMap(ChequeraPreuniv::getPersonaKey, Function.identity(),
-                            (existing, chequera) -> chequera));
+            List<PreunivCarreraFacultad> preInscriptosCarrera = preunivCarreraFacultadConsumer.findAllByCarrera(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId, resumen.getGeograficaId(), resumen.getTurnoId(), resumen.getPlanId(), resumen.getCarreraId());
+            List<String> keysFacultad = preInscriptosCarrera.stream().map(pre -> pre.getPersonaId() + "." + pre.getDocumentoId()).collect(Collectors.toList());
+            Map<String, ChequeraPreuniv> chequerasPreInscriptos = chequeraPreunivService.findAllByFacultadIdAndLectivoIdAndGeograficaIdAndPersonakeyIn(resumen.getFacultadId(), resumen.getLectivoId() - 1, resumen.getGeograficaId(), keysFacultad).stream().collect(Collectors.toMap(ChequeraPreuniv::getPersonaKey, Function.identity(), (existing, chequera) -> chequera));
 
             // Elimina de chequerasPre todas las chequeras de inscriptos
             chequerasPreInscriptos.keySet().forEach(chequerasPre::remove);
@@ -678,11 +608,9 @@ public class SheetService {
                 Geografica geografica = geograficas.get(resumen.getGeograficaId());
                 this.setCellString(row, 1, geografica.getNombre(), styleNormal);
             }
-            if (carreras
-                    .containsKey(resumen.getFacultadId() + "." + resumen.getPlanId() + "." + resumen.getCarreraId())) {
+            if (carreras.containsKey(resumen.getFacultadId() + "." + resumen.getPlanId() + "." + resumen.getCarreraId())) {
                 Plan plan = planes.get(resumen.getFacultadId() + "." + resumen.getPlanId());
-                Carrera carrera = carreras
-                        .get(resumen.getFacultadId() + "." + resumen.getPlanId() + "." + resumen.getCarreraId());
+                Carrera carrera = carreras.get(resumen.getFacultadId() + "." + resumen.getPlanId() + "." + resumen.getCarreraId());
                 String nombreCarrera = "";
                 if (plan != null) {
                     nombreCarrera += plan.getNombre();
@@ -692,10 +620,8 @@ public class SheetService {
                 }
                 this.setCellString(row, 2, nombreCarrera, styleBold);
             }
-            if (turnos.containsKey(resumen.getFacultadId() + "." + resumen.getLectivoId() + "."
-                    + resumen.getGeograficaId() + "." + resumen.getTurnoId())) {
-                PreTurnoFacultad turno = turnos.get(resumen.getFacultadId() + "." + resumen.getLectivoId() + "."
-                        + resumen.getGeograficaId() + "." + resumen.getTurnoId());
+            if (turnos.containsKey(resumen.getFacultadId() + "." + resumen.getLectivoId() + "." + resumen.getGeograficaId() + "." + resumen.getTurnoId())) {
+                PreTurnoFacultad turno = turnos.get(resumen.getFacultadId() + "." + resumen.getLectivoId() + "." + resumen.getGeograficaId() + "." + resumen.getTurnoId());
                 this.setCellString(row, 3, turno.getNombre(), styleNormal);
             }
             this.setCellInteger(row, 4, resumen.getCantidad(), styleNormal);
@@ -709,21 +635,17 @@ public class SheetService {
             // Calcula Deuda
             BigDecimal deuda = BigDecimal.ZERO;
             for (ChequeraPreuniv chequera : chequerasPreInscriptos.values()) {
-                deuda = deuda.add(chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
-                        chequera.getTipoChequeraId(), chequera.getChequeraSerieId()).getDeuda());
+                deuda = deuda.add(chequeraCuotaService.calculateDeuda(chequera.getFacultadId(), chequera.getTipoChequeraId(), chequera.getChequeraSerieId()).getDeuda());
             }
             this.setCellBigDecimal(row, 7, deuda, styleNormal);
             // Lista los alumnos sin chequera
             if (sinChequera > 0) {
                 List<String> keys = new ArrayList<>();
                 for (String key : keysFacultad)
-                    if (!chequerasPreInscriptos.containsKey(key))
-                        keys.add(key);
+                    if (!chequerasPreInscriptos.containsKey(key)) keys.add(key);
                 for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, Sort.by("apellido").ascending())) {
                     row = sheet.createRow(++fila);
-                    this.setCellString(row, 2,
-                            "(" + persona.getUnified() + ") - " + persona.getApellido() + ", " + persona.getNombre(),
-                            styleNormal);
+                    this.setCellString(row, 2, "(" + persona.getUnified() + ") - " + persona.getApellido() + ", " + persona.getNombre(), styleNormal);
                 }
             }
         }
@@ -741,13 +663,10 @@ public class SheetService {
             row = sheet.createRow(++fila);
             this.setCellString(row, 0, chequeraPreuniv.getFacultad().getNombre(), styleNormal);
             this.setCellString(row, 1, chequeraPreuniv.getGeografica().getNombre(), styleNormal);
-            this.setCellString(row, 2, "(" + chequeraPreuniv.getPersonaKey() + ") - "
-                            + chequeraPreuniv.getPersona().getApellido() + ", " + chequeraPreuniv.getPersona().getNombre(),
-                    styleNormal);
+            this.setCellString(row, 2, "(" + chequeraPreuniv.getPersonaKey() + ") - " + chequeraPreuniv.getPersona().getApellido() + ", " + chequeraPreuniv.getPersona().getNombre(), styleNormal);
             this.setCellString(row, 3, chequeraPreuniv.getChequera(), styleNormal);
             // Calcula Deuda
-            BigDecimal deuda = chequeraCuotaService.calculateDeuda(chequeraPreuniv.getFacultadId(),
-                    chequeraPreuniv.getTipoChequeraId(), chequeraPreuniv.getChequeraSerieId()).getDeuda();
+            BigDecimal deuda = chequeraCuotaService.calculateDeuda(chequeraPreuniv.getFacultadId(), chequeraPreuniv.getTipoChequeraId(), chequeraPreuniv.getChequeraSerieId()).getDeuda();
             this.setCellBigDecimal(row, 4, deuda, styleNormal);
         }
 
@@ -821,39 +740,22 @@ public class SheetService {
         this.setCellString(row, 10, "Turno", styleBold);
         this.setCellString(row, 11, "Carrera", styleBold);
 
-        Map<Integer, ArancelTipo> aranceles = arancelTipoService.findAll().stream()
-                .collect(Collectors.toMap(ArancelTipo::getArancelTipoId, arancelTipo -> arancelTipo));
-        Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream()
-                .collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
-        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream()
-                .collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
-        Map<String, CarreraKey> carreras = carreraKeyService.findAllByFacultadId(facultad.getFacultadId()).stream()
-                .collect(Collectors.toMap(CarreraKey::getUnified, carrera -> carrera));
-        Map<String, ChequeraPreuniv> chequeras = chequeraPreunivService
-                .findAllByFacultadIdAndLectivoId(facultad.getFacultadId(), lectivoId - 1).stream()
-                .collect(Collectors.toMap(ChequeraPreuniv::getPersonaKey, Function.identity(),
-                        (chequera, replacement) -> chequera));
+        Map<Integer, ArancelTipo> aranceles = arancelTipoService.findAll().stream().collect(Collectors.toMap(ArancelTipo::getArancelTipoId, arancelTipo -> arancelTipo));
+        Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream().collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
+        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
+        Map<String, CarreraKey> carreras = carreraKeyService.findAllByFacultadId(facultad.getFacultadId()).stream().collect(Collectors.toMap(CarreraKey::getUnified, carrera -> carrera));
+        Map<String, ChequeraPreuniv> chequeras = chequeraPreunivService.findAllByFacultadIdAndLectivoId(facultad.getFacultadId(), lectivoId - 1).stream().collect(Collectors.toMap(ChequeraPreuniv::getPersonaKey, Function.identity(), (chequera, replacement) -> chequera));
         List<String> keys = new ArrayList<>(chequeras.keySet());
-        Map<String, PersonaKey> personas = personaKeyService.findAllByUnifiedIn(keys, null).stream()
-                .collect(Collectors.toMap(PersonaKey::getUnified, persona -> persona));
-        Map<String, LegajoKey> legajos = legajoKeyService
-                .findAllByFacultadIdAndUnifiedIn(facultad.getFacultadId(), keys).stream()
-                .collect(Collectors.toMap(LegajoKey::getUnified, legajo -> legajo));
+        Map<String, PersonaKey> personas = personaKeyService.findAllByUnifiedIn(keys, null).stream().collect(Collectors.toMap(PersonaKey::getUnified, persona -> persona));
+        Map<String, LegajoKey> legajos = legajoKeyService.findAllByFacultadIdAndUnifiedIn(facultad.getFacultadId(), keys).stream().collect(Collectors.toMap(LegajoKey::getUnified, legajo -> legajo));
         // Turnos
-        Map<String, PreTurnoFacultad> turnos = preTurnoFacultadConsumer
-                .findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId)
-                .stream().collect(Collectors.toMap(PreTurnoFacultad::getKey, turno -> turno));
+        Map<String, PreTurnoFacultad> turnos = preTurnoFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId).stream().collect(Collectors.toMap(PreTurnoFacultad::getKey, turno -> turno));
         // Inscriptos preuniversitario
-        List<PreunivCarreraFacultad> preInscriptosCarrera = preunivCarreraFacultadConsumer
-                .findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId);
-        Map<String, PreunivCarreraFacultad> preunivs_facultad = preInscriptosCarrera.stream().collect(Collectors.toMap(
-                PreunivCarreraFacultad::getUnified, Function.identity(), (inscripcion, replacement) -> inscripcion));
-        List<String> keysFacultad = preInscriptosCarrera.stream()
-                .map(pre -> pre.getPersonaId() + "." + pre.getDocumentoId()).collect(Collectors.toList());
+        List<PreunivCarreraFacultad> preInscriptosCarrera = preunivCarreraFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId);
+        Map<String, PreunivCarreraFacultad> preunivs_facultad = preInscriptosCarrera.stream().collect(Collectors.toMap(PreunivCarreraFacultad::getUnified, Function.identity(), (inscripcion, replacement) -> inscripcion));
+        List<String> keysFacultad = preInscriptosCarrera.stream().map(pre -> pre.getPersonaId() + "." + pre.getDocumentoId()).collect(Collectors.toList());
         // Personas
-        Map<String, PersonaKeyFacultad> personas_facultad = personaKeyFacultadConsumer
-                .findAllByUnifieds(facultad.getApiserver(), facultad.getApiport(), keysFacultad).stream()
-                .collect(Collectors.toMap(PersonaKeyFacultad::getUnified, persona -> persona));
+        Map<String, PersonaKeyFacultad> personas_facultad = personaKeyFacultadConsumer.findAllByUnifieds(facultad.getApiserver(), facultad.getApiport(), keysFacultad).stream().collect(Collectors.toMap(PersonaKeyFacultad::getUnified, persona -> persona));
 
         // Busca diferencias entre facultad y tesoreria
         for (PersonaKey persona : personas.values()) {
@@ -880,12 +782,10 @@ public class SheetService {
                 show = persona.getMark_facultad();
             }
             if (show) {
-                sincronizeService.sincronizeCarreraAlumno(facultad.getFacultadId(), persona.getPersonaId(),
-                        persona.getDocumentoId());
+                sincronizeService.sincronizeCarreraAlumno(facultad.getFacultadId(), persona.getPersonaId(), persona.getDocumentoId());
                 LegajoKey legajo = legajos.get(persona.getUnified());
                 if (legajo != null)
-                    carrera = carreras
-                            .get(legajo.getFacultadId() + "." + legajo.getPlanId() + "." + legajo.getCarreraId());
+                    carrera = carreras.get(legajo.getFacultadId() + "." + legajo.getPlanId() + "." + legajo.getCarreraId());
                 row = sheet.createRow(++fila);
                 this.setCellString(row, 0, chequera.getPersonaKey(), styleNormal);
                 this.setCellString(row, 1, persona.getApellido() + ", " + persona.getNombre(), styleNormal);
@@ -893,22 +793,18 @@ public class SheetService {
                 this.setCellString(row, 3, geografica.getNombre(), styleNormal);
                 this.setCellString(row, 4, tipoChequera.getNombre(), styleNormal);
                 this.setCellString(row, 5, arancelTipo.getDescripcion(), styleNormal);
-                if (carrera != null)
-                    this.setCellString(row, 6, carrera.getNombre(), styleNormal);
+                if (carrera != null) this.setCellString(row, 6, carrera.getNombre(), styleNormal);
 
                 // Datos Facultad
                 PreunivCarreraFacultad inscripcion = preunivs_facultad.get(chequera.getPersonaKey());
                 PersonaKeyFacultad persona_facultad = personas_facultad.get(inscripcion.getUnified());
                 this.setCellString(row, 7, chequera.getPersonaKey(), styleNormal);
-                this.setCellString(row, 8, persona_facultad.getApellido() + ", " + persona_facultad.getNombre(),
-                        styleNormal);
+                this.setCellString(row, 8, persona_facultad.getApellido() + ", " + persona_facultad.getNombre(), styleNormal);
                 geografica = geograficas.get(inscripcion.getGeograficaId());
                 this.setCellString(row, 9, geografica.getNombre(), styleNormal);
-                PreTurnoFacultad turno = turnos.get(inscripcion.getFacultadId() + "." + inscripcion.getLectivoId() + "."
-                        + inscripcion.getGeograficaId() + "." + inscripcion.getTurnoId());
+                PreTurnoFacultad turno = turnos.get(inscripcion.getFacultadId() + "." + inscripcion.getLectivoId() + "." + inscripcion.getGeograficaId() + "." + inscripcion.getTurnoId());
                 this.setCellString(row, 10, turno.getNombre(), styleNormal);
-                carrera = carreras.get(
-                        inscripcion.getFacultadId() + "." + inscripcion.getPlanId() + "." + inscripcion.getCarreraId());
+                carrera = carreras.get(inscripcion.getFacultadId() + "." + inscripcion.getPlanId() + "." + inscripcion.getCarreraId());
                 if (carrera != null) {
                     this.setCellString(row, 11, carrera.getNombre(), styleNormal);
                 }
@@ -929,8 +825,7 @@ public class SheetService {
             if (!show) {
                 LegajoKey legajo = legajos.get(persona.getUnified());
                 if (legajo != null)
-                    carrera = carreras
-                            .get(legajo.getFacultadId() + "." + legajo.getPlanId() + "." + legajo.getCarreraId());
+                    carrera = carreras.get(legajo.getFacultadId() + "." + legajo.getPlanId() + "." + legajo.getCarreraId());
                 row = sheet.createRow(++fila);
                 this.setCellString(row, 0, chequera.getPersonaKey(), styleNormal);
                 this.setCellString(row, 1, persona.getApellido() + ", " + persona.getNombre(), styleNormal);
@@ -938,8 +833,7 @@ public class SheetService {
                 this.setCellString(row, 3, geografica.getNombre(), styleNormal);
                 this.setCellString(row, 4, tipoChequera.getNombre(), styleNormal);
                 this.setCellString(row, 5, arancelTipo.getDescripcion(), styleNormal);
-                if (carrera != null)
-                    this.setCellString(row, 6, carrera.getNombre(), styleNormal);
+                if (carrera != null) this.setCellString(row, 6, carrera.getNombre(), styleNormal);
             }
         }
         // Llena planilla sólo facultad
@@ -954,15 +848,12 @@ public class SheetService {
                 // Datos Facultad
                 PersonaKeyFacultad persona_facultad = personas_facultad.get(inscripcion.getUnified());
                 this.setCellString(row, 7, inscripcion.getUnified(), styleNormal);
-                this.setCellString(row, 8, persona_facultad.getApellido() + ", " + persona_facultad.getNombre(),
-                        styleNormal);
+                this.setCellString(row, 8, persona_facultad.getApellido() + ", " + persona_facultad.getNombre(), styleNormal);
                 Geografica geografica = geograficas.get(inscripcion.getGeograficaId());
                 this.setCellString(row, 9, geografica.getNombre(), styleNormal);
-                PreTurnoFacultad turno = turnos.get(inscripcion.getFacultadId() + "." + inscripcion.getLectivoId() + "."
-                        + inscripcion.getGeograficaId() + "." + inscripcion.getTurnoId());
+                PreTurnoFacultad turno = turnos.get(inscripcion.getFacultadId() + "." + inscripcion.getLectivoId() + "." + inscripcion.getGeograficaId() + "." + inscripcion.getTurnoId());
                 this.setCellString(row, 10, turno.getNombre(), styleNormal);
-                CarreraKey carrera = carreras.get(
-                        inscripcion.getFacultadId() + "." + inscripcion.getPlanId() + "." + inscripcion.getCarreraId());
+                CarreraKey carrera = carreras.get(inscripcion.getFacultadId() + "." + inscripcion.getPlanId() + "." + inscripcion.getCarreraId());
                 this.setCellString(row, 11, carrera.getNombre(), styleNormal);
             }
         }
@@ -1033,31 +924,16 @@ public class SheetService {
         this.setCellString(row, 9, "Chequera", styleBold);
         this.setCellString(row, 10, "Curso", styleBold);
 
-        List<InscripcionFacultad> inscriptos = inscripcionFacultadConsumer.findAllByLectivo(facultad.getApiserver(),
-                facultad.getApiport(), facultadId, lectivoId);
-        List<String> unifieds = inscriptos.stream().map(InscripcionFacultad::getPersonaKey)
-                .collect(Collectors.toList());
-        Map<String, PersonaKeyFacultad> personas = personaKeyFacultadConsumer
-                .findAllByUnifieds(facultad.getApiserver(), facultad.getApiport(), unifieds).stream().collect(Collectors
-                        .toMap(PersonaKeyFacultad::getUnified, Function.identity(), (persona, replacement) -> persona));
-        Map<String, LegajoKeyFacultad> legajos = legajoKeyFacultadConsumer
-                .findAllByFacultadAndKeys(facultad.getApiserver(), facultad.getApiport(), facultadId, unifieds).stream()
-                .collect(Collectors.toMap(LegajoKeyFacultad::getLegajoKey, Function.identity(),
-                        (legajo, replacemente) -> legajo));
-        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream()
-                .collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
-        Map<String, PlanFacultad> planes = planFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport())
-                .stream().collect(Collectors.toMap(PlanFacultad::getPlanKey, plan -> plan));
-        Map<String, CarreraFacultad> carreras = carreraFacultadConsumer
-                .findAll(facultad.getApiserver(), facultad.getApiport()).stream()
-                .collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
-        Map<String, ChequeraSerie> chequeras = chequeraSerieService
-                .findAllByLectivoIdAndFacultadId(lectivoId, facultadId).stream().collect(Collectors.toMap(
-                        ChequeraSerie::getFacultadKey, Function.identity(), (chequera, replacement) -> chequera));
-        Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream()
-                .collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
-        Map<Integer, ArancelTipo> aranceles = arancelTipoService.findAll().stream()
-                .collect(Collectors.toMap(ArancelTipo::getArancelTipoId, arancelTipo -> arancelTipo));
+        List<InscripcionFacultad> inscriptos = inscripcionFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId);
+        List<String> unifieds = inscriptos.stream().map(InscripcionFacultad::getPersonaKey).collect(Collectors.toList());
+        Map<String, PersonaKeyFacultad> personas = personaKeyFacultadConsumer.findAllByUnifieds(facultad.getApiserver(), facultad.getApiport(), unifieds).stream().collect(Collectors.toMap(PersonaKeyFacultad::getUnified, Function.identity(), (persona, replacement) -> persona));
+        Map<String, LegajoKeyFacultad> legajos = legajoKeyFacultadConsumer.findAllByFacultadAndKeys(facultad.getApiserver(), facultad.getApiport(), facultadId, unifieds).stream().collect(Collectors.toMap(LegajoKeyFacultad::getLegajoKey, Function.identity(), (legajo, replacemente) -> legajo));
+        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
+        Map<String, PlanFacultad> planes = planFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(PlanFacultad::getPlanKey, plan -> plan));
+        Map<String, CarreraFacultad> carreras = carreraFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
+        Map<String, ChequeraSerie> chequeras = chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId).stream().collect(Collectors.toMap(ChequeraSerie::getFacultadKey, Function.identity(), (chequera, replacement) -> chequera));
+        Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream().collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
+        Map<Integer, ArancelTipo> aranceles = arancelTipoService.findAll().stream().collect(Collectors.toMap(ArancelTipo::getArancelTipoId, arancelTipo -> arancelTipo));
         for (InscripcionFacultad inscripcion : inscriptos) {
             row = sheet.createRow(++fila);
             this.setCellString(row, 0, inscripcion.getPersonaKey(), styleNormal);
@@ -1068,25 +944,20 @@ public class SheetService {
                 this.setCellString(row, 2, geograficas.get(inscripcion.getGeograficaId()).getNombre(), styleNormal);
             }
             if (carreras.containsKey(inscripcion.getCarreraKey())) {
-                this.setCellString(row, 3, planes.get(inscripcion.getPlanKey()).getNombre() + " / "
-                        + carreras.get(inscripcion.getCarreraKey()).getNombre(), styleNormal);
+                this.setCellString(row, 3, planes.get(inscripcion.getPlanKey()).getNombre() + " / " + carreras.get(inscripcion.getCarreraKey()).getNombre(), styleNormal);
             }
             this.setCellOffsetDateTime(row, 4, inscripcion.getFecha(), styleDate);
 
             if (legajos.containsKey(inscripcion.getLegajoKey())) {
-                this.setCellString(row, 5, legajos.get(inscripcion.getLegajoKey()).getIntercambio() == 0 ? "No" : "Si",
-                        styleNormal);
+                this.setCellString(row, 5, legajos.get(inscripcion.getLegajoKey()).getIntercambio() == 0 ? "No" : "Si", styleNormal);
             }
             this.setCellInteger(row, 6, inscripcion.getCurso(), styleNormal);
 
-            String facultadKey = facultadId + "." + lectivoId + "." + inscripcion.getGeograficaId() + "."
-                    + inscripcion.getPersonaKey();
+            String facultadKey = facultadId + "." + lectivoId + "." + inscripcion.getGeograficaId() + "." + inscripcion.getPersonaKey();
             if (chequeras.containsKey(facultadKey)) {
                 ChequeraSerie chequera = chequeras.get(facultadKey);
                 this.setCellString(row, 7, tipos.get(chequera.getTipoChequeraId()).getNombre(), styleNormal);
-                this.setCellString(row, 8, aranceles
-                                .get(getArancel(inscripcion.getPersonaId(), chequera.getArancelTipoId())).getDescripcion(),
-                        styleNormal);
+                this.setCellString(row, 8, aranceles.get(getArancel(inscripcion.getPersonaId(), chequera.getArancelTipoId())).getDescripcion(), styleNormal);
                 this.setCellLong(row, 9, chequera.getChequeraSerieId(), styleNormal);
                 this.setCellInteger(row, 10, chequera.getCursoId(), styleNormal);
             }
@@ -1136,8 +1007,7 @@ public class SheetService {
             lectivo = new Lectivo();
         }
 
-        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream()
-                .collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
+        Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
 
         int fila = -1;
         row = sheet.createRow(++fila);
@@ -1153,22 +1023,16 @@ public class SheetService {
         this.setCellString(row, 7, "Egresos", styleBold);
 
         for (Facultad facultad : facultadService.findFacultades()) {
-            Map<String, PlanFacultad> planes = planFacultadConsumer
-                    .findAll(facultad.getApiserver(), facultad.getApiport()).stream()
-                    .collect(Collectors.toMap(PlanFacultad::getPlanKey, plan -> plan));
-            Map<String, CarreraFacultad> carreras = carreraFacultadConsumer
-                    .findAll(facultad.getApiserver(), facultad.getApiport()).stream()
-                    .collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
-            for (InscriptoCursoFacultad curso : inscriptoCursoFacultadConsumer.findAllByLectivo(facultad.getApiserver(),
-                    facultad.getApiport(), facultad.getFacultadId(), lectivo.getLectivoId())) {
+            Map<String, PlanFacultad> planes = planFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(PlanFacultad::getPlanKey, plan -> plan));
+            Map<String, CarreraFacultad> carreras = carreraFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
+            for (InscriptoCursoFacultad curso : inscriptoCursoFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivo.getLectivoId())) {
                 row = sheet.createRow(++fila);
                 this.setCellString(row, 0, facultad.getNombre(), styleNormal);
                 if (geograficas.containsKey(curso.getGeograficaId())) {
                     this.setCellString(row, 1, geograficas.get(curso.getGeograficaId()).getNombre(), styleNormal);
                 }
                 if (carreras.containsKey(curso.getCarreraKey())) {
-                    this.setCellString(row, 2, planes.get(curso.getPlanKey()).getNombre() + " / "
-                            + carreras.get(curso.getCarreraKey()).getNombre(), styleNormal);
+                    this.setCellString(row, 2, planes.get(curso.getPlanKey()).getNombre() + " / " + carreras.get(curso.getCarreraKey()).getNombre(), styleNormal);
                 }
 
                 this.setCellInteger(row, 3, curso.getCurso(), styleNormal);
@@ -1232,8 +1096,7 @@ public class SheetService {
         this.setCellString(row, 3, "Debe", styleBold);
         this.setCellString(row, 4, "Haber", styleBold);
 
-        Map<Integer, TipoPago> tipos = tipoPagoService.findAll().stream()
-                .collect(Collectors.toMap(TipoPago::getTipoPagoId, tipo -> tipo));
+        Map<Integer, TipoPago> tipos = tipoPagoService.findAll().stream().collect(Collectors.toMap(TipoPago::getTipoPagoId, tipo -> tipo));
 
         Ejercicio ejercicio = ejercicioService.findByEjercicioId(ejercicioId);
         OffsetDateTime desde = ejercicio.getFechaInicio().withOffsetSameInstant(ZoneOffset.UTC);
@@ -1249,8 +1112,7 @@ public class SheetService {
                     this.setCellInteger(row, 2, asiento.getOrdenContable(), styleNormal);
                     BigDecimal debe = BigDecimal.ZERO;
                     BigDecimal haber = BigDecimal.ZERO;
-                    for (CuentaMovimiento movimiento : cuentaMovimientoService
-                            .findAllByAsiento(asiento.getFechaContable(), asiento.getOrdenContable(), 0, 2)) {
+                    for (CuentaMovimiento movimiento : cuentaMovimientoService.findAllByAsiento(asiento.getFechaContable(), asiento.getOrdenContable(), 0, 2)) {
                         if (movimiento.getDebita() == 1) {
                             debe = debe.add(movimiento.getImporte()).setScale(2, RoundingMode.HALF_UP);
                         } else {
@@ -1324,18 +1186,12 @@ public class SheetService {
         this.setCellString(row, 5, "Móvil", styleBold);
 
         List<PersonaSuspendido> suspendidos = personaSuspendidoService.findAllBySede(facultadId, geograficaId);
-        List<String> keys = suspendidos.stream().map(PersonaSuspendido::personaKey)
-                .collect(Collectors.toList());
-        Map<String, PersonaKey> personas = personaKeyService.findAllByUnifiedIn(keys, null).stream().collect(
-                Collectors.toMap(PersonaKey::getUnified, Function.identity(), (persona, replacement) -> persona));
-        Map<String, DomicilioKey> domicilios = domicilioKeyService.findAllByUnifiedIn(keys).stream().collect(Collectors
-                .toMap(DomicilioKey::getUnified, Function.identity(), (domicilio, replacemente) -> domicilio));
-        Map<Integer, Lectivo> lectivos = lectivoService.findAll().stream()
-                .collect(Collectors.toMap(Lectivo::getLectivoId, lectivo -> lectivo));
-        Map<Integer, Facultad> facultades = facultadService.findAll().stream()
-                .collect(Collectors.toMap(Facultad::getFacultadId, facultad -> facultad));
-        Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream()
-                .collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
+        List<String> keys = suspendidos.stream().map(PersonaSuspendido::personaKey).collect(Collectors.toList());
+        Map<String, PersonaKey> personas = personaKeyService.findAllByUnifiedIn(keys, null).stream().collect(Collectors.toMap(PersonaKey::getUnified, Function.identity(), (persona, replacement) -> persona));
+        Map<String, DomicilioKey> domicilios = domicilioKeyService.findAllByUnifiedIn(keys).stream().collect(Collectors.toMap(DomicilioKey::getUnified, Function.identity(), (domicilio, replacemente) -> domicilio));
+        Map<Integer, Lectivo> lectivos = lectivoService.findAll().stream().collect(Collectors.toMap(Lectivo::getLectivoId, lectivo -> lectivo));
+        Map<Integer, Facultad> facultades = facultadService.findAll().stream().collect(Collectors.toMap(Facultad::getFacultadId, facultad -> facultad));
+        Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream().collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
 
         for (PersonaSuspendido suspendido : suspendidos) {
             row = sheet.createRow(++fila);
@@ -1352,20 +1208,16 @@ public class SheetService {
             }
             // Lista la deuda
             boolean deudor = false;
-            for (ChequeraSerie serie : chequeraSerieService.findAllByPersona(suspendido.getPersonaId(),
-                    suspendido.getDocumentoId())) {
-                DeudaChequera deuda = chequeraCuotaService.calculateDeuda(serie.getFacultadId(),
-                        serie.getTipoChequeraId(), serie.getChequeraSerieId());
+            for (ChequeraSerie serie : chequeraSerieService.findAllByPersona(suspendido.getPersonaId(), suspendido.getDocumentoId())) {
+                DeudaChequera deuda = chequeraCuotaService.calculateDeuda(serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId());
                 if (deuda.getCuotas() > 0) {
                     deudor = true;
                     row = sheet.createRow(++fila);
                     this.setCellString(row, 1, lectivos.get(serie.getLectivoId()).getNombre(), styleNormal);
                     this.setCellString(row, 2, facultades.get(serie.getFacultadId()).getNombre(), styleNormal);
                     this.setCellString(row, 3, tipos.get(serie.getTipoChequeraId()).getNombre(), styleNormal);
-                    this.setCellString(row, 4, MessageFormat.format("Chequera: {0}/{1}/{2}", serie.getFacultadId(),
-                            serie.getTipoChequeraId(), serie.getChequeraSerieId()), styleNormal);
-                    this.setCellString(row, 5,
-                            MessageFormat.format("Deuda: {0}/{1}", deuda.getCuotas(), deuda.getDeuda()), styleNormal);
+                    this.setCellString(row, 4, MessageFormat.format("Chequera: {0}/{1}/{2}", serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId()), styleNormal);
+                    this.setCellString(row, 5, MessageFormat.format("Deuda: {0}/{1}", deuda.getCuotas(), deuda.getDeuda()), styleNormal);
                 }
             }
             if (!deudor) {
@@ -1425,12 +1277,9 @@ public class SheetService {
 
         for (ContratoPeriodo contratoPeriodo : contratoPeriodoService.findAllByPeriodo(anho, mes)) {
             row = sheet.createRow(++fila);
-            this.setCellBigDecimal(row, 0, contratoPeriodo.getContrato().getContratado().getPersona().getPersonaId(),
-                    styleNormal);
-            this.setCellString(row, 1, contratoPeriodo.getContrato().getContratado().getPersona().getApellidoNombre(),
-                    styleNormal);
-            this.setCellString(row, 2, contratoPeriodo.getContrato().getContratado().getPersona().getCuit(),
-                    styleNormal);
+            this.setCellBigDecimal(row, 0, contratoPeriodo.getContrato().getContratado().getPersona().getPersonaId(), styleNormal);
+            this.setCellString(row, 1, contratoPeriodo.getContrato().getContratado().getPersona().getApellidoNombre(), styleNormal);
+            this.setCellString(row, 2, contratoPeriodo.getContrato().getContratado().getPersona().getCuit(), styleNormal);
             this.setCellString(row, 3, contratoPeriodo.getContrato().getFacultad().getNombre(), styleNormal);
             this.setCellString(row, 4, contratoPeriodo.getContrato().getGeografica().getNombre(), styleNormal);
             this.setCellOffsetDateTime(row, 5, contratoPeriodo.getContrato().getDesde(), styleDate);
@@ -1641,9 +1490,12 @@ public class SheetService {
         int columnaTipoComprobante = 3;
         int columnaComprobantePrefijo = 4;
         int columnaComprobanteNumero = 5;
-        int columnaImporte = 6;
-        int columnaCancedado = 7;
-        int columnaSaldo = 8;
+        int columnaImporteFactura = 6;
+        int columnaSaldo = 7;
+        int columnaFechaOrdenPago = 8;
+        int columnaPrefijoOrdenPago = 9;
+        int columnaNumeroOrdenPago = 10;
+        int columnaImporteOrdenPago = 11;
         row = sheet.createRow(++fila);
         this.setCellString(row, columnaRazonSocial, "Razón Social", styleBold);
         this.setCellString(row, columnaCUIT, "CUIT", styleBold);
@@ -1651,30 +1503,47 @@ public class SheetService {
         this.setCellString(row, columnaTipoComprobante, "Tipo Comprobante", styleBold);
         this.setCellString(row, columnaComprobantePrefijo, "Prefijo", styleBold);
         this.setCellString(row, columnaComprobanteNumero, "Numero", styleBold);
-        this.setCellString(row, columnaImporte, "Importe", styleBold);
-        this.setCellString(row, columnaCancedado, "Cancelado", styleBold);
+        this.setCellString(row, columnaImporteFactura, "Importe Factura", styleBold);
         this.setCellString(row, columnaSaldo, "Saldo al " + format.format(fechaHasta.withOffsetSameInstant(ZoneOffset.UTC)), styleBold);
+        this.setCellString(row, columnaFechaOrdenPago, "Fecha Orden Pago", styleBold);
+        this.setCellString(row, columnaPrefijoOrdenPago, "Prefijo Orden Pago", styleBold);
+        this.setCellString(row, columnaNumeroOrdenPago, "Numero Orden Pago", styleBold);
+        this.setCellString(row, columnaImporteOrdenPago, "Importe Orden Pago", styleBold);
 
-        for (ProveedorMovimiento proveedorMovimiento : proveedorMovimientoService.findAllByNotOrdenPagoBetweenAndNotAnulado(fechaDesde, fechaHasta)) {
+        for (FacturaPendiente facturaPendiente : facturaPendienteService.findAllFacturasPendientesBetweenDates(fechaDesde, fechaHasta)) {
             try {
-                log.debug("proveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
+                log.debug("FacturaPendiente -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(facturaPendiente));
             } catch (JsonProcessingException e) {
-                log.debug("sin proveedorMovimiento");
+                log.debug("FacturaPendiente error -> {}", e.getMessage());
             }
-            BigDecimal importe = proveedorMovimiento.getImporte();
-            BigDecimal cancelado = new BigDecimal(proveedorMovimiento.getOrdenPagos().stream().filter(pago -> !pago.getFechaPago().isAfter(fechaHasta)).mapToDouble(pago -> pago.getImporteAplicado().doubleValue()).sum());
-            BigDecimal saldo = importe.subtract(cancelado).setScale(2, RoundingMode.HALF_UP);
-            if (saldo.compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal importeFactura = facturaPendiente.getImporteFactura();
+            BigDecimal importePagado = BigDecimal.ZERO;
+            if (facturaPendiente.getImportePagado() != null) {
+                importePagado = facturaPendiente.getImportePagado();
+            }
+            BigDecimal saldo = importePagado.subtract(importeFactura).setScale(2, RoundingMode.HALF_UP);
+            if (saldo.compareTo(BigDecimal.ZERO) < 0) {
                 row = sheet.createRow(++fila);
-                this.setCellString(row, columnaRazonSocial, proveedorMovimiento.getProveedor().getRazonSocial(), styleNormal);
-                this.setCellString(row, columnaCUIT, proveedorMovimiento.getProveedor().getCuit(), styleNormal);
-                this.setCellString(row, columnaFechaComprobante, format.format(proveedorMovimiento.getFechaComprobante().withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
-                this.setCellString(row, columnaTipoComprobante, proveedorMovimiento.getComprobante().getDescripcion(), styleNormal);
-                this.setCellInteger(row, columnaComprobantePrefijo, proveedorMovimiento.getPrefijo(), styleNormal);
-                this.setCellLong(row, columnaComprobanteNumero, proveedorMovimiento.getNumeroComprobante(), styleNormal);
-                this.setCellBigDecimal(row, columnaImporte, importe, styleNormal);
-                this.setCellBigDecimal(row, columnaCancedado, cancelado, styleNormal);
-                this.setCellBigDecimal(row, columnaSaldo, saldo, styleNormal);
+                this.setCellString(row, columnaRazonSocial, facturaPendiente.getRazonSocial(), styleNormal);
+                this.setCellString(row, columnaCUIT, facturaPendiente.getCuit(), styleNormal);
+                this.setCellString(row, columnaFechaComprobante, format.format(facturaPendiente.getFechaComprobante().withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
+                this.setCellString(row, columnaTipoComprobante, facturaPendiente.getComprobante(), styleNormal);
+                this.setCellInteger(row, columnaComprobantePrefijo, facturaPendiente.getPrefijo(), styleNormal);
+                this.setCellLong(row, columnaComprobanteNumero, facturaPendiente.getNumeroComprobante(), styleNormal);
+                this.setCellBigDecimal(row, columnaImporteFactura, facturaPendiente.getImporteFactura(), styleNormal);
+                this.setCellBigDecimal(row, columnaSaldo, saldo.abs(), styleNormal);
+                if (facturaPendiente.getFechaOrdenPago() != null) {
+                    this.setCellString(row, columnaFechaOrdenPago, format.format(facturaPendiente.getFechaOrdenPago().withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
+                }
+                if (facturaPendiente.getPrefijoOrdenPago() != null) {
+                    this.setCellInteger(row, columnaPrefijoOrdenPago, facturaPendiente.getPrefijoOrdenPago(), styleNormal);
+                }
+                if (facturaPendiente.getNumeroOrdenPago() != null) {
+                    this.setCellLong(row, columnaNumeroOrdenPago, facturaPendiente.getNumeroOrdenPago(), styleNormal);
+                }
+                if (facturaPendiente.getImporteOrdenPago() != null) {
+                    this.setCellBigDecimal(row, columnaImporteOrdenPago, facturaPendiente.getImporteOrdenPago(), styleNormal);
+                }
             }
         }
 
@@ -1695,11 +1564,9 @@ public class SheetService {
     }
 
     private Integer getArancel(BigDecimal personaId, Integer arancelTipoId) {
-        BigDecimal[] test = new BigDecimal[]{new BigDecimal(23693840), new BigDecimal(40596925),
-                new BigDecimal(41699055), new BigDecimal(41868947)};
+        BigDecimal[] test = new BigDecimal[]{new BigDecimal(23693840), new BigDecimal(40596925), new BigDecimal(41699055), new BigDecimal(41868947)};
         for (BigDecimal value : test) {
-            if (value.compareTo(personaId) == 0)
-                return 1;
+            if (value.compareTo(personaId) == 0) return 1;
         }
         return arancelTipoId;
     }
