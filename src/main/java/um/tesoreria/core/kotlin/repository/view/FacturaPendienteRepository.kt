@@ -17,6 +17,7 @@ interface FacturaPendienteRepository : JpaRepository<FacturaPendiente, Long> {
             p.Prv_CUIT AS cuit,
             m.MvP_FechaComprob AS fecha_comprobante,
             t.TCo_Descripcion AS comprobante,
+            t.Tco_Debita as debita,
             m.MvP_Prefijo AS prefijo,
             m.MvP_NroComprob AS numero_comprobante,
             m.MvP_Importe AS importe_factura,
@@ -25,6 +26,8 @@ interface FacturaPendienteRepository : JpaRepository<FacturaPendiente, Long> {
             op.MvP_Prefijo AS prefijo_orden_pago,
             op.MvP_NroComprob AS numero_orden_pago,
             op.MvP_Importe AS importe_orden_pago,
+            MIN(v.Val_FechaEmision) AS fecha_minima_pago,
+            MAX(v.Val_FechaEmision) AS fecha_maxima_pago,
             SUM(v.Val_Importe) AS importe_pagado
         FROM movprov m
         JOIN proveedores p ON m.MvP_Prv_ID = p.Prv_ID
