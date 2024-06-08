@@ -5,6 +5,9 @@ package um.tesoreria.core.controller;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +28,7 @@ import um.tesoreria.core.service.CursoCargoContratadoService;
  */
 @RestController
 @RequestMapping("/cursocargocontratado")
+@Slf4j
 public class CursoCargoContratadoController {
 
     private final CursoCargoContratadoService service;
@@ -43,8 +47,13 @@ public class CursoCargoContratadoController {
     @GetMapping("/curso/{cursoId}/{anho}/{mes}")
     public ResponseEntity<List<CursoCargoContratado>> findAllByCurso(@PathVariable Long cursoId,
                                                                      @PathVariable Integer anho, @PathVariable Integer mes) {
-        return new ResponseEntity<>(service.findAllByCurso(cursoId, anho, mes),
-                HttpStatus.OK);
+        var cursoCargos = service.findAllByCurso(cursoId, anho, mes);
+        try {
+            log.debug("CursoCargos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cursoCargos));
+        } catch (JsonProcessingException e) {
+            log.debug("Sin CursoCargos");
+        }
+        return new ResponseEntity<>(cursoCargos, HttpStatus.OK);
     }
 
     @GetMapping("/cursosContratado/{contratadoId}/{anho}/{mes}")
