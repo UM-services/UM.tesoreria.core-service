@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import um.tesoreria.core.model.Setup;
+import um.tesoreria.core.kotlin.model.Setup;
 
 /**
  * @author daniel
@@ -17,6 +17,6 @@ import um.tesoreria.core.model.Setup;
 @Repository
 public interface ISetupRepository extends JpaRepository<Setup, Long> {
 
-	public Optional<Setup> findTopByOrderBySetupIdDesc();
+	Optional<Setup> findTopByOrderBySetupIdDesc();
 
 }
