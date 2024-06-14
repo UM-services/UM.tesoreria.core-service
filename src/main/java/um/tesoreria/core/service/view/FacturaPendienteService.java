@@ -17,6 +17,7 @@ public class FacturaPendienteService {
     }
 
     public List<FacturaPendiente> findAllFacturasPendientesBetweenDates(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta) {
+        repository.updateFechaPagoInProveedorPago();
         return repository.findFacturasPendientes(fechaDesde, fechaHasta);
     }
 
