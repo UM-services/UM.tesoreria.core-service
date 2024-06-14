@@ -1,6 +1,8 @@
 package um.tesoreria.core.kotlin.repository.view
 
+import jakarta.transaction.Transactional
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
@@ -9,6 +11,18 @@ import java.time.OffsetDateTime
 
 @Repository
 interface FacturaPendienteRepository : JpaRepository<FacturaPendiente, Long> {
+
+    @Modifying
+    @Transactional
+    @Query(
+        value = """
+        UPDATE movprov_detallecomprobantes d
+        JOIN movprov_detallevalores v ON v.OpV_OrP_ID = d.OpC_OrP_ID
+        JOIN valores p ON v.OpV_Val_ID = p.val_id
+        SET d.fecha_pago = p.Val_FechaEmision
+        """, nativeQuery = true
+    )
+    fun updateFechaPagoInProveedorPago();
 
     @Query(
         value = """
