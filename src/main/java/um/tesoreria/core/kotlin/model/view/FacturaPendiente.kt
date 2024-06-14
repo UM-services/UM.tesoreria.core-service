@@ -24,16 +24,6 @@ data class FacturaPendiente(
     val prefijo: Int,
     val numeroComprobante: Long,
     val importeFactura: BigDecimal,
-    val ordenPagoId: Long?,
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-    val fechaOrdenPago: OffsetDateTime?,
-    val prefijoOrdenPago: Int?,
-    val numeroOrdenPago: Long?,
-    val importeOrdenPago: BigDecimal?,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-    val fechaMinimaPago: OffsetDateTime?,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-    val fechaMaximaPago: OffsetDateTime?,
     val importePagado: BigDecimal?
+
 )
