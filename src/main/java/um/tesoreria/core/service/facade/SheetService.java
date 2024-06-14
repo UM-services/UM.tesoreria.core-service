@@ -1492,13 +1492,6 @@ public class SheetService {
         int columnaComprobanteNumero = 5;
         int columnaImporteFactura = 6;
         int columnaSaldo = 7;
-        int columnaFechaOrdenPago = 8;
-        int columnaPrefijoOrdenPago = 9;
-        int columnaNumeroOrdenPago = 10;
-        int columnaImporteOrdenPago = 11;
-        int columnaFechaMinimaPago = 12;
-        int columnaFechaMaximaPago = 13;
-        int columnaImportePagado = 14;
         row = sheet.createRow(++fila);
         this.setCellString(row, columnaRazonSocial, "Razón Social", styleBold);
         this.setCellString(row, columnaCUIT, "CUIT", styleBold);
@@ -1508,13 +1501,6 @@ public class SheetService {
         this.setCellString(row, columnaComprobanteNumero, "Numero", styleBold);
         this.setCellString(row, columnaImporteFactura, "Importe Factura", styleBold);
         this.setCellString(row, columnaSaldo, "Saldo al " + format.format(fechaHasta.withOffsetSameInstant(ZoneOffset.UTC)), styleBold);
-        this.setCellString(row, columnaFechaOrdenPago, "Fecha Orden Pago", styleBold);
-        this.setCellString(row, columnaPrefijoOrdenPago, "Prefijo Orden Pago", styleBold);
-        this.setCellString(row, columnaNumeroOrdenPago, "Numero Orden Pago", styleBold);
-        this.setCellString(row, columnaImporteOrdenPago, "Importe Orden Pago", styleBold);
-        this.setCellString(row, columnaFechaMinimaPago, "Fecha Minima Pago", styleBold);
-        this.setCellString(row, columnaFechaMaximaPago, "Fecha Maxima Pago", styleBold);
-        this.setCellString(row, columnaImportePagado, "Pagado Período", styleBold);
 
         for (FacturaPendiente facturaPendiente : facturaPendienteService.findAllFacturasPendientesBetweenDates(fechaDesde, fechaHasta)) {
             try {
@@ -1527,21 +1513,9 @@ public class SheetService {
             if (facturaPendiente.getImportePagado() != null) {
                 importePagado = facturaPendiente.getImportePagado();
             }
-            boolean included = false;
             BigDecimal saldo = importeFactura.subtract(importePagado).setScale(2, RoundingMode.HALF_UP);
+            log.debug("factura {} - pagado {} - saldo {}", importeFactura, importePagado, saldo);
             if (saldo.compareTo(BigDecimal.ZERO) != 0) {
-                if (importePagado.signum() == 0) {
-                    included = true;
-                } else {
-                    if (importeFactura.signum() == saldo.signum()) {
-                        included = true;
-                    } else {
-                        included = false;
-                    }
-                }
-            }
-            log.debug("factura {} - pagado {} - saldo {} - included {} - fecha minima {} - fecha maxima {} - importe pagado {}", importeFactura, importePagado, saldo, included, facturaPendiente.getFechaMinimaPago(), facturaPendiente.getFechaMaximaPago(), facturaPendiente.getImportePagado());
-            if (included) {
                 row = sheet.createRow(++fila);
                 this.setCellString(row, columnaRazonSocial, facturaPendiente.getRazonSocial(), styleNormal);
                 this.setCellString(row, columnaCUIT, facturaPendiente.getCuit(), styleNormal);
@@ -1551,27 +1525,6 @@ public class SheetService {
                 this.setCellLong(row, columnaComprobanteNumero, facturaPendiente.getNumeroComprobante(), styleNormal);
                 this.setCellBigDecimal(row, columnaImporteFactura, facturaPendiente.getImporteFactura(), styleNormal);
                 this.setCellBigDecimal(row, columnaSaldo, saldo, styleNormal);
-                if (facturaPendiente.getFechaOrdenPago() != null) {
-                    this.setCellString(row, columnaFechaOrdenPago, format.format(facturaPendiente.getFechaOrdenPago().withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
-                }
-                if (facturaPendiente.getPrefijoOrdenPago() != null) {
-                    this.setCellInteger(row, columnaPrefijoOrdenPago, facturaPendiente.getPrefijoOrdenPago(), styleNormal);
-                }
-                if (facturaPendiente.getNumeroOrdenPago() != null) {
-                    this.setCellLong(row, columnaNumeroOrdenPago, facturaPendiente.getNumeroOrdenPago(), styleNormal);
-                }
-                if (facturaPendiente.getImporteOrdenPago() != null) {
-                    this.setCellBigDecimal(row, columnaImporteOrdenPago, facturaPendiente.getImporteOrdenPago(), styleNormal);
-                }
-                if (facturaPendiente.getFechaMinimaPago() != null) {
-                    this.setCellString(row, columnaFechaMinimaPago, format.format(facturaPendiente.getFechaMinimaPago().withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
-                }
-                if (facturaPendiente.getFechaMaximaPago() != null) {
-                    this.setCellString(row, columnaFechaMaximaPago, format.format(facturaPendiente.getFechaMaximaPago().withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
-                }
-                if (facturaPendiente.getImportePagado() != null) {
-                    this.setCellBigDecimal(row, columnaImportePagado, facturaPendiente.getImportePagado(), styleNormal);
-                }
             }
         }
 
