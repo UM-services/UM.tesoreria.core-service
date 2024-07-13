@@ -1,8 +1,6 @@
 app:
+  port: 8092
   database: tesium
-#  server: 192.168.1.3:3306
-#  user: dquinteros
-#  password: aeqq2004
   server: 10.147.20.20:3306
   user: root
   password: root
@@ -13,15 +11,24 @@ app:
   open-in-view: true
   logging: debug
   mail:
-    username: chequeras@um.edu.ar
-    password: 8VlfKS44o8YbOutcm2VT
-  
+    username: uid
+    password: pwd
+
+server:
+  port: ${app.port}
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://eureka:@eureka-service:8761/eureka
+
 spring:
   application:
     name: core-service
-  cloud:
-    config:
-      uri: http://localhost:8888
   datasource:
     url: jdbc:mysql://${app.server}/${app.database}?useSSL=false&serverTimezone=UTC
     username: ${app.user}
