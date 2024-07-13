@@ -27,12 +27,12 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn clean install -Dmaven.test.skip=true
+      run: mvn clean install -DskipTests
       
     - uses: mr-smithers-excellent/docker-build-push@v6
       name: Build & push Docker image
       env:
-        VERSION: 15.48.108
+        VERSION: 16.49.109
       with:
         image: dqmdz/um.tesoreria.core-service
         tags: ${VERSION}, latest, "${GITHUB_REF#refs/heads/}.$(git rev-parse --short ${GITHUB_SHA})"
