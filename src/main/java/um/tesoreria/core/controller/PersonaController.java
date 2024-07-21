@@ -32,8 +32,11 @@ import um.tesoreria.core.service.PersonaService;
 @RequestMapping("/persona")
 public class PersonaController {
 
-	@Resource
-	private PersonaService service;
+	private final PersonaService service;
+
+	public PersonaController(PersonaService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/santander")
 	public ResponseEntity<List<Persona>> findAllSantander() {

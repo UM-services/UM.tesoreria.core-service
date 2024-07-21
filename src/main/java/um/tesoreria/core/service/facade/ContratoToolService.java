@@ -17,10 +17,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import um.tesoreria.core.kotlin.model.CursoCargoContratado;
 import um.tesoreria.core.model.Contrato;
 import um.tesoreria.core.model.ContratoFactura;
 import um.tesoreria.core.model.ContratoPeriodo;
-import um.tesoreria.core.model.CursoCargoContratado;
 import um.tesoreria.core.service.ContratoFacturaService;
 import um.tesoreria.core.service.ContratoPeriodoService;
 import um.tesoreria.core.service.ContratoService;
