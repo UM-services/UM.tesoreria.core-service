@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import um.tesoreria.core.model.CursoCargoContratado;
+import um.tesoreria.core.kotlin.model.CursoCargoContratado;
 import um.tesoreria.core.service.CursoCargoContratadoService;
 
 /**
@@ -33,7 +33,6 @@ public class CursoCargoContratadoController {
 
     private final CursoCargoContratadoService service;
 
-    @Autowired
     public CursoCargoContratadoController(CursoCargoContratadoService service) {
         this.service = service;
     }

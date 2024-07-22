@@ -5,13 +5,16 @@ package um.tesoreria.core.service;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CursoCargoContratadoException;
-import um.tesoreria.core.model.CursoCargoContratado;
+import um.tesoreria.core.kotlin.model.CursoCargoContratado;
 import um.tesoreria.core.repository.ICursoCargoContratadoRepository;
 
 /**
@@ -19,18 +22,24 @@ import um.tesoreria.core.repository.ICursoCargoContratadoRepository;
  *
  */
 @Service
+@Slf4j
 public class CursoCargoContratadoService {
 
 	private final ICursoCargoContratadoRepository repository;
 
-	@Autowired
 	public CursoCargoContratadoService(ICursoCargoContratadoRepository repository) {
 		this.repository = repository;
 	}
 
 	public List<CursoCargoContratado> findAllByContratado(Long contratadoId, Integer anho, Integer mes,
-			Long contratoId) {
-		return repository.findAllByContratadoIdAndAnhoAndMesAndContratoId(contratadoId, anho, mes, contratoId);
+														  Long contratoId) {
+		var cursoCargoContratados = repository.findAllByContratadoIdAndAnhoAndMesAndContratoId(contratadoId, anho, mes, contratoId);
+        try {
+            log.debug("cursoCargoContratados -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cursoCargoContratados));
+        } catch (JsonProcessingException e) {
+            log.debug("Sin cursoCargoContratados");
+        }
+        return cursoCargoContratados;
 	}
 
 	public List<CursoCargoContratado> findAllByCursosContratado(Long contratadoId, Integer anho, Integer mes) {
