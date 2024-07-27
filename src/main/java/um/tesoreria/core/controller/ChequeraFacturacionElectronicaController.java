@@ -10,16 +10,19 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/chequeraFacturacionElectronica")
+@RequestMapping({"/chequeraFacturacionElectronica", "/api/tesoreria/core/chequeraFacturacionElectronica"})
 public class ChequeraFacturacionElectronicaController {
 
-    @Autowired
-    private ChequeraFacturacionElectronicaService service;
+    private final ChequeraFacturacionElectronicaService service;
+
+    public ChequeraFacturacionElectronicaController(ChequeraFacturacionElectronicaService service) {
+        this.service = service;
+    }
 
     @GetMapping("/chequera/{chequeraId}")
     public ResponseEntity<ChequeraFacturacionElectronica> findByChequeraId(@PathVariable Long chequeraId) {
         try {
-            return new ResponseEntity<ChequeraFacturacionElectronica>(service.findByChequeraId(chequeraId), HttpStatus.OK);
+            return new ResponseEntity<>(service.findByChequeraId(chequeraId), HttpStatus.OK);
         } catch (ChequeraFacturacionElectronicaException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
@@ -27,18 +30,18 @@ public class ChequeraFacturacionElectronicaController {
 
     @PostMapping("/")
     public ResponseEntity<ChequeraFacturacionElectronica> add(@RequestBody ChequeraFacturacionElectronica chequeraFacturacionElectronica) {
-        return new ResponseEntity<ChequeraFacturacionElectronica>(service.add(chequeraFacturacionElectronica), HttpStatus.OK);
+        return new ResponseEntity<>(service.add(chequeraFacturacionElectronica), HttpStatus.OK);
     }
 
     @PutMapping("/{chequeraFacturacionElectronicaId}")
     public ResponseEntity<ChequeraFacturacionElectronica> update(@RequestBody ChequeraFacturacionElectronica chequeraFacturacionElectronica, @PathVariable Long chequeraFacturacionElectronicaId) {
-        return new ResponseEntity<ChequeraFacturacionElectronica>(service.update(chequeraFacturacionElectronica, chequeraFacturacionElectronicaId), HttpStatus.OK);
+        return new ResponseEntity<>(service.update(chequeraFacturacionElectronica, chequeraFacturacionElectronicaId), HttpStatus.OK);
     }
 
     @DeleteMapping("/{chequeraFacturacionElectronicaId}")
     public ResponseEntity<Void> deleteByChequeraFacturacionElectronicaId(@PathVariable Long chequeraFacturacionElectronicaId) {
         service.deleteByChequeraFacturacionElectronicaId(chequeraFacturacionElectronicaId);
-        return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
      
 }

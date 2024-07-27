@@ -93,6 +93,14 @@ data class ChequeraCuota(
     var tramoId: Int = 0,
 
     @OneToOne(optional = true)
+    @JoinColumn(name = "chc_fac_id", insertable = false, updatable = false)
+    var facultad: Facultad? = null,
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "chc_tch_id", insertable = false, updatable = false)
+    var tipoChequera: TipoChequera? = null,
+
+    @OneToOne(optional = true)
     @JoinColumn(name = "chc_pro_id", insertable = false, updatable = false)
     var producto: Producto? = null,
 

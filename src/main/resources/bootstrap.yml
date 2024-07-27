@@ -31,7 +31,6 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
-    open-in-view: ${app.open-in-view}
     hibernate:
       ddl-auto: none
   mail:
