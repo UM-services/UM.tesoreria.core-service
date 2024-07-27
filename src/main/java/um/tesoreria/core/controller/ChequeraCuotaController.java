@@ -28,11 +28,10 @@ import um.tesoreria.core.service.ChequeraCuotaService;
  *
  */
 @RestController
-@RequestMapping("/chequeraCuota")
+@RequestMapping({"/chequeraCuota", "/api/tesoreria/core/chequeraCuota"})
 public class ChequeraCuotaController {
 
     public final ChequeraCuotaService service;
-
     private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
 
     @Autowired

@@ -30,8 +30,11 @@ import um.tesoreria.core.service.EjercicioService;
 @RequestMapping("/ejercicio")
 public class EjercicioController {
 	
-	@Autowired
-	private EjercicioService service;
+	private final EjercicioService service;
+
+	public EjercicioController(EjercicioService service) {
+		this.service = service;
+	}
 	
 	@GetMapping("/")
 	public ResponseEntity<List<Ejercicio>> findAll() {

@@ -32,11 +32,10 @@ import um.tesoreria.core.service.ChequeraSerieService;
  *
  */
 @RestController
-@RequestMapping("/chequeraserie")
+@RequestMapping({"/chequeraserie", "/api/tesoreria/core/chequeraSerie"})
 public class ChequeraSerieController {
 
     private final ChequeraSerieService service;
-
     private final ChequeraCuotaService chequeraCuotaService;
 
     @Autowired
@@ -161,4 +160,5 @@ public class ChequeraSerieController {
                                                 @PathVariable Long chequeraId) {
         return new ResponseEntity<>(service.update(chequeraserie, chequeraId), HttpStatus.OK);
     }
+
 }
