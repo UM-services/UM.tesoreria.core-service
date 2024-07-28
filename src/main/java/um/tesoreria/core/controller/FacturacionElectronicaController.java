@@ -1,5 +1,7 @@
 package um.tesoreria.core.controller;
 
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.exception.FacturacionElectronicaException;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.kotlin.model.FacturacionElectronica;
 import um.tesoreria.core.service.ChequeraCuotaService;
@@ -35,12 +37,20 @@ public class FacturacionElectronicaController {
 
     @GetMapping("/{facturacionElectronicaId}")
     public ResponseEntity<FacturacionElectronica> findByFacturacionElectronicaId(@PathVariable Long facturacionElectronicaId) {
-        return new ResponseEntity<>(service.findByFacturacionElectronicaId(facturacionElectronicaId), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(service.findByFacturacionElectronicaId(facturacionElectronicaId), HttpStatus.OK);
+        } catch (FacturacionElectronicaException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     @GetMapping("/pago/{chequeraPagoId}")
     public ResponseEntity<FacturacionElectronica> findByChequeraPagoId(@PathVariable Long chequeraPagoId) {
-        return new ResponseEntity<>(service.findByChequeraPagoId(chequeraPagoId), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(service.findByChequeraPagoId(chequeraPagoId), HttpStatus.OK);
+        } catch (FacturacionElectronicaException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     @GetMapping("/periodo")
