@@ -23,11 +23,14 @@ import um.tesoreria.core.service.ComprobanteService;
  *
  */
 @RestController
-@RequestMapping("/comprobante")
+@RequestMapping({"/comprobante", "/api/tesoreria/core/comprobante"})
 public class ComprobanteController {
 
-	@Autowired
-	private ComprobanteService service;
+	private final ComprobanteService service;
+
+	public ComprobanteController(ComprobanteService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/")
 	public ResponseEntity<List<Comprobante>> findAll() {

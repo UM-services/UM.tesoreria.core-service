@@ -1,5 +1,8 @@
 package um.tesoreria.core.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import um.tesoreria.core.exception.FacturacionElectronicaException;
 import um.tesoreria.core.kotlin.model.FacturacionElectronica;
@@ -10,6 +13,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 public class FacturacionElectronicaService {
 
     private final IFacturacionElectronicaRepository repository;
@@ -23,11 +27,21 @@ public class FacturacionElectronicaService {
     }
 
     public List<FacturacionElectronica> findAllByChequeraPagoIds(List<Long> chequeraPagoIds) {
-        return repository.findAllByChequeraPagoIdIn(chequeraPagoIds);
+        var facturacionElectronicas = repository.findAllByChequeraPagoIdIn(chequeraPagoIds);
+        try {
+            log.debug("FacturacionElectronicas: {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(facturacionElectronicas));
+        } catch (JsonProcessingException e) {
+            log.debug("FacturacionElectronicas: {}", e.getMessage());
+        }
+        return facturacionElectronicas;
     }
 
     public FacturacionElectronica findByFacturacionElectronicaId(Long facturacionElectronicaId) {
-        return repository.findByFacturacionElectronicaId(facturacionElectronicaId).orElseThrow(() -> new FacturacionElectronicaException(facturacionElectronicaId));
+        return repository.findByFacturacionElectronicaId(facturacionElectronicaId).orElseThrow(() -> new FacturacionElectronicaException("facturacionElectronicaId", facturacionElectronicaId));
+    }
+
+    public FacturacionElectronica findByChequeraPagoId(Long chequeraPagoId) {
+        return repository.findByChequeraPagoId(chequeraPagoId).orElseThrow(() -> new FacturacionElectronicaException("chequeraPagoId", chequeraPagoId));
     }
 
     public FacturacionElectronica findNextPendiente() {
@@ -60,7 +74,7 @@ public class FacturacionElectronicaService {
                     .retries(newFacturacionElectronica.getRetries())
                     .build();
             return repository.save(facturacionElectronica);
-        }).orElseThrow(() ->new FacturacionElectronicaException(facturacionElectronicaId));
+        }).orElseThrow(() ->new FacturacionElectronicaException("facturacionElectronicaId", facturacionElectronicaId));
     }
 
 }
