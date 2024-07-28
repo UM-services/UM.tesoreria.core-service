@@ -27,11 +27,10 @@ import java.util.List;
  * @author daniel
  */
 @RestController
-@RequestMapping("/chequerapago")
+@RequestMapping({"/chequerapago", "/api/tesoreria/core/chequeraPago"})
 public class ChequeraPagoController {
 
     private final ChequeraPagoService service;
-
     private final ChequeraCuotaService chequeraCuotaService;
 
     @Autowired

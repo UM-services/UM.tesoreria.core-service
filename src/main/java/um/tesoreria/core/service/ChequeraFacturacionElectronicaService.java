@@ -1,5 +1,8 @@
 package um.tesoreria.core.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.ChequeraFacturacionElectronicaException;
 import um.tesoreria.core.kotlin.model.ChequeraFacturacionElectronica;
 import um.tesoreria.core.repository.IChequeraFacturacionElectronicaRepository;
@@ -8,13 +11,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class ChequeraFacturacionElectronicaService {
 
-    @Autowired
-    private IChequeraFacturacionElectronicaRepository repository;
+    private final IChequeraFacturacionElectronicaRepository repository;
+
+    public ChequeraFacturacionElectronicaService(IChequeraFacturacionElectronicaRepository repository) {
+        this.repository = repository;
+    }
 
     public ChequeraFacturacionElectronica findByChequeraId(Long chequeraId) {
-        return repository.findByChequeraId(chequeraId).orElseThrow(() -> new ChequeraFacturacionElectronicaException(chequeraId, true));
+        var chequeraFacturacionElectronica = repository.findByChequeraId(chequeraId).orElseThrow(() -> new ChequeraFacturacionElectronicaException(chequeraId, true));
+        try {
+            log.debug("ChequeraFacturacionElectronica -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequeraFacturacionElectronica));
+        } catch (JsonProcessingException e) {
+            log.debug("ChequeraFacturacionElectronica -> {}", e.getMessage());
+        }
+        return chequeraFacturacionElectronica;
     }
 
     public ChequeraFacturacionElectronica add(ChequeraFacturacionElectronica chequeraFacturacionElectronica) {

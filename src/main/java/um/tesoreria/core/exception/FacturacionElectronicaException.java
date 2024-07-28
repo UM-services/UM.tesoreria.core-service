@@ -8,8 +8,8 @@ public class FacturacionElectronicaException extends RuntimeException {
         super("Cannot find FacturacionElectronica");
     }
 
-    public FacturacionElectronicaException(Long facturacionElectronicaId) {
-        super(MessageFormat.format("Cannot find FacturacionElectronica {0}", facturacionElectronicaId));
+    public FacturacionElectronicaException(String key, Long id) {
+        super(MessageFormat.format("Cannot find {0} -> {1}", key, id));
     }
 
 }

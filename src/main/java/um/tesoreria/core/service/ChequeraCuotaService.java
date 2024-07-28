@@ -44,22 +44,14 @@ import um.tesoreria.core.util.Tool;
 public class ChequeraCuotaService {
 
     private final IChequeraCuotaRepository repository;
-
     private final ChequeraSerieService chequeraSerieService;
-
     private final ChequeraPagoService chequeraPagoService;
-
     private final ChequeraTotalService chequeraTotalService;
-
     private final FacultadService facultadService;
-
     private final TipoChequeraService tipoChequeraService;
-
     private final LectivoService lectivoService;
-
     private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
 
-    @Autowired
     public ChequeraCuotaService(IChequeraCuotaRepository repository, ChequeraSerieService chequeraSerieService, ChequeraPagoService chequeraPagoService,
                                 ChequeraTotalService chequeraTotalService, FacultadService facultadService, TipoChequeraService tipoChequeraService,
                                 LectivoService lectivoService, ChequeraCuotaDeudaService chequeraCuotaDeudaService) {
@@ -76,95 +68,108 @@ public class ChequeraCuotaService {
     @Transactional
     public List<ChequeraCuota> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
-        repository.saveAll(repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId).stream().map(cuota -> {
+
+        // Encuentra todas las cuotas por facultad, tipo de chequera y serie de chequera
+        List<ChequeraCuota> cuotas = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
+
+        // Actualiza chequeraId y chequeraSerie en las cuotas
+        cuotas.forEach(cuota -> {
             cuota.setChequeraId(chequeraSerie.getChequeraId());
-            return cuota;
-        }).toList());
-        return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId).stream().map(cuota -> {
             cuota.setChequeraSerie(chequeraSerie);
-            return cuota;
-        }).toList();
+        });
+
+        // Guarda todas las cuotas actualizadas
+        repository.saveAll(cuotas);
+
+        return cuotas;
     }
 
     @Transactional
     public List<ChequeraCuota> findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(
             Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
+
         ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
-        repository.saveAll(repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId).stream().map(cuota -> {
-            cuota.setChequeraId(chequeraSerie.getChequeraId());
-            return cuota;
-        }).toList());
-        return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId,
-                tipoChequeraId, chequeraSerieId, alternativaId, Sort.by("vencimiento1").ascending()
-                        .and(Sort.by("productoId").ascending().and(Sort.by("cuotaId").ascending()))).stream().map(cuota -> {
-            cuota.setChequeraSerie(chequeraSerie);
-            return cuota;
-        }).toList();
+
+        // Encuentra todas las cuotas por facultad, tipo de chequera y serie de chequera
+        List<ChequeraCuota> todasCuotas = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
+
+        // Actualiza chequeraId en todas las cuotas
+        todasCuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
+
+        // Guarda todas las cuotas actualizadas
+        repository.saveAll(todasCuotas);
+
+        // Encuentra todas las cuotas filtradas por facultad, tipo de chequera, serie de chequera y alternativa, con ordenación
+        List<ChequeraCuota> cuotasFiltradas = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(
+                facultadId, tipoChequeraId, chequeraSerieId, alternativaId, Sort.by("vencimiento1").ascending()
+                        .and(Sort.by("productoId").ascending().and(Sort.by("cuotaId").ascending())));
+
+        // Actualiza chequeraSerie en las cuotas filtradas
+        cuotasFiltradas.forEach(cuota -> cuota.setChequeraSerie(chequeraSerie));
+
+        return cuotasFiltradas;
     }
 
     public List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdConImporte(
             Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
+
         ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
-        repository.saveAll(repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId).stream().map(cuota -> {
-            cuota.setChequeraId(chequeraSerie.getChequeraId());
-            return cuota;
-        }).toList());
-        return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndImporte1GreaterThan(
-                facultadId, tipoChequeraId, chequeraSerieId, alternativaId, BigDecimal.ZERO, Sort.by("vencimiento1")
-                        .ascending().and(Sort.by("productoId").ascending().and(Sort.by("cuotaId").ascending()))).stream().map(cuota -> {
-            cuota.setChequeraSerie(chequeraSerie);
-            return cuota;
-        }).toList();
+
+        // Encuentra todas las cuotas por facultad, tipo de chequera y serie de chequera
+        List<ChequeraCuota> todasCuotas = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
+
+        // Actualiza chequeraId en todas las cuotas
+        todasCuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
+
+        // Guarda todas las cuotas actualizadas
+        repository.saveAll(todasCuotas);
+
+        // Encuentra todas las cuotas filtradas por facultad, tipo de chequera, serie de chequera, alternativa y con importe > 0, con ordenación
+        List<ChequeraCuota> cuotasFiltradas = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndImporte1GreaterThan(
+                facultadId, tipoChequeraId, chequeraSerieId, alternativaId, BigDecimal.ZERO,
+                Sort.by("vencimiento1").ascending().and(Sort.by("productoId").ascending().and(Sort.by("cuotaId").ascending())));
+
+        // Actualiza chequeraSerie en las cuotas filtradas
+        cuotasFiltradas.forEach(cuota -> cuota.setChequeraSerie(chequeraSerie));
+
+        return cuotasFiltradas;
     }
 
-    public List<ChequeraCuota> findAllDebidas(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-                                              Integer alternativaId) {
+    public List<ChequeraCuota> findAllDebidas(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
         ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
-        repository.saveAll(repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId).stream().map(cuota -> {
-            cuota.setChequeraId(chequeraSerie.getChequeraId());
-            return cuota;
-        }).toList());
-        return repository
-                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndPagadoAndVencimiento1LessThanEqualAndImporte1GreaterThan(
-                        facultadId, tipoChequeraId, chequeraSerieId, alternativaId, (byte) 0, (byte) 0,
-                        OffsetDateTime.now(), BigDecimal.ZERO).stream().map(cuota -> {
-                    cuota.setChequeraSerie(chequeraSerie);
-                    return cuota;
-                }).toList();
+
+        // Encuentra todas las cuotas por facultad, tipo de chequera y serie de chequera
+        List<ChequeraCuota> todasCuotas = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
+
+        // Actualiza chequeraId en todas las cuotas
+        todasCuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
+
+        // Guarda todas las cuotas actualizadas
+        repository.saveAll(todasCuotas);
+
+        // Encuentra todas las cuotas filtradas con los criterios especificados
+        List<ChequeraCuota> cuotasFiltradas = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndPagadoAndVencimiento1LessThanEqualAndImporte1GreaterThan(
+                facultadId, tipoChequeraId, chequeraSerieId, alternativaId, (byte) 0, (byte) 0, OffsetDateTime.now(), BigDecimal.ZERO);
+
+        // Actualiza chequeraSerie en las cuotas filtradas
+        cuotasFiltradas.forEach(cuota -> cuota.setChequeraSerie(chequeraSerie));
+
+        return cuotasFiltradas;
     }
 
     public List<ChequeraCuota> findAllInconsistencias(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced) {
-        List<ChequeraCuota> chequeraCuotas = new ArrayList<>();
-        for (ChequeraCuota chequeraCuota : chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null, this).stream().map(ChequeraCuotaDeuda::getChequeraCuota).toList()) {
-            if (chequeraCuota.getVencimiento1().isAfter(chequeraCuota.getVencimiento2())) {
-                chequeraCuotas.add(chequeraCuota);
-                continue;
-            }
-            if (chequeraCuota.getVencimiento2().isAfter(chequeraCuota.getVencimiento3())) {
-                chequeraCuotas.add(chequeraCuota);
-                continue;
-            }
-            if (chequeraCuota.getImporte1().compareTo(chequeraCuota.getImporte2()) > 0) {
-                chequeraCuotas.add(chequeraCuota);
-                continue;
-            }
-            if (chequeraCuota.getImporte2().compareTo(chequeraCuota.getImporte3()) > 0) {
-                chequeraCuotas.add(chequeraCuota);
-                continue;
-            }
-            if (chequeraCuota.getImporte1Original().multiply((new BigDecimal(49))).compareTo(chequeraCuota.getImporte1()) < 0) {
-                chequeraCuotas.add(chequeraCuota);
-                continue;
-            }
-            if (chequeraCuota.getImporte2Original().multiply((new BigDecimal(49))).compareTo(chequeraCuota.getImporte2()) < 0) {
-                chequeraCuotas.add(chequeraCuota);
-                continue;
-            }
-            if (chequeraCuota.getImporte3Original().multiply((new BigDecimal(49))).compareTo(chequeraCuota.getImporte3()) < 0) {
-                chequeraCuotas.add(chequeraCuota);
-            }
-        }
-        return chequeraCuotas;
+        return chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null, this).stream()
+                .map(ChequeraCuotaDeuda::getChequeraCuota)
+                .filter(chequeraCuota ->
+                                chequeraCuota.getVencimiento1().isAfter(chequeraCuota.getVencimiento2()) ||
+                                chequeraCuota.getVencimiento2().isAfter(chequeraCuota.getVencimiento3()) ||
+                                chequeraCuota.getImporte1().compareTo(chequeraCuota.getImporte2()) > 0 ||
+                                chequeraCuota.getImporte2().compareTo(chequeraCuota.getImporte3()) > 0 ||
+                                chequeraCuota.getImporte1Original().multiply(new BigDecimal(49)).compareTo(chequeraCuota.getImporte1()) < 0 ||
+                                chequeraCuota.getImporte2Original().multiply(new BigDecimal(49)).compareTo(chequeraCuota.getImporte2()) < 0 ||
+                                chequeraCuota.getImporte3Original().multiply(new BigDecimal(49)).compareTo(chequeraCuota.getImporte3()) < 0
+                )
+                .collect(Collectors.toList());
     }
 
     public ChequeraCuota findByChequeraCuotaId(Long chequeraCuotaId) {
@@ -215,14 +220,19 @@ public class ChequeraCuotaService {
     }
 
     public List<ChequeraCuota> updateBarras(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
-        var chequeraCuotas = this.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
-        for (var chequeraCuota : chequeraCuotas) {
-            if (chequeraCuota.getBaja() == 0 && chequeraCuota.getPagado() == 0 && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) > 0) {
-                chequeraCuota.setCodigoBarras(this.calculateCodigoBarras(chequeraCuota));
-            }
-        }
-        chequeraCuotas = this.saveAll(chequeraCuotas);
-        return chequeraCuotas;
+        // Obtén todas las ChequeraCuota por facultad, tipo de chequera y serie de chequera
+        List<ChequeraCuota> chequeraCuotas = this.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
+
+        // Filtra y actualiza las ChequeraCuota que cumplan con las condiciones
+        List<ChequeraCuota> actualizadas = chequeraCuotas.stream()
+                .filter(chequeraCuota -> chequeraCuota.getBaja() == 0 &&
+                        chequeraCuota.getPagado() == 0 &&
+                        chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) > 0)
+                .peek(chequeraCuota -> chequeraCuota.setCodigoBarras(this.calculateCodigoBarras(chequeraCuota)))
+                .collect(Collectors.toList());
+
+        // Guarda las ChequeraCuota actualizadas
+        return this.saveAll(actualizadas);
     }
 
     @Transactional

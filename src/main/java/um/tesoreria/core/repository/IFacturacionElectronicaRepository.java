@@ -18,5 +18,8 @@ public interface IFacturacionElectronicaRepository extends JpaRepository<Factura
 
     Optional<FacturacionElectronica> findByFacturacionElectronicaId(Long facturacionElectronicaId);
 
+    Optional<FacturacionElectronica> findByChequeraPagoId(Long chequeraPagoId);
+
     Optional<FacturacionElectronica> findTopByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaId(Byte enviada, Integer retries);
+
 }

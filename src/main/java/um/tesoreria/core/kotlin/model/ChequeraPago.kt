@@ -83,7 +83,7 @@ data class ChequeraPago(
     var producto: Producto? = null,
 
     @OneToOne(optional = true)
-    @JoinColumn(name = "chequeraCuotaId", insertable = false, updatable = false)
+    @JoinColumn(name = "chequeraCuotaId", referencedColumnName = "chc_id", insertable = false, updatable = false)
     var chequeraCuota: ChequeraCuota? = null
 
 ) : Auditable() {
