@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,14 +30,23 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CuentaMovimientoService {
 
-    @Resource
-    private ICuentaMovimientoRepository repository;
+    private final ICuentaMovimientoRepository repository;
+    private final EntregaService entregaService;
+    private final CuentaMovimientoAsientoService cuentaMovimientoAsientoService;
 
-    @Resource
-    private EntregaService entregaService;
+    public CuentaMovimientoService(ICuentaMovimientoRepository repository, EntregaService entregaService, CuentaMovimientoAsientoService cuentaMovimientoAsientoService) {
+        this.repository = repository;
+        this.entregaService = entregaService;
+        this.cuentaMovimientoAsientoService = cuentaMovimientoAsientoService;
+    }
 
-    @Resource
-    private CuentaMovimientoAsientoService cuentaMovimientoAsientoService;
+    public List<CuentaMovimiento> findAllByNumeroCuenta(BigDecimal numeroCuenta, Boolean onlyOne) {
+        if (onlyOne) {
+            var cuenta = repository.findTopByNumeroCuenta(numeroCuenta);
+            return cuenta.map(Collections::singletonList).orElse(Collections.emptyList());
+        }
+        return repository.findAllByNumeroCuenta(numeroCuenta);
+    }
 
     public List<CuentaMovimiento> findAllByAsiento(OffsetDateTime fechaContable, Integer ordenContable, Integer itemDesde, Integer debita) {
         if (debita < 2) {
@@ -68,7 +78,7 @@ public class CuentaMovimientoService {
     }
 
     public CuentaMovimiento findLastByFecha(OffsetDateTime fechaContable) {
-        return repository.findTopByFechaContableOrderByOrdenContableDesc(fechaContable).orElseGet(() -> new CuentaMovimiento());
+        return repository.findTopByFechaContableOrderByOrdenContableDesc(fechaContable).orElseGet(CuentaMovimiento::new);
     }
 
     public CuentaMovimiento findByCuentaMovimientoId(Long cuentaMovimientoId) {

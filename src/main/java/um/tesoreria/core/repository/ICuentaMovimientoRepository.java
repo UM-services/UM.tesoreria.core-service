@@ -19,23 +19,27 @@ import um.tesoreria.core.kotlin.model.CuentaMovimiento;
  */
 public interface ICuentaMovimientoRepository extends JpaRepository<CuentaMovimiento, Long> {
 
-	public List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta,
+	List<CuentaMovimiento> findAllByNumeroCuenta(BigDecimal numeroCuenta);
+
+	List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta,
 																						  OffsetDateTime desde, OffsetDateTime hasta, Byte apertura, Sort sort);
 
-	public List<CuentaMovimiento> findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(
+	List<CuentaMovimiento> findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(
 			OffsetDateTime fechaContable, Integer ordenContable, Integer item, Sort sort);
 
-	public List<CuentaMovimiento> findAllByFechaContableAndOrdenContableAndDebitaAndItemGreaterThanEqual(
+	List<CuentaMovimiento> findAllByFechaContableAndOrdenContableAndDebitaAndItemGreaterThanEqual(
 			OffsetDateTime fechaContable, Integer ordenContable, Byte debita, Integer item, Sort sort);
 
-	public Optional<CuentaMovimiento> findTopByFechaContableOrderByOrdenContableDesc(OffsetDateTime fechaContable);
+	Optional<CuentaMovimiento> findTopByNumeroCuenta(BigDecimal numeroCuenta);
 
-	public Optional<CuentaMovimiento> findByCuentaMovimientoId(Long cuentaMovimientoId);
+	Optional<CuentaMovimiento> findTopByFechaContableOrderByOrdenContableDesc(OffsetDateTime fechaContable);
+
+	Optional<CuentaMovimiento> findByCuentaMovimientoId(Long cuentaMovimientoId);
 
 	@Modifying
-	public void deleteAllByFechaContableAndOrdenContable(OffsetDateTime fechaContable, Integer ordenContable);
+	void deleteAllByFechaContableAndOrdenContable(OffsetDateTime fechaContable, Integer ordenContable);
 
 	@Modifying
-	public void deleteByCuentaMovimientoId(Long cuentaMovimientoId);
+	void deleteByCuentaMovimientoId(Long cuentaMovimientoId);
 
 }

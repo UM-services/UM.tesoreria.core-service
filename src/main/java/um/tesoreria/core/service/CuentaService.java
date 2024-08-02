@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +64,14 @@ public class CuentaService {
 	}
 
 	public Cuenta findByNumeroCuenta(BigDecimal numeroCuenta) {
-		return repository.findByNumeroCuenta(numeroCuenta).orElseThrow(() -> new CuentaException(numeroCuenta));
+		var cuenta = repository.findByNumeroCuenta(numeroCuenta).orElseThrow(() -> new CuentaException(numeroCuenta));
+        try {
+            log.debug("Cuenta -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(cuenta));
+        } catch (JsonProcessingException e) {
+            log.debug("Cuenta -> error {}", e.getMessage());
+        }
+        return cuenta;
 	}
 
 	public Cuenta findByCuentaContableId(Long cuentaContableId) {

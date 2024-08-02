@@ -89,7 +89,6 @@ public class MailChequeraService {
 
     private final BuildService buildService;
 
-    @Autowired
     public MailChequeraService(JavaMailSender javaMailSender, ChequeraSerieService chequeraSerieService, DomicilioService domicilioService, FacultadService facultadService, PersonaService personaService,
                                ChequeraCuotaService chequeraCuotaService, LectivoService lectivoService, CarreraChequeraService carreraChequeraService, CursoService cursoService, ChequeraSerieControlService chequeraSerieControlService,
                                LegajoService legajoService, SpoterDataService spoterDataService, LectivoTotalService lectivoTotalService, ChequeraTotalService chequeraTotalService, LectivoAlternativaService lectivoAlternativaService,

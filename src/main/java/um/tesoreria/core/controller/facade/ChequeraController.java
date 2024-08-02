@@ -45,15 +45,11 @@ import um.tesoreria.core.kotlin.model.SpoterData;
 public class ChequeraController {
 
     private final ChequeraService service;
-
     private final MailChequeraService mailChequeraService;
-
     private final FormulariosToPdfService formularioToPdfService;
-
     private final SpoterDataService spoterDataService;
     private final ChequeraCuotaService chequeraCuotaService;
 
-    @Autowired
     public ChequeraController(ChequeraService service, MailChequeraService mailChequeraService, FormulariosToPdfService formularioToPdfService, SpoterDataService spoterDataService, ChequeraCuotaService chequeraCuotaService) {
         this.service = service;
         this.mailChequeraService = mailChequeraService;
