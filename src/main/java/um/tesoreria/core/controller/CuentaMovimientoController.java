@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.controller;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -30,11 +31,19 @@ import um.tesoreria.core.service.CuentaMovimientoService;
  *
  */
 @RestController
-@RequestMapping("/cuentaMovimiento")
+@RequestMapping({"/cuentaMovimiento", "/api/tesoreria/core/cuentaMovimiento"})
 public class CuentaMovimientoController {
 
-	@Autowired
-	private CuentaMovimientoService service;
+	private final CuentaMovimientoService service;
+
+	public CuentaMovimientoController(CuentaMovimientoService service) {
+		this.service = service;
+	}
+
+	@GetMapping("/cuenta/{numeroCuenta}/{onlyOne}")
+	public ResponseEntity<List<CuentaMovimiento>> findAllByNumeroCuenta(@PathVariable BigDecimal numeroCuenta, @PathVariable Boolean onlyOne) {
+		return new ResponseEntity<>(service.findAllByNumeroCuenta(numeroCuenta, onlyOne), HttpStatus.OK);
+	}
 
 	@GetMapping("/asiento/{fechaContable}/{ordenContable}")
 	public ResponseEntity<List<CuentaMovimiento>> findAllByAsiento(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaContable, @PathVariable Integer ordenContable) {

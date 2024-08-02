@@ -29,11 +29,14 @@ import um.tesoreria.core.service.CuentaService;
  *
  */
 @RestController
-@RequestMapping("/cuenta")
+@RequestMapping({"/cuenta", "/api/tesoreria/core/cuenta"})
 public class CuentaController {
 
-	@Autowired
-	private CuentaService service;
+	private final CuentaService service;
+
+	public CuentaController(CuentaService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/")
 	public ResponseEntity<List<Cuenta>> findAll() {
