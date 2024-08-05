@@ -37,7 +37,13 @@ public class FacturacionElectronicaService {
     }
 
     public FacturacionElectronica findByFacturacionElectronicaId(Long facturacionElectronicaId) {
-        return repository.findByFacturacionElectronicaId(facturacionElectronicaId).orElseThrow(() -> new FacturacionElectronicaException("facturacionElectronicaId", facturacionElectronicaId));
+        var facturacionElectronica = repository.findByFacturacionElectronicaId(facturacionElectronicaId).orElseThrow(() -> new FacturacionElectronicaException("facturacionElectronicaId", facturacionElectronicaId));
+        try {
+            log.debug("FacturacionElectronica: {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(facturacionElectronica));
+        } catch (JsonProcessingException e) {
+            log.debug("FacturacionElectronica: {}", e.getMessage());
+        }
+        return facturacionElectronica;
     }
 
     public FacturacionElectronica findByChequeraPagoId(Long chequeraPagoId) {
