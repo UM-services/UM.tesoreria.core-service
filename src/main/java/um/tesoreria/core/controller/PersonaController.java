@@ -29,7 +29,7 @@ import um.tesoreria.core.service.PersonaService;
  *
  */
 @RestController
-@RequestMapping("/persona")
+@RequestMapping({"/persona", "/api/tesoreria/core/persona"})
 public class PersonaController {
 
 	private final PersonaService service;

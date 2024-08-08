@@ -34,7 +34,6 @@ public class ChequeraCuotaController {
     public final ChequeraCuotaService service;
     private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
 
-    @Autowired
     public ChequeraCuotaController(ChequeraCuotaService service, ChequeraCuotaDeudaService chequeraCuotaDeudaService) {
         this.service = service;
         this.chequeraCuotaDeudaService = chequeraCuotaDeudaService;
@@ -45,7 +44,7 @@ public class ChequeraCuotaController {
                                                                  @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId,
                                                                  @PathVariable Integer alternativaId) {
         return new ResponseEntity<>(
-                service.findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(facultadId,
+                service.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId,
                         tipoChequeraId, chequeraSerieId, alternativaId),
                 HttpStatus.OK);
     }
@@ -101,6 +100,13 @@ public class ChequeraCuotaController {
     public ResponseEntity<DeudaChequera> calculateDeuda(@PathVariable Integer facultadId,
                                                         @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
         return new ResponseEntity<>(service.calculateDeuda(facultadId, tipoChequeraId, chequeraSerieId),
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/updateBarras/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
+    public ResponseEntity<List<ChequeraCuota>> updateBarras(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
+                                             @PathVariable Long chequeraSerieId) {
+        return new ResponseEntity<>(service.updateBarras(facultadId, tipoChequeraId, chequeraSerieId),
                 HttpStatus.OK);
     }
 

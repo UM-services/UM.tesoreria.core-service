@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import um.tesoreria.core.model.Legajo;
+import um.tesoreria.core.kotlin.model.Legajo;
 
 /**
  * @author daniel
@@ -16,7 +16,7 @@ import um.tesoreria.core.model.Legajo;
  */
 public interface ILegajoRepository extends JpaRepository<Legajo, Long> {
 
-	public Optional<Legajo> findByFacultadIdAndPersonaIdAndDocumentoId(Integer facultadId, BigDecimal personaId,
+	Optional<Legajo> findByFacultadIdAndPersonaIdAndDocumentoId(Integer facultadId, BigDecimal personaId,
 			Integer documentoId);
 
 }

@@ -85,7 +85,7 @@ public class ChequeraCuotaService {
     }
 
     @Transactional
-    public List<ChequeraCuota> findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(
+    public List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(
             Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
 
         ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);

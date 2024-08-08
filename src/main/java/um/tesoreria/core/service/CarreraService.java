@@ -19,8 +19,11 @@ import um.tesoreria.core.repository.ICarreraRepository;
 @Service
 public class CarreraService {
 
-	@Autowired
-	private ICarreraRepository repository;
+	private final ICarreraRepository repository;
+
+	public CarreraService(ICarreraRepository repository) {
+		this.repository = repository;
+	}
 
 	public List<Carrera> findAll() {
 		return repository.findAll();
@@ -36,13 +39,11 @@ public class CarreraService {
 	}
 
 	public Carrera add(Carrera carrera) {
-		repository.save(carrera);
-		return carrera;
+		return repository.save(carrera);
 	}
 
 	public List<Carrera> saveAll(List<Carrera> carreras) {
-		carreras = repository.saveAll(carreras);
-		return carreras;
+		return repository.saveAll(carreras);
 	}
 
 }

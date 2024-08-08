@@ -38,7 +38,6 @@ public class ChequeraSerieController {
     private final ChequeraSerieService service;
     private final ChequeraCuotaService chequeraCuotaService;
 
-    @Autowired
     public ChequeraSerieController(ChequeraSerieService service, ChequeraCuotaService chequeraCuotaService) {
         this.service = service;
         this.chequeraCuotaService = chequeraCuotaService;
@@ -134,10 +133,10 @@ public class ChequeraSerieController {
         return new ResponseEntity<>(service.findByChequeraIdExtended(chequeraId, chequeraCuotaService), HttpStatus.OK);
     }
 
-    @GetMapping("/unique/{facultadId}/{tipochequeraId}/{chequeraserieId}")
+    @GetMapping("/unique/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<ChequeraSerie> findByUnique(@PathVariable Integer facultadId,
-                                                      @PathVariable Integer tipochequeraId, @PathVariable Long chequeraserieId) {
-        return new ResponseEntity<>(service.findByUnique(facultadId, tipochequeraId, chequeraserieId),
+                                                      @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
+        return new ResponseEntity<>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId),
                 HttpStatus.OK);
     }
 

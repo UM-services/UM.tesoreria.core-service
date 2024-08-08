@@ -182,7 +182,7 @@ public class ChequeraService {
                 .stream().collect(Collectors.toMap(Debito::cuotaKey, debito -> debito));
         List<Debito> newDebitos = new ArrayList<>();
         for (ChequeraCuota cuota : chequeraCuotaService
-                .findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(facultadId, tipoChequeraId,
+                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId, tipoChequeraId,
                         chequeraSerieId, serie.getAlternativaId())) {
             if (!debitos.containsKey(cuota.cuotaKey())) {
                 if (cuota.getImporte1().compareTo(BigDecimal.ZERO) > 0
@@ -216,7 +216,7 @@ public class ChequeraService {
                 .stream().collect(Collectors.toMap(ChequeraAlternativa::getProductoId, alternativa -> alternativa));
         List<ChequeraImpresionDetalle> detalles = new ArrayList<ChequeraImpresionDetalle>();
         for (ChequeraCuota cuota : chequeraCuotaService
-                .findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(serie.getFacultadId(),
+                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId())) {
             ChequeraTotal total = totales.get(cuota.getProductoId());
             ChequeraAlternativa alternativa = alternativas.get(cuota.getProductoId());

@@ -35,10 +35,8 @@ import um.tesoreria.core.kotlin.model.dto.ChequeraSerieDTO;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;
 import um.tesoreria.core.model.ChequeraSerieControl;
 import um.tesoreria.core.model.ChequeraTotal;
-import um.tesoreria.core.model.LectivoAlternativa;
 import um.tesoreria.core.model.LectivoCuota;
 import um.tesoreria.core.model.LectivoTotal;
-import um.tesoreria.core.model.Legajo;
 import um.tesoreria.core.model.MailSender;
 import um.tesoreria.core.service.*;
 import um.tesoreria.core.util.Tool;
@@ -50,43 +48,24 @@ import reactor.core.publisher.Mono;
 public class MailChequeraService {
 
     private final JavaMailSender javaMailSender;
-
     private final ChequeraSerieService chequeraSerieService;
-
     private final DomicilioService domicilioService;
-
     private final FacultadService facultadService;
-
     private final PersonaService personaService;
-
     private final ChequeraCuotaService chequeraCuotaService;
-
     private final LectivoService lectivoService;
-
     private final CarreraChequeraService carreraChequeraService;
-
     private final CursoService cursoService;
-
     private final ChequeraSerieControlService chequeraSerieControlService;
-
     private final LegajoService legajoService;
-
     private final SpoterDataService spoterDataService;
-
     private final LectivoTotalService lectivoTotalService;
-
     private final ChequeraTotalService chequeraTotalService;
-
     private final LectivoAlternativaService lectivoAlternativaService;
-
     private final ChequeraAlternativaService chequeraAlternativaService;
-
     private final LectivoCuotaService lectivoCuotaService;
-
     private final MailSenderService mailSenderService;
-
     private final ChequeraService chequeraService;
-
     private final BuildService buildService;
 
     public MailChequeraService(JavaMailSender javaMailSender, ChequeraSerieService chequeraSerieService, DomicilioService domicilioService, FacultadService facultadService, PersonaService personaService,

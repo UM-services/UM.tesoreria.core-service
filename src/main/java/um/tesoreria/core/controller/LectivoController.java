@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import um.tesoreria.core.kotlin.model.Lectivo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,31 +24,34 @@ import um.tesoreria.core.service.LectivoService;
  *
  */
 @RestController
-@RequestMapping("/lectivo")
+@RequestMapping({"/lectivo", "/api/tesoreria/core/lectivo"})
 public class LectivoController {
 
-	@Autowired
-	private LectivoService service;
+	private final LectivoService service;
+
+	public LectivoController(LectivoService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/")
 	public ResponseEntity<List<Lectivo>> findAll() {
-		return new ResponseEntity<List<Lectivo>>(service.findAll(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 
 	@GetMapping("/reverse")
 	public ResponseEntity<List<Lectivo>> findAllReverse() {
-		return new ResponseEntity<List<Lectivo>>(service.findAllReverse(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAllReverse(), HttpStatus.OK);
 	}
 
 	@GetMapping("/persona/{personaId}/{documentoId}")
 	public ResponseEntity<List<Lectivo>> findAllByPersona(@PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId) {
-		return new ResponseEntity<List<Lectivo>>(service.findAllByPersona(personaId, documentoId), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAllByPersona(personaId, documentoId), HttpStatus.OK);
 	}
 
 	@GetMapping("/{lectivoId}")
 	public ResponseEntity<Lectivo> findByLectivoId(@PathVariable Integer lectivoId) {
-		return new ResponseEntity<Lectivo>(service.findByLectivoId(lectivoId), HttpStatus.OK);
+		return new ResponseEntity<>(service.findByLectivoId(lectivoId), HttpStatus.OK);
 	}
 
 	@GetMapping("/last")
@@ -59,7 +61,7 @@ public class LectivoController {
 
 	@PostMapping("/")
 	public ResponseEntity<Lectivo> add(@RequestBody Lectivo lectivo) {
-		return new ResponseEntity<Lectivo>(service.add(lectivo), HttpStatus.OK);
+		return new ResponseEntity<>(service.add(lectivo), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{lectivoId}")
