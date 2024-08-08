@@ -36,7 +36,6 @@ import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.*;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.InfoLdap;
-import um.tesoreria.core.model.Legajo;
 import um.tesoreria.core.model.Matricula;
 import um.tesoreria.core.model.Plan;
 import um.tesoreria.core.model.UsuarioLdap;
@@ -62,56 +61,51 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SincronizeService {
 
-	@Autowired
-	private FacultadService facultadService;
+	private final FacultadService facultadService;
+	private final PersonaService personaService;
+	private final UsuarioLdapService usuarioLdapService;
+	private final ChequeraSerieService chequeraSerieService;
+	private final ChequeraClaseService chequeraClaseService;
+	private final InfoLdapService infoLdapService;
+	private final DomicilioService domicilioService;
+	private final CarreraService carreraService;
+	private final PlanService planService;
+	private final LegajoService legajoService;
+	private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
+	private final InscripcionDetalleFacultadConsumer inscripcionDetalleFacultadConsumer;
+	private final PersonaFacultadConsumer personaFacultadConsumer;
+	private final PreInscripcionFacultadConsumer preInscripcionFacultadConsumer;
+	private final LegajoFacultadConsumer legajoFacultadConsumer;
+	private final PlanFacultadConsumer planFacultadConsumer;
+	private final CarreraFacultadConsumer carreraFacultadConsumer;
 
-	@Autowired
-	private PersonaService personaService;
-
-	@Autowired
-	private UsuarioLdapService usuarioLdapService;
-
-	@Autowired
-	private ChequeraSerieService chequeraSerieService;
-
-	@Autowired
-	private ChequeraClaseService chequeraClaseService;
-
-	@Autowired
-	private InfoLdapService infoLdapService;
-
-	@Autowired
-	private DomicilioService domicilioService;
-
-	@Autowired
-	private CarreraService carreraService;
-
-	@Autowired
-	private PlanService planService;
-
-	@Autowired
-	private LegajoService legajoService;
-
-	@Autowired
-	private InscripcionFacultadConsumer inscripcionFacultadConsumer;
-
-	@Autowired
-	private InscripcionDetalleFacultadConsumer inscripcionDetalleFacultadConsumer;
-
-	@Autowired
-	private PersonaFacultadConsumer personaFacultadConsumer;
-
-	@Autowired
-	private PreInscripcionFacultadConsumer preInscripcionFacultadConsumer;
-
-	@Autowired
-	private LegajoFacultadConsumer legajoFacultadConsumer;
-
-	@Autowired
-	private PlanFacultadConsumer planFacultadConsumer;
-
-	@Autowired
-	private CarreraFacultadConsumer carreraFacultadConsumer;
+	public SincronizeService(FacultadService facultadService, PersonaService personaService,
+			UsuarioLdapService usuarioLdapService, ChequeraSerieService chequeraSerieService,
+			ChequeraClaseService chequeraClaseService, InfoLdapService infoLdapService,
+			DomicilioService domicilioService, CarreraService carreraService, PlanService planService,
+			LegajoService legajoService, InscripcionFacultadConsumer inscripcionFacultadConsumer,
+			InscripcionDetalleFacultadConsumer inscripcionDetalleFacultadConsumer,
+			PersonaFacultadConsumer personaFacultadConsumer, PreInscripcionFacultadConsumer preInscripcionFacultadConsumer,
+			LegajoFacultadConsumer legajoFacultadConsumer, PlanFacultadConsumer planFacultadConsumer,
+			CarreraFacultadConsumer carreraFacultadConsumer) {
+		this.facultadService = facultadService;
+		this.personaService = personaService;
+		this.usuarioLdapService = usuarioLdapService;
+		this.chequeraSerieService = chequeraSerieService;
+		this.chequeraClaseService = chequeraClaseService;
+		this.infoLdapService = infoLdapService;
+		this.domicilioService = domicilioService;
+		this.carreraService = carreraService;
+		this.planService = planService;
+		this.legajoService = legajoService;
+		this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;
+		this.inscripcionDetalleFacultadConsumer = inscripcionDetalleFacultadConsumer;
+		this.personaFacultadConsumer = personaFacultadConsumer;
+		this.preInscripcionFacultadConsumer = preInscripcionFacultadConsumer;
+		this.legajoFacultadConsumer = legajoFacultadConsumer;
+		this.planFacultadConsumer = planFacultadConsumer;
+		this.carreraFacultadConsumer = carreraFacultadConsumer;
+	}
 
 	@Transactional
 	public void sincronizeMatricula(Integer lectivoId, Integer facultadId, MatriculaService matriculaService) throws CloneNotSupportedException {

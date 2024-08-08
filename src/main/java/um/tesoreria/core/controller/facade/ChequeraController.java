@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 
 import jakarta.mail.MessagingException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -41,7 +40,7 @@ import um.tesoreria.core.kotlin.model.SpoterData;
  * @author daniel
  */
 @RestController
-@RequestMapping("/chequera")
+@RequestMapping({"/chequera", "/api/tesoreria/core/chequera"})
 public class ChequeraController {
 
     private final ChequeraService service;

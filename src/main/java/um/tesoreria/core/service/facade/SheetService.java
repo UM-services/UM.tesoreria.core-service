@@ -87,7 +87,6 @@ import um.tesoreria.core.service.ProveedorMovimientoService;
 import um.tesoreria.core.service.TipoChequeraService;
 import um.tesoreria.core.service.TipoPagoService;
 import um.tesoreria.core.service.view.*;
-import um.tesoreria.core.model.Legajo;
 import um.tesoreria.core.model.PersonaSuspendido;
 import um.tesoreria.core.model.Plan;
 import um.tesoreria.core.service.*;
@@ -100,88 +99,47 @@ import um.tesoreria.core.service.*;
 public class SheetService {
 
     private final FacultadService facultadService;
-
     private final TipoPagoService tipoPagoService;
-
     private final GeograficaService geograficaService;
-
     private final IngresoPeriodoService ingresoPeriodoService;
-
     private final ChequeraSerieService chequeraSerieService;
-
     private final PersonaKeyService personaKeyService;
-
     private final ArancelTipoService arancelTipoService;
-
     private final ChequeraCuotaService chequeraCuotaService;
-
     private final LegajoKeyService legajoKeyService;
-
     private final CarreraKeyService carreraKeyService;
-
     private final DomicilioKeyService domicilioKeyService;
-
     private final EjercicioService ejercicioService;
-
     private final ProveedorMovimientoService proveedorMovimientoService;
-
     private final SincronizeService sincronizeService;
-
     private final LectivoService lectivoService;
-
     private final PlanService planService;
-
     private final CarreraService carreraService;
-
     private final ChequeraPreunivService chequeraPreunivService;
-
     private final TipoChequeraService tipoChequeraService;
-
     private final PreunivResumenFacultadConsumer preunivResumenFacultadConsumer;
-
     private final PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer;
-
     private final PreTurnoFacultadConsumer preTurnoFacultadConsumer;
-
     private final PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer;
-
     private final PersonaKeyFacultadConsumer personaKeyFacultadConsumer;
-
     private final LegajoKeyFacultadConsumer legajoKeyFacultadConsumer;
-
     private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
-
     private final CarreraFacultadConsumer carreraFacultadConsumer;
-
     private final PlanFacultadConsumer planFacultadConsumer;
-
     private final InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer;
-
     private final TipoPagoFechaService tipoPagoFechaService;
-
     private final IngresoAsientoService ingresoAsientoService;
-
     private final CuentaMovimientoService cuentaMovimientoService;
-
     private final Environment environment;
-
     private final PersonaSuspendidoService personaSuspendidoService;
-
     private final ContratoPeriodoService contratoPeriodoService;
-
     private final BajaService bajaService;
-
     private final BajaFacultadConsumer bajaFacultadConsumer;
-
     private final LegajoService legajoService;
-
     private final FacturacionElectronicaService facturacionElectronicaService;
-
     private final ProveedorService proveedorService;
-
     private final FacturaPendienteService facturaPendienteService;
 
-    @Autowired
     public SheetService(FacultadService facultadService, TipoPagoService tipoPagoService, GeograficaService geograficaService, IngresoPeriodoService ingresoPeriodoService, ChequeraSerieService chequeraSerieService, PersonaKeyService personaKeyService, ArancelTipoService arancelTipoService, ChequeraCuotaService chequeraCuotaService, LegajoKeyService legajoKeyService, CarreraKeyService carreraKeyService, DomicilioKeyService domicilioKeyService, EjercicioService ejercicioService, ProveedorMovimientoService proveedorMovimientoService, SincronizeService sincronizeService, LectivoService lectivoService, PlanService planService, CarreraService carreraService, ChequeraPreunivService chequeraPreunivService, TipoChequeraService tipoChequeraService, PreunivResumenFacultadConsumer preunivResumenFacultadConsumer, PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer, PreTurnoFacultadConsumer preTurnoFacultadConsumer, PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer, PersonaKeyFacultadConsumer personaKeyFacultadConsumer, LegajoKeyFacultadConsumer legajoKeyFacultadConsumer, InscripcionFacultadConsumer inscripcionFacultadConsumer, CarreraFacultadConsumer carreraFacultadConsumer, PlanFacultadConsumer planFacultadConsumer, InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer, TipoPagoFechaService tipoPagoFechaService, IngresoAsientoService ingresoAsientoService, CuentaMovimientoService cuentaMovimientoService, PersonaSuspendidoService personaSuspendidoService, ContratoPeriodoService contratoPeriodoService, BajaService bajaService, BajaFacultadConsumer bajaFacultadConsumer, LegajoService legajoService, FacturacionElectronicaService facturacionElectronicaService, ProveedorService proveedorService, Environment environment, FacturaPendienteService facturaPendienteService) {
         this.facultadService = facultadService;
         this.tipoPagoService = tipoPagoService;

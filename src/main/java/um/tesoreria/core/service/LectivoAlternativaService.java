@@ -5,11 +5,10 @@ package um.tesoreria.core.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.LectivoAlternativaException;
-import um.tesoreria.core.model.LectivoAlternativa;
+import um.tesoreria.core.kotlin.model.LectivoAlternativa;
 import um.tesoreria.core.repository.ILectivoAlternativaRepository;
 
 /**
@@ -19,11 +18,14 @@ import um.tesoreria.core.repository.ILectivoAlternativaRepository;
 @Service
 public class LectivoAlternativaService {
 
-	@Autowired
-	private ILectivoAlternativaRepository repository;
+	private final ILectivoAlternativaRepository repository;
+
+	public LectivoAlternativaService(ILectivoAlternativaRepository repository) {
+		this.repository = repository;
+	}
 
 	public List<LectivoAlternativa> findAllByTipo(Integer facultadId, Integer lectivoId, Integer tipoChequeraId,
-			Integer alternativaId) {
+												  Integer alternativaId) {
 		return repository.findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(facultadId, lectivoId,
 				tipoChequeraId, alternativaId);
 	}

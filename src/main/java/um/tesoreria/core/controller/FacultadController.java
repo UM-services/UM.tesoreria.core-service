@@ -6,7 +6,6 @@ package um.tesoreria.core.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,42 +24,47 @@ import um.tesoreria.core.service.FacultadService;
  *
  */
 @RestController
-@RequestMapping("/facultad")
+@RequestMapping({"/facultad", "/api/tesoreria/core/facultad"})
 public class FacultadController {
-	@Autowired
-	private FacultadService service;
+
+	private final FacultadService service;
+
+	public FacultadController(FacultadService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/")
 	public ResponseEntity<List<Facultad>> findAll() {
-		return new ResponseEntity<List<Facultad>>(service.findAll(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 
 	@GetMapping("/facultades")
 	public ResponseEntity<List<Facultad>> findFacultades() {
-		return new ResponseEntity<List<Facultad>>(service.findFacultades(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findFacultades(), HttpStatus.OK);
 	}
 
 	@GetMapping("/lectivo/{lectivoId}")
 	public ResponseEntity<List<FacultadLectivo>> findAllByLectivoId(@PathVariable Integer lectivoId) {
-		return new ResponseEntity<List<FacultadLectivo>>(service.findAllByLectivoId(lectivoId), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAllByLectivoId(lectivoId), HttpStatus.OK);
 	}
 
 	@GetMapping("/bypersona/{personaId}/{documentoId}/{lectivoId}")
 	public ResponseEntity<List<FacultadPersona>> findAllByPersona(@PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId, @PathVariable Integer lectivoId) {
-		return new ResponseEntity<List<FacultadPersona>>(service.findAllByPersona(personaId, documentoId, lectivoId),
+		return new ResponseEntity<>(service.findAllByPersona(personaId, documentoId, lectivoId),
 				HttpStatus.OK);
 	}
 
 	@GetMapping("/disenho/{lectivoId}/{geograficaId}")
 	public ResponseEntity<List<FacultadLectivoSede>> findAllByDisenho(@PathVariable Integer lectivoId,
 			@PathVariable Integer geograficaId) {
-		return new ResponseEntity<List<FacultadLectivoSede>>(service.findAllByDisenho(lectivoId, geograficaId),
+		return new ResponseEntity<>(service.findAllByDisenho(lectivoId, geograficaId),
 				HttpStatus.OK);
 	}
 
 	@GetMapping("/{facultadId}")
 	public ResponseEntity<Facultad> findByFacultadId(@PathVariable Integer facultadId) {
-		return new ResponseEntity<Facultad>(service.findByFacultadId(facultadId), HttpStatus.OK);
+		return new ResponseEntity<>(service.findByFacultadId(facultadId), HttpStatus.OK);
 	}
+
 }

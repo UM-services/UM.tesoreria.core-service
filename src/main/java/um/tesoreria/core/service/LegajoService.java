@@ -6,11 +6,10 @@ package um.tesoreria.core.service;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.LegajoException;
-import um.tesoreria.core.model.Legajo;
+import um.tesoreria.core.kotlin.model.Legajo;
 import um.tesoreria.core.repository.ILegajoRepository;
 
 /**
@@ -20,11 +19,14 @@ import um.tesoreria.core.repository.ILegajoRepository;
 @Service
 public class LegajoService {
 
-	@Autowired
-	private ILegajoRepository repository;
+	private final ILegajoRepository repository;
+
+	public LegajoService(ILegajoRepository repository) {
+		this.repository = repository;
+	}
 
 	public Legajo findByFacultadIdAndPersonaIdAndDocumentoId(Integer facultadId, BigDecimal personaId,
-			Integer documentoId) {
+															 Integer documentoId) {
 		return repository.findByFacultadIdAndPersonaIdAndDocumentoId(facultadId, personaId, documentoId)
 				.orElseThrow(() -> new LegajoException(facultadId, personaId, documentoId));
 	}
@@ -35,7 +37,7 @@ public class LegajoService {
 	}
 
 	public Legajo add(Legajo legajo) {
-		repository.save(legajo);
+		legajo =repository.save(legajo);
 		return legajo;
 	}
 

@@ -9,7 +9,6 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
@@ -35,7 +34,6 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
 import um.tesoreria.core.kotlin.model.*;
-import um.tesoreria.core.model.Legajo;
 import um.tesoreria.core.service.CarreraService;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.service.ChequeraSerieService;
@@ -51,37 +49,24 @@ import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.exception.LectivoException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PersonaException;
-import um.tesoreria.core.model.LectivoAlternativa;
 
 @Service
 @Slf4j
 public class FormulariosToPdfService {
 
     private final Environment environment;
-
     private final ChequeraSerieService chequeraSerieService;
-
     private final FacultadService facultadService;
-
     private final TipoChequeraService tipoChequeraService;
-
     private final PersonaService personaService;
-
     private final LectivoService lectivoService;
-
     private final LegajoService legajoService;
-
     private final CarreraService carreraService;
-
     private final ChequeraCuotaService chequeraCuotaService;
-
     private final LectivoAlternativaService lectivoAlternativaService;
-
     private final SincronizeService sincronizeService;
-
     private final RestTemplateBuilder restTemplateBuilder;
 
-    @Autowired
     public FormulariosToPdfService(Environment environment, ChequeraSerieService chequeraSerieService, FacultadService facultadService, TipoChequeraService tipoChequeraService,
                                    PersonaService personaService, LectivoService lectivoService, LegajoService legajoService, CarreraService carreraService,
                                    ChequeraCuotaService chequeraCuotaService, LectivoAlternativaService lectivoAlternativaService, SincronizeService sincronizeService,
@@ -104,7 +89,7 @@ public class FormulariosToPdfService {
                                       Integer alternativaId) {
         ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         List<ChequeraCuota> cuotas = chequeraCuotaService
-                .findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(serie.getFacultadId(),
+                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId());
         boolean hayAlgoParaImprimir = false;
         for (ChequeraCuota cuota : cuotas) {
@@ -224,7 +209,7 @@ public class FormulariosToPdfService {
             document.add(new Paragraph(" ", new Font(Font.HELVETICA, 8)));
 
             for (ChequeraCuota cuota : chequeraCuotaService
-                    .findAllByFacultadIdAndTipochequeraIdAndChequeraserieIdAndAlternativaId(serie.getFacultadId(),
+                    .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                             serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId())) {
                 if (cuota.getPagado() == 0 && cuota.getBaja() == 0
                         && cuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {

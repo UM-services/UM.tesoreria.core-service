@@ -8,8 +8,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import um.tesoreria.core.model.LectivoAlternativa;
+import um.tesoreria.core.kotlin.model.LectivoAlternativa;
 
 /**
  * @author daniel
@@ -18,10 +17,10 @@ import um.tesoreria.core.model.LectivoAlternativa;
 @Repository
 public interface ILectivoAlternativaRepository extends JpaRepository<LectivoAlternativa, Long> {
 
-	public List<LectivoAlternativa> findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer facultadId,
-			Integer lectivoId, Integer tipoChequeraId, Integer alternativaId);
+	List<LectivoAlternativa> findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer facultadId,
+																							  Integer lectivoId, Integer tipoChequeraId, Integer alternativaId);
 
-	public Optional<LectivoAlternativa> findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaId(
+	Optional<LectivoAlternativa> findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaId(
 			Integer facultadId, Integer lectivoId, Integer tipoChequeraId, Integer productoId, Integer alternativaId);
 
 }
