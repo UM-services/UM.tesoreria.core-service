@@ -1,5 +1,5 @@
 app:
-  port: 8092
+  port: ${APP_PORT:8092}
   database: tesium
   server: 10.147.20.20:3306
   user: root
