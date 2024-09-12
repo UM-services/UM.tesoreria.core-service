@@ -129,16 +129,20 @@ public class MailChequeraService {
     }
 
     public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData, Boolean updateMailPersonal, Boolean responseSinEnvio) throws MessagingException {
-        // Determina lectivoId
+// Determina lectivoId
         Lectivo lectivo = null;
         OffsetDateTime ahora = Tool.dateAbsoluteArgentina();
         Integer lectivoId = (lectivo = lectivoService.findByFecha(ahora)).getLectivoId();
-        // si corresponde al segundo semestre entonces la genera para el ciclo lectivo siguiente
+// si corresponde al segundo semestre entonces la genera para el ciclo lectivo siguiente
         OffsetDateTime referenciaHasta = lectivo.getFechaFinal();
-        OffsetDateTime referenciaDesde = referenciaHasta.minusDays(150);
+
+// Ajusta la referenciaDesde para que sea en septiembre del año anterior
+        OffsetDateTime referenciaDesde = referenciaHasta.minusYears(1).withMonth(8).withDayOfMonth(1);
+
         if (ahora.isAfter(referenciaDesde) && ahora.isBefore(referenciaHasta)) {
             lectivo = lectivoService.findByLectivoId(++lectivoId);
         }
+
 
         try {
             log.debug("Lectivo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
