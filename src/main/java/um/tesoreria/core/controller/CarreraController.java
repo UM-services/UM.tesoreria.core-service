@@ -35,6 +35,16 @@ public class CarreraController {
 		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 
+	@GetMapping("/facultad/{facultadId}")
+	public ResponseEntity<List<Carrera>> findAllByFacultadId(@PathVariable Integer facultadId) {
+		return new ResponseEntity<>(service.findAllByFacultadId(facultadId), HttpStatus.OK);
+	}
+
+	@GetMapping("/{uniqueId}")
+	public ResponseEntity<Carrera> findByUniqueId(@PathVariable Long uniqueId) {
+		return new ResponseEntity<>(service.findByUniqueId(uniqueId), HttpStatus.OK);
+	}
+
 	@GetMapping("/unique/{facultadId}/{planId}/{carreraId}")
 	public ResponseEntity<Carrera> findByFacultadIdAndPlanIdAndCarreraId(@PathVariable Integer facultadId,
 			@PathVariable Integer planId, @PathVariable Integer carreraId) {

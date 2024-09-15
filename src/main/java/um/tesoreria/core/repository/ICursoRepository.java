@@ -16,6 +16,8 @@ import um.tesoreria.core.kotlin.model.Curso;
 @Repository
 public interface ICursoRepository extends JpaRepository<Curso, Integer> {
 
-	public Optional<Curso> findTopByClaseChequeraId(Integer claseChequeraId);
+    Optional<Curso>  findByCursoId(Integer cursoId);
+
+    Optional<Curso> findTopByClaseChequeraId(Integer claseChequeraId);
 
 }

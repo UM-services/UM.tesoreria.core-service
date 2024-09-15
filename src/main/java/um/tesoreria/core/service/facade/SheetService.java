@@ -88,7 +88,6 @@ import um.tesoreria.core.service.TipoChequeraService;
 import um.tesoreria.core.service.TipoPagoService;
 import um.tesoreria.core.service.view.*;
 import um.tesoreria.core.model.PersonaSuspendido;
-import um.tesoreria.core.model.Plan;
 import um.tesoreria.core.service.*;
 
 /**

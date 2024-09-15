@@ -5,6 +5,9 @@ package um.tesoreria.core.service;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +20,7 @@ import um.tesoreria.core.repository.ICarreraChequeraRepository;
  *
  */
 @Service
+@Slf4j
 public class CarreraChequeraService {
 
 	@Autowired
@@ -30,16 +34,21 @@ public class CarreraChequeraService {
 
 	public CarreraChequera findByUnique(Integer facultadId, Integer lectivoId, Integer planId, Integer carreraId,
 			Integer claseChequeraId, Integer curso, Integer geograficaId) {
-		return repository
+		var carreraChequera = repository
 				.findByFacultadIdAndLectivoIdAndPlanIdAndCarreraIdAndClaseChequeraIdAndCursoAndGeograficaId(facultadId, lectivoId, planId,
 						carreraId, claseChequeraId, curso, geograficaId)
 				.orElseThrow(() -> new CarreraChequeraException(facultadId, lectivoId, planId, carreraId, curso,
 						geograficaId));
+        try {
+            log.debug("CarreraChequera found: {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(carreraChequera));
+        } catch (JsonProcessingException e) {
+            log.debug("CarreraChequera error: {}", e.getMessage());
+        }
+        return carreraChequera;
 	}
 
 	public CarreraChequera add(CarreraChequera carreraChequera) {
-		repository.save(carreraChequera);
-		return carreraChequera;
+		return repository.save(carreraChequera);
 	}
 
 	public CarreraChequera update(CarreraChequera newCarreraChequera, Long carreraChequeraId) {
@@ -49,8 +58,7 @@ public class CarreraChequeraService {
 					newCarreraChequera.getCarreraId(), newCarreraChequera.getClaseChequeraId(),
 					newCarreraChequera.getCurso(), newCarreraChequera.getGeograficaId(),
 					newCarreraChequera.getTipoChequeraId());
-			repository.save(carreraChequera);
-			return carreraChequera;
+			return repository.save(carreraChequera);
 		}).orElseThrow(() -> new CarreraChequeraException(carreraChequeraId));
 	}
 

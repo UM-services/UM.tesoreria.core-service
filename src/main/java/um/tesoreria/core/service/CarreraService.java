@@ -30,7 +30,11 @@ public class CarreraService {
 	}
 
 	public List<Carrera> findAllByFacultadId(Integer facultadId) {
-		return repository.findAllByFacultadId(facultadId);
+		return repository.findAllByFacultadIdOrderByUniqueIdDesc(facultadId);
+	}
+
+	public Carrera findByUniqueId(Long uniqueId) {
+		return repository.findByUniqueId(uniqueId).orElseThrow(() -> new CarreraException(uniqueId));
 	}
 
 	public Carrera findByFacultadIdAndPlanIdAndCarreraId(Integer facultadId, Integer planId, Integer carreraId) {
