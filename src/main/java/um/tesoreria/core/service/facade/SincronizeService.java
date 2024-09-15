@@ -37,7 +37,6 @@ import um.tesoreria.core.extern.model.kotlin.*;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.InfoLdap;
 import um.tesoreria.core.model.Matricula;
-import um.tesoreria.core.model.Plan;
 import um.tesoreria.core.model.UsuarioLdap;
 import um.tesoreria.core.model.view.ChequeraClase;
 import um.tesoreria.core.service.CarreraService;
@@ -314,7 +313,7 @@ public class SincronizeService {
 					carreraFacultad.getCarreraId(), carreraFacultad.getNombre(), carreraFacultad.getIniciales(),
 					carreraFacultad.getTitulo(), carreraFacultad.getTrabajoFinal(), carreraFacultad.getResolucion(),
 					carreraFacultad.getChequeraUnica(), carreraFacultad.getBloqueId(),
-					carreraFacultad.getObligatorias(), carreraFacultad.getOptativas(), carreraFacultad.getVigente());
+					carreraFacultad.getObligatorias(), carreraFacultad.getOptativas(), carreraFacultad.getVigente(), null);
 			carreraService.add(carrera);
 		}
 		Long legajoId = null;
@@ -382,14 +381,14 @@ public class SincronizeService {
 						carreraFacultad.getIniciales(), carreraFacultad.getTitulo(), carreraFacultad.getTrabajoFinal(),
 						carreraFacultad.getResolucion(), carreraFacultad.getChequeraUnica(),
 						carreraFacultad.getBloqueId(), carreraFacultad.getObligatorias(),
-						carreraFacultad.getOptativas(), carreraFacultad.getVigente());
+						carreraFacultad.getOptativas(), carreraFacultad.getVigente(), null);
 			} else {
 				Carrera carrera = new Carrera(null, carreraFacultad.getFacultadId(), carreraFacultad.getPlanId(),
 						carreraFacultad.getCarreraId(), carreraFacultad.getNombre(), carreraFacultad.getIniciales(),
 						carreraFacultad.getTitulo(), carreraFacultad.getTrabajoFinal(), carreraFacultad.getResolucion(),
 						carreraFacultad.getChequeraUnica(), carreraFacultad.getBloqueId(),
 						carreraFacultad.getObligatorias(), carreraFacultad.getOptativas(),
-						carreraFacultad.getVigente());
+						carreraFacultad.getVigente(), null);
 				carreras.put(carrera.getCarreraKey(), carrera);
 			}
 		}

@@ -8,8 +8,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import um.tesoreria.core.model.Plan;
+import um.tesoreria.core.kotlin.model.Plan;
 
 /**
  * @author daniel
@@ -18,8 +17,8 @@ import um.tesoreria.core.model.Plan;
 @Repository
 public interface IPlanRepository extends JpaRepository<Plan, Long> {
 
-	public List<Plan> findAllByFacultadId(Integer facultadId);
+	List<Plan> findAllByFacultadId(Integer facultadId);
 
-	public Optional<Plan> findByFacultadIdAndPlanId(Integer facultadId, Integer planId);
+	Optional<Plan> findByFacultadIdAndPlanId(Integer facultadId, Integer planId);
 
 }

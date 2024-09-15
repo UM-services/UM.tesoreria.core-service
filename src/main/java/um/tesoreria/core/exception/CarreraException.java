@@ -17,4 +17,8 @@ public class CarreraException extends RuntimeException {
 		super("Cannot find Carrera " + facultadId + "/" + planId + "/" + carreraId);
 	}
 
+    public CarreraException(Long uniqueId) {
+		super("Cannot find Carrera with uniqueId " + uniqueId);
+    }
+
 }

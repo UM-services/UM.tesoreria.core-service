@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import um.tesoreria.core.model.Plan;
+import um.tesoreria.core.kotlin.model.Plan;
 import um.tesoreria.core.service.PlanService;
 
 /**
@@ -24,22 +24,25 @@ import um.tesoreria.core.service.PlanService;
 @RequestMapping("/plan")
 public class PlanController {
 
-	@Autowired
-	private PlanService service;
+	private final PlanService service;
+
+	public PlanController(PlanService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/")
 	public ResponseEntity<List<Plan>> findAll() {
-		return new ResponseEntity<List<Plan>>(service.findAll(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 
 	@GetMapping("/facultad/{facultadId}")
 	public ResponseEntity<List<Plan>> findAllByFacultad(@PathVariable Integer facultadId) {
-		return new ResponseEntity<List<Plan>>(service.findAllByFacultadId(facultadId), HttpStatus.OK);
+		return new ResponseEntity<>(service.findAllByFacultadId(facultadId), HttpStatus.OK);
 	}
 
 	@GetMapping("/unique/{facultadId}/{planId}")
 	public ResponseEntity<Plan> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer planId) {
-		return new ResponseEntity<Plan>(service.findByFacultadIdAndPlanId(facultadId, planId), HttpStatus.OK);
+		return new ResponseEntity<>(service.findByFacultadIdAndPlanId(facultadId, planId), HttpStatus.OK);
 	}
 
 }

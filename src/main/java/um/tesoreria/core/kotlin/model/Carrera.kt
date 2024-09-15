@@ -1,12 +1,6 @@
 package um.tesoreria.core.kotlin.model
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
-import jakarta.persistence.UniqueConstraint
+import jakarta.persistence.*
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["car_fac_id", "car_pla_id", "car_id"])])
@@ -48,10 +42,16 @@ data class Carrera(
     var optativas: Int = 0,
     var vigente: Byte = 0,
 
-    ) : Auditable() {
+    @OneToOne
+    @JoinColumns(
+        JoinColumn(name = "car_pla_id", referencedColumnName = "pla_id", insertable = false, updatable = false),
+        JoinColumn(name = "car_fac_id", referencedColumnName = "pla_fac_id", insertable = false, updatable = false)
+    )
+    var plan: Plan? = null,
+
+) : Auditable() {
 
     fun getCarreraKey(): String {
         return this.facultadId.toString() + "." + this.planId + "." + this.carreraId
     }
-
 }

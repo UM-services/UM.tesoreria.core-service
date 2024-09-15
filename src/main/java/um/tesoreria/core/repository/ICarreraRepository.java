@@ -17,8 +17,10 @@ import um.tesoreria.core.kotlin.model.Carrera;
 @Repository
 public interface ICarreraRepository extends JpaRepository<Carrera, Long> {
 
-	public List<Carrera> findAllByFacultadId(Integer facultadId);
+	List<Carrera> findAllByFacultadIdOrderByUniqueIdDesc(Integer facultadId);
 
-	public Optional<Carrera> findByFacultadIdAndPlanIdAndCarreraId(Integer facultadId, Integer planId, Integer carreraId);
+	Optional<Carrera> findByFacultadIdAndPlanIdAndCarreraId(Integer facultadId, Integer planId, Integer carreraId);
+
+	Optional<Carrera> findByUniqueId(Long uniqueId);
 
 }

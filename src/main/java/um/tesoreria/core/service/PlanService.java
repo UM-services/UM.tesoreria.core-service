@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.PlanException;
-import um.tesoreria.core.model.Plan;
+import um.tesoreria.core.kotlin.model.Plan;
 import um.tesoreria.core.repository.IPlanRepository;
 
 /**
