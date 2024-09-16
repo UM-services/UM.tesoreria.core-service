@@ -4,6 +4,7 @@
 package um.tesoreria.core.configuration;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -17,6 +18,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableScheduling
 @EnableJpaAuditing
+@EnableFeignClients(basePackages = "um.tesoreria.core.client")
 @PropertySource("classpath:config/tesoreria.properties")
 public class TesoreriaConfiguration {
 

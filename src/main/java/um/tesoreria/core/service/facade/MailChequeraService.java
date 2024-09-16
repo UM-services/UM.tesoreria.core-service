@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import um.tesoreria.core.client.tesoreria.sender.ChequeraClient;
 import um.tesoreria.core.exception.CarreraChequeraException;
 import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DomicilioException;
@@ -67,11 +68,12 @@ public class MailChequeraService {
     private final MailSenderService mailSenderService;
     private final ChequeraService chequeraService;
     private final BuildService buildService;
+    private final ChequeraClient chequeraClient;
 
     public MailChequeraService(JavaMailSender javaMailSender, ChequeraSerieService chequeraSerieService, DomicilioService domicilioService, FacultadService facultadService, PersonaService personaService,
                                ChequeraCuotaService chequeraCuotaService, LectivoService lectivoService, CarreraChequeraService carreraChequeraService, CursoService cursoService, ChequeraSerieControlService chequeraSerieControlService,
                                LegajoService legajoService, SpoterDataService spoterDataService, LectivoTotalService lectivoTotalService, ChequeraTotalService chequeraTotalService, LectivoAlternativaService lectivoAlternativaService,
-                               ChequeraAlternativaService chequeraAlternativaService, LectivoCuotaService lectivoCuotaService, MailSenderService mailSenderService, ChequeraService chequeraService, BuildService buildService) {
+                               ChequeraAlternativaService chequeraAlternativaService, LectivoCuotaService lectivoCuotaService, MailSenderService mailSenderService, ChequeraService chequeraService, BuildService buildService, ChequeraClient chequeraClient) {
         this.javaMailSender = javaMailSender;
         this.chequeraSerieService = chequeraSerieService;
         this.domicilioService = domicilioService;
@@ -92,23 +94,12 @@ public class MailChequeraService {
         this.mailSenderService = mailSenderService;
         this.chequeraService = chequeraService;
         this.buildService = buildService;
+        this.chequeraClient = chequeraClient;
     }
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
                                Boolean copiaInformes, Boolean incluyeMatricula) throws MessagingException {
-        MailSender javaMailSender = mailSenderService.findSender();
-        log.debug("mail_chequera_service.send_chequera.javaMailSender={}", javaMailSender);
-        String url = MessageFormat.format("http://{0}:{1}", javaMailSender.getIpAddress(), javaMailSender.getPort().toString());
-        log.debug("mail_chequera_service.send_chequera.url={}", url);
-        WebClient webClient = WebClient.builder().baseUrl(url + "/chequera").build();
-        String uri = MessageFormat.format("/sendChequera/{0}/{1}/{2}/{3}/{4}/{5}", facultadId.toString(),
-                tipoChequeraId.toString(), chequeraSerieId.toString(), alternativaId.toString(),
-                copiaInformes ? "true" : "false", incluyeMatricula ? "true" : "false");
-        log.debug("mail_chequera_service.send_chequera.uri={}", uri);
-        Mono<String> mono = webClient.get()
-                .uri(uri)
-                .retrieve().bodyToMono(String.class);
-        return mono.block();
+        return chequeraClient.sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes);
     }
 
     public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId,
@@ -142,7 +133,6 @@ public class MailChequeraService {
         if (ahora.isAfter(referenciaDesde) && ahora.isBefore(referenciaHasta)) {
             lectivo = lectivoService.findByLectivoId(++lectivoId);
         }
-
 
         try {
             log.debug("Lectivo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
