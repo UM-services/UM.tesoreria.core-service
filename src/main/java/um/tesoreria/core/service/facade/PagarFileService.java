@@ -55,8 +55,8 @@ public class PagarFileService {
         String outputFilename = path + "PAGAR.zip";
 
         List<Character> meses = List.of('1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C');
-        Integer cantidadLote = 5000;
-        Integer totalRegistros = chequeraCuotaDeudaService.findAllByRango(desde, hasta, false, null, chequeraCuotaService).size();
+        int cantidadLote = 5000;
+        int totalRegistros = chequeraCuotaDeudaService.findAllByRango(desde, hasta, false, null, chequeraCuotaService).size();
         ZipOutputStream zipOutputStream = new ZipOutputStream(new FileOutputStream(outputFilename));
 
         for (Integer lote = 0; lote < (totalRegistros / cantidadLote) + 1; lote++) {
@@ -76,7 +76,7 @@ public class PagarFileService {
             out.write(line);
             out.write("\r\n");
             // Identificador de deuda
-            Integer cantidadRegistros = 0;
+            int cantidadRegistros = 0;
             BigDecimal totalVencimiento1 = BigDecimal.ZERO;
             BigDecimal totalVencimiento2 = BigDecimal.ZERO;
             BigDecimal totalVencimiento3 = BigDecimal.ZERO;
