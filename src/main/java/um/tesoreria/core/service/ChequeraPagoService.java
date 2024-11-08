@@ -103,6 +103,9 @@ public class ChequeraPagoService {
         // Filtra los pagos que no tienen facturación electrónica asociada
         return pagos.stream()
                 .filter(pago -> !electronicas.containsKey(pago.getChequeraPagoId()))
+                .filter(pago -> pago.getChequeraCuota() != null 
+                    && pago.getChequeraCuota().getChequeraSerie() != null 
+                    && pago.getChequeraCuota().getChequeraSerie().getPersona() != null)
                 .collect(Collectors.toList());
     }
 
