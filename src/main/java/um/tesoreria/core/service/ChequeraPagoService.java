@@ -15,7 +15,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraPagoException;
@@ -33,7 +32,6 @@ public class ChequeraPagoService {
     private final IChequeraPagoRepository repository;
     private final FacturacionElectronicaService facturacionElectronicaService;
 
-    @Autowired
     public ChequeraPagoService(IChequeraPagoRepository repository, FacturacionElectronicaService facturacionElectronicaService) {
         this.repository = repository;
         this.facturacionElectronicaService = facturacionElectronicaService;
