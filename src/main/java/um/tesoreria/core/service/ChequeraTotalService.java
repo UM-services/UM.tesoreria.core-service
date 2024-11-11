@@ -7,9 +7,9 @@ import java.util.List;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import um.tesoreria.core.exception.ChequeraTotalException;
 import um.tesoreria.core.model.ChequeraTotal;
 import um.tesoreria.core.repository.IChequeraTotalRepository;
 
@@ -20,18 +20,25 @@ import um.tesoreria.core.repository.IChequeraTotalRepository;
 @Service
 public class ChequeraTotalService {
 
-	@Autowired
-	private IChequeraTotalRepository repository;
+	private final IChequeraTotalRepository repository;
+
+	public ChequeraTotalService(IChequeraTotalRepository repository) {
+		this.repository = repository;
+	}
 
 	public List<ChequeraTotal> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
 		return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId,
 				chequeraSerieId);
 	}
 
+	public ChequeraTotal findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId) {
+		return repository.findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoId(facultadId, tipoChequeraId,
+				chequeraSerieId, productoId).orElseThrow(() -> new ChequeraTotalException(facultadId, tipoChequeraId, chequeraSerieId, productoId));
+	}
+
 	@Transactional
 	public List<ChequeraTotal> saveAll(List<ChequeraTotal> chequeraTotals) {
-		chequeraTotals = repository.saveAll(chequeraTotals);
-		return chequeraTotals;
+		return repository.saveAll(chequeraTotals);
 	}
 
 	@Transactional
@@ -40,5 +47,20 @@ public class ChequeraTotalService {
 		repository.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId,
 				chequeraSerieId);
 	}
+
+    public ChequeraTotal update(ChequeraTotal newChequeraTotal, Long chequeraTotalId) {
+		return repository.findByChequeraTotalId(chequeraTotalId).map(chequeraTotal -> {
+			chequeraTotal = ChequeraTotal.builder()
+					.chequeraTotalId(chequeraTotalId)
+					.facultadId(newChequeraTotal.getFacultadId())
+					.tipoChequeraId(newChequeraTotal.getTipoChequeraId())
+					.chequeraSerieId(newChequeraTotal.getChequeraSerieId())
+					.productoId(newChequeraTotal.getProductoId())
+					.total(newChequeraTotal.getTotal())
+					.pagado(newChequeraTotal.getPagado())
+					.build();
+			return repository.save(chequeraTotal);
+		}).orElseThrow(() -> new ChequeraTotalException(chequeraTotalId));
+    }
 
 }

@@ -68,6 +68,29 @@ public class ChequeraPagoService {
     }
 
     @Transactional
+    public List<ChequeraPago> findAllByCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, ChequeraCuotaService chequeraCuotaService) {
+        List<ChequeraPago> pagos = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
+
+        // Rellena chequeraCuotaId si es nulo y guarda los cambios
+        pagos.forEach(pago -> {
+            if (pago.getChequeraCuotaId() == null) {
+                pago.setChequeraCuotaId(chequeraCuotaService.findByUnique(
+                        pago.getFacultadId(),
+                        pago.getTipoChequeraId(),
+                        pago.getChequeraSerieId(),
+                        pago.getProductoId(),
+                        pago.getAlternativaId(),
+                        pago.getCuotaId()).getChequeraCuotaId());
+            }
+        });
+
+        // Guarda todos los cambios en batch
+        repository.saveAll(pagos);
+
+        return pagos;
+    }
+
+    @Transactional
     public List<ChequeraPago> pendientesFactura(OffsetDateTime fechaPago, ChequeraCuotaService chequeraCuotaService) {
         List<ChequeraPago> pagos = repository.findAllByFechaAndTipoPagoIdGreaterThan(fechaPago, 2);
 
@@ -127,6 +150,18 @@ public class ChequeraPagoService {
         }
         chequeraPago = repository.save(chequeraPago);
         return chequeraPago;
+    }
+
+    public boolean isPagado(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, ChequeraCuotaService chequeraCuotaService) {
+        return !findAllByCuota(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, chequeraCuotaService).isEmpty();
+    }
+
+    public Integer nextOrden(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId) {
+        try {
+            return repository.findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdOrderByOrdenDesc(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId).get().getOrden() + 1;
+        } catch (ChequeraPagoException e) {
+            return 1;
+        }
     }
 
 }

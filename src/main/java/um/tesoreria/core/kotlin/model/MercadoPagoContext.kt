@@ -24,6 +24,9 @@ data class MercadoPagoContext(
     var activo: Byte = 0,
     var chequeraPagoId: Long? = null,
     var idMercadoPago: String? = null,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    var fechaPago: OffsetDateTime? = null,
+    var importePagado: BigDecimal = BigDecimal.ZERO,
     var payment: String? = null
 
 ) : Auditable() {
@@ -38,6 +41,8 @@ data class MercadoPagoContext(
         private var activo: Byte = 0
         private var chequeraPagoId: Long? = null
         private var idMercadoPago: String? = null
+        private var fechaPago: OffsetDateTime? = null
+        private var importePagado: BigDecimal = BigDecimal.ZERO
         private var payment: String? = null
 
         fun mercadoPagoContextId(mercadoPagoContextId: Long?) = apply { this.mercadoPagoContextId = mercadoPagoContextId }
@@ -49,6 +54,8 @@ data class MercadoPagoContext(
         fun activo(activo: Byte) = apply { this.activo = activo }
         fun chequeraPagoId(chequeraPagoId: Long?) = apply { this.chequeraPagoId = chequeraPagoId }
         fun idMercadoPago(idMercadoPago: String?) = apply { this.idMercadoPago = idMercadoPago }
+        fun fechaPago(fechaPago: OffsetDateTime?) = apply { this.fechaPago = fechaPago }
+        fun importePagado(importePagado: BigDecimal) = apply { this.importePagado = importePagado }
         fun payment(payment: String?) = apply { this.payment = payment }
 
         fun build() = MercadoPagoContext(
@@ -61,6 +68,8 @@ data class MercadoPagoContext(
             activo,
             chequeraPagoId,
             idMercadoPago,
+            fechaPago,
+            importePagado,
             payment
         )
     }

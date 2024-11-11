@@ -115,4 +115,108 @@ data class ChequeraCuota(
                 + this.alternativaId + "." + this.cuotaId)
     }
 
+    companion object {
+        fun builder(): Builder = Builder()
+    }
+
+    class Builder {
+        private var chequeraCuotaId: Long? = null
+        private var chequeraId: Long? = null
+        private var facultadId: Int? = null
+        private var tipoChequeraId: Int? = null
+        private var chequeraSerieId: Long? = null
+        private var productoId: Int? = null
+        private var alternativaId: Int? = null
+        private var cuotaId: Int? = null
+        private var mes: Int = 0
+        private var anho: Int = 0
+        private var arancelTipoId: Int? = null
+        private var vencimiento1: OffsetDateTime? = null
+        private var importe1: BigDecimal = BigDecimal.ZERO
+        private var importe1Original: BigDecimal = BigDecimal.ZERO
+        private var vencimiento2: OffsetDateTime? = null
+        private var importe2: BigDecimal = BigDecimal.ZERO
+        private var importe2Original: BigDecimal = BigDecimal.ZERO
+        private var vencimiento3: OffsetDateTime? = null
+        private var importe3: BigDecimal = BigDecimal.ZERO
+        private var importe3Original: BigDecimal = BigDecimal.ZERO
+        private var codigoBarras: String = ""
+        private var i2Of5: String = ""
+        private var pagado: Byte = 0
+        private var baja: Byte = 0
+        private var manual: Byte = 0
+        private var compensada: Byte = 0
+        private var tramoId: Int = 0
+        private var facultad: Facultad? = null
+        private var tipoChequera: TipoChequera? = null
+        private var producto: Producto? = null
+        private var chequeraSerie: ChequeraSerie? = null
+
+        fun chequeraCuotaId(chequeraCuotaId: Long?) = apply { this.chequeraCuotaId = chequeraCuotaId }
+        fun chequeraId(chequeraId: Long?) = apply { this.chequeraId = chequeraId }
+        fun facultadId(facultadId: Int?) = apply { this.facultadId = facultadId }
+        fun tipoChequeraId(tipoChequeraId: Int?) = apply { this.tipoChequeraId = tipoChequeraId }
+        fun chequeraSerieId(chequeraSerieId: Long?) = apply { this.chequeraSerieId = chequeraSerieId }
+        fun productoId(productoId: Int?) = apply { this.productoId = productoId }
+        fun alternativaId(alternativaId: Int?) = apply { this.alternativaId = alternativaId }
+        fun cuotaId(cuotaId: Int?) = apply { this.cuotaId = cuotaId }
+        fun mes(mes: Int) = apply { this.mes = mes }
+        fun anho(anho: Int) = apply { this.anho = anho }
+        fun arancelTipoId(arancelTipoId: Int?) = apply { this.arancelTipoId = arancelTipoId }
+        fun vencimiento1(vencimiento1: OffsetDateTime?) = apply { this.vencimiento1 = vencimiento1 }
+        fun importe1(importe1: BigDecimal) = apply { this.importe1 = importe1 }
+        fun importe1Original(importe1Original: BigDecimal) = apply { this.importe1Original = importe1Original }
+        fun vencimiento2(vencimiento2: OffsetDateTime?) = apply { this.vencimiento2 = vencimiento2 }
+        fun importe2(importe2: BigDecimal) = apply { this.importe2 = importe2 }
+        fun importe2Original(importe2Original: BigDecimal) = apply { this.importe2Original = importe2Original }
+        fun vencimiento3(vencimiento3: OffsetDateTime?) = apply { this.vencimiento3 = vencimiento3 }
+        fun importe3(importe3: BigDecimal) = apply { this.importe3 = importe3 }
+        fun importe3Original(importe3Original: BigDecimal) = apply { this.importe3Original = importe3Original }
+        fun codigoBarras(codigoBarras: String) = apply { this.codigoBarras = codigoBarras }
+        fun i2Of5(i2Of5: String) = apply { this.i2Of5 = i2Of5 }
+        fun pagado(pagado: Byte) = apply { this.pagado = pagado }
+        fun baja(baja: Byte) = apply { this.baja = baja }
+        fun manual(manual: Byte) = apply { this.manual = manual }
+        fun compensada(compensada: Byte) = apply { this.compensada = compensada }
+        fun tramoId(tramoId: Int) = apply { this.tramoId = tramoId }
+        fun facultad(facultad: Facultad?) = apply { this.facultad = facultad }
+        fun tipoChequera(tipoChequera: TipoChequera?) = apply { this.tipoChequera = tipoChequera }
+        fun producto(producto: Producto?) = apply { this.producto = producto }
+        fun chequeraSerie(chequeraSerie: ChequeraSerie?) = apply { this.chequeraSerie = chequeraSerie }
+
+        fun build() = ChequeraCuota(
+            chequeraCuotaId = chequeraCuotaId,
+            chequeraId = chequeraId,
+            facultadId = facultadId,
+            tipoChequeraId = tipoChequeraId,
+            chequeraSerieId = chequeraSerieId,
+            productoId = productoId,
+            alternativaId = alternativaId,
+            cuotaId = cuotaId,
+            mes = mes,
+            anho = anho,
+            arancelTipoId = arancelTipoId,
+            vencimiento1 = vencimiento1,
+            importe1 = importe1,
+            importe1Original = importe1Original,
+            vencimiento2 = vencimiento2,
+            importe2 = importe2,
+            importe2Original = importe2Original,
+            vencimiento3 = vencimiento3,
+            importe3 = importe3,
+            importe3Original = importe3Original,
+            codigoBarras = codigoBarras,
+            i2Of5 = i2Of5,
+            pagado = pagado,
+            baja = baja,
+            manual = manual,
+            compensada = compensada,
+            tramoId = tramoId,
+            facultad = facultad,
+            tipoChequera = tipoChequera,
+            producto = producto,
+            chequeraSerie = chequeraSerie
+        )
+    }
+
 }
