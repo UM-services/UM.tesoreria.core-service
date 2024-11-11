@@ -17,6 +17,7 @@ data class MercadoPagoContext(
     var mercadoPagoContextId: Long? = null,
     var chequeraCuotaId: Long? = null,
     var initPoint: String? = null,
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
     var fechaVencimiento: OffsetDateTime? = null,
     var importe: BigDecimal = BigDecimal.ZERO,
@@ -24,8 +25,14 @@ data class MercadoPagoContext(
     var activo: Byte = 0,
     var chequeraPagoId: Long? = null,
     var idMercadoPago: String? = null,
+    var status: String? = null,
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
     var fechaPago: OffsetDateTime? = null,
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    var fechaAcreditacion: OffsetDateTime? = null,
+
     var importePagado: BigDecimal = BigDecimal.ZERO,
     var payment: String? = null
 
@@ -44,6 +51,8 @@ data class MercadoPagoContext(
         private var fechaPago: OffsetDateTime? = null
         private var importePagado: BigDecimal = BigDecimal.ZERO
         private var payment: String? = null
+        private var status: String? = null
+        private var fechaAcreditacion: OffsetDateTime? = null
 
         fun mercadoPagoContextId(mercadoPagoContextId: Long?) = apply { this.mercadoPagoContextId = mercadoPagoContextId }
         fun chequeraCuotaId(chequeraCuotaId: Long?) = apply { this.chequeraCuotaId = chequeraCuotaId }
@@ -57,6 +66,8 @@ data class MercadoPagoContext(
         fun fechaPago(fechaPago: OffsetDateTime?) = apply { this.fechaPago = fechaPago }
         fun importePagado(importePagado: BigDecimal) = apply { this.importePagado = importePagado }
         fun payment(payment: String?) = apply { this.payment = payment }
+        fun status(status: String?) = apply { this.status = status }
+        fun fechaAcreditacion(fechaAcreditacion: OffsetDateTime?) = apply { this.fechaAcreditacion = fechaAcreditacion }
 
         fun build() = MercadoPagoContext(
             mercadoPagoContextId,
@@ -68,7 +79,9 @@ data class MercadoPagoContext(
             activo,
             chequeraPagoId,
             idMercadoPago,
+            status,
             fechaPago,
+            fechaAcreditacion,
             importePagado,
             payment
         )
