@@ -14,10 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import um.tesoreria.core.kotlin.model.Auditable;
 
 /**
@@ -31,6 +28,7 @@ import um.tesoreria.core.kotlin.model.Auditable;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ChequeraTotal extends Auditable implements Serializable {
 	/**
 	* 
