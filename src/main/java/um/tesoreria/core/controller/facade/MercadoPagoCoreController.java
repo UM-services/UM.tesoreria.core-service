@@ -7,7 +7,7 @@ import um.tesoreria.core.kotlin.model.dto.UMPreferenceMPDto;
 import um.tesoreria.core.service.facade.MercadoPagoCoreService;
 
 @RestController
-@RequestMapping("/api/core/mercadopago")
+@RequestMapping("/api/tesoreria/core/mercadopago")
 public class MercadoPagoCoreController {
 
     private final MercadoPagoCoreService service;

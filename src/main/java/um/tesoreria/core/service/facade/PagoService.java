@@ -45,9 +45,10 @@ public class PagoService {
                 .mes(chequeraCuota.getMes())
                 .anho(chequeraCuota.getAnho())
                 .fecha(mercadoPagoContext.getFechaPago())
-                .acreditacion(mercadoPagoContext.getFechaPago()) // averiguar fecha de acreditacion
+                .acreditacion(mercadoPagoContext.getFechaAcreditacion())
                 .importe(mercadoPagoContext.getImportePagado())
                 .tipoPagoId(MERCADOPAGO)
+                .archivo("MercadoPago")
                 .build();
         chequeraPago = chequeraPagoService.add(chequeraPago, chequeraCuotaService);
 

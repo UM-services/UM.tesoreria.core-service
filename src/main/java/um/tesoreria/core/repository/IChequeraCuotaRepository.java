@@ -36,6 +36,8 @@ public interface IChequeraCuotaRepository extends JpaRepository<ChequeraCuota, L
 
 	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndPagado(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Byte pagado);
 
+	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndImporte1GreaterThan(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Byte pagado, Byte baja, BigDecimal zero);
+
 	Optional<ChequeraCuota> findByChequeraCuotaId(Long chequeraCuotaId);
 
 	Optional<ChequeraCuota> findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(

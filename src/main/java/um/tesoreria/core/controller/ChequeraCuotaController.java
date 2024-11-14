@@ -9,7 +9,6 @@ import java.util.List;
 import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.service.view.ChequeraCuotaDeudaService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +45,15 @@ public class ChequeraCuotaController {
         return new ResponseEntity<>(
                 service.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId,
                         tipoChequeraId, chequeraSerieId, alternativaId),
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/chequera/pendientes/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
+    public ResponseEntity<List<ChequeraCuota>> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdPendentes(@PathVariable Integer facultadId,
+                                                                                                                                @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId,
+                                                                                                                                @PathVariable Integer alternativaId) {
+        return new ResponseEntity<>(
+                service.findAllPendientes(facultadId, tipoChequeraId, chequeraSerieId, alternativaId),
                 HttpStatus.OK);
     }
 
