@@ -1,7 +1,7 @@
 package um.tesoreria.core.kotlin.model.dto
 
 import um.tesoreria.core.kotlin.model.ChequeraCuota
-import um.tesoreria.core.kotlin.model.MercadoPagoContext
+import um.tesoreria.core.model.MercadoPagoContext
 
 data class UMPreferenceMPDto(
     var mercadoPagoContext: MercadoPagoContext? = null,

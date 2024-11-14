@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ChequeraCuotaException;
 import um.tesoreria.core.exception.MercadoPagoContextException;
 import um.tesoreria.core.kotlin.model.ChequeraCuota;
-import um.tesoreria.core.kotlin.model.MercadoPagoContext;
 import um.tesoreria.core.kotlin.model.dto.UMPreferenceMPDto;
+import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.service.MercadoPagoContextService;
 
@@ -62,7 +62,7 @@ public class MercadoPagoCoreService {
 
         // Crear nuevo contexto
         return new UMPreferenceMPDto.Builder()
-                .mercadoPagoContext(mercadoPagoContextService.add(new MercadoPagoContext.Builder()
+                .mercadoPagoContext(mercadoPagoContextService.add(MercadoPagoContext.builder()
                         .chequeraCuotaId(chequeraCuotaId)
                         .fechaVencimiento(fechaVencimiento)
                         .importe(importe)

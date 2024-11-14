@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import um.tesoreria.core.kotlin.model.MercadoPagoContext;
+import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.service.MercadoPagoContextService;
 
 @RestController

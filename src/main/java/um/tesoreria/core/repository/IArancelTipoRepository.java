@@ -15,13 +15,13 @@ import um.tesoreria.core.kotlin.model.ArancelTipo;
  */
 public interface IArancelTipoRepository extends JpaRepository<ArancelTipo, Integer> {
 
-	public Optional<ArancelTipo> findByArancelTipoId(Integer arancelTipoId);
+	Optional<ArancelTipo> findByArancelTipoId(Integer arancelTipoId);
 
-	public Optional<ArancelTipo> findTopByOrderByArancelTipoIdDesc();
+	Optional<ArancelTipo> findTopByOrderByArancelTipoIdDesc();
 
-	public Optional<ArancelTipo> findByArancelTipoIdCompleto(Integer arancelTipoIdCompleto);
+	Optional<ArancelTipo> findByArancelTipoIdCompleto(Integer arancelTipoIdCompleto);
 
 	@Modifying
-	public void deleteByArancelTipoId(Integer arancelTipoId);
+	void deleteByArancelTipoId(Integer arancelTipoId);
 
 }
