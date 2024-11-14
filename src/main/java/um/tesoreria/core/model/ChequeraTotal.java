@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -33,6 +34,7 @@ public class ChequeraTotal extends Auditable implements Serializable {
 	/**
 	* 
 	*/
+	@Serial
 	private static final long serialVersionUID = -8950753856481968525L;
 
 	@Id

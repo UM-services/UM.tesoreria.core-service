@@ -68,7 +68,7 @@ public class ArancelTipoService {
 		return repository.findByArancelTipoId(arancelTipoId).map(arancelTipo -> {
 			arancelTipo = new ArancelTipo(newArancelTipo.getArancelTipoId(), newArancelTipo.getDescripcion(),
 					newArancelTipo.getMedioArancel(), newArancelTipo.getArancelTipoIdCompleto());
-			repository.save(arancelTipo);
+			arancelTipo = repository.save(arancelTipo);
 			log.debug("ArancelTipo -> " + arancelTipo);
 			return arancelTipo;
 		}).orElseThrow(() -> new ArancelTipoException(arancelTipoId));

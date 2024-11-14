@@ -2,8 +2,8 @@ package um.tesoreria.core.controller.facade;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import um.tesoreria.core.kotlin.model.MercadoPagoContext;
 import um.tesoreria.core.kotlin.model.dto.UMPreferenceMPDto;
+import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.service.facade.MercadoPagoCoreService;
 
 @RestController
@@ -22,7 +22,7 @@ public class MercadoPagoCoreController {
     }
 
     @PutMapping("/updateContext/{mercadoPagoContextId}")
-    public ResponseEntity<MercadoPagoContext> updateContext(@PathVariable Long mercadoPagoContextId, @RequestBody MercadoPagoContext mercadoPagoContext) {
+    public ResponseEntity<MercadoPagoContext> updateContext(@RequestBody MercadoPagoContext mercadoPagoContext, @PathVariable Long mercadoPagoContextId) {
         return ResponseEntity.ok(service.updateContext(mercadoPagoContext, mercadoPagoContextId));
     }
 

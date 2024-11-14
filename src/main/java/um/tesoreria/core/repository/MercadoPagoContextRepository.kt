@@ -1,7 +1,7 @@
 package um.tesoreria.core.repository
 
 import org.springframework.data.jpa.repository.JpaRepository
-import um.tesoreria.core.kotlin.model.MercadoPagoContext
+import um.tesoreria.core.model.MercadoPagoContext
 import java.util.Optional
 
 interface MercadoPagoContextRepository : JpaRepository<MercadoPagoContext, Long> {
