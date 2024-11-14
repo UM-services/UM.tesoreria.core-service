@@ -157,11 +157,11 @@ public class ChequeraPagoService {
     }
 
     public Integer nextOrden(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId) {
-        try {
-            return repository.findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdOrderByOrdenDesc(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId).get().getOrden() + 1;
-        } catch (ChequeraPagoException e) {
-            return 1;
-        }
+        log.debug("Processing nextOrden");
+        return repository.findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdOrderByOrdenDesc(
+                facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId)
+                .map(pago -> pago.getOrden() + 1)
+                .orElse(1);
     }
 
 }
