@@ -40,7 +40,8 @@ public class MercadoPagoCoreService {
         if (chequeraCuota == null) return null;
 
         // Verifica que la cuota esté disponible para pagar
-        if (chequeraCuota.getPagado() == 1 || chequeraCuota.getBaja() == 1 || chequeraCuota.getCompensada() == 1) return null;
+        if (chequeraCuota.getPagado() == 1 || chequeraCuota.getBaja() == 1 || chequeraCuota.getCompensada() == 1)
+            return null;
 
         // Verificar contexto existente
         MercadoPagoContext existingContext = getExistingContext(chequeraCuotaId, today);
@@ -57,7 +58,7 @@ public class MercadoPagoCoreService {
 
         var fechaVencimiento = determinarFechaVencimiento(chequeraCuota, today);
         var importe = determinarImporte(chequeraCuota, fechaVencimiento);
-        
+
         if (importe.compareTo(BigDecimal.ZERO) == 0) return null;
 
         // Crear nuevo contexto
@@ -66,6 +67,7 @@ public class MercadoPagoCoreService {
                         .chequeraCuotaId(chequeraCuotaId)
                         .fechaVencimiento(fechaVencimiento)
                         .importe(importe)
+                        .importePagado(BigDecimal.ZERO)
                         .activo((byte) 1)
                         .build()))
                 .chequeraCuota(chequeraCuota)
