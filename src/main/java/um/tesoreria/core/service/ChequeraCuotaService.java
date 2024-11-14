@@ -185,6 +185,10 @@ public class ChequeraCuotaService {
                 .collect(Collectors.toList());
     }
 
+    public List<ChequeraCuota> findAllPendientes(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
+        return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndImporte1GreaterThan(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, (byte) 0, (byte) 0, BigDecimal.ZERO);
+    }
+
     public ChequeraCuota findByChequeraCuotaId(Long chequeraCuotaId) {
         ChequeraCuota chequeraCuota = repository.findByChequeraCuotaId(chequeraCuotaId)
                 .orElseThrow(() -> new ChequeraCuotaException(chequeraCuotaId));

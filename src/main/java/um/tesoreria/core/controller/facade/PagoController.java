@@ -6,7 +6,7 @@ import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.service.facade.PagoService;
 
 @RestController
-@RequestMapping("/api/core/pago")
+@RequestMapping("/api/tesoreria/core/pago")
 public class PagoController {
 
     private final PagoService service;

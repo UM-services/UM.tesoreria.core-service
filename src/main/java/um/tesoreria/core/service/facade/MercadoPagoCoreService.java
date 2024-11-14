@@ -43,7 +43,7 @@ public class MercadoPagoCoreService {
         if (chequeraCuota.getPagado() == 1 || chequeraCuota.getBaja() == 1 || chequeraCuota.getCompensada() == 1) return null;
 
         // Verificar contexto existente
-        MercadoPagoContext existingContext = getExistingContext(chequeraCuotaId, chequeraCuota, today);
+        MercadoPagoContext existingContext = getExistingContext(chequeraCuotaId, today);
         if (existingContext != null) return new UMPreferenceMPDto.Builder()
                 .mercadoPagoContext(existingContext)
                 .chequeraCuota(chequeraCuota)
@@ -81,10 +81,10 @@ public class MercadoPagoCoreService {
         }
     }
 
-    private MercadoPagoContext getExistingContext(Long chequeraCuotaId, ChequeraCuota cuota, OffsetDateTime today) {
+    private MercadoPagoContext getExistingContext(Long chequeraCuotaId, OffsetDateTime today) {
         try {
             MercadoPagoContext context = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuotaId);
-            if (context != null && isValidContext(context, cuota, today)) {
+            if (context != null && isValidContext(context, today)) {
                 return context;
             }
         } catch (MercadoPagoContextException e) {
@@ -93,16 +93,14 @@ public class MercadoPagoCoreService {
         return null;
     }
 
-    private boolean isValidContext(MercadoPagoContext context, ChequeraCuota cuota, OffsetDateTime today) {
-        return (Objects.equals(context.getFechaVencimiento(), cuota.getVencimiento1()) && 
-                context.getImporte().compareTo(cuota.getImporte1()) == 0 && 
-                Objects.requireNonNull(cuota.getVencimiento1()).isBefore(today.plusDays(1))) ||
-               (Objects.equals(context.getFechaVencimiento(), cuota.getVencimiento2()) && 
-                context.getImporte().compareTo(cuota.getImporte2()) == 0 && 
-                Objects.requireNonNull(cuota.getVencimiento2()).isBefore(today.plusDays(1))) ||
-               (Objects.equals(context.getFechaVencimiento(), cuota.getVencimiento3()) && 
-                context.getImporte().compareTo(cuota.getImporte3()) == 0 && 
-                Objects.requireNonNull(cuota.getVencimiento3()).isBefore(today.plusDays(1)));
+    private boolean isValidContext(MercadoPagoContext context, OffsetDateTime today) {
+        if (context.getFechaVencimiento() == null) {
+            return false;
+        }
+        if (today.isBefore(context.getFechaVencimiento().plusDays(1)) && context.getImporte().compareTo(BigDecimal.ZERO) > 0) {
+            return true;
+        }
+        return false;
     }
 
     private void deactivateExistingContexts(Long chequeraCuotaId) {
