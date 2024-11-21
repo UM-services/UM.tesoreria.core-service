@@ -5,17 +5,17 @@ package um.tesoreria.core.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import um.tesoreria.core.client.tesoreria.mercadopago.PreferenceClient;
 import um.tesoreria.core.exception.ChequeraSerieException;
 import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
@@ -24,12 +24,11 @@ import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
 import um.tesoreria.core.extern.model.kotlin.PreInscripcionFacultad;
-import um.tesoreria.core.kotlin.model.CarreraChequera;
-import um.tesoreria.core.kotlin.model.ChequeraSerie;
-import um.tesoreria.core.kotlin.model.Facultad;
-import um.tesoreria.core.kotlin.model.Persona;
+import um.tesoreria.core.kotlin.model.*;
+import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.model.dto.DeudaChequera;
 import um.tesoreria.core.model.dto.DeudaPersona;
+import um.tesoreria.core.model.dto.Vencimiento;
 import um.tesoreria.core.model.view.PersonaKey;
 import um.tesoreria.core.repository.IPersonaRepository;
 import um.tesoreria.core.service.view.PersonaKeyService;
@@ -43,32 +42,40 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PersonaService {
 
-	@Autowired
-	private IPersonaRepository repository;
+	private final IPersonaRepository repository;
 
-	@Autowired
-	private PersonaKeyService personaKeyService;
+	private final PersonaKeyService personaKeyService;
 
-	@Autowired
-	private InscripcionFacultadConsumer inscripcionFacultadConsumer;
+	private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
 
-	@Autowired
-	private PreInscripcionFacultadConsumer preInscripcionFacultadConsumer;
+	private final PreInscripcionFacultadConsumer preInscripcionFacultadConsumer;
 
-	@Autowired
-	private FacultadService facultadService;
+	private final FacultadService facultadService;
 
-	@Autowired
-	private ChequeraSerieService chequeraSerieService;
+	private final ChequeraSerieService chequeraSerieService;
 
-	@Autowired
-	private CarreraChequeraService carreraChequeraService;
+	private final CarreraChequeraService carreraChequeraService;
 
-	@Autowired
-	private LegajoFacultadConsumer legajoFacultadConsumer;
+	private final LegajoFacultadConsumer legajoFacultadConsumer;
 
-	@Autowired
-	private ChequeraCuotaService chequeraCuotaService;
+	private final ChequeraCuotaService chequeraCuotaService;
+
+    private final MercadoPagoContextService mercadoPagoContextService;
+	private final PreferenceClient preferenceClient;
+
+	public PersonaService(IPersonaRepository repository, PersonaKeyService personaKeyService, InscripcionFacultadConsumer inscripcionFacultadConsumer, PreInscripcionFacultadConsumer preInscripcionFacultadConsumer, FacultadService facultadService, ChequeraSerieService chequeraSerieService, CarreraChequeraService carreraChequeraService, LegajoFacultadConsumer legajoFacultadConsumer, ChequeraCuotaService chequeraCuotaService, MercadoPagoContextService mercadoPagoContextService, PreferenceClient preferenceClient) {
+		this.repository = repository;
+		this.personaKeyService = personaKeyService;
+		this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;
+		this.preInscripcionFacultadConsumer = preInscripcionFacultadConsumer;
+		this.facultadService = facultadService;
+		this.chequeraSerieService = chequeraSerieService;
+		this.carreraChequeraService = carreraChequeraService;
+		this.legajoFacultadConsumer = legajoFacultadConsumer;
+		this.chequeraCuotaService = chequeraCuotaService;
+		this.mercadoPagoContextService = mercadoPagoContextService;
+		this.preferenceClient = preferenceClient;
+	}
 
 	public Persona findByUnique(BigDecimal personaId, Integer documentoId) {
 		return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
@@ -84,34 +91,129 @@ public class PersonaService {
 	}
 
 	public DeudaPersona deudaByPersona(BigDecimal personaId, Integer documentoId) {
-		DeudaPersona deudaPersona = new DeudaPersona(personaId, documentoId, 0, BigDecimal.ZERO, new ArrayList<>());
+		var deudaCuotas = 0;
+		var deudaTotal = BigDecimal.ZERO;
+		List<DeudaChequera> deudas = new ArrayList<>();
 		for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
 				null)) {
 			DeudaChequera deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
 					chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
 			if (deuda.getCuotas() > 0) {
-				deudaPersona.getDeudas().add(deuda);
-				deudaPersona.setCuotas(deudaPersona.getCuotas() + deuda.getCuotas());
-				deudaPersona.setDeuda(deudaPersona.getDeuda().add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP));
+				deudas.add(deuda);
+				deudaCuotas += deuda.getCuotas();
+				deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
 			}
+		}
+		DeudaPersona deudaPersona = DeudaPersona.builder()
+				.personaId(personaId)
+				.documentoId(documentoId)
+				.cuotas(deudaCuotas)
+				.deuda(deudaTotal)
+				.deudas(deudas)
+				.vencimientos(new ArrayList<>())
+				.build();
+		try {
+			log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersona));
+		} catch (JsonProcessingException e) {
+			log.debug("DeudaPersona error -> {}", e.getMessage());
 		}
 		return deudaPersona;
 	}
 
 	public DeudaPersona deudaByPersonaExtended(BigDecimal personaId, Integer documentoId) {
-		DeudaPersona deudaPersona = new DeudaPersona(personaId, documentoId, 0, BigDecimal.ZERO, new ArrayList<>());
+		log.debug("Processing deudaByPersonaExtended");
+		var deudaCuotas = 0;
+		var deudaTotal = BigDecimal.ZERO;
+		List<DeudaChequera> deudas = new ArrayList<>();
+		List<Vencimiento> vencimientos = new ArrayList<>();
 		for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
 				null)) {
+			logChequera(chequera);
 			DeudaChequera deuda = chequeraCuotaService.calculateDeudaExtended(chequera.getFacultadId(),
 					chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
+			logDeuda(deuda);
 			if (deuda.getCuotas() > 0) {
-				deudaPersona.getDeudas().add(deuda);
-				deudaPersona.setCuotas(deudaPersona.getCuotas() + deuda.getCuotas());
-				deudaPersona.setDeuda(deudaPersona.getDeuda().add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP));
+				deudas.add(deuda);
+				deudaCuotas += deuda.getCuotas();
+				deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
+			}
+			for (ChequeraCuota chequeraCuota : chequeraCuotaService
+					.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(chequera.getFacultadId(),
+							chequera.getTipoChequeraId(), chequera.getChequeraSerieId(), chequera.getAlternativaId())) {
+				logChequeraCuota(chequeraCuota);
+				if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0
+						&& chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
+					log.debug("Creando preferencia");
+					preferenceClient.createPreference(chequeraCuota.getChequeraCuotaId());
+					var mercadoPagoContext = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
+					logMercadoPagoContext(mercadoPagoContext);
+					if (mercadoPagoContext != null) {
+						// Formatear la fecha de vencimiento
+						String fechaVencimientoFormatted = mercadoPagoContext.getFechaVencimiento()
+								.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+						vencimientos.add(Vencimiento.builder()
+								.producto(Objects.requireNonNull(chequeraCuota.getProducto()).getNombre())
+								.periodo(chequeraCuota.getMes() + "/" + chequeraCuota.getAnho())
+								.vencimiento(fechaVencimientoFormatted)
+								.importe(mercadoPagoContext.getImporte())
+								.initPoint(mercadoPagoContext.getInitPoint())
+								.build());
+					}
+				}
 			}
 		}
-		return deudaPersona;
+
+		DeudaPersona deudaPersona = DeudaPersona.builder()
+				.personaId(personaId)
+				.documentoId(documentoId)
+				.cuotas(deudaCuotas)
+				.deuda(deudaTotal)
+				.deudas(deudas)
+				.vencimientos(vencimientos)
+				.build();
+		logDeudaPersona(deudaPersona);
+        return deudaPersona;
 	}
+
+	private void logDeudaPersona(DeudaPersona deudaPersona) {
+		try {
+			log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersona));
+		} catch (JsonProcessingException e) {
+			log.debug("DeudaPersona error -> {}", e.getMessage());
+		}
+	}
+
+	private void logMercadoPagoContext(MercadoPagoContext mercadoPagoContext) {
+        try {
+            log.debug("MercadoPagoContext -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(mercadoPagoContext));
+        } catch (JsonProcessingException e) {
+            log.debug("MercadoPagoContext error -> {}", e.getMessage());
+        }
+    }
+
+	private void logChequeraCuota(ChequeraCuota chequeraCuota) {
+        try {
+            log.debug("ChequeraCuota -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequeraCuota));
+        } catch (JsonProcessingException e) {
+            log.debug("ChequeraCuota error -> {}", e.getMessage());
+        }
+    }
+
+	private void logDeuda(DeudaChequera deuda) {
+        try {
+            log.debug("DeudaChequera -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deuda));
+        } catch (JsonProcessingException e) {
+            log.debug("DeudaChequera error -> {}", e.getMessage());
+        }
+    }
+
+	private void logChequera(ChequeraSerie chequera) {
+        try {
+            log.debug("ChequeraSerie -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequera));
+        } catch (JsonProcessingException e) {
+            log.debug("ChequeraSerie error -> {}", e.getMessage());
+        }
+    }
 
 	public List<PersonaKey> findAllInscriptosSinChequera(Integer facultadId, Integer lectivoId, Integer geograficaId,
 			Integer curso) {

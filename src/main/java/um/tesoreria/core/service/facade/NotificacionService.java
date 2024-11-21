@@ -23,7 +23,6 @@ import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.exception.ProveedorMovimientoException;
 import um.tesoreria.core.exception.ProveedorException;
 import um.tesoreria.core.extern.consumer.AlumnoExamenFacultadConsumer;
-import um.tesoreria.core.extern.consumer.NotificacionFacultadConsumer;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.NotificacionExamen;
 import um.tesoreria.core.model.PersonaSuspendido;
@@ -51,15 +50,6 @@ public class NotificacionService {
 
 	@Autowired
 	private FacultadService facultadService;
-
-	@Autowired
-	private AlumnoExamenFacultadConsumer alumnoExamenFacultadConsumer;
-
-	@Autowired
-	private NotificacionExamenService notificacionExamenService;
-
-	@Autowired
-	private NotificacionFacultadConsumer notificacionFacultadConsumer;
 
 	@Autowired
 	private DomicilioService domicilioService;
@@ -90,26 +80,6 @@ public class NotificacionService {
 
 	@Autowired
 	private ValorService valorService;
-
-	public void notifyByPersona(BigDecimal personaId, Integer documentoId, Integer facultadId) {
-		try {
-			Facultad facultad = facultadService.findByFacultadId(facultadId);
-			if (!facultad.getApiserver().equals("")) {
-				Integer cantidad_inscripciones = alumnoExamenFacultadConsumer.cantidad48horas(facultad.getApiserver(),
-						facultad.getApiport(), personaId, documentoId, facultadId);
-				if (cantidad_inscripciones > 0) {
-					List<NotificacionExamen> emails = notificacionExamenService
-							.findAllByFacultadId(facultad.getFacultadId());
-					if (emails.size() > 0) {
-						notificacionFacultadConsumer.examen48horas(facultad.getApiserver(), facultad.getApiport(),
-								personaId, documentoId, facultadId, emails);
-					}
-				}
-			}
-		} catch (FacultadException e) {
-			log.debug("ERROR: Sin Facultad");
-		}
-	}
 
 	public String notifyDeudorSuspendido(PersonaSuspendido personaSuspendido) throws MessagingException {
 		String data = "";
