@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,16 +19,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class DeudaPersona implements Serializable {
-	/**
-	* 
-	*/
-	private static final long serialVersionUID = 309300403078520665L;
 
 	private BigDecimal personaId;
 	private Integer documentoId;
 	private Integer cuotas;
 	private BigDecimal deuda;
 	private List<DeudaChequera> deudas;
+	private List<Vencimiento> vencimientos;
 
 }

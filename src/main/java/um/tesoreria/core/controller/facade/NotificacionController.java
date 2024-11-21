@@ -35,13 +35,6 @@ public class NotificacionController {
 	@Autowired
 	private MailChequeraService mailChequeraService;
 
-	@GetMapping("/48horas/{personaId}/{documentoId}/{facultadId}")
-	public ResponseEntity<Void> notifyByPersona(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId,
-			@PathVariable Integer facultadId) {
-		service.notifyByPersona(personaId, documentoId, facultadId);
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-	}
-
 	@GetMapping("/notifyDeudorChequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
 	public ResponseEntity<String> notifyDeudorChequera(@PathVariable Integer facultadId,
 			@PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) throws MessagingException {
