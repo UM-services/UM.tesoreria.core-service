@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.core.service;
 
@@ -36,154 +36,155 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author daniel
- *
  */
 @Service
 @Slf4j
 public class PersonaService {
 
-	private final IPersonaRepository repository;
+    private final IPersonaRepository repository;
 
-	private final PersonaKeyService personaKeyService;
+    private final PersonaKeyService personaKeyService;
 
-	private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
+    private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
 
-	private final PreInscripcionFacultadConsumer preInscripcionFacultadConsumer;
+    private final PreInscripcionFacultadConsumer preInscripcionFacultadConsumer;
 
-	private final FacultadService facultadService;
+    private final FacultadService facultadService;
 
-	private final ChequeraSerieService chequeraSerieService;
+    private final ChequeraSerieService chequeraSerieService;
 
-	private final CarreraChequeraService carreraChequeraService;
+    private final CarreraChequeraService carreraChequeraService;
 
-	private final LegajoFacultadConsumer legajoFacultadConsumer;
+    private final LegajoFacultadConsumer legajoFacultadConsumer;
 
-	private final ChequeraCuotaService chequeraCuotaService;
+    private final ChequeraCuotaService chequeraCuotaService;
 
     private final MercadoPagoContextService mercadoPagoContextService;
-	private final PreferenceClient preferenceClient;
+    private final PreferenceClient preferenceClient;
 
-	public PersonaService(IPersonaRepository repository, PersonaKeyService personaKeyService, InscripcionFacultadConsumer inscripcionFacultadConsumer, PreInscripcionFacultadConsumer preInscripcionFacultadConsumer, FacultadService facultadService, ChequeraSerieService chequeraSerieService, CarreraChequeraService carreraChequeraService, LegajoFacultadConsumer legajoFacultadConsumer, ChequeraCuotaService chequeraCuotaService, MercadoPagoContextService mercadoPagoContextService, PreferenceClient preferenceClient) {
-		this.repository = repository;
-		this.personaKeyService = personaKeyService;
-		this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;
-		this.preInscripcionFacultadConsumer = preInscripcionFacultadConsumer;
-		this.facultadService = facultadService;
-		this.chequeraSerieService = chequeraSerieService;
-		this.carreraChequeraService = carreraChequeraService;
-		this.legajoFacultadConsumer = legajoFacultadConsumer;
-		this.chequeraCuotaService = chequeraCuotaService;
-		this.mercadoPagoContextService = mercadoPagoContextService;
-		this.preferenceClient = preferenceClient;
-	}
+    public PersonaService(IPersonaRepository repository, PersonaKeyService personaKeyService, InscripcionFacultadConsumer inscripcionFacultadConsumer, PreInscripcionFacultadConsumer preInscripcionFacultadConsumer, FacultadService facultadService, ChequeraSerieService chequeraSerieService, CarreraChequeraService carreraChequeraService, LegajoFacultadConsumer legajoFacultadConsumer, ChequeraCuotaService chequeraCuotaService, MercadoPagoContextService mercadoPagoContextService, PreferenceClient preferenceClient) {
+        this.repository = repository;
+        this.personaKeyService = personaKeyService;
+        this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;
+        this.preInscripcionFacultadConsumer = preInscripcionFacultadConsumer;
+        this.facultadService = facultadService;
+        this.chequeraSerieService = chequeraSerieService;
+        this.carreraChequeraService = carreraChequeraService;
+        this.legajoFacultadConsumer = legajoFacultadConsumer;
+        this.chequeraCuotaService = chequeraCuotaService;
+        this.mercadoPagoContextService = mercadoPagoContextService;
+        this.preferenceClient = preferenceClient;
+    }
 
-	public Persona findByUnique(BigDecimal personaId, Integer documentoId) {
-		return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
-				.orElseThrow(() -> new PersonaException(personaId, documentoId));
-	}
+    public Persona findByUnique(BigDecimal personaId, Integer documentoId) {
+        return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
+                .orElseThrow(() -> new PersonaException(personaId, documentoId));
+    }
 
-	public Persona findByPersonaId(BigDecimal personaId) {
-		return repository.findTopByPersonaId(personaId).orElseThrow(() -> new PersonaException(personaId));
-	}
+    public Persona findByPersonaId(BigDecimal personaId) {
+        return repository.findTopByPersonaId(personaId).orElseThrow(() -> new PersonaException(personaId));
+    }
 
-	public List<Persona> findAllSantander() {
-		return repository.findAllByCbuLike("072%");
-	}
+    public List<Persona> findAllSantander() {
+        return repository.findAllByCbuLike("072%");
+    }
 
-	public DeudaPersona deudaByPersona(BigDecimal personaId, Integer documentoId) {
-		var deudaCuotas = 0;
-		var deudaTotal = BigDecimal.ZERO;
-		List<DeudaChequera> deudas = new ArrayList<>();
-		for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
-				null)) {
-			DeudaChequera deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
-					chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
-			if (deuda.getCuotas() > 0) {
-				deudas.add(deuda);
-				deudaCuotas += deuda.getCuotas();
-				deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
-			}
-		}
-		DeudaPersona deudaPersona = DeudaPersona.builder()
-				.personaId(personaId)
-				.documentoId(documentoId)
-				.cuotas(deudaCuotas)
-				.deuda(deudaTotal)
-				.deudas(deudas)
-				.vencimientos(new ArrayList<>())
-				.build();
-		try {
-			log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersona));
-		} catch (JsonProcessingException e) {
-			log.debug("DeudaPersona error -> {}", e.getMessage());
-		}
-		return deudaPersona;
-	}
-
-	public DeudaPersona deudaByPersonaExtended(BigDecimal personaId, Integer documentoId) {
-		log.debug("Processing deudaByPersonaExtended");
-		var deudaCuotas = 0;
-		var deudaTotal = BigDecimal.ZERO;
-		List<DeudaChequera> deudas = new ArrayList<>();
-		List<Vencimiento> vencimientos = new ArrayList<>();
-		for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
-				null)) {
-			logChequera(chequera);
-			DeudaChequera deuda = chequeraCuotaService.calculateDeudaExtended(chequera.getFacultadId(),
-					chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
-			logDeuda(deuda);
-			if (deuda.getCuotas() > 0) {
-				deudas.add(deuda);
-				deudaCuotas += deuda.getCuotas();
-				deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
-			}
-			for (ChequeraCuota chequeraCuota : chequeraCuotaService
-					.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(chequera.getFacultadId(),
-							chequera.getTipoChequeraId(), chequera.getChequeraSerieId(), chequera.getAlternativaId())) {
-				logChequeraCuota(chequeraCuota);
-				if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0
-						&& chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
-					log.debug("Creando preferencia");
-					preferenceClient.createPreference(chequeraCuota.getChequeraCuotaId());
-					var mercadoPagoContext = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
-					logMercadoPagoContext(mercadoPagoContext);
-					if (mercadoPagoContext != null) {
-						// Formatear la fecha de vencimiento
-						String fechaVencimientoFormatted = mercadoPagoContext.getFechaVencimiento()
-								.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-						vencimientos.add(Vencimiento.builder()
-								.producto(Objects.requireNonNull(chequeraCuota.getProducto()).getNombre())
-								.periodo(chequeraCuota.getMes() + "/" + chequeraCuota.getAnho())
-								.vencimiento(fechaVencimientoFormatted)
-								.importe(mercadoPagoContext.getImporte())
-								.initPoint(mercadoPagoContext.getInitPoint())
-								.build());
-					}
-				}
-			}
-		}
-
-		DeudaPersona deudaPersona = DeudaPersona.builder()
-				.personaId(personaId)
-				.documentoId(documentoId)
-				.cuotas(deudaCuotas)
-				.deuda(deudaTotal)
-				.deudas(deudas)
-				.vencimientos(vencimientos)
-				.build();
-		logDeudaPersona(deudaPersona);
+    public DeudaPersona deudaByPersona(BigDecimal personaId, Integer documentoId) {
+        var deudaCuotas = 0;
+        var deudaTotal = BigDecimal.ZERO;
+        List<DeudaChequera> deudas = new ArrayList<>();
+        for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
+                null)) {
+            DeudaChequera deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
+                    chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
+            if (deuda.getCuotas() > 0) {
+                deudas.add(deuda);
+                deudaCuotas += deuda.getCuotas();
+                deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
+            }
+        }
+        DeudaPersona deudaPersona = DeudaPersona.builder()
+                .personaId(personaId)
+                .documentoId(documentoId)
+                .cuotas(deudaCuotas)
+                .deuda(deudaTotal)
+                .deudas(deudas)
+                .vencimientos(new ArrayList<>())
+                .build();
+        try {
+            log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersona));
+        } catch (JsonProcessingException e) {
+            log.debug("DeudaPersona error -> {}", e.getMessage());
+        }
         return deudaPersona;
-	}
+    }
 
-	private void logDeudaPersona(DeudaPersona deudaPersona) {
-		try {
-			log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersona));
-		} catch (JsonProcessingException e) {
-			log.debug("DeudaPersona error -> {}", e.getMessage());
-		}
-	}
+    public DeudaPersona deudaByPersonaExtended(BigDecimal personaId, Integer documentoId) {
+        log.debug("Processing deudaByPersonaExtended");
+        var deudaCuotas = 0;
+        var deudaTotal = BigDecimal.ZERO;
+        List<DeudaChequera> deudas = new ArrayList<>();
+        List<Vencimiento> vencimientos = new ArrayList<>();
+        for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
+                null)) {
+            logChequera(chequera);
+            DeudaChequera deuda = chequeraCuotaService.calculateDeudaExtended(chequera.getFacultadId(),
+                    chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
+            logDeuda(deuda);
+            if (deuda.getCuotas() > 0) {
+                deudas.add(deuda);
+                deudaCuotas += deuda.getCuotas();
+                deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
+            }
+            for (ChequeraCuota chequeraCuota : chequeraCuotaService
+                    .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(chequera.getFacultadId(),
+                            chequera.getTipoChequeraId(), chequera.getChequeraSerieId(), chequera.getAlternativaId())) {
+                logChequeraCuota(chequeraCuota);
+                if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0
+                        && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
+                    log.debug("Creando preferencia");
+                    preferenceClient.createPreference(chequeraCuota.getChequeraCuotaId());
+                    var mercadoPagoContext = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
+                    logMercadoPagoContext(mercadoPagoContext);
+                    if (mercadoPagoContext != null) {
+                        // Formatear la fecha de vencimiento
+                        String fechaVencimientoFormatted = mercadoPagoContext.getFechaVencimiento()
+                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                        vencimientos.add(Vencimiento.builder()
+                                .chequeraCuotaId(chequeraCuota.getChequeraCuotaId())
+                                .mercadoPagoContextId(mercadoPagoContext.getMercadoPagoContextId())
+                                .producto(Objects.requireNonNull(chequeraCuota.getProducto()).getNombre())
+                                .periodo(chequeraCuota.getMes() + "/" + chequeraCuota.getAnho())
+                                .vencimiento(fechaVencimientoFormatted)
+                                .importe(mercadoPagoContext.getImporte())
+                                .initPoint(mercadoPagoContext.getInitPoint())
+                                .build());
+                    }
+                }
+            }
+        }
 
-	private void logMercadoPagoContext(MercadoPagoContext mercadoPagoContext) {
+        DeudaPersona deudaPersona = DeudaPersona.builder()
+                .personaId(personaId)
+                .documentoId(documentoId)
+                .cuotas(deudaCuotas)
+                .deuda(deudaTotal)
+                .deudas(deudas)
+                .vencimientos(vencimientos)
+                .build();
+        logDeudaPersona(deudaPersona);
+        return deudaPersona;
+    }
+
+    private void logDeudaPersona(DeudaPersona deudaPersona) {
+        try {
+            log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersona));
+        } catch (JsonProcessingException e) {
+            log.debug("DeudaPersona error -> {}", e.getMessage());
+        }
+    }
+
+    private void logMercadoPagoContext(MercadoPagoContext mercadoPagoContext) {
         try {
             log.debug("MercadoPagoContext -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(mercadoPagoContext));
         } catch (JsonProcessingException e) {
@@ -191,7 +192,7 @@ public class PersonaService {
         }
     }
 
-	private void logChequeraCuota(ChequeraCuota chequeraCuota) {
+    private void logChequeraCuota(ChequeraCuota chequeraCuota) {
         try {
             log.debug("ChequeraCuota -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequeraCuota));
         } catch (JsonProcessingException e) {
@@ -199,7 +200,7 @@ public class PersonaService {
         }
     }
 
-	private void logDeuda(DeudaChequera deuda) {
+    private void logDeuda(DeudaChequera deuda) {
         try {
             log.debug("DeudaChequera -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deuda));
         } catch (JsonProcessingException e) {
@@ -207,7 +208,7 @@ public class PersonaService {
         }
     }
 
-	private void logChequera(ChequeraSerie chequera) {
+    private void logChequera(ChequeraSerie chequera) {
         try {
             log.debug("ChequeraSerie -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequera));
         } catch (JsonProcessingException e) {
@@ -215,171 +216,171 @@ public class PersonaService {
         }
     }
 
-	public List<PersonaKey> findAllInscriptosSinChequera(Integer facultadId, Integer lectivoId, Integer geograficaId,
-			Integer curso) {
-		Facultad facultad = facultadService.findByFacultadId(facultadId);
-		Map<String, InscripcionFacultad> inscriptos = inscripcionFacultadConsumer
-				.findAllByCursoSinProvisoria(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
-						geograficaId, curso)
-				.stream().collect(Collectors.toMap(InscripcionFacultad::getPersonaKey, Function.identity(),
-						(inscripto, replacement) -> inscripto));
-		// Elimina los que ya tengan chequera
-		Map<String, InscripcionFacultad> pendientes = new HashMap<String, InscripcionFacultad>();
-		for (InscripcionFacultad inscripto : inscriptos.values()) {
-			Boolean add = true;
-			try {
-				if (facultadId == 15) {
-					chequeraSerieService.findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
-							inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
-				} else {
-					chequeraSerieService.findGradoByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
-							inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
-				}
-				add = false;
-			} catch (ChequeraSerieException e) {
-				log.debug("Sin chequera");
-			}
-			// Verifica los alumnos de intercambio
-			if (add) {
-				try {
-					LegajoFacultad legajo = legajoFacultadConsumer.findByPersona(facultad.getApiserver(),
-							facultad.getApiport(), inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId);
-					if (legajo.getIntercambio() == 1) {
-						add = false;
-					}
-				} catch (Exception e) {
-					log.debug("Sin legajo");
-				}
-			}
-			// Agrega el alumno
-			if (add) {
-				pendientes.put(inscripto.getPersonaKey(), inscripto);
-			}
-		}
-		return personaKeyService.findAllByUnifiedIn(new ArrayList<>(pendientes.keySet()),
-				Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()));
-	}
+    public List<PersonaKey> findAllInscriptosSinChequera(Integer facultadId, Integer lectivoId, Integer geograficaId,
+                                                         Integer curso) {
+        Facultad facultad = facultadService.findByFacultadId(facultadId);
+        Map<String, InscripcionFacultad> inscriptos = inscripcionFacultadConsumer
+                .findAllByCursoSinProvisoria(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
+                        geograficaId, curso)
+                .stream().collect(Collectors.toMap(InscripcionFacultad::getPersonaKey, Function.identity(),
+                        (inscripto, replacement) -> inscripto));
+        // Elimina los que ya tengan chequera
+        Map<String, InscripcionFacultad> pendientes = new HashMap<String, InscripcionFacultad>();
+        for (InscripcionFacultad inscripto : inscriptos.values()) {
+            Boolean add = true;
+            try {
+                if (facultadId == 15) {
+                    chequeraSerieService.findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
+                            inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
+                } else {
+                    chequeraSerieService.findGradoByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
+                            inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
+                }
+                add = false;
+            } catch (ChequeraSerieException e) {
+                log.debug("Sin chequera");
+            }
+            // Verifica los alumnos de intercambio
+            if (add) {
+                try {
+                    LegajoFacultad legajo = legajoFacultadConsumer.findByPersona(facultad.getApiserver(),
+                            facultad.getApiport(), inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId);
+                    if (legajo.getIntercambio() == 1) {
+                        add = false;
+                    }
+                } catch (Exception e) {
+                    log.debug("Sin legajo");
+                }
+            }
+            // Agrega el alumno
+            if (add) {
+                pendientes.put(inscripto.getPersonaKey(), inscripto);
+            }
+        }
+        return personaKeyService.findAllByUnifiedIn(new ArrayList<>(pendientes.keySet()),
+                Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()));
+    }
 
-	public List<PersonaKey> findAllInscriptosSinChequeraDefault(Integer facultadId, Integer lectivoId,
-			Integer geograficaId, Integer claseChequeraId, Integer curso) {
-		Facultad facultad = facultadService.findByFacultadId(facultadId);
-		Map<String, InscripcionFacultad> inscriptos = inscripcionFacultadConsumer
-				.findAllByCursoSinProvisoria(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
-						geograficaId, curso)
-				.stream().collect(Collectors.toMap(InscripcionFacultad::getPersonaKey, Function.identity(),
-						(inscripto, replacemente) -> inscripto));
-		Map<String, CarreraChequera> tipos = carreraChequeraService
-				.findAllByFacultadIdAndLectivoIdAndGeograficaIdAndClaseChequeraIdAndCurso(facultadId, lectivoId,
-						geograficaId, claseChequeraId, curso)
-				.stream().collect(Collectors.toMap(CarreraChequera::getCarreraKey, Function.identity(),
-						(tipo, replacement) -> tipo));
-		// Elimina los que ya tengan chequera
-		Map<String, InscripcionFacultad> pendientes = new HashMap<String, InscripcionFacultad>();
-		for (InscripcionFacultad inscripto : inscriptos.values()) {
-			CarreraChequera carreraChequera = null;
-			if (!tipos.containsKey(facultadId + "." + inscripto.getPlanId() + "." + inscripto.getCarreraId()))
-				continue;
-			carreraChequera = tipos.get(facultadId + "." + inscripto.getPlanId() + "." + inscripto.getCarreraId());
-			Boolean add = true;
-			try {
-				chequeraSerieService
-						.findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaIdAndTipoChequeraId(
-								inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId,
-								geograficaId, carreraChequera.getTipoChequeraId());
-				add = false;
-			} catch (ChequeraSerieException e) {
-				log.debug("Sin chequera");
-			}
-			// Verifica los alumnos de intercambio
-			if (add) {
-				try {
-					LegajoFacultad legajo = legajoFacultadConsumer.findByPersona(facultad.getApiserver(),
-							facultad.getApiport(), inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId);
-					if (legajo.getIntercambio() == 1) {
-						add = false;
-					}
-				} catch (Exception e) {
-					log.debug("Sin legajo");
-				}
-			}
-			// Agrega el alumno
-			if (add) {
-				pendientes.put(inscripto.getPersonaKey(), inscripto);
-			}
-		}
-		return personaKeyService.findAllByUnifiedIn(new ArrayList<>(pendientes.keySet()),
-				Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()));
-	}
+    public List<PersonaKey> findAllInscriptosSinChequeraDefault(Integer facultadId, Integer lectivoId,
+                                                                Integer geograficaId, Integer claseChequeraId, Integer curso) {
+        Facultad facultad = facultadService.findByFacultadId(facultadId);
+        Map<String, InscripcionFacultad> inscriptos = inscripcionFacultadConsumer
+                .findAllByCursoSinProvisoria(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
+                        geograficaId, curso)
+                .stream().collect(Collectors.toMap(InscripcionFacultad::getPersonaKey, Function.identity(),
+                        (inscripto, replacemente) -> inscripto));
+        Map<String, CarreraChequera> tipos = carreraChequeraService
+                .findAllByFacultadIdAndLectivoIdAndGeograficaIdAndClaseChequeraIdAndCurso(facultadId, lectivoId,
+                        geograficaId, claseChequeraId, curso)
+                .stream().collect(Collectors.toMap(CarreraChequera::getCarreraKey, Function.identity(),
+                        (tipo, replacement) -> tipo));
+        // Elimina los que ya tengan chequera
+        Map<String, InscripcionFacultad> pendientes = new HashMap<String, InscripcionFacultad>();
+        for (InscripcionFacultad inscripto : inscriptos.values()) {
+            CarreraChequera carreraChequera = null;
+            if (!tipos.containsKey(facultadId + "." + inscripto.getPlanId() + "." + inscripto.getCarreraId()))
+                continue;
+            carreraChequera = tipos.get(facultadId + "." + inscripto.getPlanId() + "." + inscripto.getCarreraId());
+            Boolean add = true;
+            try {
+                chequeraSerieService
+                        .findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaIdAndTipoChequeraId(
+                                inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId,
+                                geograficaId, carreraChequera.getTipoChequeraId());
+                add = false;
+            } catch (ChequeraSerieException e) {
+                log.debug("Sin chequera");
+            }
+            // Verifica los alumnos de intercambio
+            if (add) {
+                try {
+                    LegajoFacultad legajo = legajoFacultadConsumer.findByPersona(facultad.getApiserver(),
+                            facultad.getApiport(), inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId);
+                    if (legajo.getIntercambio() == 1) {
+                        add = false;
+                    }
+                } catch (Exception e) {
+                    log.debug("Sin legajo");
+                }
+            }
+            // Agrega el alumno
+            if (add) {
+                pendientes.put(inscripto.getPersonaKey(), inscripto);
+            }
+        }
+        return personaKeyService.findAllByUnifiedIn(new ArrayList<>(pendientes.keySet()),
+                Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()));
+    }
 
-	public List<PersonaKey> findAllPreInscriptosSinChequera(Integer facultadId, Integer lectivoId,
-			Integer geograficaId) {
-		Facultad facultad = facultadService.findByFacultadId(facultadId);
-		Map<String, PreInscripcionFacultad> preinscriptos = preInscripcionFacultadConsumer
-				.findAllByPreInscriptos(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
-						geograficaId)
-				.stream().collect(Collectors.toMap(PreInscripcionFacultad::getPersonaKey, Function.identity(),
-						(preinscripto, replacement) -> preinscripto));
-		// Elimina los que ya tengan chequera
-		Map<String, PreInscripcionFacultad> pendientes = new HashMap<String, PreInscripcionFacultad>();
-		for (PreInscripcionFacultad preinscripto : preinscriptos.values()) {
-			Boolean add = true;
-			try {
-				chequeraSerieService
-						.findPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
-								preinscripto.getPersonaId(), preinscripto.getDocumentoId(), facultadId, lectivoId - 1,
-								geograficaId);
-				add = false;
-			} catch (ChequeraSerieException e) {
-				log.debug("Sin chequera");
-			}
-			// Agrega el alumno
-			if (add) {
-				pendientes.put(preinscripto.getPersonaKey(), preinscripto);
-			}
-		}
-		return personaKeyService.findAllByUnifiedIn(new ArrayList<>(pendientes.keySet()),
-				Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()));
-	}
+    public List<PersonaKey> findAllPreInscriptosSinChequera(Integer facultadId, Integer lectivoId,
+                                                            Integer geograficaId) {
+        Facultad facultad = facultadService.findByFacultadId(facultadId);
+        Map<String, PreInscripcionFacultad> preinscriptos = preInscripcionFacultadConsumer
+                .findAllByPreInscriptos(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
+                        geograficaId)
+                .stream().collect(Collectors.toMap(PreInscripcionFacultad::getPersonaKey, Function.identity(),
+                        (preinscripto, replacement) -> preinscripto));
+        // Elimina los que ya tengan chequera
+        Map<String, PreInscripcionFacultad> pendientes = new HashMap<String, PreInscripcionFacultad>();
+        for (PreInscripcionFacultad preinscripto : preinscriptos.values()) {
+            Boolean add = true;
+            try {
+                chequeraSerieService
+                        .findPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
+                                preinscripto.getPersonaId(), preinscripto.getDocumentoId(), facultadId, lectivoId - 1,
+                                geograficaId);
+                add = false;
+            } catch (ChequeraSerieException e) {
+                log.debug("Sin chequera");
+            }
+            // Agrega el alumno
+            if (add) {
+                pendientes.put(preinscripto.getPersonaKey(), preinscripto);
+            }
+        }
+        return personaKeyService.findAllByUnifiedIn(new ArrayList<>(pendientes.keySet()),
+                Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()));
+    }
 
-	public List<PersonaKey> findAllDeudorByLectivoId(Integer facultadId, Integer lectivoId, Integer geograficaId,
-			Integer cuotas) {
-		List<String> unifieds = new ArrayList<String>();
-		for (ChequeraSerie serie : chequeraSerieService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId,
-				facultadId, geograficaId)) {
-			if (cuotas <= chequeraCuotaService.findAllDebidas(facultadId, serie.getTipoChequeraId(),
-					serie.getChequeraSerieId(), serie.getAlternativaId()).size()) {
-				unifieds.add(serie.getPersonaKey());
-			}
-		}
-		return personaKeyService.findAllByUnifiedIn(unifieds,
-				Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()));
-	}
+    public List<PersonaKey> findAllDeudorByLectivoId(Integer facultadId, Integer lectivoId, Integer geograficaId,
+                                                     Integer cuotas) {
+        List<String> unifieds = new ArrayList<String>();
+        for (ChequeraSerie serie : chequeraSerieService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId,
+                facultadId, geograficaId)) {
+            if (cuotas <= chequeraCuotaService.findAllDebidas(facultadId, serie.getTipoChequeraId(),
+                    serie.getChequeraSerieId(), serie.getAlternativaId()).size()) {
+                unifieds.add(serie.getPersonaKey());
+            }
+        }
+        return personaKeyService.findAllByUnifiedIn(unifieds,
+                Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()));
+    }
 
-	public List<PersonaKey> findByUnifieds(List<String> unifieds) {
-		return personaKeyService.findAllByUnifiedIn(unifieds, Sort.by("apellido").ascending());
-	}
+    public List<PersonaKey> findByUnifieds(List<String> unifieds) {
+        return personaKeyService.findAllByUnifiedIn(unifieds, Sort.by("apellido").ascending());
+    }
 
-	public List<PersonaKey> findByStrings(List<String> conditions) {
-		return personaKeyService.findAllByStrings(conditions);
-	}
+    public List<PersonaKey> findByStrings(List<String> conditions) {
+        return personaKeyService.findAllByStrings(conditions);
+    }
 
-	public Persona findByUniqueId(Long uniqueId) {
-		return repository.findByUniqueId(uniqueId).orElseThrow(() -> new PersonaException(uniqueId));
-	}
+    public Persona findByUniqueId(Long uniqueId) {
+        return repository.findByUniqueId(uniqueId).orElseThrow(() -> new PersonaException(uniqueId));
+    }
 
-	public Persona add(Persona persona) {
-		persona = repository.save(persona);
-		return persona;
-	}
+    public Persona add(Persona persona) {
+        persona = repository.save(persona);
+        return persona;
+    }
 
-	public Persona update(Persona newpersona, Long uniqueId) {
-		return repository.findByUniqueId(uniqueId).map(persona -> {
-			persona = new Persona(uniqueId, newpersona.getPersonaId(), newpersona.getDocumentoId(),
-					newpersona.getApellido(), newpersona.getNombre(), newpersona.getSexo(), newpersona.getPrimero(),
-					newpersona.getCuit(), newpersona.getCbu(), newpersona.getPassword());
-			repository.save(persona);
-			return persona;
-		}).orElseThrow(() -> new PersonaException(uniqueId));
-	}
+    public Persona update(Persona newpersona, Long uniqueId) {
+        return repository.findByUniqueId(uniqueId).map(persona -> {
+            persona = new Persona(uniqueId, newpersona.getPersonaId(), newpersona.getDocumentoId(),
+                    newpersona.getApellido(), newpersona.getNombre(), newpersona.getSexo(), newpersona.getPrimero(),
+                    newpersona.getCuit(), newpersona.getCbu(), newpersona.getPassword());
+            repository.save(persona);
+            return persona;
+        }).orElseThrow(() -> new PersonaException(uniqueId));
+    }
 
 }
