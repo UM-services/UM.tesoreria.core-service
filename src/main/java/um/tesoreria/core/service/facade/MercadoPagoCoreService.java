@@ -41,7 +41,7 @@ public class MercadoPagoCoreService {
         if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
 
         MercadoPagoContext existingContext = findExistingContext(chequeraCuotaId, chequeraCuota);
-        if (existingContext != null && existingContext.getPreferenceId() != null && isContextUnchanged(chequeraCuota, existingContext)) {
+        if (existingContext != null && isContextUnchanged(chequeraCuota, existingContext)) {
             return buildResponse(existingContext, chequeraCuota);
         }
 
