@@ -83,6 +83,8 @@ public class MercadoPagoContextService {
                 .initPoint(source.getInitPoint())
                 .fechaVencimiento(source.getFechaVencimiento())
                 .importe(source.getImporte())
+                .changed(source.getChanged())
+                .preferenceId(source.getPreferenceId())
                 .preference(source.getPreference())
                 .activo(source.getActivo())
                 .chequeraPagoId(source.getChequeraPagoId())
