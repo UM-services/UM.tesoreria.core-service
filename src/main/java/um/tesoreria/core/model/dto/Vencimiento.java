@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 @Builder
 public class Vencimiento {
 
+    private Long chequeraCuotaId;
+    private Long mercadoPagoContextId;
     private String producto;
     private String periodo;
     private String vencimiento;
