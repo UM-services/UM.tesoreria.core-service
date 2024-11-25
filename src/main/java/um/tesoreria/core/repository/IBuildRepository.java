@@ -16,6 +16,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IBuildRepository extends JpaRepository<Build, Long> {
 
-	public Optional<Build> findTopByOrderByBuildDesc();
+	Optional<Build> findTopByOrderByBuildDesc();
 
 }

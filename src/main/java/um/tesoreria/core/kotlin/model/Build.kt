@@ -14,5 +14,4 @@ data class Build(
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	var build: Long? = null
 
-
 ) : Auditable()
