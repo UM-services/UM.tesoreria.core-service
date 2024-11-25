@@ -27,12 +27,12 @@ public class BuildController {
 
 	@GetMapping("/last")
 	public ResponseEntity<Build> findLast() {
-		return new ResponseEntity<Build>(service.findLast(), HttpStatus.OK);
+		return new ResponseEntity<>(service.findLast(), HttpStatus.OK);
 	}
 
 	@PostMapping("/")
 	public ResponseEntity<Build> add() {
-		return new ResponseEntity<Build>(service.add(new Build()), HttpStatus.OK);
+		return new ResponseEntity<>(service.add(new Build()), HttpStatus.OK);
 	}
 
 }
