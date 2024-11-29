@@ -1,7 +1,10 @@
 package um.tesoreria.core.controller.facade;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.exception.MercadoPagoContextException;
 import um.tesoreria.core.kotlin.model.dto.UMPreferenceMPDto;
 import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.service.facade.MercadoPagoCoreService;
@@ -28,7 +31,11 @@ public class MercadoPagoCoreController {
 
     @GetMapping("/find/context/{mercadoPagoContextId}")
     public ResponseEntity<MercadoPagoContext> findContextByMercadoPagoContextId(@PathVariable Long mercadoPagoContextId) {
-        return ResponseEntity.ok(service.findContextByMercadoPagoContextId(mercadoPagoContextId));
+        try {
+            return ResponseEntity.ok(service.findContextByMercadoPagoContextId(mercadoPagoContextId));
+        } catch (MercadoPagoContextException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
 }
