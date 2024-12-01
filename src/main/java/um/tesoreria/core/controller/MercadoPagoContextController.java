@@ -11,6 +11,8 @@ import um.tesoreria.core.exception.MercadoPagoContextException;
 import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.service.MercadoPagoContextService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/tesoreria/core/mercadoPagoContext")
 public class MercadoPagoContextController {
@@ -28,6 +30,20 @@ public class MercadoPagoContextController {
         } catch (MercadoPagoContextException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    @GetMapping("/{mercadoPagoContextId}")
+    public ResponseEntity<MercadoPagoContext> findByMercadoPagoContextId(@PathVariable Long mercadoPagoContextId) {
+        try {
+            return ResponseEntity.ok(service.findByMercadoPagoContextId(mercadoPagoContextId));
+        } catch (MercadoPagoContextException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping("/all/id")
+    public ResponseEntity<List<Long>> findAllIds() {
+        return ResponseEntity.ok(service.findAllIds());
     }
 
 }
