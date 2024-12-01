@@ -40,6 +40,9 @@ public class MercadoPagoCoreService {
         ChequeraCuota chequeraCuota = getChequeraCuota(chequeraCuotaId);
         if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
 
+        VencimientoMP vencimiento = determineVencimientoMP(chequeraCuota, today);
+        if (vencimiento.importe().compareTo(BigDecimal.ZERO) == 0) return null;
+
         MercadoPagoContext existingContext = findExistingContext(chequeraCuotaId, chequeraCuota);
         if (existingContext != null && isContextUnchanged(chequeraCuota, existingContext)) {
             return buildResponse(existingContext, chequeraCuota);
@@ -47,9 +50,6 @@ public class MercadoPagoCoreService {
 
         deactivateExistingContexts(chequeraCuotaId);
         if (today.isAfter(chequeraCuota.getVencimiento3())) return null;
-
-        VencimientoMP vencimiento = determineVencimientoMP(chequeraCuota, today);
-        if (vencimiento.importe().compareTo(BigDecimal.ZERO) == 0) return null;
 
         existingContext = findExistingContext(chequeraCuotaId, chequeraCuota);
         MercadoPagoContext newContext = createOrUpdateContext(existingContext, chequeraCuotaId, vencimiento);
