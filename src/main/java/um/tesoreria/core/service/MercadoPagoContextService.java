@@ -97,8 +97,8 @@ public class MercadoPagoContextService {
                 .build();
     }
 
-    public List<Long> findAllIds() {
-        return repository.findAll().stream().map(MercadoPagoContext::getMercadoPagoContextId).toList();
+    public List<Long> findAllActiveChequeraCuota() {
+        return Objects.requireNonNull(repository.findAllByActivo((byte) 1)).stream().filter(Objects::nonNull).map(MercadoPagoContext::getChequeraCuotaId).toList();
     }
 
 }

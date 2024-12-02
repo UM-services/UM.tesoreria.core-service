@@ -36,24 +36,18 @@ public class MercadoPagoCoreService {
     @Transactional
     public UMPreferenceMPDto makeContext(Long chequeraCuotaId) {
         log.debug("Processing makeContext");
+
         var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
         ChequeraCuota chequeraCuota = getChequeraCuota(chequeraCuotaId);
         if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
 
         VencimientoMP vencimiento = determineVencimientoMP(chequeraCuota, today);
         if (vencimiento.importe().compareTo(BigDecimal.ZERO) == 0) return null;
+        if (vencimiento.fechaVencimiento().isBefore(today)) return null;
 
-        MercadoPagoContext existingContext = findExistingContext(chequeraCuotaId, chequeraCuota);
-        if (existingContext != null && isContextUnchanged(chequeraCuota, existingContext)) {
-            return buildResponse(existingContext, chequeraCuota);
-        }
-
-        deactivateExistingContexts(chequeraCuotaId);
-        if (today.isAfter(chequeraCuota.getVencimiento3())) return null;
-
-        existingContext = findExistingContext(chequeraCuotaId, chequeraCuota);
-        MercadoPagoContext newContext = createOrUpdateContext(existingContext, chequeraCuotaId, vencimiento);
-        return buildResponse(newContext, chequeraCuota);
+        MercadoPagoContext mercadoPagoContext = findExistingContext(chequeraCuotaId);
+        mercadoPagoContext = createOrUpdateContext(mercadoPagoContext, chequeraCuotaId, vencimiento);
+        return buildResponse(mercadoPagoContext, chequeraCuota);
     }
 
     private boolean isCuotaAvailable(ChequeraCuota chequeraCuota) {
@@ -61,7 +55,7 @@ public class MercadoPagoCoreService {
         return chequeraCuota.getPagado() != 1 && chequeraCuota.getBaja() != 1 && chequeraCuota.getCompensada() != 1;
     }
 
-    private MercadoPagoContext findExistingContext(Long chequeraCuotaId, ChequeraCuota chequeraCuota) {
+    private MercadoPagoContext findExistingContext(Long chequeraCuotaId) {
         log.debug("Processing findExistingContext");
         try {
             return mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuotaId);
@@ -71,26 +65,9 @@ public class MercadoPagoCoreService {
         }
     }
 
-    private boolean isContextUnchanged(ChequeraCuota chequeraCuota, MercadoPagoContext existingContext) {
-        log.debug("Processing isContextUnchanged");
-        return (isEqual(chequeraCuota.getImporte1(), existingContext) && isEqual(chequeraCuota.getVencimiento1(), existingContext)) ||
-               (isEqual(chequeraCuota.getImporte2(), existingContext) && isEqual(chequeraCuota.getVencimiento2(), existingContext)) ||
-               (isEqual(chequeraCuota.getImporte3(), existingContext) && isEqual(chequeraCuota.getVencimiento3(), existingContext));
-    }
-
-    private boolean isEqual(BigDecimal importe, MercadoPagoContext context) {
-        log.debug("Processing isEqual");
-        return importe.compareTo(context.getImporte()) == 0;
-    }
-
-    private boolean isEqual(OffsetDateTime vencimiento, MercadoPagoContext context) {
-        log.debug("Processing isEqual");
-        return Objects.requireNonNull(vencimiento).isEqual(context.getFechaVencimiento());
-    }
-
-    private MercadoPagoContext createOrUpdateContext(MercadoPagoContext existingContext, Long chequeraCuotaId, VencimientoMP vencimiento) {
+    private MercadoPagoContext createOrUpdateContext(MercadoPagoContext mercadoPagoContext, Long chequeraCuotaId, VencimientoMP vencimiento) {
         log.debug("Processing createOrUpdateContext");
-        if (existingContext == null) {
+        if (mercadoPagoContext == null) {
             return mercadoPagoContextService.add(MercadoPagoContext.builder()
                     .chequeraCuotaId(chequeraCuotaId)
                     .fechaVencimiento(vencimiento.fechaVencimiento())
@@ -100,10 +77,10 @@ public class MercadoPagoCoreService {
                     .changed((byte) 0)
                     .build());
         } else {
-            existingContext.setFechaVencimiento(vencimiento.fechaVencimiento());
-            existingContext.setImporte(vencimiento.importe());
-            existingContext.setChanged((byte) 1);
-            return mercadoPagoContextService.update(existingContext, existingContext.getMercadoPagoContextId());
+            mercadoPagoContext.setFechaVencimiento(vencimiento.fechaVencimiento());
+            mercadoPagoContext.setImporte(vencimiento.importe());
+            mercadoPagoContext.setChanged((byte) 1);
+            return mercadoPagoContextService.update(mercadoPagoContext, mercadoPagoContext.getMercadoPagoContextId());
         }
     }
 

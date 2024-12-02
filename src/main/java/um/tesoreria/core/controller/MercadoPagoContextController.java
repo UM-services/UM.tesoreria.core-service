@@ -41,9 +41,9 @@ public class MercadoPagoContextController {
         }
     }
 
-    @GetMapping("/all/id")
-    public ResponseEntity<List<Long>> findAllIds() {
-        return ResponseEntity.ok(service.findAllIds());
+    @GetMapping("/all/active/cuota/id")
+    public ResponseEntity<List<Long>> findAllActiveChequeraCuota() {
+        return ResponseEntity.ok(service.findAllActiveChequeraCuota());
     }
 
 }
