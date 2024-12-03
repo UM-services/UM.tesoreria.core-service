@@ -4,7 +4,6 @@
 package um.tesoreria.core.controller;
 
 import um.tesoreria.core.kotlin.model.Baja;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,17 +24,20 @@ import um.tesoreria.core.service.BajaService;
  *
  */
 @RestController
-@RequestMapping("/baja")
+@RequestMapping({"/baja", "/api/tesoreria/core/baja"})
 public class BajaController {
 
-	@Autowired
-	private BajaService service;
+	private final BajaService service;
+
+	public BajaController(BajaService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/unique/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
 	public ResponseEntity<Baja> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
 											 @PathVariable Long chequeraSerieId) {
 		try {
-			return new ResponseEntity<Baja>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId),
+			return new ResponseEntity<>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId),
 					HttpStatus.OK);
 		} catch (BajaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -44,19 +46,19 @@ public class BajaController {
 
 	@PostMapping("/")
 	public ResponseEntity<Baja> add(@RequestBody Baja baja) {
-		return new ResponseEntity<Baja>(service.add(baja), HttpStatus.OK);
+		return new ResponseEntity<>(service.add(baja), HttpStatus.OK);
 	}
 
 	@PutMapping("/{bajaId}")
 	public ResponseEntity<Baja> update(@RequestBody Baja baja, @PathVariable Long bajaId) {
-		return new ResponseEntity<Baja>(service.update(baja, bajaId), HttpStatus.OK);
+		return new ResponseEntity<>(service.update(baja, bajaId), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/unique/{facultadId}/{tipochequeraId}/{chequeraserieId}")
 	public ResponseEntity<Void> deleteByUnique(@PathVariable Integer facultadId, @PathVariable Integer tipochequeraId,
 			@PathVariable Long chequeraserieId) {
 		service.deleteByUnique(facultadId, tipochequeraId, chequeraserieId);
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 }
