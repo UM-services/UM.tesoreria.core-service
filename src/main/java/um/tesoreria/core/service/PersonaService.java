@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.client.tesoreria.mercadopago.PreferenceClient;
 import um.tesoreria.core.exception.ChequeraSerieException;
+import um.tesoreria.core.exception.MercadoPagoContextException;
 import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
 import um.tesoreria.core.extern.consumer.LegajoFacultadConsumer;
@@ -144,8 +145,13 @@ public class PersonaService {
                         && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
                     log.debug("Creando preferencia");
                     preferenceClient.createPreference(chequeraCuota.getChequeraCuotaId());
-                    var mercadoPagoContext = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
-                    logMercadoPagoContext(mercadoPagoContext);
+                    MercadoPagoContext mercadoPagoContext = null;
+                    try {
+                        mercadoPagoContext = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
+                        logMercadoPagoContext(mercadoPagoContext);
+                    } catch (MercadoPagoContextException e) {
+                        log.error("Error al obtener el contexto de MercadoPago para el cuota {}", chequeraCuota.getChequeraCuotaId());
+                    }
                     if (mercadoPagoContext != null) {
                         // Formatear la fecha de vencimiento
                         String fechaVencimientoFormatted = mercadoPagoContext.getFechaVencimiento()
