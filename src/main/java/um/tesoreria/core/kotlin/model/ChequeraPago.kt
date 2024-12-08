@@ -74,6 +74,8 @@ data class ChequeraPago(
     @Column(name = "chp_tpa_id")
     var tipoPagoId: Int? = null,
 
+    var idMercadoPago: String? = null,
+
     @OneToOne(optional = true)
     @JoinColumn(name = "chp_tpa_id", insertable = false, updatable = false)
     var tipoPago: TipoPago? = null,
@@ -119,6 +121,7 @@ data class ChequeraPago(
         private var archivoBancoIdAcreditacion: Long? = null
         private var verificador: Int = 0
         private var tipoPagoId: Int? = null
+        private var idMercadoPago: String? = null
         private var tipoPago: TipoPago? = null
         private var producto: Producto? = null
         private var chequeraCuota: ChequeraCuota? = null
@@ -144,6 +147,7 @@ data class ChequeraPago(
         fun archivoBancoIdAcreditacion(archivoBancoIdAcreditacion: Long?) = apply { this.archivoBancoIdAcreditacion = archivoBancoIdAcreditacion }
         fun verificador(verificador: Int) = apply { this.verificador = verificador }
         fun tipoPagoId(tipoPagoId: Int?) = apply { this.tipoPagoId = tipoPagoId }
+        fun idMercadoPago(idMercadoPago: String?) = apply { this.idMercadoPago = idMercadoPago }
         fun tipoPago(tipoPago: TipoPago?) = apply { this.tipoPago = tipoPago }
         fun producto(producto: Producto?) = apply { this.producto = producto }
         fun chequeraCuota(chequeraCuota: ChequeraCuota?) = apply { this.chequeraCuota = chequeraCuota }
@@ -170,6 +174,7 @@ data class ChequeraPago(
             archivoBancoIdAcreditacion = archivoBancoIdAcreditacion,
             verificador = verificador,
             tipoPagoId = tipoPagoId,
+            idMercadoPago = idMercadoPago,
             tipoPago = tipoPago,
             producto = producto,
             chequeraCuota = chequeraCuota

@@ -7,6 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraPagoException;
+import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
+import um.tesoreria.core.kotlin.model.ChequeraSerie;
 import um.tesoreria.core.kotlin.model.FacturacionElectronica;
 import um.tesoreria.core.repository.IChequeraPagoRepository;
 
@@ -29,42 +32,50 @@ import um.tesoreria.core.repository.IChequeraPagoRepository;
 @Slf4j
 public class ChequeraPagoService {
 
+    private static final int TIPO_PAGO_THRESHOLD = 2;
+
     private final IChequeraPagoRepository repository;
     private final FacturacionElectronicaService facturacionElectronicaService;
+    private final JsonMapper jsonMapper;
 
     public ChequeraPagoService(IChequeraPagoRepository repository, FacturacionElectronicaService facturacionElectronicaService) {
         this.repository = repository;
         this.facturacionElectronicaService = facturacionElectronicaService;
+        this.jsonMapper = JsonMapper.builder().findAndAddModules().build();
+    }
+
+    private void fillChequeraCuotaId(ChequeraPago pago, ChequeraCuotaService chequeraCuotaService) {
+        if (pago.getChequeraCuotaId() == null) {
+            pago.setChequeraCuotaId(chequeraCuotaService.findByUnique(
+                pago.getFacultadId(),
+                pago.getTipoChequeraId(),
+                pago.getChequeraSerieId(),
+                pago.getProductoId(),
+                pago.getAlternativaId(),
+                pago.getCuotaId()
+            ).getChequeraCuotaId());
+        }
+    }
+
+    private List<ChequeraPago> processPagos(List<ChequeraPago> pagos, ChequeraCuotaService chequeraCuotaService) {
+        pagos.forEach(pago -> fillChequeraCuotaId(pago, chequeraCuotaService));
+        return repository.saveAll(pagos);
     }
 
     @Transactional
     public List<ChequeraPago> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, ChequeraCuotaService chequeraCuotaService) {
         List<ChequeraPago> pagos = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
-
-        // Rellena chequeraCuotaId si es nulo y guarda los cambios
-        pagos.forEach(pago -> {
-            if (pago.getChequeraCuotaId() == null) {
-                pago.setChequeraCuotaId(chequeraCuotaService.findByUnique(
-                        pago.getFacultadId(),
-                        pago.getTipoChequeraId(),
-                        pago.getChequeraSerieId(),
-                        pago.getProductoId(),
-                        pago.getAlternativaId(),
-                        pago.getCuotaId()).getChequeraCuotaId());
-            }
-        });
-
-        // Guarda todos los cambios en batch
-        repository.saveAll(pagos);
-
-        // Registrar chequeraPagos
+        
+        List<ChequeraPago> processedPagos = processPagos(pagos, chequeraCuotaService);
+        
         try {
-            log.debug("ChequeraPagos: {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(pagos));
+            log.debug("ChequeraPagos: {}", jsonMapper.writerWithDefaultPrettyPrinter()
+                .writeValueAsString(processedPagos));
         } catch (JsonProcessingException e) {
-            log.debug("ChequeraPagos: {}", e.getMessage());
+            log.error("Error serializing ChequeraPagos", e);
         }
 
-        return pagos;
+        return processedPagos;
     }
 
     @Transactional
@@ -92,42 +103,33 @@ public class ChequeraPagoService {
 
     @Transactional
     public List<ChequeraPago> pendientesFactura(OffsetDateTime fechaPago, ChequeraCuotaService chequeraCuotaService) {
-        List<ChequeraPago> pagos = repository.findAllByFechaAndTipoPagoIdGreaterThan(fechaPago, 2);
+        List<ChequeraPago> pagos = repository.findAllByFechaAndTipoPagoIdGreaterThan(fechaPago, TIPO_PAGO_THRESHOLD);
+        processPagos(pagos, chequeraCuotaService);
 
-        // Map para asociar chequeraPagoId con ChequeraPago
-        Map<Long, ChequeraPago> pagoMap = pagos.stream()
-                .collect(Collectors.toMap(ChequeraPago::getChequeraPagoId, Function.identity()));
+        List<Long> pagoIds = pagos.stream()
+            .map(ChequeraPago::getChequeraPagoId)
+            .collect(Collectors.toList());
 
-        // Rellena chequeraCuotaId si es nulo
-        for (ChequeraPago pago : pagos) {
-            if (pago.getChequeraCuotaId() == null) {
-                pago.setChequeraCuotaId(chequeraCuotaService.findByUnique(
-                        pago.getFacultadId(),
-                        pago.getTipoChequeraId(),
-                        pago.getChequeraSerieId(),
-                        pago.getProductoId(),
-                        pago.getAlternativaId(),
-                        pago.getCuotaId()).getChequeraCuotaId());
-            }
-        }
-
-        // Guarda todos los cambios en batch
-        repository.saveAll(pagos);
-
-        // Obtiene todas las facturaciones electrónicas asociadas a los pagos
-        List<Long> pagoIds = new ArrayList<>(pagoMap.keySet());
         Map<Long, FacturacionElectronica> electronicas = facturacionElectronicaService
-                .findAllByChequeraPagoIds(pagoIds)
-                .stream()
-                .collect(Collectors.toMap(FacturacionElectronica::getChequeraPagoId, Function.identity(), (pago, replacement) -> pago));
+            .findAllByChequeraPagoIds(pagoIds)
+            .stream()
+            .collect(Collectors.toMap(
+                FacturacionElectronica::getChequeraPagoId,
+                Function.identity(),
+                (existing, replacement) -> existing
+            ));
 
-        // Filtra los pagos que no tienen facturación electrónica asociada
         return pagos.stream()
-                .filter(pago -> !electronicas.containsKey(pago.getChequeraPagoId()))
-                .filter(pago -> pago.getChequeraCuota() != null 
-                    && pago.getChequeraCuota().getChequeraSerie() != null 
-                    && pago.getChequeraCuota().getChequeraSerie().getPersona() != null)
-                .collect(Collectors.toList());
+            .filter(pago -> !electronicas.containsKey(pago.getChequeraPagoId()))
+            .filter(this::isValidChequeraPago)
+            .collect(Collectors.toList());
+    }
+
+    private boolean isValidChequeraPago(ChequeraPago pago) {
+        return Optional.ofNullable(pago.getChequeraCuota())
+            .map(ChequeraCuota::getChequeraSerie)
+            .map(ChequeraSerie::getPersona)
+            .isPresent();
     }
 
     public ChequeraPago findByChequeraPagoId(Long chequeraPagoId, ChequeraCuotaService chequeraCuotaService) {
@@ -137,6 +139,11 @@ public class ChequeraPagoService {
             chequeraPago = repository.save(chequeraPago);
         }
         return chequeraPago;
+    }
+
+    public ChequeraPago findByIdMercadoPago(String idMercadoPago) {
+        log.debug("Processing findByIdMercadoPago");
+        return repository.findByIdMercadoPago(idMercadoPago).orElseThrow(() -> new ChequeraPagoException(idMercadoPago));
     }
 
     @Transactional
