@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import um.tesoreria.core.exception.ChequeraPagoException;
 import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.model.MercadoPagoContext;
@@ -41,6 +42,15 @@ public class PagoService {
         var chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(mercadoPagoContext.getChequeraCuotaId());
         logChequeraCuota(chequeraCuota);
 
+        // Evita registrar pagos repetidos para el caso de una nueva notificacion de MP
+        try {
+            var chequeraPago = chequeraPagoService.findByIdMercadoPago(mercadoPagoContext.getIdMercadoPago());
+            logChequeraPago(chequeraPago);
+            return chequeraPago;
+        } catch (ChequeraPagoException e) {
+            log.debug("No Existe Pago de MP previo");
+        }
+
         var nextOrder = chequeraPagoService.nextOrden(chequeraCuota.getFacultadId(), chequeraCuota.getTipoChequeraId(), chequeraCuota.getChequeraSerieId(), chequeraCuota.getProductoId(), chequeraCuota.getAlternativaId(), chequeraCuota.getCuotaId());
         log.debug("NextOrder = {}", nextOrder);
 
@@ -59,6 +69,7 @@ public class PagoService {
                 .acreditacion(mercadoPagoContext.getFechaAcreditacion())
                 .importe(mercadoPagoContext.getImportePagado())
                 .tipoPagoId(MERCADOPAGO)
+                .idMercadoPago(mercadoPagoContext.getIdMercadoPago())
                 .archivo("MercadoPago")
                 .build();
         logChequeraPago(chequeraPago);

@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.repository;
 
+import java.lang.ScopedValue;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +28,8 @@ public interface IChequeraPagoRepository extends JpaRepository<ChequeraPago, Lon
 	List<ChequeraPago> findAllByFechaAndTipoPagoIdGreaterThan(OffsetDateTime fechaPago, Integer tipoPagoId);
 
 	Optional<ChequeraPago> findByChequeraPagoId(Long chequeraPagoId);
+
+	Optional<ChequeraPago> findByIdMercadoPago(String idMercadoPago);
 
 	Optional<ChequeraPago> findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdOrderByOrdenDesc(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId);
 
