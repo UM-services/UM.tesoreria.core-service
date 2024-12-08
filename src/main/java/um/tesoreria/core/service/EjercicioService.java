@@ -6,7 +6,9 @@ package um.tesoreria.core.service;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +21,14 @@ import um.tesoreria.core.repository.IEjercicioRepository;
  *
  */
 @Service
+@Slf4j
 public class EjercicioService {
 
-	@Autowired
-	private IEjercicioRepository repository;
+	private final IEjercicioRepository repository;
+
+	public EjercicioService(IEjercicioRepository repository) {
+		this.repository = repository;
+	}
 
 	public List<Ejercicio> findAll() {
 		return repository.findAll(Sort.by("ejercicioId").descending());
@@ -33,7 +39,16 @@ public class EjercicioService {
 	}
 
 	public Ejercicio findByFecha(OffsetDateTime fecha) {
+		log.debug("Processing Ejercicio findByFecha -> {}", fecha);
 		return repository.findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(fecha, fecha)
+				.map(ejercicio -> {
+                    try {
+                        log.debug("Ejercicio findByFecha -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(ejercicio));
+                    } catch (JsonProcessingException e) {
+                        log.debug("Ejercicion jsonify error");
+                    }
+                    return ejercicio;
+				})
 				.orElseThrow(() -> new EjercicioException(fecha));
 	}
 

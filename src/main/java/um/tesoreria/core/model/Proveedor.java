@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -15,10 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.kotlin.model.Cuenta;
 
@@ -32,10 +30,12 @@ import um.tesoreria.core.kotlin.model.Cuenta;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Proveedor extends Auditable implements Serializable {
 	/**
 	 * 
 	 */
+	@Serial
 	private static final long serialVersionUID = 6015067871756572602L;
 
 	@Id

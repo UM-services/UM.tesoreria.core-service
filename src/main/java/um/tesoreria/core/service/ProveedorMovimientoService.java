@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -27,17 +28,15 @@ import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
  *
  */
 @Service
+@Slf4j
 public class ProveedorMovimientoService {
 
     private final Integer TT_PAGOS = 4;
 
     private final IProveedorMovimientoRepository repository;
-
     private final ComprobanteService comprobanteService;
-
     private final ProveedorArticuloService proveedorArticuloService;
 
-    @Autowired
     public ProveedorMovimientoService(IProveedorMovimientoRepository repository, ComprobanteService comprobanteService, ProveedorArticuloService proveedorArticuloService) {
         this.repository = repository;
         this.comprobanteService = comprobanteService;
@@ -142,4 +141,8 @@ public class ProveedorMovimientoService {
         return repository.findDistinctProveedorMovimientoIdsForCostAdjustment();
     }
 
+    public void delete(ProveedorMovimiento proveedorMovimiento) {
+        log.debug("Processing delete");
+        repository.delete(proveedorMovimiento);
+    }
 }

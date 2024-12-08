@@ -15,10 +15,10 @@ import um.tesoreria.core.kotlin.model.Ejercicio;
  */
 public interface IEjercicioRepository extends JpaRepository<Ejercicio, Integer> {
 
-	public Optional<Ejercicio> findByEjercicioId(Integer ejercicioId);
+	Optional<Ejercicio> findByEjercicioId(Integer ejercicioId);
 
-	public Optional<Ejercicio> findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(OffsetDateTime ref_inicio, OffsetDateTime ref_final);
+	Optional<Ejercicio> findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(OffsetDateTime ref_inicio, OffsetDateTime ref_final);
 
-	public Optional<Ejercicio> findTopByOrderByEjercicioIdDesc();
+	Optional<Ejercicio> findTopByOrderByEjercicioIdDesc();
 
 }

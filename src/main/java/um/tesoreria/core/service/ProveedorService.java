@@ -5,7 +5,7 @@ package um.tesoreria.core.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ProveedorException;
@@ -19,52 +19,73 @@ import um.tesoreria.core.service.view.ProveedorSearchService;
  *
  */
 @Service
+@Slf4j
 public class ProveedorService {
 
-	@Autowired
-	private IProveedorRepository repository;
+	private final IProveedorRepository repository;
+	private final ProveedorSearchService proveedorSearchService;
 
-	@Autowired
-	private ProveedorSearchService proveedorSearchService;
+	public ProveedorService(IProveedorRepository repository,
+							ProveedorSearchService proveedorSearchService) {
+		this.repository = repository;
+		this.proveedorSearchService = proveedorSearchService;
+	}
 
 	public List<Proveedor> findAll() {
+		log.debug("Processing findAll");
 		return repository.findAll();
 	}
 
 	public List<ProveedorSearch> findAllByStrings(List<String> conditions) {
+		log.debug("Processing findAllByStrings");
 		return proveedorSearchService.findAllByStrings(conditions);
 	}
 
 	public Proveedor findByProveedorId(Integer proveedorId) {
+		log.debug("Processing findByProveedorId");
 		return repository.findByProveedorId(proveedorId).orElseThrow(() -> new ProveedorException(proveedorId));
 	}
 
 	public Proveedor findByCuit(String cuit) {
+		log.debug("Processing findByCuit");
 		return repository.findTopByCuit(cuit).orElseThrow(() -> new ProveedorException(cuit));
 	}
 
 	public Proveedor findLast() {
-		return repository.findTopByOrderByProveedorIdDesc().orElseThrow(() -> new ProveedorException());
+		log.debug("Processing findLast");
+		return repository.findTopByOrderByProveedorIdDesc().orElseThrow(ProveedorException::new);
 	}
 
 	public Proveedor add(Proveedor proveedor) {
-		repository.save(proveedor);
-		return proveedor;
+		log.debug("Processing add");
+		return repository.save(proveedor);
 	}
 
 	public Proveedor update(Proveedor newProveedor, Integer proveedorId) {
-		return repository.findById(proveedorId).map(proveedor -> {
-			proveedor = new Proveedor(proveedorId, newProveedor.getCuit(), newProveedor.getNombreFantasia(),
-					newProveedor.getRazonSocial(), newProveedor.getOrdenCheque(), newProveedor.getDomicilio(),
-					newProveedor.getTelefono(), newProveedor.getFax(), newProveedor.getCelular(),
-					newProveedor.getEmail(), newProveedor.getEmailInterno(), newProveedor.getNumeroCuenta(),
-					newProveedor.getHabilitado(), newProveedor.getCbu(), null);
-			repository.save(proveedor);
-			return proveedor;
+		log.debug("Processing update");
+		return repository.findByProveedorId(proveedorId).map(proveedor -> {
+			proveedor = Proveedor.builder()
+					.proveedorId(proveedorId)
+					.cuit(newProveedor.getCuit())
+					.nombreFantasia(newProveedor.getNombreFantasia())
+					.razonSocial(newProveedor.getRazonSocial())
+					.ordenCheque(newProveedor.getOrdenCheque())
+					.domicilio(newProveedor.getDomicilio())
+					.telefono(newProveedor.getTelefono())
+					.fax(newProveedor.getFax())
+					.celular(newProveedor.getCelular())
+					.email(newProveedor.getEmail())
+					.emailInterno(newProveedor.getEmailInterno())
+					.numeroCuenta(newProveedor.getNumeroCuenta())
+					.habilitado(newProveedor.getHabilitado())
+					.cbu(newProveedor.getCbu())
+					.build();
+			return repository.save(proveedor);
 		}).orElseThrow(() -> new ProveedorException(proveedorId));
 	}
 
 	public void delete(Integer proveedorId) {
+		log.debug("Processing delete");
 		repository.deleteById(proveedorId);
 	}
 

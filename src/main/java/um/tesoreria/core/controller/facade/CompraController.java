@@ -3,7 +3,6 @@ package um.tesoreria.core.controller.facade;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.kotlin.model.ValorMovimiento;
 import um.tesoreria.core.service.facade.CompraService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
@@ -19,8 +18,11 @@ import java.util.List;
 @Slf4j
 public class CompraController {
 
-    @Autowired
-    private CompraService service;
+    private final CompraService service;
+
+    public CompraController(CompraService service) {
+        this.service = service;
+    }
 
     @GetMapping("/deleteComprobante/{proveedorMovimientoId}")
     public ResponseEntity<Boolean> deleteComprobante(@PathVariable Long proveedorMovimientoId) {
@@ -37,7 +39,7 @@ public class CompraController {
     public ResponseEntity<Boolean> anulateValor(@PathVariable Long valorMovimientoId, @PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime fechaContableAnulacion) {
         try {
             service.anulateValor(valorMovimientoId, fechaContableAnulacion);
-            return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
@@ -47,7 +49,7 @@ public class CompraController {
     public ResponseEntity<Boolean> deleteValor(@PathVariable Long valorMovimientoId) {
         try {
             service.deleteValor(valorMovimientoId);
-            return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
@@ -57,7 +59,7 @@ public class CompraController {
     public ResponseEntity<Boolean> addValores(@RequestBody List<ValorMovimiento> valorMovimientos, @PathVariable Long proveedorMovimientoId) {
         try {
             service.addValores(proveedorMovimientoId, valorMovimientos);
-            return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+            return new ResponseEntity<>(true, HttpStatus.OK);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }

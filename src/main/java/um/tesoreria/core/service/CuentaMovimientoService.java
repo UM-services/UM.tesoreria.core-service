@@ -123,4 +123,10 @@ public class CuentaMovimientoService {
         repository.deleteByCuentaMovimientoId(cuentaMovimientoId);
     }
 
+    @Transactional
+    public void deleteAllByCuentaMovimientoIdIn(List<Long> cuentaMovimientoIds) {
+        log.debug("Processing deleteAllByCuentaMovimientoIdIn");
+        repository.deleteAllByCuentaMovimientoIdIn(cuentaMovimientoIds);
+    }
+
 }

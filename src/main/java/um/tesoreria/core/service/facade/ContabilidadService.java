@@ -23,8 +23,10 @@ import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author daniel
@@ -34,17 +36,11 @@ import java.util.List;
 public class ContabilidadService {
 
     private final AsientoService asientoService;
-
     private final CuentaService cuentaService;
-
     private final EjercicioService ejercicioService;
-
     private final CuentaMovimientoService cuentaMovimientoService;
-
     private final ComprobanteService comprobanteService;
-
     private final ProveedorMovimientoService proveedorMovimientoService;
-
     private final EntregaDetalleService entregaDetalleService;
     private final EntregaService entregaService;
 
@@ -73,7 +69,7 @@ public class ContabilidadService {
         for (Cuenta cuenta : cuentas) {
             cuenta.setNombre(cuenta.getNombre().replace("\r\n", ""));
             cuenta.setGrado(5);
-            cuenta.setGrado1(cuenta.getNumeroCuenta().divideToIntegralValue(new BigDecimal("10000000000.0")).multiply(new BigDecimal("10000000000.0")));
+            cuenta.setGrado1(Objects.requireNonNull(cuenta.getNumeroCuenta()).divideToIntegralValue(new BigDecimal("10000000000.0")).multiply(new BigDecimal("10000000000.0")));
             cuenta.setGrado2(cuenta.getNumeroCuenta().divideToIntegralValue(new BigDecimal("100000000.0")).multiply(new BigDecimal("100000000.0")));
             cuenta.setGrado3(cuenta.getNumeroCuenta().divideToIntegralValue(new BigDecimal("1000000.0")).multiply(new BigDecimal("1000000.0")));
             cuenta.setGrado4(cuenta.getNumeroCuenta().divideToIntegralValue(new BigDecimal("10000.0")).multiply(new BigDecimal("10000.0")));
@@ -90,9 +86,9 @@ public class ContabilidadService {
         Ejercicio ejercicio = null;
         try {
             ejercicio = ejercicioService.findByFecha(desde);
-            log.debug("Ejercicio -> {}", ejercicio);
-            OffsetDateTime fechaInicio = ejercicio.getFechaInicio().withOffsetSameInstant(ZoneOffset.UTC);
-            OffsetDateTime fechaFinal = ejercicio.getFechaFinal().withOffsetSameInstant(ZoneOffset.UTC);
+            logEjercicio(ejercicio);
+            OffsetDateTime fechaInicio = Objects.requireNonNull(ejercicio.getFechaInicio()).withOffsetSameInstant(ZoneOffset.UTC);
+            OffsetDateTime fechaFinal = Objects.requireNonNull(ejercicio.getFechaFinal()).withOffsetSameInstant(ZoneOffset.UTC);
             if (desde.isBefore(fechaInicio)) {
                 ejercicio = null;
             }
@@ -105,7 +101,7 @@ public class ContabilidadService {
     }
 
     public List<BigDecimal> saldoInicial(BigDecimal cuenta, Ejercicio ejercicio, OffsetDateTime desde) {
-        OffsetDateTime ejercicioInicio = ejercicio.getFechaInicio().withOffsetSameInstant(ZoneOffset.UTC);
+        OffsetDateTime ejercicioInicio = Objects.requireNonNull(ejercicio.getFechaInicio()).withOffsetSameInstant(ZoneOffset.UTC);
         // Calcula saldo de asiento de apertura
         List<BigDecimal> saldos = saldoPeriodo(cuenta, ejercicioInicio, ejercicioInicio, (byte) 1);
 
@@ -130,10 +126,10 @@ public class ContabilidadService {
 
     public AsientoInternal nextAsiento(OffsetDateTime fechaContable, List<AsientoInternal> asientos) {
         CuentaMovimiento cuentaMovimiento = cuentaMovimientoService.findLastByFecha(fechaContable);
-        Integer ordenContable = 1 + cuentaMovimiento.getOrdenContable();
+        int ordenContable = 1 + cuentaMovimiento.getOrdenContable();
         if (asientos != null) {
             for (AsientoInternal asiento : asientos) {
-                if (asiento.getFechaContable().isEqual(fechaContable)) {
+                if (Objects.requireNonNull(asiento.getFechaContable()).isEqual(fechaContable)) {
                     if (asiento.getOrdenContable() == ordenContable) {
                         ordenContable += 1;
                     }
@@ -145,50 +141,69 @@ public class ContabilidadService {
 
     @Transactional
     public Boolean deleteAsiento(OffsetDateTime fechaContable, Integer ordenContable) throws EjercicioBloqueadoException {
+        log.debug("Processing deleteAsiento");
         return deleteAsientoDesde(fechaContable, ordenContable, 0);
     }
 
     @Transactional
     public Boolean deleteAsientoDesde(OffsetDateTime fechaContable, Integer ordenContable, Integer item) {
+        log.debug("Processing deleteAsientoDesde");
 
         try {
-            log.debug("FechaContable={}", fechaContable);
+            // Verify ejercicio and check if blocked
             Ejercicio ejercicio = ejercicioService.findByFecha(fechaContable);
-            try {
-                log.debug("Ejercicio={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(ejercicio));
-            } catch (JsonProcessingException e) {
-                log.debug("Sin Ejercicio");
-            }
-            if (ejercicio.getBloqueado() == 1) {
-                log.debug("Ejercicio bloqueado");
+            if (ejercicio == null || ejercicio.getBloqueado() == 1) {
                 throw new EjercicioBloqueadoException(fechaContable);
             }
 
-            Asiento asiento = null;
+            // Delete asiento if exists
             try {
-                asiento = asientoService.findByAsiento(fechaContable, ordenContable);
-            } catch (AsientoException e) {
+                Asiento asiento = asientoService.findByAsiento(fechaContable, ordenContable);
+                logAsiento(asiento);
+                if (asiento != null) {
+                    asientoService.deleteByAsientoId(asiento.getAsientoId());
+                }
+            } catch (AsientoException ignored) {
+                // No need to handle - asiento doesn't exist
+            }
 
-            }
-            if (asiento != null) {
-                asientoService.deleteByAsientoId(asiento.getAsientoId());
-            }
+            // Batch delete cuenta movimientos
+            List<Long> cuentaMovimientoIds = cuentaMovimientoService
+                .findAllByAsiento(fechaContable, ordenContable, item, 2)
+                .stream()
+                .peek(this::logCuentaMovimiento)
+                .map(CuentaMovimiento::getCuentaMovimientoId)
+                .toList();
+            
+            cuentaMovimientoService.deleteAllByCuentaMovimientoIdIn(cuentaMovimientoIds);
 
-            for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService.findAllByAsiento(fechaContable, ordenContable, item, 2)) {
-                cuentaMovimientoService.deleteByCuentaMovimientoId(cuentaMovimiento.getCuentaMovimientoId());
-            }
-        } catch (AsientoException e) {
-            log.debug("Error Asiento {}", e.getMessage());
-            return false;
-        } catch (CuentaMovimientoException e) {
-            log.debug("Error CuentaMovimiento {}", e.getMessage());
-            return false;
+            return true;
+
         } catch (EjercicioBloqueadoException e) {
             log.debug("Error Ejercicio {}", e.getMessage());
             return false;
+        } catch (Exception e) {
+            log.error("Unexpected error in deleteAsientoDesde", e);
+            return false;
         }
+    }
 
-        return true;
+    private void logAsiento(Asiento asiento) {
+        log.debug("Processing logAsiento");
+        try {
+            log.debug("Asiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asiento));
+        } catch (JsonProcessingException e) {
+            log.debug("Asiento jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logCuentaMovimiento(CuentaMovimiento movimiento) {
+        log.debug("Processing logCuentaMovimiento");
+        try {
+            log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(movimiento));
+        } catch (JsonProcessingException e) {
+            log.debug("CuentaMovimiento jsonify error -> {}", e.getMessage());
+        }
     }
 
     @Transactional
@@ -341,15 +356,12 @@ public class ContabilidadService {
                     entrega = entregaService.update(entrega, entrega.getEntregaId());
                     // Actualizando el asiento
                     for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService.findAllByAsiento(sourceDate, sourceNumber, 0, 2)) {
-                        try {
-                            log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-                        } catch (JsonProcessingException e) {
-                            log.debug("CuentaMovimiento -> error");
-                        }
+                        logCuentaMovimiento(cuentaMovimiento);
                         log.debug("Actualizando el asiento");
                         cuentaMovimiento.setFechaContable(targetDate);
                         cuentaMovimiento.setOrdenContable(targetNumber);
                         cuentaMovimiento = cuentaMovimientoService.update(cuentaMovimiento, cuentaMovimiento.getCuentaMovimientoId());
+                        logCuentaMovimiento(cuentaMovimiento);
                     }
                     // Actualizando relación con el asiento
                     log.debug("Actualizando relación con el asiento");
@@ -361,4 +373,13 @@ public class ContabilidadService {
         }
         return true;
     }
+
+    private void logEjercicio(Ejercicio ejercicio) {
+        try {
+            log.debug("Ejercicio -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(ejercicio));
+        } catch (JsonProcessingException e) {
+            log.debug("Ejercicio jsonify error -> {}", e.getMessage());
+        }
+    }
+
 }
