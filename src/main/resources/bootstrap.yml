@@ -56,4 +56,39 @@ logging:
     org:
       hibernate:
         SQL: ${app.logging}
-      springframework.cloud.config: ${app.logging}
+        engine.transaction: ${app.logging}
+        type.descriptor.sql.BasicBinder: ${app.logging}
+      springframework:
+        cloud:
+          config: ${app.logging}
+        transaction:
+          interceptor: ${app.logging}
+        orm:
+          jpa: ${app.logging}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "*"
+          - prometheus
+          - health
+  endpoint:
+    prometheus:
+      access: unrestricted
+  health:
+    db:
+      enabled: true  # Habilita la comprobación de salud de la base de datos
+  metrics:
+    enabled: true
+    enable:
+      jdbc: true
+  httpexchanges:
+    recording:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+

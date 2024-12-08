@@ -17,4 +17,7 @@ public interface IProveedorPagoRepository extends JpaRepository<ProveedorPago, L
     @Modifying
     void deleteByProveedorPagoId(Long proveedorPagoId);
 
+    @Modifying
+    void deleteAllByProveedorPagoIdIn(List<Long> proveedorPagoIds);
+
 }

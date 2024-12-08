@@ -24,4 +24,7 @@ interface ValorMovimientoRepository : JpaRepository<ValorMovimiento, Long> {
     @Modifying
     fun deleteByValorMovimientoId(valorMovimientoId: Long?)
 
+    @Modifying
+    fun deleteAllByValorMovimientoIdIn(valorMovimientoIds: List<Long>)
+
 }

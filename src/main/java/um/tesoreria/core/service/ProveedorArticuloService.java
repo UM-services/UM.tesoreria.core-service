@@ -27,7 +27,6 @@ public class ProveedorArticuloService {
 
 	private final IProveedorArticuloRepository repository;
 
-	@Autowired
 	public ProveedorArticuloService(IProveedorArticuloRepository repository) {
 		this.repository = repository;
 	}
@@ -41,15 +40,20 @@ public class ProveedorArticuloService {
 		} else {
 			proveedorArticulos = repository.findAllByProveedorMovimientoIdInOrderByOrden(proveedorMovimientoIds);
 		}
-        try {
-            log.debug("ProveedorArticulos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulos));
-        } catch (JsonProcessingException e) {
-            log.debug("ProveedorArticulos -> error: {}", e.getMessage());
-        }
+		logProveedorArticulos(proveedorArticulos);
         return proveedorArticulos;
 	}
 
+	private void logProveedorArticulos(List<ProveedorArticulo> proveedorArticulos) {
+		try {
+			log.debug("ProveedorArticulos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulos));
+		} catch (JsonProcessingException e) {
+			log.debug("ProveedorArticulos jsonify error -> {}", e.getMessage());
+		}
+	}
+
 	public List<ProveedorArticulo> findAllByProveedorMovimientoId(Long proveedorMovimientoId, Boolean asignables) {
+		log.debug("Processing findAllByProveedorMovimientoId");
 		if (asignables) {
 			return repository.findAllByProveedorMovimientoIdAndEntregadoOrderByOrden(proveedorMovimientoId,
 					BigDecimal.ZERO);
@@ -58,11 +62,13 @@ public class ProveedorArticuloService {
 	}
 
 	public ProveedorArticulo findByProveedorArticuloId(Long proveedorArticuloId) {
+		log.debug("Processing findByProveedorArticuloId");
 		return repository.findByProveedorArticuloId(proveedorArticuloId)
 				.orElseThrow(() -> new ProveedorArticuloException(proveedorArticuloId));
 	}
 
 	public ProveedorArticulo update(ProveedorArticulo newProveedorArticulo, Long proveedorArticuloId) {
+		log.debug("Processing update");
 		return repository.findByProveedorArticuloId(proveedorArticuloId).map(proveedorArticulo -> {
 			proveedorArticulo = new ProveedorArticulo(proveedorArticuloId,
 					newProveedorArticulo.getProveedorMovimientoId(), newProveedorArticulo.getOrden(),
@@ -79,4 +85,16 @@ public class ProveedorArticuloService {
     public void deleteByProveedorArticuloId(Long proveedorArticuloId) {
 		repository.deleteByProveedorArticuloId(proveedorArticuloId);
     }
+
+	@Transactional
+    public void deleteAllByProveedorArticuloIdIn(List<Long> proveedorArticuloIds) {
+		log.debug("Processing deleteAllByProveedorArticuloIdIn");
+		repository.deleteAllByProveedorArticuloIdIn(proveedorArticuloIds);
+    }
+
+	public void delete(ProveedorArticulo articulo) {
+		log.debug("Processing delete");
+		repository.delete(articulo);
+	}
+
 }

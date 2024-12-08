@@ -15,6 +15,9 @@ RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline \
 # Usar una imagen más pequeña de JRE para la ejecución
 FROM eclipse-temurin:21-jre-alpine
 
+# Instalar curl en la imagen final
+RUN apk update && apk add curl
+
 # Definir el directorio de trabajo
 WORKDIR /app
 

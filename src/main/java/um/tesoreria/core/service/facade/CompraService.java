@@ -10,9 +10,10 @@ import um.tesoreria.core.service.*;
 import um.tesoreria.core.util.Tool;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,39 +22,43 @@ import java.text.DecimalFormat;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
 public class CompraService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final ProveedorPagoService proveedorPagoService;
-
     private final ProveedorMovimientoService proveedorMovimientoService;
-
     private final ProveedorValorService proveedorValorService;
-
     private final ProveedorArticuloService proveedorArticuloService;
-
+    private final ProveedorArticuloTrackService proveedorArticuloTrackService;
     private final ValorMovimientoService valorMovimientoService;
-
     private final BancoMovimientoService bancoMovimientoService;
-
     private final ContabilidadService contabilidadService;
-
     private final EjercicioService ejercicioService;
-
     private final ValorService valorService;
-
     private final BancariaService bancariaService;
 
-    @Autowired
-    public CompraService(ProveedorPagoService proveedorPagoService, ProveedorMovimientoService proveedorMovimientoService, ProveedorValorService proveedorValorService,
-                         ProveedorArticuloService proveedorArticuloService, ValorMovimientoService valorMovimientoService, BancoMovimientoService bancoMovimientoService,
-                         ContabilidadService contabilidadService, EjercicioService ejercicioService, ValorService valorService, BancariaService bancariaService) {
+    public CompraService(ProveedorPagoService proveedorPagoService,
+                         ProveedorMovimientoService proveedorMovimientoService,
+                         ProveedorValorService proveedorValorService,
+                         ProveedorArticuloService proveedorArticuloService,
+                         ProveedorArticuloTrackService proveedorArticuloTrackService,
+                         ValorMovimientoService valorMovimientoService,
+                         BancoMovimientoService bancoMovimientoService,
+                         ContabilidadService contabilidadService,
+                         EjercicioService ejercicioService,
+                         ValorService valorService,
+                         BancariaService bancariaService) {
         this.proveedorPagoService = proveedorPagoService;
         this.proveedorMovimientoService = proveedorMovimientoService;
         this.proveedorValorService = proveedorValorService;
         this.proveedorArticuloService = proveedorArticuloService;
+        this.proveedorArticuloTrackService = proveedorArticuloTrackService;
         this.valorMovimientoService = valorMovimientoService;
         this.bancoMovimientoService = bancoMovimientoService;
         this.contabilidadService = contabilidadService;
@@ -64,65 +69,172 @@ public class CompraService {
 
     @Transactional
     public void deleteComprobante(Long proveedorMovimientoId) {
-        // Eliminar Aplicacion
-        for (ProveedorPago proveedorPago : proveedorPagoService.findAllByPago(proveedorMovimientoId)) {
-            try {
-                log.debug("Eliminando ProveedorPago -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorPago));
-            } catch (JsonProcessingException e) {
-                log.debug("Sin ProveedorPago -> {}", e.getMessage());
-            }
-            ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorPago.getProveedorMovimientoIdFactura());
-            BigDecimal cancelado = proveedorMovimiento.getCancelado();
-            cancelado = cancelado.subtract(proveedorPago.getImporteAplicado()).setScale(2, RoundingMode.HALF_UP);
-            proveedorMovimiento.setCancelado(cancelado);
+        // Collect all provider payments and their IDs in one pass
+        List<ProveedorPago> proveedorPagos = proveedorPagoService.findAllByPago(proveedorMovimientoId);
+        List<Long> proveedorPagoIds = proveedorPagos.stream()
+            .map(ProveedorPago::getProveedorPagoId)
+            .toList();
+
+        // Update cancellation amounts for all related movements
+        proveedorPagos.forEach(proveedorPago -> {
+            logProveedorPago(proveedorPago);
+            ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(
+                proveedorPago.getProveedorMovimientoIdFactura()
+            );
+            
+            proveedorMovimiento.setCancelado(
+                proveedorMovimiento.getCancelado()
+                    .subtract(proveedorPago.getImporteAplicado())
+                    .setScale(2, RoundingMode.HALF_UP)
+            );
+            
             proveedorMovimientoService.update(proveedorMovimiento, proveedorMovimiento.getProveedorMovimientoId());
-            proveedorPagoService.delete(proveedorPago.getProveedorPagoId());
-        }
-        // Eliminar Valores
-        for (ProveedorValor proveedorValor : proveedorValorService.findAllByProveedorMovimientoId(proveedorMovimientoId)) {
-            try {
-                log.debug("Eliminando ProveedorValor -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorValor));
-            } catch (JsonProcessingException e) {
-                log.debug("Sin ProveedorValor -> {}", e.getMessage());
-            }
-            ValorMovimiento valorMovimiento = valorMovimientoService.findByValorMovimientoId(proveedorValor.getValorMovimientoId());
-            if (valorMovimiento.getFechaContable() != null) {
-                log.debug("Eliminando Asiento Contable valorMovimiento -> {}/{}", valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable());
-                if (!contabilidadService.deleteAsiento(valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable())) {
-                    throw new ContableException(valorMovimiento.getFechaContable(), valorMovimiento.getOrdenContable());
+            logProveedorMovimiento(proveedorMovimiento);
+        });
+
+        // Bulk delete all provider payments
+        log.debug("Deleting all provider payments");
+        proveedorPagoService.deleteAllByProveedorPagoIdIn(proveedorPagoIds);
+
+        // Process valor-related deletions
+        var proveedorValores = proveedorValorService.findAllByProveedorMovimientoId(proveedorMovimientoId);
+        var valorMovimientos = proveedorValores.stream()
+            .peek(this::logProveedorValor)
+            .map(pv -> valorMovimientoService.findByValorMovimientoId(pv.getValorMovimientoId()))
+            .peek(vm -> {
+                if (vm.getFechaContable() != null) {
+                    log.debug("Eliminando Asiento Contable valorMovimiento -> {}/{}", 
+                        vm.getFechaContable(), vm.getOrdenContable());
+                    if (!contabilidadService.deleteAsiento(vm.getFechaContable(), vm.getOrdenContable())) {
+                        throw new ContableException(vm.getFechaContable(), vm.getOrdenContable());
+                    }
                 }
-            }
-            try {
-                BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
-                bancoMovimientoService.deleteByBancoMovimientoId(bancoMovimiento.getBancoMovimientoId());
-            } catch (BancoMovimientoException e) {
-                log.debug("Sin BancoMovimiento -> {}", e.getMessage());
-            }
-            proveedorValorService.deleteByProveedorValorId(proveedorValor.getProveedorValorId());
-            log.debug("ProveedorValor eliminado");
-            valorMovimientoService.deleteByValorMovimientoId(valorMovimiento.getValorMovimientoId());
-            log.debug("ValorMovimiento eliminado");
-        }
-        // Eliminar Artículos
-        for (ProveedorArticulo proveedorArticulo : proveedorArticuloService.findAllByProveedorMovimientoId(proveedorMovimientoId, false)) {
-            try {
-                log.debug("Eliminando ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
-            } catch (JsonProcessingException e) {
-                log.debug("Sin ProveedorArticulo -> {}", e.getMessage());
-            }
-            proveedorArticuloService.deleteByProveedorArticuloId(proveedorArticulo.getProveedorArticuloId());
-        }
-        // Eliminar Asiento
+            })
+            .toList();
+
+        // Eliminar Asiento del ProveedorMovimiento antes de los artículos
         ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
         if (proveedorMovimiento.getFechaContable() != null) {
-            log.debug("Eliminando Asiento Contable proveedorMovimiento -> {}/{}", proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable());
+            log.debug("Eliminando Asiento Contable proveedorMovimiento -> {}/{}", 
+                proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable());
             if (!contabilidadService.deleteAsiento(proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable())) {
                 throw new ContableException(proveedorMovimiento.getFechaContable(), proveedorMovimiento.getOrdenContable());
             }
         }
-        // Eliminar Comprobante
-        proveedorMovimientoService.deleteByProveedorMovimientoId(proveedorMovimiento.getProveedorMovimientoId());
-        log.debug("ProveedorMovimiento eliminado");
+
+        // Collect IDs for bulk deletion
+        var bancoMovimientoIds = valorMovimientos.stream()
+            .map(vm -> {
+                try {
+                    return bancoMovimientoService.findByValorMovimientoId(vm.getValorMovimientoId())
+                        .getBancoMovimientoId();
+                } catch (BancoMovimientoException e) {
+                    log.debug("Sin BancoMovimiento -> {}", e.getMessage());
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .toList();
+
+        var proveedorValorIds = proveedorValores.stream()
+            .map(ProveedorValor::getProveedorValorId)
+            .toList();
+
+        var valorMovimientoIds = valorMovimientos.stream()
+            .map(ValorMovimiento::getValorMovimientoId)
+            .toList();
+
+        // Bulk delete operations
+        bancoMovimientoService.deleteAllByBancoMovimientoIdIn(bancoMovimientoIds);
+        proveedorValorService.deleteAllByProveedorValorIdIn(proveedorValorIds);
+        valorMovimientoService.deleteAllByValorMovimientoIdIn(valorMovimientoIds);
+
+        // Ahora procesamos los artículos
+        var proveedorArticulos = proveedorArticuloService
+            .findAllByProveedorMovimientoId(proveedorMovimientoId, false)
+            .stream()
+            .peek(this::logProveedorArticulo)
+            .toList();
+
+        var proveedorArticuloIds = proveedorArticulos.stream()
+            .map(ProveedorArticulo::getProveedorArticuloId)
+            .toList();
+
+        if (!proveedorArticuloIds.isEmpty()) {
+            // Primero desvinculamos las relaciones
+            log.debug("Desvinculando relaciones para {} artículos", proveedorArticuloIds.size());
+            proveedorArticulos.forEach(proveedorArticulo -> {
+                var tracks = proveedorArticuloTrackService.findAllByProveedorArticuloId(proveedorArticulo.getProveedorArticuloId());
+                tracks.forEach(track -> {
+                    track.setProveedorArticulo(null);
+                    track.setProveedorMovimiento(null);
+                    proveedorArticuloTrackService.update(track, track.getProveedorArticuloTrackId());
+                });
+                proveedorArticulo.setArticulo(null);
+                proveedorArticuloService.update(proveedorArticulo, proveedorArticulo.getProveedorArticuloId());
+            });
+            entityManager.flush();
+
+            // Ahora eliminamos los tracks
+            log.debug("Eliminando tracks");
+            proveedorArticuloTrackService.deleteAllByProveedorArticuloIdIn(proveedorArticuloIds);
+            entityManager.flush();
+
+            // Finalmente eliminamos los artículos
+            log.debug("Eliminando artículos");
+            proveedorArticuloService.deleteAllByProveedorArticuloIdIn(proveedorArticuloIds);
+            entityManager.flush();
+        }
+
+        // Eliminamos el comprobante
+        log.debug("Eliminando comprobante {}", proveedorMovimientoId);
+        proveedorMovimientoService.deleteByProveedorMovimientoId(proveedorMovimientoId);
+    }
+
+    private void logProveedorArticuloTrack(ProveedorArticuloTrack paTrack) {
+        log.debug("Processing logProveedorArticuloTrack");
+        try {
+            log.debug("ProveedorArticuloTrack -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(paTrack));
+        } catch (JsonProcessingException e) {
+            log.debug("ProveedorArticuloTrack JSON error -> {}", e.getMessage());
+        }
+    }
+
+    private void logProveedorArticulo(ProveedorArticulo proveedorArticulo) {
+        log.debug("Processing logProveedorArticulo");
+        try {
+            log.debug("ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
+        } catch (JsonProcessingException e) {
+            log.debug("ProveedorArticulo JSON error -> {}", e.getMessage());
+        }
+
+    }
+
+    private void logProveedorValor(ProveedorValor proveedorValor) {
+        log.debug("Processing logProveedorValor");
+        try {
+            log.debug("ProveedorValor -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorValor));
+        } catch (JsonProcessingException e) {
+            log.debug("ProveedorValor JSON error -> {}", e.getMessage());
+        }
+    }
+
+    private void logProveedorMovimiento(ProveedorMovimiento proveedorMovimiento) {
+        log.debug("Processing logProveedorMovimiento");
+        try {
+            log.debug("ProveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
+        } catch (JsonProcessingException e) {
+            log.debug("ProveedorMovimiento JSON error -> {}", e.getMessage());
+        }
+    }
+
+    private void logProveedorPago(ProveedorPago proveedorPago) {
+        log.debug("Processing logProveedorPago");
+        try {
+            log.debug("ProveedorPago -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorPago));
+        } catch (JsonProcessingException e) {
+            log.debug("ProveedorPago JSON error -> {}", e.getMessage());
+        }
     }
 
     @Transactional
@@ -244,11 +356,7 @@ public class CompraService {
 
         proveedorMovimiento.setFechaAnulacion(Tool.dateAbsoluteArgentina());
         proveedorMovimiento = proveedorMovimientoService.update(proveedorMovimiento, proveedorMovimientoId);
-        try {
-            log.debug("ProveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
-        } catch (JsonProcessingException e) {
-            log.debug("Sin Proveedor Movimiento");
-        }
+        logProveedorMovimiento(proveedorMovimiento);
 
         for (ValorMovimiento valorMovimiento : valorMovimientoService.findAllByOrdenPago(proveedorMovimientoId)) {
             try {

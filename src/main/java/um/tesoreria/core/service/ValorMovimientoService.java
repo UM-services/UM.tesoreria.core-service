@@ -5,9 +5,10 @@ package um.tesoreria.core.service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +22,16 @@ import um.tesoreria.core.kotlin.repository.ValorMovimientoRepository;
  *
  */
 @Service
+@Slf4j
 public class ValorMovimientoService {
 
-    @Autowired
-    private ValorMovimientoRepository repository;
+    private final ValorMovimientoRepository repository;
+    private final ProveedorValorService proveedorValorService;
 
-    @Autowired
-    private ProveedorValorService proveedorValorService;
+    public ValorMovimientoService(ValorMovimientoRepository repository, ProveedorValorService proveedorValorService) {
+        this.repository = repository;
+        this.proveedorValorService = proveedorValorService;
+    }
 
     public List<ValorMovimiento> findAllByValorMovimientoIdIn(List<Long> valorMovimientoIds) {
         return repository.findAllByValorMovimientoIdIn(valorMovimientoIds);
@@ -39,21 +43,21 @@ public class ValorMovimientoService {
     }
 
     public ValorMovimiento findByValorMovimientoId(Long valorMovimientoId) {
-        return repository.findByValorMovimientoId(valorMovimientoId).orElseThrow(() -> new ValorMovimientoException(valorMovimientoId));
+        return Objects.requireNonNull(repository.findByValorMovimientoId(valorMovimientoId)).orElseThrow(() -> new ValorMovimientoException(valorMovimientoId));
     }
 
     public ValorMovimiento findByNumero(Integer valorId, Long numero) {
-        return repository.findFirstByValorIdAndNumero(valorId, numero)
+        return Objects.requireNonNull(repository.findFirstByValorIdAndNumero(valorId, numero))
                 .orElseThrow(() -> new ValorMovimientoException(valorId, numero));
     }
 
     public ValorMovimiento findByBanco(Integer valorId, Long numero, Long bancariaId) {
-        return repository.findFirstByValorIdAndNumeroAndBancariaIdOrigen(valorId, numero, bancariaId)
+        return Objects.requireNonNull(repository.findFirstByValorIdAndNumeroAndBancariaIdOrigen(valorId, numero, bancariaId))
                 .orElseThrow(() -> new ValorMovimientoException(valorId, numero, bancariaId));
     }
 
     public ValorMovimiento findFirstByContable(OffsetDateTime fechaContable, Integer ordenContable) {
-        return repository.findFirstByFechaContableAndOrdenContable(fechaContable, ordenContable)
+        return Objects.requireNonNull(repository.findFirstByFechaContableAndOrdenContable(fechaContable, ordenContable))
                 .orElseThrow(() -> new ValorMovimientoException(fechaContable, ordenContable));
     }
 
@@ -73,6 +77,11 @@ public class ValorMovimientoService {
     @Transactional
     public void deleteByValorMovimientoId(Long valorMovimientoId) {
         repository.deleteByValorMovimientoId(valorMovimientoId);
+    }
+
+    public void deleteAllByValorMovimientoIdIn(List<Long> valorMovimientoIds) {
+        log.debug("Processing deleteAllByValorMovimientoIdIn");
+        repository.deleteAllByValorMovimientoIdIn(valorMovimientoIds);
     }
 
 }

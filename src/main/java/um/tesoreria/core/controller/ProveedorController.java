@@ -5,7 +5,6 @@ package um.tesoreria.core.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,11 +27,14 @@ import um.tesoreria.core.service.ProveedorService;
  *
  */
 @RestController
-@RequestMapping("/proveedor")
+@RequestMapping({"/proveedor", "/api/tesoreria/core/proveedor"})
 public class ProveedorController {
 
-	@Autowired
-	private ProveedorService service;
+	private final ProveedorService service;
+
+	public ProveedorController(ProveedorService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/")
 	public ResponseEntity<List<Proveedor>> findAll() {

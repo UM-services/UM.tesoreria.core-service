@@ -9,4 +9,7 @@ public class ContableException extends RuntimeException {
         super(MessageFormat.format("Error with Asiento -> {0}/{1}", fechaContable, ordenContable));
     }
 
+    public ContableException(String message) {
+        super(message);
+    }
 }

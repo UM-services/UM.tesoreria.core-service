@@ -5,10 +5,10 @@ package um.tesoreria.core.service;
 
 import java.time.OffsetDateTime;
 
+import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.AsientoException;
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.Asiento;
@@ -19,17 +19,23 @@ import um.tesoreria.core.repository.IAsientoRepository;
  *
  */
 @Service
+@Slf4j
 public class AsientoService {
 
-	@Autowired
-	private IAsientoRepository repository;
+	private final IAsientoRepository repository;
+
+	public AsientoService(IAsientoRepository repository) {
+		this.repository = repository;
+	}
 
 	public Asiento findByAsiento(OffsetDateTime fecha, Integer orden) {
+		log.debug("Processing findByAsiento");
 		return repository.findByFechaAndOrden(fecha, orden).orElseThrow(() -> new AsientoException(fecha, orden));
 	}
 
 	@Transactional
 	public void deleteByAsientoId(Long asientoId) {
+		log.debug("Processing deleteByAsientoId");
 		repository.deleteByAsientoId(asientoId);
 	}
 

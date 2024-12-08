@@ -42,4 +42,7 @@ public interface ICuentaMovimientoRepository extends JpaRepository<CuentaMovimie
 	@Modifying
 	void deleteByCuentaMovimientoId(Long cuentaMovimientoId);
 
+	@Modifying
+    void deleteAllByCuentaMovimientoIdIn(List<Long> cuentaMovimientoIds);
+
 }

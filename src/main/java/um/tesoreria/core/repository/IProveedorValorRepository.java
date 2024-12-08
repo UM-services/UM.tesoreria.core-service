@@ -19,17 +19,20 @@ import um.tesoreria.core.kotlin.model.ProveedorValor;
 @Repository
 public interface IProveedorValorRepository extends JpaRepository<ProveedorValor, Long> {
 
-	public List<ProveedorValor> findAllByProveedorMovimientoId(Long proveedorMovimientoId, Sort sort);
+	List<ProveedorValor> findAllByProveedorMovimientoId(Long proveedorMovimientoId, Sort sort);
 
-	public List<ProveedorValor> findAllByValorMovimientoId(Long valorMovimientoId);
+	List<ProveedorValor> findAllByValorMovimientoId(Long valorMovimientoId);
 
-	public Optional<ProveedorValor> findFirstByValorMovimientoId(Long valorMovimientoId);
+	Optional<ProveedorValor> findFirstByValorMovimientoId(Long valorMovimientoId);
 
-	public Optional<ProveedorValor> findFirstByProveedorMovimientoIdOrderByOrdenDesc(Long proveedorMovimientoId);
+	Optional<ProveedorValor> findFirstByProveedorMovimientoIdOrderByOrdenDesc(Long proveedorMovimientoId);
 
-	public Optional<ProveedorValor> findByProveedorValorId(Long proveedorValorId);
+	Optional<ProveedorValor> findByProveedorValorId(Long proveedorValorId);
 
 	@Modifying
-	public void deleteByProveedorValorId(Long proveedorValorId);
+	void deleteByProveedorValorId(Long proveedorValorId);
+
+	@Modifying
+	void deleteAllByProveedorValorIdIn(List<Long> proveedorValorIds);
 
 }

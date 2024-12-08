@@ -3,7 +3,6 @@ package um.tesoreria.core.service;
 import um.tesoreria.core.kotlin.model.ProveedorPago;
 import um.tesoreria.core.repository.IProveedorPagoRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,7 +12,6 @@ public class ProveedorPagoService {
 
     private final IProveedorPagoRepository repository;
 
-    @Autowired
     public ProveedorPagoService(IProveedorPagoRepository repository) {
         this.repository = repository;
     }
@@ -31,5 +29,9 @@ public class ProveedorPagoService {
         repository.deleteByProveedorPagoId(proveedorPagoId);
     }
 
+    @Transactional
+    public void deleteAllByProveedorPagoIdIn(List<Long> proveedorPagoIds) {
+        repository.deleteAllByProveedorPagoIdIn(proveedorPagoIds);
+    }
 
 }
