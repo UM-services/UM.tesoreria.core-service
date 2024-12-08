@@ -168,7 +168,7 @@ public class ChequeraPagoService {
         return repository.findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdOrderByOrdenDesc(
                 facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId)
                 .map(pago -> pago.getOrden() + 1)
-                .orElse(1);
+                .orElse(0);
     }
 
 }
