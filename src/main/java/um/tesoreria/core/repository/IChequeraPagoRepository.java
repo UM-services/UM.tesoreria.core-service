@@ -3,7 +3,6 @@
  */
 package um.tesoreria.core.repository;
 
-import java.lang.ScopedValue;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
