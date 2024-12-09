@@ -12,11 +12,8 @@ FROM eclipse-temurin:21-jre-alpine
 # Instalar curl en la imagen final
 RUN apk update && apk add curl
 
-# Definir el directorio de trabajo
-WORKDIR /app
-
 # Copiar el JAR generado desde la etapa de compilación
-COPY --from=build /usr/app/target/*.jar /app/app.jar
+COPY --from=build /usr/app/target/*.jar app.jar
 
 COPY marca_etec.png marca_etec.png
 COPY marca_um.png marca_um.png
