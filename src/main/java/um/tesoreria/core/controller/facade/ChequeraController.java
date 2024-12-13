@@ -70,7 +70,7 @@ public class ChequeraController {
                                                @PathVariable Boolean copiaInformes) throws MessagingException {
         chequeraCuotaService.updateBarras(facultadId, tipoChequeraId, chequeraSerieId);
         return new ResponseEntity<>(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
-                alternativaId, copiaInformes, true), HttpStatus.OK);
+                alternativaId, copiaInformes, true, false), HttpStatus.OK);
     }
 
     @GetMapping("/sendCuota/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{productoId}/{cuotaId}/{copiaInformes}")

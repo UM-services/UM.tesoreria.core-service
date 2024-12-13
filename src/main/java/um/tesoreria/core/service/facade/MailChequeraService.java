@@ -97,8 +97,8 @@ public class MailChequeraService {
     }
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
-                               Boolean copiaInformes, Boolean incluyeMatricula) throws MessagingException {
-        return chequeraClient.sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes);
+                               Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) throws MessagingException {
+        return chequeraClient.sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes, codigoBarras);
     }
 
     public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId,
@@ -168,7 +168,7 @@ public class MailChequeraService {
             ChequeraSerieDTO chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerieService.findByUnique(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId()));
             String messageSender = "Response Sin Envío";
             if (!responseSinEnvio) {
-                messageSender = this.sendChequera(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), data.getAlternativaId(), false, false);
+                messageSender = this.sendChequera(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), data.getAlternativaId(), false, false, false);
             }
             return new SpoterDataResponse(true, messageSender, data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), chequeraSerieDTO);
         } catch (SpoterDataException e) {
@@ -213,7 +213,7 @@ public class MailChequeraService {
         // Enviar chequera
         String message = "";
         message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
-                chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false);
+                chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false, false);
         // Registrar SpoterData
         spoterData.setLectivoId(lectivoId);
         spoterData.setStatus(message.equals("Envío de Correo Ok!!") ? (byte) 1 : (byte) 0);

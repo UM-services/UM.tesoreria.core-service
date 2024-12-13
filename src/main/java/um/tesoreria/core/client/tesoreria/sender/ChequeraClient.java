@@ -9,45 +9,46 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface ChequeraClient {
 
     @GetMapping("/generatePdf/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
-    Resource generatePdf(@PathVariable("facultadId") Integer facultadId,
-                                         @PathVariable("tipoChequeraId") Integer tipoChequeraId,
-                                         @PathVariable("chequeraSerieId") Long chequeraSerieId,
-                                         @PathVariable("alternativaId") Integer alternativaId);
+    Resource generatePdf(@PathVariable Integer facultadId,
+                         @PathVariable Integer tipoChequeraId,
+                         @PathVariable Long chequeraSerieId,
+                         @PathVariable Integer alternativaId);
 
     @GetMapping("/generatePdf/completa/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
-    Resource generatePdfCompleta(@PathVariable("facultadId") Integer facultadId,
-                                                 @PathVariable("tipoChequeraId") Integer tipoChequeraId,
-                                                 @PathVariable("chequeraSerieId") Long chequeraSerieId,
-                                                 @PathVariable("alternativaId") Integer alternativaId);
+    Resource generatePdfCompleta(@PathVariable Integer facultadId,
+                                 @PathVariable Integer tipoChequeraId,
+                                 @PathVariable Long chequeraSerieId,
+                                 @PathVariable Integer alternativaId);
 
     @GetMapping("/generatePdf/reemplazo/completa/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
-    Resource generatePdfReemplazoCompleta(@PathVariable("facultadId") Integer facultadId,
-                                                          @PathVariable("tipoChequeraId") Integer tipoChequeraId,
-                                                          @PathVariable("chequeraSerieId") Long chequeraSerieId,
-                                                          @PathVariable("alternativaId") Integer alternativaId);
+    Resource generatePdfReemplazoCompleta(@PathVariable Integer facultadId,
+                                          @PathVariable Integer tipoChequeraId,
+                                          @PathVariable Long chequeraSerieId,
+                                          @PathVariable Integer alternativaId);
 
     @GetMapping("/generateCuotaPdf/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{productoId}/{cuotaId}")
-    Resource generateCuotaPdf(@PathVariable("facultadId") Integer facultadId,
-                                              @PathVariable("tipoChequeraId") Integer tipoChequeraId,
-                                              @PathVariable("chequeraSerieId") Long chequeraSerieId,
-                                              @PathVariable("alternativaId") Integer alternativaId,
-                                              @PathVariable("productoId") Integer productoId,
-                                              @PathVariable("cuotaId") Integer cuotaId);
+    Resource generateCuotaPdf(@PathVariable Integer facultadId,
+                              @PathVariable Integer tipoChequeraId,
+                              @PathVariable Long chequeraSerieId,
+                              @PathVariable Integer alternativaId,
+                              @PathVariable Integer productoId,
+                              @PathVariable Integer cuotaId);
 
-    @GetMapping("/sendChequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{copiaInformes}")
-    String sendChequera(@PathVariable("facultadId") Integer facultadId,
-                                        @PathVariable("tipoChequeraId") Integer tipoChequeraId,
-                                        @PathVariable("chequeraSerieId") Long chequeraSerieId,
-                                        @PathVariable("alternativaId") Integer alternativaId,
-                                        @PathVariable("copiaInformes") Boolean copiaInformes);
+    @GetMapping("/sendChequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{copiaInformes}/{codigoBarras}")
+    String sendChequera(@PathVariable Integer facultadId,
+                        @PathVariable Integer tipoChequeraId,
+                        @PathVariable Long chequeraSerieId,
+                        @PathVariable Integer alternativaId,
+                        @PathVariable Boolean copiaInformes,
+                        @PathVariable Boolean codigoBarras);
 
     @GetMapping("/sendCuota/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{productoId}/{cuotaId}/{copiaInformes}")
-    String sendCuota(@PathVariable("facultadId") Integer facultadId,
-                                     @PathVariable("tipoChequeraId") Integer tipoChequeraId,
-                                     @PathVariable("chequeraSerieId") Long chequeraSerieId,
-                                     @PathVariable("alternativaId") Integer alternativaId,
-                                     @PathVariable("productoId") Integer productoId,
-                                     @PathVariable("cuotaId") Integer cuotaId,
-                                     @PathVariable("copiaInformes") Boolean copiaInformes);
+    String sendCuota(@PathVariable Integer facultadId,
+                     @PathVariable Integer tipoChequeraId,
+                     @PathVariable Long chequeraSerieId,
+                     @PathVariable Integer alternativaId,
+                     @PathVariable Integer productoId,
+                     @PathVariable Integer cuotaId,
+                     @PathVariable Boolean copiaInformes);
 
 }
