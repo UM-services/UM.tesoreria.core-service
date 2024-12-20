@@ -103,7 +103,11 @@ public class ChequeraPagoService {
 
     @Transactional
     public List<ChequeraPago> pendientesFactura(OffsetDateTime fechaPago, ChequeraCuotaService chequeraCuotaService) {
-        List<ChequeraPago> pagos = repository.findAllByFechaAndTipoPagoIdGreaterThan(fechaPago, TIPO_PAGO_THRESHOLD);
+        // Crear fecha inicio (00:00:00) y fecha fin (23:59:59.999999999)
+        OffsetDateTime fechaInicio = fechaPago.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        OffsetDateTime fechaFin = fechaPago.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        
+        List<ChequeraPago> pagos = repository.findAllByFechaBetweenAndTipoPagoIdGreaterThan(fechaInicio, fechaFin, TIPO_PAGO_THRESHOLD);
         processPagos(pagos, chequeraCuotaService);
 
         List<Long> pagoIds = pagos.stream()
