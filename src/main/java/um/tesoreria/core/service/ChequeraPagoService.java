@@ -4,7 +4,6 @@
 package um.tesoreria.core.service;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +22,7 @@ import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.kotlin.model.ChequeraSerie;
 import um.tesoreria.core.kotlin.model.FacturacionElectronica;
-import um.tesoreria.core.repository.IChequeraPagoRepository;
+import um.tesoreria.core.repository.ChequeraPagoRepository;
 
 /**
  * @author daniel
@@ -34,11 +33,11 @@ public class ChequeraPagoService {
 
     private static final int TIPO_PAGO_THRESHOLD = 2;
 
-    private final IChequeraPagoRepository repository;
+    private final ChequeraPagoRepository repository;
     private final FacturacionElectronicaService facturacionElectronicaService;
     private final JsonMapper jsonMapper;
 
-    public ChequeraPagoService(IChequeraPagoRepository repository, FacturacionElectronicaService facturacionElectronicaService) {
+    public ChequeraPagoService(ChequeraPagoRepository repository, FacturacionElectronicaService facturacionElectronicaService) {
         this.repository = repository;
         this.facturacionElectronicaService = facturacionElectronicaService;
         this.jsonMapper = JsonMapper.builder().findAndAddModules().build();
@@ -60,6 +59,18 @@ public class ChequeraPagoService {
     private List<ChequeraPago> processPagos(List<ChequeraPago> pagos, ChequeraCuotaService chequeraCuotaService) {
         pagos.forEach(pago -> fillChequeraCuotaId(pago, chequeraCuotaService));
         return repository.saveAll(pagos);
+    }
+
+    public List<ChequeraPago> findAllByTipoPagoIdAndFechaAcreditacion(Integer tipoPagoId, OffsetDateTime fechaAcreditacion) {
+        return repository.findAllByTipoPagoIdAndAcreditacion(tipoPagoId, fechaAcreditacion);
+    }
+
+    public List<ChequeraPago> findAllByTipoPagoIdAndFechaPago(Integer tipoPagoId, OffsetDateTime fechaPago) {
+        // Crear fecha inicio (00:00:00) y fecha fin (23:59:59.999999999)
+        OffsetDateTime fechaInicio = fechaPago.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        OffsetDateTime fechaFin = fechaPago.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+
+        return repository.findAllByTipoPagoIdAndFechaBetween(tipoPagoId, fechaInicio, fechaFin);
     }
 
     @Transactional

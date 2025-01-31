@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model.view;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -40,6 +41,7 @@ import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
 @EqualsAndHashCode(callSuper = false)
 public class CuentaMovimientoAsiento extends Auditable implements Serializable {
 
+	@Serial
 	private static final long serialVersionUID = -2637480137165120272L;
 
 	@Id

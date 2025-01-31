@@ -3,12 +3,14 @@
  */
 package um.tesoreria.core.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraPagoReemplazoException;
 import um.tesoreria.core.model.ChequeraPagoReemplazo;
-import um.tesoreria.core.repository.IChequeraPagoReemplazoRepository;
+import um.tesoreria.core.repository.ChequeraPagoReemplazoRepository;
+
+import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
  * @author daniel
@@ -16,10 +18,19 @@ import um.tesoreria.core.repository.IChequeraPagoReemplazoRepository;
  */
 @Service
 public class ChequeraPagoReemplazoService {
-	@Autowired
-	private IChequeraPagoReemplazoRepository repository;
 
-	public ChequeraPagoReemplazo findById(Long chequerapagoreemplazoID) {
-		return repository.findById(chequerapagoreemplazoID).orElseThrow(() -> new ChequeraPagoReemplazoException(chequerapagoreemplazoID));
+	private final ChequeraPagoReemplazoRepository repository;
+
+	public ChequeraPagoReemplazoService(ChequeraPagoReemplazoRepository repository) {
+		this.repository = repository;
 	}
+
+	public List<ChequeraPagoReemplazo> findAllByTipoPagoIdAndFechaAcreditacion(Integer tipoPagoId, OffsetDateTime fecha) {
+		return repository.findAllByTipoPagoIdAndAcreditacion(tipoPagoId, fecha);
+	}
+
+	public ChequeraPagoReemplazo findByChequeraPagoReemplazoId(Long chequeraPagoReemplazoId) {
+		return repository.findByChequeraPagoReemplazoId(chequeraPagoReemplazoId).orElseThrow(() -> new ChequeraPagoReemplazoException(chequeraPagoReemplazoId));
+	}
+
 }
