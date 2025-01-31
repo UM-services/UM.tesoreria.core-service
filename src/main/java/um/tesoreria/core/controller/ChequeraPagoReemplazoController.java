@@ -3,7 +3,6 @@
  */
 package um.tesoreria.core.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,11 +21,14 @@ import um.tesoreria.core.service.ChequeraPagoReemplazoService;
 @RequestMapping("/chequerapagoreemplazo")
 public class ChequeraPagoReemplazoController {
 
-	@Autowired
-	private ChequeraPagoReemplazoService service;
+	private final ChequeraPagoReemplazoService service;
 
-	@GetMapping("/{chequerapagoreemplazoId}")
-	public ResponseEntity<ChequeraPagoReemplazo> findById(@PathVariable Long chequerapagoreemplazoId) {
-		return new ResponseEntity<ChequeraPagoReemplazo>(service.findById(chequerapagoreemplazoId), HttpStatus.OK);
+	public ChequeraPagoReemplazoController(ChequeraPagoReemplazoService service) {
+		this.service = service;
+	}
+
+	@GetMapping("/{chequeraPagoReemplazoId}")
+	public ResponseEntity<ChequeraPagoReemplazo> findByChequeraPagoReemplazoId(@PathVariable Long chequeraPagoReemplazoId) {
+		return new ResponseEntity<>(service.findByChequeraPagoReemplazoId(chequeraPagoReemplazoId), HttpStatus.OK);
 	}
 }

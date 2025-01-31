@@ -31,7 +31,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -67,7 +66,7 @@ import um.tesoreria.core.model.view.DomicilioKey;
 import um.tesoreria.core.model.view.IngresoPeriodo;
 import um.tesoreria.core.model.view.LegajoKey;
 import um.tesoreria.core.model.view.PersonaKey;
-import um.tesoreria.core.model.view.TipoPagoFecha;
+import um.tesoreria.core.model.view.TipoPagoFechaAcreditacion;
 import um.tesoreria.core.service.ArancelTipoService;
 import um.tesoreria.core.service.BajaService;
 import um.tesoreria.core.service.CarreraService;
@@ -126,7 +125,7 @@ public class SheetService {
     private final CarreraFacultadConsumer carreraFacultadConsumer;
     private final PlanFacultadConsumer planFacultadConsumer;
     private final InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer;
-    private final TipoPagoFechaService tipoPagoFechaService;
+    private final TipoPagoFechaAcreditacionService tipoPagoFechaAcreditacionService;
     private final IngresoAsientoService ingresoAsientoService;
     private final CuentaMovimientoService cuentaMovimientoService;
     private final Environment environment;
@@ -139,7 +138,7 @@ public class SheetService {
     private final ProveedorService proveedorService;
     private final FacturaPendienteService facturaPendienteService;
 
-    public SheetService(FacultadService facultadService, TipoPagoService tipoPagoService, GeograficaService geograficaService, IngresoPeriodoService ingresoPeriodoService, ChequeraSerieService chequeraSerieService, PersonaKeyService personaKeyService, ArancelTipoService arancelTipoService, ChequeraCuotaService chequeraCuotaService, LegajoKeyService legajoKeyService, CarreraKeyService carreraKeyService, DomicilioKeyService domicilioKeyService, EjercicioService ejercicioService, ProveedorMovimientoService proveedorMovimientoService, SincronizeService sincronizeService, LectivoService lectivoService, PlanService planService, CarreraService carreraService, ChequeraPreunivService chequeraPreunivService, TipoChequeraService tipoChequeraService, PreunivResumenFacultadConsumer preunivResumenFacultadConsumer, PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer, PreTurnoFacultadConsumer preTurnoFacultadConsumer, PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer, PersonaKeyFacultadConsumer personaKeyFacultadConsumer, LegajoKeyFacultadConsumer legajoKeyFacultadConsumer, InscripcionFacultadConsumer inscripcionFacultadConsumer, CarreraFacultadConsumer carreraFacultadConsumer, PlanFacultadConsumer planFacultadConsumer, InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer, TipoPagoFechaService tipoPagoFechaService, IngresoAsientoService ingresoAsientoService, CuentaMovimientoService cuentaMovimientoService, PersonaSuspendidoService personaSuspendidoService, ContratoPeriodoService contratoPeriodoService, BajaService bajaService, BajaFacultadConsumer bajaFacultadConsumer, LegajoService legajoService, FacturacionElectronicaService facturacionElectronicaService, ProveedorService proveedorService, Environment environment, FacturaPendienteService facturaPendienteService) {
+    public SheetService(FacultadService facultadService, TipoPagoService tipoPagoService, GeograficaService geograficaService, IngresoPeriodoService ingresoPeriodoService, ChequeraSerieService chequeraSerieService, PersonaKeyService personaKeyService, ArancelTipoService arancelTipoService, ChequeraCuotaService chequeraCuotaService, LegajoKeyService legajoKeyService, CarreraKeyService carreraKeyService, DomicilioKeyService domicilioKeyService, EjercicioService ejercicioService, ProveedorMovimientoService proveedorMovimientoService, SincronizeService sincronizeService, LectivoService lectivoService, PlanService planService, CarreraService carreraService, ChequeraPreunivService chequeraPreunivService, TipoChequeraService tipoChequeraService, PreunivResumenFacultadConsumer preunivResumenFacultadConsumer, PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer, PreTurnoFacultadConsumer preTurnoFacultadConsumer, PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer, PersonaKeyFacultadConsumer personaKeyFacultadConsumer, LegajoKeyFacultadConsumer legajoKeyFacultadConsumer, InscripcionFacultadConsumer inscripcionFacultadConsumer, CarreraFacultadConsumer carreraFacultadConsumer, PlanFacultadConsumer planFacultadConsumer, InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer, TipoPagoFechaAcreditacionService tipoPagoFechaAcreditacionService, IngresoAsientoService ingresoAsientoService, CuentaMovimientoService cuentaMovimientoService, PersonaSuspendidoService personaSuspendidoService, ContratoPeriodoService contratoPeriodoService, BajaService bajaService, BajaFacultadConsumer bajaFacultadConsumer, LegajoService legajoService, FacturacionElectronicaService facturacionElectronicaService, ProveedorService proveedorService, Environment environment, FacturaPendienteService facturaPendienteService) {
         this.facultadService = facultadService;
         this.tipoPagoService = tipoPagoService;
         this.geograficaService = geograficaService;
@@ -169,7 +168,7 @@ public class SheetService {
         this.carreraFacultadConsumer = carreraFacultadConsumer;
         this.planFacultadConsumer = planFacultadConsumer;
         this.inscriptoCursoFacultadConsumer = inscriptoCursoFacultadConsumer;
-        this.tipoPagoFechaService = tipoPagoFechaService;
+        this.tipoPagoFechaAcreditacionService = tipoPagoFechaAcreditacionService;
         this.ingresoAsientoService = ingresoAsientoService;
         this.cuentaMovimientoService = cuentaMovimientoService;
         this.personaSuspendidoService = personaSuspendidoService;
@@ -1059,7 +1058,7 @@ public class SheetService {
         OffsetDateTime desde = ejercicio.getFechaInicio().withOffsetSameInstant(ZoneOffset.UTC);
         OffsetDateTime hasta = ejercicio.getFechaFinal().withOffsetSameInstant(ZoneOffset.UTC);
         for (OffsetDateTime fecha = desde; !fecha.isAfter(hasta); fecha = fecha.plusDays(1)) {
-            for (TipoPagoFecha pago : tipoPagoFechaService.findAllByFechaAcreditacion(fecha)) {
+            for (TipoPagoFechaAcreditacion pago : tipoPagoFechaAcreditacionService.findAllByFechaAcreditacion(fecha)) {
                 row = sheet.createRow(++fila);
                 // Sumo 1 día para mostrar bien la fecha
                 this.setCellOffsetDateTime(row, 0, fecha.plusDays(1), styleDate);

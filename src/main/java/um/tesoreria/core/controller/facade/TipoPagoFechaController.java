@@ -1,12 +1,11 @@
 /**
  * 
  */
-package um.tesoreria.core.controller.view;
+package um.tesoreria.core.controller.facade;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
@@ -16,23 +15,27 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import um.tesoreria.core.model.view.TipoPagoFecha;
-import um.tesoreria.core.service.view.TipoPagoFechaService;
+import um.tesoreria.core.model.dto.TipoPagoFechaDto;
+import um.tesoreria.core.service.facade.TipoPagoFechaService;
 
 /**
  * @author daniel
  *
  */
 @RestController
-@RequestMapping("/tipopagofecha")
+@RequestMapping({"/tipopagofecha", "/api/tesoreria/core/tipopagofecha"})
 public class TipoPagoFechaController {
 
-	@Autowired
-	private TipoPagoFechaService service;
+	private final TipoPagoFechaService service;
 
-	@GetMapping("/fecha/{fechaAcreditacion}")
-	public ResponseEntity<List<TipoPagoFecha>> findAllByFecha(
-			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime fechaAcreditacion) {
-		return new ResponseEntity<List<TipoPagoFecha>>(service.findAllByFechaAcreditacion(fechaAcreditacion), HttpStatus.OK);
+	public TipoPagoFechaController(TipoPagoFechaService service) {
+		this.service = service;
 	}
+
+	@GetMapping("/fecha/{fecha}")
+	public ResponseEntity<List<TipoPagoFechaDto>> findAllByFecha(
+			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime fecha) {
+		return new ResponseEntity<>(service.findAllByFecha(fecha), HttpStatus.OK);
+	}
+
 }

@@ -27,7 +27,7 @@ import java.util.List;
  * @author daniel
  */
 @RestController
-@RequestMapping({"/chequerapago", "/api/tesoreria/core/chequeraPago"})
+@RequestMapping({"/chequeraPago", "/api/tesoreria/core/chequeraPago"})
 public class ChequeraPagoController {
 
     private final ChequeraPagoService service;
@@ -47,6 +47,16 @@ public class ChequeraPagoController {
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<List<ChequeraPago>> findAllByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
         return new ResponseEntity<>(service.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService), HttpStatus.OK);
+    }
+
+    @GetMapping("/fecha/acreditacion/{tipoPagoId}/{fechaAcreditacion}")
+    public ResponseEntity<List<ChequeraPago>> findAllByTipoPagoIdAndFechaAcreditacion(@PathVariable Integer tipoPagoId, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaAcreditacion) {
+        return new ResponseEntity<>(service.findAllByTipoPagoIdAndFechaAcreditacion(tipoPagoId, fechaAcreditacion), HttpStatus.OK);
+    }
+
+    @GetMapping("/fecha/pago/{tipoPagoId}/{fechaPago}")
+    public ResponseEntity<List<ChequeraPago>> findAllByTipoPagoIdAndFechaPago(@PathVariable Integer tipoPagoId, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaPago) {
+        return new ResponseEntity<>(service.findAllByTipoPagoIdAndFechaPago(tipoPagoId, fechaPago), HttpStatus.OK);
     }
 
     @GetMapping("/{chequeraPagoId}")

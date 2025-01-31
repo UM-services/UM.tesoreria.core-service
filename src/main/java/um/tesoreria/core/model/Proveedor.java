@@ -41,7 +41,7 @@ public class Proveedor extends Auditable implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "prv_id")
-	private Integer proveedorId;
+	private Integer proveedorId = null;
 
 	@Column(name = "prv_cuit")
 	private String cuit = "";
@@ -73,7 +73,7 @@ public class Proveedor extends Auditable implements Serializable {
 	private String emailInterno = "";
 
 	@Column(name = "prv_cuenta")
-	private BigDecimal numeroCuenta;
+	private BigDecimal numeroCuenta = null;
 
 	@Column(name = "prv_habilitado")
 	private Byte habilitado = 0;
@@ -82,6 +82,6 @@ public class Proveedor extends Auditable implements Serializable {
 	
 	@OneToOne(optional = true)
 	@JoinColumn(name = "prv_cuenta", insertable = false, updatable = false)
-	private Cuenta cuenta;
+	private Cuenta cuenta = null;
 
 }

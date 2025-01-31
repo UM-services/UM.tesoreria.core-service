@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -17,8 +18,7 @@ import jakarta.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import um.tesoreria.core.kotlin.model.Auditable;
 
 /**
@@ -30,37 +30,41 @@ import um.tesoreria.core.kotlin.model.Auditable;
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "cpr_fac_id", "cpr_tch_id",
 		"cpr_chs_id", "cpr_pro_id", "cpr_alt_id", "cpr_cuo_id", "cpr_orden" }) })
 @EqualsAndHashCode(callSuper = false)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChequeraPagoReemplazo extends Auditable implements Serializable {
 	/**
 	* 
 	*/
+	@Serial
 	private static final long serialVersionUID = -8330381928415301696L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "clave")
-	private Long chequerapagoId;
+	private Long chequeraPagoReemplazoId = null;
 
 	@Column(name = "cpr_fac_id")
-	private Integer facultadId;
+	private Integer facultadId = null;
 
 	@Column(name = "cpr_tch_id")
-	private Integer tipochequeraId;
+	private Integer tipoChequeraId = null;
 
 	@Column(name = "cpr_chs_id")
-	private Long chequeraserieId;
+	private Long chequeraSerieId = null;
 
 	@Column(name = "cpr_pro_id")
-	private Integer productoId;
+	private Integer productoId = null;
 
 	@Column(name = "cpr_alt_id")
-	private Integer alternativaId;
+	private Integer alternativaId = null;
 
 	@Column(name = "cpr_cuo_id")
-	private Integer cuotaId;
+	private Integer cuotaId = null;
 
 	@Column(name = "cpr_orden")
-	private Integer orden;
+	private Integer orden = 0;
 	
 	@Column(name = "cpr_mes")
 	private Integer mes = 0;
@@ -70,14 +74,14 @@ public class ChequeraPagoReemplazo extends Auditable implements Serializable {
 	
 	@Column(name = "cpr_fecha")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-	private OffsetDateTime fecha;
+	private OffsetDateTime fecha = null;
 	
 	@Column(name = "cpr_acred")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-	private OffsetDateTime acreditacion;
+	private OffsetDateTime acreditacion = null;
 	
 	@Column(name = "cpr_importe")
-	private BigDecimal importe = new BigDecimal(0);
+	private BigDecimal importe = BigDecimal.ZERO;
 
 	@Column(name = "cpr_path")
 	private String path = "";
@@ -89,14 +93,14 @@ public class ChequeraPagoReemplazo extends Auditable implements Serializable {
 	private String observaciones = "";
 
 	@Column(name = "cpr_arb_id")
-	private Long archivobancoId;
+	private Long archivoBancoId = null;
 
 	@Column(name = "cpr_arb_id_acred")
-	private Long archivobancoIdacreditacion;
+	private Long archivoBancoIdAcreditacion = null;
 
 	private Integer verificador = 0;
 
 	@Column(name = "cpr_tpa_id")
-	private Integer tipopagoId;
+	private Integer tipoPagoId = null;
 
 }

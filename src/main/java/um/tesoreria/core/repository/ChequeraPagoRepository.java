@@ -17,16 +17,18 @@ import um.tesoreria.core.kotlin.model.ChequeraPago;
  *
  */
 @Repository
-public interface IChequeraPagoRepository extends JpaRepository<ChequeraPago, Long> {
+public interface ChequeraPagoRepository extends JpaRepository<ChequeraPago, Long> {
 
 	List<ChequeraPago> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId,
 			Integer tipoChequeraId, Long chequeraSerieId);
 
 	List<ChequeraPago> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId);
 
-	List<ChequeraPago> findAllByFechaAndTipoPagoIdGreaterThan(OffsetDateTime fechaPago, Integer tipoPagoId);
-
 	List<ChequeraPago> findAllByFechaBetweenAndTipoPagoIdGreaterThan(OffsetDateTime fechaInicio, OffsetDateTime fechaFin, Integer tipoPagoThreshold);
+
+	List<ChequeraPago> findAllByTipoPagoIdAndAcreditacion(Integer tipoPagoId, OffsetDateTime fechaAcreditacion);
+
+	List<ChequeraPago> findAllByTipoPagoIdAndFechaBetween(Integer tipoPagoId, OffsetDateTime fechaInicio, OffsetDateTime fechaFin);
 
 	Optional<ChequeraPago> findByChequeraPagoId(Long chequeraPagoId);
 

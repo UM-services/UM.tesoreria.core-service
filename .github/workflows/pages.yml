@@ -1,0 +1,87 @@
+name: Deploy GitHub Pages
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Corre diariamente
+  workflow_dispatch:      # Permite ejecutar manualmente
+  push:
+    branches: [ "main" ]  # Solo en la rama principal
+  issues:
+    types: [opened, closed, edited, deleted]
+  milestone:
+    types: [created, closed, edited, deleted]
+
+# Corregimos la sintaxis de los permisos
+permissions:
+  contents: write    # Para repo y wiki
+  pages: write      # Para GitHub Pages
+  id-token: write   # Para autenticación
+  issues: read          # Para leer issues
+  pull-requests: write  # Para PR y merge
+  repository-projects: write
+  actions: read         # Para acceder a las acciones
+  deployments: write    # Para despliegues
+  statuses: write       # Para actualizar estados
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install PyGithub markdown2 jinja2 requests
+
+      - name: Fetch Issues and Milestones
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/fetch_github_data.py
+
+      - name: Generate Documentation
+        run: |
+          python scripts/generate_docs.py
+
+      - name: Generate Wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.WIKI_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          python scripts/generate_wiki.py
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+      
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4 
