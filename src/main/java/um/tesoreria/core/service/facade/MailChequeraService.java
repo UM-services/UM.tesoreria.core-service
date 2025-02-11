@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -21,24 +22,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import um.tesoreria.core.client.tesoreria.sender.ChequeraClient;
 import um.tesoreria.core.exception.CarreraChequeraException;
-import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DomicilioException;
-import um.tesoreria.core.exception.LegajoException;
-import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.ChequeraSerieDTO;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;
-import um.tesoreria.core.model.ChequeraSerieControl;
-import um.tesoreria.core.model.ChequeraTotal;
-import um.tesoreria.core.model.LectivoCuota;
-import um.tesoreria.core.model.LectivoTotal;
 import um.tesoreria.core.model.MailSender;
 import um.tesoreria.core.service.*;
+import um.tesoreria.core.service.transactional.spoter.SpoterService;
 import um.tesoreria.core.util.Tool;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -56,23 +49,27 @@ public class MailChequeraService {
     private final LectivoService lectivoService;
     private final CarreraChequeraService carreraChequeraService;
     private final CursoService cursoService;
-    private final ChequeraSerieControlService chequeraSerieControlService;
-    private final LegajoService legajoService;
     private final SpoterDataService spoterDataService;
-    private final LectivoTotalService lectivoTotalService;
-    private final ChequeraTotalService chequeraTotalService;
-    private final LectivoAlternativaService lectivoAlternativaService;
-    private final ChequeraAlternativaService chequeraAlternativaService;
-    private final LectivoCuotaService lectivoCuotaService;
     private final MailSenderService mailSenderService;
     private final ChequeraService chequeraService;
-    private final BuildService buildService;
     private final ChequeraClient chequeraClient;
+    private final SpoterService spoterService;
 
-    public MailChequeraService(JavaMailSender javaMailSender, ChequeraSerieService chequeraSerieService, DomicilioService domicilioService, FacultadService facultadService, PersonaService personaService,
-                               ChequeraCuotaService chequeraCuotaService, LectivoService lectivoService, CarreraChequeraService carreraChequeraService, CursoService cursoService, ChequeraSerieControlService chequeraSerieControlService,
-                               LegajoService legajoService, SpoterDataService spoterDataService, LectivoTotalService lectivoTotalService, ChequeraTotalService chequeraTotalService, LectivoAlternativaService lectivoAlternativaService,
-                               ChequeraAlternativaService chequeraAlternativaService, LectivoCuotaService lectivoCuotaService, MailSenderService mailSenderService, ChequeraService chequeraService, BuildService buildService, ChequeraClient chequeraClient) {
+    public MailChequeraService(JavaMailSender javaMailSender,
+                               ChequeraSerieService chequeraSerieService,
+                               DomicilioService domicilioService,
+                               FacultadService facultadService,
+                               PersonaService personaService,
+                               ChequeraCuotaService chequeraCuotaService,
+                               LectivoService lectivoService,
+                               CarreraChequeraService carreraChequeraService,
+                               CursoService cursoService,
+                               SpoterDataService spoterDataService,
+                               MailSenderService mailSenderService,
+                               ChequeraService chequeraService,
+                               ChequeraClient chequeraClient,
+                               SpoterService spoterService
+    ) {
         this.javaMailSender = javaMailSender;
         this.chequeraSerieService = chequeraSerieService;
         this.domicilioService = domicilioService;
@@ -82,27 +79,20 @@ public class MailChequeraService {
         this.lectivoService = lectivoService;
         this.carreraChequeraService = carreraChequeraService;
         this.cursoService = cursoService;
-        this.chequeraSerieControlService = chequeraSerieControlService;
-        this.legajoService = legajoService;
         this.spoterDataService = spoterDataService;
-        this.lectivoTotalService = lectivoTotalService;
-        this.chequeraTotalService = chequeraTotalService;
-        this.lectivoAlternativaService = lectivoAlternativaService;
-        this.chequeraAlternativaService = chequeraAlternativaService;
-        this.lectivoCuotaService = lectivoCuotaService;
         this.mailSenderService = mailSenderService;
         this.chequeraService = chequeraService;
-        this.buildService = buildService;
         this.chequeraClient = chequeraClient;
+        this.spoterService = spoterService;
     }
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
-                               Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) throws MessagingException {
+                               Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
         return chequeraClient.sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes, codigoBarras);
     }
 
     public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId,
-                               Boolean copiaInformes, Boolean incluyeMatricula) throws MessagingException {
+                            Boolean copiaInformes, Boolean incluyeMatricula) {
         MailSender javaMailSender = mailSenderService.findSender();
         log.debug("mail_chequera_service.send_chequera.javaMailSender={}", javaMailSender);
         String url = MessageFormat.format("http://{0}:{1}", javaMailSender.getIpAddress(), javaMailSender.getPort().toString());
@@ -118,38 +108,30 @@ public class MailChequeraService {
         return mono.block();
     }
 
-    public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData, Boolean updateMailPersonal, Boolean responseSinEnvio) throws MessagingException {
+    public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData, Boolean updateMailPersonal, Boolean responseSinEnvio) {
 // Determina lectivoId
-        Lectivo lectivo = null;
+        Lectivo lectivo;
         OffsetDateTime ahora = Tool.dateAbsoluteArgentina();
         Integer lectivoId = (lectivo = lectivoService.findByFecha(ahora)).getLectivoId();
 // si corresponde al segundo semestre entonces la genera para el ciclo lectivo siguiente
         OffsetDateTime referenciaHasta = lectivo.getFechaFinal();
 
 // Ajusta la referenciaDesde para que sea en septiembre del año anterior
+        assert referenciaHasta != null;
         OffsetDateTime referenciaDesde = referenciaHasta.minusYears(1).withMonth(8).withDayOfMonth(1);
 
         if (ahora.isAfter(referenciaDesde) && ahora.isBefore(referenciaHasta)) {
+            assert lectivoId != null;
             lectivo = lectivoService.findByLectivoId(++lectivoId);
         }
+        logLectivo(lectivo);
 
-        try {
-            log.debug("Lectivo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(lectivo));
-        } catch (JsonProcessingException e1) {
-            log.debug("Lectivo -> error");
-        }
         if (updateMailPersonal) {
             try {
                 Domicilio domicilio = domicilioService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
                 domicilio.setEmailInstitucional(spoterData.getEmailPersonal());
                 domicilio = domicilioService.update(domicilio, domicilio.getDomicilioId(), true);
-                try {
-                    log.debug("Domicilio -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(domicilio));
-                } catch (JsonProcessingException e1) {
-                    log.debug("Domicilio -> error");
-                }
+                logDomicilio(domicilio);
             } catch (DomicilioException e) {
                 log.debug("Persona SIN Domicilio para Actualizar");
             }
@@ -158,13 +140,8 @@ public class MailChequeraService {
         try {
             SpoterData data = spoterDataService.findOne(spoterData.getPersonaId(),
                     spoterData.getDocumentoId(), spoterData.getFacultadId(), spoterData.getGeograficaId(), lectivoId);
-            log.debug("Leído");
-            try {
-                log.debug("SpoterData previo -> {}", JsonMapper.builder().findAndAddModules().build()
-                        .writerWithDefaultPrettyPrinter().writeValueAsString(data));
-            } catch (JsonProcessingException e) {
-                log.debug("SpoterData previo -> error");
-            }
+            log.debug("SporterData leído");
+            logSpoterData(data);
             ChequeraSerieDTO chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerieService.findByUnique(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId()));
             String messageSender = "Response Sin Envío";
             if (!responseSinEnvio) {
@@ -172,29 +149,19 @@ public class MailChequeraService {
             }
             return new SpoterDataResponse(true, messageSender, data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), chequeraSerieDTO);
         } catch (SpoterDataException e) {
-
+            log.debug("SpoterData error -> {}", e.getMessage());
         }
         // Determina curso
         Curso curso = cursoService.findTopByClaseChequera(1);
-        try {
-            log.debug("Curso -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(curso));
-        } catch (JsonProcessingException e1) {
-            log.debug("Curso -> error");
-        }
+        logCurso(curso);
         // Determina facultadId, lectivoId, tipoChequeraId, chequeraSerieId,
         // arancelTipoId, alternativaId
-        CarreraChequera carreraChequera = null;
+        CarreraChequera carreraChequera;
         try {
             carreraChequera = carreraChequeraService.findByUnique(spoterData.getFacultadId(), lectivoId,
                     spoterData.getPlanId(), spoterData.getCarreraId(), 1, curso.getCursoId(),
                     spoterData.getGeograficaId());
-            try {
-                log.debug("CarreraChequera -> {}", JsonMapper.builder().findAndAddModules().build()
-                        .writerWithDefaultPrettyPrinter().writeValueAsString(carreraChequera));
-            } catch (JsonProcessingException e) {
-                log.debug("CarreraChequera -> error");
-            }
+            logCarreraChequera(carreraChequera);
         } catch (CarreraChequeraException e) {
             log.debug(e.getMessage());
             return new SpoterDataResponse(false, "SIN Tipo Chequera ASIGNADA", null, null, null, null);
@@ -202,181 +169,32 @@ public class MailChequeraService {
 
         // Genera la chequera nueva con los datos encontrados
         log.debug(("Calling mail_chequera_service.make_chequera_spoter"));
-        ChequeraSerie chequeraSerie = this.makeChequeraSpoter(spoterData, lectivoId, curso, carreraChequera);
-        try {
-            log.debug("ChequeraSerie -> {}", JsonMapper.builder().findAndAddModules().build()
-                    .writerWithDefaultPrettyPrinter().writeValueAsString(chequeraSerie));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerie -> error");
-        }
+        ChequeraSerie chequeraSerie = spoterService.makeChequeraSpoter(spoterData, lectivoId, curso, carreraChequera);
+        logChequeraSerie(chequeraSerie);
 
         // Enviar chequera
-        String message = "";
-        message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
+        String message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
                 chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false, false);
         // Registrar SpoterData
         spoterData.setLectivoId(lectivoId);
-        spoterData.setStatus(message.equals("Envío de Correo Ok!!") ? (byte) 1 : (byte) 0);
+        spoterData.setStatus(message.equals("Envío de Chequera Ok!!!") ? (byte) 1 : (byte) 0);
         spoterData.setMessage(message);
         spoterData.setTipoChequeraId(chequeraSerie.getTipoChequeraId());
         spoterData.setChequeraSerieId(chequeraSerie.getChequeraSerieId());
         spoterData.setAlternativaId(chequeraSerie.getAlternativaId());
         spoterData = spoterDataService.add(spoterData);
-        try {
-            log.debug("SpoterData -> {}", JsonMapper.builder().findAndAddModules().build()
-                    .writerWithDefaultPrettyPrinter().writeValueAsString(spoterData));
-        } catch (JsonProcessingException e) {
-            log.debug("SpoterData -> error");
-        }
+        logSpoterData(spoterData);
         log.debug("Construyendo chequeraDTO");
         ChequeraSerieDTO chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerie);
-        try {
-            log.debug("ChequeraSerieDTO -> {}", JsonMapper.builder().findAndAddModules().build()
-                    .writerWithDefaultPrettyPrinter().writeValueAsString(chequeraSerieDTO));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerieDTO -> error");
-        }
+        logChequeraSerieDTO(chequeraSerieDTO);
         return new SpoterDataResponse(spoterData.getStatus() == (byte) 1, spoterData.getMessage(),
                 spoterData.getFacultadId(), spoterData.getTipoChequeraId(), spoterData.getChequeraSerieId(), chequeraSerieDTO);
     }
 
-    @Transactional
-    public ChequeraSerie makeChequeraSpoter(SpoterData spoterData, Integer lectivoId, Curso curso,
-                                            CarreraChequera carreraChequera) {
-        Build build = buildService.findLast();
-        try {
-            personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
-        } catch (PersonaException e) {
-            personaService.add(new Persona(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
-                    spoterData.getApellido(), spoterData.getNombre(), "", (byte) 0, "", "", ""));
-        }
-        try {
-            domicilioService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
-        } catch (DomicilioException e) {
-            domicilioService.add(new Domicilio(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
-                    Tool.hourAbsoluteArgentina(), "", "", "", "", "", spoterData.getCelular(), "", "",
-                    spoterData.getFacultadId(), null, null, spoterData.getEmailPersonal(), "", ""), false);
-        }
-
-        // Determinar el número de chequera usando ChequeraSerieControl
-        ChequeraSerieControl chequeraSerieControl = null;
-        long chequeraSerieId = 1L;
-        try {
-            chequeraSerieControl = chequeraSerieControlService.findLastByTipoChequera(carreraChequera.getFacultadId(),
-                    carreraChequera.getTipoChequeraId());
-            chequeraSerieId = 1L + chequeraSerieControl.getChequeraSerieId();
-        } catch (ChequeraSerieControlException e) {
-
-        }
-        // Llenar Legajo tesorería
-        try {
-            legajoService.findByFacultadIdAndPersonaIdAndDocumentoId(spoterData.getFacultadId(),
-                    spoterData.getPersonaId(), spoterData.getDocumentoId());
-        } catch (LegajoException e) {
-            legajoService.add(new Legajo(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
-                    spoterData.getFacultadId(), 0L, Tool.dateAbsoluteArgentina(), lectivoId, spoterData.getPlanId(),
-                    spoterData.getCarreraId(), (byte) 1, spoterData.getGeograficaId(), "", (byte) 0));
-        }
-        // Generar ChequeraSerieControl
-        chequeraSerieControl = chequeraSerieControlService
-                .add(new ChequeraSerieControl(null, carreraChequera.getFacultadId(),
-                        carreraChequera.getTipoChequeraId(), chequeraSerieId, (byte) 0, 0, 0, 0L, (byte) 0));
-        try {
-            log.debug("ChequeraSerieControl -> {}", JsonMapper.builder().findAndAddModules().build()
-                    .writerWithDefaultPrettyPrinter().writeValueAsString(chequeraSerieControl));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerieControl -> error");
-        }
-        // Generar ChequeraSerie
-        ChequeraSerie chequeraSerie = chequeraSerieService.add(new ChequeraSerie(null,
-                chequeraSerieControl.getFacultadId(), chequeraSerieControl.getTipoChequeraId(),
-                chequeraSerieControl.getChequeraSerieId(), spoterData.getPersonaId(), spoterData.getDocumentoId(),
-                lectivoId, 1, curso.getCursoId(), (byte) 0, spoterData.getGeograficaId(), Tool.dateAbsoluteArgentina(),
-                0, "Generated By Spoter", 1, (byte) 0, 2, (byte) 0, "fsarabia", (byte) 0, (byte) 0, build.getBuild(), 0, BigDecimal.ZERO,
-                null, null, null, null, null, null, null));
-        try {
-            log.debug("ChequeraSerie -> {}", JsonMapper.builder().findAndAddModules().build()
-                    .writerWithDefaultPrettyPrinter().writeValueAsString(chequeraSerie));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerie -> error");
-        }
-        // Generar ChequeraTotal
-        List<ChequeraTotal> chequeraTotals = new ArrayList<>();
-        for (LectivoTotal lectivoTotal : lectivoTotalService.findAllByTipo(chequeraSerie.getFacultadId(),
-                chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId())) {
-            chequeraTotals.add(new ChequeraTotal(null, chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
-                    chequeraSerie.getChequeraSerieId(), lectivoTotal.getProductoId(), lectivoTotal.getTotal(),
-                    BigDecimal.ZERO));
-        }
-        chequeraTotals = chequeraTotalService.saveAll(chequeraTotals);
-        try {
-            log.debug("ChequeraTotal -> {}", JsonMapper.builder().findAndAddModules().build()
-                    .writerWithDefaultPrettyPrinter().writeValueAsString(chequeraTotals));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraTotal -> error");
-        }
-        // Generar ChequeraAlternativa
-        List<ChequeraAlternativa> chequeraAlternativas = new ArrayList<>();
-        for (LectivoAlternativa lectivoAlternativa : lectivoAlternativaService.findAllByTipo(
-                chequeraSerie.getFacultadId(), chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(),
-                chequeraSerie.getAlternativaId())) {
-            chequeraAlternativas.add(new ChequeraAlternativa(null, chequeraSerie.getFacultadId(),
-                    chequeraSerie.getTipoChequeraId(), chequeraSerie.getChequeraSerieId(),
-                    lectivoAlternativa.getProductoId(), lectivoAlternativa.getAlternativaId(),
-                    lectivoAlternativa.getTitulo(), lectivoAlternativa.getCuotas()));
-        }
-        chequeraAlternativas = chequeraAlternativaService.saveAll(chequeraAlternativas);
-        try {
-            log.debug("ChequeraAlternativa -> {}", JsonMapper.builder().findAndAddModules().build()
-                    .writerWithDefaultPrettyPrinter().writeValueAsString(chequeraAlternativas));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraAlternativa -> error");
-        }
-        // Generar Cuotas
-        List<ChequeraCuota> chequeraCuotas = new ArrayList<>();
-        int offset = 0;
-        for (LectivoCuota lectivoCuota : lectivoCuotaService.findAllByTipo(chequeraSerie.getFacultadId(),
-                chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(), chequeraSerie.getAlternativaId())) {
-            OffsetDateTime vencimiento1 = lectivoCuota.getVencimiento1();
-            OffsetDateTime vencimiento2 = lectivoCuota.getVencimiento2();
-            OffsetDateTime vencimiento3 = lectivoCuota.getVencimiento3();
-            if (OffsetDateTime.now().isAfter(vencimiento1)) {
-                vencimiento1 = Tool.dateAbsoluteArgentina().plusDays(7 + 30L * offset);
-                vencimiento2 = Tool.dateAbsoluteArgentina().plusDays(20 + 30L * offset);
-                vencimiento3 = Tool.dateAbsoluteArgentina().plusDays(40 + 30L * offset);
-                offset++;
-            }
-            ChequeraCuota chequeraCuota = new ChequeraCuota(null, chequeraSerie.getChequeraId(), chequeraSerie.getFacultadId(),
-                    chequeraSerie.getTipoChequeraId(), chequeraSerie.getChequeraSerieId(), lectivoCuota.getProductoId(),
-                    lectivoCuota.getAlternativaId(), lectivoCuota.getCuotaId(), lectivoCuota.getMes(),
-                    lectivoCuota.getAnho(), chequeraSerie.getArancelTipoId(), vencimiento1, lectivoCuota.getImporte1(),
-                    lectivoCuota.getImporte1(), vencimiento2, lectivoCuota.getImporte2(), lectivoCuota.getImporte2(),
-                    vencimiento3, lectivoCuota.getImporte3(), lectivoCuota.getImporte3(), "", "", (byte) 0, (byte) 0,
-                    (byte) 0, (byte) 0, 0, null, null, null, null);
-            try {
-                log.debug("mail_chequera_service.make_chequera_spoter.chequera_cuota -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequeraCuota));
-            } catch (JsonProcessingException e) {
-                log.debug("mail_chequera_service.make_chequera_spoter.chequera_cuota -> error");
-            }
-            log.debug("mail_chequera_service.make_chequera_spoter - calling calculate_codigo_barras");
-            chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
-            log.debug("mail_chequera_service.make_chequera_spoter - after calculate_codigo_barras");
-            chequeraCuotas.add(chequeraCuota);
-        }
-        chequeraCuotas = chequeraCuotaService.saveAll(chequeraCuotas);
-        try {
-            log.debug("ChequeraCuota -> {}", JsonMapper.builder().findAndAddModules().build()
-                    .writerWithDefaultPrettyPrinter().writeValueAsString(chequeraCuotas));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraCuota -> error");
-        }
-        return chequeraSerie;
-    }
-
     public String notificaDeudor(BigDecimal personaId, Integer documentoId) throws MessagingException {
-        String data = "";
+        String data;
 
-        Domicilio domicilio = null;
+        Domicilio domicilio;
         try {
             domicilio = domicilioService.findByUnique(personaId, documentoId);
         } catch (DomicilioException e) {
@@ -411,12 +229,12 @@ public class MailChequeraService {
 
 //		addresses.add("daniel.quinterospinto@gmail.com");
         try {
-            helper.setTo(addresses.toArray(new String[addresses.size()]));
+            helper.setTo(addresses.toArray(new String[0]));
             helper.setText(data);
             helper.setReplyTo("no-reply@um.edu.ar");
             helper.setSubject("Notificación por Deuda");
         } catch (MessagingException e) {
-            e.printStackTrace();
+            log.error("ERROR: No pudo ENVIARSE -> {}", e.getMessage());
             return "ERROR: No pudo ENVIARSE";
         }
         javaMailSender.send(message);
@@ -426,11 +244,11 @@ public class MailChequeraService {
 
     public String notificaDeudorChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId)
             throws MessagingException {
-        String data = "";
+        String data;
 
         ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
 
-        Domicilio domicilio = null;
+        Domicilio domicilio;
         try {
             domicilio = domicilioService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
         } catch (DomicilioException e) {
@@ -451,12 +269,12 @@ public class MailChequeraService {
 
 //		addresses.add("daniel.quinterospinto@gmail.com");
         try {
-            helper.setTo(addresses.toArray(new String[addresses.size()]));
+            helper.setTo(addresses.toArray(new String[0]));
             helper.setText(data);
             helper.setReplyTo("no-reply@um.edu.ar");
             helper.setSubject("Notificación por Deuda");
         } catch (MessagingException e) {
-            e.printStackTrace();
+            log.error("ERROR: No pudo ENVIARSE -> {}", e.getMessage());
             return "ERROR: No pudo ENVIARSE";
         }
         javaMailSender.send(message);
@@ -494,7 +312,7 @@ public class MailChequeraService {
             data += "         Período: " + String.format("%02d/%04d", cuota.getMes(), cuota.getAnho())
                     + "     Vencimiento: "
                     + DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                    .format(cuota.getVencimiento1().withOffsetSameInstant(ZoneOffset.UTC))
+                    .format(Objects.requireNonNull(cuota.getVencimiento1()).withOffsetSameInstant(ZoneOffset.UTC))
                     + "     Importe: " + cuota.getImporte1().setScale(2, RoundingMode.HALF_UP) + (char) 10;
 
         }
@@ -517,6 +335,97 @@ public class MailChequeraService {
                 + (char) 10;
 
         return data;
+    }
+
+    private void logLectivo(Lectivo lectivo) {
+        try {
+            log.debug("Lectivo -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(lectivo));
+        } catch (JsonProcessingException e) {
+            log.debug("Lectivo jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logDomicilio(Domicilio domicilio) {
+        try {
+            log.debug("Domicilio -> {}", JsonMapper.
+                    builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(domicilio));
+        } catch (JsonProcessingException e) {
+            log.debug("Domicilio jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logCurso(Curso curso) {
+        try {
+            log.debug("Curso -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(curso));
+        } catch (JsonProcessingException e) {
+            log.debug("Curso jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logSpoterData(SpoterData data) {
+        try {
+            log.debug("SpoterData -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(data));
+        } catch (JsonProcessingException e) {
+            log.debug("SpoterData jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logCarreraChequera(CarreraChequera carreraChequera) {
+        try {
+            log.debug("CarreraChequera -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(carreraChequera));
+        } catch (JsonProcessingException e) {
+            log.debug("CarreraChequera jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logChequeraSerie(ChequeraSerie chequeraSerie) {
+        try {
+            log.debug("ChequeraSerie -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(chequeraSerie));
+        } catch (JsonProcessingException e) {
+            log.debug("ChequeraSerie jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logChequeraSerieDTO(ChequeraSerieDTO chequeraSerieDTO) {
+        try {
+            log.debug("ChequeraSerieDTO -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(chequeraSerieDTO));
+        } catch (JsonProcessingException e) {
+            log.debug("ChequeraSerieDTO jsonify error -> {}", e.getMessage());
+        }
     }
 
 }

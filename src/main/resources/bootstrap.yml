@@ -33,6 +33,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: none
+    open-in-view: false
   mail:
     host: smtp.gmail.com
     port: 587
