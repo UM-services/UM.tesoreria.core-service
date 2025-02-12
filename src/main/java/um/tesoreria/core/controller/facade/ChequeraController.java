@@ -67,7 +67,7 @@ public class ChequeraController {
     @GetMapping("/sendChequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{copiaInformes}")
     public ResponseEntity<String> sendChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
                                                @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
-                                               @PathVariable Boolean copiaInformes) throws MessagingException {
+                                               @PathVariable Boolean copiaInformes) {
         chequeraCuotaService.updateBarras(facultadId, tipoChequeraId, chequeraSerieId);
         return new ResponseEntity<>(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
                 alternativaId, copiaInformes, true, false), HttpStatus.OK);
@@ -77,7 +77,7 @@ public class ChequeraController {
     public ResponseEntity<String> sendCuota(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
                                             @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
                                             @PathVariable Integer productoId, @PathVariable Integer cuotaId,
-                                            @PathVariable Boolean copiaInformes) throws MessagingException {
+                                            @PathVariable Boolean copiaInformes) {
         chequeraCuotaService.updateBarras(facultadId, tipoChequeraId, chequeraSerieId);
         return new ResponseEntity<>(mailChequeraService.sendCuota(facultadId, tipoChequeraId, chequeraSerieId,
                 alternativaId, productoId, cuotaId, copiaInformes, true), HttpStatus.OK);
