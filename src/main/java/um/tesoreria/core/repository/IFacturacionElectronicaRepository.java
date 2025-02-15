@@ -16,10 +16,10 @@ public interface IFacturacionElectronicaRepository extends JpaRepository<Factura
 
     List<FacturacionElectronica> findAllByFechaReciboBetween(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta, Sort sort);
 
+    List<FacturacionElectronica> findTop100ByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaId(Byte enviada, Integer retries);
+
     Optional<FacturacionElectronica> findByFacturacionElectronicaId(Long facturacionElectronicaId);
 
     Optional<FacturacionElectronica> findByChequeraPagoId(Long chequeraPagoId);
-
-    Optional<FacturacionElectronica> findTopByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaId(Byte enviada, Integer retries);
 
 }
