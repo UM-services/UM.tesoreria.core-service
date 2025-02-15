@@ -36,6 +36,10 @@ public class FacturacionElectronicaService {
         return facturacionElectronicas;
     }
 
+    public List<FacturacionElectronica> find100Pendientes() {
+        return repository.findTop100ByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaId((byte) 0, 3);
+    }
+
     public FacturacionElectronica findByFacturacionElectronicaId(Long facturacionElectronicaId) {
         var facturacionElectronica = repository.findByFacturacionElectronicaId(facturacionElectronicaId).orElseThrow(() -> new FacturacionElectronicaException("facturacionElectronicaId", facturacionElectronicaId));
         try {
@@ -48,10 +52,6 @@ public class FacturacionElectronicaService {
 
     public FacturacionElectronica findByChequeraPagoId(Long chequeraPagoId) {
         return repository.findByChequeraPagoId(chequeraPagoId).orElseThrow(() -> new FacturacionElectronicaException("chequeraPagoId", chequeraPagoId));
-    }
-
-    public FacturacionElectronica findNextPendiente() {
-        return repository.findTopByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaId((byte) 0, 3).orElseThrow(FacturacionElectronicaException::new);
     }
 
     public FacturacionElectronica add(FacturacionElectronica facturacionElectronica) {

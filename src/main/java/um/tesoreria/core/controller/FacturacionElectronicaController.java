@@ -58,9 +58,9 @@ public class FacturacionElectronicaController {
         return new ResponseEntity<>(service.findAllByPeriodo(fechaDesde, fechaHasta), HttpStatus.OK);
     }
 
-    @GetMapping("/nextPendiente")
-    public ResponseEntity<FacturacionElectronica> findNextPendiente() {
-        return new ResponseEntity<>(service.findNextPendiente(), HttpStatus.OK);
+    @GetMapping("/pendientes")
+    public ResponseEntity<List<FacturacionElectronica>> find100Pendientes() {
+        return new ResponseEntity<>(service.find100Pendientes(), HttpStatus.OK);
     }
 
     @PostMapping("/")
