@@ -36,7 +36,7 @@ public class RabbitMQConfig {
         return template;
     }
 
-    @Bean
+    @Bean(name = "rabbitTransactionManager")
     public PlatformTransactionManager rabbitTransactionManager(ConnectionFactory connectionFactory) {
         return new RabbitTransactionManager(connectionFactory);
     }
