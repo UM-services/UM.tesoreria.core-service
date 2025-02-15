@@ -1,6 +1,6 @@
 # um.tesoreria.core-service
 
-[![UM.tesoreria.core-service CI](https://github.com/UM-services/UM.tesoreria.core-service/actions/workflows/maven.yml/badge.svg)](https://github.com/UM-services/UM.tesoreria.core-service/actions/workflows/maven.yml)
+[![Estado del Build](https://github.com/UM-services/UM.tesoreria.core-service/actions/workflows/maven.yml/badge.svg)](https://github.com/UM-services/UM.tesoreria.core-service/actions/workflows/maven.yml)
 
 Servicio CORE para la arquitectura de microservicios de UM Tesoreria. Este servicio maneja la lógica central del sistema de tesorería, incluyendo la gestión de pagos, chequeras y asientos contables.
 
