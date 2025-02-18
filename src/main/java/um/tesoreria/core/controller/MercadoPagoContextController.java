@@ -46,4 +46,9 @@ public class MercadoPagoContextController {
         return ResponseEntity.ok(service.findAllActiveChequeraCuota());
     }
 
+    @GetMapping("/pagos/sin/imputar")
+    public ResponseEntity<List<MercadoPagoContext>> findAllSinImputar() {
+        return ResponseEntity.ok(service.findAllSinImputar());
+    }
+
 }
