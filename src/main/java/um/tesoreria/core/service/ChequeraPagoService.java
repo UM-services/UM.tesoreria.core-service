@@ -157,7 +157,7 @@ public class ChequeraPagoService {
     }
 
     public ChequeraPago findByIdMercadoPago(String idMercadoPago) {
-        log.debug("Processing findByIdMercadoPago");
+        log.debug("Processing ChequeraPagoService.findByIdMercadoPago -> {}", idMercadoPago);
         return repository.findByIdMercadoPago(idMercadoPago).orElseThrow(() -> new ChequeraPagoException(idMercadoPago));
     }
 

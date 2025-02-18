@@ -9,6 +9,8 @@ interface MercadoPagoContextRepository : JpaRepository<MercadoPagoContext, Long>
 
     fun findAllByChequeraCuotaIdAndActivo(chequeraCuotaId: Long, activo: Byte): List<MercadoPagoContext?>?
 
+    fun findAllByStatusAndChequeraPagoIdIsNull(status: String): List<MercadoPagoContext>
+
     fun findByChequeraCuotaIdAndActivo(chequeraCuotaId: Long, activo: Byte): Optional<MercadoPagoContext?>?
 
     fun findByMercadoPagoContextId(mercadoPagoContextId: Long): Optional<MercadoPagoContext?>?

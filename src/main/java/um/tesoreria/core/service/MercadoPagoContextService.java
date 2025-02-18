@@ -45,6 +45,14 @@ public class MercadoPagoContextService {
         return repository.saveAll(mercadoPagoContexts);
     }
 
+    public List<Long> findAllActiveChequeraCuota() {
+        return Objects.requireNonNull(repository.findAllByActivo((byte) 1)).stream().filter(Objects::nonNull).map(MercadoPagoContext::getChequeraCuotaId).toList();
+    }
+
+    public List<MercadoPagoContext> findAllSinImputar() {
+        return repository.findAllByStatusAndChequeraPagoIdIsNull("approved");
+    }
+
     private void logObject(String message, Object object) {
         if (log.isDebugEnabled()) {
             try {
@@ -95,10 +103,6 @@ public class MercadoPagoContextService {
                 .importePagado(source.getImportePagado())
                 .payment(source.getPayment())
                 .build();
-    }
-
-    public List<Long> findAllActiveChequeraCuota() {
-        return Objects.requireNonNull(repository.findAllByActivo((byte) 1)).stream().filter(Objects::nonNull).map(MercadoPagoContext::getChequeraCuotaId).toList();
     }
 
 }
