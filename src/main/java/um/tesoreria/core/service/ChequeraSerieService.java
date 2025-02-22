@@ -6,6 +6,7 @@ package um.tesoreria.core.service;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,7 +26,7 @@ import um.tesoreria.core.model.Debito;
 import um.tesoreria.core.model.dto.DeudaChequera;
 import um.tesoreria.core.model.view.ChequeraIncompleta;
 import um.tesoreria.core.model.view.ChequeraKey;
-import um.tesoreria.core.repository.IChequeraSerieRepository;
+import um.tesoreria.core.repository.ChequeraSerieRepository;
 import um.tesoreria.core.service.view.ChequeraSerieAltaFullService;
 import um.tesoreria.core.service.view.ChequeraSerieAltaService;
 import um.tesoreria.core.service.view.ChequeraIncompletaService;
@@ -39,24 +40,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ChequeraSerieService {
 
-    private final IChequeraSerieRepository repository;
-
+    private final ChequeraSerieRepository repository;
     private final ChequeraIncompletaService chequeraIncompletaService;
-
     private final ChequeraSerieAltaService chequeraSerieAltaService;
-
     private final ChequeraSerieAltaFullService chequeraSerieAltaFullService;
-
     private final TipoChequeraService tipoChequeraService;
-
     private final DebitoService debitoService;
-
     private final ChequeraKeyService chequeraKeyService;
+    private final ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
 
     @Autowired
-    public ChequeraSerieService(IChequeraSerieRepository repository, ChequeraIncompletaService chequeraIncompletaService, ChequeraSerieAltaService chequeraSerieAltaService,
+    public ChequeraSerieService(ChequeraSerieRepository repository, ChequeraIncompletaService chequeraIncompletaService, ChequeraSerieAltaService chequeraSerieAltaService,
                                 ChequeraSerieAltaFullService chequeraSerieAltaFullService, TipoChequeraService tipoChequeraService,
-                                DebitoService debitoService, ChequeraKeyService chequeraKeyService) {
+                                DebitoService debitoService, ChequeraKeyService chequeraKeyService, ChequeraImpresionCabeceraService chequeraImpresionCabeceraService) {
         this.repository = repository;
         this.chequeraIncompletaService = chequeraIncompletaService;
         this.chequeraSerieAltaService = chequeraSerieAltaService;
@@ -64,7 +60,7 @@ public class ChequeraSerieService {
         this.tipoChequeraService = tipoChequeraService;
         this.debitoService = debitoService;
         this.chequeraKeyService = chequeraKeyService;
-
+        this.chequeraImpresionCabeceraService = chequeraImpresionCabeceraService;
     }
 
     public List<ChequeraSerie> findAllByPersona(BigDecimal personaId, Integer documentoId) {
@@ -72,15 +68,18 @@ public class ChequeraSerieService {
     }
 
     public List<ChequeraSerie> findAllByPersonaExtended(BigDecimal personaId, Integer documentoId, ChequeraCuotaService chequeraCuotaService) {
-        List<ChequeraSerie> chequeras = repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
-                Sort.by("lectivoId").descending());
-        for (ChequeraSerie chequera : chequeras) {
-            DeudaChequera deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
-                    chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
-            chequera.setCuotasDeuda(deuda.getCuotas());
-            chequera.setImporteDeuda(deuda.getDeuda());
-        }
-        return chequeras;
+        return repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, Sort.by("lectivoId").descending())
+            .stream()
+            .peek(chequera -> {
+                var deuda = chequeraCuotaService.calculateDeuda(
+                    chequera.getFacultadId(),
+                    chequera.getTipoChequeraId(), 
+                    chequera.getChequeraSerieId()
+                );
+                chequera.setCuotasDeuda(deuda.getCuotas());
+                chequera.setImporteDeuda(deuda.getDeuda());
+            })
+            .toList();
     }
 
     public List<ChequeraSerie> findAllByPersonaIdAndDocumentoIdAndLectivoIdAndFacultadId(BigDecimal personaId,
@@ -119,11 +118,6 @@ public class ChequeraSerieService {
         return repository.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipoChequeraId);
     }
 
-    public List<ChequeraSerie> findAllByFacultadIdAndLectivoIdAndTipoChequeraIdIn(Integer facultadId, Integer lectivoId,
-                                                                                  List<Integer> tipoChequeraIds) {
-        return repository.findAllByFacultadIdAndLectivoIdAndTipoChequeraIdIn(facultadId, lectivoId, tipoChequeraIds);
-    }
-
     public List<ChequeraSerie> findAllByPersonaIdAndDocumentoId(BigDecimal personaId, Integer documentoId, Sort sort) {
         return repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, sort);
     }
@@ -133,20 +127,26 @@ public class ChequeraSerieService {
     }
 
     public List<ChequeraSerie> findAllByFacultadExtended(BigDecimal personaId, Integer documentoId,
-                                                         Integer facultadId, ChequeraCuotaService chequeraCuotaService) {
-        List<ChequeraSerie> chequeras = repository.findAllByPersonaIdAndDocumentoIdAndFacultadId(personaId, documentoId,
-                facultadId);
-        for (ChequeraSerie chequera : chequeras) {
-            DeudaChequera deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
-                    chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
-            chequera.setCuotasDeuda(deuda.getCuotas());
-            chequera.setImporteDeuda(deuda.getDeuda());
-        }
-        return chequeras;
+                                                        Integer facultadId, ChequeraCuotaService chequeraCuotaService) {
+        return repository.findAllByPersonaIdAndDocumentoIdAndFacultadId(personaId, documentoId, facultadId)
+            .stream()
+            .peek(chequera -> {
+                var deuda = chequeraCuotaService.calculateDeuda(
+                    chequera.getFacultadId(),
+                    chequera.getTipoChequeraId(), 
+                    chequera.getChequeraSerieId()
+                );
+                chequera.setCuotasDeuda(deuda.getCuotas());
+                chequera.setImporteDeuda(deuda.getDeuda());
+            })
+            .toList();
     }
 
     public List<ChequeraSerie> findAllByPersonaLectivo(BigDecimal personaId, Integer documentoId, Integer lectivoId) {
-        return repository.findAllByPersonaIdAndDocumentoIdAndLectivoId(personaId, documentoId, lectivoId);
+        var chequeras = repository.findAllByPersonaIdAndDocumentoIdAndLectivoId(personaId, documentoId, lectivoId);
+        return chequeras.stream().peek(chequera ->
+                chequera.setUltimoEnvio(Objects.requireNonNull(chequeraImpresionCabeceraService.findLastByUnique(chequera.getFacultadId(),
+                chequera.getTipoChequeraId(), chequera.getChequeraSerieId()).getFecha()).plusHours(-3))).toList();
     }
 
     public List<ChequeraIncompleta> findAllIncompletas(Integer lectivoId, Integer facultadId, Integer geograficaId) {
@@ -174,18 +174,14 @@ public class ChequeraSerieService {
 
     public ChequeraSerie findByChequeraId(Long chequeraId) {
         var chequeraSerie = repository.findByChequeraId(chequeraId).orElseThrow(() -> new ChequeraSerieException(chequeraId));
-        try {
-            log.debug("ChequeraSerie -> {}" + JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequeraSerie));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerie -> error");
-        }
+        logChequeraSerie(chequeraSerie);
         return chequeraSerie;
     }
 
     public ChequeraSerie findByChequeraIdExtended(Long chequeraId, ChequeraCuotaService chequeraCuotaService) {
         ChequeraSerie chequera = repository.findByChequeraId(chequeraId)
                 .orElseThrow(() -> new ChequeraSerieException(chequeraId));
-        DeudaChequera deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
+        var deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
                 chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
         chequera.setCuotasDeuda(deuda.getCuotas());
         chequera.setImporteDeuda(deuda.getDeuda());
@@ -193,16 +189,19 @@ public class ChequeraSerieService {
     }
 
     public ChequeraSerie findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
-        return repository
+        var chequera = repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
+        chequera.setUltimoEnvio(Objects.requireNonNull(chequeraImpresionCabeceraService.findLastByUnique(facultadId, tipoChequeraId, chequeraSerieId).getFecha()).plusHours(-3));
+        logChequeraSerie(chequera);
+        return chequera;
     }
 
     public ChequeraSerie findByUniqueExtended(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, ChequeraCuotaService chequeraCuotaService) {
         ChequeraSerie chequera = repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
-        DeudaChequera deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
+        var deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
                 chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
         chequera.setCuotasDeuda(deuda.getCuotas());
         chequera.setImporteDeuda(deuda.getDeuda());
@@ -258,7 +257,7 @@ public class ChequeraSerieService {
     }
 
     public ChequeraSerie setPayPerTic(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Byte flag) {
-        ChequeraSerie chequeraSerie = repository
+        var chequeraSerie = repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
         chequeraSerie.setFlagPayperTic(flag);
@@ -267,30 +266,55 @@ public class ChequeraSerieService {
     }
 
     public ChequeraSerie add(ChequeraSerie chequeraSerie) {
+        log.debug("Processing ChequeraSerieService.add");
         chequeraSerie = repository.save(chequeraSerie);
+        logChequeraSerie(chequeraSerie);
         return chequeraSerie;
     }
 
     public ChequeraSerie update(ChequeraSerie newChequeraSerie, Long chequeraId) {
+        log.debug("Processing ChequeraSerieService.update");
         Integer facultadId = newChequeraSerie.getFacultadId();
         Integer tipoChequeraId = newChequeraSerie.getTipoChequeraId();
         Long chequeraSerieId = newChequeraSerie.getChequeraSerieId();
         return repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .map(chequeraSerie -> {
-                    chequeraSerie = new ChequeraSerie(chequeraId, facultadId, tipoChequeraId, chequeraSerieId,
-                            newChequeraSerie.getPersonaId(), newChequeraSerie.getDocumentoId(),
-                            newChequeraSerie.getLectivoId(), newChequeraSerie.getArancelTipoId(),
-                            newChequeraSerie.getCursoId(), newChequeraSerie.getAsentado(),
-                            newChequeraSerie.getGeograficaId(), newChequeraSerie.getFecha(),
-                            newChequeraSerie.getCuotasPagadas(), newChequeraSerie.getObservaciones(),
-                            newChequeraSerie.getAlternativaId(), newChequeraSerie.getAlgoPagado(),
-                            newChequeraSerie.getTipoImpresionId(), newChequeraSerie.getFlagPayperTic(),
-                            newChequeraSerie.getUsuarioId(), newChequeraSerie.getEnviado(),
-                            newChequeraSerie.getRetenida(), newChequeraSerie.getVersion(), 0, BigDecimal.ZERO, null, null, null, null, null, null,
-                            null);
+                    chequeraSerie = new ChequeraSerie(chequeraId,
+                            facultadId,
+                            tipoChequeraId,
+                            chequeraSerieId,
+                            newChequeraSerie.getPersonaId(),
+                            newChequeraSerie.getDocumentoId(),
+                            newChequeraSerie.getLectivoId(),
+                            newChequeraSerie.getArancelTipoId(),
+                            newChequeraSerie.getCursoId(),
+                            newChequeraSerie.getAsentado(),
+                            newChequeraSerie.getGeograficaId(),
+                            newChequeraSerie.getFecha(),
+                            newChequeraSerie.getCuotasPagadas(),
+                            newChequeraSerie.getObservaciones(),
+                            newChequeraSerie.getAlternativaId(),
+                            newChequeraSerie.getAlgoPagado(),
+                            newChequeraSerie.getTipoImpresionId(),
+                            newChequeraSerie.getFlagPayperTic(),
+                            newChequeraSerie.getUsuarioId(),
+                            newChequeraSerie.getEnviado(),
+                            newChequeraSerie.getRetenida(),
+                            newChequeraSerie.getVersion(),
+                            0,
+                            BigDecimal.ZERO,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null
+                    );
                     chequeraSerie = repository.save(chequeraSerie);
-                    log.debug("ChequeraSerie -> " + chequeraSerie);
+                    logChequeraSerie(chequeraSerie);
                     return chequeraSerie;
                 }).orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
     }
@@ -300,6 +324,19 @@ public class ChequeraSerieService {
                                                                          Long chequeraSerieId) {
         repository.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId,
                 chequeraSerieId);
+    }
+
+    private void logChequeraSerie(ChequeraSerie chequeraSerie) {
+        try {
+            log.debug("ChequeraSerie -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(chequeraSerie));
+        } catch (JsonProcessingException e) {
+            log.debug("ChequeraSerie -> error");
+        }
     }
 
 }

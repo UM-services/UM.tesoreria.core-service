@@ -29,8 +29,10 @@ import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.ChequeraSerieDTO;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;
+import um.tesoreria.core.kotlin.model.dto.message.ChequeraMessageDto;
 import um.tesoreria.core.model.MailSender;
 import um.tesoreria.core.service.*;
+import um.tesoreria.core.service.queue.ChequeraQueueService;
 import um.tesoreria.core.service.transactional.spoter.SpoterService;
 import um.tesoreria.core.util.Tool;
 import lombok.extern.slf4j.Slf4j;
@@ -54,6 +56,7 @@ public class MailChequeraService {
     private final ChequeraService chequeraService;
     private final ChequeraClient chequeraClient;
     private final SpoterService spoterService;
+    private final ChequeraQueueService chequeraQueueService;
 
     public MailChequeraService(JavaMailSender javaMailSender,
                                ChequeraSerieService chequeraSerieService,
@@ -68,8 +71,8 @@ public class MailChequeraService {
                                MailSenderService mailSenderService,
                                ChequeraService chequeraService,
                                ChequeraClient chequeraClient,
-                               SpoterService spoterService
-    ) {
+                               SpoterService spoterService,
+                               ChequeraQueueService chequeraQueueService) {
         this.javaMailSender = javaMailSender;
         this.chequeraSerieService = chequeraSerieService;
         this.domicilioService = domicilioService;
@@ -84,11 +87,27 @@ public class MailChequeraService {
         this.chequeraService = chequeraService;
         this.chequeraClient = chequeraClient;
         this.spoterService = spoterService;
+        this.chequeraQueueService = chequeraQueueService;
     }
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
                                Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
         return chequeraClient.sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes, codigoBarras);
+    }
+
+    public String sendChequeraByQueue(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
+        log.debug("Processing MailChequeraService.sendChequeraByQueue");
+        chequeraQueueService.sendChequeraQueue(new ChequeraMessageDto.Builder()
+                .facultadId(facultadId)
+                .tipoChequeraId(tipoChequeraId)
+                .chequeraSerieId(chequeraSerieId)
+                .alternativaId(alternativaId)
+                .copiaInformes(copiaInformes)
+                .codigoBarras(codigoBarras)
+                .incluyeMatricula(incluyeMatricula)
+                .build()
+        );
+        return "Envío de Chequera Solicitado";
     }
 
     public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId,

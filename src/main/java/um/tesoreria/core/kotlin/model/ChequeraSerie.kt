@@ -77,6 +77,9 @@ data class ChequeraSerie(
     @Transient
     var importeDeuda: BigDecimal = BigDecimal.ZERO,
 
+    @Transient
+    var ultimoEnvio: OffsetDateTime? = null,
+
     @OneToOne(optional = true)
     @JoinColumn(name = "chs_fac_id", insertable = false, updatable = false)
     var facultad: Facultad? = null,
@@ -116,6 +119,7 @@ data class ChequeraSerie(
     var geografica: Geografica? = null
 
 ) : Auditable() {
+
     fun getPersonaKey(): String {
         return this.personaId.toString() + "." + this.documentoId
     }

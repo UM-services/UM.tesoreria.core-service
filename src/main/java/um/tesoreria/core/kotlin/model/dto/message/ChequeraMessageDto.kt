@@ -1,13 +1,43 @@
 package um.tesoreria.core.kotlin.model.dto.message
 
-data class ChequeraMessageDto(
+data class ChequeraMessageDto (
+    val facultadId: Int,
+    val tipoChequeraId: Int,
+    val chequeraSerieId: Long,
+    val alternativaId: Int,
+    val copiaInformes: Boolean,
+    val codigoBarras: Boolean,
+    val incluyeMatricula: Boolean
+) {
+    data class Builder(
+        var facultadId: Int = 0,
+        var tipoChequeraId: Int = 0,
+        var chequeraSerieId: Long = 0,
+        var alternativaId: Int = 0,
+        var copiaInformes: Boolean = false,
+        var codigoBarras: Boolean = false,
+        var incluyeMatricula: Boolean = false
+    ) {
+        fun facultadId(facultadId: Int) = apply { this.facultadId = facultadId }
+        fun tipoChequeraId(tipoChequeraId: Int) = apply { this.tipoChequeraId = tipoChequeraId }
+        fun chequeraSerieId(chequeraSerieId: Long) = apply { this.chequeraSerieId = chequeraSerieId }
+        fun alternativaId(alternativaId: Int) = apply { this.alternativaId = alternativaId }
+        fun copiaInformes(copiaInformes: Boolean) = apply { this.copiaInformes = copiaInformes }
+        fun codigoBarras(codigoBarras: Boolean) = apply { this.codigoBarras = codigoBarras }
+        fun incluyeMatricula(incluyeMatricula: Boolean) = apply { this.incluyeMatricula = incluyeMatricula }
+        
+        fun build() = ChequeraMessageDto(
+            facultadId,
+            tipoChequeraId,
+            chequeraSerieId,
+            alternativaId,
+            copiaInformes,
+            codigoBarras,
+            incluyeMatricula
+        )
+    }
 
-    var facultadId: Int,
-    var tipoChequeraId: Int,
-    var chequeraSerieId: Long,
-    var alternativaId: Int,
-    var copiaInformes: Boolean,
-    var codigoBarras: Boolean,
-    var incluyeMatricula: Boolean
-
-)
+    companion object {
+        fun builder() = Builder()
+    }
+}

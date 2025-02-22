@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.ChequeraImpresionDetalle;
-import um.tesoreria.core.repository.IChequeraImpresionDetalleRepository;
+import um.tesoreria.core.repository.ChequeraImpresionDetalleRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.IChequeraImpresionDetalleRepository;
 public class ChequeraImpresionDetalleService {
 
 	@Autowired
-	private IChequeraImpresionDetalleRepository repository;
+	private ChequeraImpresionDetalleRepository repository;
 
 	public List<ChequeraImpresionDetalle> saveAll(List<ChequeraImpresionDetalle> detalles) {
 		return repository.saveAll(detalles);

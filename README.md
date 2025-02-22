@@ -7,11 +7,11 @@ Servicio CORE para la arquitectura de microservicios de UM Tesoreria. Este servi
 ## Tecnologías
 
 - Java 21
-- Spring Boot 3.4.2
+- Spring Boot 3.4.3
 - Spring Cloud 2024.0.0
 - Kotlin 2.1.10
-- MySQL
-- Maven
+- MySQL 8+
+- Maven 3.8.8+
 
 ## Características Principales
 
@@ -21,12 +21,16 @@ Servicio CORE para la arquitectura de microservicios de UM Tesoreria. Este servi
 - Gestión de cuotas y facturación
 - Caché distribuido con Caffeine
 - Documentación automática con OpenAPI/Swagger
+- Soporte para RabbitMQ
+- Transacciones distribuidas
+- Métricas con Prometheus
 
 ## Requisitos
 
 - JDK 21
 - Maven 3.8.8+
 - MySQL 8+
+- RabbitMQ 3.12+
 - Docker (opcional)
 
 ## Configuración
@@ -36,9 +40,11 @@ Servicio CORE para la arquitectura de microservicios de UM Tesoreria. Este servi
 git clone https://github.com/UM-services/UM.tesoreria.core-service.git
 ```
 
-2. Configurar la base de datos en `application.properties`
+2. Configurar la base de datos en `bootstrap.yml`
 
-3. Compilar el proyecto:
+3. Configurar RabbitMQ en `bootstrap.yml`
+
+4. Compilar el proyecto:
 ```bash
 mvn clean install
 ```
@@ -53,20 +59,21 @@ mvn spring-boot:run
 ### Docker
 ```bash
 docker build -t um-tesoreria-core .
-docker run -p 8080:8080 um-tesoreria-core
+docker run -p 8092:8092 um-tesoreria-core
 ```
 
 ## Documentación
 
 - [Documentación Detallada](https://um-services.github.io/UM.tesoreria.core-service/project-documentation)
 - [Wiki del Proyecto](https://github.com/UM-services/UM.tesoreria.core-service/wiki)
-- [OpenAPI/Swagger](http://localhost:8080/swagger-ui.html)
+- [OpenAPI/Swagger](http://localhost:8092/swagger-ui.html)
 
 ## Monitoreo
 
 El servicio incluye endpoints de Actuator y métricas Prometheus en:
 - Health check: `/actuator/health`
 - Métricas: `/actuator/prometheus`
+- Otros endpoints: `/actuator`
 
 ## CI/CD
 
@@ -75,6 +82,7 @@ El proyecto utiliza GitHub Actions para:
 - Generación de documentación
 - Construcción y publicación de imágenes Docker
 - Actualización automática de la Wiki
+- Despliegue automático de GitHub Pages
 
 ## Contribuir
 
