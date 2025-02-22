@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.ClaseChequera;
-import um.tesoreria.core.repository.IClaseChequeraRepository;
+import um.tesoreria.core.repository.ClaseChequeraRepository;
 
 /**
  * @author daniel
@@ -18,7 +18,7 @@ import um.tesoreria.core.repository.IClaseChequeraRepository;
 public class ClaseChequeraService {
 
     @Autowired
-    private IClaseChequeraRepository repository;
+    private ClaseChequeraRepository repository;
 
     public List<ClaseChequera> findAll() {
         return repository.findAll();

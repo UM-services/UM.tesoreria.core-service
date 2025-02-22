@@ -43,23 +43,14 @@ import lombok.extern.slf4j.Slf4j;
 public class PersonaService {
 
     private final IPersonaRepository repository;
-
     private final PersonaKeyService personaKeyService;
-
     private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
-
     private final PreInscripcionFacultadConsumer preInscripcionFacultadConsumer;
-
     private final FacultadService facultadService;
-
     private final ChequeraSerieService chequeraSerieService;
-
     private final CarreraChequeraService carreraChequeraService;
-
     private final LegajoFacultadConsumer legajoFacultadConsumer;
-
     private final ChequeraCuotaService chequeraCuotaService;
-
     private final MercadoPagoContextService mercadoPagoContextService;
     private final PreferenceClient preferenceClient;
 
@@ -112,11 +103,7 @@ public class PersonaService {
                 .deudas(deudas)
                 .vencimientos(new ArrayList<>())
                 .build();
-        try {
-            log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersona));
-        } catch (JsonProcessingException e) {
-            log.debug("DeudaPersona error -> {}", e.getMessage());
-        }
+        logDeudaPersona(deudaPersona);
         return deudaPersona;
     }
 
@@ -128,7 +115,7 @@ public class PersonaService {
         List<Vencimiento> vencimientos = new ArrayList<>();
         for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
                 null)) {
-            logChequera(chequera);
+            logChequeraSerie(chequera);
             DeudaChequera deuda = chequeraCuotaService.calculateDeudaExtended(chequera.getFacultadId(),
                     chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
             logDeuda(deuda);
@@ -214,14 +201,6 @@ public class PersonaService {
         }
     }
 
-    private void logChequera(ChequeraSerie chequera) {
-        try {
-            log.debug("ChequeraSerie -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequera));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerie error -> {}", e.getMessage());
-        }
-    }
-
     public List<PersonaKey> findAllInscriptosSinChequera(Integer facultadId, Integer lectivoId, Integer geograficaId,
                                                          Integer curso) {
         Facultad facultad = facultadService.findByFacultadId(facultadId);
@@ -233,15 +212,17 @@ public class PersonaService {
         // Elimina los que ya tengan chequera
         Map<String, InscripcionFacultad> pendientes = new HashMap<String, InscripcionFacultad>();
         for (InscripcionFacultad inscripto : inscriptos.values()) {
-            Boolean add = true;
+            boolean add = true;
             try {
+                ChequeraSerie chequeraSerie;
                 if (facultadId == 15) {
-                    chequeraSerieService.findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
+                    chequeraSerie = chequeraSerieService.findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
                             inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
                 } else {
-                    chequeraSerieService.findGradoByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
+                    chequeraSerie = chequeraSerieService.findGradoByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
                             inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
                 }
+                logChequeraSerie(chequeraSerie);
                 add = false;
             } catch (ChequeraSerieException e) {
                 log.debug("Sin chequera");
@@ -287,9 +268,9 @@ public class PersonaService {
             if (!tipos.containsKey(facultadId + "." + inscripto.getPlanId() + "." + inscripto.getCarreraId()))
                 continue;
             carreraChequera = tipos.get(facultadId + "." + inscripto.getPlanId() + "." + inscripto.getCarreraId());
-            Boolean add = true;
+            boolean add = true;
             try {
-                chequeraSerieService
+                var chequeraSerie = chequeraSerieService
                         .findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaIdAndTipoChequeraId(
                                 inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId,
                                 geograficaId, carreraChequera.getTipoChequeraId());
@@ -329,12 +310,13 @@ public class PersonaService {
         // Elimina los que ya tengan chequera
         Map<String, PreInscripcionFacultad> pendientes = new HashMap<String, PreInscripcionFacultad>();
         for (PreInscripcionFacultad preinscripto : preinscriptos.values()) {
-            Boolean add = true;
+            boolean add = true;
             try {
-                chequeraSerieService
+                var chequeraSerie = chequeraSerieService
                         .findPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
                                 preinscripto.getPersonaId(), preinscripto.getDocumentoId(), facultadId, lectivoId - 1,
                                 geograficaId);
+                logChequeraSerie(chequeraSerie);
                 add = false;
             } catch (ChequeraSerieException e) {
                 log.debug("Sin chequera");
@@ -387,6 +369,19 @@ public class PersonaService {
             repository.save(persona);
             return persona;
         }).orElseThrow(() -> new PersonaException(uniqueId));
+    }
+
+    private void logChequeraSerie(ChequeraSerie chequeraSerie) {
+        try {
+            log.debug("ChequeraSerie -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(chequeraSerie));
+        } catch (JsonProcessingException e) {
+            log.debug("ChequeraSerie jsonify error -> {}", e.getMessage());
+        }
     }
 
 }

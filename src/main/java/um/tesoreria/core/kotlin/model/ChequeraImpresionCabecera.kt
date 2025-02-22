@@ -1,6 +1,7 @@
 package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -18,8 +19,12 @@ data class ChequeraImpresionCabecera(
     var chequeraImpresionCabeceraId: Long? = null,
 
     var facultadId: Int? = null,
-    var tipochequeraId: Int? = null,
-    var chequeraserieId: Long? = null,
+
+    @Column(name = "tipochequera_id")
+    var tipoChequeraId: Int? = null,
+
+    @Column(name = "chequeraserie_id")
+    var chequeraSerieId: Long? = null,
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
     var fecha: OffsetDateTime? = null,
@@ -28,7 +33,10 @@ data class ChequeraImpresionCabecera(
     var documentoId: Int? = null,
     var lectivoId: Int? = null,
     var geograficaId: Int? = null,
-    var aranceltipoId: Int? = null,
+
+    @Column(name = "aranceltipo_id")
+    var arancelTipoId: Int? = null,
+
     var alternativaId: Int? = null,
     var usuarioId: String? = null,
     var version: Long? = null

@@ -13,7 +13,7 @@ import java.util.List;
  * @author daniel
  */
 @Repository
-public interface IClaseChequeraRepository extends JpaRepository<ClaseChequera, Integer> {
+public interface ClaseChequeraRepository extends JpaRepository<ClaseChequera, Integer> {
 
     public List<ClaseChequera> findAllByPosgrado(Byte posgrado);
 

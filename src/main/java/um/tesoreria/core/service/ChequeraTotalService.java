@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraTotalException;
 import um.tesoreria.core.model.ChequeraTotal;
-import um.tesoreria.core.repository.IChequeraTotalRepository;
+import um.tesoreria.core.repository.ChequeraTotalRepository;
 
 /**
  * @author daniel
@@ -20,9 +20,9 @@ import um.tesoreria.core.repository.IChequeraTotalRepository;
 @Service
 public class ChequeraTotalService {
 
-	private final IChequeraTotalRepository repository;
+	private final ChequeraTotalRepository repository;
 
-	public ChequeraTotalService(IChequeraTotalRepository repository) {
+	public ChequeraTotalService(ChequeraTotalRepository repository) {
 		this.repository = repository;
 	}
 

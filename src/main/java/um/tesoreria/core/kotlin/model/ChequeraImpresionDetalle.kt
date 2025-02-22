@@ -14,8 +14,13 @@ data class ChequeraImpresionDetalle(
 
     var chequeraImpresionCabeceraId: Long? = null,
     var facultadId: Int? = null,
-    var tipochequeraId: Int? = null,
-    var chequeraserieId: Long? = null,
+
+    @Column(name = "tipochequera_id")
+    var tipoChequeraId: Int? = null,
+
+    @Column(name = "chequeraserie_id")
+    var chequeraSerieId: Long? = null,
+
     var productoId: Int? = null,
     var alternativaId: Int? = null,
     var cuotaId: Int? = null,

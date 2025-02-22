@@ -70,7 +70,19 @@ public class ChequeraController {
                                                @PathVariable Boolean copiaInformes) {
         chequeraCuotaService.updateBarras(facultadId, tipoChequeraId, chequeraSerieId);
         return new ResponseEntity<>(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
-                alternativaId, copiaInformes, true, false), HttpStatus.OK);
+                alternativaId, copiaInformes, false, false), HttpStatus.OK);
+    }
+
+    @GetMapping("/sendChequera/queue/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{copiaInformes}/{codigoBarras}")
+    public ResponseEntity<String> sendChequeraByQueue(@PathVariable Integer facultadId,
+                                                      @PathVariable Integer tipoChequeraId,
+                                                      @PathVariable Long chequeraSerieId,
+                                                      @PathVariable Integer alternativaId,
+                                                      @PathVariable Boolean copiaInformes,
+                                                      @PathVariable Boolean codigoBarras) {
+        chequeraCuotaService.updateBarras(facultadId, tipoChequeraId, chequeraSerieId);
+        return new ResponseEntity<>(mailChequeraService.sendChequeraByQueue(facultadId, tipoChequeraId, chequeraSerieId,
+                alternativaId, copiaInformes, false, codigoBarras), HttpStatus.OK);
     }
 
     @GetMapping("/sendCuota/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{productoId}/{cuotaId}/{copiaInformes}")

@@ -12,6 +12,6 @@ import um.tesoreria.core.kotlin.model.ChequeraImpresionDetalle;
  *
  */
 @Repository
-public interface IChequeraImpresionDetalleRepository extends JpaRepository<ChequeraImpresionDetalle, Long> {
+public interface ChequeraImpresionDetalleRepository extends JpaRepository<ChequeraImpresionDetalle, Long> {
 
 }
