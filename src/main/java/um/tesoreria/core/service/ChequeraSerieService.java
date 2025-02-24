@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -144,9 +145,21 @@ public class ChequeraSerieService {
 
     public List<ChequeraSerie> findAllByPersonaLectivo(BigDecimal personaId, Integer documentoId, Integer lectivoId) {
         var chequeras = repository.findAllByPersonaIdAndDocumentoIdAndLectivoId(personaId, documentoId, lectivoId);
-        return chequeras.stream().peek(chequera ->
-                chequera.setUltimoEnvio(Objects.requireNonNull(chequeraImpresionCabeceraService.findLastByUnique(chequera.getFacultadId(),
-                chequera.getTipoChequeraId(), chequera.getChequeraSerieId()).getFecha()).plusHours(-3))).toList();
+        return chequeras.stream()
+            .peek(chequera -> {
+                var ultimoEnvio = Optional.ofNullable(
+                    chequeraImpresionCabeceraService.findLastByUnique(
+                        chequera.getFacultadId(),
+                        chequera.getTipoChequeraId(), 
+                        chequera.getChequeraSerieId()
+                    )
+                )
+                .map(cabecera -> Objects.requireNonNull(cabecera.getFecha()).plusHours(-3))
+                .orElse(null);
+                
+                chequera.setUltimoEnvio(ultimoEnvio);
+            })
+            .toList();
     }
 
     public List<ChequeraIncompleta> findAllIncompletas(Integer lectivoId, Integer facultadId, Integer geograficaId) {
