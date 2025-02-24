@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface IFacturacionElectronicaRepository extends JpaRepository<FacturacionElectronica, Long> {
+public interface FacturacionElectronicaRepository extends JpaRepository<FacturacionElectronica, Long> {
 
     List<FacturacionElectronica> findAllByChequeraPagoIdIn(List<Long> chequeraPagoIds);
 
     List<FacturacionElectronica> findAllByFechaReciboBetween(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta, Sort sort);
 
-    List<FacturacionElectronica> findTop100ByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaId(Byte enviada, Integer retries);
+    List<FacturacionElectronica> findTop200ByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaIdDesc(Byte enviada, Integer retries);
 
     Optional<FacturacionElectronica> findByFacturacionElectronicaId(Long facturacionElectronicaId);
 

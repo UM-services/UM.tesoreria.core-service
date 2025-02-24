@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import um.tesoreria.core.exception.FacturacionElectronicaException;
 import um.tesoreria.core.kotlin.model.FacturacionElectronica;
-import um.tesoreria.core.repository.IFacturacionElectronicaRepository;
+import um.tesoreria.core.repository.FacturacionElectronicaRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -16,9 +16,9 @@ import java.util.List;
 @Slf4j
 public class FacturacionElectronicaService {
 
-    private final IFacturacionElectronicaRepository repository;
+    private final FacturacionElectronicaRepository repository;
 
-    public FacturacionElectronicaService(IFacturacionElectronicaRepository repository) {
+    public FacturacionElectronicaService(FacturacionElectronicaRepository repository) {
         this.repository = repository;
     }
 
@@ -37,7 +37,7 @@ public class FacturacionElectronicaService {
     }
 
     public List<FacturacionElectronica> find100Pendientes() {
-        return repository.findTop100ByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaId((byte) 0, 3);
+        return repository.findTop200ByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaIdDesc((byte) 0, 3);
     }
 
     public FacturacionElectronica findByFacturacionElectronicaId(Long facturacionElectronicaId) {
