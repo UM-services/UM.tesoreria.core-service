@@ -24,7 +24,6 @@ import um.tesoreria.core.kotlin.model.TipoChequera;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAlta;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAltaFull;
 import um.tesoreria.core.model.Debito;
-import um.tesoreria.core.model.dto.DeudaChequera;
 import um.tesoreria.core.model.view.ChequeraIncompleta;
 import um.tesoreria.core.model.view.ChequeraKey;
 import um.tesoreria.core.repository.ChequeraSerieRepository;
@@ -147,17 +146,23 @@ public class ChequeraSerieService {
         var chequeras = repository.findAllByPersonaIdAndDocumentoIdAndLectivoId(personaId, documentoId, lectivoId);
         return chequeras.stream()
             .peek(chequera -> {
-                var ultimoEnvio = Optional.ofNullable(
-                    chequeraImpresionCabeceraService.findLastByUnique(
-                        chequera.getFacultadId(),
-                        chequera.getTipoChequeraId(), 
-                        chequera.getChequeraSerieId()
+                try {
+                    var ultimoEnvio = Optional.ofNullable(
+                        chequeraImpresionCabeceraService.findLastByUnique(
+                            chequera.getFacultadId(),
+                            chequera.getTipoChequeraId(), 
+                            chequera.getChequeraSerieId()
+                        )
                     )
-                )
-                .map(cabecera -> Objects.requireNonNull(cabecera.getFecha()).plusHours(-3))
-                .orElse(null);
-                
-                chequera.setUltimoEnvio(ultimoEnvio);
+                    .map(cabecera -> Objects.requireNonNull(cabecera.getFecha()).plusHours(-3))
+                    .orElse(null);
+                    
+                    chequera.setUltimoEnvio(ultimoEnvio);
+                } catch (Exception e) {
+                    // Si no hay último envío o hay error, simplemente asignamos null
+                    chequera.setUltimoEnvio(null);
+                    log.debug("No se encontró último envío para la chequera: {}", chequera.getChequeraId());
+                }
             })
             .toList();
     }
@@ -205,7 +210,20 @@ public class ChequeraSerieService {
         var chequera = repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
-        chequera.setUltimoEnvio(Objects.requireNonNull(chequeraImpresionCabeceraService.findLastByUnique(facultadId, tipoChequeraId, chequeraSerieId).getFecha()).plusHours(-3));
+        
+        try {
+            var ultimoEnvio = Optional.ofNullable(
+                chequeraImpresionCabeceraService.findLastByUnique(facultadId, tipoChequeraId, chequeraSerieId)
+            )
+            .map(cabecera -> Objects.requireNonNull(cabecera.getFecha()).plusHours(-3))
+            .orElse(null);
+            
+            chequera.setUltimoEnvio(ultimoEnvio);
+        } catch (Exception e) {
+            chequera.setUltimoEnvio(null);
+            log.debug("No se encontró último envío para la chequera: {}", chequera.getChequeraId());
+        }
+        
         logChequeraSerie(chequera);
         return chequera;
     }
