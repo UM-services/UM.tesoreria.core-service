@@ -92,6 +92,7 @@ public class MailChequeraService {
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
                                Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
+        log.debug("Processing MailChequeraService.sendChequera");
         return chequeraClient.sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes, codigoBarras);
     }
 
@@ -128,10 +129,13 @@ public class MailChequeraService {
     }
 
     public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData, Boolean updateMailPersonal, Boolean responseSinEnvio) {
+        log.debug("Processing MailChequeraService.sendChequeraPreSpoter");
+        logSpoterData(spoterData);
 // Determina lectivoId
         Lectivo lectivo;
         OffsetDateTime ahora = Tool.dateAbsoluteArgentina();
         Integer lectivoId = (lectivo = lectivoService.findByFecha(ahora)).getLectivoId();
+        logLectivo(lectivo);
 // si corresponde al segundo semestre entonces la genera para el ciclo lectivo siguiente
         OffsetDateTime referenciaHasta = lectivo.getFechaFinal();
 
@@ -142,6 +146,7 @@ public class MailChequeraService {
         if (ahora.isAfter(referenciaDesde) && ahora.isBefore(referenciaHasta)) {
             assert lectivoId != null;
             lectivo = lectivoService.findByLectivoId(++lectivoId);
+            log.debug("Lectivo ajustado por fecha");
         }
         logLectivo(lectivo);
 
@@ -156,6 +161,7 @@ public class MailChequeraService {
             }
         }
         // Verifica si ya existe chequera asociada
+        log.debug("Verificando si existe chequera asociada");
         try {
             SpoterData data = spoterDataService.findOne(spoterData.getPersonaId(),
                     spoterData.getDocumentoId(), spoterData.getFacultadId(), spoterData.getGeograficaId(), lectivoId);
@@ -187,13 +193,13 @@ public class MailChequeraService {
         }
 
         // Genera la chequera nueva con los datos encontrados
-        log.debug(("Calling mail_chequera_service.make_chequera_spoter"));
         ChequeraSerie chequeraSerie = spoterService.makeChequeraSpoter(spoterData, lectivoId, curso, carreraChequera);
         logChequeraSerie(chequeraSerie);
 
         // Enviar chequera
         String message = this.sendChequera(chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
                 chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId(), false, false, false);
+        log.debug("MailChequeraService.sendChequeraPreSpoter - message -> {}", message);
         // Registrar SpoterData
         spoterData.setLectivoId(lectivoId);
         spoterData.setStatus(message.equals("Envío de Chequera Ok!!!") ? (byte) 1 : (byte) 0);
