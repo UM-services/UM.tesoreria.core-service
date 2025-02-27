@@ -70,20 +70,25 @@ public class SpoterService {
     @Transactional
     public ChequeraSerie makeChequeraSpoter(SpoterData spoterData, Integer lectivoId, Curso curso,
                                             CarreraChequera carreraChequera) {
+        log.debug("Processing SpoterService.makeChequeraSpoter");
         Build build = buildService.findLast();
+        Persona persona;
         try {
-            personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
+            persona = personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
         } catch (PersonaException e) {
-            personaService.add(new Persona(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
+            persona = personaService.add(new Persona(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
                     spoterData.getApellido(), spoterData.getNombre(), "", (byte) 0, "", "", ""));
         }
+        logPersona(persona);
+        Domicilio domicilio;
         try {
-            domicilioService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
+            domicilio = domicilioService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
         } catch (DomicilioException e) {
-            domicilioService.add(new Domicilio(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
+            domicilio = domicilioService.add(new Domicilio(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
                     Tool.hourAbsoluteArgentina(), "", "", "", "", "", spoterData.getCelular(), "", "",
                     spoterData.getFacultadId(), null, null, spoterData.getEmailPersonal(), "", ""), false);
         }
+        logDomicilio(domicilio);
 
         // Determinar el número usando ChequeraSerieControl
         ChequeraSerieControl chequeraSerieControl;
@@ -95,15 +100,19 @@ public class SpoterService {
         } catch (ChequeraSerieControlException e) {
             log.error("Error al obtener el último chequeraSerieControl -> {}", e.getMessage());
         }
+        log.debug("SpoterService.makeChequeraSpoter - chequeraSerieId -> {}", chequeraSerieId);
         // Llenar Legajo tesorería
+        Legajo legajo;
         try {
-            legajoService.findByFacultadIdAndPersonaIdAndDocumentoId(spoterData.getFacultadId(),
+            legajo = legajoService.findByFacultadIdAndPersonaIdAndDocumentoId(spoterData.getFacultadId(),
                     spoterData.getPersonaId(), spoterData.getDocumentoId());
         } catch (LegajoException e) {
-            legajoService.add(new Legajo(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
+            legajo = legajoService.add(new Legajo(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
                     spoterData.getFacultadId(), 0L, Tool.dateAbsoluteArgentina(), lectivoId, spoterData.getPlanId(),
                     spoterData.getCarreraId(), (byte) 1, spoterData.getGeograficaId(), "", (byte) 0));
         }
+        logLegajo(legajo);
+
         // Generar ChequeraSerieControl
         chequeraSerieControl = chequeraSerieControlService
                 .add(new ChequeraSerieControl(null, carreraChequera.getFacultadId(),
@@ -203,6 +212,45 @@ public class SpoterService {
         chequeraCuotas = chequeraCuotaService.saveAll(chequeraCuotas);
         logChequeraCuotas(chequeraCuotas);
         return chequeraSerie;
+    }
+
+    private void logLegajo(Legajo legajo) {
+        try {
+            log.debug("Legajo -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(legajo));
+        } catch (JsonProcessingException e) {
+            log.debug("Legajo jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logDomicilio(Domicilio domicilio) {
+        try {
+            log.debug("Domicilio -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(domicilio));
+        } catch (JsonProcessingException e) {
+            log.debug("Domicilio jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logPersona(Persona persona) {
+        try {
+            log.debug("Persona -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(persona));
+        } catch (JsonProcessingException e) {
+            log.debug("Persona jsonify error -> {}", e.getMessage());
+        }
     }
 
     private void logChequeraCuotas(List<ChequeraCuota> chequeraCuotas) {
