@@ -163,6 +163,7 @@ public class ChequeraSerieService {
                     chequera.setUltimoEnvio(null);
                     log.debug("No se encontró último envío para la chequera: {}", chequera.getChequeraId());
                 }
+                logChequeraSerie(chequera);
             })
             .toList();
     }
@@ -282,9 +283,19 @@ public class ChequeraSerieService {
 
     public ChequeraSerie findLastPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadId(BigDecimal personaId,
                                                                                         Integer documentoId, Integer facultadId) {
-        return repository.findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdInOrderByLectivoIdDesc(
-                personaId, documentoId, facultadId, tipoChequeraService.findAllByClaseChequera(1).stream()
-                        .map(TipoChequera::getTipoChequeraId).collect(Collectors.toList())).orElseThrow(() -> new ChequeraSerieException(personaId, documentoId, facultadId));
+        return repository.findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdIn(
+                personaId,
+                documentoId,
+                facultadId,
+                tipoChequeraService.findAllByClaseChequera(1).stream().map(TipoChequera::getTipoChequeraId).toList(),
+                Sort
+                        .by("lectivoId")
+                        .descending()
+                        .and(Sort
+                                .by("chequeraSerieId")
+                                .descending()
+                        )
+        ).orElseThrow(() -> new ChequeraSerieException(personaId, documentoId, facultadId));
     }
 
     public ChequeraSerie setPayPerTic(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Byte flag) {
