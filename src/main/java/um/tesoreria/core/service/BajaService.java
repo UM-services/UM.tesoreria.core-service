@@ -35,7 +35,7 @@ public class BajaService {
 	}
 
 	public Baja findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
-		log.debug("Processing findByUnique");
+		log.debug("Processing BajaService.findByUnique");
 		return repository
 				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
 				.map(baja -> {

@@ -66,8 +66,8 @@ public interface ChequeraSerieRepository extends JpaRepository<ChequeraSerie, Lo
 			BigDecimal personaId, Integer documentoId, Integer facultadId, Integer lectivoId, Integer geograficaId,
 			List<Integer> tipoChequeraIds);
 
-	Optional<ChequeraSerie> findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdInOrderByLectivoIdDesc(
-			BigDecimal personaId, Integer documentoId, Integer facultadId, List<Integer> tipoChequeraIds);
+	Optional<ChequeraSerie> findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdIn(
+			BigDecimal personaId, Integer documentoId, Integer facultadId, List<Integer> tipoChequeraIds, Sort sort);
 
 	@Modifying
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
