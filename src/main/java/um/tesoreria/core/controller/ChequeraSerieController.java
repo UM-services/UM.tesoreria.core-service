@@ -160,4 +160,10 @@ public class ChequeraSerieController {
         return new ResponseEntity<>(service.update(chequeraserie, chequeraId), HttpStatus.OK);
     }
 
+    @PostMapping("/mark/sent/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
+    public ResponseEntity<ChequeraSerie> markSent(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
+                                         @PathVariable Long chequeraSerieId) {
+        return new ResponseEntity<>(service.markSent(facultadId, tipoChequeraId, chequeraSerieId), HttpStatus.OK);
+    }
+
 }

@@ -78,6 +78,7 @@ data class ChequeraSerie(
     var importeDeuda: BigDecimal = BigDecimal.ZERO,
 
     @Transient
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
     var ultimoEnvio: OffsetDateTime? = null,
 
     @OneToOne(optional = true)
