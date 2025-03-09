@@ -304,6 +304,21 @@ public class ChequeraSerieService {
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
         chequeraSerie.setFlagPayperTic(flag);
         chequeraSerie = repository.save(chequeraSerie);
+        logChequeraSerie(chequeraSerie);
+        return chequeraSerie;
+    }
+
+    @Transactional
+    public ChequeraSerie markSent(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+        log.debug("Processing ChequeraSerieService.markSent");
+        var chequeraSerie = repository
+                .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
+                .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
+        logChequeraSerie(chequeraSerie);
+        chequeraSerie.setEnviado((byte) 1);
+        chequeraSerie = repository.save(chequeraSerie);
+        log.debug("after save");
+        logChequeraSerie(chequeraSerie);
         return chequeraSerie;
     }
 
