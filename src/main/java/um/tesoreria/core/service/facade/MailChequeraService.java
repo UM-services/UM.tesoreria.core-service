@@ -10,6 +10,7 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -99,6 +100,7 @@ public class MailChequeraService {
     public String sendChequeraByQueue(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
         log.debug("Processing MailChequeraService.sendChequeraByQueue");
         chequeraQueueService.sendChequeraQueue(new ChequeraMessageDto.Builder()
+                .uuid(UUID.randomUUID())
                 .facultadId(facultadId)
                 .tipoChequeraId(tipoChequeraId)
                 .chequeraSerieId(chequeraSerieId)
