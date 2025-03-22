@@ -1,6 +1,9 @@
 package um.tesoreria.core.kotlin.model.dto.message
 
+import java.util.UUID
+
 data class ChequeraMessageDto (
+    val uuid: UUID,
     val facultadId: Int,
     val tipoChequeraId: Int,
     val chequeraSerieId: Long,
@@ -10,6 +13,7 @@ data class ChequeraMessageDto (
     val incluyeMatricula: Boolean
 ) {
     data class Builder(
+        var uuid: UUID = UUID.randomUUID(),
         var facultadId: Int = 0,
         var tipoChequeraId: Int = 0,
         var chequeraSerieId: Long = 0,
@@ -18,6 +22,7 @@ data class ChequeraMessageDto (
         var codigoBarras: Boolean = false,
         var incluyeMatricula: Boolean = false
     ) {
+        fun uuid(uuid: UUID) = apply { this.uuid = uuid }
         fun facultadId(facultadId: Int) = apply { this.facultadId = facultadId }
         fun tipoChequeraId(tipoChequeraId: Int) = apply { this.tipoChequeraId = tipoChequeraId }
         fun chequeraSerieId(chequeraSerieId: Long) = apply { this.chequeraSerieId = chequeraSerieId }
@@ -27,6 +32,7 @@ data class ChequeraMessageDto (
         fun incluyeMatricula(incluyeMatricula: Boolean) = apply { this.incluyeMatricula = incluyeMatricula }
         
         fun build() = ChequeraMessageDto(
+            uuid,
             facultadId,
             tipoChequeraId,
             chequeraSerieId,
