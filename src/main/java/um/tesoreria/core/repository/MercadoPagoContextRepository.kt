@@ -15,6 +15,6 @@ interface MercadoPagoContextRepository : JpaRepository<MercadoPagoContext, Long>
 
     fun findByMercadoPagoContextId(mercadoPagoContextId: Long): Optional<MercadoPagoContext?>?
 
-    fun findAllByActivo(activo: Byte): List<MercadoPagoContext?>?
+    fun findAllByActivoOrderByMercadoPagoContextIdDesc(activo: Byte): List<MercadoPagoContext?>?
 
 }
