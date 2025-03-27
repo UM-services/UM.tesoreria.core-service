@@ -46,7 +46,7 @@ public class MercadoPagoContextService {
     }
 
     public List<Long> findAllActiveChequeraCuota() {
-        return Objects.requireNonNull(repository.findAllByActivo((byte) 1)).stream().filter(Objects::nonNull).map(MercadoPagoContext::getChequeraCuotaId).toList();
+        return Objects.requireNonNull(repository.findAllByActivoOrderByMercadoPagoContextIdDesc((byte) 1)).stream().filter(Objects::nonNull).map(MercadoPagoContext::getChequeraCuotaId).toList();
     }
 
     public List<MercadoPagoContext> findAllSinImputar() {
