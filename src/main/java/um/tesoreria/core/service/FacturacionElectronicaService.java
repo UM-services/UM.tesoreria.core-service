@@ -37,7 +37,7 @@ public class FacturacionElectronicaService {
     }
 
     public List<FacturacionElectronica> find100Pendientes() {
-        return repository.findTop200ByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaIdDesc((byte) 0, 3);
+        return repository.findTop100ByEnviadaAndRetriesLessThanOrderByFacturacionElectronicaIdDesc((byte) 0, 3);
     }
 
     public FacturacionElectronica findByFacturacionElectronicaId(Long facturacionElectronicaId) {

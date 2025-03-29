@@ -22,6 +22,7 @@ public class ChequeraMessageCheckService {
     }
 
     public ChequeraMessageCheck findByChequeraMessageCheckId(UUID chequeraMessageCheckId) {
+        log.debug("Processing ChequeraMessageCheckService.findByChequeraMessageCheckId");
         ChequeraMessageCheck chequeraMessageCheck = Objects.requireNonNull(repository.findByChequeraMessageCheckId(chequeraMessageCheckId))
                 .orElseThrow(() -> new ChequeraMessageCheckException(chequeraMessageCheckId));
         logChequeraMessageCheck(chequeraMessageCheck);
