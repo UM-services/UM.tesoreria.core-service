@@ -7,9 +7,9 @@ Servicio CORE para la arquitectura de microservicios de UM Tesoreria. Este servi
 ## Tecnologías
 
 - Java 21
-- Spring Boot 3.4.3
-- Spring Cloud 2024.0.0
-- Kotlin 2.1.10
+- Spring Boot 3.4.4
+- Spring Cloud 2024.0.1
+- Kotlin 2.1.20
 - MySQL 8+
 - Maven 3.8.8+
 
@@ -19,11 +19,13 @@ Servicio CORE para la arquitectura de microservicios de UM Tesoreria. Este servi
 - Procesamiento de pagos de MercadoPago
 - Manejo de asientos contables
 - Gestión de cuotas y facturación
+- Sistema de verificación de mensajes para chequeras
 - Caché distribuido con Caffeine
 - Documentación automática con OpenAPI/Swagger
 - Soporte para RabbitMQ
 - Transacciones distribuidas
 - Métricas con Prometheus
+- Logging mejorado con Log4j2
 
 ## Requisitos
 
