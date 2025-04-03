@@ -5,10 +5,7 @@ package um.tesoreria.core.service.facade;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
@@ -121,7 +118,7 @@ public class SincronizeService {
 					facultad.getApiserver(), facultad.getApiport(), inscripcion.getPersonaId(),
 					inscripcion.getDocumentoId(), inscripcion.getFacultadId(), inscripcion.getLectivoId());
 			// Verifica usuarioldap
-			UsuarioLdap usuarioldap = null;
+			UsuarioLdap usuarioldap;
 			try {
 				usuarioldap = usuarioLdapService.findByDocumento(inscripcion.getPersonaId());
 			} catch (UsuarioLdapException e) {
@@ -129,7 +126,7 @@ public class SincronizeService {
 				usuarioldap = usuarioLdapService.add(usuarioldap);
 			}
 			Integer[] clases = { 2, 5 };
-			ChequeraClase serie = null;
+			ChequeraClase serie;
 			try {
 				serie = chequeraClaseService
 						.findFirstByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClaseChequeraIdIn(
@@ -139,7 +136,7 @@ public class SincronizeService {
 				serie = new ChequeraClase();
 			}
 			// Verificar persona
-			Persona persona = null;
+			Persona persona;
 			try {
 				persona = personaService.findByUnique(inscripcion.getPersonaId(), inscripcion.getDocumentoId());
 			} catch (PersonaException e) {
@@ -158,7 +155,7 @@ public class SincronizeService {
 				matricula = new Matricula();
 			}
 			Matricula matricula_old = (Matricula) matricula.clone();
-			Integer clasechequeraId = 2;
+			int clasechequeraId = 2;
 			if (facultadId == 15)
 				clasechequeraId = 5;
 			if (matricula.getMatriculaId() == null) {
@@ -185,6 +182,7 @@ public class SincronizeService {
 			Integer[] clases = { 1 };
 			ChequeraClase serie = null;
 			try {
+				assert preInscripcion.getLectivoId() != null;
 				serie = chequeraClaseService
 						.findFirstByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClaseChequeraIdIn(
 								preInscripcion.getFacultadId(), preInscripcion.getPersonaId(),
@@ -194,7 +192,7 @@ public class SincronizeService {
 				serie = new ChequeraClase();
 			}
 			// Verificar persona
-			Persona persona = null;
+			Persona persona;
 			try {
 				persona = personaService.findByUnique(preInscripcion.getPersonaId(), preInscripcion.getDocumentoId());
 			} catch (PersonaException e) {
@@ -204,7 +202,7 @@ public class SincronizeService {
 				persona = personaService.add(persona);
 			}
 			// Verificar matricula
-			Matricula matricula = null;
+			Matricula matricula;
 			try {
 				matricula = matriculaService.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraId(
 						preInscripcion.getFacultadId(), preInscripcion.getPersonaId(), preInscripcion.getDocumentoId(),
@@ -238,14 +236,14 @@ public class SincronizeService {
 	@Transactional
 	public void sincronizeInstitucional(Integer lectivoId, Integer facultadId) {
 		for (ChequeraSerie serie : chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId)) {
-			InfoLdap usuario = null;
+			InfoLdap usuario;
 			try {
 				usuario = infoLdapService.findByPersonaId(serie.getPersonaId());
 			} catch (InfoLdapException e) {
 				usuario = new InfoLdap();
 			}
 			if (usuario.getPersonaId() != null) {
-				Domicilio domicilio = null;
+				Domicilio domicilio;
 				try {
 					domicilio = domicilioService.findFirstByPersonaId(serie.getPersonaId());
 
@@ -317,7 +315,7 @@ public class SincronizeService {
 			carreraService.add(carrera);
 		}
 		Long legajoId = null;
-		Boolean update = true;
+		boolean update = true;
 		try {
 			Legajo legajo = legajoService.findByFacultadIdAndPersonaIdAndDocumentoId(facultadId, personaId,
 					documentoId);
@@ -383,12 +381,21 @@ public class SincronizeService {
 						carreraFacultad.getBloqueId(), carreraFacultad.getObligatorias(),
 						carreraFacultad.getOptativas(), carreraFacultad.getVigente(), null);
 			} else {
-				Carrera carrera = new Carrera(null, carreraFacultad.getFacultadId(), carreraFacultad.getPlanId(),
-						carreraFacultad.getCarreraId(), carreraFacultad.getNombre(), carreraFacultad.getIniciales(),
-						carreraFacultad.getTitulo(), carreraFacultad.getTrabajoFinal(), carreraFacultad.getResolucion(),
-						carreraFacultad.getChequeraUnica(), carreraFacultad.getBloqueId(),
-						carreraFacultad.getObligatorias(), carreraFacultad.getOptativas(),
-						carreraFacultad.getVigente(), null);
+				Carrera carrera = new Carrera(null,
+						carreraFacultad.getFacultadId(),
+						carreraFacultad.getPlanId(),
+						carreraFacultad.getCarreraId(),
+						Objects.requireNonNull(carreraFacultad.getNombre()),
+						Objects.requireNonNull(carreraFacultad.getIniciales()),
+                        Objects.requireNonNull(carreraFacultad.getTitulo()),
+						carreraFacultad.getTrabajoFinal(),
+                        Objects.requireNonNull(carreraFacultad.getResolucion()),
+						carreraFacultad.getChequeraUnica(),
+						carreraFacultad.getBloqueId(),
+						carreraFacultad.getObligatorias(),
+						carreraFacultad.getOptativas(),
+						carreraFacultad.getVigente(),
+						null);
 				carreras.put(carrera.getCarreraKey(), carrera);
 			}
 		}

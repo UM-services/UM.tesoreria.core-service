@@ -6,6 +6,8 @@ package um.tesoreria.core.controller;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.exception.CarreraException;
 import um.tesoreria.core.kotlin.model.Carrera;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -42,14 +44,22 @@ public class CarreraController {
 
 	@GetMapping("/{uniqueId}")
 	public ResponseEntity<Carrera> findByUniqueId(@PathVariable Long uniqueId) {
-		return new ResponseEntity<>(service.findByUniqueId(uniqueId), HttpStatus.OK);
+		try {
+			return new ResponseEntity<>(service.findByUniqueId(uniqueId), HttpStatus.OK);
+		} catch (CarreraException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+		}
 	}
 
 	@GetMapping("/unique/{facultadId}/{planId}/{carreraId}")
 	public ResponseEntity<Carrera> findByFacultadIdAndPlanIdAndCarreraId(@PathVariable Integer facultadId,
 			@PathVariable Integer planId, @PathVariable Integer carreraId) {
-		return new ResponseEntity<>(service.findByFacultadIdAndPlanIdAndCarreraId(facultadId, planId, carreraId),
-				HttpStatus.OK);
+		try {
+			return new ResponseEntity<>(service.findByFacultadIdAndPlanIdAndCarreraId(facultadId, planId, carreraId),
+					HttpStatus.OK);
+		} catch (CarreraException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+		}
 	}
 
 }
