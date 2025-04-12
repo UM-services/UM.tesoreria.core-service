@@ -1,6 +1,12 @@
 # um.tesoreria.core-service
 
 [![Estado del Build](https://github.com/UM-services/UM.tesoreria.core-service/actions/workflows/maven.yml/badge.svg)](https://github.com/UM-services/UM.tesoreria.core-service/actions/workflows/maven.yml)
+[![Java](https://img.shields.io/badge/Java-21-blue.svg)](https://www.java.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2024.0.1-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-purple.svg)](https://kotlinlang.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8+-blue.svg)](https://www.mysql.com/)
+[![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
 
 Servicio CORE para la arquitectura de microservicios de UM Tesoreria. Este servicio maneja la lógica central del sistema de tesorería, incluyendo la gestión de pagos, chequeras y asientos contables.
 
@@ -26,6 +32,7 @@ Servicio CORE para la arquitectura de microservicios de UM Tesoreria. Este servi
 - Transacciones distribuidas
 - Métricas con Prometheus
 - Logging mejorado con Log4j2
+- Modo de prueba para envío de correos
 
 ## Requisitos
 
@@ -46,59 +53,13 @@ git clone https://github.com/UM-services/UM.tesoreria.core-service.git
 
 3. Configurar RabbitMQ en `bootstrap.yml`
 
-4. Compilar el proyecto:
+4. Configurar el modo de prueba en `bootstrap.yml`:
+```yaml
+app:
+  testing: false  # Cambiar a true para pruebas de correo
+```
+
+5. Compilar el proyecto:
 ```bash
 mvn clean install
 ```
-
-## Ejecución
-
-### Local
-```bash
-mvn spring-boot:run
-```
-
-### Docker
-```bash
-docker build -t um-tesoreria-core .
-docker run -p 8092:8092 um-tesoreria-core
-```
-
-## Documentación
-
-- [Documentación Detallada](https://um-services.github.io/UM.tesoreria.core-service/project-documentation)
-- [Wiki del Proyecto](https://github.com/UM-services/UM.tesoreria.core-service/wiki)
-- [OpenAPI/Swagger](http://localhost:8092/swagger-ui.html)
-
-## Monitoreo
-
-El servicio incluye endpoints de Actuator y métricas Prometheus en:
-- Health check: `/actuator/health`
-- Métricas: `/actuator/prometheus`
-- Otros endpoints: `/actuator`
-
-## CI/CD
-
-El proyecto utiliza GitHub Actions para:
-- Compilación y pruebas automáticas
-- Generación de documentación
-- Construcción y publicación de imágenes Docker
-- Actualización automática de la Wiki
-- Despliegue automático de GitHub Pages
-
-## Contribuir
-
-1. Crear un fork del repositorio
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit de tus cambios (`git commit -m 'feat: Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
-
-## Licencia
-
-Este proyecto es propiedad de la Universidad de Mendoza.
-
-## Contacto
-
-- **Equipo de Desarrollo** - [UM Services Team](https://github.com/dqmdz)
-- **Proyecto** - [UM.tesoreria.core-service](https://github.com/UM-services/UM.tesoreria.core-service)
