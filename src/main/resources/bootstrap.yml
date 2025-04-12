@@ -5,6 +5,7 @@ app:
   user: root
   password: root
   logging: debug
+  testing: false
   mail:
     username: uid
     password: pwd
@@ -24,11 +25,6 @@ eureka:
 spring:
   application:
     name: tesoreria-core-service
-  rabbitmq:
-    host: rabbitmq
-    port: 5672
-    username: admin
-    password: admin
   datasource:
     url: jdbc:mysql://${app.server}/${app.database}?useSSL=false&serverTimezone=UTC
     username: ${app.user}

@@ -3,7 +3,6 @@
  */
 package um.tesoreria.core.service.facade;
 
-import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,24 +12,20 @@ import java.util.stream.Collectors;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.DomicilioException;
-import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.exception.ProveedorMovimientoException;
 import um.tesoreria.core.exception.ProveedorException;
-import um.tesoreria.core.extern.consumer.AlumnoExamenFacultadConsumer;
 import um.tesoreria.core.kotlin.model.*;
-import um.tesoreria.core.model.NotificacionExamen;
 import um.tesoreria.core.model.PersonaSuspendido;
 import um.tesoreria.core.model.Proveedor;
 import um.tesoreria.core.service.ComprobanteService;
 import um.tesoreria.core.service.DomicilioService;
 import um.tesoreria.core.service.FacultadService;
-import um.tesoreria.core.service.NotificacionExamenService;
 import um.tesoreria.core.service.PersonaSuspendidoService;
 import um.tesoreria.core.service.ProveedorComprobanteService;
 import um.tesoreria.core.service.ProveedorMovimientoService;
@@ -48,38 +43,44 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NotificacionService {
 
-	@Autowired
-	private FacultadService facultadService;
+	@Value("${app.testing}")
+	private Boolean testing;
 
-	@Autowired
-	private DomicilioService domicilioService;
+	private final FacultadService facultadService;
+	private final DomicilioService domicilioService;
+	private final JavaMailSender sender;
+	private final PersonaSuspendidoService personaSuspendidoService;
+	private final ProveedorMovimientoService proveedorMovimientoService;
+	private final ProveedorService proveedorService;
+	private final ProveedorComprobanteService proveedorComprobanteService;
+	private final ComprobanteService comprobanteService;
+	private final ProveedorValorService proveedorValorService;
+	private final ValorMovimientoService valorMovimientoService;
+	private final ValorService valorService;
 
-	@Autowired
-	private JavaMailSender sender;
-
-	@Autowired
-	private PersonaSuspendidoService personaSuspendidoService;
-
-	@Autowired
-	private ProveedorMovimientoService proveedorMovimientoService;
-
-	@Autowired
-	private ProveedorService proveedorService;
-
-	@Autowired
-	private ProveedorComprobanteService proveedorComprobanteService;
-
-	@Autowired
-	private ComprobanteService comprobanteService;
-
-	@Autowired
-	private ProveedorValorService proveedorValorService;
-
-	@Autowired
-	private ValorMovimientoService valorMovimientoService;
-
-	@Autowired
-	private ValorService valorService;
+	public NotificacionService(FacultadService facultadService,
+			DomicilioService domicilioService,
+			JavaMailSender sender,
+			PersonaSuspendidoService personaSuspendidoService,
+			ProveedorMovimientoService proveedorMovimientoService,
+			ProveedorService proveedorService,
+			ProveedorComprobanteService proveedorComprobanteService,
+			ComprobanteService comprobanteService,
+			ProveedorValorService proveedorValorService,
+			ValorMovimientoService valorMovimientoService,
+			ValorService valorService) {
+		this.facultadService = facultadService;
+		this.domicilioService = domicilioService;
+		this.sender = sender;
+		this.personaSuspendidoService = personaSuspendidoService;
+		this.proveedorMovimientoService = proveedorMovimientoService;
+		this.proveedorService = proveedorService;
+		this.proveedorComprobanteService = proveedorComprobanteService;
+		this.comprobanteService = comprobanteService;
+		this.proveedorValorService = proveedorValorService;
+		this.valorMovimientoService = valorMovimientoService;
+		this.valorService = valorService;
+	}
 
 	public String notifyDeudorSuspendido(PersonaSuspendido personaSuspendido) throws MessagingException {
 		String data = "";
@@ -120,21 +121,24 @@ public class NotificacionService {
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		List<String> addresses = new ArrayList<String>();
 
-		if (!domicilio.getEmailPersonal().equals(""))
-			addresses.add(domicilio.getEmailPersonal());
-		if (!domicilio.getEmailInstitucional().equals(""))
-			addresses.add(domicilio.getEmailInstitucional());
-
-//		addresses.add("daniel.quinterospinto@gmail.com");
+		if (!testing) {
+			if (!domicilio.getEmailPersonal().isEmpty())
+				addresses.add(domicilio.getEmailPersonal());
+			if (!domicilio.getEmailInstitucional().isEmpty())
+				addresses.add(domicilio.getEmailInstitucional());
+		} else {
+			log.debug("Testing -> daniel.quinterospinto@gmail.com");
+			addresses.add("daniel.quinterospinto@gmail.com");
+		}
 
 		try {
-			helper.setTo(addresses.toArray(new String[addresses.size()]));
+			helper.setTo(addresses.toArray(new String[0]));
 			helper.setText(data);
 			helper.setReplyTo("no-reply@um.edu.ar");
 			helper.setSubject("Notificación Deuda");
 			log.debug("Mensaje -> {}", data);
 		} catch (MessagingException e) {
-			e.printStackTrace();
+			log.debug("ERROR: No pudo ENVIARSE -> {}", e.getMessage());
 			return "ERROR: No pudo ENVIARSE";
 		}
 		personaSuspendido.setNotificado((byte) 1);
@@ -161,7 +165,7 @@ public class NotificacionService {
 			return "ERROR: No Existe Proveedor";
 		}
 
-		if (proveedor.getEmail().equals("")) {
+		if (proveedor.getEmail().isEmpty()) {
 			return "ERROR: Proveedor SIN Correo Electrónico";
 		}
 
@@ -226,21 +230,24 @@ public class NotificacionService {
 		MimeMessageHelper helper = new MimeMessageHelper(message, true);
 		List<String> addresses = new ArrayList<String>();
 
-		if (!proveedor.getEmail().equals(""))
-			addresses.add(proveedor.getEmail());
-		if (!proveedor.getEmailInterno().equals(""))
-			addresses.add(proveedor.getEmailInterno());
-
-//		addresses.add("daniel.quinterospinto@gmail.com");
+		if (!testing) {
+			if (!proveedor.getEmail().isEmpty())
+				addresses.add(proveedor.getEmail());
+			if (!proveedor.getEmailInterno().isEmpty())
+				addresses.add(proveedor.getEmailInterno());
+		} else {
+			log.debug("Testing -> daniel.quinterospinto@gmail.com");
+			addresses.add("daniel.quinterospinto@gmail.com");
+		}
 
 		try {
-			helper.setTo(addresses.toArray(new String[addresses.size()]));
+			helper.setTo(addresses.toArray(new String[0]));
 			helper.setText(data);
 			helper.setReplyTo("no-reply@um.edu.ar");
 			helper.setSubject("Notificación Orden Pago");
 			log.debug("Mensaje -> {}", data);
 		} catch (MessagingException e) {
-			e.printStackTrace();
+			log.debug("ERROR: No pudo ENVIARSE -> {}", e.getMessage());
 			return "ERROR: No pudo ENVIARSE";
 		}
 		sender.send(message);

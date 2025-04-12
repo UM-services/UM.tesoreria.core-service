@@ -10,11 +10,11 @@ import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -30,10 +30,8 @@ import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.ChequeraSerieDTO;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;
-import um.tesoreria.core.kotlin.model.dto.message.ChequeraMessageDto;
 import um.tesoreria.core.model.MailSender;
 import um.tesoreria.core.service.*;
-import um.tesoreria.core.service.queue.ChequeraQueueService;
 import um.tesoreria.core.service.transactional.spoter.SpoterService;
 import um.tesoreria.core.util.Tool;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +40,9 @@ import reactor.core.publisher.Mono;
 @Service
 @Slf4j
 public class MailChequeraService {
+
+    @Value("${app.testing}")
+    private Boolean testing;
 
     private final JavaMailSender javaMailSender;
     private final ChequeraSerieService chequeraSerieService;
@@ -57,7 +58,6 @@ public class MailChequeraService {
     private final ChequeraService chequeraService;
     private final ChequeraClient chequeraClient;
     private final SpoterService spoterService;
-    private final ChequeraQueueService chequeraQueueService;
 
     public MailChequeraService(JavaMailSender javaMailSender,
                                ChequeraSerieService chequeraSerieService,
@@ -72,8 +72,7 @@ public class MailChequeraService {
                                MailSenderService mailSenderService,
                                ChequeraService chequeraService,
                                ChequeraClient chequeraClient,
-                               SpoterService spoterService,
-                               ChequeraQueueService chequeraQueueService) {
+                               SpoterService spoterService) {
         this.javaMailSender = javaMailSender;
         this.chequeraSerieService = chequeraSerieService;
         this.domicilioService = domicilioService;
@@ -88,29 +87,12 @@ public class MailChequeraService {
         this.chequeraService = chequeraService;
         this.chequeraClient = chequeraClient;
         this.spoterService = spoterService;
-        this.chequeraQueueService = chequeraQueueService;
     }
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
                                Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
         log.debug("Processing MailChequeraService.sendChequera");
         return chequeraClient.sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes, codigoBarras);
-    }
-
-    public String sendChequeraByQueue(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
-        log.debug("Processing MailChequeraService.sendChequeraByQueue");
-        chequeraQueueService.sendChequeraQueue(new ChequeraMessageDto.Builder()
-                .uuid(UUID.randomUUID())
-                .facultadId(facultadId)
-                .tipoChequeraId(tipoChequeraId)
-                .chequeraSerieId(chequeraSerieId)
-                .alternativaId(alternativaId)
-                .copiaInformes(copiaInformes)
-                .codigoBarras(codigoBarras)
-                .incluyeMatricula(incluyeMatricula)
-                .build()
-        );
-        return "Envío de Chequera Solicitado";
     }
 
     public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId,
@@ -249,12 +231,16 @@ public class MailChequeraService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         List<String> addresses = new ArrayList<>();
 
-        if (!domicilio.getEmailPersonal().isEmpty())
-            addresses.add(domicilio.getEmailPersonal());
-        if (!domicilio.getEmailInstitucional().isEmpty())
-            addresses.add(domicilio.getEmailInstitucional());
+        if (!testing) {
+            if (!domicilio.getEmailPersonal().isEmpty())
+                addresses.add(domicilio.getEmailPersonal());
+            if (!domicilio.getEmailInstitucional().isEmpty())
+                addresses.add(domicilio.getEmailInstitucional());
+        } else {
+            log.debug("Testing -> daniel.quinterospinto@gmail.com");
+            addresses.add("daniel.quinterospinto@gmail.com");
+        }
 
-//		addresses.add("daniel.quinterospinto@gmail.com");
         try {
             helper.setTo(addresses.toArray(new String[0]));
             helper.setText(data);
@@ -289,12 +275,16 @@ public class MailChequeraService {
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         List<String> addresses = new ArrayList<>();
 
-        if (!domicilio.getEmailPersonal().isEmpty())
-            addresses.add(domicilio.getEmailPersonal());
-        if (!domicilio.getEmailInstitucional().isEmpty())
-            addresses.add(domicilio.getEmailInstitucional());
+        if (!testing) {
+            if (!domicilio.getEmailPersonal().isEmpty())
+                addresses.add(domicilio.getEmailPersonal());
+            if (!domicilio.getEmailInstitucional().isEmpty())
+                addresses.add(domicilio.getEmailInstitucional());
+        } else {
+            log.debug("Testing -> daniel.quinterospinto@gmail.com");
+            addresses.add("daniel.quinterospinto@gmail.com");
+        }
 
-//		addresses.add("daniel.quinterospinto@gmail.com");
         try {
             helper.setTo(addresses.toArray(new String[0]));
             helper.setText(data);
