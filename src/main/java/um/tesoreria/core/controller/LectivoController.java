@@ -6,6 +6,8 @@ package um.tesoreria.core.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.exception.LectivoException;
 import um.tesoreria.core.kotlin.model.Lectivo;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,12 +53,20 @@ public class LectivoController {
 
 	@GetMapping("/{lectivoId}")
 	public ResponseEntity<Lectivo> findByLectivoId(@PathVariable Integer lectivoId) {
-		return new ResponseEntity<>(service.findByLectivoId(lectivoId), HttpStatus.OK);
+		try {
+			return ResponseEntity.ok(service.findByLectivoId(lectivoId));
+		} catch (LectivoException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+		}
 	}
 
 	@GetMapping("/last")
 	public ResponseEntity<Lectivo> findLast() {
-		return new ResponseEntity<Lectivo>(service.findLast(), HttpStatus.OK);
+		try {
+			return ResponseEntity.ok(service.findLast());
+		} catch (LectivoException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
 	}
 
 	@PostMapping("/")

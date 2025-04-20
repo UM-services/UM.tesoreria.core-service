@@ -22,6 +22,11 @@ public class LegajoController {
         this.service = service;
     }
 
+    @GetMapping("/facultad/{facultadId}")
+    public ResponseEntity<List<Legajo>> findAllByFacultadId(@PathVariable Integer facultadId) {
+        return ResponseEntity.ok(service.findAllByFacultadId(facultadId));
+    }
+
     @GetMapping("/unique/{facultadId}/{personaId}/{documentoId}")
     public ResponseEntity<Legajo> findByFacultadIdAndPersonaIdAndDocumentoId(
             @PathVariable Integer facultadId,

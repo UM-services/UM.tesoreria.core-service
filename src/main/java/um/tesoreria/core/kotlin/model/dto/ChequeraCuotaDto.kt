@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
-data class ChequeraCuotaDTO(
+data class ChequeraCuotaDto(
 
 	var cuotaId: Int = 0,
 	var mes: Int = 0,
@@ -19,6 +19,6 @@ data class ChequeraCuotaDTO(
 	var vencimiento3: OffsetDateTime? = null,
 	var importe3: BigDecimal = BigDecimal.ZERO,
 	var pagado: Byte = 0,
-	var producto: ProductoDTO? = null
+	var producto: ProductoDto? = null
 
 )

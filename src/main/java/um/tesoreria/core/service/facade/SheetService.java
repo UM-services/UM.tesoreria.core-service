@@ -11,11 +11,7 @@ import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -338,7 +334,20 @@ public class SheetService {
                         if (!lectivos.containsKey(lectivoIdAdd)) {
                             lectivoIdAdd = lectivoId;
                         }
-                        legajosUpdate.add(legajo = new Legajo(legajoId, legajoFacultad.getPersonaId(), legajoFacultad.getDocumentoId(), legajoFacultad.getFacultadId(), legajoFacultad.getNumerolegajo(), legajoFacultad.getFecha(), lectivoIdAdd, legajoFacultad.getPlanId(), legajoFacultad.getCarreraId(), (byte) 1, legajoFacultad.getGeograficaId(), legajoFacultad.getContrasenha(), legajoFacultad.getIntercambio()));
+                        legajosUpdate.add(legajo = new Legajo(legajoId,
+                                legajoFacultad.getPersonaId(),
+                                legajoFacultad.getDocumentoId(),
+                                legajoFacultad.getFacultadId(),
+                                legajoFacultad.getNumerolegajo(),
+                                legajoFacultad.getFecha(),
+                                lectivoIdAdd,
+                                legajoFacultad.getPlanId(),
+                                legajoFacultad.getCarreraId(),
+                                (byte) 1,
+                                legajoFacultad.getGeograficaId(),
+                                legajoFacultad.getContrasenha(),
+                                legajoFacultad.getIntercambio(),
+                                null));
                     }
                     ArancelTipo arancelTipo = chequeraSerie.getArancelTipo();
                     CarreraKey carrera = null;
@@ -353,7 +362,7 @@ public class SheetService {
                     // Baja Tsoreria
                     if (bajas.containsKey(chequeraSerie.getChequeraId())) {
                         Baja baja = bajas.get(chequeraSerie.getChequeraId());
-                        this.setCellOffsetDateTime(row, 4, baja.getFecha().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
+                        this.setCellOffsetDateTime(row, 4, Objects.requireNonNull(baja.getFecha()).withOffsetSameInstant(ZoneOffset.UTC), styleDate);
                     }
                     // Baja Facultad
                     BajaFacultad bajaFacultad = null;
@@ -363,12 +372,13 @@ public class SheetService {
                         log.debug("Error buscando facultad en otro servicio");
                     }
                     if (bajaFacultad != null) {
-                        this.setCellOffsetDateTime(row, 5, bajaFacultad.getFecha().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
+                        this.setCellOffsetDateTime(row, 5, Objects.requireNonNull(bajaFacultad.getFecha()).withOffsetSameInstant(ZoneOffset.UTC), styleDate);
                     }
                     this.setCellString(row, 6, geografica.getNombre(), styleNormal);
                     this.setCellString(row, 7, tipoChequera.getNombre(), styleNormal);
+                    assert arancelTipo != null;
                     this.setCellString(row, 8, arancelTipo.getDescripcion(), styleNormal);
-                    this.setCellOffsetDateTime(row, 9, chequeraSerie.getFecha().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
+                    this.setCellOffsetDateTime(row, 9, Objects.requireNonNull(chequeraSerie.getFecha()).withOffsetSameInstant(ZoneOffset.UTC), styleDate);
                     this.setCellBigDecimal(row, 10, deudaChequera.getDeuda(), styleNormal);
                     this.setCellInteger(row, 11, deudaChequera.getCuotas(), styleNormal);
                     if (carrera != null) {

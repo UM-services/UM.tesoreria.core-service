@@ -11,13 +11,16 @@ import java.util.Optional;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import um.tesoreria.core.kotlin.model.ChequeraCuota;
+import um.tesoreria.core.model.internal.CuotaPeriodoDto;
 
 /**
  * @author daniel
  *
  */
-public interface IChequeraCuotaRepository extends JpaRepository<ChequeraCuota, Long> {
+public interface ChequeraCuotaRepository extends JpaRepository<ChequeraCuota, Long> {
 
 	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId);
 
@@ -51,5 +54,14 @@ public interface IChequeraCuotaRepository extends JpaRepository<ChequeraCuota, L
 	@Modifying
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
+
+	@Query("SELECT new um.tesoreria.core.model.internal.CuotaPeriodoDto(cc.mes, cc.anho, COUNT(*)) " +
+		   "FROM ChequeraCuota cc " +
+		   "JOIN ChequeraSerie cs ON cc.chequeraId = cs.chequeraId " +
+		   "WHERE cs.lectivoId = :lectivoId " +
+		   "AND cc.importe1 > 0 " +
+		   "GROUP BY cc.mes, cc.anho " +
+		   "ORDER BY cc.anho, cc.mes")
+	List<CuotaPeriodoDto> findCuotaPeriodosByLectivoId(@Param("lectivoId") Integer lectivoId);
 
 }

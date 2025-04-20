@@ -7,10 +7,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import jakarta.mail.MessagingException;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,8 @@ import um.tesoreria.core.kotlin.model.dto.*;
 import um.tesoreria.core.model.ChequeraSerieControl;
 import um.tesoreria.core.model.ChequeraTotal;
 import um.tesoreria.core.model.Debito;
+import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
+import um.tesoreria.core.model.dto.ChequeraPagoDto;
 import um.tesoreria.core.util.Tool;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.service.*;
@@ -237,38 +240,55 @@ public class ChequeraService {
         return new PreuniversitarioData(this.constructChequeraDataDTO(chequeraSerie));
     }
 
-    public ChequeraSerieDTO constructChequeraDataDTO(ChequeraSerie chequeraSerie) {
+    public ChequeraSerieDto constructChequeraDataDTO(ChequeraSerie chequeraSerie) {
         log.debug("Leyendo Cuotas");
         List<ChequeraCuota> chequeraCuotas = chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdConImporte(
                         chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
                         chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId());
         log.debug("Leyendo Facultad");
-        FacultadDTO facultadDTO = modelMapper.map(facultadService.findByFacultadId(chequeraSerie.getFacultadId()), FacultadDTO.class);
+        FacultadDto facultadDTO = modelMapper.map(facultadService.findByFacultadId(chequeraSerie.getFacultadId()), FacultadDto.class);
         log.debug("Leyendo TipoChequera");
-        TipoChequeraDTO tipoChequeraDTO = modelMapper.map(tipoChequeraService.findByTipoChequeraId(chequeraSerie.getTipoChequeraId()), TipoChequeraDTO.class);
+        TipoChequeraDto tipoChequeraDTO = modelMapper.map(tipoChequeraService.findByTipoChequeraId(chequeraSerie.getTipoChequeraId()), TipoChequeraDto.class);
         log.debug("Leyendo Persona");
-        PersonaDTO personaDTO = modelMapper.map(personaService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId()), PersonaDTO.class);
+        PersonaDto personaDTO = modelMapper.map(personaService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId()), PersonaDto.class);
         log.debug("Leyendo Domicilio");
-        DomicilioDTO domicilioDTO = modelMapper.map(domicilioService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId()), DomicilioDTO.class);
+        DomicilioDto domicilioDTO = modelMapper.map(domicilioService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId()), DomicilioDto.class);
         log.debug("Leyendo Lectivo");
-        LectivoDTO lectivoDTO = modelMapper.map(lectivoService.findByLectivoId(chequeraSerie.getLectivoId()), LectivoDTO.class);
+        LectivoDto lectivoDTO = modelMapper.map(lectivoService.findByLectivoId(chequeraSerie.getLectivoId()), LectivoDto.class);
         log.debug("Leyendo ArancelTipo");
-        ArancelTipoDTO arancelTipoDTO = modelMapper.map(arancelTipoService.findByArancelTipoId(chequeraSerie.getArancelTipoId()), ArancelTipoDTO.class);
+        ArancelTipoDto arancelTipoDTO = modelMapper.map(arancelTipoService.findByArancelTipoId(chequeraSerie.getArancelTipoId()), ArancelTipoDto.class);
         log.debug("Leyendo Geografica");
-        GeograficaDTO geograficaDTO = modelMapper.map(geograficaService.findByGeograficaId(chequeraSerie.getGeograficaId()), GeograficaDTO.class);
+        GeograficaDto geograficaDTO = modelMapper.map(geograficaService.findByGeograficaId(chequeraSerie.getGeograficaId()), GeograficaDto.class);
         log.debug("Leyendo ChequeraCuota");
-        List<ChequeraCuotaDTO> chequeraCuotaDTOs = chequeraCuotas.stream()
-                .map(cuota -> new ChequeraCuotaDTO(cuota.getCuotaId(), cuota.getMes(), cuota.getAnho(),
+        List<ChequeraCuotaDto> chequeraCuotaDtos = chequeraCuotas.stream()
+                .map(cuota -> new ChequeraCuotaDto(cuota.getCuotaId(), cuota.getMes(), cuota.getAnho(),
                         cuota.getVencimiento1(), cuota.getImporte1(), cuota.getVencimiento2(), cuota.getImporte2(),
                         cuota.getVencimiento3(), cuota.getImporte3(), cuota.getPagado(),
-                        modelMapper.map(productoService.findByProductoId(cuota.getProductoId()), ProductoDTO.class)))
+                        modelMapper.map(productoService.findByProductoId(cuota.getProductoId()), ProductoDto.class)))
                 .collect(Collectors.toList());
         log.debug("Formando ChequeraSerieDTO");
-        ChequeraSerieDTO chequeraSerieDTO = new ChequeraSerieDTO(chequeraSerie.getChequeraSerieId(),
+        ChequeraSerieDto chequeraSerieDTO = new ChequeraSerieDto(chequeraSerie.getChequeraSerieId(),
                 chequeraSerie.getFecha(), chequeraSerie.getObservaciones(), chequeraSerie.getAlternativaId(),
-                facultadDTO, tipoChequeraDTO, personaDTO, domicilioDTO, lectivoDTO, arancelTipoDTO, geograficaDTO, chequeraCuotaDTOs);
+                facultadDTO, tipoChequeraDTO, personaDTO, domicilioDTO, lectivoDTO, arancelTipoDTO, geograficaDTO, chequeraCuotaDtos);
         return chequeraSerieDTO;
+    }
+
+    public List<ChequeraCuotaPagosDto> findAllCuotaPagosByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
+        List<ChequeraCuota> cuotas = chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
+        List<ChequeraPago> pagos = chequeraPagoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService);
+        
+        return cuotas.stream()
+            .map(cuota -> {
+                ChequeraCuotaPagosDto dto = modelMapper.map(cuota, ChequeraCuotaPagosDto.class);
+                // Filtrar los pagos de esta cuota específica usando chequeraCuotaId
+                List<ChequeraPago> pagosCuota = pagos.stream()
+                    .filter(pago -> Objects.equals(pago.getChequeraCuotaId(), cuota.getChequeraCuotaId()))
+                    .collect(Collectors.toList());
+                dto.setChequeraPagos(modelMapper.map(pagosCuota, new TypeToken<List<ChequeraPagoDto>>() {}.getType()));
+                return dto;
+            })
+            .collect(Collectors.toList());
     }
 
 }

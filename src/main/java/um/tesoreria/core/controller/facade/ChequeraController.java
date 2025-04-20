@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
+import java.util.List;
 
 import jakarta.mail.MessagingException;
 
@@ -29,6 +30,7 @@ import um.tesoreria.core.exception.ChequeraSerieException;
 import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.kotlin.model.dto.PreuniversitarioData;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;
+import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.service.SpoterDataService;
 import um.tesoreria.core.service.facade.ChequeraService;
@@ -164,5 +166,14 @@ public class ChequeraController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
+
+    @GetMapping("/cuotas/pagos/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
+    public ResponseEntity<List<ChequeraCuotaPagosDto>> findAllCuotaPagosByChequera(@PathVariable Integer facultadId,
+                                                                                   @PathVariable Integer tipoChequeraId,
+                                                                                   @PathVariable Long chequeraSerieId,
+                                                                                   @PathVariable Integer alternativaId) {
+        return ResponseEntity.ok(service.findAllCuotaPagosByChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId));
+    }
+
 
 }

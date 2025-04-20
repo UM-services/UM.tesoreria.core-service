@@ -5,6 +5,68 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2024-03-19
+
+### Añadido
+- Nuevo endpoint `/legajo/facultad/{facultadId}` para obtener legajos por facultad
+- Nuevo endpoint `/chequera/cuotas/pagos/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` para obtener cuotas y pagos de chequera
+- Nuevo DTO `ChequeraCuotaPagosDto` para manejar cuotas con sus pagos asociados
+- Nuevo DTO `ChequeraPagoDto` para representar pagos individuales
+- Nuevo DTO `CuotaPeriodoDto` para manejar periodos de cuotas
+- Relación entre Legajo y Carrera
+- Método `findAllByFacultadId` en LegajoService
+- Método `findAllCuotaPagosByChequera` en ChequeraService
+- Método `findCuotaPeriodosByLectivoId` en ChequeraCuotaRepository
+
+### Cambiado
+- Actualización de Java 17 a Java 21
+- Refactorización de nombres de DTOs para seguir la convención de nomenclatura:
+  - `ChequeraSerieDTO` -> `ChequeraSerieDto`
+  - `ChequeraCuotaDTO` -> `ChequeraCuotaDto`
+  - `ArancelTipoDTO` -> `ArancelTipoDto`
+  - `DomicilioDTO` -> `DomicilioDto`
+  - `FacultadDTO` -> `FacultadDto`
+  - `GeograficaDTO` -> `GeograficaDto`
+  - `LectivoDTO` -> `LectivoDto`
+  - `PersonaDTO` -> `PersonaDto`
+  - `ProductoDTO` -> `ProductoDto`
+  - `TipoChequeraDTO` -> `TipoChequeraDto`
+- Renombrado de interfaces de repositorios:
+  - `IChequeraCuotaRepository` -> `ChequeraCuotaRepository`
+  - `ILegajoRepository` -> `LegajoRepository`
+- Mejorado el manejo de nulls usando `Objects.requireNonNull()`
+- Actualizado el formateo del código para mayor legibilidad
+- Eliminados imports no utilizados
+
+### Removido
+- Eliminación de RabbitMQ y colas de mensajes
+- Eliminación de configuración JPA redundante
+- Eliminación de dependencias no utilizadas:
+  - disruptor
+  - spring-boot-starter-amqp
+  - spring-tx
+
+### Corregido
+- Problemas de nomenclatura inconsistente en DTOs
+- Manejo de valores nulos en fechas y otros campos
+- Formateo inconsistente en el código
+
+### Seguridad
+- Mejorado el manejo de datos sensibles en DTOs
+- Implementado mejor manejo de nulls para prevenir NPEs
+
+### Documentación
+- Actualizado README con nueva estructura y convenciones
+- Documentados nuevos endpoints y funcionalidades
+- Actualizada la documentación de la API
+
+## [0.1.0] - 2024-01-01
+### Añadido
+- Versión inicial del servicio
+- Configuración básica de Spring Boot
+- Integración con base de datos
+- Endpoints básicos para gestión de chequeras
+
 ## [Unreleased]
 
 ### Added

@@ -8,6 +8,7 @@ import java.util.List;
 
 import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
+import um.tesoreria.core.model.internal.CuotaPeriodoDto;
 import um.tesoreria.core.service.view.ChequeraCuotaDeudaService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -116,6 +117,11 @@ public class ChequeraCuotaController {
                                              @PathVariable Long chequeraSerieId) {
         return new ResponseEntity<>(service.updateBarras(facultadId, tipoChequeraId, chequeraSerieId),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/periodos/lectivo/{lectivoId}")
+    public ResponseEntity<List<CuotaPeriodoDto>> findAllPeriodosLectivo(@PathVariable Integer lectivoId) {
+        return ResponseEntity.ok(service.findAllPeriodosLectivo(lectivoId));
     }
 
 }

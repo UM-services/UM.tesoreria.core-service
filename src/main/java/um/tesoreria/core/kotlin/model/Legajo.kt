@@ -10,6 +10,9 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import com.fasterxml.jackson.annotation.JsonFormat
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinColumns
+import jakarta.persistence.OneToOne
 
 @Entity
 @Table(
@@ -58,6 +61,14 @@ data class Legajo(
     var contrasenha: String? = null,
 
     @Column(name = "intercambio")
-    var intercambio: Byte = 0
+    var intercambio: Byte = 0,
+
+    @OneToOne(optional = true)
+    @JoinColumns(
+        JoinColumn(name = "ale_fac_id", referencedColumnName = "car_fac_id", insertable = false, updatable = false),
+        JoinColumn(name = "ale_pla_id", referencedColumnName = "car_pla_id", insertable = false, updatable = false),
+        JoinColumn(name = "ale_car_id", referencedColumnName = "car_id", insertable = false, updatable = false)
+    )
+    var carrera: Carrera? = null
 
 ) : Auditable()

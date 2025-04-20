@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +33,7 @@ import um.tesoreria.core.service.ChequeraSerieService;
  */
 @RestController
 @RequestMapping({"/chequeraserie", "/api/tesoreria/core/chequeraSerie"})
+@Slf4j
 public class ChequeraSerieController {
 
     private final ChequeraSerieService service;
@@ -41,6 +42,12 @@ public class ChequeraSerieController {
     public ChequeraSerieController(ChequeraSerieService service, ChequeraCuotaService chequeraCuotaService) {
         this.service = service;
         this.chequeraCuotaService = chequeraCuotaService;
+    }
+
+    @GetMapping("/lectivo/{facultadId}/{geograficaId}/{lectivoId}")
+    public ResponseEntity<List<ChequeraSerie>> findAllByLectivo(@PathVariable Integer facultadId, @PathVariable Integer geograficaId, @PathVariable Integer lectivoId) {
+        log.debug("Processing ChequeraSerieController.findAllByLectivo");
+        return ResponseEntity.ok(service.findAllByLectivo(facultadId, geograficaId, lectivoId));
     }
 
     @GetMapping("/persona/{personaId}/{documentoId}")

@@ -18,6 +18,8 @@ import um.tesoreria.core.kotlin.model.ChequeraSerie;
  */
 public interface ChequeraSerieRepository extends JpaRepository<ChequeraSerie, Long> {
 
+	List<ChequeraSerie> findAllByFacultadIdAndGeograficaIdAndLectivoId(Integer facultadId, Integer geograficaId, Integer lectivoId);
+
 	List<ChequeraSerie> findAllByPersonaIdAndDocumentoId(BigDecimal personaId, Integer documentoId, Sort sort);
 
 	List<ChequeraSerie> findAllByFacultadIdAndLectivoId(Integer facultadId, Integer lectivoId);

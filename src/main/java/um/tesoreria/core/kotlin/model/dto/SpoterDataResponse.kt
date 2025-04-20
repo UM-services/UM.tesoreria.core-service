@@ -7,6 +7,6 @@ data class SpoterDataResponse(
 	var facultadId: Int? = null,
 	var tipoChequeraId: Int? = null,
 	var chequeraSerieId: Long? = null,
-	var chequeraSerie: ChequeraSerieDTO? = null
+	var chequeraSerie: ChequeraSerieDto? = null
 
 )
