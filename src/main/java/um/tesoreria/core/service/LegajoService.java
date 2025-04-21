@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.kotlin.model.Legajo;
-import um.tesoreria.core.repository.ILegajoRepository;
+import um.tesoreria.core.repository.LegajoRepository;
 
 /**
  * @author daniel
@@ -19,10 +19,14 @@ import um.tesoreria.core.repository.ILegajoRepository;
 @Service
 public class LegajoService {
 
-	private final ILegajoRepository repository;
+	private final LegajoRepository repository;
 
-	public LegajoService(ILegajoRepository repository) {
+	public LegajoService(LegajoRepository repository) {
 		this.repository = repository;
+	}
+
+	public List<Legajo> findAllByFacultadId(Integer facultadId) {
+		return repository.findAllByFacultadId(facultadId);
 	}
 
 	public Legajo findByFacultadIdAndPersonaIdAndDocumentoId(Integer facultadId, BigDecimal personaId,

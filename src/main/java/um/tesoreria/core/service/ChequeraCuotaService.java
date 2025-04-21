@@ -13,13 +13,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +28,8 @@ import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.model.ChequeraTotal;
 import um.tesoreria.core.model.dto.DeudaChequera;
-import um.tesoreria.core.repository.IChequeraCuotaRepository;
+import um.tesoreria.core.model.internal.CuotaPeriodoDto;
+import um.tesoreria.core.repository.ChequeraCuotaRepository;
 import um.tesoreria.core.service.view.ChequeraCuotaDeudaService;
 import um.tesoreria.core.util.Tool;
 
@@ -43,7 +40,7 @@ import um.tesoreria.core.util.Tool;
 @Slf4j
 public class ChequeraCuotaService {
 
-    private final IChequeraCuotaRepository repository;
+    private final ChequeraCuotaRepository repository;
     private final ChequeraSerieService chequeraSerieService;
     private final ChequeraPagoService chequeraPagoService;
     private final ChequeraTotalService chequeraTotalService;
@@ -52,7 +49,7 @@ public class ChequeraCuotaService {
     private final LectivoService lectivoService;
     private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
 
-    public ChequeraCuotaService(IChequeraCuotaRepository repository, ChequeraSerieService chequeraSerieService, ChequeraPagoService chequeraPagoService,
+    public ChequeraCuotaService(ChequeraCuotaRepository repository, ChequeraSerieService chequeraSerieService, ChequeraPagoService chequeraPagoService,
                                 ChequeraTotalService chequeraTotalService, FacultadService facultadService, TipoChequeraService tipoChequeraService,
                                 LectivoService lectivoService, ChequeraCuotaDeudaService chequeraCuotaDeudaService) {
         this.repository = repository;
@@ -492,6 +489,10 @@ public class ChequeraCuotaService {
                 .stream()
                 .map(ChequeraCuota::getImporte1)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public List<CuotaPeriodoDto> findAllPeriodosLectivo(Integer lectivoId) {
+        return repository.findCuotaPeriodosByLectivoId(lectivoId);
     }
 
 }

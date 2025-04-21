@@ -50,9 +50,14 @@ public class ChequeraSerieService {
     private final ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
 
     @Autowired
-    public ChequeraSerieService(ChequeraSerieRepository repository, ChequeraIncompletaService chequeraIncompletaService, ChequeraSerieAltaService chequeraSerieAltaService,
-                                ChequeraSerieAltaFullService chequeraSerieAltaFullService, TipoChequeraService tipoChequeraService,
-                                DebitoService debitoService, ChequeraKeyService chequeraKeyService, ChequeraImpresionCabeceraService chequeraImpresionCabeceraService) {
+    public ChequeraSerieService(ChequeraSerieRepository repository,
+                                ChequeraIncompletaService chequeraIncompletaService,
+                                ChequeraSerieAltaService chequeraSerieAltaService,
+                                ChequeraSerieAltaFullService chequeraSerieAltaFullService,
+                                TipoChequeraService tipoChequeraService,
+                                DebitoService debitoService,
+                                ChequeraKeyService chequeraKeyService,
+                                ChequeraImpresionCabeceraService chequeraImpresionCabeceraService) {
         this.repository = repository;
         this.chequeraIncompletaService = chequeraIncompletaService;
         this.chequeraSerieAltaService = chequeraSerieAltaService;
@@ -61,6 +66,11 @@ public class ChequeraSerieService {
         this.debitoService = debitoService;
         this.chequeraKeyService = chequeraKeyService;
         this.chequeraImpresionCabeceraService = chequeraImpresionCabeceraService;
+    }
+
+    public List<ChequeraSerie> findAllByLectivo(Integer facultadId, Integer geograficaId, Integer lectivoId) {
+        log.debug("Processing ChequeraSerieService.findAllByLectivo");
+        return repository.findAllByFacultadIdAndGeograficaIdAndLectivoId(facultadId, geograficaId, lectivoId);
     }
 
     public List<ChequeraSerie> findAllByPersona(BigDecimal personaId, Integer documentoId) {

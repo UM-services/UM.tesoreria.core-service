@@ -327,14 +327,16 @@ public class SincronizeService {
 		} catch (LegajoException e) {
 			log.debug("Sin legajo");
 		}
+		assert  legajoFacultad.getLectivoId() != null;
 		if (legajoFacultad.getLectivoId() == 0) {
 			legajoFacultad.setLectivoId(null);
 		}
 		if (update) {
+			assert legajoFacultad.getNumeroLegajo() != null;
 			Legajo legajo = new Legajo(legajoId, personaId, documentoId, facultadId, legajoFacultad.getNumeroLegajo(),
 					legajoFacultad.getFecha(), legajoFacultad.getLectivoId(), legajoFacultad.getPlanId(),
 					legajoFacultad.getCarreraId(), (byte) 1, legajoFacultad.getGeograficaId(),
-					legajoFacultad.getContrasenha(), legajoFacultad.getIntercambio());
+					legajoFacultad.getContrasenha(), legajoFacultad.getIntercambio(), null);
 			legajo = legajoService.add(legajo);
 		}
 	}

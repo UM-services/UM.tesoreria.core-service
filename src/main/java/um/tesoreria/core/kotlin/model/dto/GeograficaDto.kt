@@ -1,6 +1,6 @@
 package um.tesoreria.core.kotlin.model.dto
 
-data class TipoChequeraDTO(
+data class GeograficaDto(
 
 	var nombre: String = ""
 

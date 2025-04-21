@@ -109,7 +109,7 @@ public class SpoterService {
         } catch (LegajoException e) {
             legajo = legajoService.add(new Legajo(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
                     spoterData.getFacultadId(), 0L, Tool.dateAbsoluteArgentina(), lectivoId, spoterData.getPlanId(),
-                    spoterData.getCarreraId(), (byte) 1, spoterData.getGeograficaId(), "", (byte) 0));
+                    spoterData.getCarreraId(), (byte) 1, spoterData.getGeograficaId(), "", (byte) 0, null));
         }
         logLegajo(legajo);
 

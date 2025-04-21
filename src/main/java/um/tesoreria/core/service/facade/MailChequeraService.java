@@ -28,7 +28,7 @@ import um.tesoreria.core.exception.CarreraChequeraException;
 import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.kotlin.model.*;
-import um.tesoreria.core.kotlin.model.dto.ChequeraSerieDTO;
+import um.tesoreria.core.kotlin.model.dto.ChequeraSerieDto;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;
 import um.tesoreria.core.model.MailSender;
 import um.tesoreria.core.service.*;
@@ -151,7 +151,7 @@ public class MailChequeraService {
                     spoterData.getDocumentoId(), spoterData.getFacultadId(), spoterData.getGeograficaId(), lectivoId);
             log.debug("SporterData leído");
             logSpoterData(data);
-            ChequeraSerieDTO chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerieService.findByUnique(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId()));
+            ChequeraSerieDto chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerieService.findByUnique(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId()));
             String messageSender = "Response Sin Envío";
             if (!responseSinEnvio) {
                 messageSender = this.sendChequera(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), data.getAlternativaId(), false, false, false);
@@ -194,7 +194,7 @@ public class MailChequeraService {
         spoterData = spoterDataService.add(spoterData);
         logSpoterData(spoterData);
         log.debug("Construyendo chequeraDTO");
-        ChequeraSerieDTO chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerie);
+        ChequeraSerieDto chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerie);
         logChequeraSerieDTO(chequeraSerieDTO);
         return new SpoterDataResponse(spoterData.getStatus() == (byte) 1, spoterData.getMessage(),
                 spoterData.getFacultadId(), spoterData.getTipoChequeraId(), spoterData.getChequeraSerieId(), chequeraSerieDTO);
@@ -432,7 +432,7 @@ public class MailChequeraService {
         }
     }
 
-    private void logChequeraSerieDTO(ChequeraSerieDTO chequeraSerieDTO) {
+    private void logChequeraSerieDTO(ChequeraSerieDto chequeraSerieDTO) {
         try {
             log.debug("ChequeraSerieDTO -> {}", JsonMapper
                     .builder()
