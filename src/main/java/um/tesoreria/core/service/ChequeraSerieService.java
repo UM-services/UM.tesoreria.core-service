@@ -68,11 +68,6 @@ public class ChequeraSerieService {
         this.chequeraImpresionCabeceraService = chequeraImpresionCabeceraService;
     }
 
-    public List<ChequeraSerie> findAllByLectivo(Integer facultadId, Integer geograficaId, Integer lectivoId) {
-        log.debug("Processing ChequeraSerieService.findAllByLectivo");
-        return repository.findAllByFacultadIdAndGeograficaIdAndLectivoId(facultadId, geograficaId, lectivoId);
-    }
-
     public List<ChequeraSerie> findAllByPersona(BigDecimal personaId, Integer documentoId) {
         return repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, Sort.by("lectivoId").descending());
     }

@@ -44,10 +44,10 @@ public class ChequeraSerieController {
         this.chequeraCuotaService = chequeraCuotaService;
     }
 
-    @GetMapping("/lectivo/{facultadId}/{geograficaId}/{lectivoId}")
-    public ResponseEntity<List<ChequeraSerie>> findAllByLectivo(@PathVariable Integer facultadId, @PathVariable Integer geograficaId, @PathVariable Integer lectivoId) {
+    @GetMapping("/lectivo/{facultadId}/{lectivoId}")
+    public ResponseEntity<List<ChequeraSerie>> findAllByLectivo(@PathVariable Integer facultadId, @PathVariable Integer lectivoId) {
         log.debug("Processing ChequeraSerieController.findAllByLectivo");
-        return ResponseEntity.ok(service.findAllByLectivo(facultadId, geograficaId, lectivoId));
+        return ResponseEntity.ok(service.findAllByLectivoIdAndFacultadId(lectivoId, facultadId));
     }
 
     @GetMapping("/persona/{personaId}/{documentoId}")
