@@ -59,8 +59,8 @@ public class FacturacionElectronicaController {
     }
 
     @GetMapping("/pendientes")
-    public ResponseEntity<List<FacturacionElectronica>> find100Pendientes() {
-        return new ResponseEntity<>(service.find100Pendientes(), HttpStatus.OK);
+    public ResponseEntity<List<FacturacionElectronica>> find3Pendientes() {
+        return new ResponseEntity<>(service.find3Pendientes(), HttpStatus.OK);
     }
 
     @PostMapping("/")

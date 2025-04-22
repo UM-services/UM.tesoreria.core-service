@@ -54,6 +54,7 @@ src/
 ## API Endpoints Principales
 - `/legajo/facultad/{facultadId}` - Obtener legajos por facultad
 - `/chequera/cuotas/pagos/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` - Obtener cuotas y pagos de chequera
+- `/facturacion-electronica/pendientes` - Obtener los 3 registros pendientes de facturación electrónica
 
 ## Configuración
 El servicio requiere las siguientes configuraciones:

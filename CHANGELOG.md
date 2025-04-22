@@ -71,21 +71,13 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 - Sistema de verificación de mensajes para chequeras
-- Logging mejorado con Log4j2
-- Nuevo endpoint para consulta de registros de verificación de chequeras
-- Modo de prueba para envío de correos
+- Mejoras en el sistema de logging
+- Nuevo endpoint para verificación de registros
 
 ### Changed
-- Actualización de dependencias:
-  - Spring Boot 3.4.3 → 3.4.4
-  - Kotlin 2.1.10 → 2.1.20
-  - Spring Cloud 2024.0.0 → 2024.0.1
-  - Springdoc OpenAPI 2.8.5 → 2.8.6
-  - Guava 33.4.6-jre → 33.4.7-jre
-  - Apache POI 5.4.0 → 5.4.1
-- Mejora en el ordenamiento de resultados de MercadoPago (orden descendente por ID)
-- Optimización de código en servicios de sincronización
-- Mejora en el manejo de excepciones en controladores
+- Actualización de dependencias
+- Optimización en el código de servicios
+- Modificación del endpoint `/facturacion-electronica/pendientes` para retornar 3 registros en lugar de 100
 
 ### Removed
 - Eliminación de RabbitMQ y colas de mensajes
