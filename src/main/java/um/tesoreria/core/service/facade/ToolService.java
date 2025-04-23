@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ToolService {
 
-	public Boolean mailvalidate(String mail) {
+	public Boolean mailValidate(String mail) {
 
 		if (mail.toLowerCase().contains("ñ")) {
 			return false;
