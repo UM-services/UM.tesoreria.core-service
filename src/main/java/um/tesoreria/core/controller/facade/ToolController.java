@@ -21,17 +21,20 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @RestController
-@RequestMapping("/tool")
+@RequestMapping({"/tool", "/api/tesoreria/core/tool"})
 @Slf4j
 public class ToolController {
 
-	@Autowired
-	private ToolService service;
+	private final ToolService service;
+
+	public ToolController(ToolService service) {
+		this.service = service;
+	}
 
 	@PostMapping("/mailvalidate")
-	public ResponseEntity<Boolean> mailvalidate(@RequestBody List<String> mailes) {
+	public ResponseEntity<Boolean> mailValidate(@RequestBody List<String> mailes) {
 		log.debug(mailes.toString());
-		return new ResponseEntity<Boolean>(service.mailvalidate(mailes.get(0)), HttpStatus.OK);
+		return new ResponseEntity<>(service.mailValidate(mailes.getFirst()), HttpStatus.OK);
 	}
 
 }

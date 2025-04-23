@@ -55,6 +55,7 @@ src/
 - `/legajo/facultad/{facultadId}` - Obtener legajos por facultad
 - `/chequera/cuotas/pagos/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` - Obtener cuotas y pagos de chequera
 - `/facturacion-electronica/pendientes` - Obtener los 3 registros pendientes de facturación electrónica
+- `/tool/mailvalidate` o `/api/tesoreria/core/tool/mailvalidate` - Validar formato de correo electrónico
 
 ## Configuración
 El servicio requiere las siguientes configuraciones:

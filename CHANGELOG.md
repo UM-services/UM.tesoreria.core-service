@@ -78,6 +78,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Actualización de dependencias
 - Optimización en el código de servicios
 - Modificación del endpoint `/facturacion-electronica/pendientes` para retornar 3 registros en lugar de 100
+- Agregada ruta alternativa `/api/tesoreria/core/tool` para el endpoint de validación de correo
+- Mejorada la inyección de dependencias en ToolController usando constructor
+- Renombrado el método `mailvalidate` a `mailValidate` para seguir convenciones de nomenclatura
 
 ### Removed
 - Eliminación de RabbitMQ y colas de mensajes
