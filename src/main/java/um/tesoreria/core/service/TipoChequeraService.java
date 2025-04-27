@@ -8,12 +8,12 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.TipoChequeraException;
-import um.tesoreria.core.repository.ITipoChequeraRepository;
+import um.tesoreria.core.model.LectivoTotal;
+import um.tesoreria.core.repository.TipoChequeraRepository;
 import um.tesoreria.core.kotlin.model.TipoChequera;
 
 /**
@@ -23,11 +23,14 @@ import um.tesoreria.core.kotlin.model.TipoChequera;
 @Service
 public class TipoChequeraService {
 
-	@Autowired
-	private ITipoChequeraRepository repository;
+	private final TipoChequeraRepository repository;
+	private final LectivoTotalService lectivoTotalService;
 
-	@Autowired
-	private LectivoTotalService lectivoTotalService;
+	public TipoChequeraService(TipoChequeraRepository repository,
+							   LectivoTotalService lectivoTotalService) {
+		this.repository = repository;
+		this.lectivoTotalService = lectivoTotalService;
+	}
 
 	public List<TipoChequera> findAll() {
 		return repository.findAll();
@@ -36,14 +39,14 @@ public class TipoChequeraService {
 	public List<TipoChequera> findAllAsignable(Integer facultadId, Integer lectivoId, Integer geograficaId,
 											   Integer claseChequeraId) {
 		List<Integer> tipoChequeraIds = lectivoTotalService.findAllByLectivo(facultadId, lectivoId).stream()
-				.map(total -> total.getTipoChequeraId()).distinct().collect(Collectors.toList());
+				.map(LectivoTotal::getTipoChequeraId).distinct().collect(Collectors.toList());
 		return repository.findAllByTipoChequeraIdInAndGeograficaIdAndClaseChequeraId(tipoChequeraIds, geograficaId,
 				claseChequeraId, Sort.by("nombre").ascending());
 	}
 
 	public List<TipoChequera> findAllByFacultadIdAndGeograficaId(Integer facultadId, Integer geograficaId) {
 		List<Integer> tipoChequeraIds = lectivoTotalService.findAllByFacultadId(facultadId).stream()
-				.map(total -> total.getTipoChequeraId()).distinct().collect(Collectors.toList());
+				.map(LectivoTotal::getTipoChequeraId).distinct().collect(Collectors.toList());
 		return repository.findAllByTipoChequeraIdInAndGeograficaId(tipoChequeraIds, geograficaId);
 	}
 
@@ -61,7 +64,7 @@ public class TipoChequeraService {
 	}
 
 	public TipoChequera findLast() {
-		return repository.findTopByOrderByTipoChequeraIdDesc().orElseThrow(() -> new TipoChequeraException());
+		return repository.findTopByOrderByTipoChequeraIdDesc().orElseThrow(TipoChequeraException::new);
 	}
 
 	public TipoChequera add(TipoChequera tipoChequera) {
@@ -71,7 +74,16 @@ public class TipoChequeraService {
 
 	public TipoChequera update(TipoChequera newTipoChequera, Integer tipoChequeraId) {
 		return repository.findByTipoChequeraId(tipoChequeraId).map(tipoChequera -> {
-			tipoChequera = new TipoChequera(tipoChequeraId, newTipoChequera.getNombre(), newTipoChequera.getPrefijo(), newTipoChequera.getGeograficaId(), newTipoChequera.getClaseChequeraId(), newTipoChequera.getImprimir(), newTipoChequera.getContado(), newTipoChequera.getMultiple(), null, null);
+			tipoChequera = new TipoChequera(tipoChequeraId,
+					newTipoChequera.getNombre(),
+					newTipoChequera.getPrefijo(),
+					newTipoChequera.getGeograficaId(),
+					newTipoChequera.getClaseChequeraId(),
+					newTipoChequera.getImprimir(),
+					newTipoChequera.getContado(),
+					newTipoChequera.getMultiple(),
+					null,
+					null);
 			return repository.save(tipoChequera);
 		}).orElseThrow(() -> new TipoChequeraException(tipoChequeraId));
 	}

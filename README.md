@@ -19,6 +19,11 @@ Servicio core de Tesorería para la Universidad de Mendoza. Este servicio maneja
 - Procesamiento de pagos y acreditaciones
 - Integración con sistemas externos
 - Generación de reportes y documentos
+- Validación de mensajes
+- Integración con Mercado Pago
+- Gestión de tarjetas de crédito de Mercado Pago
+- Sistema de logging mejorado
+- Validación de correos electrónicos
 
 ## Tecnologías Utilizadas
 - Java 21
@@ -27,6 +32,8 @@ Servicio core de Tesorería para la Universidad de Mendoza. Este servicio maneja
 - Kotlin 2.1.20
 - JPA/Hibernate
 - ModelMapper
+- PostgreSQL
+- Mercado Pago SDK
 
 ## Estructura del Proyecto
 ```
@@ -61,6 +68,17 @@ src/
 El servicio requiere las siguientes configuraciones:
 - Base de datos MySQL
 - Configuración de correo electrónico
+- Java 17
+- PostgreSQL 12 o superior
+- Maven 3.6 o superior
+
+## Variables de Entorno
+```properties
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/tesoreria
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=postgres
+MERCADO_PAGO_ACCESS_TOKEN=your_access_token
+```
 
 ## Desarrollo
 Para contribuir al proyecto:

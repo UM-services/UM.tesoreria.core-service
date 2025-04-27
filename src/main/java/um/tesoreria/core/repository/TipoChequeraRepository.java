@@ -17,7 +17,7 @@ import um.tesoreria.core.kotlin.model.TipoChequera;
  *
  */
 @Repository
-public interface ITipoChequeraRepository extends JpaRepository<TipoChequera, Integer> {
+public interface TipoChequeraRepository extends JpaRepository<TipoChequera, Integer> {
 
 	public List<TipoChequera> findAllByTipoChequeraIdInAndGeograficaId(List<Integer> tipoChequeraIds,
 			Integer geograficaId);
