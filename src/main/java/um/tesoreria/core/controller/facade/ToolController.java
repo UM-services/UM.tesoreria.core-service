@@ -34,7 +34,7 @@ public class ToolController {
 	@PostMapping("/mailvalidate")
 	public ResponseEntity<Boolean> mailValidate(@RequestBody List<String> mailes) {
 		log.debug(mailes.toString());
-		return new ResponseEntity<>(service.mailValidate(mailes.getFirst()), HttpStatus.OK);
+		return ResponseEntity.ok(service.mailValidate(mailes.getFirst()));
 	}
 
 }

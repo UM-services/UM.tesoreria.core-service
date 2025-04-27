@@ -70,6 +70,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ## [Unreleased]
 
 ### Added
+- Nuevo controlador `TipoChequeraMercadoPagoCreditCardController` para manejar operaciones relacionadas con tarjetas de crédito de Mercado Pago
+- Nueva entidad `TipoChequeraMercadoPagoCreditCard` para almacenar información de configuración de tarjetas de crédito
+- Nuevo repositorio `TipoChequeraMercadoPagoCreditCardRepository` para operaciones de base de datos
+- Nuevo servicio `TipoChequeraMercadoPagoCreditCardService` para la lógica de negocio
 - Sistema de verificación de mensajes para chequeras
 - Mejoras en el sistema de logging
 - Nuevo endpoint para verificación de registros
@@ -81,6 +85,8 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Agregada ruta alternativa `/api/tesoreria/core/tool` para el endpoint de validación de correo
 - Mejorada la inyección de dependencias en ToolController usando constructor
 - Renombrado el método `mailvalidate` a `mailValidate` para seguir convenciones de nomenclatura
+- Renombrado `ITipoChequeraRepository` a `TipoChequeraRepository` siguiendo las convenciones de nomenclatura
+- Mejorado el código en `TipoChequeraService` usando referencias de método y constructor injection
 
 ### Removed
 - Eliminación de RabbitMQ y colas de mensajes
@@ -95,6 +101,8 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Mejora en el manejo de excepciones en operaciones de chequeras
 - Corrección en el manejo de correos electrónicos
 - Mejora en el logging de errores
+- Corregido el manejo de excepciones en `TipoChequeraService` para usar referencias de método
+- Mejorada la legibilidad del código en la actualización de `TipoChequera`
 
 ## [0.0.1-SNAPSHOT] - 2024-02-22
 
