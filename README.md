@@ -90,3 +90,19 @@ Para contribuir al proyecto:
 
 ## Licencia
 Este proyecto está bajo la licencia [LICENCIA].
+
+### Tarjetas de Crédito de Mercado Pago
+
+El servicio permite gestionar la configuración de tarjetas de crédito de Mercado Pago:
+
+- Configurar parámetros de tarjetas de crédito
+- Gestionar límites y restricciones
+- Validar configuraciones
+- Listar tarjetas de crédito activas
+
+#### Endpoints Disponibles
+
+- `GET /activos`: Lista todas las tarjetas de crédito activas
+- `POST /persist/{tipoChequeraId}/{alternativaId}/{cuotas}`: Persiste una nueva configuración de tarjeta de crédito
+- `DELETE /baja/{tipoChequeraId}`: Da de baja una configuración de tarjeta de crédito
+- `GET /tipoChequera/{tipoChequeraId}`: Consulta la configuración de una tarjeta de crédito

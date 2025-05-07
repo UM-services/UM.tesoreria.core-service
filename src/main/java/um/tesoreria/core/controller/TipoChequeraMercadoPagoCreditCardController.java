@@ -9,6 +9,8 @@ import um.tesoreria.core.exception.TipoChequeraMercadoPagoCreditCardException;
 import um.tesoreria.core.model.TipoChequeraMercadoPagoCreditCard;
 import um.tesoreria.core.service.TipoChequeraMercadoPagoCreditCardService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping({ "/tipoChequeraMercadoPagoCreditCard", "/api/tesoreria/core/tipoChequeraMercadoPagoCreditCard"})
 public class TipoChequeraMercadoPagoCreditCardController {
@@ -17,6 +19,11 @@ public class TipoChequeraMercadoPagoCreditCardController {
 
     public TipoChequeraMercadoPagoCreditCardController(TipoChequeraMercadoPagoCreditCardService service) {
         this.service = service;
+    }
+
+    @GetMapping("/activos")
+    public ResponseEntity<List<TipoChequeraMercadoPagoCreditCard>> findAllActivos() {
+        return ResponseEntity.ok(service.findAllActivos());
     }
 
     @PostMapping("/persist/{tipoChequeraId}/{alternativaId}/{cuotas}")
