@@ -5,6 +5,7 @@ import um.tesoreria.core.exception.TipoChequeraMercadoPagoCreditCardException;
 import um.tesoreria.core.model.TipoChequeraMercadoPagoCreditCard;
 import um.tesoreria.core.repository.TipoChequeraMercadoPagoCreditCardRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -14,6 +15,10 @@ public class TipoChequeraMercadoPagoCreditCardService {
 
     public TipoChequeraMercadoPagoCreditCardService(TipoChequeraMercadoPagoCreditCardRepository repository) {
         this.repository = repository;
+    }
+
+    public List<TipoChequeraMercadoPagoCreditCard> findAllActivos() {
+        return repository.findAllByActive((byte) 1);
     }
 
     public TipoChequeraMercadoPagoCreditCard findByTipoChequeraId(Integer tipoChequeraId) {
@@ -50,4 +55,5 @@ public class TipoChequeraMercadoPagoCreditCardService {
             return "Sin Tipo Chequera";
         }
     }
+
 }
