@@ -74,9 +74,9 @@ El servicio requiere las siguientes configuraciones:
 
 ## Variables de Entorno
 ```properties
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/tesoreria
-SPRING_DATASOURCE_USERNAME=postgres
-SPRING_DATASOURCE_PASSWORD=postgres
+SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/tesoreria
+SPRING_DATASOURCE_USERNAME=root
+SPRING_DATASOURCE_PASSWORD=root
 MERCADO_PAGO_ACCESS_TOKEN=your_access_token
 ```
 

@@ -21,7 +21,6 @@ public class TipoChequeraMercadoPagoCreditCard extends Auditable {
 
     private Integer tipoChequeraId;
     private Integer alternativaId;
-    private String defaultPaymentMethodId;
     private Integer installments;
     private Integer defaultInstallments;
     private Byte active = 1;
