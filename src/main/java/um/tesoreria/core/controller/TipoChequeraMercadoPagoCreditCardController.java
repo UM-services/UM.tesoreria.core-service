@@ -3,10 +3,7 @@ package um.tesoreria.core.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.exception.TipoChequeraMercadoPagoCreditCardException;
 import um.tesoreria.core.model.TipoChequeraMercadoPagoCreditCard;
@@ -20,6 +17,16 @@ public class TipoChequeraMercadoPagoCreditCardController {
 
     public TipoChequeraMercadoPagoCreditCardController(TipoChequeraMercadoPagoCreditCardService service) {
         this.service = service;
+    }
+
+    @PostMapping("/persist/{tipoChequeraId}/{alternativaId}/{cuotas}")
+    public ResponseEntity<String> persist(@PathVariable Integer tipoChequeraId, @PathVariable Integer alternativaId, @PathVariable Integer cuotas) {
+        return ResponseEntity.ok(service.persist(tipoChequeraId, alternativaId, cuotas));
+    }
+
+    @DeleteMapping("/baja/{tipoChequeraId}")
+    public ResponseEntity<String> baja(@PathVariable Integer tipoChequeraId) {
+        return ResponseEntity.ok(service.baja(tipoChequeraId));
     }
 
     @GetMapping("/tipoChequera/{tipoChequeraId}")

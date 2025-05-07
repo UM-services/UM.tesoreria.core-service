@@ -77,6 +77,8 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Sistema de verificación de mensajes para chequeras
 - Mejoras en el sistema de logging
 - Nuevo endpoint para verificación de registros
+- Nuevo endpoint POST `/persist/{tipoChequeraId}/{alternativaId}/{cuotas}` para persistir configuraciones de tarjetas de crédito
+- Nuevo endpoint DELETE `/baja/{tipoChequeraId}` para dar de baja configuraciones de tarjetas de crédito
 
 ### Changed
 - Actualización de dependencias
@@ -87,6 +89,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Renombrado el método `mailvalidate` a `mailValidate` para seguir convenciones de nomenclatura
 - Renombrado `ITipoChequeraRepository` a `TipoChequeraRepository` siguiendo las convenciones de nomenclatura
 - Mejorado el código en `TipoChequeraService` usando referencias de método y constructor injection
+- Actualizada la versión de Spring Boot a 3.4.5
+- Actualizada la versión de MySQL Connector a 9.3.0
+- Actualizada la versión de ModelMapper a 3.2.3
+- Eliminado el campo `defaultPaymentMethodId` del modelo TipoChequeraMercadoPagoCreditCard
+- Mejorado el manejo de UUID en el servicio de tarjetas de crédito
 
 ### Removed
 - Eliminación de RabbitMQ y colas de mensajes
@@ -103,6 +110,17 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Mejora en el logging de errores
 - Corregido el manejo de excepciones en `TipoChequeraService` para usar referencias de método
 - Mejorada la legibilidad del código en la actualización de `TipoChequera`
+- Mejorado el manejo de excepciones en el servicio de tarjetas de crédito
+- Optimizada la lógica de persistencia y baja de configuraciones
+
+### Security
+- Mejorado el manejo de datos sensibles en DTOs
+- Implementado mejor manejo de nulls para prevenir NPEs
+
+### Documentación
+- Actualizado README con nueva estructura y convenciones
+- Documentados nuevos endpoints y funcionalidades
+- Actualizada la documentación de la API
 
 ## [0.0.1-SNAPSHOT] - 2024-02-22
 
