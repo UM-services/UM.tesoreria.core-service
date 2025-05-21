@@ -31,15 +31,15 @@ public class TipoChequeraMercadoPagoCreditCardController {
         return ResponseEntity.ok(service.persist(tipoChequeraId, alternativaId, cuotas));
     }
 
-    @DeleteMapping("/baja/{tipoChequeraId}")
-    public ResponseEntity<String> baja(@PathVariable Integer tipoChequeraId) {
-        return ResponseEntity.ok(service.baja(tipoChequeraId));
+    @DeleteMapping("/baja/{tipoChequeraId}/{alternativaId}")
+    public ResponseEntity<String> baja(@PathVariable Integer tipoChequeraId, @PathVariable Integer alternativaId) {
+        return ResponseEntity.ok(service.baja(tipoChequeraId, alternativaId));
     }
 
-    @GetMapping("/tipoChequera/{tipoChequeraId}")
-    public ResponseEntity<TipoChequeraMercadoPagoCreditCard> findByTipoChequeraId(@PathVariable Integer tipoChequeraId) {
+    @GetMapping("/unique/{tipoChequeraId}/{alternativaId}")
+    public ResponseEntity<TipoChequeraMercadoPagoCreditCard> findByUnique(@PathVariable Integer tipoChequeraId, @PathVariable Integer alternativaId) {
         try {
-            return ResponseEntity.ok(service.findByTipoChequeraId(tipoChequeraId));
+            return ResponseEntity.ok(service.findByUnique(tipoChequeraId, alternativaId));
         } catch (TipoChequeraMercadoPagoCreditCardException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }

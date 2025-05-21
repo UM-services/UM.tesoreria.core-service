@@ -13,6 +13,6 @@ public interface TipoChequeraMercadoPagoCreditCardRepository extends JpaReposito
 
     List<TipoChequeraMercadoPagoCreditCard> findAllByActive(Byte active);
 
-    Optional<TipoChequeraMercadoPagoCreditCard> findByTipoChequeraId(Integer tipoChequeraId);
+    Optional<TipoChequeraMercadoPagoCreditCard> findByTipoChequeraIdAndAlternativaId(Integer tipoChequeraId, Integer alternativaId);
 
 }

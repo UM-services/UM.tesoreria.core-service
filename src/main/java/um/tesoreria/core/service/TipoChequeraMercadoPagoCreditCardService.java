@@ -21,14 +21,14 @@ public class TipoChequeraMercadoPagoCreditCardService {
         return repository.findAllByActive((byte) 1);
     }
 
-    public TipoChequeraMercadoPagoCreditCard findByTipoChequeraId(Integer tipoChequeraId) {
-        return repository.findByTipoChequeraId(tipoChequeraId).orElseThrow(() -> new TipoChequeraMercadoPagoCreditCardException(tipoChequeraId));
+    public TipoChequeraMercadoPagoCreditCard findByUnique(Integer tipoChequeraId, Integer alternativaId) {
+        return repository.findByTipoChequeraIdAndAlternativaId(tipoChequeraId, alternativaId).orElseThrow(() -> new TipoChequeraMercadoPagoCreditCardException(tipoChequeraId, alternativaId));
     }
 
     public String persist(Integer tipoChequeraId, Integer alternativaId, Integer cuotas) {
         UUID id;
         try {
-            var tipoChequeraMercadoPagoCreditCard = findByTipoChequeraId(tipoChequeraId);
+            var tipoChequeraMercadoPagoCreditCard = findByUnique(tipoChequeraId, alternativaId);
             id = tipoChequeraMercadoPagoCreditCard.getId();
         } catch (TipoChequeraMercadoPagoCreditCardException e) {
             id = UUID.randomUUID();
@@ -45,9 +45,9 @@ public class TipoChequeraMercadoPagoCreditCardService {
         return "Ok";
     }
 
-    public String baja(Integer tipoChequeraId) {
+    public String baja(Integer tipoChequeraId, Integer alternativaId) {
         try {
-            var tipoChequeraMercadoPagoCreditCard = findByTipoChequeraId(tipoChequeraId);
+            var tipoChequeraMercadoPagoCreditCard = findByUnique(tipoChequeraId, alternativaId);
             tipoChequeraMercadoPagoCreditCard.setActive((byte) 0);
             tipoChequeraMercadoPagoCreditCard = repository.save(tipoChequeraMercadoPagoCreditCard);
             return "Ok";

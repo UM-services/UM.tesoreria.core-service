@@ -12,6 +12,13 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Nuevo método `findAllByActive` en TipoChequeraMercadoPagoCreditCardRepository
 - Nuevo método `findAllActivos` en TipoChequeraMercadoPagoCreditCardService
 
+### Changed
+- Actualizado springdoc-openapi-starter-webmvc-ui a versión 2.8.8
+- Modificado endpoint DELETE `/baja/{tipoChequeraId}` a `/baja/{tipoChequeraId}/{alternativaId}`
+- Modificado endpoint GET `/tipoChequera/{tipoChequeraId}` a `/unique/{tipoChequeraId}/{alternativaId}`
+- Actualizada restricción única en TipoChequeraMercadoPagoCreditCard para incluir alternativaId
+- Actualizado manejo de excepciones para incluir alternativaId
+
 ## [1.0.0] - 2024-03-19
 
 ### Added
