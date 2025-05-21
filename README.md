@@ -1,3 +1,95 @@
+# Servicio Core de Tesorería
+
+## Descripción
+Servicio core para la gestión de tesorería, implementado con Spring Boot 3.0.1.
+
+## Características
+- Gestión de chequeras y pagos
+- Integración con Mercado Pago para tarjetas de crédito
+- Documentación automática con OpenAPI/Swagger
+- CI/CD con GitHub Actions
+- Soporte para Docker
+
+## Requisitos
+- Java 17
+- Maven 3.8+
+- Docker (opcional)
+
+## Instalación
+```bash
+git clone https://github.com/UM-services/um.tesoreria.core-service.git
+cd um.tesoreria.core-service
+mvn clean install
+```
+
+## Uso
+### Endpoints de Tarjetas de Crédito de Mercado Pago
+
+#### Listar Tarjetas Activas
+```http
+GET /activos
+```
+Retorna todas las tarjetas de crédito activas.
+
+#### Crear/Actualizar Tarjeta
+```http
+POST /persist
+```
+Cuerpo:
+```json
+{
+    "tipoChequeraId": 123,
+    "alternativaId": 456,
+    "cuotas": 12
+}
+```
+
+#### Dar de Baja Tarjeta
+```http
+DELETE /baja/{tipoChequeraId}/{alternativaId}
+```
+
+#### Obtener Tarjeta Única
+```http
+GET /unique/{tipoChequeraId}/{alternativaId}
+```
+
+## Desarrollo
+### Estructura del Proyecto
+```
+src/
+├── main/
+│   ├── java/
+│   │   └── um/
+│   │       └── tesoreria/
+│   │           └── core/
+│   │               ├── controller/
+│   │               ├── service/
+│   │               ├── repository/
+│   │               ├── model/
+│   │               └── exception/
+│   └── resources/
+│       └── application.yml
+└── test/
+    └── java/
+        └── um/
+            └── tesoreria/
+                └── core/
+```
+
+### Convenciones de Commits
+Este proyecto sigue las convenciones de [Conventional Commits](https://www.conventionalcommits.org/).
+
+### CI/CD
+El proyecto utiliza GitHub Actions para:
+- Build automático
+- Tests unitarios
+- Análisis de código
+- Despliegue automático
+
+## Licencia
+Este proyecto está bajo la Licencia MIT.
+
 # UM Tesorería Core Service
 
 [![Java](https://img.shields.io/badge/Java-21-blue.svg)](https://www.java.com/)
@@ -9,9 +101,6 @@
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
 - [Wiki del Proyecto](https://github.com/UM-services/UM.tesoreria.core-service/wiki)
-
-## Descripción
-Servicio core de Tesorería para la Universidad de Mendoza. Este servicio maneja la gestión de chequeras, legajos, pagos y cuotas.
 
 ## Características Principales
 - Gestión de chequeras y sus cuotas
