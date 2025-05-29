@@ -7,6 +7,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.0.1
 - Gestión de chequeras y pagos
 - Integración con Mercado Pago para tarjetas de crédito
 - Gestión de inscripciones y personas
+- Gestión de domicilios y documentos
 - Documentación automática con OpenAPI/Swagger
 - CI/CD con GitHub Actions
 - Soporte para Docker
@@ -36,6 +37,58 @@ Retorna la información completa de una inscripción, incluyendo:
 - Datos de pago
 - Datos de la persona
 - Domicilio
+
+### Endpoints de Domicilios
+
+#### Obtener Domicilio con Pagador
+```http
+GET /domicilio/pagador/{facultadId}/{personaId}/{documentoId}/{lectivoId}
+```
+Retorna el domicilio con información del pagador, incluyendo:
+- Datos del domicilio
+- Email del pagador (si está disponible)
+
+#### Obtener Domicilio por ID
+```http
+GET /domicilio/{domicilioId}
+```
+
+#### Obtener Domicilio por Persona y Documento
+```http
+GET /domicilio/unique/{personaId}/{documentoId}
+```
+
+#### Crear Domicilio
+```http
+POST /domicilio/
+```
+
+#### Actualizar Domicilio
+```http
+PUT /domicilio/{domicilioId}
+```
+
+#### Sincronizar Domicilio
+```http
+POST /domicilio/sincronize
+```
+
+#### Capturar Domicilio
+```http
+GET /domicilio/capture/{personaId}/{documentoId}
+```
+
+### Endpoints de Documentos
+
+#### Listar Documentos
+```http
+GET /documento/
+```
+
+#### Obtener Documento por ID
+```http
+GET /documento/{documentoId}
+```
 
 ### Endpoints de Tarjetas de Crédito de Mercado Pago
 
@@ -69,6 +122,41 @@ GET /unique/{tipoChequeraId}/{alternativaId}
 ```
 
 ## Modelos de Datos
+
+### Domicilio
+```kotlin
+data class Domicilio(
+    @Id
+    @Column(name = "dom_id")
+    var id: Long = 0,
+    
+    @Column(name = "dom_persona_id")
+    var personaId: BigDecimal = BigDecimal.ZERO,
+    
+    @Column(name = "dom_documento_id")
+    var documentoId: Int = 0,
+    
+    // ... otros campos
+    
+    @Transient
+    var emailPagador: String = ""
+)
+```
+
+### Documento
+```kotlin
+data class Documento(
+    @Id
+    @Column(name = "doc_id")
+    var id: Int = 0,
+    
+    @Column(name = "doc_documento_id")
+    var documentoId: Int? = null,
+    
+    @Column(name = "doc_nombre")
+    var nombre: String = ""
+)
+```
 
 ### TipoChequera
 ```kotlin

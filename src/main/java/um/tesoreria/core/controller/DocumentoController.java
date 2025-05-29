@@ -5,7 +5,6 @@ package um.tesoreria.core.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +23,11 @@ import um.tesoreria.core.service.DocumentoService;
 @RequestMapping("/documento")
 public class DocumentoController {
 
-	@Autowired
-	private DocumentoService service;
+	private final DocumentoService service;
+
+	public DocumentoController(DocumentoService service) {
+		this.service = service;
+	}
 
 	@GetMapping("/")
 	public ResponseEntity<List<Documento>> findAll() {
