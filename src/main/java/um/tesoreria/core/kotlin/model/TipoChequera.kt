@@ -6,7 +6,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
-import um.tesoreria.core.model.TipoChequeraMercadoPagoCreditCard
 
 @Entity
 @Table
@@ -36,6 +35,8 @@ data class TipoChequera(
 
     @Column(name = "multiple")
     var multiple: Byte = 0,
+
+    var emailCopia: String? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "tch_geo_id", insertable = false, updatable = false)

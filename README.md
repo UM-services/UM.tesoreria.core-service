@@ -6,12 +6,13 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.0.1
 ## Características
 - Gestión de chequeras y pagos
 - Integración con Mercado Pago para tarjetas de crédito
+- Gestión de inscripciones y personas
 - Documentación automática con OpenAPI/Swagger
 - CI/CD con GitHub Actions
 - Soporte para Docker
 
 ## Requisitos
-- Java 17
+- Java 21
 - Maven 3.8+
 - Docker (opcional)
 
@@ -23,6 +24,19 @@ mvn clean install
 ```
 
 ## Uso
+
+### Endpoints de Personas
+
+#### Obtener Inscripción Completa
+```http
+GET /inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}
+```
+Retorna la información completa de una inscripción, incluyendo:
+- Datos de la inscripción
+- Datos de pago
+- Datos de la persona
+- Domicilio
+
 ### Endpoints de Tarjetas de Crédito de Mercado Pago
 
 #### Listar Tarjetas Activas
@@ -54,6 +68,34 @@ DELETE /baja/{tipoChequeraId}/{alternativaId}
 GET /unique/{tipoChequeraId}/{alternativaId}
 ```
 
+## Modelos de Datos
+
+### TipoChequera
+```kotlin
+data class TipoChequera(
+    @Id
+    @Column(name = "tch_id")
+    var id: Int = 0,
+    
+    @Column(name = "tch_geo_id")
+    var geograficaId: Int = 0,
+    
+    var emailCopia: String? = null,
+    
+    // ... otros campos
+)
+```
+
+### InscripcionFullDto
+```java
+public class InscripcionFullDto {
+    private InscripcionDto inscripcion;
+    private InscripcionPagoDto inscripcionPago;
+    private PersonaDto personaPago;
+    private DomicilioDto domicilioPago;
+}
+```
+
 ## Desarrollo
 ### Estructura del Proyecto
 ```
@@ -67,6 +109,10 @@ src/
 │   │               ├── service/
 │   │               ├── repository/
 │   │               ├── model/
+│   │               ├── extern/
+│   │               │   ├── consumer/
+│   │               │   └── model/
+│   │               │       └── dto/
 │   │               └── exception/
 │   └── resources/
 │       └── application.yml
