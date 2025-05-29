@@ -86,7 +86,7 @@ public class SpoterService {
         } catch (DomicilioException e) {
             domicilio = domicilioService.add(new Domicilio(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
                     Tool.hourAbsoluteArgentina(), "", "", "", "", "", spoterData.getCelular(), "", "",
-                    spoterData.getFacultadId(), null, null, spoterData.getEmailPersonal(), "", ""), false);
+                    spoterData.getFacultadId(), null, null, spoterData.getEmailPersonal(), "", "", ""), false);
         }
         logDomicilio(domicilio);
 
