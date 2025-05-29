@@ -22,6 +22,7 @@ import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
 import um.tesoreria.core.extern.consumer.LegajoFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
+import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
 import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
 import um.tesoreria.core.extern.model.kotlin.PreInscripcionFacultad;
@@ -382,6 +383,11 @@ public class PersonaService {
         } catch (JsonProcessingException e) {
             log.debug("ChequeraSerie jsonify error -> {}", e.getMessage());
         }
+    }
+
+    public InscripcionFullDto findInscripcionFull(Integer facultadId, BigDecimal personaId, Integer documentoId, Integer lectivoId) {
+        var facultad = facultadService.findByFacultadId(facultadId);
+        return inscripcionFacultadConsumer.findInscripcionFull(facultad.getApiserver(), facultad.getApiport(), facultadId, personaId, documentoId, lectivoId);
     }
 
 }

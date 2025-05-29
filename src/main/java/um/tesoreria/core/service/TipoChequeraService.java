@@ -82,6 +82,7 @@ public class TipoChequeraService {
 					newTipoChequera.getImprimir(),
 					newTipoChequera.getContado(),
 					newTipoChequera.getMultiple(),
+					newTipoChequera.getEmailCopia(),
 					null,
 					null);
 			return repository.save(tipoChequera);

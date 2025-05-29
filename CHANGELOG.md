@@ -11,6 +11,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Nuevo endpoint GET `/activos` en TipoChequeraMercadoPagoCreditCardController
 - Nuevo método `findAllByActive` en TipoChequeraMercadoPagoCreditCardRepository
 - Nuevo método `findAllActivos` en TipoChequeraMercadoPagoCreditCardService
+- Nuevo endpoint GET `/inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}` en PersonaController
+- Nuevos DTOs para inscripciones:
+  - `InscripcionDto`
+  - `InscripcionFullDto`
+  - `InscripcionPagoDto`
+- Nuevo campo `emailCopia` en modelo `TipoChequera`
 
 ### Changed
 - Actualizado springdoc-openapi-starter-webmvc-ui a versión 2.8.8
@@ -18,6 +24,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Modificado endpoint GET `/tipoChequera/{tipoChequeraId}` a `/unique/{tipoChequeraId}/{alternativaId}`
 - Actualizada restricción única en TipoChequeraMercadoPagoCreditCard para incluir alternativaId
 - Actualizado manejo de excepciones para incluir alternativaId
+- Actualizado openpdf de 2.0.3 a 2.0.4
+- Mejorado manejo de nulos en `InscripcionFacultadConsumer` usando `Objects.requireNonNull`
+- Actualizado `TipoChequeraService` para incluir `emailCopia` en la creación
 
 ## [1.0.0] - 2024-03-19
 

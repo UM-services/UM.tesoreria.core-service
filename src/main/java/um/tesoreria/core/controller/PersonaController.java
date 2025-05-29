@@ -6,6 +6,8 @@ package um.tesoreria.core.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
+import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
 import um.tesoreria.core.kotlin.model.Persona;
 import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
@@ -129,6 +131,11 @@ public class PersonaController {
 	@PutMapping("/{uniqueId}")
 	public ResponseEntity<Persona> update(@RequestBody Persona persona, @PathVariable Long uniqueId) {
 		return new ResponseEntity<>(service.update(persona, uniqueId), HttpStatus.OK);
+	}
+
+	@GetMapping("/inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}")
+	public ResponseEntity<InscripcionFullDto> findInscripcionFull(@PathVariable Integer facultadId, @PathVariable BigDecimal personaId, @PathVariable Integer documentoId, @PathVariable Integer lectivoId) {
+		return ResponseEntity.ok(service.findInscripcionFull(facultadId, personaId, documentoId, lectivoId));
 	}
 
 }
