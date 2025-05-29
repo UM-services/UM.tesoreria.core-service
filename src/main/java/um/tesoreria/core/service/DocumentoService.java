@@ -5,12 +5,11 @@ package um.tesoreria.core.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.DocumentoException;
 import um.tesoreria.core.kotlin.model.Documento;
-import um.tesoreria.core.repository.IDocumentoRepository;
+import um.tesoreria.core.repository.DocumentoRepository;
 
 /**
  * @author daniel
@@ -19,8 +18,11 @@ import um.tesoreria.core.repository.IDocumentoRepository;
 @Service
 public class DocumentoService {
 
-	@Autowired
-	private IDocumentoRepository repository;
+	private final DocumentoRepository repository;
+
+	public DocumentoService(DocumentoRepository repository) {
+		this.repository = repository;
+	}
 
 	public List<Documento> findAll() {
 		return repository.findAll();

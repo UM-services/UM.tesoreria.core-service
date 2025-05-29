@@ -14,8 +14,8 @@ import um.tesoreria.core.kotlin.model.Documento;
  *
  */
 @Repository
-public interface IDocumentoRepository extends JpaRepository<Documento, Integer> {
+public interface DocumentoRepository extends JpaRepository<Documento, Integer> {
 
-	public Optional<Documento> findByDocumentoId(Integer documentoId);
+	Optional<Documento> findByDocumentoId(Integer documentoId);
 
 }

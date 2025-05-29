@@ -14,6 +14,6 @@ data class Documento(
     var documentoId: Int? = null,
 
     @Column(name = "doc_nombre")
-    var nombre: String = "",
+    var nombre: String = ""
 
-    ) : Auditable()
+) : Auditable()

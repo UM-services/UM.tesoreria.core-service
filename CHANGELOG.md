@@ -2,86 +2,68 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
-El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/),
+El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
 ### Added
-- Nuevo endpoint GET `/activos` en TipoChequeraMercadoPagoCreditCardController
-- Nuevo método `findAllByActive` en TipoChequeraMercadoPagoCreditCardRepository
-- Nuevo método `findAllActivos` en TipoChequeraMercadoPagoCreditCardService
-- Nuevo endpoint GET `/inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}` en PersonaController
-- Nuevos DTOs para inscripciones:
-  - `InscripcionDto`
-  - `InscripcionFullDto`
-  - `InscripcionPagoDto`
-- Nuevo campo `emailCopia` en modelo `TipoChequera`
+- Nuevo endpoint `GET /domicilio/pagador/{facultadId}/{personaId}/{documentoId}/{lectivoId}` para obtener domicilio con información del pagador
+- Nuevo campo `emailPagador` en el modelo `Domicilio`
+- Constructor con inyección de dependencias en `DocumentoController` y `DomicilioController`
+- Renombrado `IDocumentoRepository` a `DocumentoRepository` siguiendo convenciones de Spring
+- Renombrado `IDomicilioRepository` a `DomicilioRepository` siguiendo convenciones de Spring
 
 ### Changed
-- Actualizado springdoc-openapi-starter-webmvc-ui a versión 2.8.8
-- Modificado endpoint DELETE `/baja/{tipoChequeraId}` a `/baja/{tipoChequeraId}/{alternativaId}`
-- Modificado endpoint GET `/tipoChequera/{tipoChequeraId}` a `/unique/{tipoChequeraId}/{alternativaId}`
-- Actualizada restricción única en TipoChequeraMercadoPagoCreditCard para incluir alternativaId
-- Actualizado manejo de excepciones para incluir alternativaId
-- Actualizado openpdf de 2.0.3 a 2.0.4
-- Mejorado manejo de nulos en `InscripcionFacultadConsumer` usando `Objects.requireNonNull`
-- Actualizado `TipoChequeraService` para incluir `emailCopia` en la creación
+- Mejorada la inyección de dependencias en `DomicilioService` usando constructor
+- Optimizado el manejo de strings vacíos usando `isEmpty()` en lugar de `equals("")`
+- Actualizado el manejo de nulos en `DomicilioService`
+- Mejorada la estructura de los modelos eliminando espacios innecesarios
+- Actualizada la documentación en README.md
+
+### Removed
+- Eliminada la anotación `@Autowired` en favor de inyección por constructor
+- Eliminados archivos de configuración obsoletos:
+  - `TransactionConfig.java`
+  - `RabbitMQConfig.java`
+  - `JpaConfig.java`
+- Eliminados modelos obsoletos:
+  - `ChequeraMessageDto.kt`
+  - `CuotaPeriodo.java`
+  - `ChequeraCuotaDto.java`
+- Eliminado repositorio obsoleto:
+  - `IChequeraPagoRepository.java`
 
 ## [1.0.0] - 2024-03-19
 
 ### Added
-- Nuevo endpoint `/legajo/facultad/{facultadId}` para obtener legajos por facultad
-- Nuevo endpoint `/chequera/cuotas/pagos/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` para obtener cuotas y pagos de chequera
-- Nuevo DTO `ChequeraCuotaPagosDto` para manejar cuotas con sus pagos asociados
-- Nuevo DTO `ChequeraPagoDto` para representar pagos individuales
-- Nuevo DTO `CuotaPeriodoDto` para manejar periodos de cuotas
-- Relación entre Legajo y Carrera
-- Método `findAllByFacultadId` en LegajoService
-- Método `findAllCuotaPagosByChequera` en ChequeraService
-- Método `findCuotaPeriodosByLectivoId` en ChequeraCuotaRepository
+- Nuevo endpoint `GET /inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}` para obtener información completa de inscripción
+- Nuevos DTOs: `InscripcionDto`, `InscripcionFullDto`, `InscripcionPagoDto`
+- Nuevo campo `emailCopia` en el modelo `TipoChequera`
+- Actualización de openpdf de 2.0.3 a 2.0.4
+- Mejora en el manejo de nulos usando `Objects.requireNonNull`
+- Actualización de `TipoChequeraService` para incluir `emailCopia` en la creación
+- Documentación actualizada en README y CHANGELOG
+- Corrección de versión de Java en README (17 a 21)
 
 ### Changed
-- Actualización de Java 17 a Java 21
-- Refactorización de nombres de DTOs para seguir la convención de nomenclatura:
-  - `ChequeraSerieDTO` -> `ChequeraSerieDto`
-  - `ChequeraCuotaDTO` -> `ChequeraCuotaDto`
-  - `ArancelTipoDTO` -> `ArancelTipoDto`
-  - `DomicilioDTO` -> `DomicilioDto`
-  - `FacultadDTO` -> `FacultadDto`
-  - `GeograficaDTO` -> `GeograficaDto`
-  - `LectivoDTO` -> `LectivoDto`
-  - `PersonaDTO` -> `PersonaDto`
-  - `ProductoDTO` -> `ProductoDto`
-  - `TipoChequeraDTO` -> `TipoChequeraDto`
-- Renombrado de interfaces de repositorios:
-  - `IChequeraCuotaRepository` -> `ChequeraCuotaRepository`
-  - `ILegajoRepository` -> `LegajoRepository`
-- Mejorado el manejo de nulls usando `Objects.requireNonNull()`
-- Actualizado el formateo del código para mayor legibilidad
-- Eliminados imports no utilizados
+- Mejorado el manejo de nulos en `InscripcionFacultadConsumer`
+- Actualizada la documentación con nuevos endpoints y modelos
+- Actualizada la estructura del proyecto
 
-### Removed
-- Eliminación de RabbitMQ y colas de mensajes
-- Eliminación de configuración JPA redundante
-- Eliminación de dependencias no utilizadas:
-  - disruptor
-  - spring-boot-starter-amqp
-  - spring-tx
+## [0.2.0] - 2024-03-11
 
-### Fixed
-- Problemas de nomenclatura inconsistente en DTOs
-- Manejo de valores nulos en fechas y otros campos
-- Formateo inconsistente en el código
+### Added
+- Soporte para tarjetas de crédito alternativas en Mercado Pago
+- Nuevo endpoint para listar tarjetas de crédito activas
+- Nuevo endpoint para crear/actualizar tarjetas
+- Nuevo endpoint para dar de baja tarjetas
+- Nuevo endpoint para obtener tarjeta única
 
-### Security
-- Mejorado el manejo de datos sensibles en DTOs
-- Implementado mejor manejo de nulls para prevenir NPEs
-
-### Documentation
-- Actualizado README con nueva estructura y convenciones
-- Documentados nuevos endpoints y funcionalidades
-- Actualizada la documentación de la API
+### Changed
+- Mejorada la gestión de tarjetas de crédito
+- Actualizada la documentación de endpoints
+- Actualizada la estructura del proyecto
 
 ## [0.1.0] - 2024-01-01
 ### Added
