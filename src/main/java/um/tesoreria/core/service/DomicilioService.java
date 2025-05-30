@@ -107,7 +107,7 @@ public class DomicilioService {
                     newDomicilio.getDpto(), newDomicilio.getTelefono(), newDomicilio.getMovil(),
                     newDomicilio.getObservaciones(), newDomicilio.getCodigoPostal(), newDomicilio.getFacultadId(),
                     newDomicilio.getProvinciaId(), newDomicilio.getLocalidadId(), newDomicilio.getEmailPersonal(),
-                    newDomicilio.getEmailInstitucional(), newDomicilio.getLaboral(), null);
+                    newDomicilio.getEmailInstitucional(), newDomicilio.getLaboral(), "");
 			try {
 				log.debug("Domicilio previo update -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
 			} catch (JsonProcessingException e) {
