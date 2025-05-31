@@ -1,7 +1,7 @@
 # Servicio Core de Tesorería
 
 ## Descripción
-Servicio core para la gestión de tesorería, implementado con Spring Boot 3.0.1.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.0.
 
 ## Características
 - Gestión de chequeras y pagos
@@ -13,9 +13,20 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.0.1
 - Soporte para Docker
 
 ## Requisitos
-- Java 21
+- Java 21 (verificado en pom.xml)
 - Maven 3.8+
 - Docker (opcional)
+
+## Versiones de Dependencias Principales (verificado en pom.xml)
+- Spring Boot: 3.5.0
+- Spring Cloud: 2025.0.0
+- Kotlin: 2.1.21
+- MySQL Connector: 9.3.0
+- SpringDoc OpenAPI: 2.8.8
+- Apache POI: 5.4.1
+- OpenPDF: 2.0.5
+- ModelMapper: 3.2.3
+- Guava: 33.4.8-jre
 
 ## Instalación
 ```bash
