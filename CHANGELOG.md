@@ -5,33 +5,32 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased] - Cambios verificables del git log
 
 ### Added
-- Nuevo endpoint `GET /domicilio/pagador/{facultadId}/{personaId}/{documentoId}/{lectivoId}` para obtener domicilio con información del pagador
-- Nuevo campo `emailPagador` en el modelo `Domicilio`
-- Constructor con inyección de dependencias en `DocumentoController` y `DomicilioController`
-- Renombrado `IDocumentoRepository` a `DocumentoRepository` siguiendo convenciones de Spring
-- Renombrado `IDomicilioRepository` a `DomicilioRepository` siguiendo convenciones de Spring
+- Nuevo endpoint `GET /domicilio/pagador/{facultadId}/{personaId}/{documentoId}/{lectivoId}` para obtener domicilio con información del pagador (commit: ab3bc99)
+- Nuevo campo `emailPagador` en el modelo `Domicilio` (commit: 62acf40)
+- Constructor con inyección de dependencias en `DocumentoController` y `DomicilioController` (commit: 42b667c)
+- Renombrado `IDocumentoRepository` a `DocumentoRepository` siguiendo convenciones de Spring (commit: 42b667c)
+- Renombrado `IDomicilioRepository` a `DomicilioRepository` siguiendo convenciones de Spring (commit: 42b667c)
+- Nuevo endpoint para obtener información completa de inscripciones (commit: 833a92b)
 
 ### Changed
-- Mejorada la inyección de dependencias en `DomicilioService` usando constructor
-- Optimizado el manejo de strings vacíos usando `isEmpty()` en lugar de `equals("")`
-- Actualizado el manejo de nulos en `DomicilioService`
-- Mejorada la estructura de los modelos eliminando espacios innecesarios
-- Actualizada la documentación en README.md
+- Mejorada la inyección de dependencias en `DomicilioService` usando constructor (commit: a8b9de1)
+- Optimizado el manejo de strings vacíos usando `isEmpty()` en lugar de `equals("")` (commit: 42b667c)
+- Actualizado el manejo de nulos en `DomicilioService` (commit: 833a92b)
+- Mejorada la estructura de los modelos eliminando espacios innecesarios (commit: 42b667c)
 
 ### Removed
-- Eliminada la anotación `@Autowired` en favor de inyección por constructor
-- Eliminados archivos de configuración obsoletos:
+- Eliminados archivos de configuración obsoletos (commit: 42b667c):
   - `TransactionConfig.java`
   - `RabbitMQConfig.java`
   - `JpaConfig.java`
-- Eliminados modelos obsoletos:
+- Eliminados modelos obsoletos (commit: 42b667c):
   - `ChequeraMessageDto.kt`
   - `CuotaPeriodo.java`
   - `ChequeraCuotaDto.java`
-- Eliminado repositorio obsoleto:
+- Eliminado repositorio obsoleto (commit: 42b667c):
   - `IChequeraPagoRepository.java`
 
 ## [1.0.0] - 2024-03-19
@@ -72,32 +71,28 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Integración con base de datos
 - Endpoints básicos para gestión de chequeras
 
-## [0.0.1-SNAPSHOT] - 2022-12-01
+## [0.0.1-SNAPSHOT] - Versión actual según pom.xml
 
-### Added
-- Implementación inicial del servicio core de tesorería
-- Configuración básica de Spring Boot 3.0.1
-- Integración con base de datos
-- Endpoints básicos para gestión de chequeras
-- Documentación con Swagger
-- Configuración de CI/CD con GitHub Actions
-- Soporte para Docker
+### Nota
+La versión actual del proyecto es 0.0.1-SNAPSHOT según el pom.xml. Las versiones anteriores documentadas en este CHANGELOG no pueden ser verificadas directamente del código fuente y deberían ser revisadas.
 
-### Changed
-- Actualización de Spring Boot a 3.0.1
-- Mejoras en el manejo de asignación de costos
-- Optimización de asientos contables
+### Dependencias Principales (verificado en pom.xml)
+- Spring Boot: 3.5.0
+- Spring Cloud: 2025.0.0
+- Kotlin: 2.1.21
+- Java: 21
+- MySQL Connector: 9.3.0
+- SpringDoc OpenAPI: 2.8.8
+- Apache POI: 5.4.1
+- OpenPDF: 2.0.5
+- ModelMapper: 3.2.3
+- Guava: 33.4.8-jre
 
-### Fixed
-- Correcciones en asignación de costos
-- Mejoras en el manejo de asientos contables
-- Optimización de consultas y rendimiento
-
-### Deprecated
-- N/A (versión inicial)
-
-### Removed
-- N/A (versión inicial)
-
-### Security
-- N/A (versión inicial) 
+### Características Implementadas (verificado en código)
+- Gestión de chequeras y pagos
+- Integración con Mercado Pago para tarjetas de crédito
+- Gestión de inscripciones y personas
+- Gestión de domicilios y documentos
+- Documentación automática con OpenAPI/Swagger
+- CI/CD con GitHub Actions
+- Soporte para Docker 

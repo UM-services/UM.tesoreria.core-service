@@ -155,23 +155,12 @@ public class DomicilioService {
         for (Facultad facultad : facultadService.findFacultades()) {
             if (!facultad.getApiserver().isEmpty()) {
                 Domicilio domicilio = null;
-                if (facultad.getFacultadId() != 15) {
-                    domicilio = domicilioFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
-                            personaId, documentoId);
-                    try {
-                        log.debug("Domicilio -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
-                    } catch (JsonProcessingException e) {
-                        log.debug("Domicilio no se pudo mostrar");
-                    }
-                } else {
-                    domicilio = domicilioFacultadConsumer.findPagadorByUnique(facultad.getApiserver(),
-                            facultad.getApiport(), personaId, documentoId);
-                    domicilio.setEmailInstitucional("");
-                    try {
-                        log.debug("Domicilio ETEC -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
-                    } catch (JsonProcessingException e) {
-                        log.debug("Domicilio ETEC no se pudo mostrar");
-                    }
+                domicilio = domicilioFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
+                        personaId, documentoId);
+                try {
+                    log.debug("Domicilio -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
+                } catch (JsonProcessingException e) {
+                    log.debug("Domicilio no se pudo mostrar");
                 }
                 domicilio.setPersonaId(personaId);
                 domicilio.setDocumentoId(documentoId);
