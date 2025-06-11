@@ -291,6 +291,8 @@ public class SheetService {
         this.setCellString(row, 13, "Curso", styleBold);
         this.setCellString(row, 14, "Personal", styleBold);
         this.setCellString(row, 15, "Institucional", styleBold);
+        this.setCellString(row, 16, "Vencimiento 1", styleBold);
+        this.setCellString(row, 17, "Importe 1", styleBold);
 
         Map<String, CarreraKey> carreras = carreraKeyService.findAllByFacultadId(facultadId).stream().collect(Collectors.toMap(CarreraKey::getUnified, carrera -> carrera));
         Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream().collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
@@ -378,7 +380,9 @@ public class SheetService {
                     this.setCellString(row, 7, tipoChequera.getNombre(), styleNormal);
                     assert arancelTipo != null;
                     this.setCellString(row, 8, arancelTipo.getDescripcion(), styleNormal);
-                    this.setCellOffsetDateTime(row, 9, Objects.requireNonNull(chequeraSerie.getFecha()).withOffsetSameInstant(ZoneOffset.UTC), styleDate);
+                    if (chequeraSerie.getFecha() != null) {
+                        this.setCellOffsetDateTime(row, 9, Objects.requireNonNull(chequeraSerie.getFecha()).withOffsetSameInstant(ZoneOffset.UTC), styleDate);
+                    }
                     this.setCellBigDecimal(row, 10, deudaChequera.getDeuda(), styleNormal);
                     this.setCellInteger(row, 11, deudaChequera.getCuotas(), styleNormal);
                     if (carrera != null) {
@@ -389,6 +393,10 @@ public class SheetService {
                         this.setCellString(row, 14, domicilio.getEmailPersonal(), styleNormal);
                         this.setCellString(row, 15, domicilio.getEmailInstitucional(), styleNormal);
                     }
+                    if (deudaChequera.getVencimiento1() != null) {
+                        this.setCellOffsetDateTime(row, 16, deudaChequera.getVencimiento1().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
+                    }
+                    this.setCellBigDecimal(row, 17, deudaChequera.getImporte1(), styleNormal);
                 }
             }
         }
