@@ -9,6 +9,9 @@ import java.text.DecimalFormat;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -162,11 +165,11 @@ public class ChequeraCuotaService {
         final BigDecimal MULTIPLICADOR = new BigDecimal(49);
         
         return chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null, this).stream()
-                .map(ChequeraCuotaDeuda::getChequeraCuota)
+                .map(ChequeraCuotaDeuda::getChequeraCuota).filter(Objects::nonNull)
                 .filter(cuota -> {
                     // Extraer validaciones complejas a variables para mejor legibilidad
-                    boolean vencimientosInvalidos = cuota.getVencimiento1().isAfter(cuota.getVencimiento2()) ||
-                            cuota.getVencimiento2().isAfter(cuota.getVencimiento3());
+                    boolean vencimientosInvalidos = Objects.requireNonNull(cuota.getVencimiento1()).isAfter(cuota.getVencimiento2()) ||
+                            Objects.requireNonNull(cuota.getVencimiento2()).isAfter(cuota.getVencimiento3());
                             
                     boolean importesInvalidos = cuota.getImporte1().compareTo(cuota.getImporte2()) > 0 ||
                             cuota.getImporte2().compareTo(cuota.getImporte3()) > 0;
@@ -262,56 +265,133 @@ public class ChequeraCuotaService {
 
     private DeudaChequera createDefaultDeudaChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         return new DeudaChequera(
-                BigDecimal.ZERO, 0, facultadId, "", tipoChequeraId, "", 
-                chequeraSerieId, 0, "", 1, BigDecimal.ZERO, 
-                new BigDecimal(1000000), 1000, null
+                BigDecimal.ZERO,
+                0,
+                facultadId,
+                "", tipoChequeraId,
+                "",
+                chequeraSerieId,
+                0,
+                "",
+                1,
+                BigDecimal.ZERO,
+                new BigDecimal(1000000),
+                1000,
+                null,
+                OffsetDateTime.now(),
+                BigDecimal.ZERO
         );
     }
 
     public DeudaChequera calculateDeuda(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+        // Validación temprana de parámetros para evitar procesamiento innecesario
+        if (facultadId == null || tipoChequeraId == null || chequeraSerieId == null) {
+            log.warn("Parámetros inválidos para calculateDeuda: facultadId={}, tipoChequeraId={}, chequeraSerieId={}", 
+                    facultadId, tipoChequeraId, chequeraSerieId);
+            return createDefaultDeudaChequera(facultadId, tipoChequeraId, chequeraSerieId);
+        }
+
         ChequeraSerie serie;
         try {
             serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         } catch (ChequeraSerieException e) {
+            log.debug("Serie no encontrada para calculateDeuda: facultadId={}, tipoChequeraId={}, chequeraSerieId={}", 
+                    facultadId, tipoChequeraId, chequeraSerieId);
             return createDefaultDeudaChequera(facultadId, tipoChequeraId, chequeraSerieId);
         }
 
-        Map<String, ChequeraPago> pagos = chequeraPagoService
-                .findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, this)
-                .stream()
-                .collect(Collectors.toMap(ChequeraPago::getCuotaKey, Function.identity(), (pago, replacement) -> pago));
-
-        var deudaInfo = repository
-                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndPagadoAndVencimiento1LessThanEqualAndImporte1GreaterThan(
-                        facultadId, tipoChequeraId, chequeraSerieId, serie.getAlternativaId(), 
-                        (byte) 0, (byte) 0, Tool.hourAbsoluteArgentina(), BigDecimal.ZERO)
-                .stream()
-                .map(cuota -> {
-                    BigDecimal deudaCuota = cuota.getImporte1()
-                            .subtract(pagos.getOrDefault(cuota.cuotaKey(), new ChequeraPago()).getImporte())
-                            .max(BigDecimal.ZERO)
-                            .setScale(2, RoundingMode.HALF_UP);
-                    return new AbstractMap.SimpleEntry<>(deudaCuota, deudaCuota.compareTo(BigDecimal.ZERO) > 0 ? 1 : 0);
-                })
-                .reduce(
-                        new AbstractMap.SimpleEntry<>(BigDecimal.ZERO, 0),
-                        (acc, curr) -> new AbstractMap.SimpleEntry<>(
-                                acc.getKey().add(curr.getKey()),
-                                acc.getValue() + curr.getValue()
-                        )
-                );
-
-        BigDecimal total = chequeraTotalService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId)
-                .stream()
-                .map(ChequeraTotal::getTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        return new DeudaChequera(
-                serie.getPersonaId(), serie.getDocumentoId(), facultadId, "", 
-                tipoChequeraId, "", chequeraSerieId, serie.getLectivoId(), "", 
-                serie.getAlternativaId(), total, deudaInfo.getKey(), 
-                deudaInfo.getValue(), serie.getChequeraId()
+        // Optimización con computación paralela: ejecutar consultas en paralelo
+        CompletableFuture<Map<String, BigDecimal>> pagosFuture = CompletableFuture.supplyAsync(() ->
+                chequeraPagoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, this)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                ChequeraPago::getCuotaKey,
+                                ChequeraPago::getImporte,
+                                (existing, replacement) -> existing
+                        ))
         );
+
+        CompletableFuture<List<ChequeraCuota>> cuotasFuture = CompletableFuture.supplyAsync(() ->
+                repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndPagadoAndVencimiento1LessThanEqualAndImporte1GreaterThan(
+                        facultadId, tipoChequeraId, chequeraSerieId, serie.getAlternativaId(),
+                        (byte) 0, (byte) 0, Tool.hourAbsoluteArgentina(), BigDecimal.ZERO)
+        );
+
+        CompletableFuture<Optional<ChequeraCuota>> cuota1Future = CompletableFuture.supplyAsync(() -> {
+            try {
+                return repository.findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndCuotaIdOrderByProductoIdDesc(
+                        facultadId, tipoChequeraId, chequeraSerieId, serie.getAlternativaId(), 1);
+            } catch (ChequeraCuotaException e) {
+                log.debug("Sin Cuota 1 para serie: {}", chequeraSerieId);
+                return Optional.empty();
+            }
+        });
+
+        CompletableFuture<BigDecimal> totalFuture = CompletableFuture.supplyAsync(() ->
+                chequeraTotalService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId)
+                        .stream()
+                        .map(ChequeraTotal::getTotal)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add)
+        );
+
+        try {
+            // Esperar a que todas las consultas se completen en paralelo
+            Map<String, BigDecimal> pagosMap = pagosFuture.get();
+            List<ChequeraCuota> cuotas = cuotasFuture.get();
+            Optional<ChequeraCuota> cuota1 = cuota1Future.get();
+            BigDecimal total = totalFuture.get();
+
+            // Procesar cuota1
+            OffsetDateTime vencimiento1Cuota1 = null;
+            BigDecimal importa1Cuota1 = BigDecimal.ZERO;
+            if (cuota1.isPresent()) {
+                vencimiento1Cuota1 = cuota1.get().getVencimiento1();
+                importa1Cuota1 = cuota1.get().getImporte1();
+            }
+
+            // Procesar cuotas deudoras de forma más eficiente
+            var deudaInfo = cuotas.stream()
+                    .map(cuota -> {
+                        BigDecimal pagoAplicado = pagosMap.getOrDefault(cuota.cuotaKey(), BigDecimal.ZERO);
+                        BigDecimal deudaCuota = cuota.getImporte1()
+                                .subtract(pagoAplicado)
+                                .max(BigDecimal.ZERO)
+                                .setScale(2, RoundingMode.HALF_UP);
+                        return new AbstractMap.SimpleEntry<>(deudaCuota, deudaCuota.compareTo(BigDecimal.ZERO) > 0 ? 1 : 0);
+                    })
+                    .reduce(
+                            new AbstractMap.SimpleEntry<>(BigDecimal.ZERO, 0),
+                            (acc, curr) -> new AbstractMap.SimpleEntry<>(
+                                    acc.getKey().add(curr.getKey()),
+                                    acc.getValue() + curr.getValue()
+                            )
+                    );
+
+            return new DeudaChequera(
+                    serie.getPersonaId(),
+                    serie.getDocumentoId(),
+                    facultadId,
+                    "",
+                    tipoChequeraId,
+                    "",
+                    chequeraSerieId,
+                    serie.getLectivoId(),
+                    "",
+                    serie.getAlternativaId(),
+                    total,
+                    deudaInfo.getKey(),
+                    deudaInfo.getValue(),
+                    serie.getChequeraId(),
+                    vencimiento1Cuota1,
+                    importa1Cuota1
+            );
+
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("Error al procesar consultas paralelas para calculateDeuda: facultadId={}, tipoChequeraId={}, chequeraSerieId={}", 
+                    facultadId, tipoChequeraId, chequeraSerieId, e);
+            Thread.currentThread().interrupt();
+            return createDefaultDeudaChequera(facultadId, tipoChequeraId, chequeraSerieId);
+        }
     }
 
     public DeudaChequera calculateDeudaExtended(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
@@ -319,14 +399,41 @@ public class ChequeraCuotaService {
         try {
             serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         } catch (ChequeraSerieException e) {
-            return new DeudaChequera(BigDecimal.ZERO, 0, facultadId, "", tipoChequeraId, "", chequeraSerieId, 0, "", 1,
-                    BigDecimal.ZERO, new BigDecimal(1000000), 1000, null);
+            return new DeudaChequera(
+                    BigDecimal.ZERO,
+                    0,
+                    facultadId,
+                    "",
+                    tipoChequeraId,
+                    "",
+                    chequeraSerieId,
+                    0,
+                    "",
+                    1,
+                    BigDecimal.ZERO,
+                    new BigDecimal(1000000),
+                    1000,
+                    null,
+                    OffsetDateTime.now(),
+                    BigDecimal.ZERO
+            );
         }
         Map<String, ChequeraPago> pagos = chequeraPagoService
                 .findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, this).stream()
                 .collect(Collectors.toMap(ChequeraPago::getCuotaKey, Function.identity(), (pago, replacement) -> pago));
         BigDecimal deuda = BigDecimal.ZERO;
         Integer cantidad = 0;
+        OffsetDateTime vencimiento1Cuota1 = null;
+        BigDecimal importa1Cuota1 = BigDecimal.ZERO;
+        try {
+            var cuota1 = repository.findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndCuotaIdOrderByProductoIdDesc(facultadId, tipoChequeraId, chequeraSerieId, serie.getAlternativaId(), 1);
+            if (cuota1.isPresent()) {
+                vencimiento1Cuota1 = cuota1.get().getVencimiento1();
+                importa1Cuota1 = cuota1.get().getImporte1();
+            }
+        } catch (ChequeraCuotaException e) {
+            log.debug("Sin Cuota 1");
+        }
         for (ChequeraCuota cuota : repository
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndPagadoAndVencimiento1LessThanEqualAndImporte1GreaterThan(
                         facultadId, tipoChequeraId, chequeraSerieId, serie.getAlternativaId(), (byte) 0, (byte) 0,
@@ -364,18 +471,33 @@ public class ChequeraCuotaService {
         } catch (LectivoException e) {
             lectivo = new Lectivo();
         }
-        return new DeudaChequera(serie.getPersonaId(), serie.getDocumentoId(), facultadId, facultad.getNombre(),
-                tipoChequeraId, tipo.getNombre(), chequeraSerieId, serie.getLectivoId(), lectivo.getNombre(),
-                serie.getAlternativaId(), total, deuda, cantidad, serie.getChequeraId());
+        return new DeudaChequera(
+                serie.getPersonaId(),
+                serie.getDocumentoId(),
+                facultadId,
+                facultad.getNombre(),
+                tipoChequeraId,
+                tipo.getNombre(),
+                chequeraSerieId,
+                serie.getLectivoId(),
+                lectivo.getNombre(),
+                serie.getAlternativaId(),
+                total,
+                deuda,
+                cantidad,
+                serie.getChequeraId(),
+                vencimiento1Cuota1,
+                importa1Cuota1
+        );
     }
 
     public String calculateCodigoBarras(ChequeraCuota chequeraCuota) {
         String codigoBarras = "";
 
-        if (chequeraCuota.getVencimiento3().isBefore(chequeraCuota.getVencimiento2())) {
+        if (Objects.requireNonNull(chequeraCuota.getVencimiento3()).isBefore(chequeraCuota.getVencimiento2())) {
             chequeraCuota.setVencimiento2(chequeraCuota.getVencimiento3());
         }
-        if (chequeraCuota.getVencimiento2().isBefore(chequeraCuota.getVencimiento1())) {
+        if (Objects.requireNonNull(chequeraCuota.getVencimiento2()).isBefore(chequeraCuota.getVencimiento1())) {
             chequeraCuota.setVencimiento1(chequeraCuota.getVencimiento2());
         }
         // Codigo Gire
@@ -400,7 +522,7 @@ public class ChequeraCuotaService {
         codigoBarras += new DecimalFormat("00").format(chequeraCuota.getCuotaId());
         // 1er Importe
         codigoBarras += new DecimalFormat("0000000").format(chequeraCuota.getImporte1());
-        OffsetDateTime vencimiento1 = chequeraCuota.getVencimiento1().plusHours(3);
+        OffsetDateTime vencimiento1 = Objects.requireNonNull(chequeraCuota.getVencimiento1()).plusHours(3);
         OffsetDateTime vencimiento2 = chequeraCuota.getVencimiento2().plusHours(3);
         OffsetDateTime vencimiento3 = chequeraCuota.getVencimiento3().plusHours(3);
         // Dia 1er Vencimiento

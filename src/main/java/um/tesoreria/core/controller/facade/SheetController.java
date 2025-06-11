@@ -26,7 +26,7 @@ import static um.tesoreria.core.util.Tool.generateFile;
  * @author daniel
  */
 @RestController
-@RequestMapping("/sheet")
+@RequestMapping({"/sheet", "/api/tesoreria/core/sheet"})
 public class SheetController {
 
     private final SheetService service;

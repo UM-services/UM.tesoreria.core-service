@@ -3,9 +3,12 @@
  */
 package um.tesoreria.core.model.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +24,7 @@ public class DeudaChequera implements Serializable {
 	/**
 	* 
 	*/
+	@Serial
 	private static final long serialVersionUID = 8285161457827104236L;
 
 	private BigDecimal personaId;
@@ -37,5 +41,10 @@ public class DeudaChequera implements Serializable {
 	private BigDecimal deuda;
 	private Integer cuotas;
 	private Long chequeraId;
+
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	private OffsetDateTime vencimiento1;
+
+	private BigDecimal importe1;
 
 }
