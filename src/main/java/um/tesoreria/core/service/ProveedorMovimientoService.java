@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import um.tesoreria.core.exception.ProveedorMovimientoException;
 import um.tesoreria.core.kotlin.model.Comprobante;
-import um.tesoreria.core.repository.IProveedorMovimientoRepository;
+import um.tesoreria.core.repository.ProveedorMovimientoRepository;
 import um.tesoreria.core.kotlin.model.ProveedorArticulo;
 import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
 
@@ -33,11 +32,11 @@ public class ProveedorMovimientoService {
 
     private final Integer TT_PAGOS = 4;
 
-    private final IProveedorMovimientoRepository repository;
+    private final ProveedorMovimientoRepository repository;
     private final ComprobanteService comprobanteService;
     private final ProveedorArticuloService proveedorArticuloService;
 
-    public ProveedorMovimientoService(IProveedorMovimientoRepository repository, ComprobanteService comprobanteService, ProveedorArticuloService proveedorArticuloService) {
+    public ProveedorMovimientoService(ProveedorMovimientoRepository repository, ComprobanteService comprobanteService, ProveedorArticuloService proveedorArticuloService) {
         this.repository = repository;
         this.comprobanteService = comprobanteService;
         this.proveedorArticuloService = proveedorArticuloService;

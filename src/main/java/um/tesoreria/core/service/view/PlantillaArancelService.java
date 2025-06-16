@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.kotlin.model.ArancelPorcentaje;
 import um.tesoreria.core.model.LectivoCuota;
 import um.tesoreria.core.model.dto.PlantillaArancel;
-import um.tesoreria.core.repository.IArancelPorcentajeRepository;
-import um.tesoreria.core.repository.ILectivoCuotaRepository;
+import um.tesoreria.core.repository.ArancelPorcentajeRepository;
+import um.tesoreria.core.repository.LectivoCuotaRepository;
 
 /**
  * @author daniel
@@ -24,10 +24,10 @@ import um.tesoreria.core.repository.ILectivoCuotaRepository;
 public class PlantillaArancelService {
 
 	@Autowired
-	private ILectivoCuotaRepository lectivoCuotaRepository;
+	private LectivoCuotaRepository lectivoCuotaRepository;
 
 	@Autowired
-	private IArancelPorcentajeRepository arancelPorcentajeRepository;
+	private ArancelPorcentajeRepository arancelPorcentajeRepository;
 
 	public List<PlantillaArancel> findAllByPlantilla(Integer facultadId, Integer lectivoId, Integer tipoChequeraId,
 			Integer arancelTipoId) {

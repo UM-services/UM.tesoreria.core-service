@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model.view;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -36,6 +37,7 @@ public class ProveedorSearch extends Auditable implements Serializable {
 	/**
 	* 
 	*/
+	@Serial
 	private static final long serialVersionUID = 1134357311262824693L;
 
 	@Id

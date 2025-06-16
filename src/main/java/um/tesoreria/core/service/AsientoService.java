@@ -12,7 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.Asiento;
-import um.tesoreria.core.repository.IAsientoRepository;
+import um.tesoreria.core.repository.AsientoRepository;
 
 /**
  * @author daniel
@@ -22,9 +22,9 @@ import um.tesoreria.core.repository.IAsientoRepository;
 @Slf4j
 public class AsientoService {
 
-	private final IAsientoRepository repository;
+	private final AsientoRepository repository;
 
-	public AsientoService(IAsientoRepository repository) {
+	public AsientoService(AsientoRepository repository) {
 		this.repository = repository;
 	}
 

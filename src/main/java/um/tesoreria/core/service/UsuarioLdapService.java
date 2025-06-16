@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.UsuarioLdapException;
 import um.tesoreria.core.model.UsuarioLdap;
-import um.tesoreria.core.repository.IUsuarioLdapRepository;
+import um.tesoreria.core.repository.UsuarioLdapRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.IUsuarioLdapRepository;
 public class UsuarioLdapService {
 	
 	@Autowired
-	private IUsuarioLdapRepository repository;
+	private UsuarioLdapRepository repository;
 
 	public UsuarioLdap findByDocumento(BigDecimal documento) {
 		return repository.findFirstByDocumento(documento).orElseThrow(() -> new UsuarioLdapException(documento));

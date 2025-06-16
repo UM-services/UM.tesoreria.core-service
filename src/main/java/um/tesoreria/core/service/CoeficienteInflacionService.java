@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CoeficienteInflacionException;
 import um.tesoreria.core.model.CoeficienteInflacion;
-import um.tesoreria.core.repository.ICoeficienteInflacionRepository;
+import um.tesoreria.core.repository.CoeficienteInflacionRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.ICoeficienteInflacionRepository;
 public class CoeficienteInflacionService {
 
 	@Autowired
-	private ICoeficienteInflacionRepository repository;
+	private CoeficienteInflacionRepository repository;
 
 	public List<CoeficienteInflacion> findAll() {
 		return repository.findAll();

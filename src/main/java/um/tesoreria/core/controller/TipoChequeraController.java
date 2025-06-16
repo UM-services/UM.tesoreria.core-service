@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.exception.TipoChequeraException;
+import um.tesoreria.core.model.view.TipoChequeraSearch;
 import um.tesoreria.core.service.TipoChequeraService;
 import um.tesoreria.core.kotlin.model.TipoChequera;
 
@@ -38,6 +39,11 @@ public class TipoChequeraController {
 	@GetMapping("/")
 	public ResponseEntity<List<TipoChequera>> findAll() {
 		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+	}
+
+	@PostMapping("/search")
+	public ResponseEntity<List<TipoChequeraSearch>> findAllByStrings(@RequestBody List<String> conditions) {
+		return ResponseEntity.ok(service.findAllByStrings(conditions));
 	}
 
 	@GetMapping("/asignable/{facultadId}/{lectivoId}/{geograficaId}/{claseChequeraId}")

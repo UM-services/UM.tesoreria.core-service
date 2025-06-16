@@ -5,18 +5,17 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.ChequeraFacturacionElectronicaException;
 import um.tesoreria.core.kotlin.model.ChequeraFacturacionElectronica;
-import um.tesoreria.core.repository.IChequeraFacturacionElectronicaRepository;
+import um.tesoreria.core.repository.ChequeraFacturacionElectronicaRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 public class ChequeraFacturacionElectronicaService {
 
-    private final IChequeraFacturacionElectronicaRepository repository;
+    private final ChequeraFacturacionElectronicaRepository repository;
 
-    public ChequeraFacturacionElectronicaService(IChequeraFacturacionElectronicaRepository repository) {
+    public ChequeraFacturacionElectronicaService(ChequeraFacturacionElectronicaRepository repository) {
         this.repository = repository;
     }
 

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CarreraChequeraException;
 import um.tesoreria.core.kotlin.model.CarreraChequera;
-import um.tesoreria.core.repository.ICarreraChequeraRepository;
+import um.tesoreria.core.repository.CarreraChequeraRepository;
 
 /**
  * @author daniel
@@ -24,7 +24,7 @@ import um.tesoreria.core.repository.ICarreraChequeraRepository;
 public class CarreraChequeraService {
 
 	@Autowired
-	private ICarreraChequeraRepository repository;
+	private CarreraChequeraRepository repository;
 
 	public List<CarreraChequera> findAllByFacultadIdAndLectivoIdAndGeograficaIdAndClaseChequeraIdAndCurso(Integer facultadId,
 																										  Integer lectivoId, Integer geograficaId, Integer claseChequeraId, Integer curso) {

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.LegajoKey;
-import um.tesoreria.core.repository.view.ILegajoKeyRepository;
+import um.tesoreria.core.repository.view.LegajoKeyRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.view.ILegajoKeyRepository;
 public class LegajoKeyService {
 
 	@Autowired
-	private ILegajoKeyRepository repository;
+	private LegajoKeyRepository repository;
 
 	public List<LegajoKey> findAllByUnifiedIn(List<String> keys) {
 		return repository.findAllByUnifiedIn(keys);

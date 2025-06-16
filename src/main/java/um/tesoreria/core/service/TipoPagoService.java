@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.TipoPago;
-import um.tesoreria.core.repository.ITipoPagoRepository;
+import um.tesoreria.core.repository.TipoPagoRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.ITipoPagoRepository;
 public class TipoPagoService {
 	
 	@Autowired
-	private ITipoPagoRepository repository;
+	private TipoPagoRepository repository;
 
 	public List<TipoPago> findAll() {
 		return repository.findAll();

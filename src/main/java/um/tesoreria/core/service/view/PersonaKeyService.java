@@ -10,7 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.PersonaKey;
-import um.tesoreria.core.repository.view.IPersonaKeyRepository;
+import um.tesoreria.core.repository.view.PersonaKeyRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.view.IPersonaKeyRepository;
 public class PersonaKeyService {
 
 	@Autowired
-	private IPersonaKeyRepository repository;
+	private PersonaKeyRepository repository;
 
 	public List<PersonaKey> findAllByUnifiedIn(List<String> keys, Sort sort) {
 		return repository.findAllByUnifiedIn(keys, sort);

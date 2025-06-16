@@ -16,10 +16,10 @@ import um.tesoreria.core.kotlin.model.Facultad;
 import um.tesoreria.core.model.view.FacultadLectivo;
 import um.tesoreria.core.model.view.FacultadLectivoSede;
 import um.tesoreria.core.model.view.FacultadPersona;
-import um.tesoreria.core.repository.IFacultadRepository;
-import um.tesoreria.core.repository.view.IFacultadLectivoRepository;
-import um.tesoreria.core.repository.view.IFacultadLectivoSedeRepository;
-import um.tesoreria.core.repository.view.IFacultadPersonaRepository;
+import um.tesoreria.core.repository.FacultadRepository;
+import um.tesoreria.core.repository.view.FacultadLectivoRepository;
+import um.tesoreria.core.repository.view.FacultadLectivoSedeRepository;
+import um.tesoreria.core.repository.view.FacultadPersonaRepository;
 
 /**
  * @author daniel
@@ -29,16 +29,16 @@ import um.tesoreria.core.repository.view.IFacultadPersonaRepository;
 public class FacultadService {
 
 	@Autowired
-	private IFacultadRepository repository;
+	private FacultadRepository repository;
 
 	@Autowired
-	private IFacultadLectivoSedeRepository facultadlectivosederepository;
+	private FacultadLectivoSedeRepository facultadlectivosederepository;
 
 	@Autowired
-	private IFacultadPersonaRepository facultadpersonarepository;
+	private FacultadPersonaRepository facultadpersonarepository;
 
 	@Autowired
-	private IFacultadLectivoRepository facultadlectivorepository;
+	private FacultadLectivoRepository facultadlectivorepository;
 
 	public List<Facultad> findAll() {
 		return repository.findAll(Sort.by("facultadId").ascending());

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.DependenciaException;
 import um.tesoreria.core.kotlin.model.Dependencia;
-import um.tesoreria.core.repository.IDependenciaRepository;
+import um.tesoreria.core.repository.DependenciaRepository;
 
 /**
  * @author daniel
@@ -19,10 +19,10 @@ import um.tesoreria.core.repository.IDependenciaRepository;
 @Service
 public class DependenciaService {
 	
-	private final IDependenciaRepository repository;
+	private final DependenciaRepository repository;
 
 	@Autowired
-	public DependenciaService(IDependenciaRepository repository) {
+	public DependenciaService(DependenciaRepository repository) {
 		this.repository = repository;
 	}
 

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ProductoException;
 import um.tesoreria.core.kotlin.model.Producto;
 import um.tesoreria.core.model.view.ProductoTipoChequera;
-import um.tesoreria.core.repository.IProductoRepository;
-import um.tesoreria.core.repository.view.IProductoTipoChequeraRepository;
+import um.tesoreria.core.repository.ProductoRepository;
+import um.tesoreria.core.repository.view.ProductoTipoChequeraRepository;
 
 /**
  * @author daniel
@@ -22,10 +22,10 @@ import um.tesoreria.core.repository.view.IProductoTipoChequeraRepository;
 public class ProductoService {
 
 	@Autowired
-	private IProductoRepository repository;
+	private ProductoRepository repository;
 	
 	@Autowired
-	private IProductoTipoChequeraRepository productotipochequerarepository;
+	private ProductoTipoChequeraRepository productotipochequerarepository;
 
 	public List<Producto> findAll() {
 		return repository.findAll();

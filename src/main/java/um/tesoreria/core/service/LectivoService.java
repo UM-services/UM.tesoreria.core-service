@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.LectivoException;
 import um.tesoreria.core.kotlin.model.Lectivo;
-import um.tesoreria.core.repository.ILectivoRepository;
+import um.tesoreria.core.repository.LectivoRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LectivoService {
 
 	@Autowired
-	private ILectivoRepository repository;
+	private LectivoRepository repository;
 
 	@Autowired
 	private ChequeraSerieService chequeraserieservice;

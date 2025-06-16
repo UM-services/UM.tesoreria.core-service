@@ -11,8 +11,8 @@ import um.tesoreria.core.kotlin.model.Comprobante;
 import um.tesoreria.core.kotlin.model.Modulo;
 import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
 import um.tesoreria.core.kotlin.repository.ModuloRepository;
-import um.tesoreria.core.repository.IComprobanteRepository;
-import um.tesoreria.core.repository.IProveedorMovimientoRepository;
+import um.tesoreria.core.repository.ComprobanteRepository;
+import um.tesoreria.core.repository.ProveedorMovimientoRepository;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -23,10 +23,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProveedorMovimientoControllerTest {
 
     @Autowired
-    private IProveedorMovimientoRepository repository;
+    private ProveedorMovimientoRepository repository;
 
     @Autowired
-    private IComprobanteRepository comprobanteRepository;
+    private ComprobanteRepository comprobanteRepository;
 
     @Autowired
     private ModuloRepository moduloRepository;

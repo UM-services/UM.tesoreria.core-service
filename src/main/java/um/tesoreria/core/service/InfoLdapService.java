@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.InfoLdapException;
 import um.tesoreria.core.model.InfoLdap;
-import um.tesoreria.core.repository.IInfoLdapRepository;
+import um.tesoreria.core.repository.InfoLdapRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.IInfoLdapRepository;
 public class InfoLdapService {
 
 	@Autowired
-	private IInfoLdapRepository repository;
+	private InfoLdapRepository repository;
 
 	public InfoLdap findByPersonaId(BigDecimal personaId) {
 		return repository.findByPersonaId(personaId).orElseThrow(() -> new InfoLdapException(personaId));

@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import um.tesoreria.core.exception.PersonaSuspendidoException;
 import um.tesoreria.core.model.PersonaSuspendido;
-import um.tesoreria.core.repository.IPeriodoSuspendidoRepository;
+import um.tesoreria.core.repository.PeriodoSuspendidoRepository;
 
 /**
  * @author daniel
@@ -22,7 +22,7 @@ import um.tesoreria.core.repository.IPeriodoSuspendidoRepository;
 public class PersonaSuspendidoService {
 
 	@Autowired
-	private IPeriodoSuspendidoRepository repository;
+	private PeriodoSuspendidoRepository repository;
 
 	public List<PersonaSuspendido> findAllBySede(Integer facultadId, Integer geograficaId) {
 		return repository.findAllByFacultadIdAndGeograficaId(facultadId, geograficaId);

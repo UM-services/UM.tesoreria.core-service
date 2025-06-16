@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.EjercicioException;
 import um.tesoreria.core.kotlin.model.Ejercicio;
-import um.tesoreria.core.repository.IEjercicioRepository;
+import um.tesoreria.core.repository.EjercicioRepository;
 
 /**
  * @author daniel
@@ -24,9 +24,9 @@ import um.tesoreria.core.repository.IEjercicioRepository;
 @Slf4j
 public class EjercicioService {
 
-	private final IEjercicioRepository repository;
+	private final EjercicioRepository repository;
 
-	public EjercicioService(IEjercicioRepository repository) {
+	public EjercicioService(EjercicioRepository repository) {
 		this.repository = repository;
 	}
 

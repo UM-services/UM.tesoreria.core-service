@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ProveedorException;
 import um.tesoreria.core.model.Proveedor;
 import um.tesoreria.core.model.view.ProveedorSearch;
-import um.tesoreria.core.repository.IProveedorRepository;
+import um.tesoreria.core.repository.ProveedorRepository;
 import um.tesoreria.core.service.view.ProveedorSearchService;
 
 /**
@@ -22,10 +22,10 @@ import um.tesoreria.core.service.view.ProveedorSearchService;
 @Slf4j
 public class ProveedorService {
 
-	private final IProveedorRepository repository;
+	private final ProveedorRepository repository;
 	private final ProveedorSearchService proveedorSearchService;
 
-	public ProveedorService(IProveedorRepository repository,
+	public ProveedorService(ProveedorRepository repository,
 							ProveedorSearchService proveedorSearchService) {
 		this.repository = repository;
 		this.proveedorSearchService = proveedorSearchService;

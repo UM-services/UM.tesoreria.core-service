@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.ContratoExcluido;
-import um.tesoreria.core.repository.view.IContratoExcluidoRepository;
+import um.tesoreria.core.repository.view.ContratoExcluidoRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.view.IContratoExcluidoRepository;
 public class ContratoExcluidoService {
 
 	@Autowired
-	private IContratoExcluidoRepository repository;
+	private ContratoExcluidoRepository repository;
 
 	public List<ContratoExcluido> findAll() {
 		return repository.findAll();

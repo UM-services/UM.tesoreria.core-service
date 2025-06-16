@@ -1,5 +1,6 @@
 package um.tesoreria.core.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.TipoChequeraMercadoPagoCreditCardException;
 import um.tesoreria.core.model.TipoChequeraMercadoPagoCreditCard;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class TipoChequeraMercadoPagoCreditCardService {
 
     private final TipoChequeraMercadoPagoCreditCardRepository repository;
@@ -54,6 +56,21 @@ public class TipoChequeraMercadoPagoCreditCardService {
         } catch (TipoChequeraMercadoPagoCreditCardException e) {
             return "Sin Tipo Chequera";
         }
+    }
+
+    public String bajaId(UUID id) {
+        try {
+            var tipoChequeraMercadoPagoCreditCardOptional = repository.findById(id);
+            if (tipoChequeraMercadoPagoCreditCardOptional.isPresent()) {
+                var tipoChequeraMercadoPagoCreditCard = tipoChequeraMercadoPagoCreditCardOptional.get();
+                tipoChequeraMercadoPagoCreditCard.setActive((byte) 0);
+                tipoChequeraMercadoPagoCreditCard = repository.save(tipoChequeraMercadoPagoCreditCard);
+                return "Ok";
+            }
+        } catch (TipoChequeraMercadoPagoCreditCardException e) {
+            log.debug("Sin Registro -> {}", e.getMessage());
+        }
+        return "Sin Tipo Chequera";
     }
 
 }

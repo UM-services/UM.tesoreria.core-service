@@ -1,7 +1,7 @@
 package um.tesoreria.core.service;
 
 import um.tesoreria.core.kotlin.model.ProveedorPago;
-import um.tesoreria.core.repository.IProveedorPagoRepository;
+import um.tesoreria.core.repository.ProveedorPagoRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +10,9 @@ import java.util.List;
 @Service
 public class ProveedorPagoService {
 
-    private final IProveedorPagoRepository repository;
+    private final ProveedorPagoRepository repository;
 
-    public ProveedorPagoService(IProveedorPagoRepository repository) {
+    public ProveedorPagoService(ProveedorPagoRepository repository) {
         this.repository = repository;
     }
 

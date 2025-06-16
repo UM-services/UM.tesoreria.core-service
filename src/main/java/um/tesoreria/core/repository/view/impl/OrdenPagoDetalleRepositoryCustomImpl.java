@@ -5,7 +5,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import um.tesoreria.core.kotlin.model.view.OrdenPagoDetalle;
 import um.tesoreria.core.repository.view.OrdenPagoDetalleRepositoryCustom;
@@ -16,8 +15,11 @@ import java.util.List;
 @Repository
 public class OrdenPagoDetalleRepositoryCustomImpl implements OrdenPagoDetalleRepositoryCustom {
 
-    @Autowired
-    private EntityManager entityManager;
+    private final EntityManager entityManager;
+
+    public OrdenPagoDetalleRepositoryCustomImpl(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     @Override
     public List<OrdenPagoDetalle> findAllByStrings(List<String> conditions) {

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ComprobanteException;
 import um.tesoreria.core.kotlin.model.Comprobante;
-import um.tesoreria.core.repository.IComprobanteRepository;
+import um.tesoreria.core.repository.ComprobanteRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.IComprobanteRepository;
 public class ComprobanteService {
 
     @Autowired
-    private IComprobanteRepository repository;
+    private ComprobanteRepository repository;
 
     public List<Comprobante> findAll() {
         return repository.findAll();

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ContratadoException;
-import um.tesoreria.core.repository.IContratadoRepository;
+import um.tesoreria.core.repository.ContratadoRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.IContratadoRepository;
 public class ContratadoService {
 
 	@Autowired
-	private IContratadoRepository repository;
+	private ContratadoRepository repository;
 
 	public Contratado findByContratadoId(Long contratadoId) {
 		return repository.findByContratadoId(contratadoId)

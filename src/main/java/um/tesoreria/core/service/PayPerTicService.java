@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.PayPerTicException;
 import um.tesoreria.core.model.PayPerTic;
-import um.tesoreria.core.repository.IPayPerTicRepository;
+import um.tesoreria.core.repository.PayPerTicRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PayPerTicService {
 	@Autowired
-	private IPayPerTicRepository repository;
+	private PayPerTicRepository repository;
 
 	public List<PayPerTic> findAllByPeriodo(OffsetDateTime desde, OffsetDateTime hasta) {
 		return repository.findAllByPaymentdateBetween(desde, hasta);

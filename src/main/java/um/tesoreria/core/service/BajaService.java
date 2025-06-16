@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.BajaException;
 import um.tesoreria.core.kotlin.model.Baja;
-import um.tesoreria.core.repository.IBajaRepository;
+import um.tesoreria.core.repository.BajaRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,9 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BajaService {
 
-	private final IBajaRepository repository;
+	private final BajaRepository repository;
 
-	public BajaService(IBajaRepository repository) {
+	public BajaService(BajaRepository repository) {
 		this.repository = repository;
 	}
 

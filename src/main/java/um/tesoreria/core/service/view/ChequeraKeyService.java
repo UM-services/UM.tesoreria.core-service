@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.ChequeraKey;
-import um.tesoreria.core.repository.view.IChequeraKeyRepository;
+import um.tesoreria.core.repository.view.ChequeraKeyRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.view.IChequeraKeyRepository;
 public class ChequeraKeyService {
 
 	@Autowired
-	private IChequeraKeyRepository repository;
+	private ChequeraKeyRepository repository;
 
 	public List<ChequeraKey> findAllByChequeraKey(List<String> chequeraKeys) {
 		return repository.findAllByChequeraKeyInOrderByLectivoIdDesc(chequeraKeys);

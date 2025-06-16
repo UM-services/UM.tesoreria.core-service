@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import um.tesoreria.core.exception.DebitoException;
 import um.tesoreria.core.model.Debito;
-import um.tesoreria.core.repository.IDebitoRepository;
+import um.tesoreria.core.repository.DebitoRepository;
 
 /**
  * @author daniel
@@ -23,7 +23,7 @@ import um.tesoreria.core.repository.IDebitoRepository;
 public class DebitoService {
 
 	@Autowired
-	private IDebitoRepository repository;
+	private DebitoRepository repository;
 
 	public List<Debito> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
 			Integer debitoTipoId) {

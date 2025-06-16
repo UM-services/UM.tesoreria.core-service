@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ArancelPorcentajeException;
 import um.tesoreria.core.kotlin.model.ArancelPorcentaje;
-import um.tesoreria.core.repository.IArancelPorcentajeRepository;
+import um.tesoreria.core.repository.ArancelPorcentajeRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.IArancelPorcentajeRepository;
 public class ArancelPorcentajeService {
 	
 	@Autowired
-	private IArancelPorcentajeRepository repository;
+	private ArancelPorcentajeRepository repository;
 
 	public List<ArancelPorcentaje> findAllByArancelTipoID(Integer aranceltipoId) {
 		return repository.findAllByAranceltipoId(aranceltipoId);

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.CarreraKey;
-import um.tesoreria.core.repository.view.ICarreraKeyRepository;
+import um.tesoreria.core.repository.view.CarreraKeyRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.view.ICarreraKeyRepository;
 public class CarreraKeyService {
 
 	@Autowired
-	private ICarreraKeyRepository repository;
+	private CarreraKeyRepository repository;
 
 	public List<CarreraKey> findAllByFacultadId(Integer facultadId) {
 		return repository.findAllByFacultadId(facultadId);

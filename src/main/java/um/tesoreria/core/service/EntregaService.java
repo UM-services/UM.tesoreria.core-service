@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import um.tesoreria.core.exception.EntregaException;
 import um.tesoreria.core.kotlin.model.Entrega;
-import um.tesoreria.core.repository.IEntregaRepository;
+import um.tesoreria.core.repository.EntregaRepository;
 
 /**
  * @author daniel
@@ -29,7 +29,7 @@ import um.tesoreria.core.repository.IEntregaRepository;
 public class EntregaService {
 
 	@Resource
-	private IEntregaRepository repository;
+	private EntregaRepository repository;
 
 	@Resource
 	private EntregaDetalleService entregaDetalleService;

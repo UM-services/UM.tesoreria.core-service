@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ContratoPeriodoException;
 import um.tesoreria.core.model.ContratoPeriodo;
-import um.tesoreria.core.repository.IContratoPeriodoRepository;
+import um.tesoreria.core.repository.ContratoPeriodoRepository;
 
 /**
  * @author daniel
@@ -23,7 +23,7 @@ import um.tesoreria.core.repository.IContratoPeriodoRepository;
 public class ContratoPeriodoService {
 
 	@Autowired
-	private IContratoPeriodoRepository repository;
+	private ContratoPeriodoRepository repository;
 
 	public List<ContratoPeriodo> findAllByContrato(Long contratoId) {
 		return repository.findAllByContratoId(contratoId,

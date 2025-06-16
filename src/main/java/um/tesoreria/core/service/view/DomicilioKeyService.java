@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.DomicilioKey;
-import um.tesoreria.core.repository.view.IDomicilioKeyRepository;
+import um.tesoreria.core.repository.view.DomicilioKeyRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.view.IDomicilioKeyRepository;
 public class DomicilioKeyService {
 
 	@Autowired
-	private IDomicilioKeyRepository repository;
+	private DomicilioKeyRepository repository;
 
 	public List<DomicilioKey> findAllByUnifiedIn(List<String> keys) {
 		return repository.findAllByUnifiedIn(keys);

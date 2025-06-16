@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.CuentaException;
 import um.tesoreria.core.kotlin.model.Cuenta;
 import um.tesoreria.core.model.view.CuentaSearch;
-import um.tesoreria.core.repository.ICuentaRepository;
+import um.tesoreria.core.repository.CuentaRepository;
 import um.tesoreria.core.service.view.CuentaSearchService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CuentaService {
 
 	@Autowired
-	private ICuentaRepository repository;
+	private CuentaRepository repository;
 
 	@Autowired
 	private CuentaSearchService cuentaSearchService;

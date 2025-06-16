@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CursoException;
 import um.tesoreria.core.kotlin.model.Curso;
-import um.tesoreria.core.repository.ICursoRepository;
+import um.tesoreria.core.repository.CursoRepository;
 
 import java.util.List;
 
@@ -18,9 +18,9 @@ import java.util.List;
 @Service
 public class CursoService {
 
-	private final ICursoRepository repository;
+	private final CursoRepository repository;
 
-	public CursoService(ICursoRepository repository) {
+	public CursoService(CursoRepository repository) {
 		this.repository = repository;
 	}
 

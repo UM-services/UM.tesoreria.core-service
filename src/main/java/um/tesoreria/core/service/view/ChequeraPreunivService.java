@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.ChequeraPreuniv;
-import um.tesoreria.core.repository.view.IChequeraPreunivRepository;
+import um.tesoreria.core.repository.view.ChequeraPreunivRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.view.IChequeraPreunivRepository;
 public class ChequeraPreunivService {
 
 	@Autowired
-	private IChequeraPreunivRepository repository;
+	private ChequeraPreunivRepository repository;
 
 	public List<ChequeraPreuniv> findAllByFacultadIdAndLectivoIdAndGeograficaIdAndPersonakeyIn(Integer facultadId,
                                                                                                Integer lectivoId, Integer geograficaId, List<String> keys) {

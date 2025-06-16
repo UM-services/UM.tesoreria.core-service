@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.CuotaDeudaPayPerTic;
-import um.tesoreria.core.repository.view.ICuotaDeudaPayPerTicRepository;
+import um.tesoreria.core.repository.view.CuotaDeudaPayPerTicRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.view.ICuotaDeudaPayPerTicRepository;
 public class CuotaDeudaPayPerTicService {
 
 	@Autowired
-	private ICuotaDeudaPayPerTicRepository repository;
+	private CuotaDeudaPayPerTicRepository repository;
 
 	public List<CuotaDeudaPayPerTic> findAllByVencimiento1Between(OffsetDateTime desde, OffsetDateTime hasta) {
 		return repository.findAllByVencimiento1Between(desde, hasta);

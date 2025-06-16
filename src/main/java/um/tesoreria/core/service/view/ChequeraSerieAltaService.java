@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAlta;
-import um.tesoreria.core.repository.view.IChequeraSerieAltaRepository;
+import um.tesoreria.core.repository.view.ChequeraSerieAltaRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.view.IChequeraSerieAltaRepository;
 public class ChequeraSerieAltaService {
 
 	@Autowired
-	private IChequeraSerieAltaRepository repository;
+	private ChequeraSerieAltaRepository repository;
 
 	public List<ChequeraSerieAlta> findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer lectivoId, Integer facultadId,
 																				  Integer geograficaId) {

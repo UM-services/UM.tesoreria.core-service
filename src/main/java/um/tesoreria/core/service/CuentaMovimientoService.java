@@ -6,11 +6,10 @@ package um.tesoreria.core.service;
 import um.tesoreria.core.exception.CuentaMovimientoException;
 import um.tesoreria.core.kotlin.model.CuentaMovimiento;
 import um.tesoreria.core.model.view.CuentaMovimientoAsiento;
-import um.tesoreria.core.repository.ICuentaMovimientoRepository;
+import um.tesoreria.core.repository.CuentaMovimientoRepository;
 import um.tesoreria.core.service.view.CuentaMovimientoAsientoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -30,11 +29,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CuentaMovimientoService {
 
-    private final ICuentaMovimientoRepository repository;
+    private final CuentaMovimientoRepository repository;
     private final EntregaService entregaService;
     private final CuentaMovimientoAsientoService cuentaMovimientoAsientoService;
 
-    public CuentaMovimientoService(ICuentaMovimientoRepository repository, EntregaService entregaService, CuentaMovimientoAsientoService cuentaMovimientoAsientoService) {
+    public CuentaMovimientoService(CuentaMovimientoRepository repository, EntregaService entregaService, CuentaMovimientoAsientoService cuentaMovimientoAsientoService) {
         this.repository = repository;
         this.entregaService = entregaService;
         this.cuentaMovimientoAsientoService = cuentaMovimientoAsientoService;

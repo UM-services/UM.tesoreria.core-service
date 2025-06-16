@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.repository.view.IChequeraCuotaDeudaRepository;
+import um.tesoreria.core.repository.view.ChequeraCuotaDeudaRepository;
 import um.tesoreria.core.util.Tool;
 import um.tesoreria.core.service.ClaseChequeraService;
 import um.tesoreria.core.service.TipoChequeraService;
@@ -26,7 +26,7 @@ import um.tesoreria.core.service.TipoChequeraService;
 @Service
 public class ChequeraCuotaDeudaService {
 
-    private final IChequeraCuotaDeudaRepository repository;
+    private final ChequeraCuotaDeudaRepository repository;
 
     private final ClaseChequeraService claseChequeraService;
 
@@ -37,7 +37,7 @@ public class ChequeraCuotaDeudaService {
     private final FacultadGrupoService facultadGrupoService;
 
     @Autowired
-    public ChequeraCuotaDeudaService(IChequeraCuotaDeudaRepository repository, ClaseChequeraService claseChequeraService, TipoChequeraService tipoChequeraService, ChequeraSerieService chequeraSerieService, FacultadGrupoService facultadGrupoService) {
+    public ChequeraCuotaDeudaService(ChequeraCuotaDeudaRepository repository, ClaseChequeraService claseChequeraService, TipoChequeraService tipoChequeraService, ChequeraSerieService chequeraSerieService, FacultadGrupoService facultadGrupoService) {
         this.repository = repository;
         this.claseChequeraService = claseChequeraService;
         this.tipoChequeraService = tipoChequeraService;

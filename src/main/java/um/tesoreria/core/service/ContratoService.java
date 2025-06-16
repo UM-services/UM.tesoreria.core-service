@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ContratoException;
 import um.tesoreria.core.model.Contrato;
-import um.tesoreria.core.repository.IContratoRepository;
+import um.tesoreria.core.repository.ContratoRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ContratoService {
 
 	@Autowired
-	private IContratoRepository repository;
+	private ContratoRepository repository;
 
 	public List<Contrato> findAllByFacultad(Integer facultadId, Integer geograficaId) {
 		return repository.findAllByFacultadIdAndGeograficaId(facultadId, geograficaId);

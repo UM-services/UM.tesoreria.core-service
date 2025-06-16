@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.Track;
-import um.tesoreria.core.repository.ITrackRepository;
+import um.tesoreria.core.repository.TrackRepository;
 
 /**
  * @author daniel
@@ -18,7 +18,7 @@ import um.tesoreria.core.repository.ITrackRepository;
 public class TrackService {
 	
 	@Resource
-	private ITrackRepository repository;
+	private TrackRepository repository;
 
 	public Track add(Track track) {
 		return repository.save(track);

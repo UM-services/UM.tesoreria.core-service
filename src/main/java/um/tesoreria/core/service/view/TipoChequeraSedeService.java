@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.view.TipoChequeraSedeException;
 import um.tesoreria.core.model.view.TipoChequeraSede;
-import um.tesoreria.core.repository.view.ITipoChequeraSedeRepository;
+import um.tesoreria.core.repository.view.TipoChequeraSedeRepository;
 import um.tesoreria.core.service.ChequeraSerieService;
 
 /**
@@ -23,7 +23,7 @@ import um.tesoreria.core.service.ChequeraSerieService;
 public class TipoChequeraSedeService {
 
 	@Autowired
-	private ITipoChequeraSedeRepository repository;
+	private TipoChequeraSedeRepository repository;
 
 	@Autowired
 	private ChequeraSerieService chequeraSerieService;

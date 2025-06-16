@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.view.OrdenPagoEntregadoException;
 import um.tesoreria.core.model.view.OrdenPagoEntregado;
-import um.tesoreria.core.repository.view.IOrdenPagoEntregadoRepository;
+import um.tesoreria.core.repository.view.OrdenPagoEntregadoRepository;
 
 /**
  * @author daniel
@@ -18,7 +18,7 @@ import um.tesoreria.core.repository.view.IOrdenPagoEntregadoRepository;
 public class OrdenPagoEntregadoService {
 
 	@Autowired
-	private IOrdenPagoEntregadoRepository repository;
+	private OrdenPagoEntregadoRepository repository;
 
 	public OrdenPagoEntregado findByOrdenPagoId(Long ordenPagoId) {
 		return repository.findByOrdenPagoId(ordenPagoId)

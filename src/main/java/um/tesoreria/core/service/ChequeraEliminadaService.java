@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraEliminadaException;
 import um.tesoreria.core.kotlin.model.ChequeraEliminada;
-import um.tesoreria.core.repository.IChequeraEliminadaRepository;
+import um.tesoreria.core.repository.ChequeraEliminadaRepository;
 
 /**
  * @author daniel
@@ -18,7 +18,7 @@ import um.tesoreria.core.repository.IChequeraEliminadaRepository;
 public class ChequeraEliminadaService {
 
 	@Autowired
-	private IChequeraEliminadaRepository repository;
+	private ChequeraEliminadaRepository repository;
 
 	public ChequeraEliminada findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
 		return repository

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.LectivoTotalImputacionException;
 import um.tesoreria.core.model.LectivoTotalImputacion;
-import um.tesoreria.core.repository.ILectivoTotalImputacionRepository;
+import um.tesoreria.core.repository.LectivoTotalImputacionRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.ILectivoTotalImputacionRepository;
 public class LectivoTotalImputacionService {
 
 	@Autowired
-	private ILectivoTotalImputacionRepository repository;
+	private LectivoTotalImputacionRepository repository;
 
 	public List<LectivoTotalImputacion> findAllByTipo(Integer facultadId, Integer lectivoId, Integer tipoChequeraId) {
 		return repository.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipoChequeraId);

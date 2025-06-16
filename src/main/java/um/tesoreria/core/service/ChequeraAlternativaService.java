@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraAlternativaException;
 import um.tesoreria.core.kotlin.model.ChequeraAlternativa;
-import um.tesoreria.core.repository.IChequeraAlternativaRepository;
+import um.tesoreria.core.repository.ChequeraAlternativaRepository;
 
 /**
  * @author daniel
@@ -22,7 +22,7 @@ import um.tesoreria.core.repository.IChequeraAlternativaRepository;
 public class ChequeraAlternativaService {
 
 	@Autowired
-	private IChequeraAlternativaRepository repository;
+	private ChequeraAlternativaRepository repository;
 
 	public List<ChequeraAlternativa> findAllByChequera(Integer facultadId, Integer tipochequeraId, Long chequeraserieId,
 													   Integer alternativaId) {
