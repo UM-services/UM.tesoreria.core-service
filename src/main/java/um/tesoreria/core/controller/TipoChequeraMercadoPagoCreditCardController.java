@@ -10,6 +10,7 @@ import um.tesoreria.core.model.TipoChequeraMercadoPagoCreditCard;
 import um.tesoreria.core.service.TipoChequeraMercadoPagoCreditCardService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping({ "/tipoChequeraMercadoPagoCreditCard", "/api/tesoreria/core/tipoChequeraMercadoPagoCreditCard"})
@@ -34,6 +35,11 @@ public class TipoChequeraMercadoPagoCreditCardController {
     @DeleteMapping("/baja/{tipoChequeraId}/{alternativaId}")
     public ResponseEntity<String> baja(@PathVariable Integer tipoChequeraId, @PathVariable Integer alternativaId) {
         return ResponseEntity.ok(service.baja(tipoChequeraId, alternativaId));
+    }
+
+    @DeleteMapping("/baja/id/{id}")
+    public ResponseEntity<String> bajaId(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.bajaId(id));
     }
 
     @GetMapping("/unique/{tipoChequeraId}/{alternativaId}")

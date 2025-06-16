@@ -6,11 +6,10 @@ package um.tesoreria.core.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import um.tesoreria.core.kotlin.model.Build;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.BuildException;
-import um.tesoreria.core.repository.IBuildRepository;
+import um.tesoreria.core.repository.BuildRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,9 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BuildService {
 	
-	private final IBuildRepository repository;
+	private final BuildRepository repository;
 
-	public BuildService(IBuildRepository repository) {
+	public BuildService(BuildRepository repository) {
 		this.repository = repository;
 	}
 

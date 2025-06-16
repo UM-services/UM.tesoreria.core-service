@@ -10,7 +10,7 @@ import um.tesoreria.core.kotlin.model.Ubicacion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.repository.IUbicacionRepository;
+import um.tesoreria.core.repository.UbicacionRepository;
 
 /**
  * @author daniel
@@ -19,10 +19,10 @@ import um.tesoreria.core.repository.IUbicacionRepository;
 @Service
 public class UbicacionService {
 
-	private final IUbicacionRepository repository;
+	private final UbicacionRepository repository;
 
 	@Autowired
-	public UbicacionService(IUbicacionRepository repository) {
+	public UbicacionService(UbicacionRepository repository) {
 		this.repository = repository;
 	}
 

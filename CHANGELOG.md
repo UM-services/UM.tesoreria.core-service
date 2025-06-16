@@ -8,7 +8,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ## [Unreleased] - Cambios verificables del git log
 
 ### Added
-- **Optimización de rendimiento en `calculateDeuda`** (commit: a7e078b)
+- **Optimización de rendimiento en `calculateDeuda`** (commit: c6632e9, merge: 8a93581)
   - Implementación de computación paralela usando `CompletableFuture`
   - Validación temprana de parámetros para evitar procesamiento innecesario
   - Optimización de memoria usando `Map<String, BigDecimal>` en lugar de objetos completos
@@ -19,10 +19,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Constructor con inyección de dependencias en `DocumentoController` y `DomicilioController` (commit: 42b667c)
 - Renombrado `IDocumentoRepository` a `DocumentoRepository` siguiendo convenciones de Spring (commit: 42b667c)
 - Renombrado `IDomicilioRepository` a `DomicilioRepository` siguiendo convenciones de Spring (commit: 42b667c)
-- Nuevo endpoint para obtener información completa de inscripciones (commit: 833a92b)
+- Nuevo endpoint para obtener información completa de inscripciones `GET /inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}` (commit: 833a92b)
 
 ### Changed
-- **Mejorado el rendimiento de `calculateDeuda`** (commit: a7e078b)
+- **Mejorado el rendimiento de `calculateDeuda`** (commit: c6632e9, merge: 8a93581)
   - Consultas ejecutadas en paralelo: pagos, cuotas, cuota1 y totales
   - Reducción estimada del 30-50% en tiempo de respuesta
   - Reducción estimada del 30% en uso de memoria
@@ -43,48 +43,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Eliminado repositorio obsoleto (commit: 42b667c):
   - `IChequeraPagoRepository.java`
 
-## [1.0.0] - 2024-03-19
-
-### Added
-- Nuevo endpoint `GET /inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}` para obtener información completa de inscripción
-- Nuevos DTOs: `InscripcionDto`, `InscripcionFullDto`, `InscripcionPagoDto`
-- Nuevo campo `emailCopia` en el modelo `TipoChequera`
-- Actualización de openpdf de 2.0.3 a 2.0.4
-- Mejora en el manejo de nulos usando `Objects.requireNonNull`
-- Actualización de `TipoChequeraService` para incluir `emailCopia` en la creación
-- Documentación actualizada en README y CHANGELOG
-- Corrección de versión de Java en README (17 a 21)
-
-### Changed
-- Mejorado el manejo de nulos en `InscripcionFacultadConsumer`
-- Actualizada la documentación con nuevos endpoints y modelos
-- Actualizada la estructura del proyecto
-
-## [0.2.0] - 2024-03-11
-
-### Added
-- Soporte para tarjetas de crédito alternativas en Mercado Pago
-- Nuevo endpoint para listar tarjetas de crédito activas
-- Nuevo endpoint para crear/actualizar tarjetas
-- Nuevo endpoint para dar de baja tarjetas
-- Nuevo endpoint para obtener tarjeta única
-
-### Changed
-- Mejorada la gestión de tarjetas de crédito
-- Actualizada la documentación de endpoints
-- Actualizada la estructura del proyecto
-
-## [0.1.0] - 2024-01-01
-### Added
-- Versión inicial del servicio
-- Configuración básica de Spring Boot
-- Integración con base de datos
-- Endpoints básicos para gestión de chequeras
-
 ## [0.0.1-SNAPSHOT] - Versión actual según pom.xml
 
 ### Nota
-La versión actual del proyecto es 0.0.1-SNAPSHOT según el pom.xml. Las versiones anteriores documentadas en este CHANGELOG no pueden ser verificadas directamente del código fuente y deberían ser revisadas.
+La versión actual del proyecto es 0.0.1-SNAPSHOT según el pom.xml. Esta es la única versión que puede ser verificada directamente del código fuente.
 
 ### Dependencias Principales (verificado en pom.xml)
 - Spring Boot: 3.5.0
@@ -92,9 +54,9 @@ La versión actual del proyecto es 0.0.1-SNAPSHOT según el pom.xml. Las version
 - Kotlin: 2.1.21
 - Java: 21
 - MySQL Connector: 9.3.0
-- SpringDoc OpenAPI: 2.8.8
+- SpringDoc OpenAPI: 2.8.9
 - Apache POI: 5.4.1
-- OpenPDF: 2.0.5
+- OpenPDF: 2.2.1
 - ModelMapper: 3.2.3
 - Guava: 33.4.8-jre
 
@@ -115,7 +77,23 @@ La versión actual del proyecto es 0.0.1-SNAPSHOT según el pom.xml. Las version
 - **Eliminación de objetos innecesarios**: Evita crear instancias vacías de `ChequeraPago`
 
 ### Commits de Optimización Verificables (git log)
-- `a7e078b` - Merge PR #135: Actualización de documentación y optimización de `calculateDeuda`
-- `6260633` - Actualización de documentación y optimización de endpoints
-- `8aa2bbb` - Refactorización y optimización del servicio core de tesorería
-- `4cc6e6c` - Mejorar manejo de excepciones y optimizar código en servicios de sincronización 
+- `8a93581` - Merge PR #137: Optimización de rendimiento en calculatedeuda con computación paralela
+- `c6632e9` - perf(calculateDeuda): implement parallel computation with CompletableFuture
+- `a7e078b` - Merge PR #135: Actualización de documentación y limpieza de código
+- `cc5be90` - docs(changelog): actualiza documentación con cambios verificables
+- `ab3bc99` - Merge PR #133: Cambio emailpagador inicial
+- `62acf40` - fix emailPagador
+- `1e8a299` - Merge PR #131: Limpieza de código y mejoras en gestión de domicilios
+- `42b667c` - chore(cleanup): remove obsolete files and improve SpoterService
+- `1cc4146` - Merge PR #129: Refactorización y mejoras en gestión de domicilios y documentos
+- `a8b9de1` - refactor(domicilio): improve dependency injection and add pagador endpoint
+- `7ddfee9` - Merge PR #127: Feature implementación de endpoint para obtener información completa de inscripciones
+- `833a92b` - feat(inscripcion): add full endpoint for complete inscription information
+
+### Información No Verificable
+Las siguientes versiones mencionadas en el CHANGELOG anterior no pueden ser verificadas directamente del código fuente y han sido removidas:
+- Versión 1.0.0 (2024-03-19)
+- Versión 0.2.0 (2024-03-11) 
+- Versión 0.1.0 (2024-01-01)
+
+Estas versiones no aparecen en el historial de git ni en el pom.xml actual, por lo que no pueden ser confirmadas como verificables. 

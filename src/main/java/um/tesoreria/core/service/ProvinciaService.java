@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ProvinciaException;
 import um.tesoreria.core.model.Provincia;
-import um.tesoreria.core.repository.IProvinciaRepository;
+import um.tesoreria.core.repository.ProvinciaRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.IProvinciaRepository;
 public class ProvinciaService {
 
 	@Autowired
-	private IProvinciaRepository repository;
+	private ProvinciaRepository repository;
 
 	public List<Provincia> findAllByFacultadId(Integer facultadId) {
 		return repository.findAllByFacultadId(facultadId);

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.model.ChequeraSerieControl;
-import um.tesoreria.core.repository.IChequeraSerieControlRepository;
+import um.tesoreria.core.repository.ChequeraSerieControlRepository;
 
 /**
  * @author daniel
@@ -18,7 +18,7 @@ import um.tesoreria.core.repository.IChequeraSerieControlRepository;
 public class ChequeraSerieControlService {
 
 	@Autowired
-	private IChequeraSerieControlRepository repository;
+	private ChequeraSerieControlRepository repository;
 
 	public ChequeraSerieControl findLastByTipoChequera(Integer facultadId, Integer tipoChequeraId) {
 		return repository.findTopByFacultadIdAndTipoChequeraIdOrderByChequeraSerieIdDesc(facultadId, tipoChequeraId)

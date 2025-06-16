@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.SetupException;
 import um.tesoreria.core.kotlin.model.Setup;
-import um.tesoreria.core.repository.ISetupRepository;
+import um.tesoreria.core.repository.SetupRepository;
 
 /**
  * @author daniel
@@ -17,10 +17,10 @@ import um.tesoreria.core.repository.ISetupRepository;
 @Service
 public class SetupService {
 
-	private final ISetupRepository repository;
+	private final SetupRepository repository;
 
 	@Autowired
-	public SetupService(ISetupRepository repository) {
+	public SetupService(SetupRepository repository) {
 		this.repository = repository;
 	}
 

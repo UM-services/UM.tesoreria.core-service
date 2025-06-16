@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.MateriaException;
 import um.tesoreria.core.model.Materia;
-import um.tesoreria.core.repository.IMateriaRepository;
+import um.tesoreria.core.repository.MateriaRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.IMateriaRepository;
 public class MateriaService {
 
 	@Autowired
-	private IMateriaRepository repository;
+	private MateriaRepository repository;
 
 	public List<Materia> findAll() {
 		return repository.findAll();

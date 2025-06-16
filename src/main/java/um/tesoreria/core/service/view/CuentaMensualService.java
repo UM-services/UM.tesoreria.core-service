@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.CuentaMensual;
-import um.tesoreria.core.repository.view.ICuentaMensualRepository;
+import um.tesoreria.core.repository.view.CuentaMensualRepository;
 
 /**
  * @author daniel
@@ -18,7 +18,7 @@ import um.tesoreria.core.repository.view.ICuentaMensualRepository;
 @Service
 public class CuentaMensualService {
 	@Autowired
-	private ICuentaMensualRepository repository;
+	private CuentaMensualRepository repository;
 	
 	public List<CuentaMensual> findIngresosByMes(Integer anho, Integer mes) {
 		return repository.findIngresosByMes(anho, mes);

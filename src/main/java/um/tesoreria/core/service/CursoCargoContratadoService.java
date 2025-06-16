@@ -10,12 +10,11 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CursoCargoContratadoException;
 import um.tesoreria.core.kotlin.model.CursoCargoContratado;
-import um.tesoreria.core.repository.ICursoCargoContratadoRepository;
+import um.tesoreria.core.repository.CursoCargoContratadoRepository;
 
 /**
  * @author daniel
@@ -25,9 +24,9 @@ import um.tesoreria.core.repository.ICursoCargoContratadoRepository;
 @Slf4j
 public class CursoCargoContratadoService {
 
-	private final ICursoCargoContratadoRepository repository;
+	private final CursoCargoContratadoRepository repository;
 
-	public CursoCargoContratadoService(ICursoCargoContratadoRepository repository) {
+	public CursoCargoContratadoService(CursoCargoContratadoRepository repository) {
 		this.repository = repository;
 	}
 

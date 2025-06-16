@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.LectivoTotalException;
 import um.tesoreria.core.model.LectivoTotal;
-import um.tesoreria.core.repository.ILectivoTotalRepository;
+import um.tesoreria.core.repository.LectivoTotalRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.ILectivoTotalRepository;
 public class LectivoTotalService {
 
 	@Autowired
-	private ILectivoTotalRepository repository;
+	private LectivoTotalRepository repository;
 
 	public List<LectivoTotal> findAllByFacultadId(Integer facultadId) {
 		return repository.findAllByFacultadId(facultadId);

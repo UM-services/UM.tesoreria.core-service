@@ -32,7 +32,7 @@ import um.tesoreria.core.model.dto.DeudaChequera;
 import um.tesoreria.core.model.dto.DeudaPersona;
 import um.tesoreria.core.model.dto.Vencimiento;
 import um.tesoreria.core.model.view.PersonaKey;
-import um.tesoreria.core.repository.IPersonaRepository;
+import um.tesoreria.core.repository.PersonaRepository;
 import um.tesoreria.core.service.view.PersonaKeyService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PersonaService {
 
-    private final IPersonaRepository repository;
+    private final PersonaRepository repository;
     private final PersonaKeyService personaKeyService;
     private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
     private final PreInscripcionFacultadConsumer preInscripcionFacultadConsumer;
@@ -55,7 +55,7 @@ public class PersonaService {
     private final MercadoPagoContextService mercadoPagoContextService;
     private final PreferenceClient preferenceClient;
 
-    public PersonaService(IPersonaRepository repository, PersonaKeyService personaKeyService, InscripcionFacultadConsumer inscripcionFacultadConsumer, PreInscripcionFacultadConsumer preInscripcionFacultadConsumer, FacultadService facultadService, ChequeraSerieService chequeraSerieService, CarreraChequeraService carreraChequeraService, LegajoFacultadConsumer legajoFacultadConsumer, ChequeraCuotaService chequeraCuotaService, MercadoPagoContextService mercadoPagoContextService, PreferenceClient preferenceClient) {
+    public PersonaService(PersonaRepository repository, PersonaKeyService personaKeyService, InscripcionFacultadConsumer inscripcionFacultadConsumer, PreInscripcionFacultadConsumer preInscripcionFacultadConsumer, FacultadService facultadService, ChequeraSerieService chequeraSerieService, CarreraChequeraService carreraChequeraService, LegajoFacultadConsumer legajoFacultadConsumer, ChequeraCuotaService chequeraCuotaService, MercadoPagoContextService mercadoPagoContextService, PreferenceClient preferenceClient) {
         this.repository = repository;
         this.personaKeyService = personaKeyService;
         this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;

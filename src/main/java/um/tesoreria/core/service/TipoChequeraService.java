@@ -8,28 +8,40 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.TipoChequeraException;
 import um.tesoreria.core.model.LectivoTotal;
+import um.tesoreria.core.model.view.TipoChequeraSearch;
 import um.tesoreria.core.repository.TipoChequeraRepository;
 import um.tesoreria.core.kotlin.model.TipoChequera;
+import um.tesoreria.core.service.view.TipoChequeraSearchService;
 
 /**
  * @author daniel
  *
  */
 @Service
+@Slf4j
 public class TipoChequeraService {
 
 	private final TipoChequeraRepository repository;
 	private final LectivoTotalService lectivoTotalService;
+	private final TipoChequeraSearchService tipoChequeraSearchService;
 
 	public TipoChequeraService(TipoChequeraRepository repository,
-							   LectivoTotalService lectivoTotalService) {
+							   LectivoTotalService lectivoTotalService,
+							   TipoChequeraSearchService tipoChequeraSearchService) {
 		this.repository = repository;
 		this.lectivoTotalService = lectivoTotalService;
+		this.tipoChequeraSearchService = tipoChequeraSearchService;
+	}
+
+	public List<TipoChequeraSearch> findAllByStrings(List<String> conditions) {
+		log.debug("Processing findAllByStrings");
+		return tipoChequeraSearchService.findAllByStrings(conditions);
 	}
 
 	public List<TipoChequera> findAll() {

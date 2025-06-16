@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ContratoFacturaException;
 import um.tesoreria.core.model.Contrato;
 import um.tesoreria.core.model.ContratoFactura;
-import um.tesoreria.core.repository.IContratoFacturaRepository;
+import um.tesoreria.core.repository.ContratoFacturaRepository;
 
 /**
  * @author daniel
@@ -26,7 +26,7 @@ import um.tesoreria.core.repository.IContratoFacturaRepository;
 public class ContratoFacturaService {
 
 	@Autowired
-	private IContratoFacturaRepository repository;
+	private ContratoFacturaRepository repository;
 
 	@Autowired
 	private ContratoService contratoservice;

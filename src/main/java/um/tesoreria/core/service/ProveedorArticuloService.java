@@ -6,10 +6,9 @@ package um.tesoreria.core.service;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.ProveedorArticuloException;
-import um.tesoreria.core.repository.IProveedorArticuloRepository;
+import um.tesoreria.core.repository.ProveedorArticuloRepository;
 
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,9 +24,9 @@ import java.util.List;
 @Slf4j
 public class ProveedorArticuloService {
 
-	private final IProveedorArticuloRepository repository;
+	private final ProveedorArticuloRepository repository;
 
-	public ProveedorArticuloService(IProveedorArticuloRepository repository) {
+	public ProveedorArticuloService(ProveedorArticuloRepository repository) {
 		this.repository = repository;
 	}
 

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.ProveedorComprobante;
-import um.tesoreria.core.repository.IProveedorComprobanteRepository;
+import um.tesoreria.core.repository.ProveedorComprobanteRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.IProveedorComprobanteRepository;
 public class ProveedorComprobanteService {
 
 	@Autowired
-	private IProveedorComprobanteRepository repository;
+	private ProveedorComprobanteRepository repository;
 
 	public List<ProveedorComprobante> findAllByOrdenPagoId(Long proveedorMovimientoId) {
 		return repository.findAllByProveedorMovimientoIdOrdenPago(proveedorMovimientoId);

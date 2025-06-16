@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.LectivoAlternativaException;
 import um.tesoreria.core.kotlin.model.LectivoAlternativa;
-import um.tesoreria.core.repository.ILectivoAlternativaRepository;
+import um.tesoreria.core.repository.LectivoAlternativaRepository;
 
 /**
  * @author daniel
@@ -18,9 +18,9 @@ import um.tesoreria.core.repository.ILectivoAlternativaRepository;
 @Service
 public class LectivoAlternativaService {
 
-	private final ILectivoAlternativaRepository repository;
+	private final LectivoAlternativaRepository repository;
 
-	public LectivoAlternativaService(ILectivoAlternativaRepository repository) {
+	public LectivoAlternativaService(LectivoAlternativaRepository repository) {
 		this.repository = repository;
 	}
 

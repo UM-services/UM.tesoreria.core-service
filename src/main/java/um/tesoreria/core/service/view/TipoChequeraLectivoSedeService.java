@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.TipoChequeraLectivoSede;
-import um.tesoreria.core.repository.view.ITipoChequeraLectivoSedeRepository;
+import um.tesoreria.core.repository.view.TipoChequeraLectivoSedeRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.view.ITipoChequeraLectivoSedeRepository;
 public class TipoChequeraLectivoSedeService {
 	
 	@Autowired
-	private ITipoChequeraLectivoSedeRepository repository;
+	private TipoChequeraLectivoSedeRepository repository;
 
 	public List<TipoChequeraLectivoSede> findAllByDisenho(Integer facultadId, Integer lectivoId, Integer geograficaId) {
 		if (geograficaId == 0)

@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ProveedorValorException;
-import um.tesoreria.core.repository.IProveedorValorRepository;
+import um.tesoreria.core.repository.ProveedorValorRepository;
 import um.tesoreria.core.kotlin.model.ProveedorValor;
 
 /**
@@ -22,9 +22,9 @@ import um.tesoreria.core.kotlin.model.ProveedorValor;
 @Slf4j
 public class ProveedorValorService {
 
-    private final IProveedorValorRepository repository;
+    private final ProveedorValorRepository repository;
 
-    public ProveedorValorService(IProveedorValorRepository repository) {
+    public ProveedorValorService(ProveedorValorRepository repository) {
         this.repository = repository;
     }
 

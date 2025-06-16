@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ArticuloException;
 import um.tesoreria.core.kotlin.model.Articulo;
 import um.tesoreria.core.model.view.ArticuloKey;
-import um.tesoreria.core.repository.IArticuloRepository;
+import um.tesoreria.core.repository.ArticuloRepository;
 import um.tesoreria.core.service.view.ArticuloKeyService;
 
 /**
@@ -23,7 +23,7 @@ import um.tesoreria.core.service.view.ArticuloKeyService;
 public class ArticuloService {
 
 	@Autowired
-	private IArticuloRepository repository;
+	private ArticuloRepository repository;
 
 	@Autowired
 	private ArticuloKeyService articuloKeyService;

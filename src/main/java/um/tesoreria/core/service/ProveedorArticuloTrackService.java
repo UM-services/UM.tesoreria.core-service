@@ -1,10 +1,9 @@
 package um.tesoreria.core.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 import um.tesoreria.core.exception.ProveedorArticuloTrackException;
 import um.tesoreria.core.kotlin.model.ProveedorArticuloTrack;
-import um.tesoreria.core.repository.IProveedorArticuloTrackRepository;
+import um.tesoreria.core.repository.ProveedorArticuloTrackRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +13,9 @@ import java.util.List;
 @Slf4j
 public class ProveedorArticuloTrackService {
 
-    private final IProveedorArticuloTrackRepository repository;
+    private final ProveedorArticuloTrackRepository repository;
 
-    public ProveedorArticuloTrackService(IProveedorArticuloTrackRepository repository) {
+    public ProveedorArticuloTrackService(ProveedorArticuloTrackRepository repository) {
         this.repository = repository;
     }
 

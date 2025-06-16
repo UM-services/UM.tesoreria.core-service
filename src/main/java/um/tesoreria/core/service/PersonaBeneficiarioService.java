@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.PersonaBeneficiarioException;
 import um.tesoreria.core.model.PersonaBeneficiario;
-import um.tesoreria.core.repository.IPersonaBeneficiarioRepository;
+import um.tesoreria.core.repository.PersonaBeneficiarioRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.IPersonaBeneficiarioRepository;
 public class PersonaBeneficiarioService {
 
 	@Autowired
-	private IPersonaBeneficiarioRepository repository;
+	private PersonaBeneficiarioRepository repository;
 
 	public PersonaBeneficiario findByPersonaUniqueId(Long personaUniqueId) {
 		return repository.findByPersonaUniqueId(personaUniqueId)

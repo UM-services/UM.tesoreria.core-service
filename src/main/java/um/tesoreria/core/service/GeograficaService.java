@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.GeograficaException;
 import um.tesoreria.core.kotlin.model.Geografica;
 import um.tesoreria.core.model.view.GeograficaLectivo;
-import um.tesoreria.core.repository.IGeograficaRepository;
+import um.tesoreria.core.repository.GeograficaRepository;
 import um.tesoreria.core.service.view.GeograficaLectivoService;
 
 /**
@@ -22,7 +22,7 @@ import um.tesoreria.core.service.view.GeograficaLectivoService;
 public class GeograficaService {
 
 	@Autowired
-	private IGeograficaRepository repository;
+	private GeograficaRepository repository;
 
 	@Autowired
 	private GeograficaLectivoService geograficaLectivoService;

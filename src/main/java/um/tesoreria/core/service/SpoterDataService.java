@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.SpoterDataException;
-import um.tesoreria.core.repository.ISpoterDataRepository;
+import um.tesoreria.core.repository.SpoterDataRepository;
 import um.tesoreria.core.kotlin.model.SpoterData;
 
 /**
@@ -21,10 +21,10 @@ import um.tesoreria.core.kotlin.model.SpoterData;
 @Slf4j
 public class SpoterDataService {
 
-	private final ISpoterDataRepository repository;
+	private final SpoterDataRepository repository;
 
 	@Autowired
-	public SpoterDataService(ISpoterDataRepository repository) {
+	public SpoterDataService(SpoterDataRepository repository) {
 		this.repository = repository;
 	}
 

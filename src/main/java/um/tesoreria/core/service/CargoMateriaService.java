@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.CargoMateria;
-import um.tesoreria.core.repository.ICargoMateriaRepository;
+import um.tesoreria.core.repository.CargoMateriaRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.ICargoMateriaRepository;
 public class CargoMateriaService {
 
 	@Autowired
-	private ICargoMateriaRepository repository;
+	private CargoMateriaRepository repository;
 
 	public List<CargoMateria> findAll() {
 		return repository.findAll();

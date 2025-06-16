@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.ChequeraCuotaPersona;
-import um.tesoreria.core.repository.view.IChequeraCuotaPersonaRepository;
+import um.tesoreria.core.repository.view.ChequeraCuotaPersonaRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.view.IChequeraCuotaPersonaRepository;
 public class ChequeraCuotaPersonaService {
 
 	@Autowired
-	private IChequeraCuotaPersonaRepository repository;
+	private ChequeraCuotaPersonaRepository repository;
 
 	public Optional<ChequeraCuotaPersona> findByPersonaIdAndDocumentoIdAndFacultadIdAndAnhoAndMes(BigDecimal personaId,
 			Integer documentoId, Integer facultadId, Integer anho, Integer mes) {

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.LectivoCuota;
-import um.tesoreria.core.repository.ILectivoCuotaRepository;
+import um.tesoreria.core.repository.LectivoCuotaRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.ILectivoCuotaRepository;
 public class LectivoCuotaService {
 
 	@Autowired
-	private ILectivoCuotaRepository repository;
+	private LectivoCuotaRepository repository;
 
 	public List<LectivoCuota> findAllByTipo(Integer facultadId, Integer lectivoId, Integer tipoChequeraId,
 			Integer alternativaId) {

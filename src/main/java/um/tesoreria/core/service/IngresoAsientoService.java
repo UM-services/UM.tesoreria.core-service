@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.IngresoAsientoException;
 import um.tesoreria.core.model.IngresoAsiento;
-import um.tesoreria.core.repository.IIngresoAsientoRepository;
+import um.tesoreria.core.repository.IngresoAsientoRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.IIngresoAsientoRepository;
 public class IngresoAsientoService {
 
 	@Autowired
-	private IIngresoAsientoRepository repository;
+	private IngresoAsientoRepository repository;
 
 	public IngresoAsiento findByUnique(OffsetDateTime fechaContable, Integer tipoPagoId) {
 		return repository.findByFechaContableAndTipoPagoId(fechaContable, tipoPagoId)

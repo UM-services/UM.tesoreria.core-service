@@ -26,7 +26,7 @@ import um.tesoreria.core.kotlin.model.Lectivo;
 import um.tesoreria.core.model.Matricula;
 import um.tesoreria.core.model.view.ChequeraClase;
 import um.tesoreria.core.model.view.ChequeraCuotaPersona;
-import um.tesoreria.core.repository.IMatriculaRepository;
+import um.tesoreria.core.repository.MatriculaRepository;
 import um.tesoreria.core.service.facade.SincronizeService;
 import um.tesoreria.core.service.view.ChequeraClaseService;
 import um.tesoreria.core.service.view.ChequeraCuotaPersonaService;
@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MatriculaService {
 
 	@Autowired
-	private IMatriculaRepository repository;
+	private MatriculaRepository repository;
 
 	@Autowired
 	private LectivoService lectivoservice;

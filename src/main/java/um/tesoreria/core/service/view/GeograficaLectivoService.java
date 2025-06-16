@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.GeograficaLectivo;
-import um.tesoreria.core.repository.view.IGeograficaLectivoRepository;
+import um.tesoreria.core.repository.view.GeograficaLectivoRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.view.IGeograficaLectivoRepository;
 public class GeograficaLectivoService {
 
 	@Autowired
-	private IGeograficaLectivoRepository repository;
+	private GeograficaLectivoRepository repository;
 
 	public List<GeograficaLectivo> findAllByLectivoId(Integer lectivoId) {
 		return repository.findAllByLectivoId(lectivoId);

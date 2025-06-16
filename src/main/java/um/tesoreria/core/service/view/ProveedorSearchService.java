@@ -1,15 +1,14 @@
 /**
- * 
+ *
  */
 package um.tesoreria.core.service.view;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.ProveedorSearch;
-import um.tesoreria.core.repository.view.IProveedorSearchRepository;
+import um.tesoreria.core.repository.view.ProveedorSearchRepository;
 
 /**
  * @author daniel
@@ -18,11 +17,14 @@ import um.tesoreria.core.repository.view.IProveedorSearchRepository;
 @Service
 public class ProveedorSearchService {
 
-	@Autowired
-	private IProveedorSearchRepository repository;
+    private final ProveedorSearchRepository repository;
 
-	public List<ProveedorSearch> findAllByStrings(List<String> conditions) {
-		return repository.findAllByStrings(conditions);
-	}
+    public ProveedorSearchService(ProveedorSearchRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<ProveedorSearch> findAllByStrings(List<String> conditions) {
+        return repository.findAllByStrings(conditions);
+    }
 
 }

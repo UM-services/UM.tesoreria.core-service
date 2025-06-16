@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.UsuarioException;
-import um.tesoreria.core.repository.IUsuarioRepository;
+import um.tesoreria.core.repository.UsuarioRepository;
 import um.tesoreria.core.util.Tool;
 
 /**
@@ -22,7 +22,7 @@ import um.tesoreria.core.util.Tool;
 public class UsuarioService {
 
     @Autowired
-    private IUsuarioRepository repository;
+    private UsuarioRepository repository;
 
     public Usuario findByLogin(String login) {
         return repository.findByLogin(login).orElseThrow(() -> new UsuarioException(login));

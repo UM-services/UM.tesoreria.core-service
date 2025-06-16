@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ArancelTipoException;
 import um.tesoreria.core.kotlin.model.ArancelTipo;
 import um.tesoreria.core.model.view.ArancelTipoLectivo;
-import um.tesoreria.core.repository.IArancelTipoRepository;
-import um.tesoreria.core.repository.view.IArancelTipoLectivoRepository;
+import um.tesoreria.core.repository.ArancelTipoRepository;
+import um.tesoreria.core.repository.view.ArancelTipoLectivoRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,10 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 public class ArancelTipoService {
 
 	@Resource
-	private IArancelTipoRepository repository;
+	private ArancelTipoRepository repository;
 
 	@Resource
-	private IArancelTipoLectivoRepository arancelTipoLectivoRepository;
+	private ArancelTipoLectivoRepository arancelTipoLectivoRepository;
 
 	public List<ArancelTipo> findAll() {
 		return repository.findAll(Sort.by("arancelTipoId").ascending());

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.UbicacionArticulo;
-import um.tesoreria.core.repository.IUbicacionArticuloRepository;
+import um.tesoreria.core.repository.UbicacionArticuloRepository;
 
 /**
  * @author daniel
@@ -19,7 +19,7 @@ import um.tesoreria.core.repository.IUbicacionArticuloRepository;
 public class UbicacionArticuloService {
 
 	@Autowired
-	private IUbicacionArticuloRepository repository;
+	private UbicacionArticuloRepository repository;
 
 	public List<UbicacionArticulo> findAll() {
 		return repository.findAll();

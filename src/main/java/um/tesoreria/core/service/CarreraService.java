@@ -5,12 +5,11 @@ package um.tesoreria.core.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CarreraException;
 import um.tesoreria.core.kotlin.model.Carrera;
-import um.tesoreria.core.repository.ICarreraRepository;
+import um.tesoreria.core.repository.CarreraRepository;
 
 /**
  * @author daniel
@@ -19,9 +18,9 @@ import um.tesoreria.core.repository.ICarreraRepository;
 @Service
 public class CarreraService {
 
-	private final ICarreraRepository repository;
+	private final CarreraRepository repository;
 
-	public CarreraService(ICarreraRepository repository) {
+	public CarreraService(CarreraRepository repository) {
 		this.repository = repository;
 	}
 

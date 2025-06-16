@@ -10,7 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.CuentaMovimientoAsiento;
-import um.tesoreria.core.repository.view.ICuentaMovimientoAsientoRepository;
+import um.tesoreria.core.repository.view.CuentaMovimientoAsientoRepository;
 
 /**
  * @author daniel
@@ -20,7 +20,7 @@ import um.tesoreria.core.repository.view.ICuentaMovimientoAsientoRepository;
 public class CuentaMovimientoAsientoService {
 
 	@Autowired
-	private ICuentaMovimientoAsientoRepository repository;
+	private CuentaMovimientoAsientoRepository repository;
 
 	public List<CuentaMovimientoAsiento> findAllByAsientoIn(List<String> asientos, Sort sort) {
 		return repository.findAllByAsientoIn(asientos, sort);
