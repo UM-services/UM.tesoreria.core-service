@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,17 +39,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ContratoToolService {
 
-	@Autowired
-	private ContratoFacturaService contratoFacturaService;
+	private final ContratoFacturaService contratoFacturaService;
+	private final ContratoPeriodoService contratoPeriodoService;
+	private final ContratoService contratoService;
+	private final CursoCargoContratadoService cursoCargoContratadoService;
 
-	@Autowired
-	private ContratoPeriodoService contratoPeriodoService;
-
-	@Autowired
-	private ContratoService contratoService;
-
-	@Autowired
-	private CursoCargoContratadoService cursoCargoContratadoService;
+	public ContratoToolService(ContratoFacturaService contratoFacturaService,
+							   ContratoPeriodoService contratoPeriodoService,
+							   ContratoService contratoService,
+							   CursoCargoContratadoService cursoCargoContratadoService) {
+		this.contratoFacturaService = contratoFacturaService;
+		this.contratoPeriodoService = contratoPeriodoService;
+		this.contratoService = contratoService;
+		this.cursoCargoContratadoService = cursoCargoContratadoService;
+	}
 
 	@Transactional
 	public Boolean addFactura(ContratoFactura contratofactura) {
@@ -160,18 +165,23 @@ public class ContratoToolService {
 	}
 
 	@Transactional
-	public Boolean saveCurso(Long cursoId, Long contratoId, Integer cargotipoId, BigDecimal horassemanales) {
-		// Leer contrato
+	public Boolean saveCurso(Long cursoId, Long contratoId, Integer cargoTipoId, BigDecimal horasSemanales) {
+		log.debug("Processing ContratoToolService.saveCurso");
+		log.debug("ContratoToolService.saveCurso - Leyendo contrato -> {}",  contratoId);
 		Contrato contrato = contratoService.findByContratoId(contratoId);
-		log.debug("Contrato -> {}", contrato);
+		logContrato(contrato);
 		OffsetDateTime desde = contrato.getDesde().withOffsetSameInstant(ZoneOffset.UTC);
 		OffsetDateTime hasta = contrato.getHasta().withOffsetSameInstant(ZoneOffset.UTC);
 		// Armar periodos
+		log.debug("ContratoToolService.saveCurso - Armando periodos");
 		List<Periodo> periodos = Periodo.makePeriodos(desde.getYear() * 100L + desde.getMonthValue(),
 				hasta.getYear() * 100L + hasta.getMonthValue());
+		logPeriodos(periodos);
 		// Recupera registrados
-		Map<String, CursoCargoContratado> asignados = cursoCargoContratadoService
-				.findAllByCursoIdAndContratoId(cursoId, contratoId).stream()
+		log.debug("ContratoToolService.saveCurso - Leyendo cursos asignados");
+		var cursoCargos = cursoCargoContratadoService.findAllByCursoIdAndContratoId(cursoId, contratoId);
+		logCursoCargos(cursoCargos);
+		Map<String, CursoCargoContratado> asignados = cursoCargos.stream()
 				.collect(Collectors.toMap(CursoCargoContratado::getPeriodo, asignado -> asignado));
 		// Asociar periodos con cursos
 		List<CursoCargoContratado> cargos = new ArrayList<CursoCargoContratado>();
@@ -179,14 +189,30 @@ public class ContratoToolService {
 			CursoCargoContratado cargo = null;
 			if (asignados.containsKey(periodo.getAnho() + "." + periodo.getMes())) {
 				cargo = asignados.get(periodo.getAnho() + "." + periodo.getMes());
+				cargo.setContratadoId(contrato.getContratadoId());
 			} else {
-				cargo = new CursoCargoContratado(null, cursoId, periodo.getAnho(), periodo.getMes(),
-						contrato.getContratadoId(), contratoId, cargotipoId, horassemanales, BigDecimal.ZERO, null,
-						null, null, (byte) 0, null);
+				cargo = new CursoCargoContratado(null,
+						cursoId,
+						periodo.getAnho(),
+						periodo.getMes(),
+						contrato.getContratadoId(),
+						contratoId,
+						cargoTipoId,
+						horasSemanales,
+						BigDecimal.ZERO,
+						null,
+						null,
+						null,
+						(byte) 0,
+						null);
 			}
 			cargos.add(cargo);
 		}
+		log.debug("ContratoToolService.saveCurso - Cursos a registrar");
+		logCursoCargos(cargos);
 		cargos = cursoCargoContratadoService.saveAll(cargos);
+		log.debug("ContratoToolService.saveCurso - Cursos registrados");
+		logCursoCargos(cargos);
 		return true;
 	}
 
@@ -206,6 +232,45 @@ public class ContratoToolService {
 		Long contratoId = cursoCargoContratado.getContratoId();
 		Long contratadoId = cursoCargoContratado.getContratadoId();
 		cursoCargoContratadoService.deleteAllByCursoIdAndContratoIdAndContratadoId(cursoId, contratoId, contratadoId);
+	}
+
+	private void logContrato(Contrato contrato) {
+		try {
+			log.debug("Contrato -> {}", JsonMapper
+					.builder()
+					.findAndAddModules()
+					.build()
+					.writerWithDefaultPrettyPrinter()
+					.writeValueAsString(contrato));
+		} catch (JsonProcessingException e) {
+			log.debug("Contrato jsonify error -> {}", e.getMessage());
+		}
+	}
+
+	private void logPeriodos(List<Periodo> periodos) {
+		try {
+			log.debug("Periodos -> {}", JsonMapper
+					.builder()
+					.findAndAddModules()
+					.build()
+					.writerWithDefaultPrettyPrinter()
+					.writeValueAsString(periodos));
+		}  catch (JsonProcessingException e) {
+			log.debug("Periodos jsonify error -> {}", e.getMessage());
+		}
+	}
+
+	private void logCursoCargos(List<CursoCargoContratado> cursoCargos) {
+		try {
+			log.debug("CursoCargos -> {}", JsonMapper
+					.builder()
+					.findAndAddModules()
+					.build()
+					.writerWithDefaultPrettyPrinter()
+					.writeValueAsString(cursoCargos));
+		} catch (JsonProcessingException e) {
+			log.debug("CursoCargos jsonify error -> {}", e.getMessage());
+		}
 	}
 
 }

@@ -27,7 +27,7 @@ import um.tesoreria.core.service.CursoCargoContratadoService;
  * @author daniel
  */
 @RestController
-@RequestMapping("/cursocargocontratado")
+@RequestMapping({"/cursocargocontratado", "/api/core/cursocargocontratado"})
 @Slf4j
 public class CursoCargoContratadoController {
 

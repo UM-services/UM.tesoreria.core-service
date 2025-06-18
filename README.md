@@ -35,6 +35,11 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.0
 - **Optimización de memoria**: Uso de `Map<String, BigDecimal>` en lugar de objetos completos
 - **Eliminación de objetos innecesarios**: Evita crear instancias vacías de `ChequeraPago`
 
+## Cambios Recientes (verificado en git log)
+- **Refactoring de repositorios**: Eliminación del prefijo 'I' en interfaces de repositorios siguiendo convenciones de Spring (commit: 5f3d934, 31 horas atrás)
+- **Optimización de rendimiento**: Implementación de computación paralela en `calculateDeuda` (commit: c6632e9, 7 días atrás)
+- **Nuevo modelo TipoChequeraSearch**: Agregado para búsquedas optimizadas de tipos de chequera (35 líneas de código)
+
 ## Instalación
 ```bash
 git clone https://github.com/UM-services/um.tesoreria.core-service.git
