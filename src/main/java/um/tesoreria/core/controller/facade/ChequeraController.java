@@ -31,6 +31,7 @@ import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.kotlin.model.dto.PreuniversitarioData;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;
 import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
+import um.tesoreria.core.model.dto.ChequeraDetailDto;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.service.SpoterDataService;
 import um.tesoreria.core.service.facade.ChequeraService;
@@ -175,5 +176,9 @@ public class ChequeraController {
         return ResponseEntity.ok(service.findAllCuotaPagosByChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId));
     }
 
+    @GetMapping("/status/{personaId}/facultad/{facultadId}")
+    public ResponseEntity<ChequeraDetailDto> constructStatusFromChequera(@PathVariable BigDecimal personaId, @PathVariable Integer facultadId) {
+        return ResponseEntity.ok(service.constructStatusFromChequera(personaId, facultadId));
+    }
 
 }

@@ -24,6 +24,9 @@ data class Usuario(
     var eliminaChequera: Byte = 0,
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-    var lastLog: OffsetDateTime? = null
+    var lastLog: OffsetDateTime? = null,
+
+    var googleMail: String? = null,
+    var activo: Byte = 1
 
 ) : Auditable()

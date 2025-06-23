@@ -4,12 +4,15 @@
 package um.tesoreria.core.service.facade;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +27,11 @@ import um.tesoreria.core.kotlin.model.dto.*;
 import um.tesoreria.core.model.ChequeraSerieControl;
 import um.tesoreria.core.model.ChequeraTotal;
 import um.tesoreria.core.model.Debito;
+import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
+import um.tesoreria.core.model.dto.ChequeraDetailDto;
 import um.tesoreria.core.model.dto.ChequeraPagoDto;
+import um.tesoreria.core.model.dto.MercadoPagoContextDto;
 import um.tesoreria.core.util.Tool;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.service.*;
@@ -38,44 +44,26 @@ import um.tesoreria.core.service.*;
 public class ChequeraService {
 
     private final ChequeraEliminadaService chequeraEliminadaService;
-
     private final ChequeraPagoAsientoService chequeraPagoAsientoService;
-
     private final ChequeraPagoService chequeraPagoService;
-
     private final ChequeraCuotaService chequeraCuotaService;
-
     private final ChequeraAlternativaService chequeraAlternativaService;
-
     private final ChequeraTotalService chequeraTotalService;
-
     private final ChequeraSerieService chequeraSerieService;
-
     private final ChequeraSerieControlService chequeraSerieControlService;
-
     private final ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
-
     private final ChequeraImpresionDetalleService chequeraImpresionDetalleService;
-
     private final DebitoService debitoService;
-
     private final ModelMapper modelMapper;
-
     private final FacultadService facultadService;
-
     private final TipoChequeraService tipoChequeraService;
-
     private final PersonaService personaService;
-
     private final LectivoService lectivoService;
-
     private final ArancelTipoService arancelTipoService;
-
     private final GeograficaService geograficaService;
-
     private final ProductoService productoService;
-
     private final DomicilioService domicilioService;
+    private final MercadoPagoContextService mercadoPagoContextService;
 
     @Autowired
     public ChequeraService(ChequeraEliminadaService chequeraEliminadaService, ChequeraPagoAsientoService chequeraPagoAsientoService, ChequeraPagoService chequeraPagoService,
@@ -83,7 +71,7 @@ public class ChequeraService {
                            ChequeraSerieService chequeraSerieService, ChequeraSerieControlService chequeraSerieControlService, ChequeraImpresionCabeceraService chequeraImpresionCabeceraService,
                            ChequeraImpresionDetalleService chequeraImpresionDetalleService, DebitoService debitoService, ModelMapper modelMapper, FacultadService facultadService,
                            TipoChequeraService tipoChequeraService, PersonaService personaService, LectivoService lectivoService, ArancelTipoService arancelTipoService, GeograficaService geograficaService,
-                           ProductoService productoService, DomicilioService domicilioService) {
+                           ProductoService productoService, DomicilioService domicilioService, MercadoPagoContextService mercadoPagoContextService) {
         this.chequeraEliminadaService = chequeraEliminadaService;
         this.chequeraPagoService = chequeraPagoService;
         this.chequeraPagoAsientoService = chequeraPagoAsientoService;
@@ -104,6 +92,7 @@ public class ChequeraService {
         this.geograficaService = geograficaService;
         this.productoService = productoService;
         this.domicilioService = domicilioService;
+        this.mercadoPagoContextService = mercadoPagoContextService;
     }
 
     @Transactional
@@ -246,6 +235,12 @@ public class ChequeraService {
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdConImporte(
                         chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
                         chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId());
+        
+        log.debug("Leyendo Pagos");
+        List<ChequeraPago> chequeraPagos = chequeraPagoService.findAllByChequera(
+                chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
+                chequeraSerie.getChequeraSerieId(), chequeraCuotaService);
+        
         log.debug("Leyendo Facultad");
         FacultadDto facultadDTO = modelMapper.map(facultadService.findByFacultadId(chequeraSerie.getFacultadId()), FacultadDto.class);
         log.debug("Leyendo TipoChequera");
@@ -260,18 +255,61 @@ public class ChequeraService {
         ArancelTipoDto arancelTipoDTO = modelMapper.map(arancelTipoService.findByArancelTipoId(chequeraSerie.getArancelTipoId()), ArancelTipoDto.class);
         log.debug("Leyendo Geografica");
         GeograficaDto geograficaDTO = modelMapper.map(geograficaService.findByGeograficaId(chequeraSerie.getGeograficaId()), GeograficaDto.class);
-        log.debug("Leyendo ChequeraCuota");
+        log.debug("Leyendo ChequeraCuota con Pagos");
         List<ChequeraCuotaDto> chequeraCuotaDtos = chequeraCuotas.stream()
-                .map(cuota -> new ChequeraCuotaDto(cuota.getCuotaId(), cuota.getMes(), cuota.getAnho(),
-                        cuota.getVencimiento1(), cuota.getImporte1(), cuota.getVencimiento2(), cuota.getImporte2(),
-                        cuota.getVencimiento3(), cuota.getImporte3(), cuota.getPagado(),
-                        modelMapper.map(productoService.findByProductoId(cuota.getProductoId()), ProductoDto.class)))
+                .map(cuota -> {
+                    // Filtrar los pagos de esta cuota específica usando chequeraCuotaId
+                    logChequeraCuota(cuota);
+                    List<ChequeraPago> pagosCuota = chequeraPagos.stream()
+                            .filter(pago -> Objects.equals(pago.getChequeraCuotaId(), cuota.getChequeraCuotaId()))
+                            .collect(Collectors.toList());
+                    
+                    // Convertir los pagos a DTOs
+                    List<ChequeraPagoDto> pagosCuotaDto = modelMapper.map(pagosCuota, new TypeToken<List<ChequeraPagoDto>>() {}.getType());
+                    
+                    // Obtener el contexto de MercadoPago activo para esta cuota
+                    MercadoPagoContextDto mercadoPagoContextDto = null;
+                    try {
+                        MercadoPagoContext mercadoPagoContext = mercadoPagoContextService.findActiveByChequeraCuotaId(cuota.getChequeraCuotaId());
+                        logMercadoPagoContext(mercadoPagoContext);
+                        mercadoPagoContextDto = modelMapper.map(mercadoPagoContext, MercadoPagoContextDto.class);
+                        logMercadoPagoContextDto(mercadoPagoContextDto);
+                        log.debug("MercadoPagoContextDto mapeado exitosamente para cuota {}", cuota.getChequeraCuotaId());
+                    } catch (Exception e) {
+                        log.debug("Error al obtener o mapear contexto de MercadoPago para la cuota {}: {}", cuota.getChequeraCuotaId(), e.getMessage());
+                    }
+                    
+                    return new ChequeraCuotaDto(
+                            cuota.getChequeraCuotaId(),
+                            cuota.getCuotaId(),
+                            cuota.getMes(),
+                            cuota.getAnho(),
+                            cuota.getVencimiento1(),
+                            cuota.getImporte1(),
+                            cuota.getVencimiento2(),
+                            cuota.getImporte2(),
+                            cuota.getVencimiento3(),
+                            cuota.getImporte3(),
+                            cuota.getPagado(),
+                            modelMapper.map(productoService.findByProductoId(cuota.getProductoId()), ProductoDto.class),
+                            pagosCuotaDto,
+                            mercadoPagoContextDto);
+                })
                 .collect(Collectors.toList());
         log.debug("Formando ChequeraSerieDTO");
-        ChequeraSerieDto chequeraSerieDTO = new ChequeraSerieDto(chequeraSerie.getChequeraSerieId(),
-                chequeraSerie.getFecha(), chequeraSerie.getObservaciones(), chequeraSerie.getAlternativaId(),
-                facultadDTO, tipoChequeraDTO, personaDTO, domicilioDTO, lectivoDTO, arancelTipoDTO, geograficaDTO, chequeraCuotaDtos);
-        return chequeraSerieDTO;
+        assert chequeraSerie.getAlternativaId() != null;
+        return new ChequeraSerieDto(chequeraSerie.getChequeraSerieId(),
+                chequeraSerie.getFecha(),
+                Objects.requireNonNull(chequeraSerie.getObservaciones()),
+                chequeraSerie.getAlternativaId(),
+                facultadDTO,
+                tipoChequeraDTO,
+                personaDTO,
+                domicilioDTO,
+                lectivoDTO,
+                arancelTipoDTO,
+                geograficaDTO,
+                chequeraCuotaDtos);
     }
 
     public List<ChequeraCuotaPagosDto> findAllCuotaPagosByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
@@ -289,6 +327,64 @@ public class ChequeraService {
                 return dto;
             })
             .collect(Collectors.toList());
+    }
+
+    public ChequeraDetailDto constructStatusFromChequera(BigDecimal personaId, Integer facultadId) {
+        var persona = personaService.findByPersonaId(personaId);
+        var lectivo = lectivoService.findByFecha(OffsetDateTime.now());
+        var facultad = facultadService.findByFacultadId(facultadId);
+        var chequeraSeries = chequeraSerieService.findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId(persona.getPersonaId(), persona.getDocumentoId(), facultad.getFacultadId(), lectivo.getLectivoId());
+        
+        // Convertir cada ChequeraSerie a ChequeraSerieDto usando constructChequeraDataDTO para incluir las cuotas
+        List<ChequeraSerieDto> chequeraSeriesDto = chequeraSeries.stream()
+                .map(this::constructChequeraDataDTO)
+                .collect(Collectors.toList());
+        
+        return ChequeraDetailDto.builder()
+                .persona(modelMapper.map(persona, PersonaDto.class))
+                .lectivo(modelMapper.map(lectivo, LectivoDto.class))
+                .facultad(modelMapper.map(facultad, FacultadDto.class))
+                .chequeraSeries(chequeraSeriesDto)
+                .build();
+    }
+
+    private void logChequeraCuota(ChequeraCuota cuota) {
+        try {
+            log.debug("ChequeraCuota-> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(cuota));
+        } catch (JsonProcessingException e) {
+            log.error("ChequeraCuota jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logMercadoPagoContext(MercadoPagoContext mercadoPagoContext) {
+        try {
+            log.debug("MercadoPagoContext -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(mercadoPagoContext));
+        } catch (JsonProcessingException e) {
+            log.error("MercadoPagoContext jsonify error -> {}", e.getMessage());
+        }
+    }
+
+    private void logMercadoPagoContextDto(MercadoPagoContextDto mercadoPagoContextDto) {
+        try {
+            log.debug("MercadoPagoContextDto -> {}", JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(mercadoPagoContextDto));
+        } catch (JsonProcessingException e) {
+            log.error("MercadoPagoContextDto jsonify error -> {}", e.getMessage());
+        }
     }
 
 }

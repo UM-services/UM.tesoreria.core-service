@@ -3,7 +3,7 @@
  */
 package um.tesoreria.core.controller.facade;
 
-import um.tesoreria.core.model.dto.AsignacionCosto;
+import um.tesoreria.core.model.dto.AsignacionCostoDto;
 import um.tesoreria.core.service.facade.CostoService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -25,9 +25,9 @@ public class CostoController {
     private CostoService service;
 
     @PostMapping("/addAsignacion")
-    public ResponseEntity<Boolean> addAsignacion(@RequestBody AsignacionCosto asignacionCosto) throws JsonProcessingException {
-        log.debug("AsignacionCosto - {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asignacionCosto));
-        return new ResponseEntity<>(service.addAsignacion(asignacionCosto), HttpStatus.OK);
+    public ResponseEntity<Boolean> addAsignacion(@RequestBody AsignacionCostoDto asignacionCostoDto) throws JsonProcessingException {
+        log.debug("AsignacionCosto - {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asignacionCostoDto));
+        return new ResponseEntity<>(service.addAsignacion(asignacionCostoDto), HttpStatus.OK);
     }
 
     @GetMapping("/deleteDesignacion/{entregaId}")

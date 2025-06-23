@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Vencimiento {
+public class VencimientoDto {
 
     private Long chequeraCuotaId;
     private Long mercadoPagoContextId;

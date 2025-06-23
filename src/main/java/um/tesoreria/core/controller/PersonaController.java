@@ -6,10 +6,8 @@ package um.tesoreria.core.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
-import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
 import um.tesoreria.core.kotlin.model.Persona;
-import jakarta.annotation.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.exception.PersonaException;
-import um.tesoreria.core.model.dto.DeudaPersona;
+import um.tesoreria.core.model.dto.DeudaPersonaDto;
 import um.tesoreria.core.model.view.PersonaKey;
 import um.tesoreria.core.service.PersonaService;
 
@@ -112,14 +110,14 @@ public class PersonaController {
 	}
 
 	@GetMapping("/deuda/{personaId}/{documentoId}")
-	public ResponseEntity<DeudaPersona> deudaByPersona(@PathVariable BigDecimal personaId,
-			@PathVariable Integer documentoId) {
+	public ResponseEntity<DeudaPersonaDto> deudaByPersona(@PathVariable BigDecimal personaId,
+                                                          @PathVariable Integer documentoId) {
 		return new ResponseEntity<>(service.deudaByPersona(personaId, documentoId), HttpStatus.OK);
 	}
 
 	@GetMapping("/deudaextended/{personaId}/{documentoId}")
-	public ResponseEntity<DeudaPersona> deudaByPersonaExtended(@PathVariable BigDecimal personaId,
-			@PathVariable Integer documentoId) {
+	public ResponseEntity<DeudaPersonaDto> deudaByPersonaExtended(@PathVariable BigDecimal personaId,
+                                                                  @PathVariable Integer documentoId) {
 		return new ResponseEntity<>(service.deudaByPersonaExtended(personaId, documentoId), HttpStatus.OK);
 	}
 

@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeudaChequera implements Serializable {
+public class DeudaChequeraDto implements Serializable {
 	/**
 	* 
 	*/

@@ -5,9 +5,6 @@ package um.tesoreria.core.model.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import um.tesoreria.core.kotlin.model.Articulo;
 import um.tesoreria.core.kotlin.model.Comprobante;
@@ -25,7 +22,7 @@ import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AsignacionCosto implements Serializable {
+public class AsignacionCostoDto implements Serializable {
 
 	private static final long serialVersionUID = -1663996814534996127L;
 

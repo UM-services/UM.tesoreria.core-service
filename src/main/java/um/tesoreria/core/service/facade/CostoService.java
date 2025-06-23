@@ -5,11 +5,10 @@ package um.tesoreria.core.service.facade;
 
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
-import um.tesoreria.core.model.dto.AsignacionCosto;
+import um.tesoreria.core.model.dto.AsignacionCostoDto;
 import um.tesoreria.core.exception.EntregaDetalleException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import jakarta.annotation.Resource;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,10 +57,10 @@ public class CostoService {
     }
 
     @Transactional
-    public Boolean addAsignacion(AsignacionCosto asignacionCosto) {
+    public Boolean addAsignacion(AsignacionCostoDto asignacionCostoDto) {
 
         try {
-            log.debug("AsignacionCosto -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asignacionCosto));
+            log.debug("AsignacionCosto -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asignacionCostoDto));
         } catch (JsonProcessingException e) {
             log.debug("AsignacionCosto -> error: {}", e.getMessage());
         }
@@ -78,15 +77,15 @@ public class CostoService {
             }
 
             int item = 0;
-            AsientoInternal asientoInternal = contabilidadService.nextAsiento(asignacionCosto.getProveedorMovimiento().getFechaComprobante(), null);
+            AsientoInternal asientoInternal = contabilidadService.nextAsiento(asignacionCostoDto.getProveedorMovimiento().getFechaComprobante(), null);
             try {
                 log.debug("Asiento Internal -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asientoInternal));
             } catch (JsonProcessingException e) {
                 log.debug("Asiento Internal -> error: {}", e.getMessage());
             }
             Entrega entrega = new Entrega.Builder()
-                    .fecha(asignacionCosto.getProveedorMovimiento().getFechaComprobante())
-                    .ubicacionId(asignacionCosto.getUbicacionArticulo().getUbicacionId())
+                    .fecha(asignacionCostoDto.getProveedorMovimiento().getFechaComprobante())
+                    .ubicacionId(asignacionCostoDto.getUbicacionArticulo().getUbicacionId())
                     .fechaContable(asientoInternal.getFechaContable())
                     .ordenContable(asientoInternal.getOrdenContable())
                     .tipo("asignacion")
@@ -112,19 +111,19 @@ public class CostoService {
                 log.debug("Asistencia -> error: {}", e.getMessage());
             }
 
-            String concepto = MessageFormat.format("{0} - {1}-{2} - Asignación de Costos", asignacionCosto.getComprobante().getDescripcion(), String.format("%04d", asignacionCosto.getProveedorMovimiento().getPrefijo()), String.format("%08d", asignacionCosto.getProveedorMovimiento().getNumeroComprobante()));
+            String concepto = MessageFormat.format("{0} - {1}-{2} - Asignación de Costos", asignacionCostoDto.getComprobante().getDescripcion(), String.format("%04d", asignacionCostoDto.getProveedorMovimiento().getPrefijo()), String.format("%08d", asignacionCostoDto.getProveedorMovimiento().getNumeroComprobante()));
             item += 1;
             CuentaMovimiento cuentaMovimiento = new CuentaMovimiento.Builder()
                     .fechaContable(entrega.getFechaContable())
                     .ordenContable(entrega.getOrdenContable())
                     .item(item)
-                    .numeroCuenta(asignacionCosto.getArticulo().getNumeroCuenta())
-                    .debita(asignacionCosto.getComprobante().getDebita())
-                    .comprobanteId(asignacionCosto.getComprobante().getComprobanteId())
+                    .numeroCuenta(asignacionCostoDto.getArticulo().getNumeroCuenta())
+                    .debita(asignacionCostoDto.getComprobante().getDebita())
+                    .comprobanteId(asignacionCostoDto.getComprobante().getComprobanteId())
                     .concepto(concepto)
-                    .importe(BigDecimal.valueOf(Math.abs(asignacionCosto.getImporte().doubleValue())))
-                    .proveedorId(asignacionCosto.getProveedorMovimiento().getProveedorId())
-                    .proveedorMovimientoId(asignacionCosto.getProveedorMovimiento().getProveedorMovimientoId())
+                    .importe(BigDecimal.valueOf(Math.abs(asignacionCostoDto.getImporte().doubleValue())))
+                    .proveedorId(asignacionCostoDto.getProveedorMovimiento().getProveedorId())
+                    .proveedorMovimientoId(asignacionCostoDto.getProveedorMovimiento().getProveedorMovimientoId())
                     .trackId(track.getTrackId())
                     .build();
             cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
@@ -138,13 +137,13 @@ public class CostoService {
                     .fechaContable(entrega.getFechaContable())
                     .ordenContable(entrega.getOrdenContable())
                     .item(item)
-                    .numeroCuenta(asignacionCosto.getUbicacionArticulo().getNumeroCuenta())
-                    .debita((byte) (1 - asignacionCosto.getComprobante().getDebita()))
-                    .comprobanteId(asignacionCosto.getComprobante().getComprobanteId())
+                    .numeroCuenta(asignacionCostoDto.getUbicacionArticulo().getNumeroCuenta())
+                    .debita((byte) (1 - asignacionCostoDto.getComprobante().getDebita()))
+                    .comprobanteId(asignacionCostoDto.getComprobante().getComprobanteId())
                     .concepto(concepto)
-                    .importe(BigDecimal.valueOf(Math.abs(asignacionCosto.getImporte().doubleValue())))
-                    .proveedorId(asignacionCosto.getProveedorMovimiento().getProveedorId())
-                    .proveedorMovimientoId(asignacionCosto.getProveedorMovimiento().getProveedorMovimientoId())
+                    .importe(BigDecimal.valueOf(Math.abs(asignacionCostoDto.getImporte().doubleValue())))
+                    .proveedorId(asignacionCostoDto.getProveedorMovimiento().getProveedorId())
+                    .proveedorMovimientoId(asignacionCostoDto.getProveedorMovimiento().getProveedorMovimientoId())
                     .trackId(track.getTrackId())
                     .build();
             cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
@@ -162,11 +161,11 @@ public class CostoService {
             }
             EntregaDetalle entregaDetalle = new EntregaDetalle.Builder()
                     .entregaId(entrega.getEntregaId())
-                    .articuloId(asignacionCosto.getProveedorArticulo().getArticuloId())
-                    .proveedorMovimientoId(asignacionCosto.getProveedorArticulo().getProveedorMovimientoId())
-                    .orden(asignacionCosto.getProveedorArticulo().getOrden())
-                    .concepto(asignacionCosto.getProveedorArticulo().getConcepto())
-                    .cantidad(asignacionCosto.getImporte())
+                    .articuloId(asignacionCostoDto.getProveedorArticulo().getArticuloId())
+                    .proveedorMovimientoId(asignacionCostoDto.getProveedorArticulo().getProveedorMovimientoId())
+                    .orden(asignacionCostoDto.getProveedorArticulo().getOrden())
+                    .concepto(asignacionCostoDto.getProveedorArticulo().getConcepto())
+                    .cantidad(asignacionCostoDto.getImporte())
                     .trackId(track.getTrackId())
                     .build();
             try {
@@ -181,13 +180,13 @@ public class CostoService {
                 log.debug("EntregaDetalle post save -> error: {}", e.getMessage());
             }
 
-            ProveedorArticulo proveedorArticulo = proveedorArticuloService.findByProveedorArticuloId(asignacionCosto.getProveedorArticulo().getProveedorArticuloId());
+            ProveedorArticulo proveedorArticulo = proveedorArticuloService.findByProveedorArticuloId(asignacionCostoDto.getProveedorArticulo().getProveedorArticuloId());
             try {
                 log.debug("ProveedorArticulo before asignado -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
             } catch (JsonProcessingException e) {
                 log.debug("ProveedorArticulo before asignado -> error: {}", e.getMessage());
             }
-            proveedorArticulo.setAsignado(proveedorArticulo.getAsignado().add(asignacionCosto.getImporte()).setScale(2, RoundingMode.HALF_UP));
+            proveedorArticulo.setAsignado(proveedorArticulo.getAsignado().add(asignacionCostoDto.getImporte()).setScale(2, RoundingMode.HALF_UP));
             proveedorArticulo = proveedorArticuloService.update(proveedorArticulo, proveedorArticulo.getProveedorArticuloId());
             try {
                 log.debug("ProveedorArticulo after asignado -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
@@ -199,7 +198,7 @@ public class CostoService {
                     .proveedorMovimientoId(proveedorArticulo.getProveedorMovimientoId())
                     .proveedorArticuloId(proveedorArticulo.getProveedorArticuloId())
                     .trackId(track.getTrackId())
-                    .importe(asignacionCosto.getImporte())
+                    .importe(asignacionCostoDto.getImporte())
                     .build();
             try {
                 log.debug("ProveedorArticuloTrack before -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticuloTrack));

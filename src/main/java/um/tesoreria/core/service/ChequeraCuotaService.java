@@ -11,7 +11,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,7 +29,7 @@ import um.tesoreria.core.exception.TipoChequeraException;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.model.ChequeraTotal;
-import um.tesoreria.core.model.dto.DeudaChequera;
+import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.model.internal.CuotaPeriodoDto;
 import um.tesoreria.core.repository.ChequeraCuotaRepository;
 import um.tesoreria.core.service.view.ChequeraCuotaDeudaService;
@@ -263,8 +262,8 @@ public class ChequeraCuotaService {
                 chequeraSerieId);
     }
 
-    private DeudaChequera createDefaultDeudaChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
-        return new DeudaChequera(
+    private DeudaChequeraDto createDefaultDeudaChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+        return new DeudaChequeraDto(
                 BigDecimal.ZERO,
                 0,
                 facultadId,
@@ -283,7 +282,7 @@ public class ChequeraCuotaService {
         );
     }
 
-    public DeudaChequera calculateDeuda(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+    public DeudaChequeraDto calculateDeuda(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         // Validación temprana de parámetros para evitar procesamiento innecesario
         if (facultadId == null || tipoChequeraId == null || chequeraSerieId == null) {
             log.warn("Parámetros inválidos para calculateDeuda: facultadId={}, tipoChequeraId={}, chequeraSerieId={}", 
@@ -367,7 +366,7 @@ public class ChequeraCuotaService {
                             )
                     );
 
-            return new DeudaChequera(
+            return new DeudaChequeraDto(
                     serie.getPersonaId(),
                     serie.getDocumentoId(),
                     facultadId,
@@ -394,12 +393,12 @@ public class ChequeraCuotaService {
         }
     }
 
-    public DeudaChequera calculateDeudaExtended(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+    public DeudaChequeraDto calculateDeudaExtended(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         ChequeraSerie serie = null;
         try {
             serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         } catch (ChequeraSerieException e) {
-            return new DeudaChequera(
+            return new DeudaChequeraDto(
                     BigDecimal.ZERO,
                     0,
                     facultadId,
@@ -471,7 +470,7 @@ public class ChequeraCuotaService {
         } catch (LectivoException e) {
             lectivo = new Lectivo();
         }
-        return new DeudaChequera(
+        return new DeudaChequeraDto(
                 serie.getPersonaId(),
                 serie.getDocumentoId(),
                 facultadId,

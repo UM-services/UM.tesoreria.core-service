@@ -14,6 +14,7 @@ import um.tesoreria.core.kotlin.model.TipoPago;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChequeraPagoDto {
+
     private Long chequeraPagoId;
     private Long chequeraCuotaId;
     private Integer facultadId;

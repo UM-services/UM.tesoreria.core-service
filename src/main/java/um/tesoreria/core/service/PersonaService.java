@@ -28,9 +28,9 @@ import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
 import um.tesoreria.core.extern.model.kotlin.PreInscripcionFacultad;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.MercadoPagoContext;
-import um.tesoreria.core.model.dto.DeudaChequera;
-import um.tesoreria.core.model.dto.DeudaPersona;
-import um.tesoreria.core.model.dto.Vencimiento;
+import um.tesoreria.core.model.dto.DeudaChequeraDto;
+import um.tesoreria.core.model.dto.DeudaPersonaDto;
+import um.tesoreria.core.model.dto.VencimientoDto;
 import um.tesoreria.core.model.view.PersonaKey;
 import um.tesoreria.core.repository.PersonaRepository;
 import um.tesoreria.core.service.view.PersonaKeyService;
@@ -82,13 +82,13 @@ public class PersonaService {
         return repository.findAllByCbuLike("072%");
     }
 
-    public DeudaPersona deudaByPersona(BigDecimal personaId, Integer documentoId) {
+    public DeudaPersonaDto deudaByPersona(BigDecimal personaId, Integer documentoId) {
         var deudaCuotas = 0;
         var deudaTotal = BigDecimal.ZERO;
-        List<DeudaChequera> deudas = new ArrayList<>();
+        List<DeudaChequeraDto> deudas = new ArrayList<>();
         for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
                 null)) {
-            DeudaChequera deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
+            DeudaChequeraDto deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
                     chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
             if (deuda.getCuotas() > 0) {
                 deudas.add(deuda);
@@ -96,28 +96,28 @@ public class PersonaService {
                 deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
             }
         }
-        DeudaPersona deudaPersona = DeudaPersona.builder()
+        DeudaPersonaDto deudaPersonaDto = DeudaPersonaDto.builder()
                 .personaId(personaId)
                 .documentoId(documentoId)
                 .cuotas(deudaCuotas)
                 .deuda(deudaTotal)
                 .deudas(deudas)
-                .vencimientos(new ArrayList<>())
+                .vencimientoDtos(new ArrayList<>())
                 .build();
-        logDeudaPersona(deudaPersona);
-        return deudaPersona;
+        logDeudaPersona(deudaPersonaDto);
+        return deudaPersonaDto;
     }
 
-    public DeudaPersona deudaByPersonaExtended(BigDecimal personaId, Integer documentoId) {
+    public DeudaPersonaDto deudaByPersonaExtended(BigDecimal personaId, Integer documentoId) {
         log.debug("Processing deudaByPersonaExtended");
         var deudaCuotas = 0;
         var deudaTotal = BigDecimal.ZERO;
-        List<DeudaChequera> deudas = new ArrayList<>();
-        List<Vencimiento> vencimientos = new ArrayList<>();
+        List<DeudaChequeraDto> deudas = new ArrayList<>();
+        List<VencimientoDto> vencimientoDtos = new ArrayList<>();
         for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
                 null)) {
             logChequeraSerie(chequera);
-            DeudaChequera deuda = chequeraCuotaService.calculateDeudaExtended(chequera.getFacultadId(),
+            DeudaChequeraDto deuda = chequeraCuotaService.calculateDeudaExtended(chequera.getFacultadId(),
                     chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
             logDeuda(deuda);
             if (deuda.getCuotas() > 0) {
@@ -144,7 +144,7 @@ public class PersonaService {
                         // Formatear la fecha de vencimiento
                         String fechaVencimientoFormatted = mercadoPagoContext.getFechaVencimiento()
                                 .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                        vencimientos.add(Vencimiento.builder()
+                        vencimientoDtos.add(VencimientoDto.builder()
                                 .chequeraCuotaId(chequeraCuota.getChequeraCuotaId())
                                 .mercadoPagoContextId(mercadoPagoContext.getMercadoPagoContextId())
                                 .producto(Objects.requireNonNull(chequeraCuota.getProducto()).getNombre())
@@ -158,21 +158,21 @@ public class PersonaService {
             }
         }
 
-        DeudaPersona deudaPersona = DeudaPersona.builder()
+        DeudaPersonaDto deudaPersonaDto = DeudaPersonaDto.builder()
                 .personaId(personaId)
                 .documentoId(documentoId)
                 .cuotas(deudaCuotas)
                 .deuda(deudaTotal)
                 .deudas(deudas)
-                .vencimientos(vencimientos)
+                .vencimientoDtos(vencimientoDtos)
                 .build();
-        logDeudaPersona(deudaPersona);
-        return deudaPersona;
+        logDeudaPersona(deudaPersonaDto);
+        return deudaPersonaDto;
     }
 
-    private void logDeudaPersona(DeudaPersona deudaPersona) {
+    private void logDeudaPersona(DeudaPersonaDto deudaPersonaDto) {
         try {
-            log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersona));
+            log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersonaDto));
         } catch (JsonProcessingException e) {
             log.debug("DeudaPersona error -> {}", e.getMessage());
         }
@@ -194,7 +194,7 @@ public class PersonaService {
         }
     }
 
-    private void logDeuda(DeudaChequera deuda) {
+    private void logDeuda(DeudaChequeraDto deuda) {
         try {
             log.debug("DeudaChequera -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deuda));
         } catch (JsonProcessingException e) {

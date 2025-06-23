@@ -20,13 +20,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DeudaPersona implements Serializable {
+public class DeudaPersonaDto implements Serializable {
 
 	private BigDecimal personaId;
 	private Integer documentoId;
 	private Integer cuotas;
 	private BigDecimal deuda;
-	private List<DeudaChequera> deudas;
-	private List<Vencimiento> vencimientos;
+	private List<DeudaChequeraDto> deudas;
+	private List<VencimientoDto> vencimientoDtos;
 
 }

@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CostoParameter implements Serializable {
+public class CostoParameterDto implements Serializable {
 
 	private static final long serialVersionUID = 3389089202450536124L;
 

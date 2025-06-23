@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import um.tesoreria.core.model.dto.ProveedorArticuloAsignable;
+import um.tesoreria.core.model.dto.ProveedorArticuloAsignableDto;
 import um.tesoreria.core.service.ProveedorArticuloService;
 import um.tesoreria.core.kotlin.model.ProveedorArticulo;
 
@@ -32,7 +32,7 @@ public class ProveedorArticuloController {
 
 	@PostMapping("/movimiento/")
 	public ResponseEntity<List<ProveedorArticulo>> findAllByProveedorMovimientoIds(
-			@RequestBody ProveedorArticuloAsignable asignables) throws JsonProcessingException {
+			@RequestBody ProveedorArticuloAsignableDto asignables) throws JsonProcessingException {
 		return new ResponseEntity<>(service.findAllByProveedorMovimientoIds(
 				asignables.getProveedorMovimientoIds(), asignables.getAsignables()), HttpStatus.OK);
 	}
