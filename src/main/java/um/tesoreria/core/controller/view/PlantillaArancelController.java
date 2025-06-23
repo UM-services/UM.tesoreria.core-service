@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import um.tesoreria.core.model.dto.PlantillaArancel;
+import um.tesoreria.core.model.dto.PlantillaArancelDto;
 import um.tesoreria.core.service.view.PlantillaArancelService;
 
 /**
@@ -27,10 +27,10 @@ public class PlantillaArancelController {
 	private PlantillaArancelService service;
 
 	@GetMapping("/plantilla/{facultadId}/{lectivoId}/{tipochequeraId}/{aranceltipoId}")
-	public ResponseEntity<List<PlantillaArancel>> findAllByPlantilla(@PathVariable Integer facultadId,
-			@PathVariable Integer lectivoId, @PathVariable Integer tipochequeraId,
-			@PathVariable Integer aranceltipoId) {
-		return new ResponseEntity<List<PlantillaArancel>>(
+	public ResponseEntity<List<PlantillaArancelDto>> findAllByPlantilla(@PathVariable Integer facultadId,
+                                                                        @PathVariable Integer lectivoId, @PathVariable Integer tipochequeraId,
+                                                                        @PathVariable Integer aranceltipoId) {
+		return new ResponseEntity<List<PlantillaArancelDto>>(
 				service.findAllByPlantilla(facultadId, lectivoId, tipochequeraId, aranceltipoId), HttpStatus.OK);
 	}
 }

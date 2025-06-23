@@ -55,7 +55,7 @@ import um.tesoreria.core.extern.model.view.PreunivResumenFacultad;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.view.FacturaPendiente;
 import um.tesoreria.core.model.*;
-import um.tesoreria.core.model.dto.DeudaChequera;
+import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.model.view.CarreraKey;
 import um.tesoreria.core.model.view.ChequeraPreuniv;
 import um.tesoreria.core.model.view.DomicilioKey;
@@ -317,10 +317,10 @@ public class SheetService {
 
             for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()))) {
                 ChequeraSerie chequeraSerie = chequeras.get(persona.getUnified());
-                DeudaChequera deudaChequera = chequeraCuotaService.calculateDeuda(facultadId, tipochequeraId, chequeraSerie.getChequeraSerieId());
+                DeudaChequeraDto deudaChequeraDto = chequeraCuotaService.calculateDeuda(facultadId, tipochequeraId, chequeraSerie.getChequeraSerieId());
                 boolean show = true;
                 if (soloDeudores) {
-                    if (deudaChequera.getDeuda().compareTo(BigDecimal.ZERO) == 0) {
+                    if (deudaChequeraDto.getDeuda().compareTo(BigDecimal.ZERO) == 0) {
                         show = false;
                     }
                 }
@@ -383,8 +383,8 @@ public class SheetService {
                     if (chequeraSerie.getFecha() != null) {
                         this.setCellOffsetDateTime(row, 9, Objects.requireNonNull(chequeraSerie.getFecha()).withOffsetSameInstant(ZoneOffset.UTC), styleDate);
                     }
-                    this.setCellBigDecimal(row, 10, deudaChequera.getDeuda(), styleNormal);
-                    this.setCellInteger(row, 11, deudaChequera.getCuotas(), styleNormal);
+                    this.setCellBigDecimal(row, 10, deudaChequeraDto.getDeuda(), styleNormal);
+                    this.setCellInteger(row, 11, deudaChequeraDto.getCuotas(), styleNormal);
                     if (carrera != null) {
                         this.setCellString(row, 12, carrera.getNombre(), styleNormal);
                     }
@@ -393,10 +393,10 @@ public class SheetService {
                         this.setCellString(row, 14, domicilio.getEmailPersonal(), styleNormal);
                         this.setCellString(row, 15, domicilio.getEmailInstitucional(), styleNormal);
                     }
-                    if (deudaChequera.getVencimiento1() != null) {
-                        this.setCellOffsetDateTime(row, 16, deudaChequera.getVencimiento1().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
+                    if (deudaChequeraDto.getVencimiento1() != null) {
+                        this.setCellOffsetDateTime(row, 16, deudaChequeraDto.getVencimiento1().withOffsetSameInstant(ZoneOffset.UTC), styleDate);
                     }
-                    this.setCellBigDecimal(row, 17, deudaChequera.getImporte1(), styleNormal);
+                    this.setCellBigDecimal(row, 17, deudaChequeraDto.getImporte1(), styleNormal);
                 }
             }
         }
@@ -1183,7 +1183,7 @@ public class SheetService {
             // Lista la deuda
             boolean deudor = false;
             for (ChequeraSerie serie : chequeraSerieService.findAllByPersona(suspendido.getPersonaId(), suspendido.getDocumentoId())) {
-                DeudaChequera deuda = chequeraCuotaService.calculateDeuda(serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId());
+                DeudaChequeraDto deuda = chequeraCuotaService.calculateDeuda(serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId());
                 if (deuda.getCuotas() > 0) {
                     deudor = true;
                     row = sheet.createRow(++fila);

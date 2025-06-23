@@ -36,8 +36,9 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.0
 - **Eliminación de objetos innecesarios**: Evita crear instancias vacías de `ChequeraPago`
 
 ## Cambios Recientes (verificado en git log)
-- **Refactoring de repositorios**: Eliminación del prefijo 'I' en interfaces de repositorios siguiendo convenciones de Spring (commit: 5f3d934, 31 horas atrás)
-- **Optimización de rendimiento**: Implementación de computación paralela en `calculateDeuda` (commit: c6632e9, 7 días atrás)
+- **Refactoring de controladores**: Eliminación de mapeos hardcodeados y optimización de imports (commit: 3d6fd9d, 17 de junio 2025)
+- **Refactoring de repositorios**: Eliminación del prefijo 'I' en interfaces de repositorios siguiendo convenciones de Spring (commit: 5f3d934, 17 de junio 2025)
+- **Optimización de rendimiento**: Implementación de computación paralela en `calculateDeuda` (commit: c6632e9, 10 de junio 2025)
 - **Nuevo modelo TipoChequeraSearch**: Agregado para búsquedas optimizadas de tipos de chequera (35 líneas de código)
 
 ## Instalación

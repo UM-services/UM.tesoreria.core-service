@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.ArancelPorcentaje;
 import um.tesoreria.core.model.LectivoCuota;
-import um.tesoreria.core.model.dto.PlantillaArancel;
+import um.tesoreria.core.model.dto.PlantillaArancelDto;
 import um.tesoreria.core.repository.ArancelPorcentajeRepository;
 import um.tesoreria.core.repository.LectivoCuotaRepository;
 
@@ -29,9 +29,9 @@ public class PlantillaArancelService {
 	@Autowired
 	private ArancelPorcentajeRepository arancelPorcentajeRepository;
 
-	public List<PlantillaArancel> findAllByPlantilla(Integer facultadId, Integer lectivoId, Integer tipoChequeraId,
-			Integer arancelTipoId) {
-		List<PlantillaArancel> cuotas = new ArrayList<PlantillaArancel>();
+	public List<PlantillaArancelDto> findAllByPlantilla(Integer facultadId, Integer lectivoId, Integer tipoChequeraId,
+                                                        Integer arancelTipoId) {
+		List<PlantillaArancelDto> cuotas = new ArrayList<PlantillaArancelDto>();
 		for (LectivoCuota modelo : lectivoCuotaRepository.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId,
 				lectivoId, tipoChequeraId)) {
 			ArancelPorcentaje porcentaje = arancelPorcentajeRepository
@@ -40,7 +40,7 @@ public class PlantillaArancelService {
 			BigDecimal importe1 = modelo.getImporte1().multiply(porcentaje.getPorcentaje()).divide(new BigDecimal(100));
 			BigDecimal importe2 = modelo.getImporte2().multiply(porcentaje.getPorcentaje()).divide(new BigDecimal(100));
 			BigDecimal importe3 = modelo.getImporte3().multiply(porcentaje.getPorcentaje()).divide(new BigDecimal(100));
-			cuotas.add(new PlantillaArancel(facultadId, lectivoId, tipoChequeraId, arancelTipoId,
+			cuotas.add(new PlantillaArancelDto(facultadId, lectivoId, tipoChequeraId, arancelTipoId,
 					modelo.getProductoId(), modelo.getAlternativaId(), modelo.getCuotaId(), modelo.getMes(),
 					modelo.getAnho(), porcentaje.getPorcentaje(), modelo.getVencimiento1(), importe1,
 					modelo.getImporte1(), modelo.getVencimiento2(), importe2, modelo.getImporte2(),

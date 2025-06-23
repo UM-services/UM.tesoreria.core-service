@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlantillaArancel implements Serializable {
+public class PlantillaArancelDto implements Serializable {
 	/**
 	 * 
 	 */

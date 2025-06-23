@@ -8,11 +8,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 ## [Unreleased] - Cambios verificables del git log
 
 ### Added
-- **Nuevo modelo TipoChequeraSearch** (commit: 5f3d934, 31 horas atrás)
+- **Nuevo modelo TipoChequeraSearch** (commit: 5f3d934, 17 de junio 2025)
   - Modelo de vista para búsquedas optimizadas de tipos de chequera (35 líneas)
   - Incluye repositorio, servicio y controlador asociados
   - Soporte para búsquedas por condiciones de texto
-- **Optimización de rendimiento en `calculateDeuda`** (commit: c6632e9, 7 días atrás)
+- **Optimización de rendimiento en `calculateDeuda`** (commit: c6632e9, 10 de junio 2025)
   - Implementación de computación paralela usando `CompletableFuture`
   - Validación temprana de parámetros para evitar procesamiento innecesario
   - Optimización de memoria usando `Map<String, BigDecimal>` en lugar de objetos completos
@@ -26,12 +26,17 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 - Nuevo endpoint para obtener información completa de inscripciones `GET /inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}` (commit: 833a92b)
 
 ### Changed
-- **Refactoring masivo de repositorios** (commit: 5f3d934, 31 horas atrás)
+- **Refactoring de controladores** (commit: 3d6fd9d, 17 de junio 2025)
+  - Eliminación de mapeos hardcodeados en `CursoCargoContratadoController`
+  - Limpieza de imports en `ContratoToolController` removiendo anotación `@Auto` no utilizada
+  - Agregado imports de Jackson en `ContratoToolService` para procesamiento JSON
+  - Actualización de documentación en CHANGELOG.md y README.md con cambios recientes
+- **Refactoring masivo de repositorios** (commit: 5f3d934, 17 de junio 2025)
   - Eliminación del prefijo 'I' en 98 interfaces de repositorios siguiendo convenciones de Spring
   - Actualización de SpringDoc OpenAPI de 2.8.8 a 2.8.9
   - Actualización de OpenPDF de 2.0.5 a 2.2.1
   - Mejora en controladores de TipoChequera
-- **Mejorado el rendimiento de `calculateDeuda`** (commit: c6632e9, 7 días atrás)
+- **Mejorado el rendimiento de `calculateDeuda`** (commit: c6632e9, 10 de junio 2025)
   - Consultas ejecutadas en paralelo: pagos, cuotas, cuota1 y totales
   - Reducción estimada del 30-50% en tiempo de respuesta
   - Reducción estimada del 30% en uso de memoria
@@ -86,12 +91,14 @@ La versión actual del proyecto es 0.0.1-SNAPSHOT según el pom.xml. Esta es la 
 - **Eliminación de objetos innecesarios**: Evita crear instancias vacías de `ChequeraPago`
 
 ### Commits de Optimización Verificables (git log)
-- `9cab730` - Merge PR #139: Refactoring eliminación de prefijo 'I' en repositorios y actualización de documentación (31 horas atrás)
-- `5f3d934` - refactor(repositories): remove 'I' prefix from repository interfaces (31 horas atrás)
-- `8a93581` - Merge PR #137: Optimización de rendimiento en calculatedeuda con computación paralela (7 días atrás)
-- `c6632e9` - perf(calculateDeuda): implement parallel computation with CompletableFuture (7 días atrás)
-- `a7e078b` - Merge PR #135: Actualización de documentación y limpieza de código (2 semanas atrás)
-- `cc5be90` - docs(changelog): actualiza documentación con cambios verificables (2 semanas atrás)
+- `447b4b2` - Merge PR #141: Refactoring de repositorios y optimización de rendimiento (17 de junio 2025)
+- `3d6fd9d` - refactor(controllers): remove hardcoded request mappings and optimize imports (17 de junio 2025)
+- `9cab730` - Merge PR #139: Refactoring eliminación de prefijo 'I' en repositorios y actualización de documentación (17 de junio 2025)
+- `5f3d934` - refactor(repositories): remove 'I' prefix from repository interfaces (17 de junio 2025)
+- `8a93581` - Merge PR #137: Optimización de rendimiento en calculatedeuda con computación paralela (10 de junio 2025)
+- `c6632e9` - perf(calculateDeuda): implement parallel computation with CompletableFuture (10 de junio 2025)
+- `a7e078b` - Merge PR #135: Actualización de documentación y limpieza de código (3 de junio 2025)
+- `cc5be90` - docs(changelog): actualiza documentación con cambios verificables (3 de junio 2025)
 - `ab3bc99` - Merge PR #133: Cambio emailpagador inicial
 - `62acf40` - fix emailPagador
 - `1e8a299` - Merge PR #131: Limpieza de código y mejoras en gestión de domicilios

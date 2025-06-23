@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import um.tesoreria.core.model.dto.CostoParameter;
+import um.tesoreria.core.model.dto.CostoParameterDto;
 import um.tesoreria.core.service.dto.CostoParameterService;
 
 /**
@@ -25,8 +25,8 @@ public class CostoParameterController {
 	private CostoParameterService service;
 
 	@GetMapping("/")
-	public ResponseEntity<CostoParameter> findParameters() {
-		return new ResponseEntity<CostoParameter>(service.findParameters(), HttpStatus.OK);
+	public ResponseEntity<CostoParameterDto> findParameters() {
+		return new ResponseEntity<CostoParameterDto>(service.findParameters(), HttpStatus.OK);
 	}
 
 }

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.exception.ChequeraCuotaException;
-import um.tesoreria.core.model.dto.DeudaChequera;
+import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.service.ChequeraCuotaService;
 
 /**
@@ -106,8 +106,8 @@ public class ChequeraCuotaController {
     }
 
     @GetMapping("/deuda/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
-    public ResponseEntity<DeudaChequera> calculateDeuda(@PathVariable Integer facultadId,
-                                                        @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
+    public ResponseEntity<DeudaChequeraDto> calculateDeuda(@PathVariable Integer facultadId,
+                                                           @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
         return new ResponseEntity<>(service.calculateDeuda(facultadId, tipoChequeraId, chequeraSerieId),
                 HttpStatus.OK);
     }
