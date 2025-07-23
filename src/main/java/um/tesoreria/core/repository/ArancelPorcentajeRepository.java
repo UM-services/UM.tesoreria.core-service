@@ -16,8 +16,8 @@ import um.tesoreria.core.kotlin.model.ArancelPorcentaje;
  */
 public interface ArancelPorcentajeRepository extends JpaRepository<ArancelPorcentaje, Long> {
 
-	public List<ArancelPorcentaje> findAllByAranceltipoId(Integer aranceltipoId);
+	List<ArancelPorcentaje> findAllByAranceltipoId(Integer aranceltipoId);
 
-	public Optional<ArancelPorcentaje> findByAranceltipoIdAndProductoId(Integer aranceltipoId, Integer productoId);
+	Optional<ArancelPorcentaje> findByAranceltipoIdAndProductoId(Integer aranceltipoId, Integer productoId);
 
 }
