@@ -6,6 +6,9 @@ app:
   password: root
   logging: debug
   testing: false
+  consul:
+    host: consul-service
+    port: 8500
   mail:
     username: uid
     password: pwd
@@ -13,18 +16,16 @@ app:
 server:
   port: ${app.port}
 
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://eureka:@eureka-service:8761/eureka
-
 spring:
   application:
     name: tesoreria-core-service
+  cloud:
+    consul:
+      host: ${app.consul.host}
+      port: ${app.consul.port}
+      discovery:
+        prefer-ip-address: true
+        tags: tesoreria,core
   datasource:
     url: jdbc:mysql://${app.server}/${app.database}?useSSL=false&serverTimezone=UTC
     username: ${app.user}
