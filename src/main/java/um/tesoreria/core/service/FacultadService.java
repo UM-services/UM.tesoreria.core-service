@@ -45,12 +45,12 @@ public class FacultadService {
 	}
 
 	public List<Facultad> findFacultades() {
-		Integer[] facultades = { 1, 2, 3, 4, 5, 14, 15 };
+		Integer[] facultades = { 1, 2, 3, 4, 5, 6, 14, 15 };
 		return repository.findAllByFacultadIdIn(Arrays.asList(facultades));
 	}
 
 	public List<FacultadLectivo> findAllByLectivoId(Integer lectivoId) {
-		Integer[] facultades = { 1, 2, 3, 4, 5, 14, 15 };
+		Integer[] facultades = { 1, 2, 3, 4, 5, 6, 14, 15 };
 		return facultadlectivorepository.findAllByLectivoIdAndFacultadIdIn(lectivoId, Arrays.asList(facultades));
 	}
 

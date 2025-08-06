@@ -83,11 +83,12 @@ management:
   health:
     db:
       enabled: true  # Habilita la comprobación de salud de la base de datos
+    mail:
+      enabled: false
   metrics:
-    enabled: true
     enable:
       jdbc: true
-  httpexchanges:
+  http exchanges:
     recording:
       enabled: true
   prometheus:
