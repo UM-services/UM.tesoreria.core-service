@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -28,17 +27,20 @@ import um.tesoreria.core.repository.view.FacultadPersonaRepository;
 @Service
 public class FacultadService {
 
-	@Autowired
-	private FacultadRepository repository;
+	private final FacultadRepository repository;
+	private final FacultadLectivoSedeRepository facultadlectivosederepository;
+	private final FacultadPersonaRepository facultadpersonarepository;
+	private final FacultadLectivoRepository facultadlectivorepository;
 
-	@Autowired
-	private FacultadLectivoSedeRepository facultadlectivosederepository;
-
-	@Autowired
-	private FacultadPersonaRepository facultadpersonarepository;
-
-	@Autowired
-	private FacultadLectivoRepository facultadlectivorepository;
+    public FacultadService(FacultadRepository repository,
+                           FacultadLectivoSedeRepository facultadLectivoSedeRepository,
+                           FacultadPersonaRepository facultadPersonaRepository,
+                           FacultadLectivoRepository facultadlectivorepository) {
+        this.repository = repository;
+        this.facultadlectivosederepository = facultadLectivoSedeRepository;
+        this.facultadpersonarepository = facultadPersonaRepository;
+        this.facultadlectivorepository = facultadlectivorepository;
+    }
 
 	public List<Facultad> findAll() {
 		return repository.findAll(Sort.by("facultadId").ascending());

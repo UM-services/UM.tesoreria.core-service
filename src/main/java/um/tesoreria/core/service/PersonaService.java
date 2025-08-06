@@ -102,7 +102,7 @@ public class PersonaService {
                 .cuotas(deudaCuotas)
                 .deuda(deudaTotal)
                 .deudas(deudas)
-                .vencimientoDtos(new ArrayList<>())
+                .vencimientos(new ArrayList<>())
                 .build();
         logDeudaPersona(deudaPersonaDto);
         return deudaPersonaDto;
@@ -164,7 +164,7 @@ public class PersonaService {
                 .cuotas(deudaCuotas)
                 .deuda(deudaTotal)
                 .deudas(deudas)
-                .vencimientoDtos(vencimientoDtos)
+                .vencimientos(vencimientoDtos)
                 .build();
         logDeudaPersona(deudaPersonaDto);
         return deudaPersonaDto;

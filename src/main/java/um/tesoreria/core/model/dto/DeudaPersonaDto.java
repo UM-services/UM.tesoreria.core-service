@@ -27,6 +27,6 @@ public class DeudaPersonaDto implements Serializable {
 	private Integer cuotas;
 	private BigDecimal deuda;
 	private List<DeudaChequeraDto> deudas;
-	private List<VencimientoDto> vencimientoDtos;
+	private List<VencimientoDto> vencimientos;
 
 }
