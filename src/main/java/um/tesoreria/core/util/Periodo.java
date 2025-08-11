@@ -6,6 +6,8 @@ package um.tesoreria.core.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,9 +18,9 @@ import lombok.NoArgsConstructor;
  *
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Periodo {
 
 	private Integer anho;
@@ -40,7 +42,7 @@ public class Periodo {
 	}
 
 	public static Periodo parse(long periodo) {
-		Integer anho = (int) (periodo / 100);
+		int anho = (int) (periodo / 100);
 		Integer mes = (int) (periodo - anho * 100);
 		return new Periodo(anho, mes);
 	}
@@ -90,5 +92,18 @@ public class Periodo {
 		}
 		return periodos;
 	}
+
+    public String jsonify() {
+        try {
+            return JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "jsonify error -> " + e.getMessage();
+        }
+    }
 
 }

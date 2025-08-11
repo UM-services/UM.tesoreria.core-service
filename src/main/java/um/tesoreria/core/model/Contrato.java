@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +16,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -33,7 +34,6 @@ import um.tesoreria.core.kotlin.model.Geografica;
  */
 @Data
 @Entity
-@Table
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -122,5 +122,18 @@ public class Contrato extends Auditable implements Serializable {
 	@OneToOne
 	@JoinColumn(name = "con_geo_id", insertable = false, updatable = false)
 	private Geografica geografica;
+
+    public String jsonify() {
+        try {
+            return JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "jsonify error -> " + e.getMessage();
+        }
+    }
 
 }

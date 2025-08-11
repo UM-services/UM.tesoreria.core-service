@@ -3,8 +3,9 @@
  */
 package um.tesoreria.core.controller;
 
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.exception.ContratadoException;
 import um.tesoreria.core.kotlin.model.Contratado;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,28 +26,39 @@ import um.tesoreria.core.service.ContratadoService;
 @RequestMapping("/contratado")
 public class ContratadoController {
 
-	@Autowired
-	private ContratadoService service;
+	private final ContratadoService service;
+
+    public ContratadoController(ContratadoService service) {
+        this.service = service;
+    }
 
 	@GetMapping("/{contratadoId}")
 	public ResponseEntity<Contratado> findByContratadoId(@PathVariable Long contratadoId) {
-		return new ResponseEntity<Contratado>(service.findByContratadoId(contratadoId), HttpStatus.OK);
+        try {
+            return ResponseEntity.ok(service.findByContratadoId(contratadoId));
+        } catch (ContratadoException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
 	}
 
 	@GetMapping("/persona/{personaclave}")
 	public ResponseEntity<Contratado> findByPersona(@PathVariable Long personaclave) {
-		return new ResponseEntity<Contratado>(service.findByPersona(personaclave), HttpStatus.OK);
+        try {
+            return ResponseEntity.ok(service.findByPersona(personaclave));
+        } catch (ContratadoException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
 	}
 
 	@PostMapping("/")
 	public ResponseEntity<Contratado> add(@RequestBody Contratado contratado) {
-		return new ResponseEntity<Contratado>(service.add(contratado), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(contratado));
 	}
 
 	@DeleteMapping("/{contratadoId}")
 	public ResponseEntity<Void> delete(@PathVariable Long contratadoId) {
 		service.delete(contratadoId);
-		return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
 	}
 
 }

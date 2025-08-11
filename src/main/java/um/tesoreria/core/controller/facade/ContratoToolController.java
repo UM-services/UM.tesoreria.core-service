@@ -77,14 +77,20 @@ public class ContratoToolController {
 	@DeleteMapping("deleteCurso/{cursoCargoContratadoId}")
 	public ResponseEntity<Void> deleteCurso(@PathVariable Long cursoCargoContratadoId) {
 		service.deleteCurso(cursoCargoContratadoId);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
 	}
 
 	// Se agrega sólo para arreglar la consistencia de las asignaciones
 	@GetMapping("/generatecurso/{anho}/{mes}")
 	public ResponseEntity<Void> generateCurso(@PathVariable Integer anho, @PathVariable Integer mes) {
 		service.generateCurso(anho, mes);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
 	}
+
+    @GetMapping("/reset/marca/temporal/{contratoId}")
+    public ResponseEntity<Void> resetMarcaTemporal(@PathVariable Long contratoId) {
+        service.resetMarcaTemporal(contratoId);
+        return ResponseEntity.noContent().build();
+    }
 
 }
