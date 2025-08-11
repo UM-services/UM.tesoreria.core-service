@@ -4,7 +4,6 @@
 package um.tesoreria.core.controller;
 
 import um.tesoreria.core.kotlin.model.ChequeraPago;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +32,6 @@ public class ChequeraPagoController {
     private final ChequeraPagoService service;
     private final ChequeraCuotaService chequeraCuotaService;
 
-    @Autowired
     public ChequeraPagoController(ChequeraPagoService service, ChequeraCuotaService chequeraCuotaService) {
         this.service = service;
         this.chequeraCuotaService = chequeraCuotaService;
@@ -41,28 +39,28 @@ public class ChequeraPagoController {
 
     @GetMapping("/pendientesFactura/{fechaPago}")
     public ResponseEntity<List<ChequeraPago>> pendientesFactura(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaPago) {
-        return new ResponseEntity<>(service.pendientesFactura(fechaPago, chequeraCuotaService), HttpStatus.OK);
+        return ResponseEntity.ok(service.pendientesFactura(fechaPago, chequeraCuotaService));
     }
 
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<List<ChequeraPago>> findAllByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
-        return new ResponseEntity<>(service.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService));
     }
 
     @GetMapping("/fecha/acreditacion/{tipoPagoId}/{fechaAcreditacion}")
     public ResponseEntity<List<ChequeraPago>> findAllByTipoPagoIdAndFechaAcreditacion(@PathVariable Integer tipoPagoId, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaAcreditacion) {
-        return new ResponseEntity<>(service.findAllByTipoPagoIdAndFechaAcreditacion(tipoPagoId, fechaAcreditacion), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByTipoPagoIdAndFechaAcreditacion(tipoPagoId, fechaAcreditacion));
     }
 
     @GetMapping("/fecha/pago/{tipoPagoId}/{fechaPago}")
     public ResponseEntity<List<ChequeraPago>> findAllByTipoPagoIdAndFechaPago(@PathVariable Integer tipoPagoId, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaPago) {
-        return new ResponseEntity<>(service.findAllByTipoPagoIdAndFechaPago(tipoPagoId, fechaPago), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByTipoPagoIdAndFechaPago(tipoPagoId, fechaPago));
     }
 
     @GetMapping("/{chequeraPagoId}")
     public ResponseEntity<ChequeraPago> findByChequeraPagoId(@PathVariable Long chequeraPagoId) {
         try {
-            return new ResponseEntity<>(service.findByChequeraPagoId(chequeraPagoId, chequeraCuotaService), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByChequeraPagoId(chequeraPagoId, chequeraCuotaService));
         } catch (ChequeraPagoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -70,7 +68,16 @@ public class ChequeraPagoController {
 
     @PostMapping("/")
     public ResponseEntity<ChequeraPago> add(@RequestBody ChequeraPago chequeraPago) {
-        return new ResponseEntity<>(service.add(chequeraPago, chequeraCuotaService), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(chequeraPago, chequeraCuotaService));
+    }
+
+    @GetMapping("/search/id/mercado/pago/{idMercadoPago}")
+    public ResponseEntity<ChequeraPago> findByIdMercadoPago(@PathVariable String idMercadoPago) {
+        try {
+            return ResponseEntity.ok(service.findByIdMercadoPago(idMercadoPago));
+        } catch (ChequeraPagoException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
 }

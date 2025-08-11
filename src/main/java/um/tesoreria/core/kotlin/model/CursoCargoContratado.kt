@@ -1,5 +1,7 @@
 package um.tesoreria.core.kotlin.model
 
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.json.JsonMapper
 import java.math.BigDecimal
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -41,6 +43,18 @@ data class CursoCargoContratado(
     var contratadoPersona: ContratadoPersona? = null
 
 ) : Auditable() {
+
+    fun jsonify(): String {
+        return try {
+            JsonMapper
+                .builder()
+                .findAndAddModules()
+                .build()
+                .writeValueAsString(this)
+        } catch (e: JsonProcessingException) {
+            "jsonify error -> ${e.message}"
+        }
+    }
 
     val periodo: String
         get() = "$anho.$mes"

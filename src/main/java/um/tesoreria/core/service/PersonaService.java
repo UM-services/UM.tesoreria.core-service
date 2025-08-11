@@ -10,8 +10,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -104,7 +102,7 @@ public class PersonaService {
                 .deudas(deudas)
                 .vencimientos(new ArrayList<>())
                 .build();
-        logDeudaPersona(deudaPersonaDto);
+        log.debug("DeudaPersonaDto -> {}", deudaPersonaDto.jsonify());
         return deudaPersonaDto;
     }
 
@@ -116,10 +114,10 @@ public class PersonaService {
         List<VencimientoDto> vencimientoDtos = new ArrayList<>();
         for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
                 null)) {
-            logChequeraSerie(chequera);
+            log.debug("ChequeraSerie -> {}", chequera.jsonify());
             DeudaChequeraDto deuda = chequeraCuotaService.calculateDeudaExtended(chequera.getFacultadId(),
                     chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
-            logDeuda(deuda);
+            log.debug("DeudaChequera -> {}", deuda.jsonify());
             if (deuda.getCuotas() > 0) {
                 deudas.add(deuda);
                 deudaCuotas += deuda.getCuotas();
@@ -128,7 +126,7 @@ public class PersonaService {
             for (ChequeraCuota chequeraCuota : chequeraCuotaService
                     .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(chequera.getFacultadId(),
                             chequera.getTipoChequeraId(), chequera.getChequeraSerieId(), chequera.getAlternativaId())) {
-                logChequeraCuota(chequeraCuota);
+                log.debug("ChequeraCuota -> {}", chequeraCuota.jsonify());
                 if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0
                         && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
                     log.debug("Creando preferencia");
@@ -136,7 +134,7 @@ public class PersonaService {
                     MercadoPagoContext mercadoPagoContext = null;
                     try {
                         mercadoPagoContext = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
-                        logMercadoPagoContext(mercadoPagoContext);
+                        log.debug("MercadoPagoContext -> {}", mercadoPagoContext);
                     } catch (MercadoPagoContextException e) {
                         log.error("Error al obtener el contexto de MercadoPago para el cuota {}", chequeraCuota.getChequeraCuotaId());
                     }
@@ -166,40 +164,8 @@ public class PersonaService {
                 .deudas(deudas)
                 .vencimientos(vencimientoDtos)
                 .build();
-        logDeudaPersona(deudaPersonaDto);
+        log.debug("DeudaPersona -> {}", deudaPersonaDto.jsonify());
         return deudaPersonaDto;
-    }
-
-    private void logDeudaPersona(DeudaPersonaDto deudaPersonaDto) {
-        try {
-            log.debug("DeudaPersona -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deudaPersonaDto));
-        } catch (JsonProcessingException e) {
-            log.debug("DeudaPersona error -> {}", e.getMessage());
-        }
-    }
-
-    private void logMercadoPagoContext(MercadoPagoContext mercadoPagoContext) {
-        try {
-            log.debug("MercadoPagoContext -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(mercadoPagoContext));
-        } catch (JsonProcessingException e) {
-            log.debug("MercadoPagoContext error -> {}", e.getMessage());
-        }
-    }
-
-    private void logChequeraCuota(ChequeraCuota chequeraCuota) {
-        try {
-            log.debug("ChequeraCuota -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequeraCuota));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraCuota error -> {}", e.getMessage());
-        }
-    }
-
-    private void logDeuda(DeudaChequeraDto deuda) {
-        try {
-            log.debug("DeudaChequera -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(deuda));
-        } catch (JsonProcessingException e) {
-            log.debug("DeudaChequera error -> {}", e.getMessage());
-        }
     }
 
     public List<PersonaKey> findAllInscriptosSinChequera(Integer facultadId, Integer lectivoId, Integer geograficaId,
@@ -223,7 +189,7 @@ public class PersonaService {
                     chequeraSerie = chequeraSerieService.findGradoByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
                             inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
                 }
-                logChequeraSerie(chequeraSerie);
+                log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
                 add = false;
             } catch (ChequeraSerieException e) {
                 log.debug("Sin chequera");
@@ -317,7 +283,7 @@ public class PersonaService {
                         .findPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
                                 preinscripto.getPersonaId(), preinscripto.getDocumentoId(), facultadId, lectivoId - 1,
                                 geograficaId);
-                logChequeraSerie(chequeraSerie);
+                log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
                 add = false;
             } catch (ChequeraSerieException e) {
                 log.debug("Sin chequera");
@@ -370,19 +336,6 @@ public class PersonaService {
             repository.save(persona);
             return persona;
         }).orElseThrow(() -> new PersonaException(uniqueId));
-    }
-
-    private void logChequeraSerie(ChequeraSerie chequeraSerie) {
-        try {
-            log.debug("ChequeraSerie -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(chequeraSerie));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerie jsonify error -> {}", e.getMessage());
-        }
     }
 
     public InscripcionFullDto findInscripcionFull(Integer facultadId, BigDecimal personaId, Integer documentoId, Integer lectivoId) {

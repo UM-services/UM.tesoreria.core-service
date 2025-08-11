@@ -71,7 +71,7 @@ public class MercadoPagoContextService {
         log.debug("Updating MercadoPagoContext with id: {}", mercadoPagoContextId);
         logObject("New context data: {}", newMercadoPagoContext);
 
-        return repository.findByMercadoPagoContextId(mercadoPagoContextId)
+        return Objects.requireNonNull(repository.findByMercadoPagoContextId(mercadoPagoContextId))
                 .map(existingContext -> {
                     MercadoPagoContext updatedContext = copyProperties(newMercadoPagoContext, mercadoPagoContextId);
                     logObject("Before save: {}", updatedContext);

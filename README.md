@@ -1,7 +1,7 @@
 # Servicio Core de Tesorería
 
 ## Descripción
-Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.0.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.4.
 
 ## Características
 - Gestión de chequeras y pagos con optimizaciones de rendimiento
@@ -14,15 +14,15 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.0
 - Soporte para Docker
 
 ## Requisitos
-- Java 21 (verificado en pom.xml)
+- Java 24 (verificado en pom.xml)
 - Maven 3.8.8+ (verificado en pom.xml)
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en pom.xml)
-- Spring Boot: 3.5.0
+- Spring Boot: 3.5.4
 - Spring Cloud: 2025.0.0
-- Kotlin: 2.1.21
-- MySQL Connector: 9.3.0
+- Kotlin: 2.2.0
+- MySQL Connector: 9.4.0
 - SpringDoc OpenAPI: 2.8.9
 - Apache POI: 5.4.1
 - OpenPDF: 2.2.1
@@ -35,11 +35,13 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.0
 - **Optimización de memoria**: Uso de `Map<String, BigDecimal>` en lugar de objetos completos
 - **Eliminación de objetos innecesarios**: Evita crear instancias vacías de `ChequeraPago`
 
-## Cambios Recientes (verificado en git log)
-- **Refactoring de controladores**: Eliminación de mapeos hardcodeados y optimización de imports (commit: 3d6fd9d, 17 de junio 2025)
-- **Refactoring de repositorios**: Eliminación del prefijo 'I' en interfaces de repositorios siguiendo convenciones de Spring (commit: 5f3d934, 17 de junio 2025)
-- **Optimización de rendimiento**: Implementación de computación paralela en `calculateDeuda` (commit: c6632e9, 10 de junio 2025)
-- **Nuevo modelo TipoChequeraSearch**: Agregado para búsquedas optimizadas de tipos de chequera (35 líneas de código)
+## Cambios Recientes (verificado en git log y código)
+- **Nuevos endpoints y servicios**: búsqueda avanzada, reseteo de marca temporal, logging estructurado.
+- **Refactoring de controladores y repositorios**: eliminación de mapeos hardcodeados y prefijos en interfaces.
+- **Actualización de dependencias**: Spring Boot 3.5.4, Kotlin 2.2.0, MySQL Connector 9.4.0.
+- **Optimizaciones de rendimiento**: consultas paralelas y reducción de uso de memoria.
+
+> Versión y dependencias verificadas en `pom.xml` y código fuente.
 
 ## Instalación
 ```bash

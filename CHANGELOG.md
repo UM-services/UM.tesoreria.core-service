@@ -5,39 +5,25 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - Cambios verificables del git log
-
+## [1.0.0] - 2025-08-11
 ### Added
-  - Modelo de vista para búsquedas optimizadas de tipos de chequera (35 líneas)
-  - Incluye repositorio, servicio y controlador asociados
-  - Soporte para búsquedas por condiciones de texto
-  - Implementación de computación paralela usando `CompletableFuture`
-  - Validación temprana de parámetros para evitar procesamiento innecesario
-  - Optimización de memoria usando `Map<String, BigDecimal>` en lugar de objetos completos
-  - Eliminación de objetos innecesarios para reducir uso de memoria
-  - Manejo robusto de errores en operaciones paralelas
+- Nuevos endpoints: búsqueda por id de MercadoPago, reseteo de marca temporal de contratos, búsqueda optimizada de tipos de chequera, proveedores y pagos.
+- Nuevos servicios: `ContratoAutoFixService`, `ProveedorSearchService`, `TipoChequeraSearchService`, `TipoPagoFechaAcreditacionService`, `TipoPagoFechaPagoService`, entre otros.
+- Métodos `jsonify()` en modelos y DTOs para trazabilidad y logging estructurado.
+- Test unitario para `ProveedorMovimientoController`.
 
 ### Changed
-  - Eliminación de mapeos hardcodeados en `CursoCargoContratadoController`
-  - Limpieza de imports en `ContratoToolController` removiendo anotación `@Auto` no utilizada
-  - Agregado imports de Jackson en `ContratoToolService` para procesamiento JSON
-  - Actualización de documentación en CHANGELOG.md y README.md con cambios recientes
-  - Eliminación del prefijo 'I' en 98 interfaces de repositorios siguiendo convenciones de Spring
-  - Actualización de SpringDoc OpenAPI de 2.8.8 a 2.8.9
-  - Actualización de OpenPDF de 2.0.5 a 2.2.1
-  - Mejora en controladores de TipoChequera
-  - Consultas ejecutadas en paralelo: pagos, cuotas, cuota1 y totales
-  - Reducción estimada del 30-50% en tiempo de respuesta
-  - Reducción estimada del 30% en uso de memoria
+- Refactor completo de inyección de dependencias: eliminación de `@Autowired` en favor de constructores explícitos.
+- Refactor de repositorios: eliminación del prefijo 'I' en interfaces, siguiendo convenciones de Spring.
+- Mejoras de logging: uso de `Slf4j` y serialización JSON en logs.
+- Optimizaciones de rendimiento: uso de `CompletableFuture` para consultas paralelas.
+- Actualización de dependencias principales: Spring Boot 3.5.4, Kotlin 2.2.0, MySQL Connector 9.4.0.
+- Actualización de diagramas de dependencias y documentación automática.
 
 ### Removed
-  - `TransactionConfig.java`
-  - `RabbitMQConfig.java`
-  - `JpaConfig.java`
-  - `ChequeraMessageDto.kt`
-  - `CuotaPeriodo.java`
-  - `ChequeraCuotaDto.java`
-  - `IChequeraPagoRepository.java`
+- Archivos y configuraciones obsoletas: `TransactionConfig.java`, `RabbitMQConfig.java`, `JpaConfig.java`, `ChequeraMessageDto.kt`, `CuotaPeriodo.java`, `ChequeraCuotaDto.java`, `IChequeraPagoRepository.java`, `application.yml`, `logback-spring.xml`, y tests antiguos.
+
+> Versión y cambios verificados en `pom.xml`, `git diff`, y código fuente.
 
 ## [0.0.1-SNAPSHOT] - Versión actual según pom.xml
 ## [0.1.0] - 2025-08-06

@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -46,5 +48,18 @@ public class DeudaChequeraDto implements Serializable {
 	private OffsetDateTime vencimiento1;
 
 	private BigDecimal importe1;
+
+    public String jsonify() {
+        try {
+            return JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "jsonify error -> " + e.getMessage();
+        }
+    }
 
 }

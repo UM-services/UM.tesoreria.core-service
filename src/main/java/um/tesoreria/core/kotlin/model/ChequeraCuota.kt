@@ -1,6 +1,8 @@
 package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.json.JsonMapper
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -113,6 +115,19 @@ data class ChequeraCuota(
     fun cuotaKey(): String {
         return (this.facultadId.toString() + "." + this.tipoChequeraId + "." + this.chequeraSerieId + "." + this.productoId + "."
                 + this.alternativaId + "." + this.cuotaId)
+    }
+
+    fun jsonify(): String {
+        try {
+            return JsonMapper
+                .builder()
+                .findAndAddModules()
+                .build()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(this)
+        } catch (e: JsonProcessingException) {
+            return "jsonify error -> ${e.message}"
+        }
     }
 
     companion object {

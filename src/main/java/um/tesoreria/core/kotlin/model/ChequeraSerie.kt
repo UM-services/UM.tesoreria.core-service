@@ -1,6 +1,9 @@
 package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonMerge
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.json.JsonMapper
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -127,6 +130,19 @@ data class ChequeraSerie(
 
     fun getFacultadKey(): String {
         return this.facultadId.toString() + "." + this.lectivoId + "." + this.geograficaId + "." + this.getPersonaKey()
+    }
+
+    fun jsonify(): String {
+        try {
+            return JsonMapper
+                .builder()
+                .findAndAddModules()
+                .build()
+                .writerWithDefaultPrettyPrinter()
+                .writeValueAsString(this)
+        } catch (e: JsonProcessingException) {
+            return "jsonify error -> ${e.message}"
+        }
     }
 
 }
