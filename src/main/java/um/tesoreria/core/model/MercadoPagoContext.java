@@ -1,6 +1,8 @@
 package um.tesoreria.core.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,6 +33,10 @@ public class MercadoPagoContext extends Auditable {
     
     private BigDecimal importe = BigDecimal.ZERO;
     private Byte changed = 0;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    private OffsetDateTime lastVencimientoUpdated;
+
     private String preferenceId;
     private String preference;
     private Byte activo = 0;
@@ -46,5 +52,18 @@ public class MercadoPagoContext extends Auditable {
     
     private BigDecimal importePagado = BigDecimal.ZERO;
     private String payment;
+
+    public String jsonify() {
+        try {
+            return JsonMapper
+                    .builder()
+                    .findAndAddModules()
+                    .build()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "jsonify error -> " + e.getMessage();
+        }
+    }
 
 }

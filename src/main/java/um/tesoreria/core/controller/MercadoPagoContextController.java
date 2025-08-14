@@ -46,6 +46,11 @@ public class MercadoPagoContextController {
         return ResponseEntity.ok(service.findAllActiveChequeraCuota());
     }
 
+    @GetMapping("/all/active/to/change")
+    public ResponseEntity<List<Long>> findAllActiveToChange() {
+        return ResponseEntity.ok(service.findAllActiveToChange());
+    }
+
     @GetMapping("/pagos/sin/imputar")
     public ResponseEntity<List<MercadoPagoContext>> findAllSinImputar() {
         return ResponseEntity.ok(service.findAllSinImputar());

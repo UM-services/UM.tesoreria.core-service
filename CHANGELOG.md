@@ -5,6 +5,16 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-08-14
+- feat(core/mercadopago): nuevo endpoint `GET /api/tesoreria/core/mercadoPagoContext/all/active/to/change` para listar `chequeraCuotaId` activos con vencimientos en los últimos 90 días.
+- feat(model): campo `lastVencimientoUpdated` en `MercadoPagoContext` con `@JsonFormat` y método `jsonify()` para logging estructurado.
+- feat(repository): `findAllByActivoAndFechaVencimientoBetween(...)` para consultas por rango de fechas.
+- refactor(service): `update(...)` ahora actualiza la entidad gestionada y es `@Transactional`, con logs JSON de entrada/salida.
+- docs(ci): workflow de documentación mejorado; agregado render dinámico de diagramas Mermaid y árbol de dependencias; nuevos archivos en `docs/`.
+- docs: agregados diagramas `architecture.mmd`, `entities.mmd`, `deployment.mmd` y múltiples `sequence-*.mmd`.
+
+> Basado en `git diff --cached` y `pom.xml` (versión previa 1.0.0).
+
 ## [1.0.0] - 2025-08-11
 ### Added
 - Nuevos endpoints: búsqueda por id de MercadoPago, reseteo de marca temporal de contratos, búsqueda optimizada de tipos de chequera, proveedores y pagos.

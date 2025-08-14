@@ -1,0 +1,17 @@
+---
+title: Pago de Chequera
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as ChequeraPagoController
+    participant S as ChequeraPagoService
+    participant R as ChequeraPagoRepository
+    participant DB as BaseDeDatos
+    C->>Ctrl: POST /chequeras/pago (datos pago)
+    Ctrl->>S: procesar pago
+    S->>R: guardar pago
+    R->>DB: INSERT pago
+    DB-->>R: OK
+    R-->>S: pago registrado
+    S-->>Ctrl: pago registrado
+    Ctrl-->>C: Respuesta HTTP 201

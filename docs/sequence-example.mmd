@@ -1,0 +1,17 @@
+---
+title: Ejemplo de Diagrama de Secuencia
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as Controlador
+    participant S as Servicio
+    participant R as Repositorio
+    participant DB as BaseDeDatos
+    C->>Ctrl: Solicitud HTTP
+    Ctrl->>S: Lógica de negocio
+    S->>R: Consulta/Comando
+    R->>DB: Acceso a datos
+    DB-->>R: Resultado
+    R-->>S: Resultado
+    S-->>Ctrl: Respuesta
+    Ctrl-->>C: Respuesta HTTP

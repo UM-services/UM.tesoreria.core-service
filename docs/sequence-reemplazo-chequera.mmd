@@ -1,0 +1,17 @@
+---
+title: Reemplazo de Chequera
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as ChequeraPagoReemplazoController
+    participant S as ChequeraPagoReemplazoService
+    participant R as ChequeraPagoReemplazoRepository
+    participant DB as BaseDeDatos
+    C->>Ctrl: POST /chequeras/reemplazo (datos)
+    Ctrl->>S: procesar reemplazo
+    S->>R: guardar reemplazo
+    R->>DB: INSERT reemplazo
+    DB-->>R: OK
+    R-->>S: reemplazo registrado
+    S-->>Ctrl: reemplazo registrado
+    Ctrl-->>C: Respuesta HTTP 201

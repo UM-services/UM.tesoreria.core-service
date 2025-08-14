@@ -1,0 +1,17 @@
+---
+title: Proceso de Liquidación de Sueldos
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as LiquidacionSueldosController
+    participant S as LiquidacionSueldosService
+    participant R as LiquidacionSueldosRepository
+    participant DB as BaseDeDatos
+    C->>Ctrl: POST /liquidaciones (datos)
+    Ctrl->>S: procesar liquidación
+    S->>R: guardar liquidación
+    R->>DB: INSERT liquidación
+    DB-->>R: OK
+    R-->>S: liquidación registrada
+    S-->>Ctrl: liquidación registrada
+    Ctrl-->>C: Respuesta HTTP 201

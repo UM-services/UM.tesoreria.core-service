@@ -3,6 +3,8 @@
 ## Descripción
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.4.
 
+Versión actual (SemVer): 1.1.0
+
 ## Características
 - Gestión de chequeras y pagos con optimizaciones de rendimiento
 - Cálculo de deudas con computación paralela
@@ -18,15 +20,15 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.4
 - Maven 3.8.8+ (verificado en pom.xml)
 - Docker (opcional)
 
-## Versiones de Dependencias Principales (verificado en pom.xml)
+## Versiones de Dependencias Principales (verificado en `pom.xml`)
 - Spring Boot: 3.5.4
 - Spring Cloud: 2025.0.0
 - Kotlin: 2.2.0
 - MySQL Connector: 9.4.0
 - SpringDoc OpenAPI: 2.8.9
 - Apache POI: 5.4.1
-- OpenPDF: 2.2.1
-- ModelMapper: 3.2.3
+- OpenPDF: 2.2.4
+- ModelMapper: 3.2.4
 - Guava: 33.4.8-jre
 
 ## Optimizaciones de Rendimiento (verificado en código)
@@ -35,11 +37,17 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.4
 - **Optimización de memoria**: Uso de `Map<String, BigDecimal>` en lugar de objetos completos
 - **Eliminación de objetos innecesarios**: Evita crear instancias vacías de `ChequeraPago`
 
-## Cambios Recientes (verificado en git log y código)
-- **Nuevos endpoints y servicios**: búsqueda avanzada, reseteo de marca temporal, logging estructurado.
-- **Refactoring de controladores y repositorios**: eliminación de mapeos hardcodeados y prefijos en interfaces.
-- **Actualización de dependencias**: Spring Boot 3.5.4, Kotlin 2.2.0, MySQL Connector 9.4.0.
-- **Optimizaciones de rendimiento**: consultas paralelas y reducción de uso de memoria.
+## Novedades 1.1.0 (verificado en código)
+- Nuevo endpoint MercadoPago:
+  - `GET /api/tesoreria/core/mercadoPagoContext/all/active/to/change`: devuelve `chequeraCuotaId` activos con `fechaVencimiento` en los últimos 90 días (usa `Tool.dateAbsoluteArgentina()`).
+- `MercadoPagoContext`:
+  - Campo `lastVencimientoUpdated` con formato ISO UTC.
+  - Método `jsonify()` para logs estructurados.
+- Servicio/Repositorios:
+  - `findAllByActivoAndFechaVencimientoBetween(...)` en repositorio.
+  - `update(...)` transaccional y actualización sobre entidad gestionada.
+- Documentación:
+  - Workflow de docs mejorado y diagramas Mermaid en `docs/`.
 
 > Versión y dependencias verificadas en `pom.xml` y código fuente.
 
@@ -255,10 +263,10 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 
 # UM Tesorería Core Service
 
-[![Java](https://img.shields.io/badge/Java-21-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Java](https://img.shields.io/badge/Java-24-blue.svg)](https://www.java.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.4-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.0.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.21-purple.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
 
 ## Documentación
@@ -278,10 +286,10 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 - Validación de correos electrónicos
 
 ## Tecnologías Utilizadas
-- Java 21
-- Spring Boot 3.5.0
+- Java 24
+- Spring Boot 3.5.4
 - Spring Cloud 2025.0.0
-- Kotlin 2.1.21
+- Kotlin 2.2.0
 - JPA/Hibernate
 - ModelMapper
 - MySQL

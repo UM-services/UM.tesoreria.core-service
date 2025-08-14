@@ -1,0 +1,14 @@
+---
+title: Diagrama Entidad-Relación (ER)
+---
+erDiagram
+    Usuario ||--o{ Chequera : "tiene"
+    Chequera ||--o{ ChequeraPago : "genera"
+    Chequera ||--o{ ChequeraCuota : "incluye"
+    ChequeraPago }o--|| BancoMovimiento : "origina"
+    Usuario ||--o{ Contrato : "firma"
+    Contrato ||--o{ ContratoFactura : "factura"
+    Articulo ||--o{ ProveedorArticulo : "proveído por"
+    Carrera ||--o{ Plan : "incluye"
+    Persona ||--o{ Matricula : "matricula"
+    // ...agrega más relaciones según entidades del dominio

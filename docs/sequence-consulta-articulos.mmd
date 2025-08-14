@@ -1,0 +1,17 @@
+---
+title: Consulta de Artículos
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as ProductoController
+    participant S as ProductoService
+    participant R as ProductoRepository
+    participant DB as BaseDeDatos
+    C->>Ctrl: GET /articulos
+    Ctrl->>S: obtener artículos
+    S->>R: buscar artículos
+    R->>DB: SELECT articulos
+    DB-->>R: lista artículos
+    R-->>S: lista artículos
+    S-->>Ctrl: lista artículos
+    Ctrl-->>C: Respuesta HTTP 200 (JSON)

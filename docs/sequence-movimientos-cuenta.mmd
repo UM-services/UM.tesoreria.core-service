@@ -1,0 +1,17 @@
+---
+title: Consulta de Movimientos de Cuenta
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as CuentaMovimientoController
+    participant S as CuentaMovimientoService
+    participant R as CuentaMovimientoRepository
+    participant DB as BaseDeDatos
+    C->>Ctrl: GET /cuentas/{id}/movimientos
+    Ctrl->>S: obtener movimientos
+    S->>R: buscar movimientos
+    R->>DB: SELECT movimientos
+    DB-->>R: lista movimientos
+    R-->>S: lista movimientos
+    S-->>Ctrl: lista movimientos
+    Ctrl-->>C: Respuesta HTTP 200 (JSON)
