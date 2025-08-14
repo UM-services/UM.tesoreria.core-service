@@ -1,0 +1,19 @@
+---
+title: Arquitectura General
+---
+flowchart TD
+    Controller["Controladores<br/>(@RestController)"]
+    Service["Servicios<br/>(@Service)"]
+    Repository["Repositorios<br/>(@Repository)"]
+    Entity["Entidades<br/>(@Entity)"]
+    Controller --> Service
+    Service --> Repository
+    Repository --> Entity
+    subgraph Spring Boot
+        Controller
+        Service
+        Repository
+        Entity
+    end
+    DB[(Base de Datos)]
+    Repository --> DB

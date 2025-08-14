@@ -1,0 +1,17 @@
+---
+title: Baja de Usuario
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as BajaController
+    participant S as BajaService
+    participant R as BajaRepository
+    participant DB as BaseDeDatos
+    C->>Ctrl: DELETE /usuarios/{id}
+    Ctrl->>S: procesar baja
+    S->>R: eliminar usuario
+    R->>DB: DELETE usuario
+    DB-->>R: OK
+    R-->>S: usuario eliminado
+    S-->>Ctrl: usuario eliminado
+    Ctrl-->>C: Respuesta HTTP 200

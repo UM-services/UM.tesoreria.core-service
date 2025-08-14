@@ -1,0 +1,13 @@
+---
+title: Diagrama de Despliegue
+---
+flowchart TD
+    Client["Cliente Web/Móvil"]
+    LB["Load Balancer"]
+    App["um.tesoreria.core-service<br/>Spring Boot"]
+    DB[(MySQL)]
+    Ext["Servicios Externos<br/>(MercadoPago, etc.)"]
+    Client --> LB
+    LB --> App
+    App --> DB
+    App --> Ext

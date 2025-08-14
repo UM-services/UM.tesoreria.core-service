@@ -80,6 +80,7 @@ public class MercadoPagoCoreService {
             mercadoPagoContext.setFechaVencimiento(vencimiento.fechaVencimiento());
             mercadoPagoContext.setImporte(vencimiento.importe());
             mercadoPagoContext.setChanged((byte) 1);
+            mercadoPagoContext.setLastVencimientoUpdated(OffsetDateTime.now(ZoneOffset.UTC));
             return mercadoPagoContextService.update(mercadoPagoContext, mercadoPagoContext.getMercadoPagoContextId());
         }
     }

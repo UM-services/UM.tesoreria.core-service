@@ -1,0 +1,17 @@
+---
+title: Generación de Comprobante
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as ComprobanteController
+    participant S as ComprobanteService
+    participant R as ComprobanteRepository
+    participant DB as BaseDeDatos
+    C->>Ctrl: POST /comprobantes (datos)
+    Ctrl->>S: generar comprobante
+    S->>R: guardar comprobante
+    R->>DB: INSERT comprobante
+    DB-->>R: OK
+    R-->>S: comprobante creado
+    S-->>Ctrl: comprobante creado
+    Ctrl-->>C: Respuesta HTTP 201

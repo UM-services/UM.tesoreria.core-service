@@ -1,0 +1,17 @@
+---
+title: Alta de Usuario (LDAP)
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as UsuarioLdapController
+    participant S as UsuarioLdapService
+    participant R as UsuarioLdapRepository
+    participant DB as BaseDeDatos
+    C->>Ctrl: POST /usuarios-ldap (datos usuario)
+    Ctrl->>S: validar y procesar alta
+    S->>R: guardar usuario
+    R->>DB: INSERT usuario
+    DB-->>R: OK
+    R-->>S: usuario creado
+    S-->>Ctrl: usuario creado
+    Ctrl-->>C: Respuesta HTTP 201

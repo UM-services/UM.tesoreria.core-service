@@ -1,0 +1,14 @@
+---
+title: Cuotas activas a cambiar (MercadoPago)
+---
+sequenceDiagram
+    participant C as Cliente
+    participant Ctrl as MercadoPagoContextController
+    participant S as MercadoPagoContextService
+    participant R as MercadoPagoContextRepository
+    C->>Ctrl: GET /api/tesoreria/core/mercadoPagoContext/all/active/to/change
+    Ctrl->>S: findAllActiveToChange()
+    S->>R: findAllByActivoAndFechaVencimientoBetween(1, hoy-90d, hoy)
+    R-->>S: List<MercadoPagoContext>
+    S-->>Ctrl: List<Long> (chequeraCuotaId)
+    Ctrl-->>C: 200 OK (JSON)
