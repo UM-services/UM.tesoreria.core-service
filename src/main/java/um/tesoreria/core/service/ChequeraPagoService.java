@@ -76,17 +76,8 @@ public class ChequeraPagoService {
     @Transactional
     public List<ChequeraPago> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, ChequeraCuotaService chequeraCuotaService) {
         List<ChequeraPago> pagos = repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
-        
-        List<ChequeraPago> processedPagos = processPagos(pagos, chequeraCuotaService);
-        
-        try {
-            log.debug("ChequeraPagos: {}", jsonMapper.writerWithDefaultPrettyPrinter()
-                .writeValueAsString(processedPagos));
-        } catch (JsonProcessingException e) {
-            log.error("Error serializing ChequeraPagos", e);
-        }
 
-        return processedPagos;
+        return processPagos(pagos, chequeraCuotaService);
     }
 
     @Transactional
@@ -138,6 +129,10 @@ public class ChequeraPagoService {
             .filter(pago -> !electronicas.containsKey(pago.getChequeraPagoId()))
             .filter(this::isValidChequeraPago)
             .collect(Collectors.toList());
+    }
+
+    public List<ChequeraPago> findAllByFacultadIdAndTipoChequeraIdAndLectivoId(Integer facultadId, Integer tipoChequeraId, Integer lectivoId) {
+        return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraCuotaChequeraSerieLectivoId(facultadId, tipoChequeraId, lectivoId);
     }
 
     private boolean isValidChequeraPago(ChequeraPago pago) {

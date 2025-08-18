@@ -3,7 +3,15 @@
 ## Descripción
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.4.
 
-Versión actual (SemVer): 1.1.0
+**Versión actual (SemVer): 1.2.0**
+
+## Novedades 1.2.0 (verificado en código)
+- Nuevos endpoints REST para consulta de pagos por facultad, tipo de chequera y lectivo.
+- Refactor de controladores: respuestas HTTP simplificadas.
+- Mejoras en la documentación automática y despliegue de docs.
+- Diagramas Mermaid actualizados y sincronizados con el código.
+
+> Versión y dependencias verificadas en `pom.xml` y código fuente.
 
 ## Características
 - Gestión de chequeras y pagos con optimizaciones de rendimiento

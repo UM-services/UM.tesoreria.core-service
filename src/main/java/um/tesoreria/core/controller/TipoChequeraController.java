@@ -50,21 +50,19 @@ public class TipoChequeraController {
 	public ResponseEntity<List<TipoChequera>> findAllAsignable(@PathVariable Integer facultadId,
 			@PathVariable Integer lectivoId, @PathVariable Integer geograficaId,
 			@PathVariable Integer claseChequeraId) {
-		return new ResponseEntity<>(
-				service.findAllAsignable(facultadId, lectivoId, geograficaId, claseChequeraId), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllAsignable(facultadId, lectivoId, geograficaId, claseChequeraId));
 	}
 
 	@GetMapping("/facultad/{facultadId}/geografica/{geograficaId}")
 	public ResponseEntity<List<TipoChequera>> findAllByFacultadIdAndGeograficaId(@PathVariable Integer facultadId,
 			@PathVariable Integer geograficaId) {
-		return new ResponseEntity<>(
-				service.findAllByFacultadIdAndGeograficaId(facultadId, geograficaId), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByFacultadIdAndGeograficaId(facultadId, geograficaId));
 	}
 
 	@GetMapping("/{tipoChequeraId}")
 	public ResponseEntity<TipoChequera> findByTipoChequeraId(@PathVariable Integer tipoChequeraId) {
 		try {
-			return new ResponseEntity<>(service.findByTipoChequeraId(tipoChequeraId), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByTipoChequeraId(tipoChequeraId));
 		} catch (TipoChequeraException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -73,7 +71,7 @@ public class TipoChequeraController {
 	@GetMapping("/last")
 	public ResponseEntity<TipoChequera> findLast() {
 		try {
-			return new ResponseEntity<>(service.findLast(), HttpStatus.OK);
+            return ResponseEntity.ok(service.findLast());
 		} catch (TipoChequeraException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -81,31 +79,31 @@ public class TipoChequeraController {
 
 	@PostMapping("/")
 	public ResponseEntity<TipoChequera> add(@RequestBody TipoChequera tipochequera) {
-		return new ResponseEntity<>(service.add(tipochequera), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(tipochequera));
 	}
 
 	@PutMapping("/{tipochequeraId}")
 	public ResponseEntity<TipoChequera> update(@RequestBody TipoChequera tipochequera,
 			@PathVariable Integer tipochequeraId) {
-		return new ResponseEntity<>(service.update(tipochequera, tipochequeraId), HttpStatus.OK);
+        return ResponseEntity.ok(service.update(tipochequera, tipochequeraId));
 	}
 
 	@DeleteMapping("/{tipochequeraId}")
 	public ResponseEntity<Void> delete(@PathVariable Integer tipochequeraId) {
 		service.delete(tipochequeraId);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/unmark")
 	public ResponseEntity<Void> unmark() {
 		service.unmark();
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/mark/{tipochequeraId}/{imprimir}")
 	public ResponseEntity<Void> mark(@PathVariable Integer tipochequeraId, @PathVariable Byte imprimir) {
 		service.mark(tipochequeraId, imprimir);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
 	}
 
 }

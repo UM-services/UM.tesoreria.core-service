@@ -5,6 +5,15 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.2.0] - 2025-08-18
+- feat(controller): nuevos endpoints REST en ChequeraPagoController para consulta por facultad/tipoChequera/lectivo.
+- feat(repository/service): métodos para búsqueda avanzada de pagos por facultad, tipo de chequera y lectivo.
+- refactor(controller): simplificación de respuestas HTTP en FacultadController y TipoChequeraController (uso de ResponseEntity.ok).
+- docs(ci): mejoras en el workflow de documentación automática y despliegue en GitHub Pages.
+- docs: diagramas Mermaid y documentación sincronizados con la funcionalidad actual.
+> Basado en análisis de código (`git diff HEAD`), historial de commits y `pom.xml`.
+
 ## [1.1.0] - 2025-08-14
 - feat(core/mercadopago): nuevo endpoint `GET /api/tesoreria/core/mercadoPagoContext/all/active/to/change` para listar `chequeraCuotaId` activos con vencimientos en los últimos 90 días.
 - feat(model): campo `lastVencimientoUpdated` en `MercadoPagoContext` con `@JsonFormat` y método `jsonify()` para logging estructurado.
