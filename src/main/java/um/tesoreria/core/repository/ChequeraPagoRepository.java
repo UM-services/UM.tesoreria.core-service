@@ -30,6 +30,8 @@ public interface ChequeraPagoRepository extends JpaRepository<ChequeraPago, Long
 
 	List<ChequeraPago> findAllByTipoPagoIdAndFechaBetween(Integer tipoPagoId, OffsetDateTime fechaInicio, OffsetDateTime fechaFin);
 
+    List<ChequeraPago> findAllByFacultadIdAndTipoChequeraIdAndChequeraCuotaChequeraSerieLectivoId(Integer facultadId, Integer tipoChequeraId, Integer lectivoId);
+
 	Optional<ChequeraPago> findByChequeraPagoId(Long chequeraPagoId);
 
 	Optional<ChequeraPago> findByIdMercadoPago(String idMercadoPago);

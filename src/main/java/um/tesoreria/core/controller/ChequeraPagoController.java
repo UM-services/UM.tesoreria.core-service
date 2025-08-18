@@ -57,6 +57,13 @@ public class ChequeraPagoController {
         return ResponseEntity.ok(service.findAllByTipoPagoIdAndFechaPago(tipoPagoId, fechaPago));
     }
 
+    @GetMapping("/pagos/facultad/{facultadId}/tipoChequera/{tipoChequeraId}/lectivo/{lectivoId}")
+    public ResponseEntity<List<ChequeraPago>> findAllByFacultadIdAndTipoChequeraIdAndLectivoId(@PathVariable Integer facultadId,
+                                                                                               @PathVariable Integer tipoChequeraId,
+                                                                                               @PathVariable Integer lectivoId) {
+        return ResponseEntity.ok(service.findAllByFacultadIdAndTipoChequeraIdAndLectivoId(facultadId, tipoChequeraId, lectivoId));
+    }
+
     @GetMapping("/{chequeraPagoId}")
     public ResponseEntity<ChequeraPago> findByChequeraPagoId(@PathVariable Long chequeraPagoId) {
         try {

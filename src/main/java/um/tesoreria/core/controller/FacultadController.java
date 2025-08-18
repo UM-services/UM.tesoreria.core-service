@@ -40,31 +40,30 @@ public class FacultadController {
 
 	@GetMapping("/facultades")
 	public ResponseEntity<List<Facultad>> findFacultades() {
-		return new ResponseEntity<>(service.findFacultades(), HttpStatus.OK);
+        return ResponseEntity.ok(service.findFacultades());
 	}
 
 	@GetMapping("/lectivo/{lectivoId}")
 	public ResponseEntity<List<FacultadLectivo>> findAllByLectivoId(@PathVariable Integer lectivoId) {
-		return new ResponseEntity<>(service.findAllByLectivoId(lectivoId), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByLectivoId(lectivoId));
 	}
 
 	@GetMapping("/bypersona/{personaId}/{documentoId}/{lectivoId}")
 	public ResponseEntity<List<FacultadPersona>> findAllByPersona(@PathVariable BigDecimal personaId,
-			@PathVariable Integer documentoId, @PathVariable Integer lectivoId) {
-		return new ResponseEntity<>(service.findAllByPersona(personaId, documentoId, lectivoId),
-				HttpStatus.OK);
+                                                                  @PathVariable Integer documentoId,
+                                                                  @PathVariable Integer lectivoId) {
+        return ResponseEntity.ok(service.findAllByPersona(personaId, documentoId, lectivoId));
 	}
 
 	@GetMapping("/disenho/{lectivoId}/{geograficaId}")
 	public ResponseEntity<List<FacultadLectivoSede>> findAllByDisenho(@PathVariable Integer lectivoId,
 			@PathVariable Integer geograficaId) {
-		return new ResponseEntity<>(service.findAllByDisenho(lectivoId, geograficaId),
-				HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByDisenho(lectivoId, geograficaId));
 	}
 
 	@GetMapping("/{facultadId}")
 	public ResponseEntity<Facultad> findByFacultadId(@PathVariable Integer facultadId) {
-		return new ResponseEntity<>(service.findByFacultadId(facultadId), HttpStatus.OK);
+        return ResponseEntity.ok(service.findByFacultadId(facultadId));
 	}
 
 }
