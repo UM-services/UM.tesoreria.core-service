@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UM.tesoreria.core-service - Documentación del Proyecto</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="header">
+    <h1>📋 UM.tesoreria.core-service - Documentación del Proyecto</h1>
+    <p>Tesoreria API REST</p>
+    <p>Última actualización: <span id="update-date"></span></p>
+  </div>
+  <div id="stats" class="stats"></div>
+  <div id="architecture" class="section"></div>
+  <div id="sequence-diagram" class="section"></div>
+  <div id="erd-diagram" class="section"></div>
+  <div id="deployment-diagram" class="section"></div>
+  <div id="sequence-diagrams" class="section"></div>
+  <div id="dependencies" class="section">
+    <h2>🌳 Grafo de Dependencias</h2>
+    <p>El siguiente es el árbol de dependencias completo del proyecto, generado por Maven.</p>
+    <pre id="dependency-tree-content">Cargando...</pre>
+  </div>
+  <div id="milestones" class="section"></div>
+  <div id="pull-requests" class="section"></div>
+  
+  <script>mermaid.initialize({startOnLoad:true});</script>
+  <script src="script.js"></script>
+</body>
+</html>

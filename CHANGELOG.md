@@ -6,6 +6,13 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.3.0] - 2025-08-19
+- refactor(controller): simplificación de respuestas HTTP en ChequeraCuotaController (uso de ResponseEntity.ok).
+- feat(model/repository): `productoId` agregado a `CuotaPeriodoDto` y ajustada la query en ChequeraCuotaRepository.
+- docs: nueva generación de documentación automática y pipeline local (`generate-docs-local.sh`), nuevos archivos en `docs/`.
+- docs: actualización de `index.html`, `script.js` y `style.css` para documentación dinámica y visual.
+> Basado en análisis de código (`git diff HEAD`), historial de commits y `pom.xml`.
+
 ## [1.2.0] - 2025-08-18
 - feat(controller): nuevos endpoints REST en ChequeraPagoController para consulta por facultad/tipoChequera/lectivo.
 - feat(repository/service): métodos para búsqueda avanzada de pagos por facultad, tipo de chequera y lectivo.
