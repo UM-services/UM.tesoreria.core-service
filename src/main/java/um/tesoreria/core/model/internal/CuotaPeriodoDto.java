@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CuotaPeriodoDto {
 
+    private Integer productoId;
     private Integer mes;
     private Integer anho;
     private Long cantidad;

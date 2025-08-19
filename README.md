@@ -3,13 +3,15 @@
 ## Descripción
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.4.
 
-**Versión actual (SemVer): 1.2.0**
 
-## Novedades 1.2.0 (verificado en código)
-- Nuevos endpoints REST para consulta de pagos por facultad, tipo de chequera y lectivo.
-- Refactor de controladores: respuestas HTTP simplificadas.
-- Mejoras en la documentación automática y despliegue de docs.
-- Diagramas Mermaid actualizados y sincronizados con el código.
+**Versión actual (SemVer): 1.3.0**
+
+
+## Novedades 1.3.0 (verificado en código)
+- Refactor de ChequeraCuotaController: respuestas HTTP simplificadas (uso de ResponseEntity.ok).
+- Nuevo campo `productoId` en `CuotaPeriodoDto` y query ajustada en ChequeraCuotaRepository.
+- Nueva generación de documentación automática y pipeline local (`generate-docs-local.sh`).
+- Documentación dinámica y visual en `docs/` (index.html, script.js, style.css).
 
 > Versión y dependencias verificadas en `pom.xml` y código fuente.
 
