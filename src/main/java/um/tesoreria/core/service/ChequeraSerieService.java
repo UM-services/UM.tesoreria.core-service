@@ -10,8 +10,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +99,11 @@ public class ChequeraSerieService {
         return repository.findAllByLectivoIdAndFacultadId(lectivoId, facultadId);
     }
 
+    public List<ChequeraSerie> findAllByLectivoIdAndFacultadIdTest(Integer lectivoId, Integer facultadId) {
+        return repository.findAllByLectivoIdAndFacultadIdAndPersonaId(lectivoId, facultadId, new BigDecimal(45719365));
+    }
+
+
     public List<ChequeraSerie> findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer lectivoId, Integer facultadId,
                                                                               Integer geograficaId) {
         return repository.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId, facultadId, geograficaId);
@@ -172,7 +175,7 @@ public class ChequeraSerieService {
                     chequera.setUltimoEnvio(null);
                     log.debug("No se encontró último envío para la chequera: {}", chequera.getChequeraId());
                 }
-                logChequeraSerie(chequera);
+                log.debug("ChequeraSerie -> {}", chequera.jsonify());
             })
             .toList();
     }
@@ -202,7 +205,7 @@ public class ChequeraSerieService {
 
     public ChequeraSerie findByChequeraId(Long chequeraId) {
         var chequeraSerie = repository.findByChequeraId(chequeraId).orElseThrow(() -> new ChequeraSerieException(chequeraId));
-        logChequeraSerie(chequeraSerie);
+        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
         return chequeraSerie;
     }
 
@@ -233,8 +236,7 @@ public class ChequeraSerieService {
             chequera.setUltimoEnvio(null);
             log.debug("No se encontró último envío para la chequera: {}", chequera.getChequeraId());
         }
-        
-        logChequeraSerie(chequera);
+        log.debug("ChequeraSerie -> {}", chequera.jsonify());
         return chequera;
     }
 
@@ -313,7 +315,7 @@ public class ChequeraSerieService {
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
         chequeraSerie.setFlagPayperTic(flag);
         chequeraSerie = repository.save(chequeraSerie);
-        logChequeraSerie(chequeraSerie);
+        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
         return chequeraSerie;
     }
 
@@ -323,18 +325,18 @@ public class ChequeraSerieService {
         var chequeraSerie = repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
-        logChequeraSerie(chequeraSerie);
+        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
         chequeraSerie.setEnviado((byte) 1);
         chequeraSerie = repository.save(chequeraSerie);
         log.debug("after save");
-        logChequeraSerie(chequeraSerie);
+        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
         return chequeraSerie;
     }
 
     public ChequeraSerie add(ChequeraSerie chequeraSerie) {
         log.debug("Processing ChequeraSerieService.add");
         chequeraSerie = repository.save(chequeraSerie);
-        logChequeraSerie(chequeraSerie);
+        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
         return chequeraSerie;
     }
 
@@ -380,7 +382,7 @@ public class ChequeraSerieService {
                             null
                     );
                     chequeraSerie = repository.save(chequeraSerie);
-                    logChequeraSerie(chequeraSerie);
+                    log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
                     return chequeraSerie;
                 }).orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
     }
@@ -390,19 +392,6 @@ public class ChequeraSerieService {
                                                                          Long chequeraSerieId) {
         repository.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId,
                 chequeraSerieId);
-    }
-
-    private void logChequeraSerie(ChequeraSerie chequeraSerie) {
-        try {
-            log.debug("ChequeraSerie -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(chequeraSerie));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerie -> error");
-        }
     }
 
 }

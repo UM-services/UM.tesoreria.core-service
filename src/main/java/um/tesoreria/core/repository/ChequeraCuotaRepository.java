@@ -58,13 +58,13 @@ public interface ChequeraCuotaRepository extends JpaRepository<ChequeraCuota, Lo
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 
-	@Query("SELECT new um.tesoreria.core.model.internal.CuotaPeriodoDto(cc.productoId, cc.mes, cc.anho, COUNT(*)) " +
+	@Query("SELECT new um.tesoreria.core.model.internal.CuotaPeriodoDto(cc.mes, cc.anho, COUNT(*)) " +
 		   "FROM ChequeraCuota cc " +
 		   "JOIN ChequeraSerie cs ON cc.chequeraId = cs.chequeraId " +
 		   "WHERE cs.lectivoId = :lectivoId " +
 		   "AND cc.importe1 > 0 " +
-		   "GROUP BY cc.productoId, cc.mes, cc.anho " +
-		   "ORDER BY cc.anho, cc.mes, cc.productoId")
+		   "GROUP BY cc.mes, cc.anho " +
+		   "ORDER BY cc.anho, cc.mes")
 	List<CuotaPeriodoDto> findCuotaPeriodosByLectivoId(@Param("lectivoId") Integer lectivoId);
 
 }
