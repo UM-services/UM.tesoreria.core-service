@@ -5,18 +5,18 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.4</version>
+        <version>3.5.5</version>
         <relativePath/>
         <!-- lookup parent from repository -->
     </parent>
     <groupId>ar.edu</groupId>
     <artifactId>um.tesoreria.core-service</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <name>UM.tesoreria.core-service</name>
     <description>Tesoreria API REST</description>
     <properties>
         <java.version>24</java.version>
-        <kotlin.version>2.2.0</kotlin.version>
+        <kotlin.version>2.2.10</kotlin.version>
         <spring-cloud.version>2025.0.0</spring-cloud.version>
         <sonar.organization>um-services</sonar.organization>
         <sonar.projectKey>UM-services_UM.tesoreria.core-service</sonar.projectKey>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-log4j2</artifactId>
-            <version>3.5.4</version>
+            <version>3.5.5</version>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
@@ -96,12 +96,12 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.9</version>
+            <version>2.8.10</version>
         </dependency>
         <dependency>
             <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
-            <version>2.2.4</version>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
