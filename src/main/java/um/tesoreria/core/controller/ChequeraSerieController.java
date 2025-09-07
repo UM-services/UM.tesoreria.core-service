@@ -58,6 +58,13 @@ public class ChequeraSerieController {
         return ResponseEntity.ok(service.findAllByLectivoIdAndFacultadIdTest(lectivoId, facultadId));
     }
 
+    @GetMapping("/sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}")
+    public ResponseEntity<List<ChequeraSerie>> findAllBySede(@PathVariable Integer facultadId,
+                                                             @PathVariable Integer lectivoId,
+                                                             @PathVariable Integer geograficaId) {
+        return ResponseEntity.ok(service.findAllBySede(facultadId, lectivoId, geograficaId));
+    }
+
     @GetMapping("/persona/{personaId}/{documentoId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByPersona(@PathVariable BigDecimal personaId,
                                                                 @PathVariable Integer documentoId) {

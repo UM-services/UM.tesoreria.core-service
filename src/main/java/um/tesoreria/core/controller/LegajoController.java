@@ -33,7 +33,7 @@ public class LegajoController {
             @PathVariable BigDecimal personaId,
             @PathVariable Integer documentoId) {
         try {
-            return new ResponseEntity<>(service.findByFacultadIdAndPersonaIdAndDocumentoId(facultadId, personaId, documentoId), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByFacultadIdAndPersonaIdAndDocumentoId(facultadId, personaId, documentoId));
         } catch (LegajoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -41,12 +41,12 @@ public class LegajoController {
 
     @PostMapping("/")
     public ResponseEntity<Legajo> add(@RequestBody Legajo legajo) {
-        return new ResponseEntity<>(service.add(legajo), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(legajo));
     }
 
     @PostMapping("/saveAll")
     public ResponseEntity<List<Legajo>> saveAll(@RequestBody List<Legajo> legajos) {
-        return new ResponseEntity<>(service.saveAll(legajos), HttpStatus.OK);
+        return ResponseEntity.ok(service.saveAll(legajos));
     }
 
 }
