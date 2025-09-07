@@ -1,0 +1,17 @@
+```mermaid
+sequenceDiagram
+    participant User
+    participant Gateway
+    participant ChequeraSerieController
+    participant ChequeraSerieService
+    participant ChequeraSerieRepository
+
+    User->>Gateway: GET /api/tesoreria/core/chequera/serie/sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}
+    Gateway->>ChequeraSerieController: GET /chequera/serie/sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}
+    ChequeraSerieController->>ChequeraSerieService: findAllBySede(facultadId, lectivoId, geograficaId)
+    ChequeraSerieService->>ChequeraSerieRepository: findAllByFacultadIdAndLectivoIdAndGeograficaId(facultadId, lectivoId, geograficaId)
+    ChequeraSerieRepository-->>ChequeraSerieService: List<ChequeraSerie>
+    ChequeraSerieService-->>ChequeraSerieController: List<ChequeraSerie>
+    ChequeraSerieController-->>Gateway: ResponseEntity.ok(List<ChequeraSerie>)
+    Gateway-->>User: 200 OK
+```

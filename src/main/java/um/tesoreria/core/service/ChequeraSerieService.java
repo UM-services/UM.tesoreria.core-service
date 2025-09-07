@@ -99,6 +99,11 @@ public class ChequeraSerieService {
         return repository.findAllByLectivoIdAndFacultadId(lectivoId, facultadId);
     }
 
+    public List<ChequeraSerie> findAllBySede(Integer facultadId, Integer lectivoId, Integer geograficaId) {
+        return repository.findAllByFacultadIdAndLectivoIdAndGeograficaId(facultadId, lectivoId, geograficaId);
+    }
+
+
     public List<ChequeraSerie> findAllByLectivoIdAndFacultadIdTest(Integer lectivoId, Integer facultadId) {
         return repository.findAllByLectivoIdAndFacultadIdAndPersonaId(lectivoId, facultadId, new BigDecimal(45719365));
     }
