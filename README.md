@@ -4,7 +4,12 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.5.
 
-**Versión actual (SemVer): 1.5.0**
+**Versión actual (SemVer): 1.6.0**
+
+## Novedades 1.6.0 (verificado en código)
+- Nuevo endpoint de resumen por lectivo (`/resumen/lectivo/{lectivoId}`) que devuelve la cantidad de chequeras agrupadas por facultad y sede
+- Refactorización de `ChequeraSerieController` y `ChequeraSerieService` para usar `@RequiredArgsConstructor` en lugar de constructores explícitos
+- Creación del DTO `FacultadSedeChequeraDto` para representar los datos del resumen
 
 ## Novedades 1.5.0 (verificado en código)
 - Añadido nuevo endpoint para buscar `ChequeraSerie` por sede (`/sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}`).

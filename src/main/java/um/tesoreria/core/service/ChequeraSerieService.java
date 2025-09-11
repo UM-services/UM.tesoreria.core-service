@@ -12,7 +12,7 @@ import java.util.Optional;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +22,7 @@ import um.tesoreria.core.kotlin.model.TipoChequera;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAlta;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAltaFull;
 import um.tesoreria.core.model.Debito;
+import um.tesoreria.core.model.internal.FacultadSedeChequeraDto;
 import um.tesoreria.core.model.view.ChequeraIncompleta;
 import um.tesoreria.core.model.view.ChequeraKey;
 import um.tesoreria.core.repository.ChequeraSerieRepository;
@@ -36,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ChequeraSerieService {
 
     private final ChequeraSerieRepository repository;
@@ -46,25 +48,6 @@ public class ChequeraSerieService {
     private final DebitoService debitoService;
     private final ChequeraKeyService chequeraKeyService;
     private final ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
-
-    @Autowired
-    public ChequeraSerieService(ChequeraSerieRepository repository,
-                                ChequeraIncompletaService chequeraIncompletaService,
-                                ChequeraSerieAltaService chequeraSerieAltaService,
-                                ChequeraSerieAltaFullService chequeraSerieAltaFullService,
-                                TipoChequeraService tipoChequeraService,
-                                DebitoService debitoService,
-                                ChequeraKeyService chequeraKeyService,
-                                ChequeraImpresionCabeceraService chequeraImpresionCabeceraService) {
-        this.repository = repository;
-        this.chequeraIncompletaService = chequeraIncompletaService;
-        this.chequeraSerieAltaService = chequeraSerieAltaService;
-        this.chequeraSerieAltaFullService = chequeraSerieAltaFullService;
-        this.tipoChequeraService = tipoChequeraService;
-        this.debitoService = debitoService;
-        this.chequeraKeyService = chequeraKeyService;
-        this.chequeraImpresionCabeceraService = chequeraImpresionCabeceraService;
-    }
 
     public List<ChequeraSerie> findAllByPersona(BigDecimal personaId, Integer documentoId) {
         return repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, Sort.by("lectivoId").descending());
@@ -397,6 +380,10 @@ public class ChequeraSerieService {
                                                                          Long chequeraSerieId) {
         repository.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId,
                 chequeraSerieId);
+    }
+
+    public List<FacultadSedeChequeraDto> resumenLectivo(Integer lectivoId) {
+        return repository.findAllFacultadSedeByLectivo(lectivoId);
     }
 
 }
