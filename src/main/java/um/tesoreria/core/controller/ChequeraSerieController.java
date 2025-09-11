@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import um.tesoreria.core.kotlin.model.ChequeraSerie;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAlta;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAltaFull;
+import um.tesoreria.core.model.internal.FacultadSedeChequeraDto;
 import um.tesoreria.core.model.view.ChequeraIncompleta;
 import um.tesoreria.core.model.view.ChequeraKey;
 import um.tesoreria.core.service.ChequeraCuotaService;
@@ -34,15 +36,11 @@ import um.tesoreria.core.service.ChequeraSerieService;
 @RestController
 @RequestMapping({"/chequeraserie", "/api/tesoreria/core/chequeraSerie"})
 @Slf4j
+@RequiredArgsConstructor
 public class ChequeraSerieController {
 
     private final ChequeraSerieService service;
     private final ChequeraCuotaService chequeraCuotaService;
-
-    public ChequeraSerieController(ChequeraSerieService service, ChequeraCuotaService chequeraCuotaService) {
-        this.service = service;
-        this.chequeraCuotaService = chequeraCuotaService;
-    }
 
     @GetMapping("/lectivo/{facultadId}/{lectivoId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByLectivo(@PathVariable Integer facultadId,
@@ -191,6 +189,11 @@ public class ChequeraSerieController {
                                                   @PathVariable Integer tipoChequeraId,
                                                   @PathVariable Long chequeraSerieId) {
         return ResponseEntity.ok(service.markSent(facultadId, tipoChequeraId, chequeraSerieId));
+    }
+
+    @GetMapping("/resumen/lectivo/{lectivoId}")
+    public ResponseEntity<List<FacultadSedeChequeraDto>> resumenLectivo(@PathVariable Integer lectivoId) {
+        return ResponseEntity.ok(service.resumenLectivo(lectivoId));
     }
 
 }

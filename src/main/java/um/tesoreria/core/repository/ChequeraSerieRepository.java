@@ -10,7 +10,11 @@ import java.util.Optional;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import um.tesoreria.core.kotlin.model.ChequeraSerie;
+import um.tesoreria.core.model.internal.CuotaPeriodoDto;
+import um.tesoreria.core.model.internal.FacultadSedeChequeraDto;
 
 /**
  * @author daniel
@@ -76,5 +80,14 @@ public interface ChequeraSerieRepository extends JpaRepository<ChequeraSerie, Lo
 	@Modifying
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
+
+    @Query("SELECT new um.tesoreria.core.model.internal.FacultadSedeChequeraDto(cs.facultadId, f.nombre, cs.geograficaId, g.nombre, COUNT(*)) " +
+            "FROM ChequeraSerie cs " +
+            "JOIN Facultad f ON cs.facultadId = f.facultadId " +
+            "JOIN Geografica g on cs.geograficaId = g.geograficaId " +
+            "WHERE cs.lectivoId = :lectivoId " +
+            "GROUP BY cs.facultadId, cs.geograficaId " +
+            "ORDER BY cs.facultadId, cs.geograficaId")
+    List<FacultadSedeChequeraDto> findAllFacultadSedeByLectivo(@Param("lectivoId") Integer lectivoId);
 
 }

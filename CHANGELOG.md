@@ -5,6 +5,13 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2025-09-11
+- feat(controller,repository,service): agregar endpoint de resumen por lectivo (`/resumen/lectivo/{lectivoId}`) que devuelve la cantidad de chequeras agrupadas por facultad y sede
+- refactor(controller,service): reemplazar constructores con inyección de dependencias por `@RequiredArgsConstructor` en `ChequeraSerieController` y `ChequeraSerieService`
+- feat(model): crear nuevo DTO `FacultadSedeChequeraDto` para representar los datos del resumen
+
+> Basado en análisis de código (`git diff HEAD`), historial de commits y `pom.xml`.
+
 ## [1.5.0] - 2025-09-07
 - feat: Añadido nuevo endpoint para buscar `ChequeraSerie` por sede (`/sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}`).
 - refactor: Refactorizados `GeograficaController` y `LegajoController` para usar inyección de dependencias por constructor, `ResponseEntity.ok()` y manejo de excepciones mejorado.
