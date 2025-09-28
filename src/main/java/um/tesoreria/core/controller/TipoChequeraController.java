@@ -5,6 +5,7 @@ package um.tesoreria.core.controller;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,13 +29,10 @@ import um.tesoreria.core.kotlin.model.TipoChequera;
  */
 @RestController
 @RequestMapping({"/tipoChequera", "/api/tesoreria/core/tipoChequera"})
+@RequiredArgsConstructor
 public class TipoChequeraController {
 
 	private final TipoChequeraService service;
-
-	public TipoChequeraController(TipoChequeraService service) {
-		this.service = service;
-	}
 
 	@GetMapping("/")
 	public ResponseEntity<List<TipoChequera>> findAll() {

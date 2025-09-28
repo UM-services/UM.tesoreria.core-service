@@ -21,19 +21,17 @@ import um.tesoreria.core.model.Contrato;
 @Repository
 public interface ContratoRepository extends JpaRepository<Contrato, Long> {
 
-	public List<Contrato> findAllByFacultadIdAndGeograficaId(Integer facultadId, Integer geograficaId);
+	List<Contrato> findAllByFacultadIdAndGeograficaId(Integer facultadId, Integer geograficaId);
 
-	public List<Contrato> findAllByAjusteAndHastaGreaterThanEqual(Byte ajuste, OffsetDateTime referencia);
+	List<Contrato> findAllByAjusteAndHastaGreaterThanEqual(Byte ajuste, OffsetDateTime referencia);
 
-	public List<Contrato> findAllByHastaGreaterThanEqual(OffsetDateTime referencia);
+	List<Contrato> findAllByHastaGreaterThanEqual(OffsetDateTime referencia);
 
-	public List<Contrato> findAllByPersonaIdAndDocumentoIdOrderByDesdeDesc(BigDecimal personaId, Integer documentoId);
+	List<Contrato> findAllByPersonaIdAndDocumentoIdOrderByDesdeDesc(BigDecimal personaId, Integer documentoId);
 
-	public List<Contrato> findAllByContratadoId(Long contratadoId);
-
-	public Optional<Contrato> findByContratoId(Long contratoId);
+	Optional<Contrato> findByContratoId(Long contratoId);
 
 	@Modifying
-	public void deleteByContratoId(Long contratoId);
+	void deleteByContratoId(Long contratoId);
 
 }

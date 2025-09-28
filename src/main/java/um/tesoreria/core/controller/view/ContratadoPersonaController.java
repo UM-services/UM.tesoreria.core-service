@@ -5,6 +5,7 @@ package um.tesoreria.core.controller.view;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,10 @@ import um.tesoreria.core.service.view.ContratadoPersonaService;
  */
 @RestController
 @RequestMapping("/contratadopersona")
+@RequiredArgsConstructor
 public class ContratadoPersonaController {
 
-	@Autowired
-	private ContratadoPersonaService service;
+	private final ContratadoPersonaService service;
 
 	@GetMapping("/")
 	public ResponseEntity<List<ContratadoPersona>> findAll() {

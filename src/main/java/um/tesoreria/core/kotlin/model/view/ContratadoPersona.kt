@@ -12,7 +12,7 @@ import java.math.BigDecimal
 data class ContratadoPersona(
 
     @Id
-    var contratadoId: Long? = null,
+    var uniqueId: String? = null,
 
     var personaId: BigDecimal? = null,
     var documentoId: Int? = null,

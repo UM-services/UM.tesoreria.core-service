@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -25,19 +26,12 @@ import um.tesoreria.core.service.view.TipoChequeraSearchService;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class TipoChequeraService {
 
 	private final TipoChequeraRepository repository;
 	private final LectivoTotalService lectivoTotalService;
 	private final TipoChequeraSearchService tipoChequeraSearchService;
-
-	public TipoChequeraService(TipoChequeraRepository repository,
-							   LectivoTotalService lectivoTotalService,
-							   TipoChequeraSearchService tipoChequeraSearchService) {
-		this.repository = repository;
-		this.lectivoTotalService = lectivoTotalService;
-		this.tipoChequeraSearchService = tipoChequeraSearchService;
-	}
 
 	public List<TipoChequeraSearch> findAllByStrings(List<String> conditions) {
 		log.debug("Processing findAllByStrings");
@@ -71,8 +65,10 @@ public class TipoChequeraService {
 	}
 
 	public TipoChequera findByTipoChequeraId(Integer tipoChequeraId) {
-		return repository.findByTipoChequeraId(tipoChequeraId)
-				.orElseThrow(() -> new TipoChequeraException(tipoChequeraId));
+        var tipoChequera = repository.findByTipoChequeraId(tipoChequeraId)
+                .orElseThrow(() -> new TipoChequeraException(tipoChequeraId));
+        log.debug("TipoChequera -> {}", tipoChequera.jsonify());
+		return tipoChequera;
 	}
 
 	public TipoChequera findLast() {

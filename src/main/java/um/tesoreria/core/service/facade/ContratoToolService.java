@@ -12,11 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.CursoCargoContratado;
@@ -27,7 +25,7 @@ import um.tesoreria.core.service.ContratoFacturaService;
 import um.tesoreria.core.service.ContratoPeriodoService;
 import um.tesoreria.core.service.ContratoService;
 import um.tesoreria.core.service.CursoCargoContratadoService;
-import um.tesoreria.core.service.facade.autofix.ContratoAutoFixService;
+import um.tesoreria.core.util.Jsonifier;
 import um.tesoreria.core.util.Periodo;
 import um.tesoreria.core.util.Tool;
 import lombok.extern.slf4j.Slf4j;
@@ -38,25 +36,13 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ContratoToolService {
 
 	private final ContratoFacturaService contratoFacturaService;
 	private final ContratoPeriodoService contratoPeriodoService;
 	private final ContratoService contratoService;
 	private final CursoCargoContratadoService cursoCargoContratadoService;
-    private final ContratoAutoFixService contratoAutoFixService;
-
-	public ContratoToolService(ContratoFacturaService contratoFacturaService,
-							   ContratoPeriodoService contratoPeriodoService,
-							   ContratoService contratoService,
-							   CursoCargoContratadoService cursoCargoContratadoService,
-                               ContratoAutoFixService contratoAutoFixService) {
-		this.contratoFacturaService = contratoFacturaService;
-		this.contratoPeriodoService = contratoPeriodoService;
-		this.contratoService = contratoService;
-		this.cursoCargoContratadoService = cursoCargoContratadoService;
-        this.contratoAutoFixService = contratoAutoFixService;
-	}
 
 	@Transactional
 	public Boolean addFactura(ContratoFactura contratofactura) {
@@ -88,8 +74,9 @@ public class ContratoToolService {
 
 	@Transactional
 	public Boolean deleteContrato(Long contratoId) {
+        log.debug("Processing ContratoToolService.deleteContrato(contratoId); {}", contratoId);
 		for (ContratoPeriodo periodo : contratoPeriodoService.findAllPendienteByContrato(contratoId)) {
-			log.debug("ContratoPeriodo -> {}", periodo);
+			log.debug("ContratoPeriodo -> {}", periodo.jsonify());
 			contratoPeriodoService.deleteByContratoPeriodoId(periodo.getContratoPeriodoId());
 		}
 		contratoService.deleteByContratoId(contratoId);
@@ -98,16 +85,26 @@ public class ContratoToolService {
 
 	@Transactional
 	public Boolean depuraContrato(Long contratoId) {
+        log.debug("Processing ContratoToolService.depuraContrato");
 		Contrato contrato = contratoService.findByContratoId(contratoId);
 		long desde = contrato.getDesde().getYear() * 100L + contrato.getDesde().getMonthValue();
 		long hasta = contrato.getHasta().getYear() * 100L + contrato.getHasta().getMonthValue();
 		for (ContratoPeriodo periodo : contratoPeriodoService.findAllPendienteByContrato(contratoId)) {
+            log.debug("ContratoPeriodo -> {}", periodo.jsonify());
 			long periodo_ciclo = periodo.getAnho() * 100L + periodo.getMes();
 			if (periodo_ciclo < desde) {
+                log.debug("Eliminando ContratoPeriodo -> {}", periodo.getContratoPeriodoId());
 				contratoPeriodoService.deleteByContratoPeriodoId(periodo.getContratoPeriodoId());
+                // Agregar eliminación de cursos para este período
+                log.debug("Eliminando CursoCargoContratado -> {}", periodo.getContratoId());
+                cursoCargoContratadoService.deleteByContratoAndPeriodo(contratoId, periodo.getAnho(), periodo.getMes());
 			}
 			if (periodo_ciclo > hasta) {
+                log.debug("Eliminando ContratoPeriodo -> {}", periodo.getContratoPeriodoId());
 				contratoPeriodoService.deleteByContratoPeriodoId(periodo.getContratoPeriodoId());
+                // Agregar eliminación de cursos para este período
+                log.debug("Eliminando CursoCargoContratado -> {}", periodo.getContratoId());
+                cursoCargoContratadoService.deleteByContratoAndPeriodo(contratoId, periodo.getAnho(), periodo.getMes());
 			}
 		}
 		return true;
@@ -132,15 +129,15 @@ public class ContratoToolService {
 			contrato = contratoService.update(contrato, contrato.getContratoId());
 		}
 		// Carga los períodos ya registrados
-		Map<String, ContratoPeriodo> periodokeys = contratoPeriodoService.findAllByContrato(contrato.getContratoId())
+		Map<String, ContratoPeriodo> periodoKeys = contratoPeriodoService.findAllByContrato(contrato.getContratoId())
 				.stream().collect(Collectors.toMap(ContratoPeriodo::periodoKey, periodo -> periodo));
 		// Busca los períodos incluídos
 		Long desde = contrato.getDesde().getYear() * 100L + contrato.getDesde().getMonthValue();
 		Long hasta = contrato.getHasta().getYear() * 100L + contrato.getHasta().getMonthValue();
 		List<ContratoPeriodo> periodos = new ArrayList<ContratoPeriodo>();
 		for (Periodo mes : Periodo.makePeriodos(desde, hasta)) {
-			if (periodokeys.containsKey(mes.periodoKey())) {
-				ContratoPeriodo periodo = periodokeys.get(mes.periodoKey());
+			if (periodoKeys.containsKey(mes.periodoKey())) {
+				ContratoPeriodo periodo = periodoKeys.get(mes.periodoKey());
 				if (periodo.getContratoFacturaId() == null && periodo.getContratoChequeId() == null) {
 					periodo.setImporte(contrato.getCanonMensual());
 					periodos.add(periodo);
@@ -151,6 +148,7 @@ public class ContratoToolService {
 			}
 		}
 		periodos = contratoPeriodoService.saveAll(periodos);
+        log.debug("Periodos -> {}", Jsonifier.builder(periodos).build());
 		// Depura contrato
 		this.depuraContrato(contrato.getContratoId());
 		return true;
@@ -172,7 +170,7 @@ public class ContratoToolService {
 	public Boolean saveCurso(Long cursoId, Long contratoId, Integer cargoTipoId, BigDecimal horasSemanales) {
 		log.debug("Processing ContratoToolService.saveCurso");
 		log.debug("ContratoToolService.saveCurso - Leyendo contrato -> {}",  contratoId);
-        var contrato = contratoAutoFixService.fixContratadoId(contratoId);
+        var contrato = contratoService.findByContratoId(contratoId);
         log.debug("Contrato -> {}",  contrato.jsonify());
 		OffsetDateTime desde = contrato.getDesde().withOffsetSameInstant(ZoneOffset.UTC);
 		OffsetDateTime hasta = contrato.getHasta().withOffsetSameInstant(ZoneOffset.UTC);
@@ -187,29 +185,30 @@ public class ContratoToolService {
         cursoCargos.forEach(cursoCargoContratado -> log.debug("CursoCargoContratado -> {}", cursoCargoContratado.jsonify()));
 		Map<String, CursoCargoContratado> asignados = cursoCargos.stream()
 				.collect(Collectors.toMap(CursoCargoContratado::getPeriodo, asignado -> asignado));
+        log.debug("Asignados -> {}",  Jsonifier.builder(asignados).build());
 		// Asociar periodos con cursos
 		List<CursoCargoContratado> cargos = new ArrayList<CursoCargoContratado>();
 		for (Periodo periodo : periodos) {
 			CursoCargoContratado cargo = null;
 			if (asignados.containsKey(periodo.getAnho() + "." + periodo.getMes())) {
 				cargo = asignados.get(periodo.getAnho() + "." + periodo.getMes());
-				cargo.setContratadoId(contrato.getContratadoId());
 			} else {
 				cargo = new CursoCargoContratado(null,
 						cursoId,
 						periodo.getAnho(),
 						periodo.getMes(),
-						contrato.getContratadoId(),
 						contratoId,
+                        contrato.getPersonaId(),
+                        contrato.getDocumentoId(),
 						cargoTipoId,
 						horasSemanales,
 						BigDecimal.ZERO,
 						null,
 						null,
 						null,
-						(byte) 0,
-						null);
+						(byte) 0);
 			}
+            log.debug("Cargo a grabar -> {}",  cargo.jsonify());
 			cargos.add(cargo);
 		}
 		log.debug("ContratoToolService.saveCurso - Cursos a registrar");
@@ -234,11 +233,7 @@ public class ContratoToolService {
 				.findByCursoCargo(cursoCargoContratadoId);
 		Long cursoId = cursoCargoContratado.getCursoId();
 		Long contratoId = cursoCargoContratado.getContratoId();
-		Long contratadoId = cursoCargoContratado.getContratadoId();
-		cursoCargoContratadoService.deleteAllByCursoIdAndContratoIdAndContratadoId(cursoId, contratoId, contratadoId);
+		cursoCargoContratadoService.deleteAllByCursoIdAndContratoId(cursoId, contratoId);
 	}
 
-    public void resetMarcaTemporal(Long contratoId) {
-        contratoAutoFixService.resetMarcaTemporal(contratoId);
-    }
 }

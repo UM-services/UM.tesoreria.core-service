@@ -6,6 +6,7 @@ package um.tesoreria.core.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,10 @@ import um.tesoreria.core.service.MatriculaService;
  */
 @RestController
 @RequestMapping("/matricula")
+@RequiredArgsConstructor
 public class MatriculaController {
 
-	@Autowired
-	private MatriculaService service;
+	private final MatriculaService service;
 
 	@GetMapping("/pendientes")
 	public ResponseEntity<List<Matricula>> findPendientes() {
@@ -42,7 +43,7 @@ public class MatriculaController {
 	@GetMapping("/{matriculaId}")
 	public ResponseEntity<Matricula> findByMatriculaId(@PathVariable Long matriculaId) {
 		try {
-			return new ResponseEntity<Matricula>(service.findByMatriculaId(matriculaId), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByMatriculaId(matriculaId));
 		} catch (MatriculaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -52,9 +53,7 @@ public class MatriculaController {
 	public ResponseEntity<Matricula> findByUnique(@PathVariable Integer facultadId, @PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId, @PathVariable Integer lectivoId, @PathVariable Integer clasechequeraId) {
 		try {
-			return new ResponseEntity<Matricula>(
-					service.findByUnique(facultadId, personaId, documentoId, lectivoId, clasechequeraId),
-					HttpStatus.OK);
+            return ResponseEntity.ok(service.findByUnique(facultadId, personaId, documentoId, lectivoId, clasechequeraId));
 		} catch (MatriculaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -62,12 +61,12 @@ public class MatriculaController {
 
 	@PostMapping("/")
 	public ResponseEntity<Matricula> add(@RequestBody Matricula matricula) {
-		return new ResponseEntity<Matricula>(service.add(matricula), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(matricula));
 	}
 
 	@PutMapping("/{matriculaId}")
 	public ResponseEntity<Matricula> update(@RequestBody Matricula matricula, @PathVariable Long matriculaId) {
-		return new ResponseEntity<Matricula>(service.update(matricula, matriculaId), HttpStatus.OK);
+        return ResponseEntity.ok(service.update(matricula, matriculaId));
 	}
 
 	@GetMapping("/depurate")

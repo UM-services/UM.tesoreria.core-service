@@ -6,6 +6,7 @@ package um.tesoreria.core.controller.facade;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
@@ -28,50 +29,48 @@ import um.tesoreria.core.service.facade.ContratoToolService;
  */
 @RestController
 @RequestMapping({"/contratotool", "/api/core/contratotool"})
+@RequiredArgsConstructor
 public class ContratoToolController {
 
 	private final ContratoToolService service;
 
-	public ContratoToolController(ContratoToolService service) {
-		this.service = service;
-	}
-
 	@PostMapping("/addfactura")
 	public ResponseEntity<Boolean> addFactura(@RequestBody ContratoFactura contratofactura) {
-		return new ResponseEntity<>(service.addFactura(contratofactura), HttpStatus.OK);
+        return ResponseEntity.ok(service.addFactura(contratofactura));
 	}
 
 	@DeleteMapping("/deletefactura/{contratofacturaId}")
 	public ResponseEntity<Boolean> deleteFactura(@PathVariable Long contratofacturaId) {
-		return new ResponseEntity<>(service.deleteFactura(contratofacturaId), HttpStatus.OK);
+        return ResponseEntity.ok(service.deleteFactura(contratofacturaId));
 	}
 
 	@DeleteMapping("/deletecontrato/{contratoId}")
 	public ResponseEntity<Boolean> deleteContrato(@PathVariable Long contratoId) {
-		return new ResponseEntity<>(service.deleteContrato(contratoId), HttpStatus.OK);
+        return ResponseEntity.ok(service.deleteContrato(contratoId));
 	}
 
 	@GetMapping("/depuracontrato/{contratoId}")
 	public ResponseEntity<Boolean> depuraContrato(@PathVariable Long contratoId) {
-		return new ResponseEntity<>(service.depuraContrato(contratoId), HttpStatus.OK);
+        return ResponseEntity.ok(service.depuraContrato(contratoId));
 	}
 
 	@PostMapping("/savecontrato")
 	public ResponseEntity<Boolean> saveContrato(@RequestBody Contrato contrato) {
-		return new ResponseEntity<>(service.saveContrato(contrato), HttpStatus.OK);
+        return ResponseEntity.ok(service.saveContrato(contrato));
 	}
 
 	@GetMapping("/anulaenvio/{fecha}/{envio}")
 	public ResponseEntity<Boolean> anulaEnvio(@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime fecha,
 			@PathVariable Integer envio) {
-		return new ResponseEntity<>(service.anulaEnvio(fecha, envio), HttpStatus.OK);
+        return ResponseEntity.ok(service.anulaEnvio(fecha, envio));
 	}
 
 	@GetMapping("/savecurso/{cursoId}/{contratoId}/{cargotipoId}/{horasSemanales}")
-	public ResponseEntity<Boolean> saveCurso(@PathVariable Long cursoId, @PathVariable Long contratoId,
-			@PathVariable Integer cargotipoId, @PathVariable BigDecimal horasSemanales) {
-		return new ResponseEntity<>(service.saveCurso(cursoId, contratoId, cargotipoId, horasSemanales),
-				HttpStatus.OK);
+	public ResponseEntity<Boolean> saveCurso(@PathVariable Long cursoId,
+                                             @PathVariable Long contratoId,
+                                             @PathVariable Integer cargotipoId,
+                                             @PathVariable BigDecimal horasSemanales) {
+        return ResponseEntity.ok(service.saveCurso(cursoId, contratoId, cargotipoId, horasSemanales));
 	}
 
 	@DeleteMapping("deleteCurso/{cursoCargoContratadoId}")
@@ -86,11 +85,5 @@ public class ContratoToolController {
 		service.generateCurso(anho, mes);
         return ResponseEntity.noContent().build();
 	}
-
-    @GetMapping("/reset/marca/temporal/{contratoId}")
-    public ResponseEntity<Void> resetMarcaTemporal(@PathVariable Long contratoId) {
-        service.resetMarcaTemporal(contratoId);
-        return ResponseEntity.noContent().build();
-    }
 
 }

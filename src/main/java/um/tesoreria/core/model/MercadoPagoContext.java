@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
 import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.util.Jsonifier;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -54,16 +55,7 @@ public class MercadoPagoContext extends Auditable {
     private String payment;
 
     public String jsonify() {
-        try {
-            return JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            return "jsonify error -> " + e.getMessage();
-        }
+        return Jsonifier.builder(this).build();
     }
 
 }

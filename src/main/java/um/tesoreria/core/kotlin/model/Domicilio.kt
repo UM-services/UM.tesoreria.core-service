@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -75,4 +76,10 @@ data class Domicilio(
     @Transient
     var emailPagador: String = ""
 
-) : Auditable()
+) : Auditable() {
+
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
+
+}

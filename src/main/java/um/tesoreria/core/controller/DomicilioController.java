@@ -6,6 +6,7 @@ package um.tesoreria.core.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.kotlin.model.Domicilio;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +29,10 @@ import um.tesoreria.core.service.DomicilioService;
  */
 @RestController
 @RequestMapping("/domicilio")
+@RequiredArgsConstructor
 public class DomicilioController {
 
 	private final DomicilioService service;
-
-	public DomicilioController(DomicilioService service) {
-		this.service = service;
-	}
 
 	@GetMapping("/{domicilioId}")
 	public ResponseEntity<Domicilio> findByDomicilioId(@PathVariable Long domicilioId) {
@@ -49,7 +47,7 @@ public class DomicilioController {
 	public ResponseEntity<Domicilio> findByUnique(@PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId) {
 		try {
-			return new ResponseEntity<>(service.findByUnique(personaId, documentoId), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByUnique(personaId, documentoId));
 		} catch (DomicilioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}

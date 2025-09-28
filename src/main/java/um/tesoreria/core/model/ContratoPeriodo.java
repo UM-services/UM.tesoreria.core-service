@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -21,6 +22,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.util.Jsonifier;
 
 /**
  * @author daniel
@@ -37,7 +39,8 @@ public class ContratoPeriodo extends Auditable implements Serializable {
 	/**
 	* 
 	*/
-	private static final long serialVersionUID = -7090020857258666836L;
+	@Serial
+    private static final long serialVersionUID = -7090020857258666836L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,5 +75,9 @@ public class ContratoPeriodo extends Auditable implements Serializable {
 	public String periodoKey() {
 		return this.anho + "." + this.mes;
 	}
+
+    public String jsonify() {
+        return Jsonifier.builder(this).build();
+    }
 
 }
