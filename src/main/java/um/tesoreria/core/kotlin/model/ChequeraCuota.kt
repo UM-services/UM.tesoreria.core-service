@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.json.JsonMapper
 import jakarta.persistence.*
+import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -118,16 +119,7 @@ data class ChequeraCuota(
     }
 
     fun jsonify(): String {
-        try {
-            return JsonMapper
-                .builder()
-                .findAndAddModules()
-                .build()
-                .writerWithDefaultPrettyPrinter()
-                .writeValueAsString(this)
-        } catch (e: JsonProcessingException) {
-            return "jsonify error -> ${e.message}"
-        }
+        return Jsonifier.builder(this).build()
     }
 
     companion object {

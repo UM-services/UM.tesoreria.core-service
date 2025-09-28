@@ -2,9 +2,21 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.5.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
 
-**Versión actual (SemVer): 1.6.0**
+**Versión actual (SemVer): 2.0.0**
+
+## Novedades 2.0.0 (verificado en código)
+- Eliminación de ContratadoController y referencias al modelo contratado en servicios y controladores
+- Actualización de dependencias principales:
+  - Spring Boot: 3.5.6
+  - Kotlin: 2.2.20
+  - OpenPDF: 3.0.0
+- Refactorización para usar `@RequiredArgsConstructor` en lugar de `@Autowired` en múltiples servicios
+- Nueva clase utilitaria `Jsonifier` para logging estructurado en JSON
+- Actualización de imports para la biblioteca openpdf (cambio de paquete com.lowagie a org.openpdf)
+- Eliminación de ContratoAutoFixService y dependencias relacionadas
+- Mejoras en logging con métodos `jsonify()` en varios servicios
 
 ## Novedades 1.6.0 (verificado en código)
 - Nuevo endpoint de resumen por lectivo (`/resumen/lectivo/{lectivoId}`) que devuelve la cantidad de chequeras agrupadas por facultad y sede
@@ -45,13 +57,13 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.5
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 3.5.5
+- Spring Boot: 3.5.6
 - Spring Cloud: 2025.0.0
-- Kotlin: 2.2.10
+- Kotlin: 2.2.20
 - MySQL Connector: 9.4.0
 - SpringDoc OpenAPI: 2.8.10
 - Apache POI: 5.4.1
-- OpenPDF: 2.4.0
+- OpenPDF: 3.0.0
 - ModelMapper: 3.2.4
 - Guava: 33.4.8-jre
 
@@ -288,9 +300,9 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 # UM Tesorería Core Service
 
 [![Java](https://img.shields.io/badge/Java-24-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.0.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-purple.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
 
 ## Documentación
@@ -311,9 +323,9 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 
 ## Tecnologías Utilizadas
 - Java 24
-- Spring Boot 3.5.5
+- Spring Boot 3.5.6
 - Spring Cloud 2025.0.0
-- Kotlin 2.2.10
+- Kotlin 2.2.20
 - JPA/Hibernate
 - ModelMapper
 - MySQL

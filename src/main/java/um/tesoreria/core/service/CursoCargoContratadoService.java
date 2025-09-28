@@ -3,18 +3,21 @@
  */
 package um.tesoreria.core.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CursoCargoContratadoException;
 import um.tesoreria.core.kotlin.model.CursoCargoContratado;
 import um.tesoreria.core.repository.CursoCargoContratadoRepository;
+import um.tesoreria.core.util.Jsonifier;
 
 /**
  * @author daniel
@@ -22,30 +25,37 @@ import um.tesoreria.core.repository.CursoCargoContratadoRepository;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CursoCargoContratadoService {
 
 	private final CursoCargoContratadoRepository repository;
 
-	public CursoCargoContratadoService(CursoCargoContratadoRepository repository) {
-		this.repository = repository;
-	}
-
-	public List<CursoCargoContratado> findAllByContratado(Long contratadoId, Integer anho, Integer mes,
-														  Long contratoId) {
-		var cursoCargoContratados = repository.findAllByContratadoIdAndAnhoAndMesAndContratoId(contratadoId, anho, mes, contratoId);
-        try {
-            log.debug("cursoCargoContratados -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cursoCargoContratados));
-        } catch (JsonProcessingException e) {
-            log.debug("Sin cursoCargoContratados");
-        }
+	public List<CursoCargoContratado> findAllByContrato(Long contratoId,
+                                                          Integer anho,
+                                                          Integer mes,
+                                                          BigDecimal personaId,
+                                                          Integer documentoId
+    ) {
+        log.debug("Processing CursoCargoContratadoService.findAllByContrato");
+		var cursoCargoContratados = repository.findAllByContratoIdAndAnhoAndMesAndPersonaIdAndDocumentoId(
+                contratoId,
+                anho,
+                mes,
+                personaId,
+                documentoId
+        );
+        log.debug("Cursos -> {}", Jsonifier.builder(cursoCargoContratados).build());
         return cursoCargoContratados;
 	}
 
-	public List<CursoCargoContratado> findAllByCursosContratado(Long contratadoId, Integer anho, Integer mes) {
-		return repository.findAllByContratadoIdAndAnhoAndMes(contratadoId, anho, mes);
-	}
+    public List<CursoCargoContratado> findAllByPersona(BigDecimal personaId, Integer documentoId, Integer anho, Integer mes) {
+        log.debug("Processing CursoCargoContratadoService.findAllByPersona");
+        var cursoCargoContratados = repository.findAllByPersonaIdAndDocumentoIdAndAnhoAndMes(personaId, documentoId, anho, mes);
+        log.debug("Cursos -> {}", Jsonifier.builder(cursoCargoContratados).build());
+        return cursoCargoContratados;
+    }
 
-	public List<CursoCargoContratado> findAllByCurso(Long cursoId, Integer anho, Integer mes) {
+    public List<CursoCargoContratado> findAllByCurso(Long cursoId, Integer anho, Integer mes) {
 		return repository.findAllByCursoIdAndAnhoAndMes(cursoId, anho, mes);
 	}
 
@@ -62,11 +72,6 @@ public class CursoCargoContratadoService {
 				.orElseThrow(() -> new CursoCargoContratadoException(cursoCargoContratadoId));
 	}
 
-	public CursoCargoContratado findByContratado(Long cursoId, Integer anho, Integer mes, Long contratadoId) {
-		return repository.findByCursoIdAndAnhoAndMesAndContratadoId(cursoId, anho, mes, contratadoId)
-				.orElseThrow(() -> new CursoCargoContratadoException(cursoId, anho, mes, contratadoId));
-	}
-
 	public CursoCargoContratado add(CursoCargoContratado cursoCargoContratado) {
 		cursoCargoContratado = repository.save(cursoCargoContratado);
 		return cursoCargoContratado;
@@ -74,14 +79,21 @@ public class CursoCargoContratadoService {
 
 	public CursoCargoContratado update(CursoCargoContratado newCursoCargoContratado, Long cursoCargoContratadoId) {
 		return repository.findByCursoCargoContratadoId(cursoCargoContratadoId).map(cursoCargoContratado -> {
-			cursoCargoContratado = new CursoCargoContratado(cursoCargoContratadoId,
-					newCursoCargoContratado.getCursoId(), newCursoCargoContratado.getAnho(),
-					newCursoCargoContratado.getMes(), newCursoCargoContratado.getContratadoId(),
-					newCursoCargoContratado.getContratoId(), newCursoCargoContratado.getCargoTipoId(),
-					newCursoCargoContratado.getHorasSemanales(), newCursoCargoContratado.getHorasTotales(),
-					newCursoCargoContratado.getDesignacionTipoId(), newCursoCargoContratado.getCategoriaId(),
-					newCursoCargoContratado.getCursoCargoNovedadId(), newCursoCargoContratado.getAcreditado(), null);
+            cursoCargoContratado.setCursoId(newCursoCargoContratado.getCursoId());
+            cursoCargoContratado.setAnho(newCursoCargoContratado.getAnho());
+            cursoCargoContratado.setMes(newCursoCargoContratado.getMes());
+            cursoCargoContratado.setContratoId(newCursoCargoContratado.getContratoId());
+            cursoCargoContratado.setPersonaId(newCursoCargoContratado.getPersonaId());
+            cursoCargoContratado.setDocumentoId(newCursoCargoContratado.getDocumentoId());
+            cursoCargoContratado.setCargoTipoId(newCursoCargoContratado.getCargoTipoId());
+            cursoCargoContratado.setHorasSemanales(newCursoCargoContratado.getHorasSemanales());
+            cursoCargoContratado.setHorasTotales(newCursoCargoContratado.getHorasTotales());
+            cursoCargoContratado.setDesignacionTipoId(newCursoCargoContratado.getDesignacionTipoId());
+            cursoCargoContratado.setCategoriaId(newCursoCargoContratado.getCategoriaId());
+            cursoCargoContratado.setCursoCargoNovedadId(newCursoCargoContratado.getCursoCargoNovedadId());
+            cursoCargoContratado.setAcreditado(newCursoCargoContratado.getAcreditado());
 			cursoCargoContratado = repository.save(cursoCargoContratado);
+            log.debug("CursoCargoContratado -> {}", cursoCargoContratado.jsonify());
 			return cursoCargoContratado;
 		}).orElseThrow(() -> new CursoCargoContratadoException(cursoCargoContratadoId));
 	}
@@ -97,8 +109,13 @@ public class CursoCargoContratadoService {
 	}
 
 	@Transactional
-	public void deleteAllByCursoIdAndContratoIdAndContratadoId(Long cursoId, Long contratoId, Long contratadoId) {
-		repository.deleteAllByCursoIdAndContratoIdAndContratadoId(cursoId, contratoId, contratadoId);
+	public void deleteAllByCursoIdAndContratoId(Long cursoId, Long contratoId) {
+		repository.deleteAllByCursoIdAndContratoId(cursoId, contratoId);
 	}
+
+    @Transactional
+    public void deleteByContratoAndPeriodo(Long contratoId, Integer anho, Integer mes) {
+        repository.deleteAllByContratoIdAndAnhoAndMes(contratoId, anho, mes);
+    }
 
 }

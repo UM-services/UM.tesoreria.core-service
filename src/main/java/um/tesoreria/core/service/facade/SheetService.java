@@ -1251,9 +1251,9 @@ public class SheetService {
 
         for (ContratoPeriodo contratoPeriodo : contratoPeriodoService.findAllByPeriodo(anho, mes)) {
             row = sheet.createRow(++fila);
-            this.setCellBigDecimal(row, 0, contratoPeriodo.getContrato().getContratado().getPersona().getPersonaId(), styleNormal);
-            this.setCellString(row, 1, contratoPeriodo.getContrato().getContratado().getPersona().getApellidoNombre(), styleNormal);
-            this.setCellString(row, 2, contratoPeriodo.getContrato().getContratado().getPersona().getCuit(), styleNormal);
+//            this.setCellBigDecimal(row, 0, contratoPeriodo.getContrato().getContratado().getPersona().getPersonaId(), styleNormal);
+//            this.setCellString(row, 1, contratoPeriodo.getContrato().getContratado().getPersona().getApellidoNombre(), styleNormal);
+//            this.setCellString(row, 2, contratoPeriodo.getContrato().getContratado().getPersona().getCuit(), styleNormal);
             this.setCellString(row, 3, contratoPeriodo.getContrato().getFacultad().getNombre(), styleNormal);
             this.setCellString(row, 4, contratoPeriodo.getContrato().getGeografica().getNombre(), styleNormal);
             this.setCellOffsetDateTime(row, 5, contratoPeriodo.getContrato().getDesde(), styleDate);

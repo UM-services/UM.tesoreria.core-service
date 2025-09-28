@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -24,9 +25,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.kotlin.model.Auditable;
-import um.tesoreria.core.kotlin.model.Contratado;
 import um.tesoreria.core.kotlin.model.Facultad;
 import um.tesoreria.core.kotlin.model.Geografica;
+import um.tesoreria.core.util.Jsonifier;
 
 /**
  * @author daniel
@@ -41,13 +42,12 @@ public class Contrato extends Auditable implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -6511834189234951853L;
+	@Serial
+    private static final long serialVersionUID = -6511834189234951853L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long contratoId;
-
-	private Long contratadoId;
 
 	@Column(name = "con_per_id")
 	private BigDecimal personaId;
@@ -112,10 +112,6 @@ public class Contrato extends Auditable implements Serializable {
 	private Byte ajuste = 0;
 
 	@OneToOne
-	@JoinColumn(name = "contratadoId", insertable = false, updatable = false)
-	private Contratado contratado;
-
-	@OneToOne
 	@JoinColumn(name = "con_fac_id", insertable = false, updatable = false)
 	private Facultad facultad;
 
@@ -124,16 +120,7 @@ public class Contrato extends Auditable implements Serializable {
 	private Geografica geografica;
 
     public String jsonify() {
-        try {
-            return JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            return "jsonify error -> " + e.getMessage();
-        }
+        return Jsonifier.builder(this).build();
     }
 
 }

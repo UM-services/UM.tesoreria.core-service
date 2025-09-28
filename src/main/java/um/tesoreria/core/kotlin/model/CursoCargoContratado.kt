@@ -12,11 +12,12 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import um.tesoreria.core.kotlin.model.view.ContratadoPersona
+import um.tesoreria.core.util.Jsonifier
 
 @Entity
 @Table(
     uniqueConstraints = [
-        UniqueConstraint(columnNames = ["cursoId", "anho", "mes", "contratadoId"])
+        UniqueConstraint(columnNames = ["cursoId", "anho", "mes", "contratoId"])
     ]
 )
 data class CursoCargoContratado(
@@ -28,8 +29,9 @@ data class CursoCargoContratado(
     var cursoId: Long? = null,
     var anho: Int = 0,
     var mes: Int = 0,
-    var contratadoId: Long? = null,
     var contratoId: Long? = null,
+    var personaId: BigDecimal? = null,
+    var documentoId: Int? = null,
     var cargoTipoId: Int? = null,
     var horasSemanales: BigDecimal = BigDecimal.ZERO,
     var horasTotales: BigDecimal = BigDecimal.ZERO,
@@ -38,22 +40,10 @@ data class CursoCargoContratado(
     var cursoCargoNovedadId: Long? = null,
     var acreditado: Byte = 0,
 
-    @OneToOne
-    @JoinColumn(name = "contratadoId", insertable = false, updatable = false)
-    var contratadoPersona: ContratadoPersona? = null
-
 ) : Auditable() {
 
     fun jsonify(): String {
-        return try {
-            JsonMapper
-                .builder()
-                .findAndAddModules()
-                .build()
-                .writeValueAsString(this)
-        } catch (e: JsonProcessingException) {
-            "jsonify error -> ${e.message}"
-        }
+        return Jsonifier.builder(this).build()
     }
 
     val periodo: String

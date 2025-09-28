@@ -7,6 +7,7 @@ import java.util.List;
 
 import jakarta.transaction.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -20,10 +21,10 @@ import um.tesoreria.core.repository.ContratoPeriodoRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class ContratoPeriodoService {
 
-	@Autowired
-	private ContratoPeriodoRepository repository;
+	private final ContratoPeriodoRepository repository;
 
 	public List<ContratoPeriodo> findAllByContrato(Long contratoId) {
 		return repository.findAllByContratoId(contratoId,
@@ -73,9 +74,8 @@ public class ContratoPeriodoService {
 	}
 
 	public List<ContratoPeriodo> saveAll(List<ContratoPeriodo> contratoperiodos) {
-		repository.saveAll(contratoperiodos);
+        contratoperiodos = repository.saveAll(contratoperiodos);
 		return contratoperiodos;
-
 	}
 
 	@Transactional

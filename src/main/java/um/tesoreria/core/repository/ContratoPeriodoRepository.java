@@ -20,22 +20,22 @@ import um.tesoreria.core.model.ContratoPeriodo;
 @Repository
 public interface ContratoPeriodoRepository extends JpaRepository<ContratoPeriodo, Long> {
 
-	public List<ContratoPeriodo> findAllByContratoId(Long contratoId, Sort sort);
+	List<ContratoPeriodo> findAllByContratoId(Long contratoId, Sort sort);
 
-	public List<ContratoPeriodo> findAllByContratoFacturaId(Long contratoFacturaId);
+	List<ContratoPeriodo> findAllByContratoFacturaId(Long contratoFacturaId);
 
-	public List<ContratoPeriodo> findAllByContratoIdAndContratoFacturaIdIsNullAndContratoChequeIdIsNull(
+	List<ContratoPeriodo> findAllByContratoIdAndContratoFacturaIdIsNullAndContratoChequeIdIsNull(
 			Long contratoId);
 
-	public List<ContratoPeriodo> findAllByContratoIdAndMarcaTemporal(Long contratoId, Byte marcaTemporal);
+	List<ContratoPeriodo> findAllByContratoIdAndMarcaTemporal(Long contratoId, Byte marcaTemporal);
 
-	public List<ContratoPeriodo> findAllByAnhoAndMes(Integer anho, Integer mes);
+	List<ContratoPeriodo> findAllByAnhoAndMes(Integer anho, Integer mes);
 
-	public Optional<ContratoPeriodo> findByContratoIdAndAnhoAndMes(Long contratoId, Integer anho, Integer mes);
+	Optional<ContratoPeriodo> findByContratoIdAndAnhoAndMes(Long contratoId, Integer anho, Integer mes);
 
-	public Optional<ContratoPeriodo> findByContratoPeriodoId(Long contratoPeriodoId);
+	Optional<ContratoPeriodo> findByContratoPeriodoId(Long contratoPeriodoId);
 
 	@Modifying
-	public void deleteByContratoPeriodoId(Long contratoPeriodoId);
+	void deleteByContratoPeriodoId(Long contratoPeriodoId);
 
 }

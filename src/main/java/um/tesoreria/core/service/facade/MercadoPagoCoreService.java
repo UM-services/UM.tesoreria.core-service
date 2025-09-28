@@ -1,6 +1,7 @@
 package um.tesoreria.core.service.facade;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ChequeraCuotaException;
@@ -10,6 +11,7 @@ import um.tesoreria.core.kotlin.model.dto.UMPreferenceMPDto;
 import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.service.MercadoPagoContextService;
+import um.tesoreria.core.util.Jsonifier;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,6 +22,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MercadoPagoCoreService {
 
     private final ChequeraCuotaService chequeraCuotaService;
@@ -27,38 +30,38 @@ public class MercadoPagoCoreService {
 
     private record VencimientoMP(OffsetDateTime fechaVencimiento, BigDecimal importe) {}
 
-    public MercadoPagoCoreService(ChequeraCuotaService chequeraCuotaService,
-                                  MercadoPagoContextService mercadoPagoContextService) {
-        this.chequeraCuotaService = chequeraCuotaService;
-        this.mercadoPagoContextService = mercadoPagoContextService;
-    }
-
     @Transactional
     public UMPreferenceMPDto makeContext(Long chequeraCuotaId) {
-        log.debug("Processing makeContext");
+        log.debug("Processing MercadoPagoCoreService.makeContext");
 
         var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
-        ChequeraCuota chequeraCuota = getChequeraCuota(chequeraCuotaId);
+        var chequeraCuota = getChequeraCuota(chequeraCuotaId);
         if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
 
-        VencimientoMP vencimiento = determineVencimientoMP(chequeraCuota, today);
+        var vencimiento = determineVencimientoMP(chequeraCuota, today);
+        log.debug("Vencimiento -> {}", Jsonifier.builder(vencimiento).build());
         if (vencimiento.importe().compareTo(BigDecimal.ZERO) == 0) return null;
         if (vencimiento.fechaVencimiento().isBefore(today)) return null;
 
-        MercadoPagoContext mercadoPagoContext = findExistingContext(chequeraCuotaId);
+        var mercadoPagoContext = findExistingContext(chequeraCuotaId);
+        log.debug("MercadoPagoContext -> {}", mercadoPagoContext);
         mercadoPagoContext = createOrUpdateContext(mercadoPagoContext, chequeraCuotaId, vencimiento);
         return buildResponse(mercadoPagoContext, chequeraCuota);
     }
 
     private boolean isCuotaAvailable(ChequeraCuota chequeraCuota) {
-        log.debug("Processing isCuotaAvailable");
-        return chequeraCuota.getPagado() != 1 && chequeraCuota.getBaja() != 1 && chequeraCuota.getCompensada() != 1;
+        log.debug("Processing MercadoPagoCoreService.isCuotaAvailable");
+        var result = chequeraCuota.getPagado() != 1 && chequeraCuota.getBaja() != 1 && chequeraCuota.getCompensada() != 1;
+        log.debug("ChequeraCuota available result -> {}", result);
+        return result;
     }
 
     private MercadoPagoContext findExistingContext(Long chequeraCuotaId) {
-        log.debug("Processing findExistingContext");
+        log.debug("Processing MercadoPagoCoreService.findExistingContext");
         try {
-            return mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuotaId);
+            var context = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuotaId);
+            log.debug("MercadoPagoContext -> {}", context.jsonify());
+            return context;
         } catch (MercadoPagoContextException e) {
             log.debug("MercadoPagoContext Error -> {}", e.getMessage());
             return null;
@@ -66,9 +69,9 @@ public class MercadoPagoCoreService {
     }
 
     private MercadoPagoContext createOrUpdateContext(MercadoPagoContext mercadoPagoContext, Long chequeraCuotaId, VencimientoMP vencimiento) {
-        log.debug("Processing createOrUpdateContext");
+        log.debug("Processing MercadoPagoCoreService.createOrUpdateContext");
         if (mercadoPagoContext == null) {
-            return mercadoPagoContextService.add(MercadoPagoContext.builder()
+            mercadoPagoContext = mercadoPagoContextService.add(MercadoPagoContext.builder()
                     .chequeraCuotaId(chequeraCuotaId)
                     .fechaVencimiento(vencimiento.fechaVencimiento())
                     .importe(vencimiento.importe())
@@ -76,17 +79,20 @@ public class MercadoPagoCoreService {
                     .activo((byte) 1)
                     .changed((byte) 0)
                     .build());
-        } else {
-            mercadoPagoContext.setFechaVencimiento(vencimiento.fechaVencimiento());
-            mercadoPagoContext.setImporte(vencimiento.importe());
-            mercadoPagoContext.setChanged((byte) 1);
-            mercadoPagoContext.setLastVencimientoUpdated(OffsetDateTime.now(ZoneOffset.UTC));
-            return mercadoPagoContextService.update(mercadoPagoContext, mercadoPagoContext.getMercadoPagoContextId());
+            log.debug("MercadoPagoContext added -> {}", mercadoPagoContext.jsonify());
+            return mercadoPagoContext;
         }
+        mercadoPagoContext.setFechaVencimiento(vencimiento.fechaVencimiento());
+        mercadoPagoContext.setImporte(vencimiento.importe());
+        mercadoPagoContext.setChanged((byte) 1);
+        mercadoPagoContext.setLastVencimientoUpdated(OffsetDateTime.now(ZoneOffset.UTC));
+        mercadoPagoContext = mercadoPagoContextService.update(mercadoPagoContext, mercadoPagoContext.getMercadoPagoContextId());
+        log.debug("MercadoPagoContext updated -> {}", mercadoPagoContext.jsonify());
+        return mercadoPagoContext;
     }
 
     private UMPreferenceMPDto buildResponse(MercadoPagoContext context, ChequeraCuota chequeraCuota) {
-        log.debug("Processing buildResponse");
+        log.debug("Processing MercadoPagoCoreService.buildResponse");
         return new UMPreferenceMPDto.Builder()
                 .mercadoPagoContext(context)
                 .chequeraCuota(chequeraCuota)
@@ -94,9 +100,11 @@ public class MercadoPagoCoreService {
     }
 
     private ChequeraCuota getChequeraCuota(Long id) {
-        log.debug("Processing getChequeraCuota");
+        log.debug("Processing MercadoPagoCoreService.getChequeraCuota");
         try {
-            return chequeraCuotaService.findByChequeraCuotaId(id);
+            var cuota = chequeraCuotaService.findByChequeraCuotaId(id);
+            log.debug("ChequeraCuota -> {}", cuota.jsonify());
+            return cuota;
         } catch (ChequeraCuotaException e) {
             log.debug("ChequeraCuota Error -> {}", e.getMessage());
             return null;
@@ -104,7 +112,7 @@ public class MercadoPagoCoreService {
     }
 
     private void deactivateExistingContexts(Long chequeraCuotaId) {
-        log.debug("Processing deactivateExistingContexts");
+        log.debug("Processing MercadoPagoCoreService.deactivateExistingContexts");
         List<MercadoPagoContext> contexts = mercadoPagoContextService.findAllByChequeraCuotaIdAndActivo(chequeraCuotaId, (byte) 1);
         contexts.forEach(context -> {
             context.setActivo((byte) 0);
@@ -114,7 +122,7 @@ public class MercadoPagoCoreService {
     }
 
     private VencimientoMP determineVencimientoMP(ChequeraCuota cuota, OffsetDateTime today) {
-        log.debug("Processing determineVencimientoMP");
+        log.debug("Processing MercadoPagoCoreService.determineVencimientoMP");
         if (today.isEqual(Objects.requireNonNull(cuota.getVencimiento1())) || today.isBefore(cuota.getVencimiento1())) {
             return new VencimientoMP(cuota.getVencimiento1(), cuota.getImporte1());
         }
@@ -125,12 +133,12 @@ public class MercadoPagoCoreService {
     }
 
     public MercadoPagoContext updateContext(MercadoPagoContext mercadoPagoContext, Long mercadoPagoContextId) {
-        log.debug("Processing updateContext");
+        log.debug("Processing MercadoPagoCoreService.updateContext");
         return mercadoPagoContextService.update(mercadoPagoContext, mercadoPagoContextId);
     }
 
     public MercadoPagoContext findContextByMercadoPagoContextId(Long mercadoPagoContextId) {
-        log.debug("Processing findContextByMercadoPagoContextId");
+        log.debug("Processing MercadoPagoCoreService.findContextByMercadoPagoContextId");
         return mercadoPagoContextService.findByMercadoPagoContextId(mercadoPagoContextId);
     }
 

@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.LocalidadException;
 import um.tesoreria.core.exception.ProvinciaException;
@@ -14,8 +15,6 @@ import um.tesoreria.core.model.Provincia;
 import um.tesoreria.core.model.view.DomicilioKey;
 import um.tesoreria.core.repository.DomicilioRepository;
 import um.tesoreria.core.service.view.DomicilioKeyService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +30,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class DomicilioService {
 
     private final DomicilioRepository repository;
@@ -44,27 +44,6 @@ public class DomicilioService {
     private final LocalidadFacultadConsumer localidadFacultadConsumer;
     private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
 
-    public DomicilioService(DomicilioRepository repository,
-                            DomicilioKeyService domicilioKeyService,
-                            FacultadService facultadService,
-                            PersonaFacultadConsumer personaFacultadConsumer,
-                            DomicilioFacultadConsumer domicilioFacultadConsumer,
-                            ProvinciaService provinciaService,
-                            ProvinciaFacultadConsumer provinciaFacultadConsumer,
-                            LocalidadService localidadService,
-                            LocalidadFacultadConsumer localidadFacultadConsumer, InscripcionFacultadConsumer inscripcionFacultadConsumer) {
-        this.repository = repository;
-        this.domicilioKeyService = domicilioKeyService;
-        this.facultadService = facultadService;
-        this.personaFacultadConsumer = personaFacultadConsumer;
-        this.domicilioFacultadConsumer = domicilioFacultadConsumer;
-        this.provinciaService = provinciaService;
-        this.provinciaFacultadConsumer = provinciaFacultadConsumer;
-        this.localidadService = localidadService;
-        this.localidadFacultadConsumer = localidadFacultadConsumer;
-        this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;
-    }
-
     public List<DomicilioKey> findAllByUnifieds(List<String> unifieds) {
         return domicilioKeyService.findAllByUnifiedIn(unifieds);
     }
@@ -74,13 +53,9 @@ public class DomicilioService {
     }
 
     public Domicilio findByUnique(BigDecimal personaId, Integer documentoId) {
-        Domicilio domicilio = repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
+        var domicilio = repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
                 .orElseThrow(() -> new DomicilioException(personaId, documentoId));
-		try {
-			log.debug("Domicilio by unique -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
-		} catch (JsonProcessingException e) {
-			log.debug("Domicilio by unique no se pudo mostrar");
-		}
+        log.debug("Domicilio -> {}", domicilio.jsonify());
 		return domicilio;
     }
 
@@ -108,17 +83,9 @@ public class DomicilioService {
                     newDomicilio.getObservaciones(), newDomicilio.getCodigoPostal(), newDomicilio.getFacultadId(),
                     newDomicilio.getProvinciaId(), newDomicilio.getLocalidadId(), newDomicilio.getEmailPersonal(),
                     newDomicilio.getEmailInstitucional(), newDomicilio.getLaboral(), "");
-			try {
-				log.debug("Domicilio previo update -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
-			} catch (JsonProcessingException e) {
-				log.debug("Domicilio previo update no pudo mostrarse");
-			}
+            log.debug("Domicilio Previo -> {}", domicilio.jsonify());
 			domicilio = repository.save(domicilio);
-			try {
-				log.debug("Domicilio updated update -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
-			} catch (JsonProcessingException e) {
-				log.debug("Domicilio updated update no pudo mostrarse");
-			}
+            log.debug("Domicilio Post -> {}", domicilio.jsonify());
 
             if (sincronize)
                 this.sincronizeFacultad(domicilio);
@@ -157,11 +124,7 @@ public class DomicilioService {
                 Domicilio domicilio = null;
                 domicilio = domicilioFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
                         personaId, documentoId);
-                try {
-                    log.debug("Domicilio -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
-                } catch (JsonProcessingException e) {
-                    log.debug("Domicilio no se pudo mostrar");
-                }
+                log.debug("Domicilio -> {}", domicilio.jsonify());
                 domicilio.setPersonaId(personaId);
                 domicilio.setDocumentoId(documentoId);
                 if (domicilio.getDomicilioId() != null) {
@@ -215,17 +178,9 @@ public class DomicilioService {
                             localidadService.add(localidad);
                         }
                     }
-                    try {
-                        log.debug("Domicilio previo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
-                    } catch (JsonProcessingException e) {
-                        log.debug("Domicilio previo no se pudo mostrar");
-                    }
+                    log.debug("Domicilio Previo -> {}", domicilio.jsonify());
                     domicilio = repository.save(domicilio);
-                    try {
-                        log.debug("Domicilio saved -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(domicilio));
-                    } catch (JsonProcessingException e) {
-                        log.debug("Domicilio saved no se pudo mostrar");
-                    }
+                    log.debug("Domicilio Post -> {}", domicilio.jsonify());
                     return facultad.getFacultadId();
                 }
             }

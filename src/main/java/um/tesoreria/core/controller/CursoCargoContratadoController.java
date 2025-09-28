@@ -3,10 +3,12 @@
  */
 package um.tesoreria.core.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,67 +31,56 @@ import um.tesoreria.core.service.CursoCargoContratadoService;
 @RestController
 @RequestMapping({"/cursocargocontratado", "/api/core/cursocargocontratado"})
 @Slf4j
+@RequiredArgsConstructor
 public class CursoCargoContratadoController {
 
     private final CursoCargoContratadoService service;
 
-    public CursoCargoContratadoController(CursoCargoContratadoService service) {
-        this.service = service;
+    @GetMapping("/cursos/contrato/{contratoId}/periodo/{anho}/{mes}/persona/{personaId}/{documentoId}")
+    public ResponseEntity<List<CursoCargoContratado>> findAllByContrato(@PathVariable Long contratoId,
+                                                                        @PathVariable Integer anho,
+                                                                        @PathVariable Integer mes,
+                                                                        @PathVariable BigDecimal personaId,
+                                                                        @PathVariable Integer documentoId
+    ) {
+        return ResponseEntity.ok(service.findAllByContrato(contratoId, anho, mes, personaId, documentoId));
     }
 
-    @GetMapping("/cursos/{contratadoId}/{anho}/{mes}/{contratoId}")
-    public ResponseEntity<List<CursoCargoContratado>> findAllByContratado(@PathVariable Long contratadoId,
-                                                                          @PathVariable Integer anho, @PathVariable Integer mes, @PathVariable Long contratoId) {
-        return new ResponseEntity<>(service.findAllByContratado(contratadoId, anho, mes, contratoId), HttpStatus.OK);
+    @GetMapping("/cursos/persona/{personaId}/{documentoId}/periodo/{anho}/{mes}")
+    public ResponseEntity<List<CursoCargoContratado>> findAllByPersona(@PathVariable BigDecimal personaId,
+                                                                       @PathVariable Integer documentoId,
+                                                                       @PathVariable Integer anho,
+                                                                       @PathVariable Integer mes) {
+        return ResponseEntity.ok(service.findAllByPersona(personaId, documentoId, anho, mes));
     }
 
     @GetMapping("/curso/{cursoId}/{anho}/{mes}")
     public ResponseEntity<List<CursoCargoContratado>> findAllByCurso(@PathVariable Long cursoId,
-                                                                     @PathVariable Integer anho, @PathVariable Integer mes) {
-        var cursoCargos = service.findAllByCurso(cursoId, anho, mes);
-        try {
-            log.debug("CursoCargos -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cursoCargos));
-        } catch (JsonProcessingException e) {
-            log.debug("Sin CursoCargos");
-        }
-        return new ResponseEntity<>(cursoCargos, HttpStatus.OK);
-    }
-
-    @GetMapping("/cursosContratado/{contratadoId}/{anho}/{mes}")
-    public ResponseEntity<List<CursoCargoContratado>> findAllByCursosContratado(@PathVariable Long contratadoId, @PathVariable Integer anho, @PathVariable Integer mes) {
-        return new ResponseEntity<>(service.findAllByCursosContratado(contratadoId, anho, mes),
-                HttpStatus.OK);
+                                                                     @PathVariable Integer anho,
+                                                                     @PathVariable Integer mes) {
+        return ResponseEntity.ok(service.findAllByCurso(cursoId, anho, mes));
     }
 
     @GetMapping("/{cursocargocontratadoId}")
     public ResponseEntity<CursoCargoContratado> findByCursoCargo(@PathVariable Long cursocargocontratadoId) {
-        return new ResponseEntity<>(service.findByCursoCargo(cursocargocontratadoId),
-                HttpStatus.OK);
-    }
-
-    @GetMapping("/contratado/{cursoId}/{anho}/{mes}/{contratadoId}")
-    public ResponseEntity<CursoCargoContratado> findByContratado(@PathVariable Long cursoId, @PathVariable Integer anho,
-                                                                 @PathVariable Integer mes, @PathVariable Long contratadoId) {
-        return new ResponseEntity<>(service.findByContratado(cursoId, anho, mes, contratadoId),
-                HttpStatus.OK);
+        return ResponseEntity.ok(service.findByCursoCargo(cursocargocontratadoId));
     }
 
     @PostMapping("/")
     public ResponseEntity<CursoCargoContratado> add(@RequestBody CursoCargoContratado cursocargocontratado) {
-        return new ResponseEntity<>(service.add(cursocargocontratado), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(cursocargocontratado));
     }
 
-    @PutMapping("/{cursocargocontratadoId}")
-    public ResponseEntity<CursoCargoContratado> update(@RequestBody CursoCargoContratado cursocargocontratado,
-                                                       @PathVariable Long cursocargocontratadoId) {
-        return new ResponseEntity<>(service.update(cursocargocontratado, cursocargocontratadoId),
-                HttpStatus.OK);
+    @PutMapping("/{cursoCargoContratadoId}")
+    public ResponseEntity<CursoCargoContratado> update(@RequestBody CursoCargoContratado cursoCargoContratado,
+                                                       @PathVariable Long cursoCargoContratadoId) {
+        return ResponseEntity.ok(service.update(cursoCargoContratado, cursoCargoContratadoId));
     }
 
-    @DeleteMapping("/{cursocargocontratadoId}")
-    public ResponseEntity<Void> delete(@PathVariable Long cursocargocontratadoId) {
-        service.delete(cursocargocontratadoId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    @DeleteMapping("/{cursoCargoContratadoId}")
+    public ResponseEntity<Void> delete(@PathVariable Long cursoCargoContratadoId) {
+        service.delete(cursoCargoContratadoId);
+        return ResponseEntity.noContent().build();
     }
 
 }

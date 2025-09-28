@@ -9,7 +9,7 @@ import java.util.List;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ContratoException;
@@ -23,10 +23,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ContratoService {
 
-	@Autowired
-	private ContratoRepository repository;
+	private final ContratoRepository repository;
 
 	public List<Contrato> findAllByFacultad(Integer facultadId, Integer geograficaId) {
 		return repository.findAllByFacultadIdAndGeograficaId(facultadId, geograficaId);
@@ -44,31 +44,40 @@ public class ContratoService {
 		return repository.findAllByPersonaIdAndDocumentoIdOrderByDesdeDesc(personaId, documentoId);
 	}
 
-	public List<Contrato> findAllByContratado(Long contratadoId) {
-		return repository.findAllByContratadoId(contratadoId);
-	}
-
 	public Contrato findByContratoId(Long contratoId) {
 		return repository.findByContratoId(contratoId).orElseThrow(() -> new ContratoException(contratoId));
 	}
 
 	public Contrato add(Contrato contrato) {
 		contrato = repository.save(contrato);
-		log.debug("Contrato -> {}", contrato);
+		log.debug("Contrato -> {}", contrato.jsonify());
 		return contrato;
 	}
 
 	public Contrato update(Contrato newContrato, Long contratoId) {
 		return repository.findByContratoId(contratoId).map(contrato -> {
-			contrato = new Contrato(contratoId, newContrato.getContratadoId(), newContrato.getPersonaId(),
-					newContrato.getDocumentoId(), newContrato.getDesde(), newContrato.getFacultadId(),
-					newContrato.getPlanId(), newContrato.getMateriaId(), newContrato.getGeograficaId(),
-					newContrato.getCargoMateriaId(), newContrato.getPrimerVencimiento(), newContrato.getCargo(),
-					newContrato.getMontoFijo(), newContrato.getCanonMensual(), newContrato.getCanonMensualSinAjuste(),
-					newContrato.getHasta(), newContrato.getCanonMensualLetras(), newContrato.getCanonTotal(),
-					newContrato.getCanonTotalLetras(), newContrato.getMeses(), newContrato.getMesesLetras(),
-					newContrato.getAjuste(), null, null, null);
+            contrato.setPersonaId(newContrato.getPersonaId());
+            contrato.setDocumentoId(newContrato.getDocumentoId());
+            contrato.setDesde(newContrato.getDesde());
+            contrato.setHasta(newContrato.getHasta());
+            contrato.setFacultadId(newContrato.getFacultadId());
+            contrato.setPlanId(newContrato.getPlanId());
+            contrato.setMateriaId(newContrato.getMateriaId());
+            contrato.setGeograficaId(newContrato.getGeograficaId());
+            contrato.setCargoMateriaId(newContrato.getCargoMateriaId());
+            contrato.setPrimerVencimiento(newContrato.getPrimerVencimiento());
+            contrato.setCargo(newContrato.getCargo());
+            contrato.setMontoFijo(newContrato.getMontoFijo());
+            contrato.setCanonMensual(newContrato.getCanonMensual());
+            contrato.setCanonMensualSinAjuste(newContrato.getCanonMensualSinAjuste());
+            contrato.setCanonMensualLetras(newContrato.getCanonMensualLetras());
+            contrato.setCanonTotal(newContrato.getCanonTotal());
+            contrato.setCanonTotalLetras(newContrato.getCanonTotalLetras());
+            contrato.setMeses(newContrato.getMeses());
+            contrato.setMesesLetras(newContrato.getMesesLetras());
+            contrato.setAjuste(newContrato.getAjuste());
 			contrato = repository.save(contrato);
+            log.debug("Contrato -> {}", contrato.jsonify());
 			return contrato;
 		}).orElseThrow(() -> new ContratoException(contratoId));
 	}

@@ -5,6 +5,17 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2025-09-28
+- refactor: remove ContratadoController and references to contratado model across services and controllers
+- chore(deps): update Spring Boot to 3.5.6, Kotlin to 2.2.20, openpdf to 3.0.0
+- refactor: replace @Autowired with @RequiredArgsConstructor in multiple services and controllers
+- feat: add Jsonifier utility class for structured JSON logging
+- refactor: update imports for openpdf library change from com.lowagie to org.openpdf
+- refactor: remove ContratoAutoFixService and related dependencies
+- fix: improve logging with jsonify() methods in various services
+
+> Based on deep analysis of code changes in git diff HEAD, commit history, and pom.xml.
+
 ## [1.6.0] - 2025-09-11
 - feat(controller,repository,service): agregar endpoint de resumen por lectivo (`/resumen/lectivo/{lectivoId}`) que devuelve la cantidad de chequeras agrupadas por facultad y sede
 - refactor(controller,service): reemplazar constructores con inyección de dependencias por `@RequiredArgsConstructor` en `ChequeraSerieController` y `ChequeraSerieService`

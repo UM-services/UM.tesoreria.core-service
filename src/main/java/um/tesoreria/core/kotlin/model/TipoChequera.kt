@@ -5,6 +5,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
+import um.tesoreria.core.util.Jsonifier
 
 @Entity
 data class TipoChequera(
@@ -44,4 +45,10 @@ data class TipoChequera(
     @JoinColumn(name = "tch_cch_id", insertable = false, updatable = false)
     var claseChequera: ClaseChequera? = null
 
-) : Auditable()
+) : Auditable() {
+
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
+
+}

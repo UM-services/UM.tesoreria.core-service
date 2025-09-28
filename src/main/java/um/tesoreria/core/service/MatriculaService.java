@@ -10,7 +10,7 @@ import java.util.Optional;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -38,25 +38,15 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MatriculaService {
 
-	@Autowired
-	private MatriculaRepository repository;
-
-	@Autowired
-	private LectivoService lectivoservice;
-
-	@Autowired
-	private FacultadService facultadService;
-
-	@Autowired
-	private SincronizeService sincronizeservice;
-
-	@Autowired
-	private ChequeraClaseService chequeraclaseservice;
-
-	@Autowired
-	private ChequeraCuotaPersonaService chequeraCuotaPersonaService;
+	private final MatriculaRepository repository;
+	private final LectivoService lectivoservice;
+	private final FacultadService facultadService;
+	private final SincronizeService sincronizeservice;
+	private final ChequeraClaseService chequeraclaseservice;
+	private final ChequeraCuotaPersonaService chequeraCuotaPersonaService;
 
 	public List<Matricula> findPendientes() {
 		return repository.findAllByChequerapendiente((byte) 1,
@@ -71,17 +61,19 @@ public class MatriculaService {
 
 	public Matricula findByUnique(Integer facultadId, BigDecimal personaId, Integer documentoId, Integer lectivoId,
 			Integer clasechequeraId) {
-		return repository
-				.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraId(facultadId, personaId,
-						documentoId, lectivoId, clasechequeraId)
-				.orElseThrow(() -> new MatriculaException(facultadId, personaId, documentoId, lectivoId,
-						clasechequeraId));
+        var matricula = repository
+                .findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraId(facultadId, personaId,
+                        documentoId, lectivoId, clasechequeraId)
+                .orElseThrow(() -> new MatriculaException(facultadId, personaId, documentoId, lectivoId,
+                        clasechequeraId));
+        log.debug("Matricula -> {}", matricula.jsonify());
+		return matricula;
 	}
 
 	public Matricula findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraIdIn(Integer facultadId,
 			BigDecimal personaId, Integer documentoId, Integer lectivoId, List<Integer> clases) {
 		return repository.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraIdIn(facultadId,
-				personaId, documentoId, lectivoId, clases).orElseThrow(() -> new MatriculaException());
+				personaId, documentoId, lectivoId, clases).orElseThrow(MatriculaException::new);
 	}
 
 	public Matricula findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraId(Integer facultadId,
