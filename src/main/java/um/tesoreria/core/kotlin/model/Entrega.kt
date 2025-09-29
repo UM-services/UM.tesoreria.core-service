@@ -10,6 +10,7 @@ import java.time.OffsetDateTime
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import um.tesoreria.core.util.Jsonifier
 
 @Entity
 data class Entrega (
@@ -56,8 +57,11 @@ data class Entrega (
 	var track: Track? = null
 
 ) : Auditable() {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
 
-	companion object {
+    companion object {
 		fun builder() = Builder()
 	}
 

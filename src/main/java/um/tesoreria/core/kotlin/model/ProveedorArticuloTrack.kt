@@ -7,6 +7,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 
 @Entity
@@ -35,6 +36,9 @@ data class ProveedorArticuloTrack(
     var proveedorArticulo: ProveedorArticulo? = null
 
 ) : Auditable() {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
 
     companion object {
         fun builder() = Builder()

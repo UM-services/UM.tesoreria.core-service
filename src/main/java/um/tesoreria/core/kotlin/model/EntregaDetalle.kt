@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Column
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 
 @Entity
@@ -68,6 +69,9 @@ data class EntregaDetalle @JvmOverloads constructor(
     var track: Track? = null
 
 ) : Auditable() {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
 
     companion object {
         fun builder() = Builder()

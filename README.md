@@ -4,7 +4,14 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
 
-**Versión actual (SemVer): 2.0.0**
+**Versión actual (SemVer): 2.1.0**
+
+## Novedades 2.1.0 (verificado en código)
+- Refactorización para usar `@RequiredArgsConstructor` en CostoController y CostoService
+- Añadidos métodos `jsonify()` en modelos Asiento, CuentaMovimiento, Entrega y AsignacionCostoDto para logging estructurado
+- Mejoras en logging con serialización JSON en servicios
+- Eliminación de modificadores public innecesarios en AsientoRepository
+- Mejora en manejo de errores en CostoService al eliminar asiento previo antes de agregar nuevo
 
 ## Novedades 2.0.0 (verificado en código)
 - Eliminación de ContratadoController y referencias al modelo contratado en servicios y controladores

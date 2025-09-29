@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -14,6 +15,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.kotlin.model.ProveedorArticulo;
 import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
+import um.tesoreria.core.util.Jsonifier;
 
 /**
  * @author daniel
@@ -24,7 +26,8 @@ import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
 @AllArgsConstructor
 public class AsignacionCostoDto implements Serializable {
 
-	private static final long serialVersionUID = -1663996814534996127L;
+	@Serial
+    private static final long serialVersionUID = -1663996814534996127L;
 
 	private ProveedorMovimiento proveedorMovimiento;
 	private ProveedorArticulo proveedorArticulo;
@@ -33,5 +36,9 @@ public class AsignacionCostoDto implements Serializable {
 	private UbicacionArticulo ubicacionArticulo;
 
 	private BigDecimal importe;
+
+    public String jsonify() {
+        return Jsonifier.builder(this).build();
+    }
 
 }

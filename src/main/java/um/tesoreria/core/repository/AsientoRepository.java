@@ -19,11 +19,11 @@ import um.tesoreria.core.kotlin.model.Asiento;
 @Repository
 public interface AsientoRepository extends JpaRepository<Asiento, Long> {
 
-	public Optional<Asiento> findByFechaAndOrden(OffsetDateTime fecha, Integer orden);
+	Optional<Asiento> findByFechaAndOrden(OffsetDateTime fecha, Integer orden);
 
-	public Optional<Asiento> findByAsientoId(Long asientoId);
+	Optional<Asiento> findByAsientoId(Long asientoId);
 
 	@Modifying
-	public void deleteByAsientoId(Long asientoId);
+	void deleteByAsientoId(Long asientoId);
 
 }

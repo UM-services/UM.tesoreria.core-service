@@ -3,12 +3,10 @@
  */
 package um.tesoreria.core.controller.facade;
 
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.model.dto.AsignacionCostoDto;
 import um.tesoreria.core.service.facade.CostoService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +17,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/costo")
 @Slf4j
+@RequiredArgsConstructor
 public class CostoController {
 
-    @Autowired
-    private CostoService service;
+    private final CostoService service;
 
     @PostMapping("/addAsignacion")
-    public ResponseEntity<Boolean> addAsignacion(@RequestBody AsignacionCostoDto asignacionCostoDto) throws JsonProcessingException {
-        log.debug("AsignacionCosto - {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asignacionCostoDto));
+    public ResponseEntity<Boolean> addAsignacion(@RequestBody AsignacionCostoDto asignacionCostoDto) {
         return new ResponseEntity<>(service.addAsignacion(asignacionCostoDto), HttpStatus.OK);
     }
 
