@@ -1,6 +1,7 @@
 package um.tesoreria.core.kotlin.model.internal
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import um.tesoreria.core.util.Jsonifier
 import java.time.OffsetDateTime
 import java.math.BigDecimal
 
@@ -13,4 +14,8 @@ data class AsientoInternal(
 	var debe: BigDecimal = BigDecimal.ZERO,
 	var haber: BigDecimal = BigDecimal.ZERO
 
-)
+) {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
+}

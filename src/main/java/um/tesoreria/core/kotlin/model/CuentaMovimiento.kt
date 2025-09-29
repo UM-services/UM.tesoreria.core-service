@@ -13,6 +13,7 @@ import java.time.OffsetDateTime
 import java.math.BigDecimal
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import um.tesoreria.core.util.Jsonifier
 
 @Entity
 @Table(
@@ -96,6 +97,9 @@ data class  CuentaMovimiento(
     var track: Track? = null
 
 ) : Auditable() {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
 
     companion object {
         fun builder() = Builder()

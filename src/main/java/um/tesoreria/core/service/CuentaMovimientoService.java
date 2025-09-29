@@ -77,7 +77,10 @@ public class CuentaMovimientoService {
     }
 
     public CuentaMovimiento findLastByFecha(OffsetDateTime fechaContable) {
-        return repository.findTopByFechaContableOrderByOrdenContableDesc(fechaContable).orElseGet(CuentaMovimiento::new);
+        log.debug("Processing CuentaMovimientoService.findLastByFecha -> {}", fechaContable);
+        var movimiento = repository.findTopByFechaContableOrderByOrdenContableDesc(fechaContable).orElseGet(CuentaMovimiento::new);
+        log.debug("Last CuentaMovimiento -> {}", movimiento.jsonify());
+        return movimiento;
     }
 
     public CuentaMovimiento findByCuentaMovimientoId(Long cuentaMovimientoId) {

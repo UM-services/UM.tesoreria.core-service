@@ -5,6 +5,16 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2025-09-29
+- refactor: Improved dependency injection with @RequiredArgsConstructor in CostoController and CostoService
+- feat: Added jsonify() methods to Asiento, CuentaMovimiento, Entrega, and AsignacionCostoDto models for structured JSON logging
+- refactor: Enhanced logging throughout services with JSON serialization using Jsonifier utility
+- refactor: Removed unnecessary public modifiers in AsientoRepository methods
+- fix: Improved error handling in CostoService by deleting previous asiento before adding new one
+- chore: Minor code cleanups and logging improvements
+
+> Based on deep analysis of code changes in git diff HEAD and pom.xml.
+
 ## [2.0.0] - 2025-09-28
 - refactor: remove ContratadoController and references to contratado model across services and controllers
 - chore(deps): update Spring Boot to 3.5.6, Kotlin to 2.2.20, openpdf to 3.0.0

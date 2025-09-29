@@ -3,86 +3,51 @@
  */
 package um.tesoreria.core.service.facade;
 
-import um.tesoreria.core.kotlin.model.*;
-import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
-import um.tesoreria.core.model.dto.AsignacionCostoDto;
-import um.tesoreria.core.exception.EntregaDetalleException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.*;
+import um.tesoreria.core.kotlin.model.*;
+import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
+import um.tesoreria.core.model.dto.AsignacionCostoDto;
 import um.tesoreria.core.service.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.MessageFormat;
 
-/**
- * @author daniel
- */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CostoService {
 
+    private final EntityManager entityManager;
     private final TrackService trackService;
 
     private final AsientoService asientoService;
-
     private final ContabilidadService contabilidadService;
-
     private final EntregaService entregaService;
-
     private final EntregaDetalleService entregaDetalleService;
-
     private final CuentaMovimientoService cuentaMovimientoService;
-
     private final ProveedorArticuloService proveedorArticuloService;
-
     private final ProveedorMovimientoService proveedorMovimientoService;
-
     private final ProveedorArticuloTrackService proveedorArticuloTrackService;
-
-    public CostoService(TrackService trackService, AsientoService asientoService, ContabilidadService contabilidadService, EntregaService entregaService, EntregaDetalleService entregaDetalleService, CuentaMovimientoService cuentaMovimientoService, ProveedorArticuloService proveedorArticuloService, ProveedorMovimientoService proveedorMovimientoService, ProveedorArticuloTrackService proveedorArticuloTrackService) {
-        this.trackService = trackService;
-        this.asientoService = asientoService;
-        this.contabilidadService = contabilidadService;
-        this.entregaService = entregaService;
-        this.entregaDetalleService = entregaDetalleService;
-        this.cuentaMovimientoService = cuentaMovimientoService;
-        this.proveedorArticuloService = proveedorArticuloService;
-        this.proveedorMovimientoService = proveedorMovimientoService;
-        this.proveedorArticuloTrackService = proveedorArticuloTrackService;
-    }
 
     @Transactional
     public Boolean addAsignacion(AsignacionCostoDto asignacionCostoDto) {
-
+        log.debug("Processing CostoService.addAsignacion");
+        log.debug("AsignacionCostoDto -> {}", asignacionCostoDto.jsonify());
         try {
-            log.debug("AsignacionCosto -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asignacionCostoDto));
-        } catch (JsonProcessingException e) {
-            log.debug("AsignacionCosto -> error: {}", e.getMessage());
-        }
-
-        try {
-
             Track track = trackService.add(new Track.Builder()
                     .descripcion("Asignación Costo")
                     .build());
-            try {
-                log.debug("Track -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(track));
-            } catch (JsonProcessingException e) {
-                log.debug("Track -> error: {}", e.getMessage());
-            }
+            log.debug("Track -> {}", track.jsonify());
 
             int item = 0;
             AsientoInternal asientoInternal = contabilidadService.nextAsiento(asignacionCostoDto.getProveedorMovimiento().getFechaComprobante(), null);
-            try {
-                log.debug("Asiento Internal -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asientoInternal));
-            } catch (JsonProcessingException e) {
-                log.debug("Asiento Internal -> error: {}", e.getMessage());
-            }
+            log.debug("AsientoInternal -> {}", asientoInternal.jsonify());
             Entrega entrega = new Entrega.Builder()
                     .fecha(asignacionCostoDto.getProveedorMovimiento().getFechaComprobante())
                     .ubicacionId(asignacionCostoDto.getUbicacionArticulo().getUbicacionId())
@@ -91,25 +56,26 @@ public class CostoService {
                     .tipo("asignacion")
                     .trackId(track.getTrackId())
                     .build();
-            try {
-                log.debug("Entrega -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entrega));
-            } catch (JsonProcessingException e) {
-                log.debug("Entrega -> error: {}", e.getMessage());
-            }
+            log.debug("Entrega -> {}", entrega.jsonify());
 
             // Asiento
-            Asiento asiento = new Asiento.Builder()
+            log.debug("Eliminando asiento previo si existiera -> {}-{}", asientoInternal.getFechaContable(), asientoInternal.getOrdenContable());
+            try {
+                contabilidadService.deleteAsiento(asientoInternal.getFechaContable(), asientoInternal.getOrdenContable());
+                entityManager.flush();
+            } catch (EjercicioBloqueadoException e) {
+                log.debug("Error Ejercicio : {}", e.getMessage());
+                return false;
+            }
+            var asiento = new Asiento.Builder()
                     .fecha(asientoInternal.getFechaContable())
                     .orden(asientoInternal.getOrdenContable())
                     .vinculo("Asignación Costos")
                     .trackId(track.getTrackId())
                     .build();
+            log.debug("Agregando asiento");
             asiento = asientoService.add(asiento);
-            try {
-                log.debug("Asiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asiento));
-            } catch (JsonProcessingException e) {
-                log.debug("Asistencia -> error: {}", e.getMessage());
-            }
+            log.debug("Asiento -> {}", asiento.jsonify());
 
             String concepto = MessageFormat.format("{0} - {1}-{2} - Asignación de Costos", asignacionCostoDto.getComprobante().getDescripcion(), String.format("%04d", asignacionCostoDto.getProveedorMovimiento().getPrefijo()), String.format("%08d", asignacionCostoDto.getProveedorMovimiento().getNumeroComprobante()));
             item += 1;
@@ -127,11 +93,7 @@ public class CostoService {
                     .trackId(track.getTrackId())
                     .build();
             cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
-            try {
-                log.debug("CuentaMovimiento 1ra Imputación -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("CuentaMovimiento 1ra Imputación -> error: {}", e.getMessage());
-            }
+            log.debug("CuentaMovimiento -> {}", cuentaMovimiento.jsonify());
             item += 1;
             cuentaMovimiento = new CuentaMovimiento.Builder()
                     .fechaContable(entrega.getFechaContable())
@@ -147,18 +109,10 @@ public class CostoService {
                     .trackId(track.getTrackId())
                     .build();
             cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
-            try {
-                log.debug("CuentaMovimiento 2da Imputación -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("CuentaMovimiento 2da Imputación -> error: {}", e.getMessage());
-            }
+            log.debug("CuentaMovimiento -> {}", cuentaMovimiento.jsonify());
 
             entrega = entregaService.add(entrega);
-            try {
-                log.debug("Entrega -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entrega));
-            } catch (JsonProcessingException e) {
-                log.debug("Entrega -> error: {}", e.getMessage());
-            }
+            log.debug("Entrega -> {}", entrega.jsonify());
             EntregaDetalle entregaDetalle = new EntregaDetalle.Builder()
                     .entregaId(entrega.getEntregaId())
                     .articuloId(asignacionCostoDto.getProveedorArticulo().getArticuloId())
@@ -168,31 +122,13 @@ public class CostoService {
                     .cantidad(asignacionCostoDto.getImporte())
                     .trackId(track.getTrackId())
                     .build();
-            try {
-                log.debug("EntregaDetalle pre save -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
-            } catch (JsonProcessingException e) {
-                log.debug("EntregaDetalle pre save -> error: {}", e.getMessage());
-            }
             entregaDetalle = entregaDetalleService.add(entregaDetalle);
-            try {
-                log.debug("EntregaDetalle post save -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
-            } catch (JsonProcessingException e) {
-                log.debug("EntregaDetalle post save -> error: {}", e.getMessage());
-            }
+            log.debug("EntregaDetalle -> {}", entregaDetalle.jsonify());
 
             ProveedorArticulo proveedorArticulo = proveedorArticuloService.findByProveedorArticuloId(asignacionCostoDto.getProveedorArticulo().getProveedorArticuloId());
-            try {
-                log.debug("ProveedorArticulo before asignado -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
-            } catch (JsonProcessingException e) {
-                log.debug("ProveedorArticulo before asignado -> error: {}", e.getMessage());
-            }
             proveedorArticulo.setAsignado(proveedorArticulo.getAsignado().add(asignacionCostoDto.getImporte()).setScale(2, RoundingMode.HALF_UP));
             proveedorArticulo = proveedorArticuloService.update(proveedorArticulo, proveedorArticulo.getProveedorArticuloId());
-            try {
-                log.debug("ProveedorArticulo after asignado -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
-            } catch (JsonProcessingException e) {
-                log.debug("ProveedorArticulo after asignado -> error: {}", e.getMessage());
-            }
+            log.debug("ProveedorArticulo -> {}", proveedorArticulo.jsonify());
 
             ProveedorArticuloTrack proveedorArticuloTrack = new ProveedorArticuloTrack.Builder()
                     .proveedorMovimientoId(proveedorArticulo.getProveedorMovimientoId())
@@ -200,17 +136,8 @@ public class CostoService {
                     .trackId(track.getTrackId())
                     .importe(asignacionCostoDto.getImporte())
                     .build();
-            try {
-                log.debug("ProveedorArticuloTrack before -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticuloTrack));
-            } catch (JsonProcessingException e) {
-                log.debug("ProveedorArticuloTrack before -> error: {}", e.getMessage());
-            }
             proveedorArticuloTrack = proveedorArticuloTrackService.add(proveedorArticuloTrack);
-            try {
-                log.debug("ProveedorArticuloTrack after -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticuloTrack));
-            } catch (JsonProcessingException e) {
-                log.debug("ProveedorArticuloTrack after -> error: {}", e.getMessage());
-            }
+            log.debug("ProveedorArticuloTrack -> {}", proveedorArticuloTrack.jsonify());
         } catch (CuentaMovimientoException e) {
             log.debug("Error CuentaMovimiento - {}", e.getMessage());
             return false;
@@ -234,35 +161,19 @@ public class CostoService {
         try {
             Entrega entrega = new Entrega();
             for (EntregaDetalle entregaDetalle : entregaDetalleService.findAllByEntregaId(entregaId)) {
-                try {
-                    log.debug("EntregaDetalle in deleteDesignacion -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
-                } catch (JsonProcessingException e) {
-                    log.debug("Cannot show EntregaDetalle in deleteDesignacion");
-                }
+                log.debug("EntregaDetalle in deleteDesignacion -> {}", entregaDetalle.jsonify());
                 entrega = entregaDetalle.getEntrega();
                 trackId = entrega.getTrackId();
-                try {
-                    log.debug("Entrega in deleteDesignacion -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entrega));
-                } catch (JsonProcessingException e) {
-                    log.debug("Cannot show Entrega in deleteDesignacion");
-                }
+                log.debug("Entrega in deleteDesignacion -> {}", entrega.jsonify());
                 if (entregaDetalle.getProveedorArticulo() != null) {
-                    ProveedorArticulo proveedorArticulo = entregaDetalle.getProveedorArticulo();
-                    try {
-                        log.debug("ProveedorArticulo before in deleteDesignacion -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
-                    } catch (JsonProcessingException e) {
-                        log.debug("Cannot show ProveedorArticulo before in deleteDesignacion");
-                    }
+                    var proveedorArticulo = entregaDetalle.getProveedorArticulo();
+                    log.debug("ProveedorArticulo before in deleteDesignacion -> {}", proveedorArticulo.jsonify());
                     proveedorArticulo.setAsignado(proveedorArticulo.getAsignado().subtract(entregaDetalle.getCantidad()).setScale(2, RoundingMode.HALF_UP));
                     if (proveedorArticulo.getAsignado().compareTo(BigDecimal.ZERO) < 0) {
                         proveedorArticulo.setAsignado(BigDecimal.ZERO);
                     }
                     proveedorArticulo = proveedorArticuloService.update(proveedorArticulo, proveedorArticulo.getProveedorArticuloId());
-                    try {
-                        log.debug("ProveedorArticulo after in deleteDesignacion -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
-                    } catch (JsonProcessingException e) {
-                        log.debug("Cannot show ProveedorArticulo after in deleteDesignacion");
-                    }
+                    log.debug("ProveedorArticulo after in deleteDesignacion -> {}", proveedorArticulo.jsonify());
                     proveedorArticuloTrackService.deleteAllByProveedorArticuloIdAndTrackId(proveedorArticulo.getProveedorArticuloId(), trackId);
                     log.debug("ProveedorArticuloTrack eliminado");
                 }

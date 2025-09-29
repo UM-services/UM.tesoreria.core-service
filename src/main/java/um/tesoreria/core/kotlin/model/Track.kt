@@ -4,6 +4,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
+import um.tesoreria.core.util.Jsonifier
 
 @Entity
 data class Track(
@@ -14,6 +15,10 @@ data class Track(
     var descripcion: String = ""
 
 ) : Auditable() {
+
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
 
     companion object {
         fun builder() = Builder()

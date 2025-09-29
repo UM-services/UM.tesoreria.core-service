@@ -125,6 +125,7 @@ public class ContabilidadService {
     }
 
     public AsientoInternal nextAsiento(OffsetDateTime fechaContable, List<AsientoInternal> asientos) {
+        log.debug("Processing ContabilidadService.nextAsiento");
         CuentaMovimiento cuentaMovimiento = cuentaMovimientoService.findLastByFecha(fechaContable);
         int ordenContable = 1 + cuentaMovimiento.getOrdenContable();
         if (asientos != null) {
@@ -136,7 +137,9 @@ public class ContabilidadService {
                 }
             }
         }
-        return new AsientoInternal(fechaContable, ordenContable, BigDecimal.ZERO, BigDecimal.ZERO);
+        var internal = new AsientoInternal(fechaContable, ordenContable, BigDecimal.ZERO, BigDecimal.ZERO);
+        log.debug("Internal -> {}", internal.jsonify());
+        return internal;
     }
 
     @Transactional
