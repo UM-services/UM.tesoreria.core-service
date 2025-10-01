@@ -206,7 +206,8 @@ public class ContratoToolService {
 						null,
 						null,
 						null,
-						(byte) 0);
+						(byte) 0,
+                        null);
 			}
             log.debug("Cargo a grabar -> {}",  cargo.jsonify());
 			cargos.add(cargo);
