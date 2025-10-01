@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.OffsetDateTime;
 
@@ -24,6 +25,7 @@ import lombok.NoArgsConstructor;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.kotlin.model.ChequeraSerie;
 import um.tesoreria.core.kotlin.model.Producto;
+import um.tesoreria.core.util.Jsonifier;
 
 /**
  * @author daniel
@@ -40,7 +42,8 @@ public class Debito extends Auditable implements Serializable {
 	/**
 	* 
 	*/
-	private static final long serialVersionUID = 7517468625898950334L;
+	@Serial
+    private static final long serialVersionUID = 7517468625898950334L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -87,5 +90,9 @@ public class Debito extends Auditable implements Serializable {
 	public String cuotaKey() {
 		return this.chequeraKey() + "." + this.productoId + "." + this.alternativaId + "." + this.cuotaId;
 	}
+
+    public String jsonify() {
+        return Jsonifier.builder(this).build();
+    }
 
 }

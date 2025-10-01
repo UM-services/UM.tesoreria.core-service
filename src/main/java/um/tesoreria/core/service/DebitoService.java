@@ -6,6 +6,8 @@ package um.tesoreria.core.service;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -20,10 +22,11 @@ import um.tesoreria.core.repository.DebitoRepository;
  *
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class DebitoService {
 
-	@Autowired
-	private DebitoRepository repository;
+	private final DebitoRepository repository;
 
 	public List<Debito> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
 			Integer debitoTipoId) {
@@ -105,11 +108,13 @@ public class DebitoService {
 
 	public Debito findByCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId,
 			Integer alternativaId, Integer cuotaId, Integer debitoTipoId) {
-		return repository
-				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdAndDebitoTipoId(
-						facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, debitoTipoId)
-				.orElseThrow(() -> new DebitoException(facultadId, tipoChequeraId, chequeraSerieId, productoId,
-						alternativaId, cuotaId, debitoTipoId));
+        var cuota = repository
+                .findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdAndDebitoTipoId(
+                        facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, debitoTipoId)
+                .orElseThrow(() -> new DebitoException(facultadId, tipoChequeraId, chequeraSerieId, productoId,
+                        alternativaId, cuotaId, debitoTipoId));
+        log.debug("Debito -> {}", cuota.jsonify());
+		return cuota;
 	}
 
 	public Debito findLastByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,

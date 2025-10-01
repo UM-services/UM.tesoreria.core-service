@@ -5,6 +5,16 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-10-01
+- feat: Agregar relación contratadoPersona en modelo CursoCargoContratado
+- feat: Agregar método jsonify() en modelo Debito para logging estructurado
+- refactor: Refactorización de DebitoController para usar @RequiredArgsConstructor y simplificar respuestas HTTP
+- refactor: Mejoras en DebitoService con logging JSON y inyección por constructor
+- refactor: Actualizaciones en ContratoToolService con mejoras en manejo de datos
+- docs: Actualización de diagramas Mermaid (dependencies.mmd y sequence-chequera-serie-sede.mmd)
+
+> Based on deep analysis of code changes in git diff HEAD and pom.xml.
+
 ## [2.1.0] - 2025-09-29
 - refactor: Improved dependency injection with @RequiredArgsConstructor in CostoController and CostoService
 - feat: Added jsonify() methods to Asiento, CuentaMovimiento, Entrega, and AsignacionCostoDto models for structured JSON logging

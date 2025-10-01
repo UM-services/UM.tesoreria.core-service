@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinColumns
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
@@ -39,6 +40,13 @@ data class CursoCargoContratado(
     var categoriaId: Int? = null,
     var cursoCargoNovedadId: Long? = null,
     var acreditado: Byte = 0,
+
+    @OneToOne(optional = true)
+    @JoinColumns(
+        JoinColumn(name = "personaId", referencedColumnName = "personaId", insertable = false, updatable = false),
+        JoinColumn(name = "documentoId", referencedColumnName = "documentoId", insertable = false, updatable = false)
+    )
+    var contratadoPersona: ContratadoPersona? = null
 
 ) : Auditable() {
 
