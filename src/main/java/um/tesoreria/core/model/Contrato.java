@@ -10,13 +10,7 @@ import java.time.OffsetDateTime;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -27,6 +21,8 @@ import lombok.NoArgsConstructor;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.kotlin.model.Facultad;
 import um.tesoreria.core.kotlin.model.Geografica;
+import um.tesoreria.core.kotlin.model.Persona;
+import um.tesoreria.core.kotlin.model.view.ContratadoPersona;
 import um.tesoreria.core.util.Jsonifier;
 
 /**
@@ -111,13 +107,20 @@ public class Contrato extends Auditable implements Serializable {
 	@Column(name = "con_ajuste")
 	private Byte ajuste = 0;
 
-	@OneToOne
+    @OneToOne(optional = true)
 	@JoinColumn(name = "con_fac_id", insertable = false, updatable = false)
 	private Facultad facultad;
 
-	@OneToOne
+    @OneToOne(optional = true)
 	@JoinColumn(name = "con_geo_id", insertable = false, updatable = false)
 	private Geografica geografica;
+
+    @OneToOne(optional = true)
+    @JoinColumns({
+            @JoinColumn(name = "con_per_id", referencedColumnName = "per_id", insertable = false, updatable = false),
+            @JoinColumn(name = "con_doc_id", referencedColumnName = "per_doc_id", insertable = false, updatable = false)
+    })
+    private Persona persona = null;
 
     public String jsonify() {
         return Jsonifier.builder(this).build();

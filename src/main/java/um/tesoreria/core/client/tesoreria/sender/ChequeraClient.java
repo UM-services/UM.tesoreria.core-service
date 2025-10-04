@@ -5,7 +5,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "tesoreria-sender-service/api/tesoreria/sender/chequera")
+@FeignClient(name = "tesoreria-sender-service", contextId = "chequeraClient", path = "/api/tesoreria/sender/chequera")
 public interface ChequeraClient {
 
     @GetMapping("/generatePdf/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")

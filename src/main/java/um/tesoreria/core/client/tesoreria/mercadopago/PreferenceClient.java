@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "tesoreria-mercadopago-service/api/tesoreria/mercadopago/preference")
+@FeignClient(name = "tesoreria-mercadopago-service", contextId = "preferenceClient", path = "/api/tesoreria/mercadopago/preference")
 public interface PreferenceClient {
 
     @GetMapping("/create/{chequeraCuotaId}")

@@ -17,14 +17,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.kotlin.model.CursoCargoContratado;
+import um.tesoreria.core.hexagonal.cursoCargoContratado.infrastructure.persistence.entity.CursoCargoContratadoEntity;
 import um.tesoreria.core.model.Contrato;
 import um.tesoreria.core.model.ContratoFactura;
 import um.tesoreria.core.model.ContratoPeriodo;
 import um.tesoreria.core.service.ContratoFacturaService;
 import um.tesoreria.core.service.ContratoPeriodoService;
 import um.tesoreria.core.service.ContratoService;
-import um.tesoreria.core.service.CursoCargoContratadoService;
+import um.tesoreria.core.hexagonal.cursoCargoContratado.application.service.CursoCargoContratadoService;
 import um.tesoreria.core.util.Jsonifier;
 import um.tesoreria.core.util.Periodo;
 import um.tesoreria.core.util.Tool;
@@ -182,18 +182,18 @@ public class ContratoToolService {
 		// Recupera registrados
 		log.debug("ContratoToolService.saveCurso - Leyendo cursos asignados");
 		var cursoCargos = cursoCargoContratadoService.findAllByCursoIdAndContratoId(cursoId, contratoId);
-        cursoCargos.forEach(cursoCargoContratado -> log.debug("CursoCargoContratado -> {}", cursoCargoContratado.jsonify()));
-		Map<String, CursoCargoContratado> asignados = cursoCargos.stream()
-				.collect(Collectors.toMap(CursoCargoContratado::getPeriodo, asignado -> asignado));
+        cursoCargos.forEach(cursoCargoContratadoEntity -> log.debug("CursoCargoContratado -> {}", cursoCargoContratadoEntity.jsonify()));
+		Map<String, CursoCargoContratadoEntity> asignados = cursoCargos.stream()
+				.collect(Collectors.toMap(CursoCargoContratadoEntity::getPeriodo, asignado -> asignado));
         log.debug("Asignados -> {}",  Jsonifier.builder(asignados).build());
 		// Asociar periodos con cursos
-		List<CursoCargoContratado> cargos = new ArrayList<CursoCargoContratado>();
+		List<CursoCargoContratadoEntity> cargos = new ArrayList<CursoCargoContratadoEntity>();
 		for (Periodo periodo : periodos) {
-			CursoCargoContratado cargo = null;
+			CursoCargoContratadoEntity cargo = null;
 			if (asignados.containsKey(periodo.getAnho() + "." + periodo.getMes())) {
 				cargo = asignados.get(periodo.getAnho() + "." + periodo.getMes());
 			} else {
-				cargo = new CursoCargoContratado(null,
+				cargo = new CursoCargoContratadoEntity(null,
 						cursoId,
 						periodo.getAnho(),
 						periodo.getMes(),
@@ -213,16 +213,16 @@ public class ContratoToolService {
 			cargos.add(cargo);
 		}
 		log.debug("ContratoToolService.saveCurso - Cursos a registrar");
-        cargos.forEach(cursoCargoContratado -> log.debug("CursoCargoContratado -> {}", cursoCargoContratado.jsonify()));
+        cargos.forEach(cursoCargoContratadoEntity -> log.debug("CursoCargoContratado -> {}", cursoCargoContratadoEntity.jsonify()));
 		cargos = cursoCargoContratadoService.saveAll(cargos);
 		log.debug("ContratoToolService.saveCurso - Cursos registrados");
-        cargos.forEach(cursoCargoContratado -> log.debug("CursoCargoContratado -> {}", cursoCargoContratado.jsonify()));
+        cargos.forEach(cursoCargoContratadoEntity -> log.debug("CursoCargoContratado -> {}", cursoCargoContratadoEntity.jsonify()));
 		return true;
 	}
 
 	@Transactional
 	public void generateCurso(Integer anho, Integer mes) {
-		for (CursoCargoContratado cargo : cursoCargoContratadoService.findAllByPeriodo(anho, mes)) {
+		for (CursoCargoContratadoEntity cargo : cursoCargoContratadoService.findAllByPeriodo(anho, mes)) {
 			this.saveCurso(cargo.getCursoId(), cargo.getContratoId(), cargo.getCargoTipoId(),
 					cargo.getHorasSemanales());
 		}
@@ -230,10 +230,10 @@ public class ContratoToolService {
 
 	@Transactional
 	public void deleteCurso(Long cursoCargoContratadoId) {
-		CursoCargoContratado cursoCargoContratado = cursoCargoContratadoService
+		CursoCargoContratadoEntity cursoCargoContratadoEntity = cursoCargoContratadoService
 				.findByCursoCargo(cursoCargoContratadoId);
-		Long cursoId = cursoCargoContratado.getCursoId();
-		Long contratoId = cursoCargoContratado.getContratoId();
+		Long cursoId = cursoCargoContratadoEntity.getCursoId();
+		Long contratoId = cursoCargoContratadoEntity.getContratoId();
 		cursoCargoContratadoService.deleteAllByCursoIdAndContratoId(cursoId, contratoId);
 	}
 

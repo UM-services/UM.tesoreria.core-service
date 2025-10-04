@@ -1,0 +1,34 @@
+---
+title: Arquitectura Hexagonal - Caso de Uso Curso Cargo Contratado
+---
+graph TD
+    subgraph "Dominio (Domain)"
+        D[Entidades<br/>Casos de Uso<br/>Reglas de Negocio]
+    end
+
+    subgraph "Aplicación (Application)"
+        IP[Puertos de Entrada<br/>(Interfaces de Casos de Uso)]
+        OP[Puertos de Salida<br/>(Interfaces de Repositorios)]
+    end
+
+    subgraph "Infraestructura (Infrastructure)"
+        C[Controladores Web<br/>(Adaptadores de Entrada)]
+        R[Repositorios JPA<br/>(Adaptadores de Salida)]
+        M[Mappers<br/>DTOs]
+    end
+
+    C --> IP
+    IP --> D
+    D --> OP
+    OP --> R
+    C --> M
+    M --> C
+    R --> M
+    M --> R
+
+    style D fill:#e1f5fe
+    style IP fill:#f3e5f5
+    style OP fill:#f3e5f5
+    style C fill:#e8f5e8
+    style R fill:#e8f5e8
+    style M fill:#fff3e0
