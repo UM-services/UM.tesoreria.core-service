@@ -4,6 +4,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 
 - `dependencies.mmd`: Diagrama de dependencias del proyecto.
 - `architecture.mmd`: Arquitectura general (controladores, servicios, repositorios, entidades).
+- `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado.
 - `entities.mmd`: Diagrama entidad-relación (ER) de los principales modelos de dominio.
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 - `sequence-example.mmd`: Ejemplo de diagrama de secuencia para una petición típica.

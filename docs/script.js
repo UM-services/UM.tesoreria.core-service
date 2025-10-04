@@ -113,6 +113,7 @@ Promise.all([
 // --- Diagramas Mermaid ---
 const diagrams = [
 { id: 'architecture', file: 'architecture.mmd', title: '🏛️ Arquitectura General del Servicio' },
+{ id: 'hexagonal-architecture', file: 'hexagonal-architecture.mmd', title: '🔷 Arquitectura Hexagonal - Caso de Uso Curso Cargo Contratado' },
 { id: 'sequence-diagram', file: 'sequence-example.mmd', title: '🔄 Ejemplo de Diagrama de Secuencia' },
 { id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },
 { id: 'deployment-diagram', file: 'deployment.mmd', title: '🚀 Diagrama de Despliegue' }
