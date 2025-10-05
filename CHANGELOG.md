@@ -5,6 +5,14 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2025-10-05
+- refactor: Added debug logging in CursoCargoContratadoService.findAllByCurso method
+- refactor: Improved formatting in CursoCargoContratadoEntity annotations
+- refactor: Removed unused imports in CursoCargoContratadoResponse
+- docs: Enhanced script.js for better Mermaid diagram handling (frontmatter stripping and validation fixes)
+
+> Based on deep analysis of code changes in git diff HEAD.
+
 ## [2.2.0] - 2025-10-01
 - feat: Agregar relación contratadoPersona en modelo CursoCargoContratado
 - feat: Agregar método jsonify() en modelo Debito para logging estructurado

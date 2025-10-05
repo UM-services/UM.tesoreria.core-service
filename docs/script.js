@@ -17,8 +17,16 @@ fetch('.')
         fetch(file)
           .then(r => r.text())
           .then(data => {
+            // Strip frontmatter if present
+            let contentData = data;
+            if (contentData.startsWith('---')) {
+              const end = contentData.indexOf('---', 3);
+              if (end !== -1) {
+                contentData = contentData.substring(end + 3).trim();
+              }
+            }
             // Validación básica de sintaxis Mermaid
-            const valid = /^sequenceDiagram/.test(data.trim());
+            const valid = /^sequenceDiagram/.test(contentData);
             content += `<div class='section'><h3>${file.replace('sequence-','').replace('.mmd','').replace(/-/g,' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>`;
             if (valid) {
               content += `<div class='mermaid'>${data}</div>`;
@@ -125,14 +133,22 @@ fetch(diag.file)
   return response.text();
   })
   .then(data => {
+  // Strip frontmatter if present
+  let content = data;
+  if (content.startsWith('---')) {
+    const end = content.indexOf('---', 3);
+    if (end !== -1) {
+      content = content.substring(end + 3).trim();
+    }
+  }
   // Validación básica de sintaxis Mermaid (solo si hay contenido y empieza con un tipo válido)
-  const valid = /^(flowchart|sequenceDiagram|erDiagram|classDiagram|stateDiagram|gantt|pie|journey|requirementDiagram|gitGraph|mindmap|timeline|quadrantChart)/.test(data.trim());
+  const valid = /^(flowchart|sequenceDiagram|erDiagram|classDiagram|stateDiagram|gantt|pie|journey|requirementDiagram|gitGraph|mindmap|timeline|quadrantChart)/.test(content);
   const container = document.getElementById(diag.id);
   if (valid) {
     container.innerHTML = `<h2>${diag.title}</h2><div class="mermaid">${data}</div>`;
     mermaid.init(undefined, container.querySelector('.mermaid'));
   } else {
-    container.innerHTML = `<div class="warn">⚠️ El archivo <b>${file}</b> existe pero no contiene un diagrama Mermaid válido.</div>`;
+    container.innerHTML = `<div class="warn">⚠️ El archivo <b>${diag.file}</b> existe pero no contiene un diagrama Mermaid válido.</div>`;
   }
   })
   .catch(() => {

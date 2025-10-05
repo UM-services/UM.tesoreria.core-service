@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
 
-**Versión actual (SemVer): 2.2.0**
+**Versión actual (SemVer): 2.2.1**
+
+## Novedades 2.2.1 (verificado en código)
+- Añadido logging de debug en método findAllByCurso de CursoCargoContratadoService
+- Mejoras de formato en anotaciones de CursoCargoContratadoEntity
+- Eliminación de imports no utilizados en CursoCargoContratadoResponse
+- Mejoras en script.js para mejor manejo de diagramas Mermaid (eliminación de frontmatter y correcciones de validación)
 
 ## Novedades 2.1.0 (verificado en código)
 - Refactorización para usar `@RequiredArgsConstructor` en CostoController y CostoService
