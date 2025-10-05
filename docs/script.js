@@ -1,48 +1,5 @@
 document.getElementById('update-date').textContent = new Date().toLocaleString('es-AR');
 
-// --- Diagramas de Secuencia dinámicos ---
-fetch('.')
-  .then(response => response.text())
-  .then(html => {
-    // Extrae nombres de archivos sequence-*.mmd del listado HTML
-    const regex = /href=\"(sequence-[^\"]+\.mmd)\"/g;
-    let match;
-    const files = [];
-    while ((match = regex.exec(html)) !== null) {
-      files.push(match[1]);
-    }
-    if (files.length > 0) {
-      let content = '<h2>🔄 Diagramas de Secuencia</h2>';
-      files.forEach(file => {
-        fetch(file)
-          .then(r => r.text())
-          .then(data => {
-            // Strip frontmatter if present
-            let contentData = data;
-            if (contentData.startsWith('---')) {
-              const end = contentData.indexOf('---', 3);
-              if (end !== -1) {
-                contentData = contentData.substring(end + 3).trim();
-              }
-            }
-            // Validación básica de sintaxis Mermaid
-            const valid = /^sequenceDiagram/.test(contentData);
-            content += `<div class='section'><h3>${file.replace('sequence-','').replace('.mmd','').replace(/-/g,' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>`;
-            if (valid) {
-              content += `<div class='mermaid'>${data}</div>`;
-            } else {
-              content += `<div class='warn'>⚠️ El archivo <b>${file}</b> no contiene un diagrama Mermaid válido.</div>`;
-            }
-            content += '</div>';
-            document.getElementById('sequence-diagrams').innerHTML = content;
-            mermaid.init(undefined, document.getElementById('sequence-diagrams').querySelectorAll('.mermaid'));
-          });
-      });
-    } else {
-      document.getElementById('sequence-diagrams').innerHTML = '<div class="warn">No se encontraron diagramas de secuencia.</div>';
-    }
-  });
-
 // --- Carga de datos del proyecto (issues, PRs, etc.) ---
 Promise.all([
   fetch('dependency-tree.txt').then(res => res.ok ? res.text() : Promise.resolve('Error al cargar dependencias.')),
@@ -120,39 +77,74 @@ Promise.all([
 
 // --- Diagramas Mermaid ---
 const diagrams = [
-{ id: 'architecture', file: 'architecture.mmd', title: '🏛️ Arquitectura General del Servicio' },
-{ id: 'hexagonal-architecture', file: 'hexagonal-architecture.mmd', title: '🔷 Arquitectura Hexagonal - Caso de Uso Curso Cargo Contratado' },
-{ id: 'sequence-diagram', file: 'sequence-example.mmd', title: '🔄 Ejemplo de Diagrama de Secuencia' },
-{ id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },
-{ id: 'deployment-diagram', file: 'deployment.mmd', title: '🚀 Diagrama de Despliegue' }
+  { id: 'architecture', file: 'architecture.mmd', title: '🏛️ Arquitectura General del Servicio' },
+  { id: 'hexagonal-architecture', file: 'hexagonal-architecture.mmd', title: '🔷 Arquitectura Hexagonal - Caso de Uso Curso Cargo Contratado' },
+  { id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },
+  { id: 'deployment-diagram', file: 'deployment.mmd', title: '🚀 Diagrama de Despliegue' },
+  { id: 'sequence-diagrams', file: 'sequence-alta-usuario.mmd', title: 'Alta de Usuario' },
+  { id: 'sequence-diagrams', file: 'sequence-baja-usuario.mmd', title: 'Baja de Usuario' },
+  { id: 'sequence-diagrams', file: 'sequence-chequera-serie-sede.mmd', title: 'Chequera Serie Sede' },
+  { id: 'sequence-diagrams', file: 'sequence-comprobante.mmd', title: 'Comprobante' },
+  { id: 'sequence-diagrams', file: 'sequence-consulta-articulos.mmd', title: 'Consulta de Artículos' },
+  { id: 'sequence-diagrams', file: 'sequence-example.mmd', title: 'Ejemplo de Secuencia' },
+  { id: 'sequence-diagrams', file: 'sequence-liquidacion-sueldos.mmd', title: 'Liquidación de Sueldos' },
+  { id: 'sequence-diagrams', file: 'sequence-mercadopago-to-change.mmd', title: 'MercadoPago to Change' },
+  { id: 'sequence-diagrams', file: 'sequence-movimientos-cuenta.mmd', title: 'Movimientos de Cuenta' },
+  { id: 'sequence-diagrams', file: 'sequence-pago-chequera.mmd', title: 'Pago de Chequera' },
+  { id: 'sequence-diagrams', file: 'sequence-reemplazo-chequera.mmd', title: 'Reemplazo de Chequera' }
 ];
+
+const sequenceDiagramsContainer = document.getElementById('sequence-diagrams');
+sequenceDiagramsContainer.innerHTML = '<h2>🔄 Diagramas de Secuencia</h2>';
+
 diagrams.forEach(diag => {
-fetch(diag.file)
-  .then(response => {
-  if (!response.ok) throw new Error('missing');
-  return response.text();
-  })
-  .then(data => {
-  // Strip frontmatter if present
-  let content = data;
-  if (content.startsWith('---')) {
-    const end = content.indexOf('---', 3);
-    if (end !== -1) {
-      content = content.substring(end + 3).trim();
-    }
-  }
-  // Validación básica de sintaxis Mermaid (solo si hay contenido y empieza con un tipo válido)
-  const valid = /^(flowchart|sequenceDiagram|erDiagram|classDiagram|stateDiagram|gantt|pie|journey|requirementDiagram|gitGraph|mindmap|timeline|quadrantChart)/.test(content);
-  const container = document.getElementById(diag.id);
-  if (valid) {
-    container.innerHTML = `<h2>${diag.title}</h2><div class="mermaid">${data}</div>`;
-    mermaid.init(undefined, container.querySelector('.mermaid'));
-  } else {
-    container.innerHTML = `<div class="warn">⚠️ El archivo <b>${diag.file}</b> existe pero no contiene un diagrama Mermaid válido.</div>`;
-  }
-  })
-  .catch(() => {
-  const container = document.getElementById(diag.id);
-  container.innerHTML = `<div class="warn">⚠️ El archivo <b>${diag.file}</b> no se encuentra o no pudo cargarse.</div>`;
-  });
+  fetch(diag.file)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Network response was not ok for ${diag.file}`);
+      }
+      return response.text();
+    })
+    .then(data => {
+      let content = data.startsWith('---') ? data.substring(data.indexOf('---', 3) + 3).trim() : data;
+      const valid = /^(flowchart|sequenceDiagram|erDiagram|classDiagram|stateDiagram|gantt|pie|journey|requirementDiagram|gitGraph|mindmap|timeline|quadrantChart)/.test(content);
+      
+      const container = document.getElementById(diag.id);
+      const diagramElement = document.createElement('div');
+      diagramElement.className = 'section';
+
+      if (valid) {
+        diagramElement.innerHTML = `<h3>${diag.title}</h3><div class="mermaid">${content}</div>`;
+      } else {
+        diagramElement.innerHTML = `<div class="warn">⚠️ El archivo <b>${diag.file}</b> no contiene un diagrama Mermaid válido.</div>`;
+      }
+
+      if (diag.id === 'sequence-diagrams') {
+        sequenceDiagramsContainer.appendChild(diagramElement);
+      } else {
+        container.innerHTML = `<h2>${diag.title}</h2>`;
+        container.appendChild(diagramElement);
+      }
+    })
+    .catch(() => {
+      const container = document.getElementById(diag.id);
+      const errorElement = document.createElement('div');
+      errorElement.className = 'warn';
+      errorElement.innerHTML = `⚠️ El archivo <b>${diag.file}</b> no se encuentra o no pudo cargarse.`;
+      
+      if (diag.id === 'sequence-diagrams') {
+        const diagramElement = document.createElement('div');
+        diagramElement.className = 'section';
+        diagramElement.appendChild(errorElement);
+        sequenceDiagramsContainer.appendChild(diagramElement);
+      } else {
+        container.innerHTML = `<h2>${diag.title}</h2>`;
+        container.appendChild(errorElement);
+      }
+    });
 });
+
+// Render all Mermaid diagrams at once after a short delay
+setTimeout(() => {
+    mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+}, 500);
