@@ -41,7 +41,10 @@ public class CursoCargoContratadoService implements GetAllCargosByPersonaUseCase
     }
 
     public List<CursoCargoContratadoEntity> findAllByCurso(Long cursoId, Integer anho, Integer mes) {
-		return repository.findAllByCursoIdAndAnhoAndMes(cursoId, anho, mes);
+        log.debug("Processing CursoCargoContratadoService.findAllByCurso");
+        var cargos = repository.findAllByCursoIdAndAnhoAndMes(cursoId, anho, mes);
+        log.debug("Cargos -> {}", Jsonifier.builder(cargos).build());
+		return cargos;
 	}
 
 	public List<CursoCargoContratadoEntity> findAllByCursoIdAndContratoId(Long cursoId, Long contratoId) {

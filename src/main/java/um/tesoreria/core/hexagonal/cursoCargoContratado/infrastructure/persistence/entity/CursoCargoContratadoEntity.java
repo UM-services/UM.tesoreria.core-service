@@ -12,9 +12,9 @@ import java.math.BigDecimal;
 @Entity
 @Table(
         name = "curso_cargo_contratado",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"cursoId", "anho", "mes", "contratoId"})
-    }
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"cursoId", "anho", "mes", "contratoId"})
+        }
 )
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,8 +41,8 @@ public class CursoCargoContratadoEntity extends Auditable {
 
     @OneToOne(optional = true)
     @JoinColumns({
-        @JoinColumn(name = "personaId", referencedColumnName = "personaId", insertable = false, updatable = false),
-        @JoinColumn(name = "documentoId", referencedColumnName = "documentoId", insertable = false, updatable = false)
+            @JoinColumn(name = "personaId", referencedColumnName = "personaId", insertable = false, updatable = false),
+            @JoinColumn(name = "documentoId", referencedColumnName = "documentoId", insertable = false, updatable = false)
     })
     private ContratadoPersona contratadoPersona = null;
 
