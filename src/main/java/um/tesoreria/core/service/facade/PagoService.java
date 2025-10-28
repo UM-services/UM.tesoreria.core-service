@@ -17,6 +17,7 @@ import um.tesoreria.core.service.*;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -183,6 +184,8 @@ public class PagoService {
         var nextOrder = chequeraPagoService.nextOrden(chequeraCuota.getFacultadId(), chequeraCuota.getTipoChequeraId(), chequeraCuota.getChequeraSerieId(), chequeraCuota.getProductoId(), chequeraCuota.getAlternativaId(), chequeraCuota.getCuotaId());
         log.debug("NextOrder = {}", nextOrder);
 
+        var fechaAcreditacion = LocalDate.now().isAfter(LocalDate.of(2025, 9, 1).minusDays(1)) ? mercadoPagoContext.getFechaPago() : mercadoPagoContext.getFechaAcreditacion();
+
         var chequeraPago = new ChequeraPago.Builder()
                 .chequeraCuotaId(chequeraCuota.getChequeraCuotaId())
                 .facultadId(chequeraCuota.getFacultadId())
@@ -195,7 +198,7 @@ public class PagoService {
                 .mes(chequeraCuota.getMes())
                 .anho(chequeraCuota.getAnho())
                 .fecha(mercadoPagoContext.getFechaPago())
-                .acreditacion(mercadoPagoContext.getFechaAcreditacion())
+                .acreditacion(fechaAcreditacion)
                 .importe(mercadoPagoContext.getImportePagado())
                 .tipoPagoId(MERCADOPAGO)
                 .idMercadoPago(mercadoPagoContext.getIdMercadoPago())

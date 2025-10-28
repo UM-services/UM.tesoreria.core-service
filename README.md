@@ -4,7 +4,14 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
 
-**Versión actual (SemVer): 2.2.1**
+**Versión actual (SemVer): 2.2.2**
+
+## Novedades 2.2.2 (verificado en código)
+- Mejora en lógica de fecha de acreditación en PagoService para fechas posteriores al 1 de septiembre 2025
+- Actualización de ID de persona en método de test de ChequeraSerieService
+- Actualización de versión de Kotlin a 2.2.21
+- Corrección de sintaxis de comentarios en diagrama entities.mmd
+- Corrección de flechas de flujo en diagrama hexagonal-architecture.mmd
 
 ## Novedades 2.2.1 (verificado en código)
 - Añadido logging de debug en método findAllByCurso de CursoCargoContratadoService
@@ -72,7 +79,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
 - Spring Boot: 3.5.6
 - Spring Cloud: 2025.0.0
-- Kotlin: 2.2.20
+- Kotlin: 2.2.21
 - MySQL Connector: 9.4.0
 - SpringDoc OpenAPI: 2.8.10
 - Apache POI: 5.4.1
