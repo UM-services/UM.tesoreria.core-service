@@ -5,6 +5,15 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.2] - 2025-10-28
+- fix: Improved acreditacion date logic in PagoService for dates after September 1, 2025
+- refactor: Updated test persona ID in ChequeraSerieService.findAllByLectivoIdAndFacultadIdTest
+- chore(deps): Updated Kotlin version to 2.2.21
+- docs: Fixed Mermaid comment syntax in entities.mmd diagram
+- docs: Corrected flow arrows in hexagonal-architecture.mmd diagram
+
+> Based on deep analysis of code changes in git diff HEAD and pom.xml.
+
 ## [2.2.1] - 2025-10-05
 - refactor: Added debug logging in CursoCargoContratadoService.findAllByCurso method
 - refactor: Improved formatting in CursoCargoContratadoEntity annotations

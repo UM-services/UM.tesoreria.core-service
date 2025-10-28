@@ -88,7 +88,7 @@ public class ChequeraSerieService {
 
 
     public List<ChequeraSerie> findAllByLectivoIdAndFacultadIdTest(Integer lectivoId, Integer facultadId) {
-        return repository.findAllByLectivoIdAndFacultadIdAndPersonaId(lectivoId, facultadId, new BigDecimal(45719365));
+        return repository.findAllByLectivoIdAndFacultadIdAndPersonaId(lectivoId, facultadId, new BigDecimal(49083424));
     }
 
 
