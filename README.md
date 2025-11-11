@@ -4,7 +4,11 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
 
-**Versión actual (SemVer): 2.3.0**
+**Versión actual (SemVer): 2.3.1**
+
+## Novedades 2.3.1 (verificado en código)
+- Añadido filtro de compensada en ChequeraCuotaRepository para excluir cuotas compensadas de consultas pendientes
+- Actualizado ChequeraCuotaService.findAllPendientes para incluir parámetro compensada
 
 ## Novedades 2.3.0 (verificado en código)
 - Añadido módulo MercadoPagoContextHistory para seguimiento del historial de contextos de MercadoPago
