@@ -5,6 +5,12 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2025-11-11
+- fix: Added compensada filter to ChequeraCuotaRepository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndCompensadaAndImporte1GreaterThan to exclude compensated cuotas from pending queries
+- Updated ChequeraCuotaService.findAllPendientes to include compensada parameter
+
+> Based on deep analysis of git diff HEAD.
+
 ## [2.3.0] - 2025-11-11
 - feat: Added MercadoPagoContextHistory module for tracking history of MercadoPago contexts
 - refactor: Replaced @Autowired with @RequiredArgsConstructor in PagarFileController and PagarFileService
