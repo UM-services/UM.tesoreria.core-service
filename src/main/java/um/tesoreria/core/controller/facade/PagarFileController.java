@@ -6,7 +6,7 @@ package um.tesoreria.core.controller.facade;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -26,14 +26,10 @@ import static um.tesoreria.core.util.Tool.generateFile;
  */
 @RestController
 @RequestMapping("/pagarfile")
+@RequiredArgsConstructor
 public class PagarFileController {
 
 	private final PagarFileService service;
-
-	@Autowired
-	public PagarFileController(PagarFileService service) {
-		this.service = service;
-	}
 
 	@GetMapping("/generate/{desde}/{hasta}")
 	public ResponseEntity<Resource> generateFiles(

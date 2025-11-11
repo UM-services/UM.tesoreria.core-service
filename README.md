@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
 
-**Versión actual (SemVer): 2.2.2**
+**Versión actual (SemVer): 2.3.0**
+
+## Novedades 2.3.0 (verificado en código)
+- Añadido módulo MercadoPagoContextHistory para seguimiento del historial de contextos de MercadoPago
+- Refactorización para usar @RequiredArgsConstructor en PagarFileController y PagarFileService
+- Actualización de Collectors.toList() a .toList() en JpaCursoCargoContratadoRepositoryAdapter
+- Integración de MercadoPagoContextHistory en MercadoPagoContextService para creación automática de historial en operaciones add, saveAll y update
 
 ## Novedades 2.2.2 (verificado en código)
 - Mejora en lógica de fecha de acreditación en PagoService para fechas posteriores al 1 de septiembre 2025

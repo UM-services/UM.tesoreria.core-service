@@ -8,7 +8,6 @@ import um.tesoreria.core.hexagonal.cursoCargoContratado.infrastructure.persisten
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -23,7 +22,7 @@ public class JpaCursoCargoContratadoRepositoryAdapter implements CursoCargoContr
                 .findAllByContratoIdAndAnhoAndMesAndPersonaIdAndDocumentoId(contratoId, anho, mes, personaId, documentoId)
                 .stream()
                 .map(cursoCargoContratadoMapper::toDomainModel)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }

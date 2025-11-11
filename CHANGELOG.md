@@ -5,6 +5,14 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2025-11-11
+- feat: Added MercadoPagoContextHistory module for tracking history of MercadoPago contexts
+- refactor: Replaced @Autowired with @RequiredArgsConstructor in PagarFileController and PagarFileService
+- refactor: Updated Collectors.toList() to .toList() in JpaCursoCargoContratadoRepositoryAdapter
+- refactor: Integrated MercadoPagoContextHistory into MercadoPagoContextService for automatic history creation on add, saveAll, and update operations
+
+> Based on deep analysis of code changes in git diff HEAD and pom.xml.
+
 ## [2.2.2] - 2025-10-28
 - fix: Improved acreditacion date logic in PagoService for dates after September 1, 2025
 - refactor: Updated test persona ID in ChequeraSerieService.findAllByLectivoIdAndFacultadIdTest
