@@ -1,0 +1,33 @@
+---
+title: Arquitectura Hexagonal - MercadoPagoContextHistory
+---
+graph TD
+    subgraph "Dominio (Domain)"
+        D[MercadoPagoContextHistory<br/>CreateMercadoPagoContextHistoryUseCase]
+    end
+
+    subgraph "Aplicación (Application)"
+        IP[CreateMercadoPagoContextHistoryUseCase<br/>(Puerto de Entrada)]
+        OP[MercadoPagoContextHistoryRepository<br/>(Puerto de Salida)]
+    end
+
+    subgraph "Infraestructura (Infrastructure)"
+        C[MercadoPagoContextHistoryRequestService<br/>(Adaptador de Entrada)]
+        R[JpaMercadoPagoContextHistoryRepositoryAdapter<br/>(Adaptador de Salida)]
+        M[MercadoPagoContextHistoryMapper<br/>MercadoPagoContextHistoryEntity]
+    end
+
+    C --> IP
+    IP --> D
+    D --> OP
+    R --> OP
+
+    C --> M
+    R --> M
+
+    style D fill:#e1f5fe
+    style IP fill:#f3e5f5
+    style OP fill:#f3e5f5
+    style C fill:#e8f5e8
+    style R fill:#e8f5e8
+    style M fill:#fff3e0

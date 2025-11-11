@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageRequest;
@@ -35,20 +36,12 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PagarFileService {
 
     private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
-
     private final Environment environment;
-
     private final ChequeraCuotaService chequeraCuotaService;
-
-    @Autowired
-    public PagarFileService(ChequeraCuotaDeudaService chequeraCuotaDeudaService, Environment environment, ChequeraCuotaService chequeraCuotaService) {
-        this.chequeraCuotaDeudaService = chequeraCuotaDeudaService;
-        this.environment = environment;
-        this.chequeraCuotaService = chequeraCuotaService;
-    }
 
     public String generateFiles(OffsetDateTime desde, OffsetDateTime hasta) throws IOException {
         String path = environment.getProperty("path.files");
@@ -113,7 +106,7 @@ public class PagarFileService {
                 totalVencimiento1 = totalVencimiento1.add(deuda.getImporte1());
                 totalVencimiento2 = totalVencimiento2.add(deuda.getImporte2());
                 totalVencimiento3 = totalVencimiento3.add(deuda.getImporte3());
-                if (lastDate == null || deuda.getVencimiento3().plusHours(3).isAfter(lastDate)) {
+                if (deuda.getVencimiento3().plusHours(3).isAfter(lastDate)) {
                     lastDate = deuda.getVencimiento3().plusHours(3);
                 }
             }
