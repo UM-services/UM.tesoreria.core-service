@@ -4,7 +4,10 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
 
-**Versión actual (SemVer): 2.3.1**
+**Versión actual (SemVer): 2.3.2**
+
+## Novedades 2.3.2 (verificado en código)
+- Refactorización para usar @RequiredArgsConstructor en ChequeraController y MercadoPagoCoreController
 
 ## Novedades 2.3.1 (verificado en código)
 - Añadido filtro de compensada en ChequeraCuotaRepository para excluir cuotas compensadas de consultas pendientes
