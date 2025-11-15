@@ -11,6 +11,7 @@ import java.util.List;
 
 import jakarta.mail.MessagingException;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -44,6 +45,7 @@ import um.tesoreria.core.kotlin.model.SpoterData;
  */
 @RestController
 @RequestMapping({"/chequera", "/api/tesoreria/core/chequera"})
+@RequiredArgsConstructor
 public class ChequeraController {
 
     private final ChequeraService service;
@@ -51,14 +53,6 @@ public class ChequeraController {
     private final FormulariosToPdfService formularioToPdfService;
     private final SpoterDataService spoterDataService;
     private final ChequeraCuotaService chequeraCuotaService;
-
-    public ChequeraController(ChequeraService service, MailChequeraService mailChequeraService, FormulariosToPdfService formularioToPdfService, SpoterDataService spoterDataService, ChequeraCuotaService chequeraCuotaService) {
-        this.service = service;
-        this.mailChequeraService = mailChequeraService;
-        this.formularioToPdfService = formularioToPdfService;
-        this.spoterDataService = spoterDataService;
-        this.chequeraCuotaService = chequeraCuotaService;
-    }
 
     @DeleteMapping("/delete/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{usuarioId}")
     public ResponseEntity<Void> deleteByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
