@@ -3,22 +3,22 @@
  */
 package um.tesoreria.core.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.LocalidadException;
 import um.tesoreria.core.exception.ProvinciaException;
 import um.tesoreria.core.extern.consumer.*;
 import um.tesoreria.core.kotlin.model.Domicilio;
 import um.tesoreria.core.kotlin.model.Facultad;
+import um.tesoreria.core.kotlin.model.Persona;
 import um.tesoreria.core.model.Localidad;
 import um.tesoreria.core.model.Provincia;
 import um.tesoreria.core.model.view.DomicilioKey;
 import um.tesoreria.core.repository.DomicilioRepository;
 import um.tesoreria.core.service.view.DomicilioKeyService;
-import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import um.tesoreria.core.kotlin.model.Persona;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -32,6 +32,9 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class DomicilioService {
+
+    private static final Integer DEFAULT_PROVINCIA_ID = 1;
+    private static final Integer DEFAULT_LOCALIDAD_ID = 1;
 
     private final DomicilioRepository repository;
     private final DomicilioKeyService domicilioKeyService;
@@ -53,10 +56,8 @@ public class DomicilioService {
     }
 
     public Domicilio findByUnique(BigDecimal personaId, Integer documentoId) {
-        var domicilio = repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
+        return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
                 .orElseThrow(() -> new DomicilioException(personaId, documentoId));
-        log.debug("Domicilio -> {}", domicilio.jsonify());
-		return domicilio;
     }
 
     public Domicilio findFirstByPersonaId(BigDecimal personaId) {
@@ -77,15 +78,25 @@ public class DomicilioService {
     @Transactional
     public Domicilio update(Domicilio newDomicilio, Long domicilioId, Boolean sincronize) {
         return repository.findByDomicilioId(domicilioId).map(domicilio -> {
-            domicilio = new Domicilio(domicilioId, newDomicilio.getPersonaId(), newDomicilio.getDocumentoId(),
-                    OffsetDateTime.now(), newDomicilio.getCalle(), newDomicilio.getPuerta(), newDomicilio.getPiso(),
-                    newDomicilio.getDpto(), newDomicilio.getTelefono(), newDomicilio.getMovil(),
-                    newDomicilio.getObservaciones(), newDomicilio.getCodigoPostal(), newDomicilio.getFacultadId(),
-                    newDomicilio.getProvinciaId(), newDomicilio.getLocalidadId(), newDomicilio.getEmailPersonal(),
-                    newDomicilio.getEmailInstitucional(), newDomicilio.getLaboral(), "");
-            log.debug("Domicilio Previo -> {}", domicilio.jsonify());
-			domicilio = repository.save(domicilio);
-            log.debug("Domicilio Post -> {}", domicilio.jsonify());
+            domicilio.setPersonaId(newDomicilio.getPersonaId());
+            domicilio.setDocumentoId(newDomicilio.getDocumentoId());
+            domicilio.setFecha(OffsetDateTime.now());
+            domicilio.setCalle(newDomicilio.getCalle());
+            domicilio.setPuerta(newDomicilio.getPuerta());
+            domicilio.setPiso(newDomicilio.getPiso());
+            domicilio.setDpto(newDomicilio.getDpto());
+            domicilio.setTelefono(newDomicilio.getTelefono());
+            domicilio.setMovil(newDomicilio.getMovil());
+            domicilio.setObservaciones(newDomicilio.getObservaciones());
+            domicilio.setCodigoPostal(newDomicilio.getCodigoPostal());
+            domicilio.setFacultadId(newDomicilio.getFacultadId());
+            domicilio.setProvinciaId(newDomicilio.getProvinciaId());
+            domicilio.setLocalidadId(newDomicilio.getLocalidadId());
+            domicilio.setEmailPersonal(newDomicilio.getEmailPersonal());
+            domicilio.setEmailInstitucional(newDomicilio.getEmailInstitucional());
+            domicilio.setLaboral(newDomicilio.getLaboral());
+            domicilio.setEmailPagador("");
+            domicilio = repository.save(domicilio);
 
             if (sincronize)
                 this.sincronizeFacultad(domicilio);
@@ -107,85 +118,78 @@ public class DomicilioService {
     }
 
     public Domicilio sincronize(Domicilio domicilio) {
-        Domicilio otro_domicilio = repository
-                .findByPersonaIdAndDocumentoId(domicilio.getPersonaId(), domicilio.getDocumentoId())
-                .orElse(new Domicilio());
-        if (otro_domicilio.getDomicilioId() == null)
-            otro_domicilio = this.add(domicilio, false);
-        else
-            otro_domicilio = this.update(domicilio, otro_domicilio.getDomicilioId(), false);
-        return otro_domicilio;
+        return repository.findByPersonaIdAndDocumentoId(domicilio.getPersonaId(), domicilio.getDocumentoId())
+                .map(existingDomicilio -> this.update(domicilio, existingDomicilio.getDomicilioId(), false))
+                .orElseGet(() -> this.add(domicilio, false));
     }
 
     @Transactional
     public Integer capture(BigDecimal personaId, Integer documentoId) {
         for (Facultad facultad : facultadService.findFacultades()) {
-            if (!facultad.getApiserver().isEmpty()) {
-                Domicilio domicilio = null;
-                domicilio = domicilioFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
-                        personaId, documentoId);
-                log.debug("Domicilio -> {}", domicilio.jsonify());
+            if (facultad.getApiserver().isEmpty()) {
+                continue;
+            }
+
+            Domicilio domicilio = domicilioFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
+                    personaId, documentoId);
+
+            if (domicilio.getDomicilioId() != null) {
                 domicilio.setPersonaId(personaId);
                 domicilio.setDocumentoId(documentoId);
-                if (domicilio.getDomicilioId() != null) {
-                    domicilio.setDomicilioId(null);
-                    Domicilio domicilio_old = repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
-                            .orElse(new Domicilio());
-                    if (domicilio_old.getDomicilioId() != null) {
-                        domicilio.setDomicilioId(domicilio_old.getDomicilioId());
-                        domicilio.setPersonaId(domicilio_old.getPersonaId());
-                        domicilio.setDocumentoId(domicilio_old.getDocumentoId());
-                        if (domicilio.getProvinciaId() == 0)
-                            domicilio.setProvinciaId(null);
-                        if (domicilio.getLocalidadId() == 0)
-                            domicilio.setLocalidadId(null);
-                    }
-                    domicilio.setFacultadId(facultad.getFacultadId());
-                    if (domicilio.getProvinciaId() == null || domicilio.getProvinciaId() == 0)
-                        domicilio.setProvinciaId(1);
-                    if (domicilio.getLocalidadId() == null || domicilio.getLocalidadId() == 0) {
-                        domicilio.setProvinciaId(1);
-                        domicilio.setLocalidadId(1);
-                    }
-                    if (domicilio.getProvinciaId() != null) {
-                        Provincia provincia_old = null;
-                        try {
-                            provincia_old = provinciaService.findByUnique(domicilio.getFacultadId(),
-                                    domicilio.getProvinciaId());
-                        } catch (ProvinciaException e) {
-                            provincia_old = new Provincia();
-                        }
-                        if (provincia_old.getUniqueId() == null) {
-                            // Capturar provincia
-                            Provincia provincia = provinciaFacultadConsumer.findByUnique(facultad.getApiserver(),
-                                    facultad.getApiport(), domicilio.getFacultadId(), domicilio.getProvinciaId());
-                            provincia.setUniqueId(null);
-                            provinciaService.add(provincia);
-                        }
-                        Localidad localidad_old = null;
-                        try {
-                            localidad_old = localidadService.findByUnique(domicilio.getFacultadId(),
-                                    domicilio.getProvinciaId(), domicilio.getLocalidadId());
-                        } catch (LocalidadException e) {
-                            localidad_old = new Localidad();
-                        }
-                        if (localidad_old.getUniqueId() == null) {
-                            // Capturar localidad
-                            Localidad localidad = localidadFacultadConsumer.findByUnique(facultad.getApiserver(),
-                                    facultad.getApiport(), domicilio.getFacultadId(), domicilio.getProvinciaId(),
-                                    domicilio.getLocalidadId());
-                            localidad.setUniqueId(null);
-                            localidadService.add(localidad);
-                        }
-                    }
-                    log.debug("Domicilio Previo -> {}", domicilio.jsonify());
-                    domicilio = repository.save(domicilio);
-                    log.debug("Domicilio Post -> {}", domicilio.jsonify());
-                    return facultad.getFacultadId();
+                domicilio.setDomicilioId(null);
+
+                repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
+                        .ifPresent(existingDomicilio -> {
+                            domicilio.setDomicilioId(existingDomicilio.getDomicilioId());
+                            domicilio.setPersonaId(existingDomicilio.getPersonaId());
+                            domicilio.setDocumentoId(existingDomicilio.getDocumentoId());
+                        });
+
+                if (domicilio.getProvinciaId() == null || domicilio.getProvinciaId() == 0) {
+                    domicilio.setProvinciaId(DEFAULT_PROVINCIA_ID);
                 }
+                if (domicilio.getLocalidadId() == null || domicilio.getLocalidadId() == 0) {
+                    domicilio.setProvinciaId(DEFAULT_PROVINCIA_ID);
+                    domicilio.setLocalidadId(DEFAULT_LOCALIDAD_ID);
+                }
+
+                domicilio.setFacultadId(facultad.getFacultadId());
+                sincronizeProvinciaAndLocalidad(domicilio, facultad);
+
+                repository.save(domicilio);
+                return facultad.getFacultadId();
             }
         }
         return 0;
+    }
+
+    private void sincronizeProvinciaAndLocalidad(Domicilio domicilio, Facultad facultad) {
+        if (domicilio.getProvinciaId() == null) {
+            return;
+        }
+        // Sincronizar Provincia
+        try {
+            provinciaService.findByUnique(domicilio.getFacultadId(), domicilio.getProvinciaId());
+        } catch (ProvinciaException e) {
+            // No existe, la capturamos
+            Provincia provincia = provinciaFacultadConsumer.findByUnique(facultad.getApiserver(),
+                    facultad.getApiport(), domicilio.getFacultadId(), domicilio.getProvinciaId());
+            provincia.setUniqueId(null);
+            provinciaService.add(provincia);
+        }
+
+        // Sincronizar Localidad
+        try {
+            localidadService.findByUnique(domicilio.getFacultadId(),
+                    domicilio.getProvinciaId(), domicilio.getLocalidadId());
+        } catch (LocalidadException e) {
+            // No existe, la capturamos
+            Localidad localidad = localidadFacultadConsumer.findByUnique(facultad.getApiserver(),
+                    facultad.getApiport(), domicilio.getFacultadId(), domicilio.getProvinciaId(),
+                    domicilio.getLocalidadId());
+            localidad.setUniqueId(null);
+            localidadService.add(localidad);
+        }
     }
 
     public Domicilio findWithPagador(Integer facultadId, BigDecimal personaId, Integer documentoId, Integer lectivoId) {

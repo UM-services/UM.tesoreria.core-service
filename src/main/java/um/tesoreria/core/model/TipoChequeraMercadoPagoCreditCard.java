@@ -23,6 +23,8 @@ public class TipoChequeraMercadoPagoCreditCard extends Auditable {
     private Integer alternativaId;
     private Integer installments;
     private Integer defaultInstallments;
+
+    @Builder.Default
     private Byte active = 1;
 
     @OneToOne(optional = true)

@@ -22,8 +22,11 @@ public class MercadoPagoContextDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
     private OffsetDateTime fechaVencimiento;
 
+    @Builder.Default
     private BigDecimal importe = BigDecimal.ZERO;
     private String preferenceId;
+
+    @Builder.Default
     private Byte activo = 0;
     private String status;
 

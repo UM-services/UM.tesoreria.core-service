@@ -29,6 +29,8 @@ import um.tesoreria.core.service.view.TipoChequeraSearchService;
 @RequiredArgsConstructor
 public class TipoChequeraService {
 
+	private static final Byte DO_NOT_PRINT = 0;
+
 	private final TipoChequeraRepository repository;
 	private final LectivoTotalService lectivoTotalService;
 	private final TipoChequeraSearchService tipoChequeraSearchService;
@@ -65,10 +67,8 @@ public class TipoChequeraService {
 	}
 
 	public TipoChequera findByTipoChequeraId(Integer tipoChequeraId) {
-        var tipoChequera = repository.findByTipoChequeraId(tipoChequeraId)
+        return repository.findByTipoChequeraId(tipoChequeraId)
                 .orElseThrow(() -> new TipoChequeraException(tipoChequeraId));
-        log.debug("TipoChequera -> {}", tipoChequera.jsonify());
-		return tipoChequera;
 	}
 
 	public TipoChequera findLast() {
@@ -76,23 +76,19 @@ public class TipoChequeraService {
 	}
 
 	public TipoChequera add(TipoChequera tipoChequera) {
-		repository.save(tipoChequera);
-		return tipoChequera;
+		return repository.save(tipoChequera);
 	}
 
 	public TipoChequera update(TipoChequera newTipoChequera, Integer tipoChequeraId) {
 		return repository.findByTipoChequeraId(tipoChequeraId).map(tipoChequera -> {
-			tipoChequera = new TipoChequera(tipoChequeraId,
-					newTipoChequera.getNombre(),
-					newTipoChequera.getPrefijo(),
-					newTipoChequera.getGeograficaId(),
-					newTipoChequera.getClaseChequeraId(),
-					newTipoChequera.getImprimir(),
-					newTipoChequera.getContado(),
-					newTipoChequera.getMultiple(),
-					newTipoChequera.getEmailCopia(),
-					null,
-					null);
+			tipoChequera.setNombre(newTipoChequera.getNombre());
+			tipoChequera.setPrefijo(newTipoChequera.getPrefijo());
+			tipoChequera.setGeograficaId(newTipoChequera.getGeograficaId());
+			tipoChequera.setClaseChequeraId(newTipoChequera.getClaseChequeraId());
+			tipoChequera.setImprimir(newTipoChequera.getImprimir());
+			tipoChequera.setContado(newTipoChequera.getContado());
+			tipoChequera.setMultiple(newTipoChequera.getMultiple());
+			tipoChequera.setEmailCopia(newTipoChequera.getEmailCopia());
 			return repository.save(tipoChequera);
 		}).orElseThrow(() -> new TipoChequeraException(tipoChequeraId));
 	}
@@ -104,9 +100,7 @@ public class TipoChequeraService {
 	@Transactional
 	public void unmark() {
 		List<TipoChequera> tipos = repository.findAll();
-		for (TipoChequera tipo : tipos) {
-			tipo.setImprimir((byte) 0);
-		}
+		tipos.forEach(tipo -> tipo.setImprimir(DO_NOT_PRINT));
 		repository.saveAll(tipos);
 	}
 

@@ -5,6 +5,19 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2025-11-16
+- feat: Added @Builder.Default to various model fields for improved object instantiation (MercadoPagoContext, Proveedor, TipoChequeraMercadoPagoCreditCard, MercadoPagoContextDto)
+- refactor: Extracted common logic into private helper methods (setDeuda, setUltimoEnvio) in ChequeraSerieService to reduce code duplication and improve readability
+- refactor: Updated update methods in ChequeraSerieService, DomicilioService, and TipoChequeraService to modify existing entities directly instead of creating new instances
+- refactor: Simplified add, setPayPerTic, setEnviado methods in ChequeraSerieService by directly returning repository.save() results and removing redundant logging
+- refactor: Replaced manual constructor with @RequiredArgsConstructor in PersonaService
+- refactor: Improved DomicilioService.capture method by extracting province and locality synchronization into a helper method and handling default IDs
+- refactor: Removed redundant logging in MercadoPagoContextService, PersonaService, TipoChequeraService, and MercadoPagoCoreService
+- fix: Excluded compensated quotas from pending MercadoPago preference creation in PersonaService
+- fix: Improved error logging in ChequeraSerieService.setUltimoEnvio from debug to error
+
+> Based on deep analysis of git diff HEAD.
+
 ## [2.3.2] - 2025-11-15
 - refactor: Replaced manual constructors with @RequiredArgsConstructor in ChequeraController and MercadoPagoCoreController
 

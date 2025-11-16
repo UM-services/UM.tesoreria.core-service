@@ -51,7 +51,6 @@ public class MercadoPagoContextService {
     public MercadoPagoContext add(MercadoPagoContext mercadoPagoContext) {
         var mercadoPagoContextCreated = repository.save(mercadoPagoContext);
         var historyCreated =  mercadoPagoContextHistoryRequestService.createMercadoPagoContextHistory(mercadoPagoContextCreated);
-        log.debug("Created MercadoPagoContext History: {}", historyCreated.jsonify());
         return mercadoPagoContextCreated;
     }
 
@@ -67,14 +66,10 @@ public class MercadoPagoContextService {
         if (mercadoPagoContextId == null || newMercadoPagoContext == null) {
             throw new MercadoPagoContextException("Invalid input parameters", mercadoPagoContextId);
         }
-
         log.debug("Updating MercadoPagoContext with id: {}", mercadoPagoContextId);
-        log.debug("Incoming context data -> {}", newMercadoPagoContext.jsonify());
 
         return Objects.requireNonNull(repository.findByMercadoPagoContextId(mercadoPagoContextId))
                 .map(existing -> {
-                    log.debug("Existing before update -> {}", existing.jsonify());
-
                     // Update managed entity fields (do not replace the instance)
                     existing.setChequeraCuotaId(newMercadoPagoContext.getChequeraCuotaId());
                     existing.setInitPoint(newMercadoPagoContext.getInitPoint());
@@ -92,12 +87,8 @@ public class MercadoPagoContextService {
                     existing.setFechaAcreditacion(newMercadoPagoContext.getFechaAcreditacion());
                     existing.setImportePagado(newMercadoPagoContext.getImportePagado());
                     existing.setPayment(newMercadoPagoContext.getPayment());
-
-                    log.debug("Before save (managed entity) -> {}", existing.jsonify());
                     MercadoPagoContext updated = repository.save(existing);
-                    log.debug("After save -> {}", updated.jsonify());
                     var historyCreated =  mercadoPagoContextHistoryRequestService.createMercadoPagoContextHistory(updated);
-                    log.debug("Created MercadoPagoContext History: {}", historyCreated.jsonify());
                     return updated;
                 })
                 .orElseThrow(() -> new MercadoPagoContextException("Context not found for id", mercadoPagoContextId));

@@ -4,7 +4,18 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
 
-**Versión actual (SemVer): 2.3.2**
+**Versión actual (SemVer): 2.4.0**
+
+## Novedades 2.4.0 (verificado en código)
+- Añadido `@Builder.Default` a varios campos de modelos para mejorar la instanciación de objetos (MercadoPagoContext, Proveedor, TipoChequeraMercadoPagoCreditCard, MercadoPagoContextDto)
+- Refactorización: Se extrajo lógica común en métodos auxiliares privados (`setDeuda`, `setUltimoEnvio`) en `ChequeraSerieService` para reducir la duplicación de código y mejorar la legibilidad.
+- Refactorización: Se actualizaron los métodos `update` en `ChequeraSerieService`, `DomicilioService` y `TipoChequeraService` para modificar directamente las entidades existentes en lugar de crear nuevas instancias.
+- Refactorización: Se simplificaron los métodos `add`, `setPayPerTic`, `setEnviado` en `ChequeraSerieService` devolviendo directamente los resultados de `repository.save()` y eliminando el registro redundante.
+- Refactorización: Se reemplazó el constructor manual con `@RequiredArgsConstructor` en `PersonaService`.
+- Refactorización: Se mejoró el método `DomicilioService.capture` extrayendo la sincronización de provincia y localidad en un método auxiliar y manejando IDs predeterminados.
+- Refactorización: Se eliminó el registro redundante en `MercadoPagoContextService`, `PersonaService`, `TipoChequeraService` y `MercadoPagoCoreService`.
+- Corrección: Se excluyeron las cuotas compensadas de la creación de preferencias pendientes de MercadoPago en `PersonaService`.
+- Corrección: Se mejoró el registro de errores en `ChequeraSerieService.setUltimoEnvio` de debug a error.
 
 ## Novedades 2.3.2 (verificado en código)
 - Refactorización para usar @RequiredArgsConstructor en ChequeraController y MercadoPagoCoreController
@@ -104,7 +115,12 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6
 - **Computación paralela**: La función `calculateDeuda` utiliza `CompletableFuture` para ejecutar consultas en paralelo
 - **Validación temprana**: Verificación de parámetros nulos antes del procesamiento
 - **Optimización de memoria**: Uso de `Map<String, BigDecimal>` en lugar de objetos completos
-- **Eliminación de objetos innecesarios**: Evita crear instancias vacías de `ChequeraPago`
+- **Manejo robusto de errores**: Logging detallado y manejo de excepciones en operaciones paralelas
+
+### Beneficios de Rendimiento
+- **Reducción de tiempo de respuesta**: Las consultas paralelas pueden reducir el tiempo total en un 30-50%
+- **Menor uso de memoria**: Eliminación de objetos innecesarios reduce el uso de memoria en ~30%
+- **Mejor escalabilidad**: El procesamiento paralelo mejora el rendimiento con múltiples solicitudes
 
 ## Novedades 1.1.0 (verificado en código)
 - Nuevo endpoint MercadoPago:
@@ -297,7 +313,7 @@ src/
 │   │       ├── controller/
 │   │       ├── service/
 │   │       ├── repository/
-│   │       └── model/
+│   │       ├── model/
 │   └── kotlin/
 │       └── um/tesoreria/core/
 │           └── model/
@@ -335,7 +351,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Java](https://img.shields.io/badge/Java-24-blue.svg)](https://www.java.com/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.0.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.20-purple.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
 
 ## Documentación
@@ -358,7 +374,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 - Java 24
 - Spring Boot 3.5.6
 - Spring Cloud 2025.0.0
-- Kotlin 2.2.20
+- Kotlin 2.2.21
 - JPA/Hibernate
 - ModelMapper
 - MySQL

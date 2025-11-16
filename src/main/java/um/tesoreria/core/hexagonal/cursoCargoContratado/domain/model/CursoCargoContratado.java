@@ -13,19 +13,25 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class CursoCargoContratado {
 
-    private Long cursoCargoContratadoId = null;
-    private Long cursoId = null;
+    private Long cursoCargoContratadoId;
+    private Long cursoId;
+
+    @Builder.Default
     private Integer anho = 0;
+    @Builder.Default
     private Integer mes = 0;
-    private Long contratoId = null;
-    private BigDecimal personaId = null;
-    private Integer documentoId = null;
-    private Integer cargoTipoId = null;
+    private Long contratoId;
+    private BigDecimal personaId;
+    private Integer documentoId;
+    private Integer cargoTipoId;
+    @Builder.Default
     private BigDecimal horasSemanales = BigDecimal.ZERO;
+    @Builder.Default
     private BigDecimal horasTotales = BigDecimal.ZERO;
-    private Integer designacionTipoId = null;
-    private Integer categoriaId = null;
-    private Long cursoCargoNovedadId = null;
+    private Integer designacionTipoId;
+    private Integer categoriaId;
+    private Long cursoCargoNovedadId;
+    @Builder.Default
     private Byte acreditado = 0;
 
 }

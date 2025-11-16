@@ -54,9 +54,11 @@ public class ChequeraTotal extends Auditable implements Serializable {
 	@Column(name = "cht_pro_id")
 	private Integer productoId;
 
+    @Builder.Default
 	@Column(name = "cht_total")
 	private BigDecimal total = BigDecimal.ZERO;
 
+    @Builder.Default
 	@Column(name = "cht_pagado")
 	private BigDecimal pagado = BigDecimal.ZERO;
 

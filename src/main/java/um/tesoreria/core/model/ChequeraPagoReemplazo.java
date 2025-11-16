@@ -43,64 +43,72 @@ public class ChequeraPagoReemplazo extends Auditable implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "clave")
-	private Long chequeraPagoReemplazoId = null;
+	private Long chequeraPagoReemplazoId;
 
 	@Column(name = "cpr_fac_id")
-	private Integer facultadId = null;
+	private Integer facultadId;
 
 	@Column(name = "cpr_tch_id")
-	private Integer tipoChequeraId = null;
+	private Integer tipoChequeraId;
 
 	@Column(name = "cpr_chs_id")
-	private Long chequeraSerieId = null;
+	private Long chequeraSerieId;
 
 	@Column(name = "cpr_pro_id")
-	private Integer productoId = null;
+	private Integer productoId;
 
 	@Column(name = "cpr_alt_id")
-	private Integer alternativaId = null;
+	private Integer alternativaId;
 
 	@Column(name = "cpr_cuo_id")
-	private Integer cuotaId = null;
+	private Integer cuotaId;
 
+    @Builder.Default
 	@Column(name = "cpr_orden")
 	private Integer orden = 0;
-	
+
+    @Builder.Default
 	@Column(name = "cpr_mes")
 	private Integer mes = 0;
-	
+
+    @Builder.Default
 	@Column(name = "cpr_anio")
 	private Integer anho = 0;
 	
 	@Column(name = "cpr_fecha")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-	private OffsetDateTime fecha = null;
+	private OffsetDateTime fecha;
 	
 	@Column(name = "cpr_acred")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-	private OffsetDateTime acreditacion = null;
-	
+	private OffsetDateTime acreditacion;
+
+    @Builder.Default
 	@Column(name = "cpr_importe")
 	private BigDecimal importe = BigDecimal.ZERO;
 
+    @Builder.Default
 	@Column(name = "cpr_path")
 	private String path = "";
 
+    @Builder.Default
 	@Column(name = "cpr_archivo")
 	private String archivo = "";
 
+    @Builder.Default
 	@Column(name = "cpr_observaciones")
 	private String observaciones = "";
 
 	@Column(name = "cpr_arb_id")
-	private Long archivoBancoId = null;
+	private Long archivoBancoId;
 
 	@Column(name = "cpr_arb_id_acred")
-	private Long archivoBancoIdAcreditacion = null;
+	private Long archivoBancoIdAcreditacion;
 
+    @Builder.Default
 	private Integer verificador = 0;
 
 	@Column(name = "cpr_tpa_id")
-	private Integer tipoPagoId = null;
+	private Integer tipoPagoId;
 
 }
