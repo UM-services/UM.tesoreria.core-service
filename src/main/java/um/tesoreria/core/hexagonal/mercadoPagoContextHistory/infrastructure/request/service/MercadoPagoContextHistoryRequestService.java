@@ -16,8 +16,6 @@ public class MercadoPagoContextHistoryRequestService {
 
     public MercadoPagoContextHistory createMercadoPagoContextHistory(MercadoPagoContext mercadoPagoContext) {
         log.debug("Processing MercadoPagoContextHistoryRequestService.createMercadoPagoContextHistory");
-        var created = createMercadoPagoContextHistoryUseCase.createMercadoPagoContextHistory(mercadoPagoContext);
-        log.debug("Created MercadoPagoContext History: {}", created.jsonify());
-        return created;
+        return createMercadoPagoContextHistoryUseCase.createMercadoPagoContextHistory(mercadoPagoContext);
     }
 }

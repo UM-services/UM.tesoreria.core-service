@@ -49,13 +49,6 @@ public class ChequeraSerieController {
         return ResponseEntity.ok(service.findAllByLectivoIdAndFacultadId(lectivoId, facultadId));
     }
 
-    @GetMapping("/lectivo/test/{facultadId}/{lectivoId}")
-    public ResponseEntity<List<ChequeraSerie>>  findAllByLectivoTest(@PathVariable Integer facultadId,
-                                                                     @PathVariable Integer lectivoId) {
-        log.debug("Processing ChequeraSerieController.findAllByLectivoTest");
-        return ResponseEntity.ok(service.findAllByLectivoIdAndFacultadIdTest(lectivoId, facultadId));
-    }
-
     @GetMapping("/sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}")
     public ResponseEntity<List<ChequeraSerie>> findAllBySede(@PathVariable Integer facultadId,
                                                              @PathVariable Integer lectivoId,

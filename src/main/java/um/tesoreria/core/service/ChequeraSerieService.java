@@ -7,15 +7,16 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.ChequeraSerieException;
 import um.tesoreria.core.kotlin.model.ChequeraSerie;
 import um.tesoreria.core.kotlin.model.TipoChequera;
@@ -26,11 +27,10 @@ import um.tesoreria.core.model.internal.FacultadSedeChequeraDto;
 import um.tesoreria.core.model.view.ChequeraIncompleta;
 import um.tesoreria.core.model.view.ChequeraKey;
 import um.tesoreria.core.repository.ChequeraSerieRepository;
-import um.tesoreria.core.service.view.ChequeraSerieAltaFullService;
-import um.tesoreria.core.service.view.ChequeraSerieAltaService;
 import um.tesoreria.core.service.view.ChequeraIncompletaService;
 import um.tesoreria.core.service.view.ChequeraKeyService;
-import lombok.extern.slf4j.Slf4j;
+import um.tesoreria.core.service.view.ChequeraSerieAltaFullService;
+import um.tesoreria.core.service.view.ChequeraSerieAltaService;
 
 /**
  * @author daniel
@@ -59,17 +59,9 @@ public class ChequeraSerieService {
 
     public List<ChequeraSerie> findAllByPersonaExtended(BigDecimal personaId, Integer documentoId, ChequeraCuotaService chequeraCuotaService) {
         return repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, Sort.by("lectivoId").descending())
-            .stream()
-            .peek(chequera -> {
-                var deuda = chequeraCuotaService.calculateDeuda(
-                    chequera.getFacultadId(),
-                    chequera.getTipoChequeraId(), 
-                    chequera.getChequeraSerieId()
-                );
-                chequera.setCuotasDeuda(deuda.getCuotas());
-                chequera.setImporteDeuda(deuda.getDeuda());
-            })
-            .toList();
+                .stream()
+                .peek(chequera -> setDeuda(chequera, chequeraCuotaService))
+                .toList();
     }
 
     public List<ChequeraSerie> findAllByPersonaIdAndDocumentoIdAndLectivoIdAndFacultadId(BigDecimal personaId,
@@ -85,12 +77,6 @@ public class ChequeraSerieService {
     public List<ChequeraSerie> findAllBySede(Integer facultadId, Integer lectivoId, Integer geograficaId) {
         return repository.findAllByFacultadIdAndLectivoIdAndGeograficaId(facultadId, lectivoId, geograficaId);
     }
-
-
-    public List<ChequeraSerie> findAllByLectivoIdAndFacultadIdTest(Integer lectivoId, Integer facultadId) {
-        return repository.findAllByLectivoIdAndFacultadIdAndPersonaId(lectivoId, facultadId, new BigDecimal(49083424));
-    }
-
 
     public List<ChequeraSerie> findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer lectivoId, Integer facultadId,
                                                                               Integer geograficaId) {
@@ -127,45 +113,18 @@ public class ChequeraSerieService {
     }
 
     public List<ChequeraSerie> findAllByFacultadExtended(BigDecimal personaId, Integer documentoId,
-                                                        Integer facultadId, ChequeraCuotaService chequeraCuotaService) {
+                                                         Integer facultadId, ChequeraCuotaService chequeraCuotaService) {
         return repository.findAllByPersonaIdAndDocumentoIdAndFacultadId(personaId, documentoId, facultadId)
-            .stream()
-            .peek(chequera -> {
-                var deuda = chequeraCuotaService.calculateDeuda(
-                    chequera.getFacultadId(),
-                    chequera.getTipoChequeraId(), 
-                    chequera.getChequeraSerieId()
-                );
-                chequera.setCuotasDeuda(deuda.getCuotas());
-                chequera.setImporteDeuda(deuda.getDeuda());
-            })
-            .toList();
+                .stream()
+                .peek(chequera -> setDeuda(chequera, chequeraCuotaService))
+                .toList();
     }
 
     public List<ChequeraSerie> findAllByPersonaLectivo(BigDecimal personaId, Integer documentoId, Integer lectivoId) {
-        var chequeras = repository.findAllByPersonaIdAndDocumentoIdAndLectivoId(personaId, documentoId, lectivoId);
-        return chequeras.stream()
-            .peek(chequera -> {
-                try {
-                    var ultimoEnvio = Optional.ofNullable(
-                        chequeraImpresionCabeceraService.findLastByUnique(
-                            chequera.getFacultadId(),
-                            chequera.getTipoChequeraId(), 
-                            chequera.getChequeraSerieId()
-                        )
-                    )
-                    .map(cabecera -> Objects.requireNonNull(cabecera.getFecha()).plusHours(-3))
-                    .orElse(null);
-                    
-                    chequera.setUltimoEnvio(ultimoEnvio);
-                } catch (Exception e) {
-                    // Si no hay último envío o hay error, simplemente asignamos null
-                    chequera.setUltimoEnvio(null);
-                    log.debug("No se encontró último envío para la chequera: {}", chequera.getChequeraId());
-                }
-                log.debug("ChequeraSerie -> {}", chequera.jsonify());
-            })
-            .toList();
+        return repository.findAllByPersonaIdAndDocumentoIdAndLectivoId(personaId, documentoId, lectivoId)
+                .stream()
+                .peek(this::setUltimoEnvio)
+                .toList();
     }
 
     public List<ChequeraIncompleta> findAllIncompletas(Integer lectivoId, Integer facultadId, Integer geograficaId) {
@@ -192,18 +151,12 @@ public class ChequeraSerieService {
     }
 
     public ChequeraSerie findByChequeraId(Long chequeraId) {
-        var chequeraSerie = repository.findByChequeraId(chequeraId).orElseThrow(() -> new ChequeraSerieException(chequeraId));
-        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
-        return chequeraSerie;
+        return repository.findByChequeraId(chequeraId).orElseThrow(() -> new ChequeraSerieException(chequeraId));
     }
 
     public ChequeraSerie findByChequeraIdExtended(Long chequeraId, ChequeraCuotaService chequeraCuotaService) {
-        ChequeraSerie chequera = repository.findByChequeraId(chequeraId)
-                .orElseThrow(() -> new ChequeraSerieException(chequeraId));
-        var deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
-                chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
-        chequera.setCuotasDeuda(deuda.getCuotas());
-        chequera.setImporteDeuda(deuda.getDeuda());
+        ChequeraSerie chequera = findByChequeraId(chequeraId);
+        setDeuda(chequera, chequeraCuotaService);
         return chequera;
     }
 
@@ -211,31 +164,13 @@ public class ChequeraSerieService {
         var chequera = repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
-        
-        try {
-            var ultimoEnvio = Optional.ofNullable(
-                chequeraImpresionCabeceraService.findLastByUnique(facultadId, tipoChequeraId, chequeraSerieId)
-            )
-            .map(cabecera -> Objects.requireNonNull(cabecera.getFecha()).plusHours(-3))
-            .orElse(null);
-            
-            chequera.setUltimoEnvio(ultimoEnvio);
-        } catch (Exception e) {
-            chequera.setUltimoEnvio(null);
-            log.debug("No se encontró último envío para la chequera: {}", chequera.getChequeraId());
-        }
-        log.debug("ChequeraSerie -> {}", chequera.jsonify());
+        setUltimoEnvio(chequera);
         return chequera;
     }
 
     public ChequeraSerie findByUniqueExtended(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, ChequeraCuotaService chequeraCuotaService) {
-        ChequeraSerie chequera = repository
-                .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
-                .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
-        var deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
-                chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
-        chequera.setCuotasDeuda(deuda.getCuotas());
-        chequera.setImporteDeuda(deuda.getDeuda());
+        ChequeraSerie chequera = findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        setDeuda(chequera, chequeraCuotaService);
         return chequera;
     }
 
@@ -297,14 +232,13 @@ public class ChequeraSerieService {
         ).orElseThrow(() -> new ChequeraSerieException(personaId, documentoId, facultadId));
     }
 
+    @Transactional
     public ChequeraSerie setPayPerTic(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Byte flag) {
         var chequeraSerie = repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
         chequeraSerie.setFlagPayperTic(flag);
-        chequeraSerie = repository.save(chequeraSerie);
-        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
-        return chequeraSerie;
+        return repository.save(chequeraSerie);
     }
 
     @Transactional
@@ -313,66 +247,44 @@ public class ChequeraSerieService {
         var chequeraSerie = repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
-        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
         chequeraSerie.setEnviado((byte) 1);
-        chequeraSerie = repository.save(chequeraSerie);
-        log.debug("after save");
-        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
-        return chequeraSerie;
+        return repository.save(chequeraSerie);
     }
 
     public ChequeraSerie add(ChequeraSerie chequeraSerie) {
         log.debug("Processing ChequeraSerieService.add");
-        chequeraSerie = repository.save(chequeraSerie);
-        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
-        return chequeraSerie;
+        return repository.save(chequeraSerie);
     }
 
+    @Transactional
     public ChequeraSerie update(ChequeraSerie newChequeraSerie, Long chequeraId) {
-        log.debug("Processing ChequeraSerieService.update");
-        Integer facultadId = newChequeraSerie.getFacultadId();
-        Integer tipoChequeraId = newChequeraSerie.getTipoChequeraId();
-        Long chequeraSerieId = newChequeraSerie.getChequeraSerieId();
-        return repository
-                .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
-                .map(chequeraSerie -> {
-                    chequeraSerie = new ChequeraSerie(chequeraId,
-                            facultadId,
-                            tipoChequeraId,
-                            chequeraSerieId,
-                            newChequeraSerie.getPersonaId(),
-                            newChequeraSerie.getDocumentoId(),
-                            newChequeraSerie.getLectivoId(),
-                            newChequeraSerie.getArancelTipoId(),
-                            newChequeraSerie.getCursoId(),
-                            newChequeraSerie.getAsentado(),
-                            newChequeraSerie.getGeograficaId(),
-                            newChequeraSerie.getFecha(),
-                            newChequeraSerie.getCuotasPagadas(),
-                            newChequeraSerie.getObservaciones(),
-                            newChequeraSerie.getAlternativaId(),
-                            newChequeraSerie.getAlgoPagado(),
-                            newChequeraSerie.getTipoImpresionId(),
-                            newChequeraSerie.getFlagPayperTic(),
-                            newChequeraSerie.getUsuarioId(),
-                            newChequeraSerie.getEnviado(),
-                            newChequeraSerie.getRetenida(),
-                            newChequeraSerie.getVersion(),
-                            0,
-                            BigDecimal.ZERO,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null
-                    );
-                    chequeraSerie = repository.save(chequeraSerie);
-                    log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
-                    return chequeraSerie;
-                }).orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));
+        log.debug("Processing ChequeraSerieService.update for id {}", chequeraId);
+        ChequeraSerie chequeraSerie = repository.findByChequeraId(chequeraId)
+                .orElseThrow(() -> new ChequeraSerieException(chequeraId));
+
+        chequeraSerie.setFacultadId(newChequeraSerie.getFacultadId());
+        chequeraSerie.setTipoChequeraId(newChequeraSerie.getTipoChequeraId());
+        chequeraSerie.setChequeraSerieId(newChequeraSerie.getChequeraSerieId());
+        chequeraSerie.setPersonaId(newChequeraSerie.getPersonaId());
+        chequeraSerie.setDocumentoId(newChequeraSerie.getDocumentoId());
+        chequeraSerie.setLectivoId(newChequeraSerie.getLectivoId());
+        chequeraSerie.setArancelTipoId(newChequeraSerie.getArancelTipoId());
+        chequeraSerie.setCursoId(newChequeraSerie.getCursoId());
+        chequeraSerie.setAsentado(newChequeraSerie.getAsentado());
+        chequeraSerie.setGeograficaId(newChequeraSerie.getGeograficaId());
+        chequeraSerie.setFecha(newChequeraSerie.getFecha());
+        chequeraSerie.setCuotasPagadas(newChequeraSerie.getCuotasPagadas());
+        chequeraSerie.setObservaciones(newChequeraSerie.getObservaciones());
+        chequeraSerie.setAlternativaId(newChequeraSerie.getAlternativaId());
+        chequeraSerie.setAlgoPagado(newChequeraSerie.getAlgoPagado());
+        chequeraSerie.setTipoImpresionId(newChequeraSerie.getTipoImpresionId());
+        chequeraSerie.setFlagPayperTic(newChequeraSerie.getFlagPayperTic());
+        chequeraSerie.setUsuarioId(newChequeraSerie.getUsuarioId());
+        chequeraSerie.setEnviado(newChequeraSerie.getEnviado());
+        chequeraSerie.setRetenida(newChequeraSerie.getRetenida());
+        chequeraSerie.setVersion(newChequeraSerie.getVersion());
+
+        return repository.save(chequeraSerie);
     }
 
     @Transactional
@@ -384,6 +296,35 @@ public class ChequeraSerieService {
 
     public List<FacultadSedeChequeraDto> resumenLectivo(Integer lectivoId) {
         return repository.findAllFacultadSedeByLectivo(lectivoId);
+    }
+
+    private void setDeuda(ChequeraSerie chequera, ChequeraCuotaService chequeraCuotaService) {
+        var deuda = chequeraCuotaService.calculateDeuda(
+                chequera.getFacultadId(),
+                chequera.getTipoChequeraId(),
+                chequera.getChequeraSerieId()
+        );
+        chequera.setCuotasDeuda(deuda.getCuotas());
+        chequera.setImporteDeuda(deuda.getDeuda());
+    }
+
+    private void setUltimoEnvio(ChequeraSerie chequera) {
+        try {
+            var ultimoEnvio = Optional.ofNullable(
+                    chequeraImpresionCabeceraService.findLastByUnique(
+                            chequera.getFacultadId(),
+                            chequera.getTipoChequeraId(),
+                            chequera.getChequeraSerieId()
+                    )
+            )
+            .map(cabecera -> Objects.requireNonNull(cabecera.getFecha()).plusHours(-3))
+            .orElse(null);
+
+            chequera.setUltimoEnvio(ultimoEnvio);
+        } catch (Exception e) {
+            chequera.setUltimoEnvio(null);
+            log.error("No se encontró último envío para la chequera: {}", chequera.getChequeraId(), e);
+        }
     }
 
 }

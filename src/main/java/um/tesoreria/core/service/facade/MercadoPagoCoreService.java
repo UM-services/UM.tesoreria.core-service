@@ -44,7 +44,6 @@ public class MercadoPagoCoreService {
         if (vencimiento.fechaVencimiento().isBefore(today)) return null;
 
         var mercadoPagoContext = findExistingContext(chequeraCuotaId);
-        log.debug("MercadoPagoContext -> {}", mercadoPagoContext);
         mercadoPagoContext = createOrUpdateContext(mercadoPagoContext, chequeraCuotaId, vencimiento);
         return buildResponse(mercadoPagoContext, chequeraCuota);
     }
@@ -59,9 +58,7 @@ public class MercadoPagoCoreService {
     private MercadoPagoContext findExistingContext(Long chequeraCuotaId) {
         log.debug("Processing MercadoPagoCoreService.findExistingContext");
         try {
-            var context = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuotaId);
-            log.debug("MercadoPagoContext -> {}", context.jsonify());
-            return context;
+            return mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuotaId);
         } catch (MercadoPagoContextException e) {
             log.debug("MercadoPagoContext Error -> {}", e.getMessage());
             return null;
@@ -79,7 +76,6 @@ public class MercadoPagoCoreService {
                     .activo((byte) 1)
                     .changed((byte) 0)
                     .build());
-            log.debug("MercadoPagoContext added -> {}", mercadoPagoContext.jsonify());
             return mercadoPagoContext;
         }
         mercadoPagoContext.setFechaVencimiento(vencimiento.fechaVencimiento());
@@ -87,7 +83,6 @@ public class MercadoPagoCoreService {
         mercadoPagoContext.setChanged((byte) 1);
         mercadoPagoContext.setLastVencimientoUpdated(OffsetDateTime.now(ZoneOffset.UTC));
         mercadoPagoContext = mercadoPagoContextService.update(mercadoPagoContext, mercadoPagoContext.getMercadoPagoContextId());
-        log.debug("MercadoPagoContext updated -> {}", mercadoPagoContext.jsonify());
         return mercadoPagoContext;
     }
 
@@ -102,9 +97,7 @@ public class MercadoPagoCoreService {
     private ChequeraCuota getChequeraCuota(Long id) {
         log.debug("Processing MercadoPagoCoreService.getChequeraCuota");
         try {
-            var cuota = chequeraCuotaService.findByChequeraCuotaId(id);
-            log.debug("ChequeraCuota -> {}", cuota.jsonify());
-            return cuota;
+            return chequeraCuotaService.findByChequeraCuotaId(id);
         } catch (ChequeraCuotaException e) {
             log.debug("ChequeraCuota Error -> {}", e.getMessage());
             return null;

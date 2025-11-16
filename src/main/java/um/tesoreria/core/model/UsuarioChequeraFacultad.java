@@ -37,17 +37,17 @@ public class UsuarioChequeraFacultad extends Auditable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long usuarioChequeraFacultadId = null;
+	private Long usuarioChequeraFacultadId;
 
-	private Long userId = null;
-	private Integer facultadId = null;
+	private Long userId;
+	private Integer facultadId;
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "userId", insertable = false, updatable = false)
-	private Usuario usuario = null;
+	private Usuario usuario;
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "facultadId", insertable = false, updatable = false)
-	private Facultad facultad = null;
+	private Facultad facultad;
 
 } 

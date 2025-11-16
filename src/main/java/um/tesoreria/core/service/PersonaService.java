@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PersonaService {
 
     private final PersonaRepository repository;
@@ -52,20 +54,6 @@ public class PersonaService {
     private final ChequeraCuotaService chequeraCuotaService;
     private final MercadoPagoContextService mercadoPagoContextService;
     private final PreferenceClient preferenceClient;
-
-    public PersonaService(PersonaRepository repository, PersonaKeyService personaKeyService, InscripcionFacultadConsumer inscripcionFacultadConsumer, PreInscripcionFacultadConsumer preInscripcionFacultadConsumer, FacultadService facultadService, ChequeraSerieService chequeraSerieService, CarreraChequeraService carreraChequeraService, LegajoFacultadConsumer legajoFacultadConsumer, ChequeraCuotaService chequeraCuotaService, MercadoPagoContextService mercadoPagoContextService, PreferenceClient preferenceClient) {
-        this.repository = repository;
-        this.personaKeyService = personaKeyService;
-        this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;
-        this.preInscripcionFacultadConsumer = preInscripcionFacultadConsumer;
-        this.facultadService = facultadService;
-        this.chequeraSerieService = chequeraSerieService;
-        this.carreraChequeraService = carreraChequeraService;
-        this.legajoFacultadConsumer = legajoFacultadConsumer;
-        this.chequeraCuotaService = chequeraCuotaService;
-        this.mercadoPagoContextService = mercadoPagoContextService;
-        this.preferenceClient = preferenceClient;
-    }
 
     public Persona findByUnique(BigDecimal personaId, Integer documentoId) {
         return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
@@ -94,7 +82,7 @@ public class PersonaService {
                 deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
             }
         }
-        DeudaPersonaDto deudaPersonaDto = DeudaPersonaDto.builder()
+        return DeudaPersonaDto.builder()
                 .personaId(personaId)
                 .documentoId(documentoId)
                 .cuotas(deudaCuotas)
@@ -102,8 +90,6 @@ public class PersonaService {
                 .deudas(deudas)
                 .vencimientos(new ArrayList<>())
                 .build();
-        log.debug("DeudaPersonaDto -> {}", deudaPersonaDto.jsonify());
-        return deudaPersonaDto;
     }
 
     public DeudaPersonaDto deudaByPersonaExtended(BigDecimal personaId, Integer documentoId) {
@@ -114,10 +100,8 @@ public class PersonaService {
         List<VencimientoDto> vencimientoDtos = new ArrayList<>();
         for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
                 null)) {
-            log.debug("ChequeraSerie -> {}", chequera.jsonify());
             DeudaChequeraDto deuda = chequeraCuotaService.calculateDeudaExtended(chequera.getFacultadId(),
                     chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
-            log.debug("DeudaChequera -> {}", deuda.jsonify());
             if (deuda.getCuotas() > 0) {
                 deudas.add(deuda);
                 deudaCuotas += deuda.getCuotas();
@@ -126,15 +110,13 @@ public class PersonaService {
             for (ChequeraCuota chequeraCuota : chequeraCuotaService
                     .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(chequera.getFacultadId(),
                             chequera.getTipoChequeraId(), chequera.getChequeraSerieId(), chequera.getAlternativaId())) {
-                log.debug("ChequeraCuota -> {}", chequeraCuota.jsonify());
-                if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0
+                if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0 && chequeraCuota.getCompensada() == 0
                         && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
                     log.debug("Creando preferencia");
                     preferenceClient.createPreference(chequeraCuota.getChequeraCuotaId());
                     MercadoPagoContext mercadoPagoContext = null;
                     try {
                         mercadoPagoContext = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
-                        log.debug("MercadoPagoContext -> {}", mercadoPagoContext);
                     } catch (MercadoPagoContextException e) {
                         log.error("Error al obtener el contexto de MercadoPago para el cuota {}", chequeraCuota.getChequeraCuotaId());
                     }
@@ -156,7 +138,7 @@ public class PersonaService {
             }
         }
 
-        DeudaPersonaDto deudaPersonaDto = DeudaPersonaDto.builder()
+        return DeudaPersonaDto.builder()
                 .personaId(personaId)
                 .documentoId(documentoId)
                 .cuotas(deudaCuotas)
@@ -164,8 +146,6 @@ public class PersonaService {
                 .deudas(deudas)
                 .vencimientos(vencimientoDtos)
                 .build();
-        log.debug("DeudaPersona -> {}", deudaPersonaDto.jsonify());
-        return deudaPersonaDto;
     }
 
     public List<PersonaKey> findAllInscriptosSinChequera(Integer facultadId, Integer lectivoId, Integer geograficaId,
@@ -189,7 +169,6 @@ public class PersonaService {
                     chequeraSerie = chequeraSerieService.findGradoByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
                             inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
                 }
-                log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
                 add = false;
             } catch (ChequeraSerieException e) {
                 log.debug("Sin chequera");
