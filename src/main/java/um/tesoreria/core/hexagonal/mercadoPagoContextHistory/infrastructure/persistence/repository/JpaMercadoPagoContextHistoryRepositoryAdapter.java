@@ -1,5 +1,6 @@
 package um.tesoreria.core.hexagonal.mercadoPagoContextHistory.infrastructure.persistence.repository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.mercadoPagoContextHistory.domain.model.MercadoPagoContextHistory;
@@ -15,6 +16,7 @@ public class JpaMercadoPagoContextHistoryRepositoryAdapter implements MercadoPag
     private final MercadoPagoContextHistoryMapper mercadoPagoContextHistoryMapper;
 
     @Override
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public MercadoPagoContextHistory create(MercadoPagoContext mercadoPagoContext) {
         var mercadoPagoContextHistory = mercadoPagoContextHistoryMapper.fromContext(mercadoPagoContext);
         var mercadoPagoContextHistoryEntity = mercadoPagoContextHistoryMapper.toEntityModel(mercadoPagoContextHistory);
