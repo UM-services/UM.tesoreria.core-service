@@ -3,6 +3,8 @@ package um.tesoreria.core.repository
 import jakarta.persistence.LockModeType
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import um.tesoreria.core.model.MercadoPagoContext
 import java.time.OffsetDateTime
 import java.util.Arrays
@@ -17,6 +19,10 @@ interface MercadoPagoContextRepository : JpaRepository<MercadoPagoContext, Long>
     fun findByChequeraCuotaIdAndActivo(chequeraCuotaId: Long, activo: Byte): Optional<MercadoPagoContext?>?
 
     fun findByMercadoPagoContextId(mercadoPagoContextId: Long): Optional<MercadoPagoContext?>?
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT m FROM MercadoPagoContext m WHERE m.mercadoPagoContextId = :mercadoPagoContextId")
+    fun findByMercadoPagoContextIdWithLock(@Param("mercadoPagoContextId") mercadoPagoContextId: Long): Optional<MercadoPagoContext?>?
 
     fun findAllByActivoOrderByMercadoPagoContextIdDesc(activo: Byte): List<MercadoPagoContext?>?
 

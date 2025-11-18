@@ -68,7 +68,7 @@ public class MercadoPagoContextService {
         }
         log.debug("Updating MercadoPagoContext with id: {}", mercadoPagoContextId);
 
-        return Objects.requireNonNull(repository.findByMercadoPagoContextId(mercadoPagoContextId))
+        return Objects.requireNonNull(repository.findByMercadoPagoContextIdWithLock(mercadoPagoContextId))
                 .map(existing -> {
                     // Update managed entity fields (do not replace the instance)
                     existing.setChequeraCuotaId(newMercadoPagoContext.getChequeraCuotaId());
