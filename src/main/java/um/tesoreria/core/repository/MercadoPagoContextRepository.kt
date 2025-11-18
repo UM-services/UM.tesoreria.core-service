@@ -16,7 +16,6 @@ interface MercadoPagoContextRepository : JpaRepository<MercadoPagoContext, Long>
 
     fun findByChequeraCuotaIdAndActivo(chequeraCuotaId: Long, activo: Byte): Optional<MercadoPagoContext?>?
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     fun findByMercadoPagoContextId(mercadoPagoContextId: Long): Optional<MercadoPagoContext?>?
 
     fun findAllByActivoOrderByMercadoPagoContextIdDesc(activo: Byte): List<MercadoPagoContext?>?
