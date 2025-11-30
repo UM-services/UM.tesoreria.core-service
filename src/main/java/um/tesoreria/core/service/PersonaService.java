@@ -54,6 +54,7 @@ public class PersonaService {
     private final ChequeraCuotaService chequeraCuotaService;
     private final MercadoPagoContextService mercadoPagoContextService;
     private final PreferenceClient preferenceClient;
+    private final um.tesoreria.core.service.facade.MercadoPagoCoreService mercadoPagoCoreService;
 
     public Persona findByUnique(BigDecimal personaId, Integer documentoId) {
         return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
@@ -113,12 +114,17 @@ public class PersonaService {
                 if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0 && chequeraCuota.getCompensada() == 0
                         && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
                     log.debug("Creando preferencia");
-                    preferenceClient.createPreference(chequeraCuota.getChequeraCuotaId());
+                    var umPreferenceMPDto = mercadoPagoCoreService.makeContext(chequeraCuota.getChequeraCuotaId());
+                    if (umPreferenceMPDto != null) {
+                        preferenceClient.createPreference(umPreferenceMPDto);
+                    }
                     MercadoPagoContext mercadoPagoContext = null;
                     try {
-                        mercadoPagoContext = mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
+                        mercadoPagoContext = mercadoPagoContextService
+                                .findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
                     } catch (MercadoPagoContextException e) {
-                        log.error("Error al obtener el contexto de MercadoPago para el cuota {}", chequeraCuota.getChequeraCuotaId());
+                        log.error("Error al obtener el contexto de MercadoPago para el cuota {}",
+                                chequeraCuota.getChequeraCuotaId());
                     }
                     if (mercadoPagoContext != null) {
                         // Formatear la fecha de vencimiento
@@ -149,7 +155,7 @@ public class PersonaService {
     }
 
     public List<PersonaKey> findAllInscriptosSinChequera(Integer facultadId, Integer lectivoId, Integer geograficaId,
-                                                         Integer curso) {
+            Integer curso) {
         Facultad facultad = facultadService.findByFacultadId(facultadId);
         Map<String, InscripcionFacultad> inscriptos = inscripcionFacultadConsumer
                 .findAllByCursoSinProvisoria(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
@@ -163,11 +169,15 @@ public class PersonaService {
             try {
                 ChequeraSerie chequeraSerie;
                 if (facultadId == 15) {
-                    chequeraSerie = chequeraSerieService.findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
-                            inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
+                    chequeraSerie = chequeraSerieService
+                            .findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
+                                    inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId,
+                                    geograficaId);
                 } else {
-                    chequeraSerie = chequeraSerieService.findGradoByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
-                            inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId, geograficaId);
+                    chequeraSerie = chequeraSerieService
+                            .findGradoByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
+                                    inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId, lectivoId,
+                                    geograficaId);
                 }
                 add = false;
             } catch (ChequeraSerieException e) {
@@ -195,7 +205,7 @@ public class PersonaService {
     }
 
     public List<PersonaKey> findAllInscriptosSinChequeraDefault(Integer facultadId, Integer lectivoId,
-                                                                Integer geograficaId, Integer claseChequeraId, Integer curso) {
+            Integer geograficaId, Integer claseChequeraId, Integer curso) {
         Facultad facultad = facultadService.findByFacultadId(facultadId);
         Map<String, InscripcionFacultad> inscriptos = inscripcionFacultadConsumer
                 .findAllByCursoSinProvisoria(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
@@ -246,7 +256,7 @@ public class PersonaService {
     }
 
     public List<PersonaKey> findAllPreInscriptosSinChequera(Integer facultadId, Integer lectivoId,
-                                                            Integer geograficaId) {
+            Integer geograficaId) {
         Facultad facultad = facultadService.findByFacultadId(facultadId);
         Map<String, PreInscripcionFacultad> preinscriptos = preInscripcionFacultadConsumer
                 .findAllByPreInscriptos(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
@@ -277,7 +287,7 @@ public class PersonaService {
     }
 
     public List<PersonaKey> findAllDeudorByLectivoId(Integer facultadId, Integer lectivoId, Integer geograficaId,
-                                                     Integer cuotas) {
+            Integer cuotas) {
         List<String> unifieds = new ArrayList<String>();
         for (ChequeraSerie serie : chequeraSerieService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId,
                 facultadId, geograficaId)) {
@@ -317,9 +327,11 @@ public class PersonaService {
         }).orElseThrow(() -> new PersonaException(uniqueId));
     }
 
-    public InscripcionFullDto findInscripcionFull(Integer facultadId, BigDecimal personaId, Integer documentoId, Integer lectivoId) {
+    public InscripcionFullDto findInscripcionFull(Integer facultadId, BigDecimal personaId, Integer documentoId,
+            Integer lectivoId) {
         var facultad = facultadService.findByFacultadId(facultadId);
-        return inscripcionFacultadConsumer.findInscripcionFull(facultad.getApiserver(), facultad.getApiport(), facultadId, personaId, documentoId, lectivoId);
+        return inscripcionFacultadConsumer.findInscripcionFull(facultad.getApiserver(), facultad.getApiport(),
+                facultadId, personaId, documentoId, lectivoId);
     }
 
 }

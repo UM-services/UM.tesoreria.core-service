@@ -4,6 +4,7 @@
 package um.tesoreria.core.service;
 
 import um.tesoreria.core.kotlin.model.Usuario;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.stereotype.Service;
@@ -49,14 +50,13 @@ public class UsuarioService {
                     DigestUtils.sha256Hex(newUsuario.getPassword()),
                     newUsuario.getNombre(),
                     newUsuario.getGeograficaId(),
-                    newUsuario.getImprimeChequera(),
-                    newUsuario.getNumeroOpManual(),
-                    newUsuario.getHabilitaOpEliminacion(),
-                    newUsuario.getEliminaChequera(),
+                    Objects.requireNonNullElse(newUsuario.getImprimeChequera(), (byte) 0),
+                    Objects.requireNonNullElse(newUsuario.getNumeroOpManual(), (byte) 0),
+                    Objects.requireNonNullElse(newUsuario.getHabilitaOpEliminacion(), (byte) 0),
+                    Objects.requireNonNullElse(newUsuario.getEliminaChequera(), (byte) 0),
                     Tool.hourAbsoluteArgentina(),
                     newUsuario.getGoogleMail(),
-                    newUsuario.getActivo()
-            );
+                    Objects.requireNonNullElse(newUsuario.getActivo(), (byte) 1));
             usuario = repository.save(usuario);
             return usuario;
         }).orElseThrow(() -> new UsuarioException(userId));
@@ -75,15 +75,15 @@ public class UsuarioService {
                     usuario.getEliminaChequera(),
                     Tool.hourAbsoluteArgentina(),
                     usuario.getGoogleMail(),
-                    usuario.getActivo()
-            );
+                    usuario.getActivo());
             usuario = repository.save(usuario);
             return usuario;
         }).orElseThrow(() -> new UsuarioException(userId));
     }
 
     public Usuario findByGoogleMail(String googleMail) {
-        return repository.findByGoogleMailAndActivo(googleMail, (byte) 1).orElseThrow(() -> new UsuarioException(googleMail));
+        return repository.findByGoogleMailAndActivo(googleMail, (byte) 1)
+                .orElseThrow(() -> new UsuarioException(googleMail));
     }
 
 }

@@ -5,7 +5,7 @@ package um.tesoreria.core.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.exception.ProvinciaException;
 import um.tesoreria.core.model.Provincia;
 import um.tesoreria.core.service.ProvinciaService;
 
@@ -22,35 +24,56 @@ import um.tesoreria.core.service.ProvinciaService;
  *
  */
 @RestController
-@RequestMapping("/provincia")
+@RequestMapping({"/provincia", "/api/tesoreria/core/provincia"})
+@RequiredArgsConstructor
 public class ProvinciaController {
-	@Autowired
-	private ProvinciaService service;
+
+	private final ProvinciaService service;
 
 	@GetMapping("/facultad/{facultadId}")
 	public ResponseEntity<List<Provincia>> findAllByFacultadId(@PathVariable Integer facultadId) {
-		return new ResponseEntity<List<Provincia>>(service.findAllByFacultadId(facultadId), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByFacultadId(facultadId));
 	}
 
 	@GetMapping("/{uniqueId}")
 	public ResponseEntity<Provincia> findByUnicoId(@PathVariable Long uniqueId) {
-		return new ResponseEntity<Provincia>(service.findByUniqueId(uniqueId), HttpStatus.OK);
+        try {
+            return ResponseEntity.ok(service.findByUniqueId(uniqueId));
+        }
+        catch (ProvinciaException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
 	}
 
 	@GetMapping("/unique/{facultadId}/{provinciaId}")
 	public ResponseEntity<Provincia> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer provinciaId) {
-		return new ResponseEntity<Provincia>(service.findByUnique(facultadId, provinciaId), HttpStatus.OK);
+        try {
+            return ResponseEntity.ok(service.findByUnique(facultadId, provinciaId));
+        }
+        catch (ProvinciaException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
 	}
 
 	@GetMapping("/nombre/{facultadId}")
 	public ResponseEntity<Provincia> findByNombre(@PathVariable Integer facultadId,
 			@RequestParam("nombre") String nombre) {
-		return new ResponseEntity<Provincia>(service.findByNombre(facultadId, nombre), HttpStatus.OK);
+        try {
+            return ResponseEntity.ok(service.findByNombre(facultadId, nombre));
+        }
+        catch (ProvinciaException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
 	}
 
 	@GetMapping("/last/{facultadId}")
 	public ResponseEntity<Provincia> findLastByFacultadId(@PathVariable Integer facultadId) {
-		return new ResponseEntity<Provincia>(service.findLastByFacultadId(facultadId), HttpStatus.OK);
+        try {
+            return ResponseEntity.ok(service.findLastByFacultadId(facultadId));
+        }
+        catch (ProvinciaException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
 	}
 
 }

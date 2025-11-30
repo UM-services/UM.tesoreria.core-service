@@ -35,13 +35,13 @@ data class Persona(
     var sexo: String? = null,
 
     @Column(name = "per_primero")
-    var primero: Byte = 0,
+    var primero: Byte? = 0,
 
     @Column(name = "per_cuit")
-    var cuit: String = "",
+    var cuit: String? = "",
 
     @Column(name = "per_cbu")
-    var cbu: String = "",
+    var cbu: String? = "",
 
     @Column(name = "per_contrasenha")
     var password: String? = null

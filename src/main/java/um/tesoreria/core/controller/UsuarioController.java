@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.kotlin.model.Usuario;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +25,10 @@ import um.tesoreria.core.service.UsuarioService;
  */
 @RestController
 @RequestMapping({"/usuario", "/api/tesoreria/core/usuario"})
+@RequiredArgsConstructor
 public class UsuarioController {
 
 	private final UsuarioService service;
-
-	public UsuarioController(UsuarioService service) {
-		this.service = service;
-	}
 
 	@GetMapping("/usuario/{login}")
 	public ResponseEntity<Usuario> findByLogin(@PathVariable String login) {
@@ -43,18 +41,18 @@ public class UsuarioController {
 
 	@PostMapping("/usuario")
 	public ResponseEntity<Usuario> add(@RequestBody Usuario usuario) {
-		return new ResponseEntity<>(service.add(usuario), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(usuario));
 	}
 
 	@PutMapping("/usuario/{userId}")
 	public ResponseEntity<Usuario> update(@RequestBody Usuario usuario, @PathVariable Long userId) {
-		return new ResponseEntity<>(service.update(usuario, userId), HttpStatus.OK);
+        return ResponseEntity.ok(service.update(usuario, userId));
 	}
 
 	@PutMapping("/password")
 	public ResponseEntity<Usuario> findByPassword(@RequestBody Usuario usuario) {
 		try {
-			return new ResponseEntity<>(service.findByPassword(usuario.getPassword()), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByPassword(usuario.getPassword()));
 		} catch (UsuarioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -63,7 +61,7 @@ public class UsuarioController {
 	@GetMapping("/lastLog/{userId}")
 	public ResponseEntity<Usuario> updateLastLog(@PathVariable Long userId) {
 		try {
-			return new ResponseEntity<>(service.updateLastLog(userId), HttpStatus.OK);
+            return ResponseEntity.ok(service.updateLastLog(userId));
 		} catch (UsuarioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
