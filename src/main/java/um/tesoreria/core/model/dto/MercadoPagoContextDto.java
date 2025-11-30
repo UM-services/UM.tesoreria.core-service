@@ -25,6 +25,7 @@ public class MercadoPagoContextDto {
     @Builder.Default
     private BigDecimal importe = BigDecimal.ZERO;
     private String preferenceId;
+    private String preference;
 
     @Builder.Default
     private Byte activo = 0;

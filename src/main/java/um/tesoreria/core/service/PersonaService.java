@@ -5,6 +5,8 @@ package um.tesoreria.core.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
@@ -116,7 +118,20 @@ public class PersonaService {
                     log.debug("Creando preferencia");
                     var umPreferenceMPDto = mercadoPagoCoreService.makeContext(chequeraCuota.getChequeraCuotaId());
                     if (umPreferenceMPDto != null) {
-                        preferenceClient.createPreference(umPreferenceMPDto);
+                        var mercadoPagoContextDto = preferenceClient.createPreference(umPreferenceMPDto);
+                        // Update context with returned data
+                        try {
+                            var context = mercadoPagoContextService
+                                    .findByMercadoPagoContextId(mercadoPagoContextDto.getMercadoPagoContextId());
+                            context.setPreferenceId(mercadoPagoContextDto.getPreferenceId());
+                            context.setInitPoint(mercadoPagoContextDto.getInitPoint());
+                            context.setPreference(mercadoPagoContextDto.getPreference());
+                            context.setLastVencimientoUpdated(OffsetDateTime.now(java.time.ZoneOffset.UTC));
+                            context.setChanged((byte) 0);
+                            mercadoPagoContextService.update(context, context.getMercadoPagoContextId());
+                        } catch (Exception e) {
+                            log.error("Error updating context after preference creation", e);
+                        }
                     }
                     MercadoPagoContext mercadoPagoContext = null;
                     try {
