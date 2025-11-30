@@ -5,7 +5,7 @@ package um.tesoreria.core.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ProvinciaException;
@@ -17,10 +17,10 @@ import um.tesoreria.core.repository.ProvinciaRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class ProvinciaService {
 
-	@Autowired
-	private ProvinciaRepository repository;
+	private final ProvinciaRepository repository;
 
 	public List<Provincia> findAllByFacultadId(Integer facultadId) {
 		return repository.findAllByFacultadId(facultadId);

@@ -74,7 +74,7 @@ data class Domicilio(
     var laboral: String = "",
 
     @Transient
-    var emailPagador: String = ""
+    var emailPagador: String? = ""
 
 ) : Auditable() {
 

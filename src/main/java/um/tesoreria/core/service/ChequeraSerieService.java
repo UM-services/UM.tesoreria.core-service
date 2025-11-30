@@ -54,6 +54,7 @@ public class ChequeraSerieService {
     }
 
     public List<ChequeraSerie> findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId(BigDecimal personaId, Integer documentoId, Integer facultadId, Integer lectivoId) {
+        log.debug("\n\nProcessing ChequeraSerieService.findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId\n\n");
         return repository.findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId(personaId, documentoId, facultadId, lectivoId);
     }
 
@@ -161,6 +162,7 @@ public class ChequeraSerieService {
     }
 
     public ChequeraSerie findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+        log.debug("\n\nProcessing ChequeraSerieService.findByUnique\n\n");
         var chequera = repository
                 .findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .orElseThrow(() -> new ChequeraSerieException(facultadId, tipoChequeraId, chequeraSerieId));

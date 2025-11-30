@@ -1,5 +1,6 @@
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,13 +16,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tesoreria/core/mercadoPagoContext")
+@RequiredArgsConstructor
 public class MercadoPagoContextController {
 
     private final MercadoPagoContextService service;
-
-    public MercadoPagoContextController(MercadoPagoContextService service) {
-        this.service = service;
-    }
 
     @GetMapping("/cuota/activo/{chequeraCuotaId}")
     public ResponseEntity<MercadoPagoContext> findActivoByChequeraCuotaId(@PathVariable Long chequeraCuotaId) {

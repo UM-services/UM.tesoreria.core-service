@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,14 +33,14 @@ public class MercadoPagoCoreService {
 
     @Transactional
     public UMPreferenceMPDto makeContext(Long chequeraCuotaId) {
-        log.debug("Processing MercadoPagoCoreService.makeContext");
+        log.debug("\n\nProcessing MercadoPagoCoreService.makeContext\n\n");
 
         var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
         var chequeraCuota = getChequeraCuota(chequeraCuotaId);
         if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
 
         var vencimiento = determineVencimientoMP(chequeraCuota, today);
-        log.debug("Vencimiento -> {}", Jsonifier.builder(vencimiento).build());
+        log.debug("\n\nVencimiento -> Fecha: {}, Importe: {}\n\n", vencimiento.fechaVencimiento().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE), vencimiento.importe());
         if (vencimiento.importe().compareTo(BigDecimal.ZERO) == 0) return null;
         if (vencimiento.fechaVencimiento().isBefore(today)) return null;
 
@@ -49,14 +50,14 @@ public class MercadoPagoCoreService {
     }
 
     private boolean isCuotaAvailable(ChequeraCuota chequeraCuota) {
-        log.debug("Processing MercadoPagoCoreService.isCuotaAvailable");
+        log.debug("\n\nProcessing MercadoPagoCoreService.isCuotaAvailable\n\n");
         var result = chequeraCuota.getPagado() != 1 && chequeraCuota.getBaja() != 1 && chequeraCuota.getCompensada() != 1;
         log.debug("ChequeraCuota available result -> {}", result);
         return result;
     }
 
     private MercadoPagoContext findExistingContext(Long chequeraCuotaId) {
-        log.debug("Processing MercadoPagoCoreService.findExistingContext");
+        log.debug("\n\nProcessing MercadoPagoCoreService.findExistingContext\n\n");
         try {
             return mercadoPagoContextService.findActiveByChequeraCuotaId(chequeraCuotaId);
         } catch (MercadoPagoContextException e) {
@@ -66,7 +67,7 @@ public class MercadoPagoCoreService {
     }
 
     private MercadoPagoContext createOrUpdateContext(MercadoPagoContext mercadoPagoContext, Long chequeraCuotaId, VencimientoMP vencimiento) {
-        log.debug("Processing MercadoPagoCoreService.createOrUpdateContext");
+        log.debug("\n\nProcessing MercadoPagoCoreService.createOrUpdateContext\n\n");
         if (mercadoPagoContext == null) {
             mercadoPagoContext = mercadoPagoContextService.add(MercadoPagoContext.builder()
                     .chequeraCuotaId(chequeraCuotaId)
@@ -95,7 +96,7 @@ public class MercadoPagoCoreService {
     }
 
     private ChequeraCuota getChequeraCuota(Long id) {
-        log.debug("Processing MercadoPagoCoreService.getChequeraCuota");
+        log.debug("\n\nProcessing MercadoPagoCoreService.getChequeraCuota\n\n");
         try {
             return chequeraCuotaService.findByChequeraCuotaId(id);
         } catch (ChequeraCuotaException e) {
@@ -115,7 +116,7 @@ public class MercadoPagoCoreService {
     }
 
     private VencimientoMP determineVencimientoMP(ChequeraCuota cuota, OffsetDateTime today) {
-        log.debug("Processing MercadoPagoCoreService.determineVencimientoMP");
+        log.debug("\n\nProcessing MercadoPagoCoreService.determineVencimientoMP\n\n");
         if (today.isEqual(Objects.requireNonNull(cuota.getVencimiento1())) || today.isBefore(cuota.getVencimiento1())) {
             return new VencimientoMP(cuota.getVencimiento1(), cuota.getImporte1());
         }

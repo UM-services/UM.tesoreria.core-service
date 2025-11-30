@@ -20,10 +20,6 @@ interface MercadoPagoContextRepository : JpaRepository<MercadoPagoContext, Long>
 
     fun findByMercadoPagoContextId(mercadoPagoContextId: Long): Optional<MercadoPagoContext?>?
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT m FROM MercadoPagoContext m WHERE m.mercadoPagoContextId = :mercadoPagoContextId")
-    fun findByMercadoPagoContextIdWithLock(@Param("mercadoPagoContextId") mercadoPagoContextId: Long): Optional<MercadoPagoContext?>?
-
     fun findAllByActivoOrderByMercadoPagoContextIdDesc(activo: Byte): List<MercadoPagoContext?>?
 
     fun findAllByActivoAndFechaVencimientoBetween(

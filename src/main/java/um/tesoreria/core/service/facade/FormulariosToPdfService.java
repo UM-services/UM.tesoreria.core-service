@@ -9,15 +9,13 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
 
 import com.google.common.io.Files;
 import org.openpdf.text.Document;
@@ -65,12 +63,12 @@ public class FormulariosToPdfService {
     private final ChequeraCuotaService chequeraCuotaService;
     private final LectivoAlternativaService lectivoAlternativaService;
     private final SincronizeService sincronizeService;
-    private final RestTemplateBuilder restTemplateBuilder;
+    private final WebClient.Builder webClientBuilder;
 
     public FormulariosToPdfService(Environment environment, ChequeraSerieService chequeraSerieService, FacultadService facultadService, TipoChequeraService tipoChequeraService,
                                    PersonaService personaService, LectivoService lectivoService, LegajoService legajoService, CarreraService carreraService,
                                    ChequeraCuotaService chequeraCuotaService, LectivoAlternativaService lectivoAlternativaService, SincronizeService sincronizeService,
-                                   RestTemplateBuilder restTemplateBuilder) {
+                                   WebClient.Builder webClientBuilder) {
         this.environment = environment;
         this.chequeraSerieService = chequeraSerieService;
         this.facultadService = facultadService;
@@ -82,7 +80,7 @@ public class FormulariosToPdfService {
         this.chequeraCuotaService = chequeraCuotaService;
         this.lectivoAlternativaService = lectivoAlternativaService;
         this.sincronizeService = sincronizeService;
-        this.restTemplateBuilder = restTemplateBuilder;
+        this.webClientBuilder = webClientBuilder;
     }
 
     public String generateChequeraPdf(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
@@ -536,13 +534,18 @@ public class FormulariosToPdfService {
                 + ".pdf";
 
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setAccept(List.of(MediaType.APPLICATION_OCTET_STREAM));
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            ResponseEntity<byte[]> response = restTemplateBuilder.build().exchange(url, HttpMethod.GET, entity,
-                    byte[].class);
-            Files.write(response.getBody(), new File(filename));
-        } catch (HttpServerErrorException e) {
+            byte[] response = webClientBuilder.build()
+                    .get()
+                    .uri(url)
+                    .accept(MediaType.APPLICATION_OCTET_STREAM)
+                    .retrieve()
+                    .bodyToMono(byte[].class)
+                    .block();
+
+            if (response != null) {
+                Files.write(response, new File(filename));
+            }
+        } catch (WebClientResponseException e) {
             log.debug("No se pudo generar {}", filename);
             filename = null;
         } catch (IOException e) {
