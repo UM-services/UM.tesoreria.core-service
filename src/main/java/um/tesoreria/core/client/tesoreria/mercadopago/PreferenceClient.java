@@ -11,6 +11,7 @@ import um.tesoreria.core.kotlin.model.dto.UMPreferenceMPDto;
 public interface PreferenceClient {
 
     @PostMapping("/create")
-    String createPreference(@RequestBody UMPreferenceMPDto umPreferenceMPDto);
+    um.tesoreria.core.model.dto.MercadoPagoContextDto createPreference(
+            @RequestBody UMPreferenceMPDto umPreferenceMPDto);
 
 }
