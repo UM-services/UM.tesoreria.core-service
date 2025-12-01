@@ -1,17 +1,12 @@
 package um.tesoreria.core.service.facade;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ChequeraPagoException;
-import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.kotlin.model.ChequeraPagoAsiento;
 import um.tesoreria.core.model.ChequeraPagoReemplazo;
-import um.tesoreria.core.model.ChequeraTotal;
-import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.model.dto.ItemAsientoDto;
 import um.tesoreria.core.model.dto.PagoDto;
 import um.tesoreria.core.service.*;

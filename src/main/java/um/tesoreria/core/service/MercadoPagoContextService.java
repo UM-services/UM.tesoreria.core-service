@@ -1,14 +1,14 @@
 package um.tesoreria.core.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.event.PaymentProcessedEvent;
 import um.tesoreria.core.exception.MercadoPagoContextException;
-import um.tesoreria.core.hexagonal.mercadoPagoContextHistory.infrastructure.request.service.MercadoPagoContextHistoryRequestService;
 import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.repository.MercadoPagoContextRepository;
+import um.tesoreria.core.service.facade.PagoService;
 import um.tesoreria.core.util.Tool;
 
 import java.util.List;
@@ -19,14 +19,10 @@ import java.util.Objects;
 public class MercadoPagoContextService {
 
     private final MercadoPagoContextRepository repository;
-    private final MercadoPagoContextHistoryRequestService mercadoPagoContextHistoryRequestService;
-    private final um.tesoreria.core.service.facade.PagoService pagoService;
+    private final PagoService pagoService;
 
-    public MercadoPagoContextService(MercadoPagoContextRepository repository,
-            MercadoPagoContextHistoryRequestService mercadoPagoContextHistoryRequestService,
-            @org.springframework.context.annotation.Lazy um.tesoreria.core.service.facade.PagoService pagoService) {
+    public MercadoPagoContextService(MercadoPagoContextRepository repository, @Lazy PagoService pagoService) {
         this.repository = repository;
-        this.mercadoPagoContextHistoryRequestService = mercadoPagoContextHistoryRequestService;
         this.pagoService = pagoService;
     }
 
@@ -64,17 +60,12 @@ public class MercadoPagoContextService {
 
     @Transactional
     public MercadoPagoContext add(MercadoPagoContext mercadoPagoContext) {
-        var mercadoPagoContextCreated = repository.save(mercadoPagoContext);
-        var historyCreated = mercadoPagoContextHistoryRequestService
-                .createMercadoPagoContextHistory(mercadoPagoContextCreated);
-        return mercadoPagoContextCreated;
+        return repository.save(mercadoPagoContext);
     }
 
     @Transactional
     public List<MercadoPagoContext> saveAll(List<MercadoPagoContext> mercadoPagoContexts) {
-        var mercadoPagoContextCreateds = repository.saveAll(mercadoPagoContexts);
-        mercadoPagoContextCreateds.forEach(mercadoPagoContextHistoryRequestService::createMercadoPagoContextHistory);
-        return mercadoPagoContextCreateds;
+        return repository.saveAll(mercadoPagoContexts);
     }
 
     @Transactional
@@ -103,10 +94,7 @@ public class MercadoPagoContextService {
                     existing.setFechaAcreditacion(newMercadoPagoContext.getFechaAcreditacion());
                     existing.setImportePagado(newMercadoPagoContext.getImportePagado());
                     existing.setPayment(newMercadoPagoContext.getPayment());
-                    MercadoPagoContext updated = repository.save(existing);
-                    var historyCreated = mercadoPagoContextHistoryRequestService
-                            .createMercadoPagoContextHistory(updated);
-                    return updated;
+                    return repository.save(existing);
                 })
                 .orElseThrow(() -> new MercadoPagoContextException("Context not found for id", mercadoPagoContextId));
     }
