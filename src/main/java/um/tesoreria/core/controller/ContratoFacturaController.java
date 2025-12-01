@@ -6,6 +6,7 @@ package um.tesoreria.core.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.exception.ContratoFacturaException;
 import um.tesoreria.core.model.ContratoFactura;
 import um.tesoreria.core.service.ContratoFacturaService;
 
@@ -26,57 +29,62 @@ import um.tesoreria.core.service.ContratoFacturaService;
  */
 @RestController
 @RequestMapping("/contratofactura")
+@RequiredArgsConstructor
 public class ContratoFacturaController {
 
-	@Autowired
-	private ContratoFacturaService service;
+	private final ContratoFacturaService service;
 
 	@GetMapping("/pendientefacultad/{facultadId}/{geograficaId}")
 	public ResponseEntity<List<ContratoFactura>> findAllPendienteByFacultad(@PathVariable Integer facultadId,
 			@PathVariable Integer geograficaId) {
-		return new ResponseEntity<List<ContratoFactura>>(service.findAllPendienteByFacultad(facultadId, geograficaId),
-				HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllPendienteByFacultad(facultadId, geograficaId));
 	}
 
 	@GetMapping("/pendientepersona/{personaId}/{documentoId}")
 	public ResponseEntity<List<ContratoFactura>> findAllPendienteByPersona(@PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId) {
-		return new ResponseEntity<List<ContratoFactura>>(service.findAllPendienteByPersona(personaId, documentoId),
-				HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllPendienteByPersona(personaId, documentoId));
 	}
 
 	@GetMapping("/excluidopersona/{personaId}/{documentoId}")
 	public ResponseEntity<List<ContratoFactura>> findAllExcluidoByPersona(@PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId) {
-		return new ResponseEntity<List<ContratoFactura>>(service.findAllExcluidoByPersona(personaId, documentoId),
-				HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllExcluidoByPersona(personaId, documentoId));
 	}
 
 	@GetMapping("/contrato/{contratoId}")
 	public ResponseEntity<List<ContratoFactura>> findAllByContrato(@PathVariable Long contratoId) {
-		return new ResponseEntity<List<ContratoFactura>>(service.findAllByContrato(contratoId), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByContrato(contratoId));
 	}
 
 	@GetMapping("/{contratofacturaId}")
 	public ResponseEntity<ContratoFactura> findByContratofacturaId(@PathVariable Long contratofacturaId) {
-		return new ResponseEntity<ContratoFactura>(service.findByContratofacturaId(contratofacturaId), HttpStatus.OK);
+        try {
+            return ResponseEntity.ok(service.findByContratofacturaId(contratofacturaId));
+        } catch (ContratoFacturaException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
 	}
 
 	@GetMapping("/persona/{personaId}/{documentoId}")
 	public ResponseEntity<ContratoFactura> findLastByPersona(@PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId) {
-		return new ResponseEntity<ContratoFactura>(service.findLastByPersona(personaId, documentoId), HttpStatus.OK);
+        try {
+            return ResponseEntity.ok(service.findLastByPersona(personaId, documentoId));
+        } catch (ContratoFacturaException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
 	}
 
 	@PostMapping("/")
 	public ResponseEntity<ContratoFactura> add(@RequestBody ContratoFactura contratofactura) {
-		return new ResponseEntity<ContratoFactura>(service.add(contratofactura), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(contratofactura));
 	}
 
 	@PutMapping("/{contratofacturaId}")
 	public ResponseEntity<ContratoFactura> update(@RequestBody ContratoFactura contratofactura,
 			@PathVariable Long contratofacturaId) {
-		return new ResponseEntity<ContratoFactura>(service.update(contratofactura, contratofacturaId), HttpStatus.OK);
+        return ResponseEntity.ok(service.update(contratofactura, contratofacturaId));
 	}
 
 }
