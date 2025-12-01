@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.kotlin.model.Baja;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,20 +26,16 @@ import um.tesoreria.core.service.BajaService;
  */
 @RestController
 @RequestMapping({"/baja", "/api/tesoreria/core/baja"})
+@RequiredArgsConstructor
 public class BajaController {
 
 	private final BajaService service;
-
-	public BajaController(BajaService service) {
-		this.service = service;
-	}
 
 	@GetMapping("/unique/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
 	public ResponseEntity<Baja> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
 											 @PathVariable Long chequeraSerieId) {
 		try {
-			return new ResponseEntity<>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId),
-					HttpStatus.OK);
+            return ResponseEntity.ok(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId));
 		} catch (BajaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -46,12 +43,12 @@ public class BajaController {
 
 	@PostMapping("/")
 	public ResponseEntity<Baja> add(@RequestBody Baja baja) {
-		return new ResponseEntity<>(service.add(baja), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(baja));
 	}
 
 	@PutMapping("/{bajaId}")
 	public ResponseEntity<Baja> update(@RequestBody Baja baja, @PathVariable Long bajaId) {
-		return new ResponseEntity<>(service.update(baja, bajaId), HttpStatus.OK);
+        return ResponseEntity.ok(service.update(baja, bajaId));
 	}
 
 	@DeleteMapping("/unique/{facultadId}/{tipochequeraId}/{chequeraserieId}")
