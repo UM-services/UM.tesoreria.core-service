@@ -14,9 +14,9 @@ data class Geografica(
 	var geograficaId: Int? = null,
 
 	@Column(name = "geo_nombre")
-	var nombre: String = "",
+	var nombre: String? = "",
 
 	@Column(name = "geo_sinchequera")
-	var sinChequera: Byte = 0
+	var sinChequera: Byte? = 0
 
 ) : Auditable()

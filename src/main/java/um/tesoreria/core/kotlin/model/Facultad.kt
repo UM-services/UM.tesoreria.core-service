@@ -13,27 +13,27 @@ data class Facultad(
     var facultadId: Int? = null,
 
     @Column(name = "fac_nombre")
-    var nombre: String = "",
+    var nombre: String? = "",
 
     @Column(name = "fac_codigo_empresa")
-    var codigoempresa: String = "",
+    var codigoempresa: String? = "",
 
     @Column(name = "fac_server")
-    var server: String = "",
+    var server: String? = "",
 
     @Column(name = "fac_db_adm")
-    var dbadm: String = "",
+    var dbadm: String? = "",
 
     @Column(name = "fac_dsn")
-    var dsn: String = "",
+    var dsn: String? = "",
 
     @Column(name = "fac_pla_cuenta")
-    var cuentacontable: BigDecimal = BigDecimal.ZERO,
+    var cuentacontable: BigDecimal? = BigDecimal.ZERO,
 
     @Column(name = "api_server")
-    var apiserver: String = "",
+    var apiserver: String? = "",
 
     @Column(name = "api_port")
-    var apiport: Long = 0L
+    var apiport: Long? = 0L
 
 ) : Auditable()
