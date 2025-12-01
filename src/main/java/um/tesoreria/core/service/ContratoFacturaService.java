@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,30 +24,28 @@ import um.tesoreria.core.repository.ContratoFacturaRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class ContratoFacturaService {
 
-	@Autowired
-	private ContratoFacturaRepository repository;
-
-	@Autowired
-	private ContratoService contratoservice;
+	private final ContratoFacturaRepository repository;
+	private final ContratoService contratoservice;
 
 	public List<ContratoFactura> findAllPendienteByFacultad(Integer facultadId, Integer geograficaId) {
 		return repository.findAllByPendienteAndContratoIdIn((byte) 1,
 				contratoservice.findAllByFacultad(facultadId, geograficaId).stream()
-						.map(contrato -> contrato.getContratoId()).collect(Collectors.toList()));
+						.map(Contrato::getContratoId).collect(Collectors.toList()));
 	}
 
 	public List<ContratoFactura> findAllPendienteByPersona(BigDecimal personaId, Integer documentoId) {
 		return repository.findAllByPendienteAndContratoIdIn((byte) 1,
 				contratoservice.findAllByPersona(personaId, documentoId).stream()
-						.map(contrato -> contrato.getContratoId()).collect(Collectors.toList()));
+						.map(Contrato::getContratoId).collect(Collectors.toList()));
 	}
 
 	public List<ContratoFactura> findAllExcluidoByPersona(BigDecimal personaId, Integer documentoId) {
 		return repository.findAllByExcluidoAndContratoIdIn((byte) 1,
 				contratoservice.findAllByPersona(personaId, documentoId).stream()
-						.map(contrato -> contrato.getContratoId()).collect(Collectors.toList()));
+						.map(Contrato::getContratoId).collect(Collectors.toList()));
 	}
 
 	public List<ContratoFactura> findAllByContrato(Long contratoId) {
@@ -64,7 +63,7 @@ public class ContratoFacturaService {
 
 	public ContratoFactura findLastByPersona(BigDecimal personaId, Integer documentoId) {
 		List<Contrato> contratos = contratoservice.findAllByPersona(personaId, documentoId);
-		List<Long> contratoIds = contratos.stream().map(contrato -> contrato.getContratoId())
+		List<Long> contratoIds = contratos.stream().map(Contrato::getContratoId)
 				.collect(Collectors.toList());
 		return repository.findFirstByContratoIdInAndCbuNotOrderByFechaDesc(contratoIds, "")
 				.orElseThrow(() -> new ContratoFacturaException(personaId, documentoId));
