@@ -133,7 +133,11 @@ public class PersonaController {
 
 	@GetMapping("/inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}")
 	public ResponseEntity<InscripcionFullDto> findInscripcionFull(@PathVariable Integer facultadId, @PathVariable BigDecimal personaId, @PathVariable Integer documentoId, @PathVariable Integer lectivoId) {
-		return ResponseEntity.ok(service.findInscripcionFull(facultadId, personaId, documentoId, lectivoId));
+        try {
+            return ResponseEntity.ok(service.findInscripcionFull(facultadId, personaId, documentoId, lectivoId));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
 	}
 
 }
