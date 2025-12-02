@@ -6,8 +6,8 @@ data class PersonaDto(
 
     var personaId: BigDecimal? = null,
     var documentoId: Int? = null,
-    var apellido: String = "",
-    var nombre: String = ""
+    var apellido: String? = "",
+    var nombre: String? = ""
 
 )
 	
