@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import jakarta.transaction.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ import um.tesoreria.core.util.Tool;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ChequeraCuotaService {
 
     private final ChequeraCuotaRepository repository;
@@ -48,21 +50,6 @@ public class ChequeraCuotaService {
     private final TipoChequeraService tipoChequeraService;
     private final LectivoService lectivoService;
     private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
-
-    public ChequeraCuotaService(ChequeraCuotaRepository repository, ChequeraSerieService chequeraSerieService,
-            ChequeraPagoService chequeraPagoService,
-            ChequeraTotalService chequeraTotalService, FacultadService facultadService,
-            TipoChequeraService tipoChequeraService,
-            LectivoService lectivoService, ChequeraCuotaDeudaService chequeraCuotaDeudaService) {
-        this.repository = repository;
-        this.chequeraSerieService = chequeraSerieService;
-        this.chequeraPagoService = chequeraPagoService;
-        this.chequeraTotalService = chequeraTotalService;
-        this.facultadService = facultadService;
-        this.tipoChequeraService = tipoChequeraService;
-        this.lectivoService = lectivoService;
-        this.chequeraCuotaDeudaService = chequeraCuotaDeudaService;
-    }
 
     @Transactional
     public List<ChequeraCuota> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
@@ -202,6 +189,7 @@ public class ChequeraCuotaService {
 
     public List<ChequeraCuota> findAllPendientes(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
             Integer alternativaId) {
+        log.debug("\n\nProcessing ChequeraCuotaService.findAllPendientes\n\n");
         return repository
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndCompensadaAndImporte1GreaterThan(
                         facultadId, tipoChequeraId, chequeraSerieId, alternativaId, (byte) 0, (byte) 0, (byte) 0,
