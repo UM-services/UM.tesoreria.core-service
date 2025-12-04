@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.exception.ChequeraSerieException;
 import um.tesoreria.core.kotlin.model.ChequeraSerie;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAlta;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAltaFull;
@@ -153,14 +155,22 @@ public class ChequeraSerieController {
     public ResponseEntity<ChequeraSerie> findByUnique(@PathVariable Integer facultadId,
                                                       @PathVariable Integer tipoChequeraId,
                                                       @PathVariable Long chequeraSerieId) {
-        return ResponseEntity.ok(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId));
+        try {
+            return ResponseEntity.ok(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId));
+        } catch (ChequeraSerieException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     @GetMapping("/uniqueextended/{facultadId}/{tipochequeraId}/{chequeraserieId}")
     public ResponseEntity<ChequeraSerie> findByUniqueExtended(@PathVariable Integer facultadId,
                                                               @PathVariable Integer tipochequeraId,
                                                               @PathVariable Long chequeraserieId) {
-        return ResponseEntity.ok(service.findByUniqueExtended(facultadId, tipochequeraId, chequeraserieId, chequeraCuotaService));
+        try {
+            return ResponseEntity.ok(service.findByUniqueExtended(facultadId, tipochequeraId, chequeraserieId, chequeraCuotaService));
+        } catch (ChequeraSerieException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     @GetMapping("/setpaypertic/{facultadId}/{tipochequeraId}/{chequeraserieId}/{flag}")

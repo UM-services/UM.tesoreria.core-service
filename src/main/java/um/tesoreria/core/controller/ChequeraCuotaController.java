@@ -6,6 +6,7 @@ package um.tesoreria.core.controller;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.model.internal.CuotaPeriodoDto;
@@ -29,15 +30,11 @@ import um.tesoreria.core.service.ChequeraCuotaService;
  */
 @RestController
 @RequestMapping({"/chequeraCuota", "/api/tesoreria/core/chequeraCuota"})
+@RequiredArgsConstructor
 public class ChequeraCuotaController {
 
     public final ChequeraCuotaService service;
     private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
-
-    public ChequeraCuotaController(ChequeraCuotaService service, ChequeraCuotaDeudaService chequeraCuotaDeudaService) {
-        this.service = service;
-        this.chequeraCuotaDeudaService = chequeraCuotaDeudaService;
-    }
 
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
     public ResponseEntity<List<ChequeraCuota>> findAllByChequera(@PathVariable Integer facultadId,
@@ -48,7 +45,7 @@ public class ChequeraCuotaController {
     }
 
     @GetMapping("/chequera/pendientes/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
-    public ResponseEntity<List<ChequeraCuota>> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdPendentes(@PathVariable Integer facultadId,
+    public ResponseEntity<List<ChequeraCuota>> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdPendientes(@PathVariable Integer facultadId,
                                                                                                                                 @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId,
                                                                                                                                 @PathVariable Integer alternativaId) {
         return ResponseEntity.ok(service.findAllPendientes(facultadId, tipoChequeraId, chequeraSerieId, alternativaId));
