@@ -14,7 +14,9 @@ import java.util.Objects;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MailChequeraService {
 
     @Value("${app.testing}")
@@ -56,54 +59,39 @@ public class MailChequeraService {
     private final SpoterDataService spoterDataService;
     private final MailSenderService mailSenderService;
     private final ChequeraService chequeraService;
-    private final ChequeraClient chequeraClient;
     private final SpoterService spoterService;
 
-    public MailChequeraService(JavaMailSender javaMailSender,
-                               ChequeraSerieService chequeraSerieService,
-                               DomicilioService domicilioService,
-                               FacultadService facultadService,
-                               PersonaService personaService,
-                               ChequeraCuotaService chequeraCuotaService,
-                               LectivoService lectivoService,
-                               CarreraChequeraService carreraChequeraService,
-                               CursoService cursoService,
-                               SpoterDataService spoterDataService,
-                               MailSenderService mailSenderService,
-                               ChequeraService chequeraService,
-                               ChequeraClient chequeraClient,
-                               SpoterService spoterService) {
-        this.javaMailSender = javaMailSender;
-        this.chequeraSerieService = chequeraSerieService;
-        this.domicilioService = domicilioService;
-        this.facultadService = facultadService;
-        this.personaService = personaService;
-        this.chequeraCuotaService = chequeraCuotaService;
-        this.lectivoService = lectivoService;
-        this.carreraChequeraService = carreraChequeraService;
-        this.cursoService = cursoService;
-        this.spoterDataService = spoterDataService;
-        this.mailSenderService = mailSenderService;
-        this.chequeraService = chequeraService;
-        this.chequeraClient = chequeraClient;
-        this.spoterService = spoterService;
-    }
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
-                               Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
+            Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
         log.debug("Processing MailChequeraService.sendChequera");
-        return chequeraClient.sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes, codigoBarras);
+        var event = um.tesoreria.core.event.SendChequeraEvent.builder()
+                .facultadId(facultadId)
+                .tipoChequeraId(tipoChequeraId)
+                .chequeraSerieId(chequeraSerieId)
+                .alternativaId(alternativaId)
+                .copiaInformes(copiaInformes)
+                .incluyeMatricula(incluyeMatricula)
+                .codigoBarras(codigoBarras)
+                .build();
+        log.debug("Publishing SendChequeraEvent: {}", event);
+        kafkaTemplate.send("send-chequera", event);
+        return "Solicitud de envío en proceso";
     }
 
-    public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId,
-                            Boolean copiaInformes, Boolean incluyeMatricula) {
+    public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
+            Integer productoId, Integer cuotaId,
+            Boolean copiaInformes, Boolean incluyeMatricula) {
         MailSender javaMailSender = mailSenderService.findSender();
         log.debug("mail_chequera_service.send_chequera.javaMailSender={}", javaMailSender);
-        String url = MessageFormat.format("http://{0}:{1}", javaMailSender.getIpAddress(), javaMailSender.getPort().toString());
+        String url = MessageFormat.format("http://{0}:{1}", javaMailSender.getIpAddress(),
+                javaMailSender.getPort().toString());
         log.debug("mail_chequera_service.send_chequera.url={}", url);
         WebClient webClient = WebClient.builder().baseUrl(url + "/chequera").build();
         String uri = MessageFormat.format("/sendCuota/{0}/{1}/{2}/{3}/{4}/{5}/{6}/{7}", facultadId.toString(),
-                tipoChequeraId.toString(), chequeraSerieId.toString(), alternativaId.toString(), productoId.toString(), cuotaId.toString(),
+                tipoChequeraId.toString(), chequeraSerieId.toString(), alternativaId.toString(), productoId.toString(),
+                cuotaId.toString(),
                 copiaInformes ? "true" : "false", incluyeMatricula ? "true" : "false");
         log.debug("mail_chequera_service.send_cuota.uri={}", uri);
         Mono<String> mono = webClient.get()
@@ -112,18 +100,20 @@ public class MailChequeraService {
         return mono.block();
     }
 
-    public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData, Boolean updateMailPersonal, Boolean responseSinEnvio) {
+    public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData, Boolean updateMailPersonal,
+            Boolean responseSinEnvio) {
         log.debug("Processing MailChequeraService.sendChequeraPreSpoter");
         logSpoterData(spoterData);
-// Determina lectivoId
+        // Determina lectivoId
         Lectivo lectivo;
         OffsetDateTime ahora = Tool.dateAbsoluteArgentina();
         Integer lectivoId = (lectivo = lectivoService.findByFecha(ahora)).getLectivoId();
         logLectivo(lectivo);
-// si corresponde al segundo semestre entonces la genera para el ciclo lectivo siguiente
+        // si corresponde al segundo semestre entonces la genera para el ciclo lectivo
+        // siguiente
         OffsetDateTime referenciaHasta = lectivo.getFechaFinal();
 
-// Ajusta la referenciaDesde para que sea en septiembre del año anterior
+        // Ajusta la referenciaDesde para que sea en septiembre del año anterior
         assert referenciaHasta != null;
         OffsetDateTime referenciaDesde = referenciaHasta.minusYears(1).withMonth(8).withDayOfMonth(1);
 
@@ -136,7 +126,8 @@ public class MailChequeraService {
 
         if (updateMailPersonal) {
             try {
-                Domicilio domicilio = domicilioService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
+                Domicilio domicilio = domicilioService.findByUnique(spoterData.getPersonaId(),
+                        spoterData.getDocumentoId());
                 domicilio.setEmailInstitucional(spoterData.getEmailPersonal());
                 domicilio = domicilioService.update(domicilio, domicilio.getDomicilioId(), true);
                 logDomicilio(domicilio);
@@ -151,12 +142,15 @@ public class MailChequeraService {
                     spoterData.getDocumentoId(), spoterData.getFacultadId(), spoterData.getGeograficaId(), lectivoId);
             log.debug("SporterData leído");
             logSpoterData(data);
-            ChequeraSerieDto chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerieService.findByUnique(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId()));
+            ChequeraSerieDto chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerieService
+                    .findByUnique(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId()));
             String messageSender = "Response Sin Envío";
             if (!responseSinEnvio) {
-                messageSender = this.sendChequera(data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), data.getAlternativaId(), false, false, false);
+                messageSender = this.sendChequera(data.getFacultadId(), data.getTipoChequeraId(),
+                        data.getChequeraSerieId(), data.getAlternativaId(), false, false, false);
             }
-            return new SpoterDataResponse(true, messageSender, data.getFacultadId(), data.getTipoChequeraId(), data.getChequeraSerieId(), chequeraSerieDTO);
+            return new SpoterDataResponse(true, messageSender, data.getFacultadId(), data.getTipoChequeraId(),
+                    data.getChequeraSerieId(), chequeraSerieDTO);
         } catch (SpoterDataException e) {
             log.debug("SpoterData error -> {}", e.getMessage());
         }
@@ -197,7 +191,8 @@ public class MailChequeraService {
         ChequeraSerieDto chequeraSerieDTO = chequeraService.constructChequeraDataDTO(chequeraSerie);
         logChequeraSerieDTO(chequeraSerieDTO);
         return new SpoterDataResponse(spoterData.getStatus() == (byte) 1, spoterData.getMessage(),
-                spoterData.getFacultadId(), spoterData.getTipoChequeraId(), spoterData.getChequeraSerieId(), chequeraSerieDTO);
+                spoterData.getFacultadId(), spoterData.getTipoChequeraId(), spoterData.getChequeraSerieId(),
+                chequeraSerieDTO);
     }
 
     public String notificaDeudor(BigDecimal personaId, Integer documentoId) throws MessagingException {
@@ -329,7 +324,8 @@ public class MailChequeraService {
             data += "         Período: " + String.format("%02d/%04d", cuota.getMes(), cuota.getAnho())
                     + "     Vencimiento: "
                     + DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                    .format(Objects.requireNonNull(cuota.getVencimiento1()).withOffsetSameInstant(ZoneOffset.UTC))
+                            .format(Objects.requireNonNull(cuota.getVencimiento1())
+                                    .withOffsetSameInstant(ZoneOffset.UTC))
                     + "     Importe: " + cuota.getImporte1().setScale(2, RoundingMode.HALF_UP) + (char) 10;
 
         }
@@ -369,8 +365,7 @@ public class MailChequeraService {
 
     private void logDomicilio(Domicilio domicilio) {
         try {
-            log.debug("Domicilio -> {}", JsonMapper.
-                    builder()
+            log.debug("Domicilio -> {}", JsonMapper.builder()
                     .findAndAddModules()
                     .build()
                     .writerWithDefaultPrettyPrinter()

@@ -6,8 +6,10 @@ flowchart TD
     LB["Load Balancer"]
     App["um.tesoreria.core-service<br/>Spring Boot"]
     DB[(MySQL)]
+    Kafka["Apache Kafka"]
     Ext["Servicios Externos<br/>(MercadoPago, etc.)"]
     Client --> LB
     LB --> App
     App --> DB
+    App --> Kafka
     App --> Ext
