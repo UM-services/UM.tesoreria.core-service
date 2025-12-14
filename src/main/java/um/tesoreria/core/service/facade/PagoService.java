@@ -182,6 +182,9 @@ public class PagoService {
                 .build();
         chequeraPago = chequeraPagoService.add(chequeraPago, chequeraCuotaService);
 
+        mercadoPagoContext.setChequeraPagoId(chequeraPago.getChequeraPagoId());
+        mercadoPagoContextService.update(mercadoPagoContext, mercadoPagoContextId);
+
         marcarPago(chequeraCuota.getFacultadId(), chequeraCuota.getTipoChequeraId(), chequeraCuota.getChequeraSerieId(), chequeraCuota.getProductoId(), chequeraCuota.getAlternativaId(), chequeraCuota.getCuotaId(), chequeraCuotaService);
 
         return chequeraPago;
