@@ -5,6 +5,14 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2025-12-14
+- feat: Implementación de envío asíncrono de chequeras mediante Kafka y `SendChequeraEvent`.
+- feat: Configuración de productor de Kafka en `KafkaProducerConfig`.
+- refactor: Modificación de `MailChequeraService` para publicar eventos en lugar de procesamiento síncrono.
+- chore(deps): Actualización de Spring Boot de 3.5.6 a 3.5.8.
+
+> Based on deep analysis of git diff HEAD (Kafka integration) and pom.xml (Spring Boot update).
+
 ## [2.4.0] - 2025-11-16
 - feat: Added @Builder.Default to various model fields for improved object instantiation (MercadoPagoContext, Proveedor, TipoChequeraMercadoPagoCreditCard, MercadoPagoContextDto)
 - refactor: Extracted common logic into private helper methods (setDeuda, setUltimoEnvio) in ChequeraSerieService to reduce code duplication and improve readability

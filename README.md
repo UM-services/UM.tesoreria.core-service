@@ -4,7 +4,12 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
 
-**Versión actual (SemVer): 2.4.0**
+**Versión actual (SemVer): 2.5.0**
+
+## Novedades 2.5.0 (verificado en código)
+- Implementación de envío asíncrono de correos de chequeras utilizando Kafka (`SendChequeraEvent`).
+- Actualización de Spring Boot a la versión 3.5.8.
+- Configuración de `KafkaProducerConfig` para manejo de eventos.
 
 ## Novedades 2.4.0 (verificado en código)
 - Añadido `@Builder.Default` a varios campos de modelos para mejorar la instanciación de objetos (MercadoPagoContext, Proveedor, TipoChequeraMercadoPagoCreditCard, MercadoPagoContextDto)
@@ -101,7 +106,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 3.5.6
+- Spring Boot: 3.5.8
 - Spring Cloud: 2025.0.0
 - Kotlin: 2.2.21
 - MySQL Connector: 9.4.0
