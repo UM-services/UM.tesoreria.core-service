@@ -32,8 +32,11 @@ spring:
     password: ${app.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      maximum-pool-size: 20
-      connection-timeout: 30000
+      maximum-pool-size: 40
+      max-lifetime: 1200000        # 20 minutos (seguro, << 4h)
+      idle-timeout: 600000         # 10 minutos
+      connection-timeout: 30000    # 30 segundos
+      validation-timeout: 3000     # 3 segundos
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
