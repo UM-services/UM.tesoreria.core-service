@@ -1,5 +1,6 @@
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.exception.FacturacionElectronicaException;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
@@ -17,17 +18,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tesoreria/core/facturacionElectronica")
+@RequiredArgsConstructor
 public class FacturacionElectronicaController {
 
     private final FacturacionElectronicaService service;
     private final ChequeraPagoService chequeraPagoService;
     private final ChequeraCuotaService chequeraCuotaService;
-
-    public FacturacionElectronicaController(FacturacionElectronicaService service, ChequeraPagoService chequeraPagoService, ChequeraCuotaService chequeraCuotaService) {
-        this.service = service;
-        this.chequeraPagoService = chequeraPagoService;
-        this.chequeraCuotaService = chequeraCuotaService;
-    }
 
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<List<FacturacionElectronica>> findAllByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
