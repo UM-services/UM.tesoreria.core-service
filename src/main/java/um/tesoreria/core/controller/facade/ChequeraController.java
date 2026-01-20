@@ -66,8 +66,8 @@ public class ChequeraController {
                                                @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
                                                @PathVariable Boolean copiaInformes) {
         chequeraCuotaService.updateBarras(facultadId, tipoChequeraId, chequeraSerieId);
-        return new ResponseEntity<>(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
-                alternativaId, copiaInformes, false, false), HttpStatus.OK);
+        return ResponseEntity.ok(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
+                alternativaId, copiaInformes, false, false));
     }
 
     @GetMapping("/sendCuota/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{productoId}/{cuotaId}/{copiaInformes}")
@@ -76,14 +76,14 @@ public class ChequeraController {
                                             @PathVariable Integer productoId, @PathVariable Integer cuotaId,
                                             @PathVariable Boolean copiaInformes) {
         chequeraCuotaService.updateBarras(facultadId, tipoChequeraId, chequeraSerieId);
-        return new ResponseEntity<>(mailChequeraService.sendCuota(facultadId, tipoChequeraId, chequeraSerieId,
-                alternativaId, productoId, cuotaId, copiaInformes, true), HttpStatus.OK);
+        return ResponseEntity.ok(mailChequeraService.sendCuota(facultadId, tipoChequeraId, chequeraSerieId,
+                alternativaId, productoId, cuotaId, copiaInformes, true));
     }
 
     @GetMapping("/notificaDeudor/{personaId}/{documentoId}")
-    public String notificaDeudor(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId)
+    public ResponseEntity<String> notificaDeudor(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId)
             throws MessagingException {
-        return mailChequeraService.notificaDeudor(personaId, documentoId);
+        return ResponseEntity.ok(mailChequeraService.notificaDeudor(personaId, documentoId));
     }
 
     @GetMapping("/generatePdf/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
@@ -123,20 +123,19 @@ public class ChequeraController {
     public ResponseEntity<Void> extendDebito(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
                                              @PathVariable Long chequeraSerieId) {
         service.extendDebito(facultadId, tipoChequeraId, chequeraSerieId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/track/{chequeraId}")
     public ResponseEntity<Void> track(@PathVariable Long chequeraId) {
         service.track(chequeraId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/spoter/{updateMailPersonal}/{responseSinEnvio}")
     public ResponseEntity<SpoterDataResponse> sendChequeraPreSpoter(@RequestBody SpoterData spoterData, @PathVariable Boolean updateMailPersonal, @PathVariable Boolean responseSinEnvio) {
         try {
-            return new ResponseEntity<>(mailChequeraService.sendChequeraPreSpoter(spoterData, updateMailPersonal, responseSinEnvio),
-                    HttpStatus.OK);
+            return ResponseEntity.ok(mailChequeraService.sendChequeraPreSpoter(spoterData, updateMailPersonal, responseSinEnvio));
         } catch (Exception e) {
             return new ResponseEntity<>(
                     new SpoterDataResponse(false, e.getMessage(), null, null, null, null), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -146,7 +145,7 @@ public class ChequeraController {
     @GetMapping("/spoter/{personaId}/{documentoId}/{facultadId}/{geograficaId}/{lectivoId}")
     public ResponseEntity<SpoterData> findOne(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId, @PathVariable Integer facultadId, @PathVariable Integer geograficaId, @PathVariable Integer lectivoId) {
         try {
-            return new ResponseEntity<>(spoterDataService.findOne(personaId, documentoId, facultadId, geograficaId, lectivoId), HttpStatus.OK);
+            return ResponseEntity.ok(spoterDataService.findOne(personaId, documentoId, facultadId, geograficaId, lectivoId));
         } catch (SpoterDataException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
