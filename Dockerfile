@@ -1,6 +1,6 @@
 # Etapa 1: Compilación con Maven y JDK
 # Usamos una imagen oficial que contiene Maven y Java (Temurin)
-FROM maven:3-eclipse-temurin-24-alpine AS build
+FROM maven:3-eclipse-temurin-25-alpine AS build
 
 # Establecemos el directorio de trabajo
 WORKDIR /app
@@ -19,7 +19,7 @@ RUN mvn clean package
 
 # Etapa 2: Creación de la imagen final y ligera
 # Usamos una imagen solo con el JRE, que es más pequeña
-FROM eclipse-temurin:24-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 # Instalar curl en la imagen final
 RUN apk update && apk add curl
