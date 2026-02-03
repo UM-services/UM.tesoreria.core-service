@@ -2,9 +2,24 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 3.5.6.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 2.5.0**
+**Versión actual (SemVer): 3.0.0**
+
+## Novedades 3.0.0 (verificado en código)
+- Actualización de Spring Boot de 3.5.8 a 4.0.2
+- Actualización de Java de 24 a 25
+- Actualización de Kotlin de 2.2.21 a 2.3.0
+- Actualización de Spring Cloud de 2025.0.0 a 2025.1.0
+- Actualización de mysql-connector-j de 9.4.0 a 9.6.0
+- Actualización de springdoc-openapi de 2.8.10 a 3.0.1
+- Actualización de Apache POI de 5.4.1 a 5.5.1
+- Actualización de guava de 33.4.8-jre a 33.5.0-jre
+- Actualización de commons-lang3 de 3.18.0 a 3.20.0
+- Actualización de modelmapper de 3.2.4 a 3.2.6
+- Actualización de json-path de 2.9.0 a 2.10.0
+- Actualización de GitHub Actions para usar JDK 25
+- Actualización de Dockerfile para usar JDK 25
 
 ## Novedades 2.5.0 (verificado en código)
 - Implementación de envío asíncrono de correos de chequeras utilizando Kafka (`SendChequeraEvent`).
