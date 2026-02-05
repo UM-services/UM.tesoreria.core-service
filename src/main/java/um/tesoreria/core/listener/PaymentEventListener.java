@@ -21,7 +21,7 @@ public class PaymentEventListener {
         log.info("\n\nPaymentEventListener initialized\n\n");
     }
 
-    @KafkaListener(topics = "payment-processed", groupId = "tesoreria-core-group")
+    @KafkaListener(topics = "payment-processed", groupId = "tesoreria-core-group", containerFactory = "kafkaListenerContainerFactory")
     public void handlePaymentProcessed(PaymentProcessedEvent event) {
         log.debug("\n\nReceived payment event: {}\n\n", event);
         try {

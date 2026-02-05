@@ -1,12 +1,11 @@
 /**
  *
  */
-package um.tesoreria.core.service;
+package um.tesoreria.core.hexagonal.persona.application.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
@@ -27,13 +26,15 @@ import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
 import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
 import um.tesoreria.core.extern.model.kotlin.PreInscripcionFacultad;
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.model.dto.DeudaPersonaDto;
 import um.tesoreria.core.model.dto.VencimientoDto;
 import um.tesoreria.core.model.view.PersonaKey;
-import um.tesoreria.core.repository.PersonaRepository;
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.repository.PersonaRepository;
+import um.tesoreria.core.service.*;
 import um.tesoreria.core.service.view.PersonaKeyService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -58,16 +59,16 @@ public class PersonaService {
     private final PreferenceClient preferenceClient;
     private final um.tesoreria.core.service.facade.MercadoPagoCoreService mercadoPagoCoreService;
 
-    public Persona findByUnique(BigDecimal personaId, Integer documentoId) {
+    public PersonaEntity findByUnique(BigDecimal personaId, Integer documentoId) {
         return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
                 .orElseThrow(() -> new PersonaException(personaId, documentoId));
     }
 
-    public Persona findByPersonaId(BigDecimal personaId) {
+    public PersonaEntity findByPersonaId(BigDecimal personaId) {
         return repository.findTopByPersonaId(personaId).orElseThrow(() -> new PersonaException(personaId));
     }
 
-    public List<Persona> findAllSantander() {
+    public List<PersonaEntity> findAllSantander() {
         return repository.findAllByCbuLike("072%");
     }
 
@@ -323,18 +324,18 @@ public class PersonaService {
         return personaKeyService.findAllByStrings(conditions);
     }
 
-    public Persona findByUniqueId(Long uniqueId) {
+    public PersonaEntity findByUniqueId(Long uniqueId) {
         return repository.findByUniqueId(uniqueId).orElseThrow(() -> new PersonaException(uniqueId));
     }
 
-    public Persona add(Persona persona) {
-        persona = repository.save(persona);
-        return persona;
+    public PersonaEntity add(PersonaEntity personaEntity) {
+        personaEntity = repository.save(personaEntity);
+        return personaEntity;
     }
 
-    public Persona update(Persona newpersona, Long uniqueId) {
+    public PersonaEntity update(PersonaEntity newpersona, Long uniqueId) {
         return repository.findByUniqueId(uniqueId).map(persona -> {
-            persona = new Persona(uniqueId, newpersona.getPersonaId(), newpersona.getDocumentoId(),
+            persona = new PersonaEntity(uniqueId, newpersona.getPersonaId(), newpersona.getDocumentoId(),
                     newpersona.getApellido(), newpersona.getNombre(), newpersona.getSexo(), newpersona.getPrimero(),
                     newpersona.getCuit(), newpersona.getCbu(), newpersona.getPassword());
             repository.save(persona);

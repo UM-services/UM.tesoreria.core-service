@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -78,7 +79,7 @@ data class ChequeraSerieReemplazo(
         JoinColumn(name = "CSR_Per_ID", referencedColumnName = "per_id", insertable = false, updatable = false),
         JoinColumn(name = "CSR_Doc_ID", referencedColumnName = "per_doc_id", insertable = false, updatable = false)
     )
-    var persona: Persona? = null,
+    var personaEntity: PersonaEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumns(

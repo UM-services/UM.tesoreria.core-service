@@ -84,6 +84,7 @@ logging:
           interceptor: ${app.logging}
         orm:
           jpa: ${app.logging}
+        kafka: DEBUG
 
 management:
   endpoints:

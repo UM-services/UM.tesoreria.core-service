@@ -3,6 +3,7 @@ package um.tesoreria.core.kotlin.model.view
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
 import org.hibernate.annotations.Immutable
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
 import um.tesoreria.core.kotlin.model.*
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -87,7 +88,7 @@ data class ChequeraSerieAlta(
         JoinColumn(name = "chs_per_id", referencedColumnName = "per_id", insertable = false, updatable = false),
         JoinColumn(name = "chs_doc_id", referencedColumnName = "per_doc_id", insertable = false, updatable = false)
     )
-    var persona: Persona? = null,
+    var personaEntity: PersonaEntity? = null,
 
     @OneToOne
     @JoinColumns(

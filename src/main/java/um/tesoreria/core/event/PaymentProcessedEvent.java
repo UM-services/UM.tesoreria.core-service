@@ -1,5 +1,6 @@
 package um.tesoreria.core.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.time.OffsetDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PaymentProcessedEvent {
     private Long mercadoPagoContextId;
     private Long chequeraCuotaId;

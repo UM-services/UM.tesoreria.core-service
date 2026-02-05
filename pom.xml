@@ -11,7 +11,7 @@
     </parent>
     <groupId>ar.edu</groupId>
     <artifactId>um.tesoreria.core-service</artifactId>
-    <version>2.4.0</version>
+    <version>3.1.0</version>
     <name>UM.tesoreria.core-service</name>
     <description>Tesoreria API REST</description>
     <properties>

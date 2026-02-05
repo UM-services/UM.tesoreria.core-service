@@ -637,7 +637,7 @@ public class SheetService {
             row = sheet.createRow(++fila);
             this.setCellString(row, 0, chequeraPreuniv.getFacultad().getNombre(), styleNormal);
             this.setCellString(row, 1, chequeraPreuniv.getGeografica().getNombre(), styleNormal);
-            this.setCellString(row, 2, "(" + chequeraPreuniv.getPersonaKey() + ") - " + chequeraPreuniv.getPersona().getApellido() + ", " + chequeraPreuniv.getPersona().getNombre(), styleNormal);
+            this.setCellString(row, 2, "(" + chequeraPreuniv.getPersonaKey() + ") - " + chequeraPreuniv.getPersonaEntity().getApellido() + ", " + chequeraPreuniv.getPersonaEntity().getNombre(), styleNormal);
             this.setCellString(row, 3, chequeraPreuniv.getChequera(), styleNormal);
             // Calcula Deuda
             BigDecimal deuda = chequeraCuotaService.calculateDeuda(chequeraPreuniv.getFacultadId(), chequeraPreuniv.getTipoChequeraId(), chequeraPreuniv.getChequeraSerieId()).getDeuda();

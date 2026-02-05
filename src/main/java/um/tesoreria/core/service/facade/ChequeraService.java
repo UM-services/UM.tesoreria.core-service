@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.exception.ChequeraEliminadaException;
 import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DebitoException;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.*;
 import um.tesoreria.core.model.ChequeraSerieControl;

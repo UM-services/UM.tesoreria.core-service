@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.0.0**
+**Versión actual (SemVer): 3.1.0**
+
+## Novedades 3.1.0 (verificado en código)
+- Refactorización del módulo Persona a arquitectura hexagonal
+- Implementación de Kafka Consumer Config para manejo de eventos de pago
+- Mejoras en KafkaProducerConfig usando string serializer class name
+- Actualización de PaymentEventListener con containerFactory específico
+- Modificación de PreferenceClient para usar MercadoPagoContextDto importado
+- Actualización de logging en bootstrap.yml para incluir debug de Kafka
 
 ## Novedades 3.0.0 (verificado en código)
 - Actualización de Spring Boot de 3.5.8 a 4.0.2
@@ -116,20 +124,20 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2
 - Soporte para Docker
 
 ## Requisitos
-- Java 24 (verificado en pom.xml)
+- Java 25 (verificado en pom.xml)
 - Maven 3.8.8+ (verificado en pom.xml)
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 3.5.8
-- Spring Cloud: 2025.0.0
-- Kotlin: 2.2.21
-- MySQL Connector: 9.4.0
-- SpringDoc OpenAPI: 2.8.10
-- Apache POI: 5.4.1
+- Spring Boot: 4.0.2
+- Spring Cloud: 2025.1.0
+- Kotlin: 2.3.0
+- MySQL Connector: 9.6.0
+- SpringDoc OpenAPI: 3.0.1
+- Apache POI: 5.5.1
 - OpenPDF: 3.0.0
-- ModelMapper: 3.2.4
-- Guava: 33.4.8-jre
+- ModelMapper: 3.2.6
+- Guava: 33.5.0-jre
 
 ## Optimizaciones de Rendimiento (verificado en código)
 - **Computación paralela**: La función `calculateDeuda` utiliza `CompletableFuture` para ejecutar consultas en paralelo
@@ -368,10 +376,10 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 
 # UM Tesorería Core Service
 
-[![Java](https://img.shields.io/badge/Java-24-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.0.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-purple.svg)](https://kotlinlang.org/)
+[![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
 
 ## Documentación
@@ -391,10 +399,10 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 - Validación de correos electrónicos
 
 ## Tecnologías Utilizadas
-- Java 24
-- Spring Boot 3.5.6
-- Spring Cloud 2025.0.0
-- Kotlin 2.2.21
+- Java 25
+- Spring Boot 4.0.2
+- Spring Cloud 2025.1.0
+- Kotlin 2.3.0
 - JPA/Hibernate
 - ModelMapper
 - MySQL
@@ -412,7 +420,17 @@ src/
 │   │               ├── service/          # Lógica de negocio
 │   │               ├── repository/       # Acceso a datos
 │   │               ├── model/            # Modelos de datos
-│   │               └── configuration/    # Configuraciones
+│   │               ├── configuration/    # Configuraciones
+│   │               └── hexagonal/        # Arquitectura hexagonal
+│   │                   └── persona/
+│   │                       ├── application/
+│   │                       │   └── service/
+│   │                       └── infrastructure/
+│   │                           ├── persistence/
+│   │                           │   ├── entity/
+│   │                           │   └── repository/
+│   │                           └── web/
+│   │                               └── controller/
 │   └── resources/
 └── test/                                # Pruebas unitarias
 ```

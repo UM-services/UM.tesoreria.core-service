@@ -25,10 +25,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
-import um.tesoreria.core.client.tesoreria.sender.ChequeraClient;
 import um.tesoreria.core.exception.CarreraChequeraException;
 import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.SpoterDataException;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.ChequeraSerieDto;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;
@@ -297,13 +298,13 @@ public class MailChequeraService {
     public String notaDeudorChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         Facultad facultad = facultadService.findByFacultadId(facultadId);
-        Persona persona = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
+        PersonaEntity personaEntity = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
 
         String data = "" + (char) 10;
         data += "UNIVERSIDAD DE MENDOZA" + (char) 10;
         data += "Rectorado - Arístides Villanueva 794 (5500) Mendoza" + (char) 10;
         data += (char) 10;
-        data += persona.getApellido() + ", " + persona.getNombre() + " (" + persona.getPersonaId() + ")" + (char) 10;
+        data += personaEntity.getApellido() + ", " + personaEntity.getNombre() + " (" + personaEntity.getPersonaId() + ")" + (char) 10;
         data += facultad.getNombre() + (char) 10;
         data += (char) 10;
         data += "De nuestra mayor consideración:" + (char) 10;

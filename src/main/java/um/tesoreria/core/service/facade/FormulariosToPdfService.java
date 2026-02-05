@@ -12,8 +12,6 @@ import java.util.List;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +29,7 @@ import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
 
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.CarreraService;
 import um.tesoreria.core.service.ChequeraCuotaService;
@@ -39,7 +38,7 @@ import um.tesoreria.core.service.FacultadService;
 import um.tesoreria.core.service.LectivoAlternativaService;
 import um.tesoreria.core.service.LectivoService;
 import um.tesoreria.core.service.LegajoService;
-import um.tesoreria.core.service.PersonaService;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.service.TipoChequeraService;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.CarreraException;
@@ -102,11 +101,11 @@ public class FormulariosToPdfService {
 
         Facultad facultad = facultadService.findByFacultadId(serie.getFacultadId());
         TipoChequera tipoChequera = tipoChequeraService.findByTipoChequeraId(serie.getTipoChequeraId());
-        Persona persona = null;
+        PersonaEntity personaEntity = null;
         try {
-            persona = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
+            personaEntity = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
         } catch (PersonaException e) {
-            persona = new Persona();
+            personaEntity = new PersonaEntity();
         }
         Lectivo lectivo = null;
         try {
@@ -116,7 +115,7 @@ public class FormulariosToPdfService {
         }
         // Sincroniza carrera
         try {
-            sincronizeService.sincronizeCarreraAlumno(facultadId, persona.getPersonaId(), persona.getDocumentoId());
+            sincronizeService.sincronizeCarreraAlumno(facultadId, personaEntity.getPersonaId(), personaEntity.getDocumentoId());
         } catch (Exception e) {
             log.debug("Sin sincronizar");
         }
@@ -183,8 +182,8 @@ public class FormulariosToPdfService {
             paragraph.setAlignment(Element.ALIGN_RIGHT);
             document.add(paragraph);
             paragraph = new Paragraph(
-                    new Phrase("         Alumno: (" + persona.getPersonaId() + ") ", new Font(Font.HELVETICA, 11)));
-            paragraph.add(new Phrase(persona.getApellido() + ", " + persona.getNombre(),
+                    new Phrase("         Alumno: (" + personaEntity.getPersonaId() + ") ", new Font(Font.HELVETICA, 11)));
+            paragraph.add(new Phrase(personaEntity.getApellido() + ", " + personaEntity.getNombre(),
                     new Font(Font.HELVETICA, 11, Font.BOLD)));
             if (facultadId != 6)
                 paragraph.add(new Phrase(" - (" + carrera.getNombre() + ")", new Font(Font.HELVETICA, 11)));
@@ -317,11 +316,11 @@ public class FormulariosToPdfService {
 
         Facultad facultad = facultadService.findByFacultadId(serie.getFacultadId());
         TipoChequera tipoChequera = tipoChequeraService.findByTipoChequeraId(serie.getTipoChequeraId());
-        Persona persona = null;
+        PersonaEntity personaEntity = null;
         try {
-            persona = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
+            personaEntity = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
         } catch (PersonaException e) {
-            persona = new Persona();
+            personaEntity = new PersonaEntity();
         }
         Lectivo lectivo = null;
         try {
@@ -331,7 +330,7 @@ public class FormulariosToPdfService {
         }
         // Sincroniza carrera
         try {
-            sincronizeService.sincronizeCarreraAlumno(facultadId, persona.getPersonaId(), persona.getDocumentoId());
+            sincronizeService.sincronizeCarreraAlumno(facultadId, personaEntity.getPersonaId(), personaEntity.getDocumentoId());
         } catch (Exception e) {
             log.debug("Sin sincronizar");
         }
@@ -398,8 +397,8 @@ public class FormulariosToPdfService {
             paragraph.setAlignment(Element.ALIGN_RIGHT);
             document.add(paragraph);
             paragraph = new Paragraph(
-                    new Phrase("         Alumno: (" + persona.getPersonaId() + ") ", new Font(Font.HELVETICA, 11)));
-            paragraph.add(new Phrase(persona.getApellido() + ", " + persona.getNombre(),
+                    new Phrase("         Alumno: (" + personaEntity.getPersonaId() + ") ", new Font(Font.HELVETICA, 11)));
+            paragraph.add(new Phrase(personaEntity.getApellido() + ", " + personaEntity.getNombre(),
                     new Font(Font.HELVETICA, 11, Font.BOLD)));
             if (facultadId != 6)
                 paragraph.add(new Phrase(" - (" + carrera.getNombre() + ")", new Font(Font.HELVETICA, 11)));

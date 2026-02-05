@@ -19,7 +19,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.kotlin.model.Auditable;
-import um.tesoreria.core.kotlin.model.Persona;
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 
 /**
  * @author daniel
@@ -49,6 +49,6 @@ public class PersonaBeneficiario extends Auditable implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "personaUniqueId", insertable = false, updatable = false)
-	private Persona persona;
+	private PersonaEntity personaEntity;
 
 }

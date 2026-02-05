@@ -9,6 +9,8 @@ import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PersonaException;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.ChequeraSerieControl;
 import um.tesoreria.core.model.ChequeraTotal;
@@ -72,14 +74,14 @@ public class SpoterService {
                                             CarreraChequera carreraChequera) {
         log.debug("Processing SpoterService.makeChequeraSpoter");
         Build build = buildService.findLast();
-        Persona persona;
+        PersonaEntity personaEntity;
         try {
-            persona = personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
+            personaEntity = personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
         } catch (PersonaException e) {
-            persona = personaService.add(new Persona(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
+            personaEntity = personaService.add(new PersonaEntity(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
                     spoterData.getApellido(), spoterData.getNombre(), "", (byte) 0, "", "", ""));
         }
-        logPersona(persona);
+        logPersona(personaEntity);
         Domicilio domicilio;
         try {
             domicilio = domicilioService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
@@ -240,14 +242,14 @@ public class SpoterService {
         }
     }
 
-    private void logPersona(Persona persona) {
+    private void logPersona(PersonaEntity personaEntity) {
         try {
             log.debug("Persona -> {}", JsonMapper
                     .builder()
                     .findAndAddModules()
                     .build()
                     .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(persona));
+                    .writeValueAsString(personaEntity));
         } catch (JsonProcessingException e) {
             log.debug("Persona jsonify error -> {}", e.getMessage());
         }

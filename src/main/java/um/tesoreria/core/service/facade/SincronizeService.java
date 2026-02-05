@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CarreraException;
@@ -31,6 +30,7 @@ import um.tesoreria.core.extern.consumer.PersonaFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PlanFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.*;
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.InfoLdap;
 import um.tesoreria.core.model.Matricula;
@@ -43,7 +43,7 @@ import um.tesoreria.core.service.FacultadService;
 import um.tesoreria.core.service.InfoLdapService;
 import um.tesoreria.core.service.LegajoService;
 import um.tesoreria.core.service.MatriculaService;
-import um.tesoreria.core.service.PersonaService;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.service.PlanService;
 import um.tesoreria.core.service.UsuarioLdapService;
 import um.tesoreria.core.service.view.ChequeraClaseService;
@@ -136,14 +136,14 @@ public class SincronizeService {
 				serie = new ChequeraClase();
 			}
 			// Verificar persona
-			Persona persona;
+			PersonaEntity personaEntity;
 			try {
-				persona = personaService.findByUnique(inscripcion.getPersonaId(), inscripcion.getDocumentoId());
+				personaEntity = personaService.findByUnique(inscripcion.getPersonaId(), inscripcion.getDocumentoId());
 			} catch (PersonaException e) {
-				persona = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
+				personaEntity = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
 						inscripcion.getPersonaId(), inscripcion.getDocumentoId());
-				persona.setUniqueId(null);
-				persona = personaService.add(persona);
+				personaEntity.setUniqueId(null);
+				personaEntity = personaService.add(personaEntity);
 			}
 			// Verificar matricula
 			Matricula matricula = null;
@@ -192,14 +192,14 @@ public class SincronizeService {
 				serie = new ChequeraClase();
 			}
 			// Verificar persona
-			Persona persona;
+			PersonaEntity personaEntity;
 			try {
-				persona = personaService.findByUnique(preInscripcion.getPersonaId(), preInscripcion.getDocumentoId());
+				personaEntity = personaService.findByUnique(preInscripcion.getPersonaId(), preInscripcion.getDocumentoId());
 			} catch (PersonaException e) {
-				persona = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
+				personaEntity = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
 						preInscripcion.getPersonaId(), preInscripcion.getDocumentoId());
-				persona.setUniqueId(null);
-				persona = personaService.add(persona);
+				personaEntity.setUniqueId(null);
+				personaEntity = personaService.add(personaEntity);
 			}
 			// Verificar matricula
 			Matricula matricula;

@@ -1,10 +1,10 @@
 package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.annotation.JsonMerge
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.json.JsonMapper
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -97,7 +97,7 @@ data class ChequeraSerie(
         JoinColumn(name = "chs_per_id", referencedColumnName = "per_id", insertable = false, updatable = false),
         JoinColumn(name = "chs_doc_id", referencedColumnName = "per_doc_id", insertable = false, updatable = false)
     )
-    var persona: Persona? = null,
+    var persona: PersonaEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumns(
