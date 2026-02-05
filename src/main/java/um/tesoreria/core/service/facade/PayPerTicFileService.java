@@ -42,12 +42,12 @@ import um.tesoreria.core.service.ChequeraAlternativaService;
 import um.tesoreria.core.service.ChequeraSerieService;
 import um.tesoreria.core.service.DomicilioService;
 import um.tesoreria.core.service.PayPerTicService;
-import um.tesoreria.core.service.PersonaService;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.service.view.CuotaDeudaPayPerTicService;
 import um.tesoreria.core.util.Tool;
 import um.tesoreria.core.util.transfer.FileInfo;
 import lombok.extern.slf4j.Slf4j;
-import um.tesoreria.core.kotlin.model.Persona;
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 
 /**
  * @author daniel
@@ -126,14 +126,14 @@ public class PayPerTicFileService {
 				chequeraSerie = new ChequeraSerie();
 			}
 
-			Persona persona = null;
+			PersonaEntity personaEntity = null;
 			try {
-				persona = personaService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId());
+				personaEntity = personaService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId());
 			} catch (PersonaException e) {
-				persona = new Persona();
+				personaEntity = new PersonaEntity();
 			}
 
-			if (persona.getUniqueId() != null) {
+			if (personaEntity.getUniqueId() != null) {
 				row = sheet.createRow(++fila);
 				this.setCellString(row, 0, cuota.getKey(), style_normal); // external_transaction_id
 				this.setCellString(row, 1, cuota.getKey(), style_normal); // external_reference
@@ -167,12 +167,12 @@ public class PayPerTicFileService {
 				BigDecimal payer_reference = chequeraSerie.getPersonaId();
 				this.setCellBigDecimal(row, 16, payer_reference, style_normal);
 
-				String payer_name = persona.getApellido() + ", " + persona.getNombre();
+				String payer_name = personaEntity.getApellido() + ", " + personaEntity.getNombre();
 				this.setCellString(row, 17, payer_name, style_normal);
 
 				Domicilio domicilio = null;
 				try {
-					domicilio = domicilioService.findByUnique(persona.getPersonaId(), persona.getDocumentoId());
+					domicilio = domicilioService.findByUnique(personaEntity.getPersonaId(), personaEntity.getDocumentoId());
 				} catch (DomicilioException e) {
 					domicilio = new Domicilio();
 				}

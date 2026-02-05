@@ -13,7 +13,7 @@ import um.tesoreria.core.exception.ProvinciaException;
 import um.tesoreria.core.extern.consumer.*;
 import um.tesoreria.core.kotlin.model.Domicilio;
 import um.tesoreria.core.kotlin.model.Facultad;
-import um.tesoreria.core.kotlin.model.Persona;
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.model.Localidad;
 import um.tesoreria.core.model.Provincia;
 import um.tesoreria.core.model.view.DomicilioKey;
@@ -108,9 +108,9 @@ public class DomicilioService {
     private void sincronizeFacultad(Domicilio domicilio) {
         for (Facultad facultad : facultadService.findFacultades()) {
             if (!facultad.getApiserver().isEmpty()) {
-                Persona persona = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
+                PersonaEntity personaEntity = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
                         domicilio.getPersonaId(), domicilio.getDocumentoId());
-                if (persona.getUniqueId() != null) {
+                if (personaEntity.getUniqueId() != null) {
                     domicilioFacultadConsumer.sincronize(facultad.getApiserver(), facultad.getApiport(), domicilio);
                 }
             }

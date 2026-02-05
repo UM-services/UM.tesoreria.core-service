@@ -8,8 +8,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,8 +19,7 @@ import lombok.NoArgsConstructor;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.kotlin.model.Facultad;
 import um.tesoreria.core.kotlin.model.Geografica;
-import um.tesoreria.core.kotlin.model.Persona;
-import um.tesoreria.core.kotlin.model.view.ContratadoPersona;
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.util.Jsonifier;
 
 /**
@@ -120,7 +117,7 @@ public class Contrato extends Auditable implements Serializable {
             @JoinColumn(name = "con_per_id", referencedColumnName = "per_id", insertable = false, updatable = false),
             @JoinColumn(name = "con_doc_id", referencedColumnName = "per_doc_id", insertable = false, updatable = false)
     })
-    private Persona persona = null;
+    private PersonaEntity personaEntity = null;
 
     public String jsonify() {
         return Jsonifier.builder(this).build();

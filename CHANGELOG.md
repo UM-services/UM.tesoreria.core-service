@@ -5,6 +5,19 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-02-05
+- refactor: Migración del módulo Persona a arquitectura hexagonal
+  - Renombramiento de `Persona.kt` a `PersonaEntity.java`
+  - Reubicación de servicios y repositorios a paquete `um.tesoreria.core.hexagonal.persona`
+  - Actualización de dependencias en todos los servicios que usan Persona
+- feat: Implementación de Kafka Consumer Config para manejo de eventos de pago
+- refactor: Mejoras en KafkaProducerConfig usando string serializer class name
+- feat: Actualización de PaymentEventListener con containerFactory específico
+- refactor: Modificación de PreferenceClient para usar MercadoPagoContextDto importado
+- chore: Actualización de logging en bootstrap.yml para incluir debug de Kafka
+
+> Based on deep analysis of git diff HEAD (staged changes).
+
 ## [3.0.0] - 2026-02-03
 - chore(deps): Actualización de Spring Boot de 3.5.8 a 4.0.2
 - chore(deps): Actualización de Java de 24 a 25

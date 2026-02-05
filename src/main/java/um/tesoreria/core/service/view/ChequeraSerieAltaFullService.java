@@ -27,7 +27,7 @@ public class ChequeraSerieAltaFullService {
     public List<ChequeraSerieAltaFull> findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(Integer lectivoId, Integer facultadId, Integer geograficaId, Integer tipoChequeraId, OffsetDateTime fechaDesdePrimerVencimiento, ChequeraCuotaService chequeraCuotaService) {
         List<ChequeraSerieAltaFull> chequeras = new ArrayList<>();
         for (ChequeraSerieAltaFull chequeraSerieAltaFull : repository.findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(lectivoId, facultadId, geograficaId, tipoChequeraId)) {
-            log.debug(chequeraSerieAltaFull.getPersona().getApellidoNombre());
+            log.debug(chequeraSerieAltaFull.getPersonaEntity().getApellidoNombre());
             try {
                 ChequeraCuota chequeraCuota = chequeraCuotaService.findOneActivaImpagaPrevia(chequeraSerieAltaFull.getFacultadId(), chequeraSerieAltaFull.getTipoChequeraId(), chequeraSerieAltaFull.getChequeraSerieId(), chequeraSerieAltaFull.getAlternativaId(), fechaDesdePrimerVencimiento);
                 if (chequeraCuota.getVencimiento1().isBefore(fechaDesdePrimerVencimiento)) {

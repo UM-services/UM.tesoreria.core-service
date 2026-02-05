@@ -36,7 +36,7 @@ public class MercadoPagoCoreService {
         log.debug("\n\nProcessing MercadoPagoCoreService.makeContext\n\n");
 
         var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
-        var chequeraCuota = getChequeraCuota(chequeraCuotaId);
+        ChequeraCuota chequeraCuota = getChequeraCuota(chequeraCuotaId);
         if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
 
         var vencimiento = determineVencimientoMP(chequeraCuota, today);

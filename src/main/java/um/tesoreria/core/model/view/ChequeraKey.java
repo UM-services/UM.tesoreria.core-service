@@ -20,6 +20,7 @@ import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -83,7 +84,7 @@ public class ChequeraKey extends Auditable implements Serializable {
 	@JoinColumns({
 			@JoinColumn(name = "personaId", referencedColumnName = "per_id", insertable = false, updatable = false),
 			@JoinColumn(name = "documentoId", referencedColumnName = "per_doc_id", insertable = false, updatable = false) })
-	private Persona persona;
+	private PersonaEntity personaEntity;
 
 	@OneToOne
 	@JoinColumn(name = "lectivoId", insertable = false, updatable = false)
