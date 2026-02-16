@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.1.0**
+**Versión actual (SemVer): 3.1.1**
+
+## Novedades 3.1.1 (verificado en código)
+- fix: Corrección de timezone en consultas de pagos de MercadoPago (`findAllByTipoPagoIdAndFechaPago`)
+  - Ajuste de +3 horas para fechas posteriores a febrero 2026
+  - Ajuste especial para el 31 de enero de 2026 (+2h 59m)
+  - Nueva constante `TIPO_MERCADO_PAGO = 18`
+- refactor: Uso de `@RequiredArgsConstructor` en lugar de constructor manual
+- chore: Eliminación de campo `jsonMapper` no utilizado
 
 ## Novedades 3.1.0 (verificado en código)
 - Refactorización del módulo Persona a arquitectura hexagonal

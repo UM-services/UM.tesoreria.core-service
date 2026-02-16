@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -28,19 +29,14 @@ import um.tesoreria.core.repository.ChequeraPagoRepository;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ChequeraPagoService {
 
     private static final int TIPO_PAGO_THRESHOLD = 2;
+    private static final int TIPO_MERCADO_PAGO = 18;
 
     private final ChequeraPagoRepository repository;
     private final FacturacionElectronicaService facturacionElectronicaService;
-    private final JsonMapper jsonMapper;
-
-    public ChequeraPagoService(ChequeraPagoRepository repository, FacturacionElectronicaService facturacionElectronicaService) {
-        this.repository = repository;
-        this.facturacionElectronicaService = facturacionElectronicaService;
-        this.jsonMapper = JsonMapper.builder().findAndAddModules().build();
-    }
 
     private void fillChequeraCuotaId(ChequeraPago pago, ChequeraCuotaService chequeraCuotaService) {
         if (pago.getChequeraCuotaId() == null) {
@@ -68,6 +64,15 @@ public class ChequeraPagoService {
         // Crear fecha inicio (00:00:00) y fecha fin (23:59:59.999999999)
         OffsetDateTime fechaInicio = fechaPago.withHour(0).withMinute(0).withSecond(0).withNano(0);
         OffsetDateTime fechaFin = fechaPago.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+
+        if (tipoPagoId != null && tipoPagoId == TIPO_MERCADO_PAGO) {
+            if (fechaPago.getYear() > 2026 || (fechaPago.getYear() == 2026 && fechaPago.getMonthValue() >= 2)) {
+                fechaInicio = fechaInicio.plusHours(3);
+                fechaFin = fechaFin.plusHours(3);
+            } else if (fechaPago.getYear() == 2026 && fechaPago.getDayOfMonth() == 31) {
+                fechaFin = fechaFin.plusHours(2).plusMinutes(59).plusSeconds(59).plusNanos(999999999);
+            }
+        }
 
         return repository.findAllByTipoPagoIdAndFechaBetween(tipoPagoId, fechaInicio, fechaFin);
     }
