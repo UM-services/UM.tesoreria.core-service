@@ -5,6 +5,16 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2026-02-16
+- fix: Corrección de timezone en consultas de pagos de MercadoPago (`ChequeraPagoService.findAllByTipoPagoIdAndFechaPago`)
+  - Ajuste de +3 horas para fechas posteriores a febrero 2026
+  - Ajuste especial para el 31 de enero de 2026 (+2h 59m)
+  - Nueva constante `TIPO_MERCADO_PAGO = 18` para identificar pagos de MercadoPago
+- refactor: Uso de `@RequiredArgsConstructor` en `ChequeraPagoService` en lugar de constructor manual
+- chore: Eliminación de campo `jsonMapper` no utilizado en `ChequeraPagoService`
+
+> Based on deep analysis of git diff HEAD (uncommitted changes).
+
 ## [3.1.0] - 2026-02-05
 - refactor: Migración del módulo Persona a arquitectura hexagonal
   - Renombramiento de `Persona.kt` a `PersonaEntity.java`
