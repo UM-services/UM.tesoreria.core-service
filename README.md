@@ -4,7 +4,14 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.1.1**
+**Versión actual (SemVer): 3.1.2**
+
+## Novedades 3.1.2 (verificado en código)
+- fix: Refinamiento de corrección de timezone en pagos de MercadoPago
+  - Simplificación de la lógica de ajuste de timezone en `ChequeraPagoService`
+  - Ajuste directo de -3 horas al guardar fechas de pago y acreditación en `PagoService`
+  - Eliminación de lógica condicional compleja basada en fechas específicas
+- refactor: Uso consistente de `minusHours(3)` para normalización de fechas UTC a Argentina
 
 ## Novedades 3.1.1 (verificado en código)
 - fix: Corrección de timezone en consultas de pagos de MercadoPago (`findAllByTipoPagoIdAndFechaPago`)
