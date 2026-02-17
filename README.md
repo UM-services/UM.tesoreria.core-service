@@ -4,7 +4,19 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.1.2**
+**Versión actual (SemVer): 3.2.0**
+
+## Novedades 3.2.0 (verificado en código)
+- feat: Implementación completa del módulo ChequeraCuota con Arquitectura Hexagonal
+  - Nuevos modelos de dominio: `ChequeraCuota`, `ChequeraPago`, `ChequeraTotal`, `DeudaData`, `ChequeraSerie`
+  - Puertos definidos: `CalculateDeudaUseCase`, `ChequeraCuotaRepository`
+  - Servicio de aplicación: `ChequeraCuotaService` con cálculo de deudas y extensión
+  - Adaptador JPA: `JpaChequeraCuotaRepositoryAdapter` con mappers
+- refactor: Migración de lógica de negocio desde servicio tradicional a arquitectura hexagonal
+  - Integración en `ChequeraCuotaController`, `PersonaService`, `ChequeraSerieService`, `SheetService`
+  - Mejora en separación de concerns y testeabilidad
+- fix: Eliminación de dependencia circular en `LectivoService` (uso directo de repository)
+- chore: Limpieza de código comentado y optimización de imports
 
 ## Novedades 3.1.2 (verificado en código)
 - fix: Refinamiento de corrección de timezone en pagos de MercadoPago
@@ -437,15 +449,27 @@ src/
 │   │               ├── model/            # Modelos de datos
 │   │               ├── configuration/    # Configuraciones
 │   │               └── hexagonal/        # Arquitectura hexagonal
-│   │                   └── persona/
-│   │                       ├── application/
-│   │                       │   └── service/
+│   │                   ├── persona/
+│   │                   │   ├── application/
+│   │                   │   │   └── service/
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/
+│   │                   │       │   └── repository/
+│   │                   │       └── web/
+│   │                   │           └── controller/
+│   │                   └── chequeraCuota/        # Módulo ChequeraCuota (v3.2.0)
+│   │                       ├── domain/
+│   │                       │   ├── model/        # Entidades de dominio
+│   │                       │   └── ports/        # Puertos (interfaces)
+│   │                       │       ├── in/       # Puertos de entrada
+│   │                       │       └── out/      # Puertos de salida
 │   │                       └── infrastructure/
 │   │                           ├── persistence/
-│   │                           │   ├── entity/
-│   │                           │   └── repository/
-│   │                           └── web/
-│   │                               └── controller/
+│   │                           │   ├── repository/   # Adaptadores JPA
+│   │                           │   └── mapper/       # Mappers
+│   │                           └── application/
+│   │                               └── service/      # Servicios de aplicación
 │   └── resources/
 └── test/                                # Pruebas unitarias
 ```

@@ -26,6 +26,7 @@ import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
 import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
 import um.tesoreria.core.extern.model.kotlin.PreInscripcionFacultad;
+import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.MercadoPagoContext;
@@ -58,6 +59,7 @@ public class PersonaService {
     private final MercadoPagoContextService mercadoPagoContextService;
     private final PreferenceClient preferenceClient;
     private final um.tesoreria.core.service.facade.MercadoPagoCoreService mercadoPagoCoreService;
+    private final CalculateDeudaUseCase calculateDeudaUseCase;
 
     public PersonaEntity findByUnique(BigDecimal personaId, Integer documentoId) {
         return repository.findByPersonaIdAndDocumentoId(personaId, documentoId)
@@ -78,8 +80,7 @@ public class PersonaService {
         List<DeudaChequeraDto> deudas = new ArrayList<>();
         for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
                 null)) {
-            DeudaChequeraDto deuda = chequeraCuotaService.calculateDeuda(chequera.getFacultadId(),
-                    chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
+            DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeuda(toDomain(chequera));
             if (deuda.getCuotas() > 0) {
                 deudas.add(deuda);
                 deudaCuotas += deuda.getCuotas();
@@ -104,8 +105,7 @@ public class PersonaService {
         List<VencimientoDto> vencimientoDtos = new ArrayList<>();
         for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
                 null)) {
-            DeudaChequeraDto deuda = chequeraCuotaService.calculateDeudaExtended(chequera.getFacultadId(),
-                    chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
+            DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeudaExtended(toDomain(chequera));
             if (deuda.getCuotas() > 0) {
                 deudas.add(deuda);
                 deudaCuotas += deuda.getCuotas();
@@ -167,6 +167,22 @@ public class PersonaService {
                 .deuda(deudaTotal)
                 .deudas(deudas)
                 .vencimientos(vencimientoDtos)
+                .build();
+    }
+    
+    private um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraSerie toDomain(ChequeraSerie chequera) {
+        if (chequera == null) {
+            return null;
+        }
+        return um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraSerie.builder()
+                .chequeraId(chequera.getChequeraId())
+                .facultadId(chequera.getFacultadId())
+                .tipoChequeraId(chequera.getTipoChequeraId())
+                .chequeraSerieId(chequera.getChequeraSerieId())
+                .personaId(chequera.getPersonaId())
+                .documentoId(chequera.getDocumentoId())
+                .alternativaId(chequera.getAlternativaId())
+                .lectivoId(chequera.getLectivoId())
                 .build();
     }
 

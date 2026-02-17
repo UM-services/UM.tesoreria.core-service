@@ -5,6 +5,38 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-02-17
+### Added
+- feat(hexagonal): Implementación completa del módulo ChequeraCuota con Arquitectura Hexagonal
+  - Creación de modelo de dominio: `ChequeraCuota`, `ChequeraPago`, `ChequeraTotal`, `DeudaData`, `ChequeraSerie`
+  - Definición de puertos (interfaces): `CalculateDeudaUseCase` (entrada), `ChequeraCuotaRepository` (salida)
+  - Implementación de servicio de aplicación: `ChequeraCuotaService` con métodos `calculateDeuda()` y `calculateDeudaExtended()`
+  - Adaptador de persistencia: `JpaChequeraCuotaRepositoryAdapter` con mapeo entre entidades JPA y modelos de dominio
+  - Mappers: `ChequeraCuotaMapper` para conversión entre capas, `ChequeraSerieMapper` para integración
+- feat(api): Integración del nuevo caso de uso en controladores y servicios existentes
+  - `ChequeraCuotaController`: Uso de `CalculateDeudaUseCase` en endpoint `/deuda/{facultadId}/{tipoChequeraId}/{chequeraSerieId}`
+  - `PersonaService`: Migración de cálculo de deudas al nuevo servicio hexagonal
+  - `ChequeraSerieService`: Integración para seteo automático de deuda en chequeras
+  - `SheetService`: Actualización para usar el nuevo caso de uso
+
+### Changed
+- refactor(hexagonal): Migración de lógica de negocio desde `ChequeraCuotaService` tradicional a arquitectura hexagonal
+  - Eliminación de métodos `calculateDeuda()` y `calculateDeudaExtended()` del servicio tradicional (~210 líneas)
+  - Separación de concerns: lógica de negocio aislada en capa de dominio
+  - Mejora en testeabilidad mediante inyección de dependencias por interfaces
+
+### Fixed
+- fix(circular-deps): Eliminación de dependencia circular en `LectivoService`
+  - Reemplazo de `ChequeraSerieService` por `ChequeraSerieRepository` directamente
+  - Resolución de acoplamiento entre servicios de dominio
+
+### Removed
+- chore(cleanup): Limpieza de código obsoleto
+  - Eliminación de comentario de código muerto en `ChequeraCuotaController`
+  - Remoción de imports no utilizados en `ChequeraCuotaService`
+
+> Basado en análisis profundo de `git diff HEAD`, estructura de archivos y dependencias en `pom.xml`.
+
 ## [3.1.2] - 2026-02-17
 - fix: Refinamiento de corrección de timezone en pagos de MercadoPago
   - Simplificación de la lógica de ajuste de timezone en `ChequeraPagoService`

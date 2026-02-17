@@ -1,20 +1,20 @@
 ---
 title: Arquitectura Hexagonal - Caso de Uso Curso Cargo Contratado
 ---
-graph TD
-    subgraph "Dominio (Domain)"
-        D[Entidades<br/>Casos de Uso<br/>Reglas de Negocio]
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        D["Entidades<br/>Casos de Uso<br/>Reglas de Negocio"]
     end
 
-    subgraph "Aplicación (Application)"
-        IP[Puertos de Entrada<br/>(Interfaces de Casos de Uso)]
-        OP[Puertos de Salida<br/>(Interfaces de Repositorios)]
+    subgraph Aplicacion ["Aplicación (Application)"]
+        IP["Puertos de Entrada<br/>(Interfaces de Casos de Uso)"]
+        OP["Puertos de Salida<br/>(Interfaces de Repositorios)"]
     end
 
-    subgraph "Infraestructura (Infrastructure)"
-        C[Controladores Web<br/>(Adaptadores de Entrada)]
-        R[Repositorios JPA<br/>(Adaptadores de Salida)]
-        M[Mappers<br/>DTOs]
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        C["Controladores Web<br/>(Adaptadores de Entrada)"]
+        R["Repositorios JPA<br/>(Adaptadores de Salida)"]
+        M["Mappers<br/>DTOs"]
     end
 
     C --> IP

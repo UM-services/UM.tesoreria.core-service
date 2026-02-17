@@ -79,6 +79,9 @@ Promise.all([
 const diagrams = [
   { id: 'architecture', file: 'architecture.mmd', title: '🏛️ Arquitectura General del Servicio' },
   { id: 'hexagonal-architecture', file: 'hexagonal-architecture.mmd', title: '🔷 Arquitectura Hexagonal - Caso de Uso Curso Cargo Contratado' },
+  { id: 'hexagonal-chequeraCuota', file: 'hexagonal-chequeraCuota.mmd', title: '🔷 Arquitectura Hexagonal - Chequera Cuota' },
+  { id: 'hexagonal-mercadopago', file: 'hexagonal-mercadopago-context-history.mmd', title: '🔷 Arquitectura Hexagonal - MercadoPago Context History' },
+  { id: 'dependencies-diagram', file: 'dependencies.mmd', title: '📦 Diagrama de Dependencias' },
   { id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },
   { id: 'deployment-diagram', file: 'deployment.mmd', title: '🚀 Diagrama de Despliegue' },
   { id: 'sequence-diagrams', file: 'sequence-alta-usuario.mmd', title: 'Alta de Usuario' },

@@ -66,7 +66,6 @@ import um.tesoreria.core.model.view.TipoPagoFechaAcreditacion;
 import um.tesoreria.core.service.ArancelTipoService;
 import um.tesoreria.core.service.BajaService;
 import um.tesoreria.core.service.CarreraService;
-import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.service.ChequeraSerieService;
 import um.tesoreria.core.service.ContratoPeriodoService;
 import um.tesoreria.core.service.CuentaMovimientoService;
@@ -83,6 +82,9 @@ import um.tesoreria.core.service.TipoChequeraService;
 import um.tesoreria.core.service.TipoPagoService;
 import um.tesoreria.core.service.view.*;
 import um.tesoreria.core.model.PersonaSuspendido;
+import lombok.RequiredArgsConstructor;
+import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
+import um.tesoreria.core.util.ChequeraSerieMapper;
 import um.tesoreria.core.service.*;
 
 /**
@@ -90,6 +92,7 @@ import um.tesoreria.core.service.*;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SheetService {
 
     private final FacultadService facultadService;
@@ -97,9 +100,9 @@ public class SheetService {
     private final GeograficaService geograficaService;
     private final IngresoPeriodoService ingresoPeriodoService;
     private final ChequeraSerieService chequeraSerieService;
+    private final CalculateDeudaUseCase calculateDeudaUseCase;
     private final PersonaKeyService personaKeyService;
     private final ArancelTipoService arancelTipoService;
-    private final ChequeraCuotaService chequeraCuotaService;
     private final LegajoKeyService legajoKeyService;
     private final CarreraKeyService carreraKeyService;
     private final DomicilioKeyService domicilioKeyService;
@@ -134,49 +137,6 @@ public class SheetService {
     private final ProveedorService proveedorService;
     private final FacturaPendienteService facturaPendienteService;
 
-    public SheetService(FacultadService facultadService, TipoPagoService tipoPagoService, GeograficaService geograficaService, IngresoPeriodoService ingresoPeriodoService, ChequeraSerieService chequeraSerieService, PersonaKeyService personaKeyService, ArancelTipoService arancelTipoService, ChequeraCuotaService chequeraCuotaService, LegajoKeyService legajoKeyService, CarreraKeyService carreraKeyService, DomicilioKeyService domicilioKeyService, EjercicioService ejercicioService, ProveedorMovimientoService proveedorMovimientoService, SincronizeService sincronizeService, LectivoService lectivoService, PlanService planService, CarreraService carreraService, ChequeraPreunivService chequeraPreunivService, TipoChequeraService tipoChequeraService, PreunivResumenFacultadConsumer preunivResumenFacultadConsumer, PreunivMatricResumenFacultadConsumer preunivMatricResumenFacultadConsumer, PreTurnoFacultadConsumer preTurnoFacultadConsumer, PreunivCarreraFacultadConsumer preunivCarreraFacultadConsumer, PersonaKeyFacultadConsumer personaKeyFacultadConsumer, LegajoKeyFacultadConsumer legajoKeyFacultadConsumer, InscripcionFacultadConsumer inscripcionFacultadConsumer, CarreraFacultadConsumer carreraFacultadConsumer, PlanFacultadConsumer planFacultadConsumer, InscriptoCursoFacultadConsumer inscriptoCursoFacultadConsumer, TipoPagoFechaAcreditacionService tipoPagoFechaAcreditacionService, IngresoAsientoService ingresoAsientoService, CuentaMovimientoService cuentaMovimientoService, PersonaSuspendidoService personaSuspendidoService, ContratoPeriodoService contratoPeriodoService, BajaService bajaService, BajaFacultadConsumer bajaFacultadConsumer, LegajoService legajoService, FacturacionElectronicaService facturacionElectronicaService, ProveedorService proveedorService, Environment environment, FacturaPendienteService facturaPendienteService) {
-        this.facultadService = facultadService;
-        this.tipoPagoService = tipoPagoService;
-        this.geograficaService = geograficaService;
-        this.ingresoPeriodoService = ingresoPeriodoService;
-        this.chequeraSerieService = chequeraSerieService;
-        this.personaKeyService = personaKeyService;
-        this.arancelTipoService = arancelTipoService;
-        this.chequeraCuotaService = chequeraCuotaService;
-        this.legajoKeyService = legajoKeyService;
-        this.carreraKeyService = carreraKeyService;
-        this.domicilioKeyService = domicilioKeyService;
-        this.ejercicioService = ejercicioService;
-        this.proveedorMovimientoService = proveedorMovimientoService;
-        this.sincronizeService = sincronizeService;
-        this.lectivoService = lectivoService;
-        this.planService = planService;
-        this.carreraService = carreraService;
-        this.chequeraPreunivService = chequeraPreunivService;
-        this.tipoChequeraService = tipoChequeraService;
-        this.preunivResumenFacultadConsumer = preunivResumenFacultadConsumer;
-        this.preunivMatricResumenFacultadConsumer = preunivMatricResumenFacultadConsumer;
-        this.preTurnoFacultadConsumer = preTurnoFacultadConsumer;
-        this.preunivCarreraFacultadConsumer = preunivCarreraFacultadConsumer;
-        this.personaKeyFacultadConsumer = personaKeyFacultadConsumer;
-        this.legajoKeyFacultadConsumer = legajoKeyFacultadConsumer;
-        this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;
-        this.carreraFacultadConsumer = carreraFacultadConsumer;
-        this.planFacultadConsumer = planFacultadConsumer;
-        this.inscriptoCursoFacultadConsumer = inscriptoCursoFacultadConsumer;
-        this.tipoPagoFechaAcreditacionService = tipoPagoFechaAcreditacionService;
-        this.ingresoAsientoService = ingresoAsientoService;
-        this.cuentaMovimientoService = cuentaMovimientoService;
-        this.personaSuspendidoService = personaSuspendidoService;
-        this.contratoPeriodoService = contratoPeriodoService;
-        this.bajaService = bajaService;
-        this.bajaFacultadConsumer = bajaFacultadConsumer;
-        this.legajoService = legajoService;
-        this.facturacionElectronicaService = facturacionElectronicaService;
-        this.proveedorService = proveedorService;
-        this.environment = environment;
-        this.facturaPendienteService = facturaPendienteService;
-    }
 
     public String generateIngresos(Integer anho, Integer mes) {
         String path = environment.getProperty("path.files");
@@ -317,7 +277,7 @@ public class SheetService {
 
             for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()))) {
                 ChequeraSerie chequeraSerie = chequeras.get(persona.getUnified());
-                DeudaChequeraDto deudaChequeraDto = chequeraCuotaService.calculateDeuda(facultadId, tipochequeraId, chequeraSerie.getChequeraSerieId());
+                DeudaChequeraDto deudaChequeraDto = calculateDeudaUseCase.calculateDeuda(ChequeraSerieMapper.toHexagonal(chequeraSerie));
                 boolean show = true;
                 if (soloDeudores) {
                     if (deudaChequeraDto.getDeuda().compareTo(BigDecimal.ZERO) == 0) {
@@ -609,7 +569,12 @@ public class SheetService {
             // Calcula Deuda
             BigDecimal deuda = BigDecimal.ZERO;
             for (ChequeraPreuniv chequera : chequerasPreInscriptos.values()) {
-                deuda = deuda.add(chequeraCuotaService.calculateDeuda(chequera.getFacultadId(), chequera.getTipoChequeraId(), chequera.getChequeraSerieId()).getDeuda());
+                try {
+                    var serie = chequeraSerieService.findByUnique(chequera.getFacultadId(), chequera.getTipoChequeraId(), chequera.getChequeraSerieId());
+                    deuda = deuda.add(calculateDeudaUseCase.calculateDeuda(ChequeraSerieMapper.toHexagonal(serie)).getDeuda());
+                } catch (Exception e) {
+                    deuda = deuda.add(calculateDeudaUseCase.calculateDeuda(null).getDeuda());
+                }
             }
             this.setCellBigDecimal(row, 7, deuda, styleNormal);
             // Lista los alumnos sin chequera
@@ -640,7 +605,13 @@ public class SheetService {
             this.setCellString(row, 2, "(" + chequeraPreuniv.getPersonaKey() + ") - " + chequeraPreuniv.getPersonaEntity().getApellido() + ", " + chequeraPreuniv.getPersonaEntity().getNombre(), styleNormal);
             this.setCellString(row, 3, chequeraPreuniv.getChequera(), styleNormal);
             // Calcula Deuda
-            BigDecimal deuda = chequeraCuotaService.calculateDeuda(chequeraPreuniv.getFacultadId(), chequeraPreuniv.getTipoChequeraId(), chequeraPreuniv.getChequeraSerieId()).getDeuda();
+            BigDecimal deuda = BigDecimal.ZERO;
+            try {
+                var serie = chequeraSerieService.findByUnique(chequeraPreuniv.getFacultadId(), chequeraPreuniv.getTipoChequeraId(), chequeraPreuniv.getChequeraSerieId());
+                deuda = calculateDeudaUseCase.calculateDeuda(ChequeraSerieMapper.toHexagonal(serie)).getDeuda();
+            } catch (Exception e) {
+                deuda = calculateDeudaUseCase.calculateDeuda(null).getDeuda();
+            }
             this.setCellBigDecimal(row, 4, deuda, styleNormal);
         }
 
@@ -1183,7 +1154,7 @@ public class SheetService {
             // Lista la deuda
             boolean deudor = false;
             for (ChequeraSerie serie : chequeraSerieService.findAllByPersona(suspendido.getPersonaId(), suspendido.getDocumentoId())) {
-                DeudaChequeraDto deuda = chequeraCuotaService.calculateDeuda(serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId());
+                DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeuda(ChequeraSerieMapper.toHexagonal(serie));
                 if (deuda.getCuotas() > 0) {
                     deudor = true;
                     row = sheet.createRow(++fila);

@@ -67,7 +67,7 @@ public class ChequeraSerieController {
     @GetMapping("/personaextended/{personaId}/{documentoId}")
     public ResponseEntity<List<ChequeraSerie>> findAllByPersonaExtended(@PathVariable BigDecimal personaId,
                                                                         @PathVariable Integer documentoId) {
-        return new ResponseEntity<>(service.findAllByPersonaExtended(personaId, documentoId, chequeraCuotaService),
+        return new ResponseEntity<>(service.findAllByPersonaExtended(personaId, documentoId),
                 HttpStatus.OK);
     }
 
@@ -82,7 +82,7 @@ public class ChequeraSerieController {
     public ResponseEntity<List<ChequeraSerie>> findAllByFacultadExtended(@PathVariable BigDecimal personaId,
                                                                          @PathVariable Integer documentoId,
                                                                          @PathVariable Integer facultadId) {
-        return ResponseEntity.ok(service.findAllByFacultadExtended(personaId, documentoId, facultadId, chequeraCuotaService));
+        return ResponseEntity.ok(service.findAllByFacultadExtended(personaId, documentoId, facultadId));
     }
 
     @GetMapping("/personaLectivo/{personaId}/{documentoId}/{lectivoId}")
@@ -148,7 +148,7 @@ public class ChequeraSerieController {
 
     @GetMapping("/extended/{chequeraId}")
     public ResponseEntity<ChequeraSerie> findByChequeraIdExtended(@PathVariable Long chequeraId) {
-        return ResponseEntity.ok(service.findByChequeraIdExtended(chequeraId, chequeraCuotaService));
+        return ResponseEntity.ok(service.findByChequeraIdExtended(chequeraId));
     }
 
     @GetMapping("/unique/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
@@ -167,7 +167,7 @@ public class ChequeraSerieController {
                                                               @PathVariable Integer tipochequeraId,
                                                               @PathVariable Long chequeraserieId) {
         try {
-            return ResponseEntity.ok(service.findByUniqueExtended(facultadId, tipochequeraId, chequeraserieId, chequeraCuotaService));
+            return ResponseEntity.ok(service.findByUniqueExtended(facultadId, tipochequeraId, chequeraserieId));
         } catch (ChequeraSerieException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
