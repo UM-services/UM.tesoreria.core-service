@@ -5,6 +5,15 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2] - 2026-02-17
+- fix: Refinamiento de corrección de timezone en pagos de MercadoPago
+  - Simplificación de la lógica de ajuste de timezone en `ChequeraPagoService`
+  - Ajuste directo de -3 horas al guardar fechas de pago y acreditación en `PagoService`
+  - Eliminación de lógica condicional compleja basada en fechas específicas
+- refactor: Uso consistente de `minusHours(3)` para normalización de fechas UTC a Argentina
+
+> Based on deep analysis of git diff HEAD (uncommitted changes) en `ChequeraPagoService.java` y `PagoService.java`.
+
 ## [3.1.1] - 2026-02-16
 - fix: Corrección de timezone en consultas de pagos de MercadoPago (`ChequeraPagoService.findAllByTipoPagoIdAndFechaPago`)
   - Ajuste de +3 horas para fechas posteriores a febrero 2026
