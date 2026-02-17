@@ -1,20 +1,20 @@
 ---
 title: Arquitectura Hexagonal - MercadoPagoContextHistory
 ---
-graph TD
-    subgraph "Dominio (Domain)"
-        D[MercadoPagoContextHistory<br/>CreateMercadoPagoContextHistoryUseCase]
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        D["MercadoPagoContextHistory<br/>CreateMercadoPagoContextHistoryUseCase"]
     end
 
-    subgraph "Aplicación (Application)"
-        IP[CreateMercadoPagoContextHistoryUseCase<br/>(Puerto de Entrada)]
-        OP[MercadoPagoContextHistoryRepository<br/>(Puerto de Salida)]
+    subgraph Aplicacion ["Aplicación (Application)"]
+        IP["CreateMercadoPagoContextHistoryUseCase<br/>(Puerto de Entrada)"]
+        OP["MercadoPagoContextHistoryRepository<br/>(Puerto de Salida)"]
     end
 
-    subgraph "Infraestructura (Infrastructure)"
-        C[MercadoPagoContextHistoryRequestService<br/>(Adaptador de Entrada)]
-        R[JpaMercadoPagoContextHistoryRepositoryAdapter<br/>(Adaptador de Salida)]
-        M[MercadoPagoContextHistoryMapper<br/>MercadoPagoContextHistoryEntity]
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        C["MercadoPagoContextHistoryRequestService<br/>(Adaptador de Entrada)"]
+        R["JpaMercadoPagoContextHistoryRepositoryAdapter<br/>(Adaptador de Salida)"]
+        M["MercadoPagoContextHistoryMapper<br/>MercadoPagoContextHistoryEntity"]
     end
 
     C --> IP

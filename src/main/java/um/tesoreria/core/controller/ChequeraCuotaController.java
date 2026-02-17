@@ -24,6 +24,10 @@ import um.tesoreria.core.exception.ChequeraCuotaException;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.service.ChequeraCuotaService;
 
+import um.tesoreria.core.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
+import um.tesoreria.core.util.ChequeraSerieMapper;
+
 /**
  * @author daniel
  *
@@ -35,6 +39,8 @@ public class ChequeraCuotaController {
 
     public final ChequeraCuotaService service;
     private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
+    private final ChequeraSerieService chequeraSerieService;
+    private final CalculateDeudaUseCase calculateDeudaUseCase;
 
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
     public ResponseEntity<List<ChequeraCuota>> findAllByChequera(@PathVariable Integer facultadId,
@@ -59,7 +65,6 @@ public class ChequeraCuotaController {
     @GetMapping("/deudaRango/{desde}/{hasta}/{reduced}")
     public ResponseEntity<List<ChequeraCuotaDeuda>> findAllDeudaRango(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta, @PathVariable Boolean reduced) {
         return ResponseEntity.ok(chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null, service));
-//        return new ResponseEntity<>(chequeraCuotaDeudaService.findQuinterosByRango(desde, hasta, reduced, null, service), HttpStatus.OK);
     }
 
     @GetMapping("/deudaRango/grupo/{grupo}/{desde}/{hasta}/{reduced}")
@@ -101,7 +106,12 @@ public class ChequeraCuotaController {
     @GetMapping("/deuda/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<DeudaChequeraDto> calculateDeuda(@PathVariable Integer facultadId,
                                                            @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
-        return ResponseEntity.ok(service.calculateDeuda(facultadId, tipoChequeraId, chequeraSerieId));
+        try {
+            var chequera = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+            return ResponseEntity.ok(calculateDeudaUseCase.calculateDeudaExtended(ChequeraSerieMapper.toHexagonal(chequera)));
+        } catch (um.tesoreria.core.exception.ChequeraSerieException e) {
+            return ResponseEntity.ok(calculateDeudaUseCase.calculateDeuda(null));
+        }
     }
 
     @GetMapping("/updateBarras/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")

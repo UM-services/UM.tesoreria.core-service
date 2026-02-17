@@ -32,6 +32,9 @@ import um.tesoreria.core.service.view.ChequeraKeyService;
 import um.tesoreria.core.service.view.ChequeraSerieAltaFullService;
 import um.tesoreria.core.service.view.ChequeraSerieAltaService;
 
+import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
+import um.tesoreria.core.util.ChequeraSerieMapper;
+
 /**
  * @author daniel
  */
@@ -48,6 +51,7 @@ public class ChequeraSerieService {
     private final DebitoService debitoService;
     private final ChequeraKeyService chequeraKeyService;
     private final ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
+    private final CalculateDeudaUseCase calculateDeudaUseCase;
 
     public List<ChequeraSerie> findAllByPersona(BigDecimal personaId, Integer documentoId) {
         return repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, Sort.by("lectivoId").descending());
@@ -58,10 +62,10 @@ public class ChequeraSerieService {
         return repository.findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId(personaId, documentoId, facultadId, lectivoId);
     }
 
-    public List<ChequeraSerie> findAllByPersonaExtended(BigDecimal personaId, Integer documentoId, ChequeraCuotaService chequeraCuotaService) {
+    public List<ChequeraSerie> findAllByPersonaExtended(BigDecimal personaId, Integer documentoId) {
         return repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, Sort.by("lectivoId").descending())
                 .stream()
-                .peek(chequera -> setDeuda(chequera, chequeraCuotaService))
+                .peek(chequera -> setDeuda(chequera))
                 .toList();
     }
 
@@ -114,10 +118,10 @@ public class ChequeraSerieService {
     }
 
     public List<ChequeraSerie> findAllByFacultadExtended(BigDecimal personaId, Integer documentoId,
-                                                         Integer facultadId, ChequeraCuotaService chequeraCuotaService) {
+                                                         Integer facultadId) {
         return repository.findAllByPersonaIdAndDocumentoIdAndFacultadId(personaId, documentoId, facultadId)
                 .stream()
-                .peek(chequera -> setDeuda(chequera, chequeraCuotaService))
+                .peek(chequera -> setDeuda(chequera))
                 .toList();
     }
 
@@ -155,9 +159,9 @@ public class ChequeraSerieService {
         return repository.findByChequeraId(chequeraId).orElseThrow(() -> new ChequeraSerieException(chequeraId));
     }
 
-    public ChequeraSerie findByChequeraIdExtended(Long chequeraId, ChequeraCuotaService chequeraCuotaService) {
+    public ChequeraSerie findByChequeraIdExtended(Long chequeraId) {
         ChequeraSerie chequera = findByChequeraId(chequeraId);
-        setDeuda(chequera, chequeraCuotaService);
+        setDeuda(chequera);
         return chequera;
     }
 
@@ -170,9 +174,9 @@ public class ChequeraSerieService {
         return chequera;
     }
 
-    public ChequeraSerie findByUniqueExtended(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, ChequeraCuotaService chequeraCuotaService) {
+    public ChequeraSerie findByUniqueExtended(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         ChequeraSerie chequera = findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
-        setDeuda(chequera, chequeraCuotaService);
+        setDeuda(chequera);
         return chequera;
     }
 
@@ -300,11 +304,9 @@ public class ChequeraSerieService {
         return repository.findAllFacultadSedeByLectivo(lectivoId);
     }
 
-    private void setDeuda(ChequeraSerie chequera, ChequeraCuotaService chequeraCuotaService) {
-        var deuda = chequeraCuotaService.calculateDeuda(
-                chequera.getFacultadId(),
-                chequera.getTipoChequeraId(),
-                chequera.getChequeraSerieId()
+    private void setDeuda(ChequeraSerie chequera) {
+        var deuda = calculateDeudaUseCase.calculateDeuda(
+                ChequeraSerieMapper.toHexagonal(chequera)
         );
         chequera.setCuotasDeuda(deuda.getCuotas());
         chequera.setImporteDeuda(deuda.getDeuda());

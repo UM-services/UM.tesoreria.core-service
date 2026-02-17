@@ -1,0 +1,76 @@
+---
+title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.2.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        CC[ChequeraCuota<br/>Entidad de Dominio]
+        CP[ChequeraPago<br/>Entidad de Dominio]
+        CT[ChequeraTotal<br/>Entidad de Dominio]
+        CS[ChequeraSerie<br/>Entidad de Dominio]
+        DD[DeudaData<br/>Agregado]
+        CDU[CalculateDeudaUseCase<br/>Puerto de Entrada]
+        CCR[ChequeraCuotaRepository<br/>Puerto de Salida]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        CCS[ChequeraCuotaService<br/>Servicio de Aplicación]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        CCC[ChequeraCuotaController<br/>Adaptador Web]
+        PS[PersonaService<br/>Consumidor]
+        CSS[ChequeraSerieService<br/>Consumidor]
+        SS[SheetService<br/>Consumidor]
+        JPA[JpaChequeraCuotaRepositoryAdapter<br/>Adaptador JPA]
+        MAP[ChequeraCuotaMapper<br/>Mapeo Entidad-Dominio]
+        MSM[ChequeraSerieMapper<br/>Mapeo de Serie]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+        FAC[FacultadService<br/>Servicio Externo]
+        TIP[TipoChequeraService<br/>Servicio Externo]
+        LEC[LectivoService<br/>Servicio Externo]
+    end
+
+    %% Flujo de Dependencias
+    CCC -->|usa| CDU
+    PS -->|usa| CDU
+    CSS -->|usa| CDU
+    SS -->|usa| CDU
+    
+    CDU -->|implementa| CCS
+    CCS -->|depende| CCR
+    CCS -->|usa| FAC
+    CCS -->|usa| TIP
+    CCS -->|usa| LEC
+    
+    CCR -->|implementa| JPA
+    JPA -->|usa| MAP
+    JPA -->|persiste| JPAR
+    
+    MAP -->|convierte| CC
+    MAP -->|convierte| CP
+    MAP -->|convierte| CT
+    MSM -->|convierte| CS
+    
+    %% Entidades
+    CC -->|compone| DD
+    CP -->|compone| DD
+    CT -->|compone| DD
+
+    style CC fill:#e1f5fe
+    style CP fill:#e1f5fe
+    style CT fill:#e1f5fe
+    style CS fill:#e1f5fe
+    style DD fill:#e3f2fd
+    style CDU fill:#f3e5f5
+    style CCR fill:#f3e5f5
+    style CCS fill:#fff3e0
+    style CCC fill:#e8f5e8
+    style PS fill:#e8f5e8
+    style CSS fill:#e8f5e8
+    style SS fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style MAP fill:#fff8e1
+    style MSM fill:#fff8e1

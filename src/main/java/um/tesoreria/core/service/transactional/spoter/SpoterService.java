@@ -2,6 +2,7 @@ package um.tesoreria.core.service.transactional.spoter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SpoterService {
 
     private final BuildService buildService;
@@ -41,33 +43,6 @@ public class SpoterService {
     private final ChequeraAlternativaService chequeraAlternativaService;
     private final LectivoCuotaService lectivoCuotaService;
     private final ChequeraCuotaService chequeraCuotaService;
-
-    public SpoterService(BuildService buildService,
-                         PersonaService personaService,
-                         ChequeraSerieService chequeraSerieService,
-                         DomicilioService domicilioService,
-                         ChequeraSerieControlService chequeraSerieControlService,
-                         LegajoService legajoService,
-                         LectivoTotalService lectivoTotalService,
-                         ChequeraTotalService chequeraTotalService,
-                         LectivoAlternativaService lectivoAlternativaService,
-                         ChequeraAlternativaService chequeraAlternativaService,
-                         LectivoCuotaService lectivoCuotaService,
-                         ChequeraCuotaService chequeraCuotaService
-    ) {
-        this.buildService = buildService;
-        this.personaService = personaService;
-        this.chequeraSerieService = chequeraSerieService;
-        this.domicilioService = domicilioService;
-        this.chequeraSerieControlService = chequeraSerieControlService;
-        this.legajoService = legajoService;
-        this.lectivoTotalService = lectivoTotalService;
-        this.chequeraTotalService = chequeraTotalService;
-        this.lectivoAlternativaService = lectivoAlternativaService;
-        this.chequeraAlternativaService = chequeraAlternativaService;
-        this.lectivoCuotaService = lectivoCuotaService;
-        this.chequeraCuotaService = chequeraCuotaService;
-    }
 
     @Transactional
     public ChequeraSerie makeChequeraSpoter(SpoterData spoterData, Integer lectivoId, Curso curso,
