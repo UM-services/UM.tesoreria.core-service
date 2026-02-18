@@ -406,4 +406,12 @@ public class ChequeraCuotaService {
         return repository.findCuotaPeriodosByLectivoId(lectivoId);
     }
 
+    public List<ChequeraCuota> findAllByChequeraIds(List<Long> chequeraIds) {
+        return repository.findAllByChequeraIdIn(chequeraIds);
+    }
+
+    public List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIds(Integer facultadId, Integer tipoChequeraId, List<Long> chequeraSerieIds) {
+        return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdIn(facultadId, tipoChequeraId, chequeraSerieIds);
+    }
+
 }

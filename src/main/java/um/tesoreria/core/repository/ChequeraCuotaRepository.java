@@ -67,4 +67,10 @@ public interface ChequeraCuotaRepository extends JpaRepository<ChequeraCuota, Lo
 		   "ORDER BY cc.anho, cc.mes")
 	List<CuotaPeriodoDto> findCuotaPeriodosByLectivoId(@Param("lectivoId") Integer lectivoId);
 
+	@Query("SELECT c FROM ChequeraCuota c LEFT JOIN FETCH c.producto WHERE c.chequeraId IN :chequeraIds")
+	List<ChequeraCuota> findAllByChequeraIdIn(@Param("chequeraIds") List<Long> chequeraIds);
+
+	@Query("SELECT c FROM ChequeraCuota c LEFT JOIN FETCH c.producto WHERE c.facultadId = :facultadId AND c.tipoChequeraId = :tipoChequeraId AND c.chequeraSerieId IN :chequeraSerieIds")
+	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdIn(@Param("facultadId") Integer facultadId, @Param("tipoChequeraId") Integer tipoChequeraId, @Param("chequeraSerieIds") List<Long> chequeraSerieIds);
+
 }

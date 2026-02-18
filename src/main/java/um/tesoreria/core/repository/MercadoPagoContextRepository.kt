@@ -28,4 +28,6 @@ interface MercadoPagoContextRepository : JpaRepository<MercadoPagoContext, Long>
         hasta: OffsetDateTime
     ): List<MercadoPagoContext?>?
 
+    fun findAllByChequeraCuotaIdInAndActivo(chequeraCuotaIds: List<Long>, activo: Byte): List<MercadoPagoContext>?
+
 }

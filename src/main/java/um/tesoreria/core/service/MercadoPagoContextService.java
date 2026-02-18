@@ -30,6 +30,11 @@ public class MercadoPagoContextService {
         return repository.findAllByChequeraCuotaIdAndActivo(chequeraCuotaId, activo);
     }
 
+    public List<MercadoPagoContext> findAllByChequeraCuotaIds(List<Long> chequeraCuotaIds) {
+        List<MercadoPagoContext> result = repository.findAllByChequeraCuotaIdInAndActivo(chequeraCuotaIds, (byte) 1);
+        return result != null ? result : List.of();
+    }
+
     public List<Long> findAllActiveToChange() {
         var today = Tool.dateAbsoluteArgentina();
         var _90DaysAgo = today.minusDays(90);

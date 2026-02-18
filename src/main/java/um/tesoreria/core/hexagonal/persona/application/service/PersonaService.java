@@ -103,57 +103,129 @@ public class PersonaService {
         var deudaTotal = BigDecimal.ZERO;
         List<DeudaChequeraDto> deudas = new ArrayList<>();
         List<VencimientoDto> vencimientoDtos = new ArrayList<>();
-        for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
-                null)) {
+
+        // 1. Fetch all series for the person
+        List<ChequeraSerie> series = chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId, null);
+
+        // 2. Fetch all cuotas using business keys (Facultad, Tipo, Serie) to ensure we get them even if chequeraId is null
+        List<ChequeraCuota> allCuotas = new ArrayList<>();
+        Map<String, List<ChequeraSerie>> seriesByGroup = series.stream()
+                .collect(Collectors.groupingBy(s -> s.getFacultadId() + "-" + s.getTipoChequeraId()));
+
+        for (Map.Entry<String, List<ChequeraSerie>> entry : seriesByGroup.entrySet()) {
+            List<ChequeraSerie> groupSeries = entry.getValue();
+            if (groupSeries.isEmpty()) continue;
+            
+            Integer facultadId = groupSeries.get(0).getFacultadId();
+            Integer tipoChequeraId = groupSeries.get(0).getTipoChequeraId();
+            List<Long> serieIds = groupSeries.stream().map(ChequeraSerie::getChequeraSerieId).collect(Collectors.toList());
+
+            allCuotas.addAll(chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIds(
+                    facultadId, tipoChequeraId, serieIds));
+        }
+
+        // 3. Batch "Self-Healing": Update chequeraId if null
+        List<ChequeraCuota> cuotasToUpdate = new ArrayList<>();
+        // Create a lookup map for series: key = "fac-tipo-serie"
+        Map<String, ChequeraSerie> seriesMap = series.stream()
+                .collect(Collectors.toMap(
+                        s -> s.getFacultadId() + "-" + s.getTipoChequeraId() + "-" + s.getChequeraSerieId(),
+                        Function.identity(),
+                        (existing, replacement) -> existing
+                ));
+
+        for (ChequeraCuota cuota : allCuotas) {
+            String key = cuota.getFacultadId() + "-" + cuota.getTipoChequeraId() + "-" + cuota.getChequeraSerieId();
+            ChequeraSerie serie = seriesMap.get(key);
+            
+            if (serie != null) {
+                // Ensure relationship is set in memory for processing
+                cuota.setChequeraSerie(serie);
+                
+                // If persistent ID is missing, fix it
+                if (cuota.getChequeraId() == null) {
+                    cuota.setChequeraId(serie.getChequeraId());
+                    cuotasToUpdate.add(cuota);
+                }
+            }
+        }
+
+        if (!cuotasToUpdate.isEmpty()) {
+            log.info("Fixing {} cuotas with missing chequeraId", cuotasToUpdate.size());
+            chequeraCuotaService.saveAll(cuotasToUpdate);
+        }
+
+        // 4. Group cuotas by chequeraId for processing
+        Map<Long, List<ChequeraCuota>> cuotasByChequeraId = allCuotas.stream()
+                .filter(c -> c.getChequeraId() != null)
+                .collect(Collectors.groupingBy(ChequeraCuota::getChequeraId));
+
+        // 5. Fetch MercadoPago contexts
+        List<Long> allCuotaIds = allCuotas.stream()
+                .map(ChequeraCuota::getChequeraCuotaId)
+                .collect(Collectors.toList());
+
+        Map<Long, MercadoPagoContext> contextsByCuotaId = mercadoPagoContextService.findAllByChequeraCuotaIds(allCuotaIds)
+                .stream()
+                .collect(Collectors.toMap(MercadoPagoContext::getChequeraCuotaId, Function.identity(), (a, b) -> a));
+
+        // 6. Process debts
+        for (ChequeraSerie chequera : series) {
             DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeudaExtended(toDomain(chequera));
             if (deuda.getCuotas() > 0) {
                 deudas.add(deuda);
                 deudaCuotas += deuda.getCuotas();
                 deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
             }
-            for (ChequeraCuota chequeraCuota : chequeraCuotaService
-                    .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(chequera.getFacultadId(),
-                            chequera.getTipoChequeraId(), chequera.getChequeraSerieId(), chequera.getAlternativaId())) {
+
+            List<ChequeraCuota> currentCuotas = cuotasByChequeraId.getOrDefault(chequera.getChequeraId(), List.of());
+
+            List<ChequeraCuota> filteredCuotas = currentCuotas.stream()
+                    .filter(c -> Objects.equals(c.getAlternativaId(), chequera.getAlternativaId()))
+                    .sorted(Comparator.comparing(ChequeraCuota::getVencimiento1, Comparator.nullsLast(Comparator.naturalOrder()))
+                            .thenComparing(ChequeraCuota::getProductoId, Comparator.nullsLast(Comparator.naturalOrder()))
+                            .thenComparing(ChequeraCuota::getCuotaId, Comparator.nullsLast(Comparator.naturalOrder())))
+                    .toList();
+
+            for (ChequeraCuota chequeraCuota : filteredCuotas) {
                 if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0 && chequeraCuota.getCompensada() == 0
                         && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
-                    log.debug("Creando preferencia");
-                    var umPreferenceMPDto = mercadoPagoCoreService.makeContext(chequeraCuota.getChequeraCuotaId());
+
+                    MercadoPagoContext existingContext = contextsByCuotaId.get(chequeraCuota.getChequeraCuotaId());
+                    var umPreferenceMPDto = mercadoPagoCoreService.makeContext(chequeraCuota, existingContext);
+
                     if (umPreferenceMPDto != null) {
-                        var mercadoPagoContextDto = preferenceClient.createPreference(umPreferenceMPDto);
-                        // Update context with returned data
-                        try {
-                            var context = mercadoPagoContextService
-                                    .findByMercadoPagoContextId(mercadoPagoContextDto.getMercadoPagoContextId());
-                            context.setPreferenceId(mercadoPagoContextDto.getPreferenceId());
-                            context.setInitPoint(mercadoPagoContextDto.getInitPoint());
-                            context.setPreference(mercadoPagoContextDto.getPreference());
-                            context.setLastVencimientoUpdated(OffsetDateTime.now(java.time.ZoneOffset.UTC));
-                            context.setChanged((byte) 0);
-                            mercadoPagoContextService.update(context, context.getMercadoPagoContextId());
-                        } catch (Exception e) {
-                            log.error("Error updating context after preference creation", e);
+                        var context = umPreferenceMPDto.getMercadoPagoContext();
+                        boolean needsUpdate = context.getPreferenceId() == null || context.getChanged() == 1;
+
+                        if (needsUpdate) {
+                            log.debug("Creando preferencia");
+                            var mercadoPagoContextDto = preferenceClient.createPreference(umPreferenceMPDto);
+                            // Update context with returned data
+                            try {
+                                context.setPreferenceId(mercadoPagoContextDto.getPreferenceId());
+                                context.setInitPoint(mercadoPagoContextDto.getInitPoint());
+                                context.setPreference(mercadoPagoContextDto.getPreference());
+                                context.setLastVencimientoUpdated(OffsetDateTime.now(java.time.ZoneOffset.UTC));
+                                context.setChanged((byte) 0);
+                                mercadoPagoContextService.update(context, context.getMercadoPagoContextId());
+                                contextsByCuotaId.put(chequeraCuota.getChequeraCuotaId(), context);
+                            } catch (Exception e) {
+                                log.error("Error updating context after preference creation", e);
+                            }
                         }
-                    }
-                    MercadoPagoContext mercadoPagoContext = null;
-                    try {
-                        mercadoPagoContext = mercadoPagoContextService
-                                .findActiveByChequeraCuotaId(chequeraCuota.getChequeraCuotaId());
-                    } catch (MercadoPagoContextException e) {
-                        log.error("Error al obtener el contexto de MercadoPago para el cuota {}",
-                                chequeraCuota.getChequeraCuotaId());
-                    }
-                    if (mercadoPagoContext != null) {
+
                         // Formatear la fecha de vencimiento
-                        String fechaVencimientoFormatted = mercadoPagoContext.getFechaVencimiento()
+                        String fechaVencimientoFormatted = context.getFechaVencimiento()
                                 .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
                         vencimientoDtos.add(VencimientoDto.builder()
                                 .chequeraCuotaId(chequeraCuota.getChequeraCuotaId())
-                                .mercadoPagoContextId(mercadoPagoContext.getMercadoPagoContextId())
+                                .mercadoPagoContextId(context.getMercadoPagoContextId())
                                 .producto(Objects.requireNonNull(chequeraCuota.getProducto()).getNombre())
                                 .periodo(chequeraCuota.getMes() + "/" + chequeraCuota.getAnho())
                                 .vencimiento(fechaVencimientoFormatted)
-                                .importe(mercadoPagoContext.getImporte())
-                                .initPoint(mercadoPagoContext.getInitPoint())
+                                .importe(context.getImporte())
+                                .initPoint(context.getInitPoint())
                                 .build());
                     }
                 }

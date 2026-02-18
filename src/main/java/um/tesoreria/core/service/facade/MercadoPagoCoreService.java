@@ -49,6 +49,19 @@ public class MercadoPagoCoreService {
         return buildResponse(mercadoPagoContext, chequeraCuota);
     }
 
+    @Transactional
+    public UMPreferenceMPDto makeContext(ChequeraCuota chequeraCuota, MercadoPagoContext existingContext) {
+        var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
+        if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
+
+        var vencimiento = determineVencimientoMP(chequeraCuota, today);
+        if (vencimiento.importe().compareTo(BigDecimal.ZERO) == 0) return null;
+        if (vencimiento.fechaVencimiento().isBefore(today)) return null;
+
+        var mercadoPagoContext = createOrUpdateContext(existingContext, chequeraCuota.getChequeraCuotaId(), vencimiento);
+        return buildResponse(mercadoPagoContext, chequeraCuota);
+    }
+
     private boolean isCuotaAvailable(ChequeraCuota chequeraCuota) {
         log.debug("\n\nProcessing MercadoPagoCoreService.isCuotaAvailable\n\n");
         var result = chequeraCuota.getPagado() != 1 && chequeraCuota.getBaja() != 1 && chequeraCuota.getCompensada() != 1;
@@ -79,6 +92,12 @@ public class MercadoPagoCoreService {
                     .build());
             return mercadoPagoContext;
         }
+
+        if (mercadoPagoContext.getFechaVencimiento().isEqual(vencimiento.fechaVencimiento()) &&
+                mercadoPagoContext.getImporte().compareTo(vencimiento.importe()) == 0) {
+            return mercadoPagoContext;
+        }
+
         mercadoPagoContext.setFechaVencimiento(vencimiento.fechaVencimiento());
         mercadoPagoContext.setImporte(vencimiento.importe());
         mercadoPagoContext.setChanged((byte) 1);

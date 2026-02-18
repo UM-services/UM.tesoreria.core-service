@@ -5,6 +5,38 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-02-18
+### Added
+- feat(performance): Implementación de batch processing y optimizaciones de rendimiento en PersonaService
+  - Nuevo método `findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIds()` en ChequeraCuotaRepository para consultas batch
+  - Nuevo método `findAllByChequeraIdIn()` en ChequeraCuotaRepository para carga masiva por IDs de chequera
+  - Nuevo método `findAllByChequeraCuotaIds()` en MercadoPagoContextService para recuperación batch de contextos
+  - Implementación de "Self-Healing" para corregir chequeraId nulos en cuotas
+  - Procesamiento batch de cuotas con agrupación por facultad y tipo de chequera
+  - Reducción de N+1 queries mediante carga masiva de contextos de MercadoPago
+  - Optimización en creación de preferencias con reutilización de contextos existentes
+- feat(api): Nuevo método sobrecargado `makeContext(ChequeraCuota, MercadoPagoContext)` en MercadoPagoCoreService
+  - Permite reutilizar contextos existentes evitando duplicados
+  - Validación inteligente para evitar actualizaciones innecesarias
+
+### Changed
+- refactor(kafka): Migración de configuración de deserialización Jackson en KafkaConsumerConfig
+  - Cambio de `JsonDeserializer` a `JacksonJsonDeserializer` (nueva API de Spring Kafka)
+  - Actualización de `DefaultJackson2JavaTypeMapper` a `DefaultJacksonJavaTypeMapper`
+  - Migración de paquetes `com.fasterxml.jackson` a `tools.jackson`
+  - Simplificación de configuración del ObjectMapper usando `JsonMapper.builder()`
+- refactor(service): Mejoras en arquitectura hexagonal de PersonaService
+  - Inyección de contextos pre-cargados en lugar de consultas individuales
+  - Mejor separación de concerns entre lógica de negocio y acceso a datos
+  - Optimización de ordenamiento y filtrado de cuotas en memoria
+
+### Fixed
+- fix(data-integrity): Corrección automática de cuotas con chequeraId nulo
+  - Detección y reparación batch de registros inconsistentes
+  - Relación automática entre cuotas y series mediante business keys
+
+> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados), estructura de repositorios y servicios.
+
 ## [3.2.0] - 2026-02-17
 ### Added
 - feat(hexagonal): Implementación completa del módulo ChequeraCuota con Arquitectura Hexagonal

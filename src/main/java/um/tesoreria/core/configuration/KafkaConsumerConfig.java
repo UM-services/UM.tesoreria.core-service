@@ -11,14 +11,13 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.support.mapping.DefaultJackson2JavaTypeMapper;
+import org.springframework.kafka.support.mapping.DefaultJacksonJavaTypeMapper;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 import um.tesoreria.core.event.PaymentProcessedEvent;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,15 +42,16 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JsonMapper objectMapper = JsonMapper.builder()
+                .findAndAddModules()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
 
-        JsonDeserializer<Object> jsonDeserializer = (JsonDeserializer) new JsonDeserializer<>(PaymentProcessedEvent.class, objectMapper);
+        JacksonJsonDeserializer<Object> jsonDeserializer = (JacksonJsonDeserializer<Object>) (Object) new JacksonJsonDeserializer<>(PaymentProcessedEvent.class, objectMapper);
         jsonDeserializer.addTrustedPackages("*");
         jsonDeserializer.setUseTypeMapperForKey(true);
         
-        DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
+        DefaultJacksonJavaTypeMapper typeMapper = new DefaultJacksonJavaTypeMapper();
         Map<String, Class<?>> mappings = new HashMap<>();
         mappings.put("um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent", PaymentProcessedEvent.class);
         typeMapper.setIdClassMapping(mappings);
