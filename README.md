@@ -4,7 +4,20 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.2.0**
+**Versión actual (SemVer): 3.3.0**
+
+## Novedades 3.3.0 (verificado en código)
+- feat: Implementación de batch processing y optimizaciones de rendimiento en PersonaService
+  - Nuevos métodos batch en ChequeraCuotaRepository para consultas masivas por IDs
+  - Nuevo método `findAllByChequeraCuotaIds()` en MercadoPagoContextService
+  - Implementación de "Self-Healing" para corrección automática de chequeraId nulos
+  - Reducción de N+1 queries mediante carga masiva de contextos
+  - Optimización en creación de preferencias con reutilización de contextos existentes
+- refactor: Migración de configuración Kafka a nueva API Jackson (JacksonJsonDeserializer)
+  - Actualización de paquetes de `com.fasterxml.jackson` a `tools.jackson`
+  - Simplificación de configuración del ObjectMapper
+- feat: Nuevo método sobrecargado `makeContext()` en MercadoPagoCoreService
+  - Permite reutilizar contextos existentes evitando duplicados
 
 ## Novedades 3.2.0 (verificado en código)
 - feat: Implementación completa del módulo ChequeraCuota con Arquitectura Hexagonal
