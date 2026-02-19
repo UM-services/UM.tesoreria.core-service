@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.3.1**
+**Versión actual (SemVer): 3.3.2**
+
+## Novedades 3.3.2 (verificado en código)
+- refactor: Migración a inyección por constructor con `@RequiredArgsConstructor` en ArancelTipoController, FacultadController y TipoChequeraSedeController
+  - Reemplazo de `@Resource`/`@Autowired` por `final` + constructor Lombok
+  - Uso de `ResponseEntity.ok()` en lugar de `new ResponseEntity<>()`
+- fix(api): Agregado manejo de excepciones con `ResponseStatusException` en controladores
+  - Devolución de HTTP 400 Bad Request para errores de negocio
+- fix(transaction): Agregado `@Transactional` en MercadoPagoContextService.processPaymentEvent()
 
 ## Novedades 3.3.1 (verificado en código)
 - fix(performance): Optimización de rendimiento en actualización de último login
@@ -427,7 +435,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.3.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.3.2-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

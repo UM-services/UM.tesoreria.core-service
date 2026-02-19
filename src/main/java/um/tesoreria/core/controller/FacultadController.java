@@ -6,6 +6,7 @@ package um.tesoreria.core.controller;
 import java.math.BigDecimal;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.kotlin.model.Facultad;
 import um.tesoreria.core.model.view.FacultadLectivo;
 import um.tesoreria.core.model.view.FacultadLectivoSede;
@@ -25,17 +28,14 @@ import um.tesoreria.core.service.FacultadService;
  */
 @RestController
 @RequestMapping({"/facultad", "/api/tesoreria/core/facultad"})
+@RequiredArgsConstructor
 public class FacultadController {
 
 	private final FacultadService service;
 
-	public FacultadController(FacultadService service) {
-		this.service = service;
-	}
-
 	@GetMapping("/")
 	public ResponseEntity<List<Facultad>> findAll() {
-		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAll());
 	}
 
 	@GetMapping("/facultades")
@@ -63,7 +63,11 @@ public class FacultadController {
 
 	@GetMapping("/{facultadId}")
 	public ResponseEntity<Facultad> findByFacultadId(@PathVariable Integer facultadId) {
-        return ResponseEntity.ok(service.findByFacultadId(facultadId));
+		try {
+			return ResponseEntity.ok(service.findByFacultadId(facultadId));
+		} catch (FacultadException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
 	}
 
 }
