@@ -22,5 +22,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	Optional<Usuario> findByUserId(Long userId);
 
-    Optional<Usuario> findByGoogleMailAndActivo(String googleMail, Byte activo);
-}
+    	Optional<Usuario> findByGoogleMailAndActivo(String googleMail, Byte activo);
+    
+        @org.springframework.data.jpa.repository.Modifying
+        @org.springframework.data.jpa.repository.Query("UPDATE Usuario u SET u.lastLog = :lastLog WHERE u.userId = :userId")
+        void updateLastLog(@org.springframework.data.repository.query.Param("userId") Long userId, @org.springframework.data.repository.query.Param("lastLog") java.time.OffsetDateTime lastLog);
+    }

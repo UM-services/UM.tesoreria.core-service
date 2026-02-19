@@ -104,7 +104,6 @@ public class MercadoPagoContextService {
                 .orElseThrow(() -> new MercadoPagoContextException("Context not found for id", mercadoPagoContextId));
     }
 
-    @Transactional
     public void processPaymentEvent(PaymentProcessedEvent event) {
         log.debug("\n\nProcessing payment event for contextId: {}\n\n", event.getMercadoPagoContextId());
         var context = findByMercadoPagoContextId(event.getMercadoPagoContextId());
