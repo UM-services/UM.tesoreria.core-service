@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.3.0**
+**Versión actual (SemVer): 3.3.1**
+
+## Novedades 3.3.1 (verificado en código)
+- fix(performance): Optimización de rendimiento en actualización de último login
+  - Implementación de query directa con `@Modifying` en `UsuarioRepository`
+  - Refactorización de `UsuarioService.updateLastLog()` para reducir overhead de persistencia
+  - Corrección de manejo transaccional en `MercadoPagoContextService.processPaymentEvent()`
 
 ## Novedades 3.3.0 (verificado en código)
 - feat: Implementación de batch processing y optimizaciones de rendimiento en PersonaService
@@ -421,6 +427,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
+[![Versión](https://img.shields.io/badge/versión-3.3.1-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

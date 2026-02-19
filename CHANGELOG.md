@@ -5,6 +5,18 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.1] - 2026-02-19
+### Fixed
+- fix(performance): Optimización de rendimiento en actualización de último login de usuario
+  - Nuevo método `updateLastLog()` en `UsuarioRepository` con `@Modifying` y `@Query` para actualización directa
+  - Refactorización de `UsuarioService.updateLastLog()` para usar query directa en lugar de cargar/guardar entidad completa
+  - Reducción de overhead de persistencia al actualizar solo el campo `lastLog`
+- fix(transaction): Corrección de manejo transaccional en procesamiento de eventos de pago
+  - Eliminación de `@Transactional` en `MercadoPagoContextService.processPaymentEvent()`
+  - El procesamiento de eventos hereda la transacción del contexto de ejecución de Kafka
+
+> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados).
+
 ## [3.3.0] - 2026-02-18
 ### Added
 - feat(performance): Implementación de batch processing y optimizaciones de rendimiento en PersonaService

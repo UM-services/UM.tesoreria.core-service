@@ -62,23 +62,10 @@ public class UsuarioService {
         }).orElseThrow(() -> new UsuarioException(userId));
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public Usuario updateLastLog(Long userId) {
-        return repository.findByUserId(userId).map(usuario -> {
-            usuario = new Usuario(usuario.getUserId(),
-                    usuario.getLogin(),
-                    usuario.getPassword(),
-                    usuario.getNombre(),
-                    usuario.getGeograficaId(),
-                    usuario.getImprimeChequera(),
-                    usuario.getNumeroOpManual(),
-                    usuario.getHabilitaOpEliminacion(),
-                    usuario.getEliminaChequera(),
-                    Tool.hourAbsoluteArgentina(),
-                    usuario.getGoogleMail(),
-                    usuario.getActivo());
-            usuario = repository.save(usuario);
-            return usuario;
-        }).orElseThrow(() -> new UsuarioException(userId));
+        repository.updateLastLog(userId, Tool.hourAbsoluteArgentina());
+        return repository.findByUserId(userId).orElseThrow(() -> new UsuarioException(userId));
     }
 
     public Usuario findByGoogleMail(String googleMail) {
