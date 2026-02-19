@@ -5,6 +5,23 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.2] - 2026-02-19
+### Changed
+- refactor(controller): Migración a inyección por constructor con `@RequiredArgsConstructor` en ArancelTipoController, FacultadController y TipoChequeraSedeController
+  - Reemplazo de `@Resource`/`@Autowired` por `final` + constructor Lombok
+  - Uso de `ResponseEntity.ok()` en lugar de `new ResponseEntity<>()`
+  - Simplificación de código y mejor testabilidad
+
+### Fixed
+- fix(api): Agregado manejo de excepciones con `ResponseStatusException` en ArancelTipoController, FacultadController y TipoChequeraSedeController
+  - Nuevo manejo de excepciones para findByArancelTipoId, findByArancelTipoIdCompleto, findByFacultadId, findByTipoChequeraId
+  - Devolución de HTTP 400 Bad Request en lugar de 200 para errores de negocio
+- fix(transaction): Agregado `@Transactional` en MercadoPagoContextService.processPaymentEvent()
+  - Corrección del manejo transaccional para procesamiento de eventos de pago
+  - Asegura consistencia en la actualización de contextos de MercadoPago
+
+> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados).
+
 ## [3.3.1] - 2026-02-19
 ### Fixed
 - fix(performance): Optimización de rendimiento en actualización de último login de usuario
