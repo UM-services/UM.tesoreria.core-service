@@ -4,6 +4,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import jakarta.persistence.Id
 import jakarta.persistence.Column
+import um.tesoreria.core.util.Jsonifier
 
 @Entity
 @Table
@@ -17,6 +18,13 @@ data class ArancelTipo(
 	var descripcion: String = "",
 
 	var medioArancel: Byte = 0,
-	var arancelTipoIdCompleto: Int? = null
+	var arancelTipoIdCompleto: Int? = null,
+	var habilitado: Byte = 0
 
-) : Auditable()
+) : Auditable() {
+
+	fun jsonify(): String {
+		return Jsonifier.builder(this).build()
+	}
+
+}

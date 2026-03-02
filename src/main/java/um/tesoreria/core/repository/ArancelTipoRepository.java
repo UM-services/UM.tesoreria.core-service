@@ -3,8 +3,10 @@
  */
 package um.tesoreria.core.repository;
 
+import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import um.tesoreria.core.kotlin.model.ArancelTipo;
@@ -14,6 +16,8 @@ import um.tesoreria.core.kotlin.model.ArancelTipo;
  *
  */
 public interface ArancelTipoRepository extends JpaRepository<ArancelTipo, Integer> {
+
+	List<ArancelTipo> findAllByHabilitado(Byte habilitado, Sort sort);
 
 	Optional<ArancelTipo> findByArancelTipoId(Integer arancelTipoId);
 

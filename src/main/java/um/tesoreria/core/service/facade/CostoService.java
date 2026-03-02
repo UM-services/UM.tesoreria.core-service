@@ -163,6 +163,7 @@ public class CostoService {
             for (EntregaDetalle entregaDetalle : entregaDetalleService.findAllByEntregaId(entregaId)) {
                 log.debug("EntregaDetalle in deleteDesignacion -> {}", entregaDetalle.jsonify());
                 entrega = entregaDetalle.getEntrega();
+                assert entrega != null;
                 trackId = entrega.getTrackId();
                 log.debug("Entrega in deleteDesignacion -> {}", entrega.jsonify());
                 if (entregaDetalle.getProveedorArticulo() != null) {
