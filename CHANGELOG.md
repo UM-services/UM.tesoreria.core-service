@@ -5,6 +5,27 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.0] - 2026-03-02
+### Added
+- feat(api): Nuevo endpoint `/habilitados` en ArancelTipoController para obtener tipos de arancel habilitados
+  - Nuevo método `findAllHabilitados()` en ArancelTipoService
+  - Nuevo método `findAllByHabilitado()` en ArancelTipoRepository
+  - Retorna solo registros con campo `habilitado = 1`
+
+### Changed
+- refactor(controller): Migración a inyección por constructor con `@RequiredArgsConstructor` en ArancelTipoService
+  - Reemplazo de `@Resource` por campos `final` + constructor Lombok
+  - Uso de `ResponseEntity.ok()` en lugar de `new ResponseEntity<>()` en CostoController
+- refactor(model): Agregado campo `habilitado` (Byte) en ArancelTipo.kt
+  - Agregado método `jsonify()` para logging estructurado
+  - Actualización de método `update()` en ArancelTipoService para mantener el campo habilitado
+- refactor(logging): Mejoras en logging con `jsonify()` en ArancelTipoService
+
+### Fixed
+- fix(validation): Agregado `assert` en CostoService para validación de objeto Entrega en deleteDesignacion
+
+> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados).
+
 ## [3.3.2] - 2026-02-19
 ### Changed
 - refactor(controller): Migración a inyección por constructor con `@RequiredArgsConstructor` en ArancelTipoController, FacultadController y TipoChequeraSedeController

@@ -36,7 +36,6 @@ import um.tesoreria.core.hexagonal.cursoCargoContratado.infrastructure.web.mappe
 public class CursoCargoContratadoController {
 
     private final CursoCargoContratadoService service;
-
     private final GetAllCargosByPersonaUseCase getAllCargosByPersonaUseCase;
     private final CursoCargoContratadoDtoMapper cursoCargoContratadoDtoMapper;
 

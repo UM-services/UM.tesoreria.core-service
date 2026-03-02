@@ -40,6 +40,11 @@ public class ArancelTipoController {
 		return ResponseEntity.ok(service.findAll());
 	}
 
+	@GetMapping("/habilitados")
+	public ResponseEntity<List<ArancelTipo>> findAllHabilitados() {
+		return ResponseEntity.ok(service.findAllHabilitados());
+	}
+
 	@GetMapping("/lectivo/{lectivoId}")
 	public ResponseEntity<List<ArancelTipoLectivo>> findAllByLectivoId(@PathVariable Integer lectivoId) {
 		return ResponseEntity.ok(service.findAllByLectivoId(lectivoId));

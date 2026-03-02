@@ -24,26 +24,26 @@ public class CostoController {
 
     @PostMapping("/addAsignacion")
     public ResponseEntity<Boolean> addAsignacion(@RequestBody AsignacionCostoDto asignacionCostoDto) {
-        return new ResponseEntity<>(service.addAsignacion(asignacionCostoDto), HttpStatus.OK);
+        return ResponseEntity.ok(service.addAsignacion(asignacionCostoDto));
     }
 
     @GetMapping("/deleteDesignacion/{entregaId}")
     public ResponseEntity<Boolean> deleteAsignacion(@PathVariable Long entregaId) {
         log.debug("DeleteDesignacion - {}", entregaId);
-        return new ResponseEntity<>(service.deleteDesignacion(entregaId), HttpStatus.OK);
+        return ResponseEntity.ok(service.deleteDesignacion(entregaId));
     }
 
     @GetMapping("/depurarGastosProveedor/{proveedorId}/{geograficaId}")
     public ResponseEntity<Boolean> depurarGastosProveedor(@PathVariable Integer proveedorId, @PathVariable Integer geograficaId) {
         log.debug("DepurarGastosProveedor - {}/{}", proveedorId, geograficaId);
-        return new ResponseEntity<>(service.depurarGastosProveedor(proveedorId, geograficaId), HttpStatus.OK);
+        return ResponseEntity.ok(service.depurarGastosProveedor(proveedorId, geograficaId));
     }
 
     @GetMapping("/recalcularAsignado/{proveedorArticuloId}")
     public ResponseEntity<Void> recalcularAsignado(@PathVariable Long proveedorArticuloId) {
         log.debug("Recalcular Asignado {}", proveedorArticuloId);
         service.recalcularAsignado(proveedorArticuloId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
 }
