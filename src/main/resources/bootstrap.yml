@@ -17,6 +17,9 @@ server:
   port: ${app.port}
 
 spring:
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
   application:
     name: tesoreria-core-service
   cloud:

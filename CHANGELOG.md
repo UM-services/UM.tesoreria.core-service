@@ -5,6 +5,22 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.1] - 2026-03-14
+### Changed
+- refactor(model): Migración de FacturacionElectronica de Kotlin a Java
+  - Eliminación de `FacturacionElectronica.kt` (modelo Kotlin)
+  - Creación de `FacturacionElectronica.java` con anotaciones Lombok (@Getter, @Setter, @Builder, @NoArgsConstructor, @AllArgsConstructor)
+  - Nuevo método `jsonify()` para logging estructurado
+- refactor(controller): Uso de `ResponseEntity.ok()` en lugar de `new ResponseEntity<>()` en FacturacionElectronicaController
+  - Simplificación del código y mejor legibilidad
+- refactor(service): Uso de utilitaria `Jsonifier` en lugar de `JsonMapper` directamente
+  - FacturacionElectronicaService ahora usa `Jsonifier.builder()` para logging
+  - ChequeraPagoService eliminación de import `JsonMapper` sin usar
+- refactor(config): Nueva configuración de Jackson en bootstrap.yml
+  - `spring.jackson.deserialization.fail-on-null-for-primitives: false`
+
+> Basado en análisis profundo de `git diff HEAD` (cambios staged).
+
 ## [3.5.0] - 2026-03-13
 ### Added
 - feat(model): Agregado campo `hpum` (Byte) en PersonaEntity para nuevo indicador de persona
