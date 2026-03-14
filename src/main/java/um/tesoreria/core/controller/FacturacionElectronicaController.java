@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.exception.FacturacionElectronicaException;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
-import um.tesoreria.core.kotlin.model.FacturacionElectronica;
+import um.tesoreria.core.model.FacturacionElectronica;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.service.ChequeraPagoService;
 import um.tesoreria.core.service.FacturacionElectronicaService;
@@ -28,13 +28,13 @@ public class FacturacionElectronicaController {
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<List<FacturacionElectronica>> findAllByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
         List<Long> chequeraPagoIds = chequeraPagoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService).stream().map(ChequeraPago::getChequeraPagoId).collect(Collectors.toList());
-        return new ResponseEntity<>(service.findAllByChequeraPagoIds(chequeraPagoIds), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByChequeraPagoIds(chequeraPagoIds));
     }
 
     @GetMapping("/{facturacionElectronicaId}")
     public ResponseEntity<FacturacionElectronica> findByFacturacionElectronicaId(@PathVariable Long facturacionElectronicaId) {
         try {
-            return new ResponseEntity<>(service.findByFacturacionElectronicaId(facturacionElectronicaId), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByFacturacionElectronicaId(facturacionElectronicaId));
         } catch (FacturacionElectronicaException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -43,7 +43,7 @@ public class FacturacionElectronicaController {
     @GetMapping("/pago/{chequeraPagoId}")
     public ResponseEntity<FacturacionElectronica> findByChequeraPagoId(@PathVariable Long chequeraPagoId) {
         try {
-            return new ResponseEntity<>(service.findByChequeraPagoId(chequeraPagoId), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByChequeraPagoId(chequeraPagoId));
         } catch (FacturacionElectronicaException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -51,22 +51,22 @@ public class FacturacionElectronicaController {
 
     @GetMapping("/periodo")
     public ResponseEntity<List<FacturacionElectronica>> findAllByPeriodo(@RequestParam OffsetDateTime fechaDesde, @RequestParam OffsetDateTime fechaHasta) {
-        return new ResponseEntity<>(service.findAllByPeriodo(fechaDesde, fechaHasta), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByPeriodo(fechaDesde, fechaHasta));
     }
 
     @GetMapping("/pendientes")
     public ResponseEntity<List<FacturacionElectronica>> find3Pendientes() {
-        return new ResponseEntity<>(service.find3Pendientes(), HttpStatus.OK);
+        return ResponseEntity.ok(service.find3Pendientes());
     }
 
     @PostMapping("/")
     public ResponseEntity<FacturacionElectronica> add(@RequestBody FacturacionElectronica facturacionElectronica) {
-        return new ResponseEntity<>(service.add(facturacionElectronica), HttpStatus.OK);
+        return ResponseEntity.ok(service.add(facturacionElectronica));
     }
 
     @PutMapping("/{facturacionElectronicaId}")
     public ResponseEntity<FacturacionElectronica> update(@RequestBody FacturacionElectronica facturacionElectronica, @PathVariable Long facturacionElectronicaId) {
-        return new ResponseEntity<>(service.update(facturacionElectronica, facturacionElectronicaId), HttpStatus.OK);
+        return ResponseEntity.ok(service.update(facturacionElectronica, facturacionElectronicaId));
     }
 
 }

@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ import um.tesoreria.core.exception.ChequeraPagoException;
 import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.kotlin.model.ChequeraSerie;
-import um.tesoreria.core.kotlin.model.FacturacionElectronica;
+import um.tesoreria.core.model.FacturacionElectronica;
 import um.tesoreria.core.repository.ChequeraPagoRepository;
 
 /**

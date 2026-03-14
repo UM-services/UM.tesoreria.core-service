@@ -3,7 +3,7 @@ package um.tesoreria.core.repository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import um.tesoreria.core.kotlin.model.FacturacionElectronica;
+import um.tesoreria.core.model.FacturacionElectronica;
 
 import java.time.OffsetDateTime;
 import java.util.List;

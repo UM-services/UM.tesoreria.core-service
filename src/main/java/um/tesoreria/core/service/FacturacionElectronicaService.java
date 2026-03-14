@@ -1,26 +1,23 @@
 package um.tesoreria.core.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import um.tesoreria.core.exception.FacturacionElectronicaException;
-import um.tesoreria.core.kotlin.model.FacturacionElectronica;
+import um.tesoreria.core.model.FacturacionElectronica;
 import um.tesoreria.core.repository.FacturacionElectronicaRepository;
 import org.springframework.stereotype.Service;
+import um.tesoreria.core.util.Jsonifier;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class FacturacionElectronicaService {
 
     private final FacturacionElectronicaRepository repository;
-
-    public FacturacionElectronicaService(FacturacionElectronicaRepository repository) {
-        this.repository = repository;
-    }
 
     public List<FacturacionElectronica> findAllByPeriodo(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta) {
         return repository.findAllByFechaReciboBetween(fechaDesde, fechaHasta, Sort.by("fechaRecibo").ascending().and(Sort.by("facturacionElectronicaId")));
@@ -28,11 +25,7 @@ public class FacturacionElectronicaService {
 
     public List<FacturacionElectronica> findAllByChequeraPagoIds(List<Long> chequeraPagoIds) {
         var facturacionElectronicas = repository.findAllByChequeraPagoIdIn(chequeraPagoIds);
-        try {
-            log.debug("FacturacionElectronicas: {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(facturacionElectronicas));
-        } catch (JsonProcessingException e) {
-            log.debug("FacturacionElectronicas: {}", e.getMessage());
-        }
+        log.debug("FacturacionElectronicas: {}", Jsonifier.builder(facturacionElectronicas).build());
         return facturacionElectronicas;
     }
 
@@ -42,11 +35,7 @@ public class FacturacionElectronicaService {
 
     public FacturacionElectronica findByFacturacionElectronicaId(Long facturacionElectronicaId) {
         var facturacionElectronica = repository.findByFacturacionElectronicaId(facturacionElectronicaId).orElseThrow(() -> new FacturacionElectronicaException("facturacionElectronicaId", facturacionElectronicaId));
-        try {
-            log.debug("FacturacionElectronica: {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(facturacionElectronica));
-        } catch (JsonProcessingException e) {
-            log.debug("FacturacionElectronica: {}", e.getMessage());
-        }
+        log.debug("FacturacionElectronica: {}", facturacionElectronica.jsonify());
         return facturacionElectronica;
     }
 
@@ -60,26 +49,26 @@ public class FacturacionElectronicaService {
     }
 
     public FacturacionElectronica update(FacturacionElectronica newFacturacionElectronica, Long facturacionElectronicaId) {
+        log.debug("Processing FacturacionElectronicaService.update");
         return repository.findByFacturacionElectronicaId(facturacionElectronicaId).map(facturacionElectronica -> {
-            facturacionElectronica = new FacturacionElectronica.Builder()
-                    .facturacionElectronicaId(facturacionElectronicaId)
-                    .chequeraPagoId(newFacturacionElectronica.getChequeraPagoId())
-                    .comprobanteId(newFacturacionElectronica.getComprobanteId())
-                    .numeroComprobante(newFacturacionElectronica.getNumeroComprobante())
-                    .personaId(newFacturacionElectronica.getPersonaId())
-                    .tipoDocumento(newFacturacionElectronica.getTipoDocumento())
-                    .apellido(newFacturacionElectronica.getApellido())
-                    .nombre(newFacturacionElectronica.getNombre())
-                    .cuit(newFacturacionElectronica.getCuit())
-                    .condicionIva(newFacturacionElectronica.getCondicionIva())
-                    .importe(newFacturacionElectronica.getImporte())
-                    .cae(newFacturacionElectronica.getCae())
-                    .fechaRecibo(newFacturacionElectronica.getFechaRecibo())
-                    .fechaVencimientoCae(newFacturacionElectronica.getFechaVencimientoCae())
-                    .enviada(newFacturacionElectronica.getEnviada())
-                    .retries(newFacturacionElectronica.getRetries())
-                    .build();
-            return repository.save(facturacionElectronica);
+            facturacionElectronica.setChequeraPagoId(newFacturacionElectronica.getChequeraPagoId());
+            facturacionElectronica.setComprobanteId(newFacturacionElectronica.getComprobanteId());
+            facturacionElectronica.setNumeroComprobante(newFacturacionElectronica.getNumeroComprobante());
+            facturacionElectronica.setPersonaId(newFacturacionElectronica.getPersonaId());
+            facturacionElectronica.setTipoDocumento(newFacturacionElectronica.getTipoDocumento());
+            facturacionElectronica.setApellido(newFacturacionElectronica.getApellido());
+            facturacionElectronica.setNombre(newFacturacionElectronica.getNombre());
+            facturacionElectronica.setCuit(newFacturacionElectronica.getCuit());
+            facturacionElectronica.setCondicionIva(newFacturacionElectronica.getCondicionIva());
+            facturacionElectronica.setImporte(newFacturacionElectronica.getImporte());
+            facturacionElectronica.setCae(newFacturacionElectronica.getCae());
+            facturacionElectronica.setFechaRecibo(newFacturacionElectronica.getFechaRecibo());
+            facturacionElectronica.setFechaVencimientoCae(newFacturacionElectronica.getFechaVencimientoCae());
+            facturacionElectronica.setEnviada(newFacturacionElectronica.getEnviada());
+            facturacionElectronica.setRetries(newFacturacionElectronica.getRetries());
+            facturacionElectronica = repository.save(facturacionElectronica);
+            log.debug("FacturacionElectronica -> {}", facturacionElectronica.jsonify());
+            return facturacionElectronica;
         }).orElseThrow(() ->new FacturacionElectronicaException("facturacionElectronicaId", facturacionElectronicaId));
     }
 

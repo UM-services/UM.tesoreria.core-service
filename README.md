@@ -4,7 +4,16 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.5.0**
+**Versión actual (SemVer): 3.5.1**
+
+## Novedades 3.5.1 (verificado en código)
+- refactor(model): Migración de FacturacionElectronica de Kotlin a Java
+  - Eliminación de FacturacionElectronica.kt (modelo Kotlin)
+  - Creación de FacturacionElectronica.java con anotaciones Lombok (@Getter, @Setter, @Builder, @NoArgsConstructor, @AllArgsConstructor)
+  - Nuevo método jsonify() para logging estructurado
+- refactor(controller): Uso de ResponseEntity.ok() en lugar de new ResponseEntity<>() en FacturacionElectronicaController
+- refactor(service): Uso de utilitaria Jsonifier en lugar de JsonMapper directamente en FacturacionElectronicaService
+- refactor(config): Nueva configuración de Jackson en bootstrap.yml (fail-on-null-for-primitives: false)
 
 ## Novedades 3.5.0 (verificado en código)
 - refactor(deps): Actualización de Kotlin de 2.3.0 a 2.3.10
@@ -452,9 +461,9 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.10-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.5.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.5.1-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -548,7 +557,7 @@ src/
 El servicio requiere las siguientes configuraciones:
 - Base de datos MySQL
 - Configuración de correo electrónico
-- Java 21
+- Java 25
 - MySQL 8.0 o superior
 - Maven 3.8.8 o superior
 
