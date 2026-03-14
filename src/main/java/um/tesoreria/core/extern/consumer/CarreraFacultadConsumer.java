@@ -5,29 +5,26 @@ package um.tesoreria.core.extern.consumer;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import um.tesoreria.core.extern.model.kotlin.CarreraFacultad;
 
-/**
- * @author daniel
- *
- */
 @Service
 public class CarreraFacultadConsumer {
 
+	private final RestClient restClient = RestClient.create();
+
 	public List<CarreraFacultad> findAll(String server, Long port) {
-		RestTemplate restTemplate = new RestTemplate();
 		String url = "http://" + server + ":" + port + "/carrera/";
-		return Arrays.asList(restTemplate.getForEntity(url, CarreraFacultad[].class).getBody());
+		return Arrays.asList(Objects.requireNonNull(restClient.get().uri(url).retrieve().toEntity(CarreraFacultad[].class).getBody()));
 	}
 
 	public CarreraFacultad findByUnique(String server, Long port, Integer facultadId, Integer planId,
 			Integer carreraId) {
-		RestTemplate restTemplate = new RestTemplate();
 		String url = "http://" + server + ":" + port + "/carrera/unique/" + facultadId + "/" + planId + "/" + carreraId;
-		return restTemplate.getForObject(url, CarreraFacultad.class);
+		return restClient.get().uri(url).retrieve().body(CarreraFacultad.class);
 	}
 
 }

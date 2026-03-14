@@ -39,6 +39,14 @@ data class ChequeraImpresionCabecera(
 
     var alternativaId: Int? = null,
     var usuarioId: String? = null,
-    var version: Long? = null
+    var version: Long? = null,
+    var hpum: Byte = 0,
+    var becaPorcentaje: BigDecimal = BigDecimal.ZERO,
+    var becaResolucion: String? = null,
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    var becaFecha: OffsetDateTime? = null,
+
+    var becaUserId: Long? = null
 
 ) : Auditable()

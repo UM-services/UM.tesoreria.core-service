@@ -73,6 +73,14 @@ data class ChequeraSerie(
     var enviado: Byte = 0,
     var retenida: Byte = 0,
     var version: Long? = null,
+    var hpum: Byte = 0,
+    var becaPorcentaje: BigDecimal = BigDecimal.ZERO,
+    var becaResolucion: String? = null,
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    var becaFecha: OffsetDateTime? = null,
+
+    var becaUserId: Long? = null,
 
     @Transient
     var cuotasDeuda: Int = 0,

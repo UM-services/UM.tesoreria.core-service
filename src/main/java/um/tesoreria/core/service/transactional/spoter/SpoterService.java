@@ -54,7 +54,7 @@ public class SpoterService {
             personaEntity = personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
         } catch (PersonaException e) {
             personaEntity = personaService.add(new PersonaEntity(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
-                    spoterData.getApellido(), spoterData.getNombre(), "", (byte) 0, "", "", ""));
+                    spoterData.getApellido(), spoterData.getNombre(), "", (byte) 0, "", "", "", (byte) 0));
         }
         logPersona(personaEntity);
         Domicilio domicilio;
@@ -119,6 +119,11 @@ public class SpoterService {
                 (byte) 0,
                 (byte) 0,
                 build.getBuild(),
+                (byte) 0,
+                BigDecimal.ZERO,
+                null,
+                null,
+                null,
                 0,
                 BigDecimal.ZERO,
                 null,

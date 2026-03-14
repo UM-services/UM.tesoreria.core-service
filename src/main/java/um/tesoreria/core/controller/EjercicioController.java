@@ -6,6 +6,7 @@ package um.tesoreria.core.controller;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,27 +30,28 @@ import um.tesoreria.core.service.EjercicioService;
  */
 @RestController
 @RequestMapping("/ejercicio")
+@RequiredArgsConstructor
 public class EjercicioController {
 	
 	private final EjercicioService service;
 
-	public EjercicioController(EjercicioService service) {
-		this.service = service;
-	}
-	
 	@GetMapping("/")
 	public ResponseEntity<List<Ejercicio>> findAll() {
-		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAll());
 	}
 	
 	@GetMapping("/{ejercicioId}")
 	public ResponseEntity<Ejercicio> findByEjercicioId(@PathVariable Integer ejercicioId) {
-		return new ResponseEntity<>(service.findByEjercicioId(ejercicioId), HttpStatus.OK);
+		try {
+			return ResponseEntity.ok(service.findByEjercicioId(ejercicioId));
+		} catch (EjercicioException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+		}
 	}
 	
 	@GetMapping("/last")
 	public ResponseEntity<Ejercicio> findLast() {
-		return new ResponseEntity<>(service.findLast(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findLast());
 	}
 	
 	@GetMapping("/fecha/{fecha}")
@@ -57,24 +59,24 @@ public class EjercicioController {
 		try {
 			return new ResponseEntity<>(service.findByFecha(fecha), HttpStatus.OK);
 		} catch (EjercicioException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
 	}
 	
 	@PostMapping("/")
 	public ResponseEntity<Ejercicio> add(@RequestBody Ejercicio ejercicio) {
-		return new ResponseEntity<>(service.add(ejercicio), HttpStatus.OK);
+		return ResponseEntity.ok(service.add(ejercicio));
 	}
 	
 	@PutMapping("/{ejercicioId}")
 	public ResponseEntity<Ejercicio> update(@RequestBody Ejercicio ejercicio, @PathVariable Integer ejercicioId) {
-		return new ResponseEntity<>(service.update(ejercicio, ejercicioId), HttpStatus.OK);
+		return ResponseEntity.ok(service.update(ejercicio, ejercicioId));
 	}
 	
 	@DeleteMapping("/{ejercicioId}")
 	public ResponseEntity<Void> delete(@PathVariable Integer ejercicioId) {
 		service.delete(ejercicioId);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		return ResponseEntity.noContent().build();
 	}
 
 }

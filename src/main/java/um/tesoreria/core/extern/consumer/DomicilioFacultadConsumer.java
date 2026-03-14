@@ -6,32 +6,27 @@ package um.tesoreria.core.extern.consumer;
 import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 import um.tesoreria.core.kotlin.model.Domicilio;
 
-/**
- * @author daniel
- *
- */
 @Service
 public class DomicilioFacultadConsumer {
 
+	private final RestClient restClient = RestClient.create();
+
 	public Domicilio sincronize(String server, Long port, Domicilio domicilio) {
-		RestTemplate restTemplate = new RestTemplate();
 		String url = "http://" + server + ":" + port + "/domicilio/sincronize";
-		return restTemplate.postForObject(url, domicilio, Domicilio.class);
+		return restClient.post().uri(url).body(domicilio).retrieve().body(Domicilio.class);
 	}
 
 	public Domicilio findByUnique(String server, Long port, BigDecimal personaId, Integer documentoId) {
-		RestTemplate restTemplate = new RestTemplate();
 		String url = "http://" + server + ":" + port + "/domicilio/" + personaId + "/" + documentoId;
-		return restTemplate.getForObject(url, Domicilio.class);
+		return restClient.get().uri(url).retrieve().body(Domicilio.class);
 	}
 
 	public Domicilio findPagadorByUnique(String server, Long port, BigDecimal personaId, Integer documentoId) {
-		RestTemplate restTemplate = new RestTemplate();
 		String url = "http://" + server + ":" + port + "/domicilio/pagador/" + personaId + "/" + documentoId;
-		return restTemplate.getForObject(url, Domicilio.class);
+		return restClient.get().uri(url).retrieve().body(Domicilio.class);
 	}
 
 }

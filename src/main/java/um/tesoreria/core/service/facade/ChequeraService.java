@@ -196,7 +196,8 @@ public class ChequeraService {
         ChequeraImpresionCabecera cabecera = new ChequeraImpresionCabecera(null, serie.getFacultadId(),
                 serie.getTipoChequeraId(), serie.getChequeraSerieId(), Tool.hourAbsoluteArgentina(),
                 serie.getPersonaId(), serie.getDocumentoId(), serie.getLectivoId(), serie.getGeograficaId(),
-                serie.getArancelTipoId(), serie.getAlternativaId(), serie.getUsuarioId(), serie.getVersion());
+                serie.getArancelTipoId(), serie.getAlternativaId(), serie.getUsuarioId(), serie.getVersion(),
+                serie.getHpum(), serie.getBecaPorcentaje(), serie.getBecaResolucion(), serie.getBecaFecha(), serie.getBecaUserId());
         cabecera = chequeraImpresionCabeceraService.add(cabecera);
         Map<Integer, ChequeraTotal> totales = chequeraTotalService
                 .findAllByChequera(serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId())

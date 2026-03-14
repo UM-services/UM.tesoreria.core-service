@@ -44,7 +44,7 @@ import um.tesoreria.core.extern.consumer.view.PersonaKeyFacultadConsumer;
 import um.tesoreria.core.extern.consumer.view.PreunivCarreraFacultadConsumer;
 import um.tesoreria.core.extern.consumer.view.PreunivMatricResumenFacultadConsumer;
 import um.tesoreria.core.extern.consumer.view.PreunivResumenFacultadConsumer;
-import um.tesoreria.core.extern.exception.BajaFacultadNotFoundException;
+import um.tesoreria.core.extern.exception.BajaFacultadException;
 import um.tesoreria.core.extern.model.kotlin.*;
 import um.tesoreria.core.extern.model.view.InscriptoCursoFacultad;
 import um.tesoreria.core.extern.model.view.LegajoKeyFacultad;
@@ -330,7 +330,7 @@ public class SheetService {
                     BajaFacultad bajaFacultad = null;
                     try {
                         bajaFacultad = bajaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(), facultadId, persona.getPersonaId(), persona.getDocumentoId(), lectivoId);
-                    } catch (BajaFacultadNotFoundException e) {
+                    } catch (BajaFacultadException e) {
                         log.debug("Error buscando facultad en otro servicio");
                     }
                     if (bajaFacultad != null) {
