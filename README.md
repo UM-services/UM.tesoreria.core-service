@@ -4,9 +4,18 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.4.0**
+**Versión actual (SemVer): 3.5.0**
 
-## Novedades 3.4.0 (verificado en código)
+## Novedades 3.5.0 (verificado en código)
+- refactor(deps): Actualización de Kotlin de 2.3.0 a 2.3.10
+- refactor(http): Migración masiva de RestTemplate a RestClient en todos los consumers externos (~14 archivos)
+- feat(model): Nuevos campos de becario (hpum, becaPorcentaje, becaResolucion, becaFecha, becaUserId) en ChequeraImpresionCabecera y ChequeraSerie
+- feat(model): Nuevo campo hpum en PersonaEntity
+- feat(hexagonal): Nueva estructura skeleton MatriculacionContext con arquitectura hexagonal
+- refactor(controller): Migración de EjercicioController a inyección con @RequiredArgsConstructor
+- fix(exception): Renombrado BajaFacultadNotFoundException a BajaFacultadException
+- chore(cleanup): Eliminación de MatriculaController, MatriculaRepository y modelo Matricula
+- fix(api): Eliminación de endpoint sincronizeMatricula en SincronizeController
 - feat(api): Nuevo endpoint `/habilitados` en ArancelTipoController para obtener tipos de arancel habilitados
   - Nuevo método `findAllHabilitados()` en ArancelTipoService
   - Nuevo método `findAllByHabilitado()` en ArancelTipoRepository
@@ -195,7 +204,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
 - Spring Boot: 4.0.2
 - Spring Cloud: 2025.1.0
-- Kotlin: 2.3.0
+- Kotlin: 2.3.10
 - MySQL Connector: 9.6.0
 - SpringDoc OpenAPI: 3.0.1
 - Apache POI: 5.5.1
@@ -445,7 +454,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.4.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.5.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -467,7 +476,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 - Java 25
 - Spring Boot 4.0.2
 - Spring Cloud 2025.1.0
-- Kotlin 2.3.0
+- Kotlin 2.3.10
 - JPA/Hibernate
 - ModelMapper
 - MySQL
@@ -508,6 +517,17 @@ src/
 │   │                           │   └── mapper/       # Mappers
 │   │                           └── application/
 │   │                               └── service/      # Servicios de aplicación
+│   │                   └── matriculacionContext/  # Módulo MatriculacionContext (v3.5.0)
+│   │                       ├── domain/
+│   │                       │   ├── model/        # Entidades de dominio
+│   │                       │   └── ports/        # Puertos (interfaces)
+│   │                       │       ├── in/       # Puertos de entrada
+│   │                       │       └── out/      # Puertos de salida
+│   │                       └── infrastructure/
+│   │                           ├── persistence/
+│   │                           │   └── repository/   # Adaptadores JPA
+│   │                           └── web/
+│   │                               └── controller/  # Controladores REST
 │   └── resources/
 └── test/                                # Pruebas unitarias
 ```

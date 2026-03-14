@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CarreraException;
@@ -33,7 +34,6 @@ import um.tesoreria.core.extern.model.kotlin.*;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.InfoLdap;
-import um.tesoreria.core.model.Matricula;
 import um.tesoreria.core.model.UsuarioLdap;
 import um.tesoreria.core.model.view.ChequeraClase;
 import um.tesoreria.core.service.CarreraService;
@@ -42,7 +42,6 @@ import um.tesoreria.core.service.DomicilioService;
 import um.tesoreria.core.service.FacultadService;
 import um.tesoreria.core.service.InfoLdapService;
 import um.tesoreria.core.service.LegajoService;
-import um.tesoreria.core.service.MatriculaService;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.service.PlanService;
 import um.tesoreria.core.service.UsuarioLdapService;
@@ -55,6 +54,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SincronizeService {
 
 	private final FacultadService facultadService;
@@ -74,164 +74,6 @@ public class SincronizeService {
 	private final LegajoFacultadConsumer legajoFacultadConsumer;
 	private final PlanFacultadConsumer planFacultadConsumer;
 	private final CarreraFacultadConsumer carreraFacultadConsumer;
-
-	public SincronizeService(FacultadService facultadService, PersonaService personaService,
-			UsuarioLdapService usuarioLdapService, ChequeraSerieService chequeraSerieService,
-			ChequeraClaseService chequeraClaseService, InfoLdapService infoLdapService,
-			DomicilioService domicilioService, CarreraService carreraService, PlanService planService,
-			LegajoService legajoService, InscripcionFacultadConsumer inscripcionFacultadConsumer,
-			InscripcionDetalleFacultadConsumer inscripcionDetalleFacultadConsumer,
-			PersonaFacultadConsumer personaFacultadConsumer, PreInscripcionFacultadConsumer preInscripcionFacultadConsumer,
-			LegajoFacultadConsumer legajoFacultadConsumer, PlanFacultadConsumer planFacultadConsumer,
-			CarreraFacultadConsumer carreraFacultadConsumer) {
-		this.facultadService = facultadService;
-		this.personaService = personaService;
-		this.usuarioLdapService = usuarioLdapService;
-		this.chequeraSerieService = chequeraSerieService;
-		this.chequeraClaseService = chequeraClaseService;
-		this.infoLdapService = infoLdapService;
-		this.domicilioService = domicilioService;
-		this.carreraService = carreraService;
-		this.planService = planService;
-		this.legajoService = legajoService;
-		this.inscripcionFacultadConsumer = inscripcionFacultadConsumer;
-		this.inscripcionDetalleFacultadConsumer = inscripcionDetalleFacultadConsumer;
-		this.personaFacultadConsumer = personaFacultadConsumer;
-		this.preInscripcionFacultadConsumer = preInscripcionFacultadConsumer;
-		this.legajoFacultadConsumer = legajoFacultadConsumer;
-		this.planFacultadConsumer = planFacultadConsumer;
-		this.carreraFacultadConsumer = carreraFacultadConsumer;
-	}
-
-	@Transactional
-	public void sincronizeMatricula(Integer lectivoId, Integer facultadId, MatriculaService matriculaService) throws CloneNotSupportedException {
-		Facultad facultad = null;
-		try {
-			facultad = facultadService.findByFacultadId(facultadId);
-		} catch (FacultadException e) {
-			return;
-		}
-		List<Matricula> matriculas = new ArrayList<>();
-		for (InscripcionFacultad inscripcion : inscripcionFacultadConsumer.findAllByLectivo(facultad.getApiserver(),
-				facultad.getApiport(), facultadId, lectivoId)) {
-			List<InscripcionDetalleFacultad> detalles = inscripcionDetalleFacultadConsumer.findAllByPersona(
-					facultad.getApiserver(), facultad.getApiport(), inscripcion.getPersonaId(),
-					inscripcion.getDocumentoId(), inscripcion.getFacultadId(), inscripcion.getLectivoId());
-			// Verifica usuarioldap
-			UsuarioLdap usuarioldap;
-			try {
-				usuarioldap = usuarioLdapService.findByDocumento(inscripcion.getPersonaId());
-			} catch (UsuarioLdapException e) {
-				usuarioldap = new UsuarioLdap(null, inscripcion.getPersonaId(), "alta", "pendiente", facultad.getDsn());
-				usuarioldap = usuarioLdapService.add(usuarioldap);
-			}
-			Integer[] clases = { 2, 5 };
-			ChequeraClase serie;
-			try {
-				serie = chequeraClaseService
-						.findFirstByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClaseChequeraIdIn(
-								inscripcion.getFacultadId(), inscripcion.getPersonaId(), inscripcion.getDocumentoId(),
-								inscripcion.getLectivoId(), Arrays.asList(clases));
-			} catch (ChequeraClaseException e) {
-				serie = new ChequeraClase();
-			}
-			// Verificar persona
-			PersonaEntity personaEntity;
-			try {
-				personaEntity = personaService.findByUnique(inscripcion.getPersonaId(), inscripcion.getDocumentoId());
-			} catch (PersonaException e) {
-				personaEntity = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
-						inscripcion.getPersonaId(), inscripcion.getDocumentoId());
-				personaEntity.setUniqueId(null);
-				personaEntity = personaService.add(personaEntity);
-			}
-			// Verificar matricula
-			Matricula matricula = null;
-			try {
-				matricula = matriculaService.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraIdIn(
-						inscripcion.getFacultadId(), inscripcion.getPersonaId(), inscripcion.getDocumentoId(),
-						inscripcion.getLectivoId(), Arrays.asList(clases));
-			} catch (MatriculaException e) {
-				matricula = new Matricula();
-			}
-			Matricula matricula_old = (Matricula) matricula.clone();
-			int clasechequeraId = 2;
-			if (facultadId == 15)
-				clasechequeraId = 5;
-			if (matricula.getMatriculaId() == null) {
-				matricula = new Matricula(null, inscripcion.getFecha(), facultadId, inscripcion.getPersonaId(),
-						inscripcion.getDocumentoId(), lectivoId, inscripcion.getGeograficaId(), inscripcion.getPlanId(),
-						inscripcion.getCarreraId(), null, null, inscripcion.getCurso(), detalles.size(), 0, (byte) 1,
-						inscripcion.getProvisoria(), clasechequeraId);
-			}
-			if (serie.getChequeraId() != null) {
-				matricula.setChequerapendiente((byte) 0);
-				matricula.setTipochequeraId(serie.getTipoChequeraId());
-				matricula.setChequeraserieId(serie.getChequeraSerieId());
-			}
-			if (!matricula_old.equals(matricula))
-				matriculas.add(matricula);
-		}
-//		Comienzo análisis preuniversitario
-		Integer offset = 1;
-		if (OffsetDateTime.now().getMonthValue() < 7) {
-			offset = 0;
-		}
-		for (PreInscripcionFacultad preInscripcion : preInscripcionFacultadConsumer.findAllByLectivo(
-				facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId + offset)) {
-			Integer[] clases = { 1 };
-			ChequeraClase serie = null;
-			try {
-				assert preInscripcion.getLectivoId() != null;
-				serie = chequeraClaseService
-						.findFirstByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClaseChequeraIdIn(
-								preInscripcion.getFacultadId(), preInscripcion.getPersonaId(),
-								preInscripcion.getDocumentoId(), preInscripcion.getLectivoId() - 1,
-								Arrays.asList(clases));
-			} catch (ChequeraClaseException e) {
-				serie = new ChequeraClase();
-			}
-			// Verificar persona
-			PersonaEntity personaEntity;
-			try {
-				personaEntity = personaService.findByUnique(preInscripcion.getPersonaId(), preInscripcion.getDocumentoId());
-			} catch (PersonaException e) {
-				personaEntity = personaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
-						preInscripcion.getPersonaId(), preInscripcion.getDocumentoId());
-				personaEntity.setUniqueId(null);
-				personaEntity = personaService.add(personaEntity);
-			}
-			// Verificar matricula
-			Matricula matricula;
-			try {
-				matricula = matriculaService.findByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoIdAndClasechequeraId(
-						preInscripcion.getFacultadId(), preInscripcion.getPersonaId(), preInscripcion.getDocumentoId(),
-						preInscripcion.getLectivoId(), 1);
-			} catch (MatriculaException e) {
-				matricula = new Matricula();
-			}
-			Matricula matricula_old = (Matricula) matricula.clone();
-			if (matricula.getMatriculaId() == null) {
-				LegajoFacultad legajo = legajoFacultadConsumer.findByPersona(facultad.getApiserver(),
-						facultad.getApiport(), preInscripcion.getPersonaId(), preInscripcion.getDocumentoId(),
-						preInscripcion.getFacultadId());
-				matricula = new Matricula(null, preInscripcion.getFecha(), facultadId, preInscripcion.getPersonaId(),
-						preInscripcion.getDocumentoId(), preInscripcion.getLectivoId(),
-						preInscripcion.getGeograficaId(), legajo.getPlanId(), legajo.getCarreraId(), null, null, 0, 0,
-						0, (byte) 1, (byte) 0, 1);
-			}
-			if (serie.getChequeraId() != null) {
-				matricula.setChequerapendiente((byte) 0);
-				matricula.setTipochequeraId(serie.getTipoChequeraId());
-				matricula.setChequeraserieId(serie.getChequeraSerieId());
-			}
-			if (!matricula_old.equals(matricula))
-				matriculas.add(matricula);
-		}
-		if (!matriculas.isEmpty()) {
-			matriculas = matriculaService.saveAll(matriculas);
-		}
-	}
 
 	@Transactional
 	public void sincronizeInstitucional(Integer lectivoId, Integer facultadId) {

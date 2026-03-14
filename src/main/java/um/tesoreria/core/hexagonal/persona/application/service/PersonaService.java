@@ -425,7 +425,7 @@ public class PersonaService {
         return repository.findByUniqueId(uniqueId).map(persona -> {
             persona = new PersonaEntity(uniqueId, newpersona.getPersonaId(), newpersona.getDocumentoId(),
                     newpersona.getApellido(), newpersona.getNombre(), newpersona.getSexo(), newpersona.getPrimero(),
-                    newpersona.getCuit(), newpersona.getCbu(), newpersona.getPassword());
+                    newpersona.getCuit(), newpersona.getCbu(), newpersona.getPassword(), newpersona.getHpum());
             repository.save(persona);
             return persona;
         }).orElseThrow(() -> new PersonaException(uniqueId));

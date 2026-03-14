@@ -56,6 +56,8 @@ public class PersonaEntity extends Auditable implements Serializable {
     @Column(name = "per_contrasenha")
     private String password;
 
+    private Byte hpum;
+
     public String getApellidoNombre() {
         return MessageFormat.format("{0}, {1}", apellido, nombre);
     }

@@ -6,21 +6,21 @@ package um.tesoreria.core.extern.consumer;
 import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
-/**
- * @author daniel
- *
- */
 @Service
 public class AlumnoExamenFacultadConsumer {
 
+	private final RestClient restClient = RestClient.create();
+
 	public Integer cantidad48horas(String server, Long port, BigDecimal personaId, Integer documentoId,
 			Integer facultadId) {
-		RestTemplate restTemplate = new RestTemplate();
 		String url = "http://" + server + ":" + port + "/alumnoexamen/48horascantidad/" + personaId + "/" + documentoId
 				+ "/" + facultadId;
-		return restTemplate.getForObject(url, Integer.class);
+		return restClient.get()
+			.uri(url)
+			.retrieve()
+			.body(Integer.class);
 	}
 
 }

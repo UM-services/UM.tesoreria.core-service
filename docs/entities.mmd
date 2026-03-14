@@ -10,6 +10,8 @@ erDiagram
     Contrato ||--o{ ContratoFactura : "factura"
     Articulo ||--o{ ProveedorArticulo : "proveído por"
     Carrera ||--o{ Plan : "incluye"
-    Persona ||--o{ Matricula : "matricula"
+    Persona ||--o{ ChequeraSerie : "posee"
+    Persona ||--o{ Domicilio : "domicilio"
+    Persona ||--o{ Legajo : "legajo"
     MercadoPagoContext ||--o{ MercadoPagoContextHistory : "tiene historial"
     %% ...agrega más relaciones según entidades del dominio

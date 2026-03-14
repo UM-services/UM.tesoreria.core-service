@@ -5,6 +5,57 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.0] - 2026-03-13
+### Added
+- feat(model): Agregado campo `hpum` (Byte) en PersonaEntity para nuevo indicador de persona
+- feat(model): Nuevos campos de becario en ChequeraImpresionCabecera y ChequeraSerie
+  - `hpum`: Byte (indicador)
+  - `becaPorcentaje`: BigDecimal (porcentaje de beca)
+  - `becaResolucion`: String (número de resolución)
+  - `becaFecha`: OffsetDateTime (fecha de resolución)
+  - `becaUserId`: Long (usuario que registra la beca)
+- feat(hexagonal): Nueva estructura skeleton MatriculacionContext con arquitectura hexagonal
+  - Nuevo paquete: `um.tesoreria.core.hexagonal.matriculacionContext`
+  - Servicios, puertos y controladores base
+
+### Changed
+- refactor(deps): Actualización de Kotlin de 2.3.0 a 2.3.10
+  - Actualización en pom.xml: `<kotlin.version>2.3.10</kotlin.version>`
+- refactor(http): Migración masiva de RestTemplate a RestClient en consumers externos
+  - AlumnoExamenFacultadConsumer
+  - BajaFacultadConsumer
+  - CarreraFacultadConsumer
+  - DomicilioFacultadConsumer
+  - InscripcionDetalleFacultadConsumer
+  - InscripcionFacultadConsumer
+  - LegajoFacultadConsumer
+  - LocalidadFacultadConsumer
+  - PersonaFacultadConsumer
+  - PlanFacultadConsumer
+  - PreInscripcionFacultadConsumer
+  - PreTurnoFacultadConsumer
+  - ProvinciaFacultadConsumer
+  - Consumers en paquete view: InscriptoCurso, LegajoKey, PersonaKey, PreunivCarrera, PreunivMatricResumen, PreunivResumen
+- refactor(controller): Migración de EjercicioController a inyección con @RequiredArgsConstructor
+  - Uso de ResponseEntity.ok() en lugar de new ResponseEntity<>()
+  - Mejor manejo de excepciones con ResponseStatusException
+
+### Fixed
+- fix(exception): Renombrado BajaFacultadNotFoundException a BajaFacultadException
+  - Actualización en BajaFacultadConsumer
+- fix(api): Mejora en manejo de errores en endpoints de EjercicioController
+  - Cambiado HttpStatus.BAD_REQUEST a NOT_FOUND para excepciones de negocio
+
+### Removed
+- chore(cleanup): Eliminación de código obsoleto
+  - MatriculaController.java eliminado
+  - MatriculaRepository.java eliminado
+  - Matricula.java (modelo) eliminado
+  - Endpoint sincronizeMatricula en SincronizeController eliminado
+  - Dependencia de MatriculaService en SincronizeController eliminada
+
+> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados).
+
 ## [3.4.0] - 2026-03-02
 ### Added
 - feat(api): Nuevo endpoint `/habilitados` en ArancelTipoController para obtener tipos de arancel habilitados
