@@ -4,7 +4,17 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.5.1**
+**Versión actual (SemVer): 3.5.2**
+
+## Novedades 3.5.2 (verificado en código)
+- chore(deps): Actualización de Spring Boot de 4.0.2 a 4.0.5
+- chore(deps): Actualización de Kotlin de 2.3.10 a 2.3.20
+- chore(deps): Actualización de log4j2 de 4.0.2 a 4.0.5
+- chore(deps): Actualización de springdoc-openapi de 3.0.1 a 3.0.2
+- chore(deps): Actualización de openpdf de 3.0.0 a 3.0.3
+- chore(deps): Actualización de json-path de 2.10.0 a 3.0.0
+- chore(ci): Actualización de GitHub Actions (checkout v4→v6, setup-java v4→v5, cache v4→v5, login-action v3→v4, metadata-action v5→v6, buildx-action v3→v4, build-push-action v6→v7, deploy-pages v4→v5)
+- feat(deps): Nueva dependencia commons-fileupload 1.6.0
 
 ## Novedades 3.5.1 (verificado en código)
 - refactor(model): Migración de FacturacionElectronica de Kotlin a Java
@@ -211,15 +221,16 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.0.2
+- Spring Boot: 4.0.5
 - Spring Cloud: 2025.1.0
-- Kotlin: 2.3.10
+- Kotlin: 2.3.20
 - MySQL Connector: 9.6.0
-- SpringDoc OpenAPI: 3.0.1
+- SpringDoc OpenAPI: 3.0.2
 - Apache POI: 5.5.1
-- OpenPDF: 3.0.0
+- OpenPDF: 3.0.3
 - ModelMapper: 3.2.6
 - Guava: 33.5.0-jre
+- json-path: 3.0.0
 
 ## Optimizaciones de Rendimiento (verificado en código)
 - **Computación paralela**: La función `calculateDeuda` utiliza `CompletableFuture` para ejecutar consultas en paralelo
@@ -459,11 +470,11 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 # UM Tesorería Core Service
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.10-purple.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.5.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.5.2-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -483,9 +494,9 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 
 ## Tecnologías Utilizadas
 - Java 25
-- Spring Boot 4.0.2
+- Spring Boot 4.0.5
 - Spring Cloud 2025.1.0
-- Kotlin 2.3.10
+- Kotlin 2.3.20
 - JPA/Hibernate
 - ModelMapper
 - MySQL
