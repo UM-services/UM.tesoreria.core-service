@@ -5,6 +5,19 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.2] - 2026-04-04
+### Changed
+- chore(deps): Actualización de Spring Boot de 4.0.2 a 4.0.5
+- chore(deps): Actualización de Kotlin de 2.3.10 a 2.3.20
+- chore(deps): Actualización de log4j2 de 4.0.2 a 4.0.5
+- chore(deps): Actualización de springdoc-openapi de 3.0.1 a 3.0.2
+- chore(deps): Actualización de openpdf de 3.0.0 a 3.0.3
+- chore(deps): Actualización de json-path de 2.10.0 a 3.0.0
+- chore(ci): Actualización de GitHub Actions (checkout v4→v6, setup-java v4→v5, cache v4→v5, login-action v3→v4, metadata-action v5→v6, buildx-action v3→v4, build-push-action v6→v7, deploy-pages v4→v5)
+- feat(deps): Nueva dependencia commons-fileupload 1.6.0
+
+> Basado en análisis de `git diff HEAD` (cambios staged) y `pom.xml`.
+
 ## [3.5.1] - 2026-03-14
 ### Changed
 - refactor(model): Migración de FacturacionElectronica de Kotlin a Java
