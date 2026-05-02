@@ -1,88 +1,56 @@
-/**
- * 
- */
 package um.tesoreria.core.hexagonal.proveedor.application.service;
 
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.proveedor.domain.model.ProveedorSearch;
+import um.tesoreria.core.hexagonal.proveedor.domain.ports.in.*;
 
-import um.tesoreria.core.exception.ProveedorException;
-import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
-import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository.JpaProveedorRepository;
-import um.tesoreria.core.model.view.ProveedorSearch;
-import um.tesoreria.core.service.view.ProveedorSearchService;
+import java.util.List;
+import java.util.Optional;
 
-/**
- * @author daniel
- *
- */
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class ProveedorService {
 
-	private final JpaProveedorRepository repository;
-	private final ProveedorSearchService proveedorSearchService;
+    private final CreateProveedorUseCase createProveedorUseCase;
+    private final GetProveedorByIdUseCase getProveedorByIdUseCase;
+    private final GetProveedorByCuitUseCase getProveedorByCuitUseCase;
+    private final GetLastProveedorUseCase getLastProveedorUseCase;
+    private final GetAllProveedoresUseCase getAllProveedoresUseCase;
+    private final SearchProveedoresUseCase searchProveedoresUseCase;
+    private final UpdateProveedorUseCase updateProveedorUseCase;
+    private final DeleteProveedorUseCase deleteProveedorUseCase;
 
-    public List<ProveedorEntity> findAll() {
-		log.debug("Processing findAll");
-		return repository.findAll();
-	}
+    public Proveedor create(Proveedor proveedor) {
+        return createProveedorUseCase.createProveedor(proveedor);
+    }
 
-	public List<ProveedorSearch> findAllByStrings(List<String> conditions) {
-		log.debug("Processing findAllByStrings");
-		return proveedorSearchService.findAllByStrings(conditions);
-	}
+    public Optional<Proveedor> getByProveedorId(Integer proveedorId) {
+        return getProveedorByIdUseCase.getProveedorById(proveedorId);
+    }
 
-	public ProveedorEntity findByProveedorId(Integer proveedorId) {
-		log.debug("Processing findByProveedorId");
-		return repository.findByProveedorId(proveedorId).orElseThrow(() -> new ProveedorException(proveedorId));
-	}
+    public Optional<Proveedor> getByCuit(String cuit) {
+        return getProveedorByCuitUseCase.getProveedorByCuit(cuit);
+    }
 
-	public ProveedorEntity findByCuit(String cuit) {
-		log.debug("Processing findByCuit");
-		return repository.findTopByCuit(cuit).orElseThrow(() -> new ProveedorException(cuit));
-	}
+    public Optional<Proveedor> getLast() {
+        return getLastProveedorUseCase.getLastProveedor();
+    }
 
-	public ProveedorEntity findLast() {
-		log.debug("Processing findLast");
-		return repository.findTopByOrderByProveedorIdDesc().orElseThrow(ProveedorException::new);
-	}
+    public List<Proveedor> getAll() {
+        return getAllProveedoresUseCase.getAllProveedores();
+    }
 
-	public ProveedorEntity add(ProveedorEntity proveedor) {
-		log.debug("Processing add");
-		return repository.save(proveedor);
-	}
+    public List<ProveedorSearch> search(List<String> conditions) {
+        return searchProveedoresUseCase.searchProveedores(conditions);
+    }
 
-	public ProveedorEntity update(ProveedorEntity newProveedor, Integer proveedorId) {
-		log.debug("Processing update");
-		return repository.findByProveedorId(proveedorId).map(proveedor -> {
-			proveedor = ProveedorEntity.builder()
-					.proveedorId(proveedorId)
-					.cuit(newProveedor.getCuit())
-					.nombreFantasia(newProveedor.getNombreFantasia())
-					.razonSocial(newProveedor.getRazonSocial())
-					.ordenCheque(newProveedor.getOrdenCheque())
-					.domicilio(newProveedor.getDomicilio())
-					.telefono(newProveedor.getTelefono())
-					.fax(newProveedor.getFax())
-					.celular(newProveedor.getCelular())
-					.email(newProveedor.getEmail())
-					.emailInterno(newProveedor.getEmailInterno())
-					.numeroCuenta(newProveedor.getNumeroCuenta())
-					.habilitado(newProveedor.getHabilitado())
-					.cbu(newProveedor.getCbu())
-					.build();
-			return repository.save(proveedor);
-		}).orElseThrow(() -> new ProveedorException(proveedorId));
-	}
+    public Optional<Proveedor> update(Integer proveedorId, Proveedor proveedor) {
+        return updateProveedorUseCase.updateProveedor(proveedorId, proveedor);
+    }
 
-	public void delete(Integer proveedorId) {
-		log.debug("Processing delete");
-		repository.deleteById(proveedorId);
-	}
-
+    public boolean delete(Integer proveedorId) {
+        return deleteProveedorUseCase.deleteProveedor(proveedorId);
+    }
 }

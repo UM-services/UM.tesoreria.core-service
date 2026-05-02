@@ -1,88 +1,89 @@
-/**
- * 
- */
 package um.tesoreria.core.hexagonal.proveedor.infrastructure.web.controller;
-
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import um.tesoreria.core.exception.ProveedorException;
-import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
-import um.tesoreria.core.model.view.ProveedorSearch;
 import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
+import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.web.dto.ProveedorRequest;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.web.dto.ProveedorResponse;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.web.dto.ProveedorSearchResponse;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.web.mapper.ProveedorDtoMapper;
 
-/**
- * @author daniel
- *
- */
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping({"/proveedor", "/api/tesoreria/core/proveedor"})
 public class ProveedorController {
 
-	private final ProveedorService service;
+    private final ProveedorService proveedorService;
+    private final ProveedorDtoMapper proveedorDtoMapper;
 
-	public ProveedorController(ProveedorService service) {
-		this.service = service;
-	}
+    public ProveedorController(ProveedorService proveedorService, ProveedorDtoMapper proveedorDtoMapper) {
+        this.proveedorService = proveedorService;
+        this.proveedorDtoMapper = proveedorDtoMapper;
+    }
 
-	@GetMapping("/")
-	public ResponseEntity<List<ProveedorEntity>> findAll() {
-		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
-	}
+    @GetMapping("/")
+    public ResponseEntity<List<ProveedorResponse>> findAll() {
+        List<ProveedorResponse> responses = proveedorService.getAll().stream()
+                .map(proveedorDtoMapper::toResponse)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
 
-	@PostMapping("/search")
-	public ResponseEntity<List<ProveedorSearch>> findAllByStrings(@RequestBody List<String> conditions) {
-		return new ResponseEntity<>(service.findAllByStrings(conditions), HttpStatus.OK);
-	}
+    @PostMapping("/search")
+    public ResponseEntity<List<ProveedorSearchResponse>> findAllByStrings(@RequestBody List<String> conditions) {
+        List<ProveedorSearchResponse> responses = proveedorService.search(conditions).stream()
+                .map(proveedorDtoMapper::toSearchResponse)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
 
-	@GetMapping("/{proveedorId}")
-	public ResponseEntity<ProveedorEntity> findByProveedorId(@PathVariable Integer proveedorId) {
-		try {
-			return new ResponseEntity<>(service.findByProveedorId(proveedorId), HttpStatus.OK);
-		} catch (ProveedorException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-	}
+    @GetMapping("/{proveedorId}")
+    public ResponseEntity<ProveedorResponse> findByProveedorId(@PathVariable Integer proveedorId) {
+        return proveedorService.getByProveedorId(proveedorId)
+                .map(proveedor -> new ResponseEntity<>(proveedorDtoMapper.toResponse(proveedor), HttpStatus.OK))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor no encontrado"));
+    }
 
-	@GetMapping("/cuit/{cuit}")
-	public ResponseEntity<ProveedorEntity> findByCuit(@PathVariable String cuit) {
-		try {
-			return new ResponseEntity<>(service.findByCuit(cuit), HttpStatus.OK);
-		} catch (ProveedorException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-	}
+    @GetMapping("/cuit/{cuit}")
+    public ResponseEntity<ProveedorResponse> findByCuit(@PathVariable String cuit) {
+        return proveedorService.getByCuit(cuit)
+                .map(proveedor -> new ResponseEntity<>(proveedorDtoMapper.toResponse(proveedor), HttpStatus.OK))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor no encontrado con CUIT " + cuit));
+    }
 
-	@GetMapping("/last")
-	public ResponseEntity<ProveedorEntity> findLast() {
-		return new ResponseEntity<>(service.findLast(), HttpStatus.OK);
-	}
+    @GetMapping("/last")
+    public ResponseEntity<ProveedorResponse> findLast() {
+        return proveedorService.getLast()
+                .map(proveedor -> new ResponseEntity<>(proveedorDtoMapper.toResponse(proveedor), HttpStatus.OK))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay proveedores"));
+    }
 
-	@PostMapping("/")
-	public ResponseEntity<ProveedorEntity> add(@RequestBody ProveedorEntity proveedor) {
-		return new ResponseEntity<>(service.add(proveedor), HttpStatus.OK);
-	}
+    @PostMapping("/")
+    public ResponseEntity<ProveedorResponse> add(@RequestBody ProveedorRequest proveedorRequest) {
+        Proveedor proveedor = proveedorDtoMapper.toDomain(proveedorRequest);
+        Proveedor createdProveedor = proveedorService.create(proveedor);
+        return new ResponseEntity<>(proveedorDtoMapper.toResponse(createdProveedor), HttpStatus.OK);
+    }
 
-	@PutMapping("/{proveedorId}")
-	public ResponseEntity<ProveedorEntity> update(@RequestBody ProveedorEntity proveedor, @PathVariable Integer proveedorId) {
-		return new ResponseEntity<>(service.update(proveedor, proveedorId), HttpStatus.OK);
-	}
+    @PutMapping("/{proveedorId}")
+    public ResponseEntity<ProveedorResponse> update(@RequestBody ProveedorRequest proveedorRequest, @PathVariable Integer proveedorId) {
+        Proveedor proveedor = proveedorDtoMapper.toDomain(proveedorRequest);
+        return proveedorService.update(proveedorId, proveedor)
+                .map(updated -> new ResponseEntity<>(proveedorDtoMapper.toResponse(updated), HttpStatus.OK))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se pudo actualizar"));
+    }
 
-	@DeleteMapping("/{proveedorId}")
-	public ResponseEntity<Void> delete(@PathVariable Integer proveedorId) {
-		service.delete(proveedorId);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
-
+    @DeleteMapping("/{proveedorId}")
+    public ResponseEntity<Void> delete(@PathVariable Integer proveedorId) {
+        if (proveedorService.delete(proveedorId)) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 }

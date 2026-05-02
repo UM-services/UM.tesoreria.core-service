@@ -56,6 +56,7 @@ import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaServ
 import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
+import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.view.FacturaPendiente;
@@ -1370,7 +1371,7 @@ public class SheetService {
         this.setCellString(row, 13, "Habilitado", styleBold);
         this.setCellString(row, 14, "CBU", styleBold);
 
-        for (ProveedorEntity proveedor : proveedorService.findAll()) {
+        for (Proveedor proveedor : proveedorService.getAll()) {
             row = sheet.createRow(++fila);
             this.setCellInteger(row, 0, proveedor.getProveedorId(), styleNormal);
             this.setCellString(row, 1, proveedor.getCuit(), styleNormal);
@@ -1384,7 +1385,7 @@ public class SheetService {
             this.setCellString(row, 9, proveedor.getEmail(), styleNormal);
             this.setCellString(row, 10, proveedor.getEmailInterno(), styleNormal);
             this.setCellBigDecimal(row, 11, proveedor.getNumeroCuenta(), styleNormal);
-            this.setCellString(row, 12, proveedor.getCuenta().getNombre(), styleNormal);
+//            this.setCellString(row, 12, proveedor.getCuenta().getNombre(), styleNormal);
             this.setCellString(row, 13, proveedor.getHabilitado() == 1 ? "Si" : "No", styleNormal);
             this.setCellString(row, 14, proveedor.getCbu(), styleNormal);
         }

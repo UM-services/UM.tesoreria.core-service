@@ -2,7 +2,7 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
 **Versión actual (SemVer): 3.6.0**
 
@@ -21,18 +21,24 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2
   - Adaptador JPA: `JpaGeograficaRepositoryAdapter` con `GeograficaEntity`
   - Controlador REST: `GeograficaController` migrado a arquitectura hexagonal
   - DTO: `GeograficaResponse` para respuestas HTTP
-- feat(hexagonal): Nuevo módulo Proveedor con arquitectura hexagonal
-  - Entidad de persistencia: `ProveedorEntity` con anotaciones Lombok
-  - Adaptador JPA: `JpaProveedorRepositoryAdapter` con operaciones CRUD
-  - Servicio de aplicación: `ProveedorService` con integración a `ProveedorSearchService`
-  - Migración de controlador existente a nueva estructura hexagonal
+- feat(hexagonal): Implementación completa del módulo Proveedor con arquitectura hexagonal
+  - Modelos de dominio: `Proveedor` y `ProveedorSearch` con Lombok
+  - Puertos de entrada: `CreateProveedorUseCase`, `DeleteProveedorUseCase`, `GetAllProveedoresUseCase`, `GetLastProveedorUseCase`, `GetProveedorByCuitUseCase`, `GetProveedorByIdUseCase`, `SearchProveedoresUseCase`, `UpdateProveedorUseCase`
+  - Puerto de salida: `ProveedorRepository` con métodos CRUD completos
+  - Casos de uso: Implementaciones completas en `application/usecases/`
+  - Servicio de aplicación: `ProveedorService` refactorizado con `Optional<Proveedor>` en retornos
+  - Adaptador JPA: `JpaProveedorRepositoryAdapter` con implementación completa
+  - Mappers: `ProveedorMapper` (dominio ↔ JPA) y `ProveedorDtoMapper` (dominio ↔ DTO)
+  - DTOs: `ProveedorRequest`, `ProveedorResponse`, `ProveedorSearchResponse`
+  - Controlador REST: `ProveedorController` migrado con manejo de `ResponseEntity` y `Optional`
 - refactor(model): Migración de `Geografica.kt` (Kotlin) a `GeograficaEntity.java`
   - Eliminación de modelo Kotlin en paquete `core/kotlin/model/`
   - Creación de entidad JPA en `hexagonal/geografica/infrastructure/persistence/entity/`
   - Actualización de `CursoHaberes.java` para usar `GeograficaEntity` en lugar de `Geografica`
-- refactor(proveedor): Reestructuración de paquetes de Proveedor
+- refactor(proveedor): Reestructuración completa de paquetes de Proveedor a arquitectura hexagonal
   - Migración de servicios y repositorios al paquete `hexagonal/proveedor/`
-  - Nueva entidad `ProveedorEntity` con `@Builder` y validaciones
+  - Nuevos modelos de dominio reemplazando entidades en capa de dominio
+  - Mappers agregados para conversión entre capas
 
 > Basado en análisis profundo de `git diff HEAD` (55 archivos modificados).
 
@@ -251,7 +257,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.0.5
+- Spring Boot: 4.0.6
 - Spring Cloud: 2025.1.0
 - Kotlin: 2.3.20
 - MySQL Connector: 9.6.0
@@ -500,7 +506,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 # UM Tesorería Core Service
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
@@ -524,7 +530,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 
 ## Tecnologías Utilizadas
 - Java 25
-- Spring Boot 4.0.5
+- Spring Boot 4.0.6
 - Spring Cloud 2025.1.0
 - Kotlin 2.3.20
 - JPA/Hibernate

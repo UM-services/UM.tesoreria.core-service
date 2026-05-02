@@ -3,17 +3,31 @@ title: Arquitectura Hexagonal - Módulo Proveedor (v3.6.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
-        P[ProveedorEntity<br/>Entidad de Persistencia]
+        P[Proveedor<br/>Modelo de Dominio]
+        PS[ProveedorSearch<br/>Modelo de Búsqueda]
         PR[ProveedorRepository<br/>Puerto de Salida]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
-        PS[ProveedorService<br/>Servicio de Aplicación]
+        Svc[ProveedorService<br/>Servicio de Aplicación]
+        UC1[CreateProveedorUseCase]
+        UC2[DeleteProveedorUseCase]
+        UC3[GetAllProveedoresUseCase]
+        UC4[GetLastProveedorUseCase]
+        UC5[GetProveedorByCuitUseCase]
+        UC6[GetProveedorByIdUseCase]
+        UC7[SearchProveedoresUseCase]
+        UC8[UpdateProveedorUseCase]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         PC[ProveedorController<br/>Adaptador Web]
         JPA[JpaProveedorRepositoryAdapter<br/>Adaptador JPA]
+        PM[ProveedorMapper<br/>Mapeador]
+        DM[ProveedorDtoMapper<br/>Mapeador DTO]
+        Req[ProveedorRequest<br/>DTO Entrada]
+        Resp[ProveedorResponse<br/>DTO Salida]
+        Resp2[ProveedorSearchResponse<br/>DTO Búsqueda]
         ENT[ProveedorEntity<br/>Entidad JPA]
     end
 
@@ -23,27 +37,44 @@ flowchart TD
     end
 
     %% Flujo de Dependencias
-    PC -->|usa| PS
-    PS -->|depende| PR
-    PS -->|usa| PSS
-    
+    PC -->|usa| Svc
+    PC -->|recibe| Req
+    PC -->|envía| Resp
+    PC -->|envía| Resp2
+    PC -->|usa| DM
+
+    Svc -->|depende| PR
+    Svc -->|ejecuta| UC1
+    Svc -->|ejecuta| UC2
+    Svc -->|ejecuta| UC3
+    Svc -->|ejecuta| UC4
+    Svc -->|ejecuta| UC5
+    Svc -->|ejecuta| UC6
+    Svc -->|ejecuta| UC7
+    Svc -->|ejecuta| UC8
+
     PR -->|implementa| JPA
     JPA -->|persiste| JPAR
     JPA -->|gestiona| ENT
+    JPA -->|usa| PM
     JPA -->|usa| PSS
 
+    PM -->|convierte| P
+    PM -->|convierte| PS
+    PM -->|convierte| ENT
+
+    DM -->|convierte| Req
+    DM -->|convierte| Resp
+    DM -->|convierte| Resp2
+    DM -->|convierte| P
+    DM -->|convierte| PS
+
     style P fill:#e1f5fe
+    style PS fill:#e1f5fe
     style PR fill:#f3e5f5
-    style PS fill:#fff3e0
+    style Svc fill:#fff3e0
     style PC fill:#e8f5e8
     style JPA fill:#e8f5e8
+    style PM fill:#e8f5e8
+    style DM fill:#e8f5e8
     style ENT fill:#e8f5e8
-
-    %% Operaciones CRUD
-    PC -.->|findAll| PS
-    PC -.->|findByProveedorId| PS
-    PC -.->|findByCuit| PS
-    PC -.->|findLast| PS
-    PC -.->|add| PS
-    PC -.->|update| PS
-    PC -.->|delete| PS

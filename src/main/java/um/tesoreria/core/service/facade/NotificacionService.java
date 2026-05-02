@@ -22,6 +22,7 @@ import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.ProveedorMovimientoException;
 import um.tesoreria.core.exception.ProveedorException;
 import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
+import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.PersonaSuspendido;
@@ -136,9 +137,9 @@ public class NotificacionService {
 		} catch (ProveedorMovimientoException e) {
 			return "ERROR: No Existe Orden de Pago";
 		}
-		ProveedorEntity proveedor = null;
+		Proveedor proveedor = null;
 		try {
-			proveedor = proveedorService.findByProveedorId(proveedorMovimiento.getProveedorId());
+			proveedor = proveedorService.getByProveedorId(proveedorMovimiento.getProveedorId()).get();
 		} catch (ProveedorException e) {
 			return "ERROR: No Existe Proveedor";
 		}
@@ -151,7 +152,7 @@ public class NotificacionService {
 		List<ProveedorComprobante> proveedorComprobantes = proveedorComprobanteService
 				.findAllByOrdenPagoId(proveedorMovimientoId);
 		List<Long> proveedorMovimientoIds = proveedorComprobantes.stream()
-				.map(comprobante -> comprobante.getProveedorMovimientoIdComprobante()).collect(Collectors.toList());
+				.map(ProveedorComprobante::getProveedorMovimientoIdComprobante).collect(Collectors.toList());
 		Map<Long, ProveedorMovimiento> proveedorMovimientos = proveedorMovimientoService
 				.findAllByProveedorMovimientoIdIn(proveedorMovimientoIds).stream()
 				.collect(Collectors.toMap(ProveedorMovimiento::getProveedorMovimientoId, comprobante -> comprobante));
