@@ -3,9 +3,7 @@
  */
 package um.tesoreria.core.service.facade;
 
-import um.tesoreria.core.controller.EntregaDetalleController;
 import um.tesoreria.core.exception.AsientoException;
-import um.tesoreria.core.exception.CuentaMovimientoException;
 import um.tesoreria.core.exception.EjercicioBloqueadoException;
 import um.tesoreria.core.exception.EjercicioException;
 import um.tesoreria.core.exception.facade.ContableException;
@@ -14,6 +12,8 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.service.*;
@@ -23,7 +23,6 @@ import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -65,8 +64,8 @@ public class ContabilidadService {
     }
 
     public void recalculateGrados() {
-        List<Cuenta> cuentas = cuentaService.findAll();
-        for (Cuenta cuenta : cuentas) {
+        List<CuentaEntity> cuentas = cuentaService.findAll();
+        for (CuentaEntity cuenta : cuentas) {
             cuenta.setNombre(cuenta.getNombre().replace("\r\n", ""));
             cuenta.setGrado(5);
             cuenta.setGrado1(Objects.requireNonNull(cuenta.getNumeroCuenta()).divideToIntegralValue(new BigDecimal("10000000000.0")).multiply(new BigDecimal("10000000000.0")));

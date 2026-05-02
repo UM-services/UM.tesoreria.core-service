@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 
 import lombok.*;
 import um.tesoreria.core.kotlin.model.Auditable;
-import um.tesoreria.core.kotlin.model.Cuenta;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 
 /**
  * @author daniel
@@ -95,6 +95,6 @@ public class ProveedorEntity extends Auditable implements Serializable {
 	
 	@OneToOne(optional = true)
 	@JoinColumn(name = "prv_cuenta", insertable = false, updatable = false)
-	private Cuenta cuenta;
+	private CuentaEntity cuenta;
 
 }

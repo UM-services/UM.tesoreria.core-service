@@ -5,6 +5,34 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.7.0] - 2026-05-02
+### Added
+- feat(hexagonal): Nuevo módulo Cuenta con arquitectura hexagonal
+  - Entidad JPA: `CuentaEntity` en `hexagonal/cuenta/infrastructure/persistence/entity/` con anotaciones Lombok
+  - Repositorio: `CuentaRepository` en `hexagonal/cuenta/infrastructure/persistence/repository/` con métodos de consulta personalizados
+  - Servicio de aplicación: `CuentaService` en `hexagonal/cuenta/application/service/` con lógica de negocio
+  - Controlador REST: `CuentaController` en `hexagonal/cuenta/infrastructure/web/controller/` con endpoints REST
+  - Métodos de consulta: `findAllByGradoAndNumeroCuentaGreaterThan`, `findAllByNumeroCuentaIn`, `findAllByGradoAndNumeroCuentaBetween`
+  - Métodos de búsqueda: `findByNumeroCuenta`, `findByCuentaContableId`
+  - Operaciones CRUD: `add`, `update`, `delete`, `saveAll`
+  - Utilidad: `recalculaGrados()` para recalcular grados de cuentas
+  - Integración con `CuentaSearchService` para búsquedas avanzadas
+
+### Changed
+- refactor(cuenta): Migración de módulo Cuenta a arquitectura hexagonal
+  - Eliminación de `Cuenta.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `CuentaRepository.java` del paquete `core/repository/`
+  - Eliminación de `CuentaService.java` del paquete `core/service/`
+  - Eliminación de `CuentaController.java` del paquete `core/controller/`
+  - Creación de estructura hexagonal en `hexagonal/cuenta/` con capas domain, application, infrastructure
+  - Actualización de `BalanceService`, `CompraService`, `ContabilidadService` para usar nueva estructura
+  - Migración de modelos Kotlin a Java: `Articulo.kt`, `Bancaria.kt`, `BancoMovimiento.kt`, `CuentaMovimiento.kt`, `Dependencia.kt`, `Setup.kt`, `Valor.kt`
+  - Actualización de `UbicacionArticulo.java` y `CuentaMovimientoAsiento.java` para usar nuevas entidades
+  - `CuentaEntity` con relación `@OneToOne` a `GeograficaEntity`
+  - Uso de `Auditable` como clase base para auditoría
+
+> Basado en análisis profundo de `git diff HEAD` (19 archivos modificados, +161/-146 líneas).
+
 ## [3.6.0] - 2026-05-02
 ### Added
 - feat(hexagonal): Nuevo módulo Auth con arquitectura hexagonal para autenticación

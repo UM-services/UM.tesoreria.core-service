@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.kotlin.model.Comprobante;
-import um.tesoreria.core.kotlin.model.Cuenta;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -67,7 +67,7 @@ public class CuentaMovimientoAsiento extends Auditable implements Serializable {
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "numeroCuenta", insertable = false, updatable = false)
-	private Cuenta cuenta;
+	private CuentaEntity cuenta;
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "proveedorId", insertable = false, updatable = false)

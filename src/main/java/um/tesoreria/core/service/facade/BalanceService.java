@@ -32,6 +32,8 @@ import um.tesoreria.core.exception.ProveedorMovimientoException;
 import um.tesoreria.core.exception.ProveedorValorException;
 import um.tesoreria.core.exception.ValorMovimientoException;
 import um.tesoreria.core.exception.ValorException;
+import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -109,10 +111,10 @@ public class BalanceService {
 		this.setCellString(row, 6, "Saldo Deudor", style_normal);
 		this.setCellString(row, 7, "Saldo Acreedor", style_normal);
 
-		List<Cuenta> cuentas = cuentaService.findAllGrado5();
+		List<CuentaEntity> cuentas = cuentaService.findAllGrado5();
 //		List<Cuenta> cuentas = cuentaService
 //				.findAllByCuentaIn(List.of(new BigDecimal(10102030001.0), new BigDecimal(10102040001.0)));
-		for (Cuenta cuenta : cuentas) {
+		for (CuentaEntity cuenta : cuentas) {
 			Boolean show = false;
 			show = true;
 			List<BigDecimal> iniciales = contabilidadService.saldoInicial(cuenta.getNumeroCuenta(), ejercicio, desde);
@@ -173,7 +175,7 @@ public class BalanceService {
 		if (ejercicio == null)
 			return "Error: SIN Ejercicio";
 
-		Cuenta cuenta = cuentaService.findByNumeroCuenta(numeroCuenta);
+		CuentaEntity cuenta = cuentaService.findByNumeroCuenta(numeroCuenta);
 		Map<Integer, Comprobante> comprobantes = comprobanteService.findAll().stream()
 				.collect(Collectors.toMap(Comprobante::getComprobanteId, Function.identity(), (comprobante, replacement) -> comprobante));
 

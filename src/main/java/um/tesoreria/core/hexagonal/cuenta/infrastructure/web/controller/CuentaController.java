@@ -1,12 +1,11 @@
 /**
  * 
  */
-package um.tesoreria.core.controller;
+package um.tesoreria.core.hexagonal.cuenta.infrastructure.web.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.exception.CuentaException;
-import um.tesoreria.core.kotlin.model.Cuenta;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.model.view.CuentaSearch;
-import um.tesoreria.core.service.CuentaService;
+import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
 
 /**
  * @author daniel
@@ -39,17 +38,17 @@ public class CuentaController {
 	}
 
 	@GetMapping("/")
-	public ResponseEntity<List<Cuenta>> findAll() {
+	public ResponseEntity<List<CuentaEntity>> findAll() {
 		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 
 	@GetMapping("/cierreresultado")
-	public ResponseEntity<List<Cuenta>> findAllByCierreResultado() {
+	public ResponseEntity<List<CuentaEntity>> findAllByCierreResultado() {
 		return new ResponseEntity<>(service.findAllByCierreResultado(), HttpStatus.OK);
 	}
 
 	@GetMapping("/cierreactivopasivo")
-	public ResponseEntity<List<Cuenta>> findAllByCierreActivoPasivo() {
+	public ResponseEntity<List<CuentaEntity>> findAllByCierreActivoPasivo() {
 		return new ResponseEntity<>(service.findAllByCierreActivoPasivo(), HttpStatus.OK);
 	}
 
@@ -60,7 +59,7 @@ public class CuentaController {
 	}
 
 	@GetMapping("/{numeroCuenta}")
-	public ResponseEntity<Cuenta> findByCuenta(@PathVariable BigDecimal numeroCuenta) {
+	public ResponseEntity<CuentaEntity> findByCuenta(@PathVariable BigDecimal numeroCuenta) {
 		try {
 			return new ResponseEntity<>(service.findByNumeroCuenta(numeroCuenta), HttpStatus.OK);
 		} catch (CuentaException e) {
@@ -69,7 +68,7 @@ public class CuentaController {
 	}
 
 	@GetMapping("/id/{cuentaContableId}")
-	public ResponseEntity<Cuenta> findByCuentaContableId(@PathVariable Long cuentaContableId) {
+	public ResponseEntity<CuentaEntity> findByCuentaContableId(@PathVariable Long cuentaContableId) {
 		try {
 			return new ResponseEntity<>(service.findByCuentaContableId(cuentaContableId), HttpStatus.OK);
 		} catch (CuentaException e) {
@@ -78,12 +77,12 @@ public class CuentaController {
 	}
 
 	@PostMapping("/")
-	public ResponseEntity<Cuenta> add(@RequestBody Cuenta cuenta) {
+	public ResponseEntity<CuentaEntity> add(@RequestBody CuentaEntity cuenta) {
 		return new ResponseEntity<>(service.add(cuenta), HttpStatus.OK);
 	}
 
 	@PutMapping("/{numeroCuenta}")
-	public ResponseEntity<Cuenta> update(@RequestBody Cuenta cuenta, @PathVariable BigDecimal numeroCuenta) {
+	public ResponseEntity<CuentaEntity> update(@RequestBody CuentaEntity cuenta, @PathVariable BigDecimal numeroCuenta) {
 		return new ResponseEntity<>(service.update(cuenta, numeroCuenta), HttpStatus.OK);
 	}
 

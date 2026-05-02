@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.service;
+package um.tesoreria.core.hexagonal.cuenta.application.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -16,9 +16,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CuentaException;
-import um.tesoreria.core.kotlin.model.Cuenta;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.model.view.CuentaSearch;
-import um.tesoreria.core.repository.CuentaRepository;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.repository.CuentaRepository;
 import um.tesoreria.core.service.view.CuentaSearchService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,25 +36,25 @@ public class CuentaService {
 	@Autowired
 	private CuentaSearchService cuentaSearchService;
 
-	public List<Cuenta> findAll() {
+	public List<CuentaEntity> findAll() {
 		return repository.findAll();
 	}
 
-	public List<Cuenta> findAllByNumeroCuentaIn(List<BigDecimal> cuentas) {
+	public List<CuentaEntity> findAllByNumeroCuentaIn(List<BigDecimal> cuentas) {
 		return repository.findAllByNumeroCuentaIn(cuentas);
 	}
 
-	public List<Cuenta> findAllGrado5() {
+	public List<CuentaEntity> findAllGrado5() {
 		return repository.findAllByGradoAndNumeroCuentaGreaterThan(5, BigDecimal.ZERO,
 				Sort.by("numeroCuenta").ascending());
 	}
 
-	public List<Cuenta> findAllByCierreResultado() {
+	public List<CuentaEntity> findAllByCierreResultado() {
 		return repository.findAllByGradoAndNumeroCuentaBetween(5, new BigDecimal(30000000000L),
 				new BigDecimal(49999999999L));
 	}
 
-	public List<Cuenta> findAllByCierreActivoPasivo() {
+	public List<CuentaEntity> findAllByCierreActivoPasivo() {
 		return repository.findAllByGradoAndNumeroCuentaBetween(5, new BigDecimal(10000000000L),
 				new BigDecimal(29999999999L));
 	}
@@ -63,7 +63,7 @@ public class CuentaService {
 		return cuentaSearchService.findAllByStrings(conditions, visible);
 	}
 
-	public Cuenta findByNumeroCuenta(BigDecimal numeroCuenta) {
+	public CuentaEntity findByNumeroCuenta(BigDecimal numeroCuenta) {
 		var cuenta = repository.findByNumeroCuenta(numeroCuenta).orElseThrow(() -> new CuentaException(numeroCuenta));
         try {
             log.debug("Cuenta -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter()
@@ -74,21 +74,21 @@ public class CuentaService {
         return cuenta;
 	}
 
-	public Cuenta findByCuentaContableId(Long cuentaContableId) {
+	public CuentaEntity findByCuentaContableId(Long cuentaContableId) {
 		return repository.findByCuentaContableId(cuentaContableId)
 				.orElseThrow(() -> new CuentaException(cuentaContableId));
 	}
 
-	public Cuenta add(Cuenta cuenta) {
+	public CuentaEntity add(CuentaEntity cuenta) {
 		cuenta = repository.save(cuenta);
 		return cuenta;
 	}
 
-	public Cuenta update(Cuenta newCuenta, BigDecimal numeroCuenta) {
+	public CuentaEntity update(CuentaEntity newCuenta, BigDecimal numeroCuenta) {
 		log.debug("New -> {}", newCuenta);
 		return repository.findByNumeroCuenta(numeroCuenta).map(cuenta -> {
 			log.debug("Cuenta -> {}", cuenta);
-			cuenta = new Cuenta(numeroCuenta, newCuenta.getNombre(), newCuenta.getIntegradora(), newCuenta.getGrado(),
+			cuenta = new CuentaEntity(numeroCuenta, newCuenta.getNombre(), newCuenta.getIntegradora(), newCuenta.getGrado(),
 					newCuenta.getGrado1(), newCuenta.getGrado2(), newCuenta.getGrado3(), newCuenta.getGrado4(),
 					newCuenta.getGeograficaId(), newCuenta.getFechaBloqueo(), newCuenta.getVisible(),
 					newCuenta.getCuentaContableId(), null);
@@ -98,7 +98,7 @@ public class CuentaService {
 	}
 
 	@Transactional
-	public List<Cuenta> saveAll(List<Cuenta> cuentas) {
+	public List<CuentaEntity> saveAll(List<CuentaEntity> cuentas) {
 		return repository.saveAll(cuentas);
 	}
 
@@ -109,8 +109,8 @@ public class CuentaService {
 
 	@Transactional
 	public String recalculaGrados() {
-		List<Cuenta> cuentas = findAll();
-		for (Cuenta cuenta : cuentas) {
+		List<CuentaEntity> cuentas = findAll();
+		for (CuentaEntity cuenta : cuentas) {
 			cuenta.setGrado(5);
 			BigDecimal factor = new BigDecimal(10000);
 			cuenta.setGrado4(cuenta.getNumeroCuenta().divide(factor).setScale(0, RoundingMode.DOWN).multiply(factor)

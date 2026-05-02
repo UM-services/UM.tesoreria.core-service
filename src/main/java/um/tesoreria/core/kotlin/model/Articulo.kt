@@ -7,6 +7,7 @@ import jakarta.persistence.Column
 import java.math.BigDecimal
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity
 
 @Entity
 @Table(name = "articulos")
@@ -48,6 +49,6 @@ data class Articulo(
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "art_cuenta", insertable = false, updatable = false)
-	var cuenta: Cuenta? = null
+	var cuenta: CuentaEntity? = null
 
 ) : Auditable()

@@ -83,6 +83,7 @@ const diagrams = [
   { id: 'hexagonal-auth', file: 'hexagonal-auth.mmd', title: '🔷 Arquitectura Hexagonal - Auth (Autenticación)' },
   { id: 'hexagonal-geografica', file: 'hexagonal-geografica.mmd', title: '🔷 Arquitectura Hexagonal - Geografica' },
   { id: 'hexagonal-proveedor', file: 'hexagonal-proveedor.mmd', title: '🔷 Arquitectura Hexagonal - Proveedor' },
+  { id: 'hexagonal-cuenta', file: 'hexagonal-cuenta.mmd', title: '🔷 Arquitectura Hexagonal - Cuenta' },
   { id: 'hexagonal-mercadopago', file: 'hexagonal-mercadopago-context-history.mmd', title: '🔷 Arquitectura Hexagonal - MercadoPago Context History' },
   { id: 'dependencies-diagram', file: 'dependencies.mmd', title: '📦 Diagrama de Dependencias' },
   { id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },

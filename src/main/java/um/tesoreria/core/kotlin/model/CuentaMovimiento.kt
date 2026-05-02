@@ -12,6 +12,7 @@ import java.time.OffsetDateTime
 import java.math.BigDecimal
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity
 import um.tesoreria.core.util.Jsonifier
 
@@ -74,7 +75,7 @@ data class  CuentaMovimiento(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "mco_pla_cuenta", insertable = false, updatable = false)
-    var cuenta: Cuenta? = null,
+    var cuenta: CuentaEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "mco_prv_id", insertable = false, updatable = false)
@@ -122,7 +123,7 @@ data class  CuentaMovimiento(
         private var proveedorMovimientoIdOrdenPago: Long? = null
         private var apertura: Byte = 0
         private var trackId: Long? = null
-        private var cuenta: Cuenta? = null
+        private var cuenta: CuentaEntity? = null
         private var proveedor: ProveedorEntity? = null
         private var comprobante: Comprobante? = null
         private var proveedorMovimiento: ProveedorMovimiento? = null
@@ -149,7 +150,7 @@ data class  CuentaMovimiento(
 
         fun apertura(apertura: Byte) = apply { this.apertura = apertura }
         fun trackId(trackId: Long?) = apply { this.trackId = trackId }
-        fun cuenta(cuenta: Cuenta?) = apply { this.cuenta = cuenta }
+        fun cuenta(cuenta: CuentaEntity?) = apply { this.cuenta = cuenta }
         fun proveedor(proveedor: ProveedorEntity?) = apply { this.proveedor = proveedor }
         fun comprobante(comprobante: Comprobante?) = apply { this.comprobante = comprobante }
         fun proveedorMovimiento(proveedorMovimiento: ProveedorMovimiento?) =

@@ -1,0 +1,42 @@
+---
+title: Arquitectura Hexagonal - Módulo Cuenta (v3.7.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        C[Cuenta<br/>Entidad de Dominio]
+        CR[CuentaRepository<br/>Puerto de Salida]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        CS[CuentaService<br/>Servicio de Aplicación]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        CC[CuentaController<br/>Adaptador Web]
+        JPA[JpaCuentaRepositoryAdapter<br/>Adaptador JPA]
+        ENT[CuentaEntity<br/>Entidad JPA]
+        CSS[CuentaSearchService<br/>Servicio Externo]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+    end
+
+    %% Flujo de Dependencias
+    CC -->|usa| CS
+    CC -->|recibe/envía| ENT
+
+    CS -->|depende| CR
+    CS -->|usa| CSS
+
+    CR -->|implementa| JPA
+    JPA -->|persiste| JPAR
+    JPA -->|gestiona| ENT
+
+    style C fill:#e1f5fe
+    style CR fill:#f3e5f5
+    style CS fill:#fff3e0
+    style CC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style ENT fill:#e8f5e8
+    style CSS fill:#fff8e1

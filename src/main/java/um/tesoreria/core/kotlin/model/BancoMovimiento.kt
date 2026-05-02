@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -61,7 +62,7 @@ data class BancoMovimiento(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "lib_cuentacontable", insertable = false, updatable = false)
-    var cuenta: Cuenta? = null,
+    var cuenta: CuentaEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "lib_val_id", insertable = false, updatable = false)

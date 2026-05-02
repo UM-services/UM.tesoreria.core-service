@@ -4,7 +4,28 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.6.0**
+**Versión actual (SemVer): 3.7.0**
+
+## Novedades 3.7.0 (verificado en código)
+- feat(hexagonal): Nuevo módulo Cuenta con arquitectura hexagonal
+  - Entidad JPA: `CuentaEntity` con anotaciones Lombok (`@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Repositorio: `CuentaRepository` con métodos `findAllByGradoAndNumeroCuentaGreaterThan`, `findAllByNumeroCuentaIn`, `findAllByGradoAndNumeroCuentaBetween`
+  - Servicio de aplicación: `CuentaService` con lógica de negocio y método `recalculaGrados()`
+  - Controlador REST: `CuentaController` con endpoints CRUD y búsquedas
+  - Integración con `CuentaSearchService` para búsquedas avanzadas por condiciones
+  - Relación `@OneToOne` con `GeograficaEntity`
+- refactor(cuenta): Migración completa de módulo Cuenta a arquitectura hexagonal
+  - Eliminación de `Cuenta.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `CuentaRepository.java` del paquete `core/repository/`
+  - Eliminación de `CuentaService.java` del paquete `core/service/`
+  - Eliminación de `CuentaController.java` del paquete `core/controller/`
+  - Nueva estructura en `hexagonal/cuenta/` con capas domain, application, infrastructure
+  - Actualización de servicios externos (`BalanceService`, `CompraService`, `ContabilidadService`) para usar nueva estructura
+- refactor(model): Migración de modelos Kotlin a Java en paquete `core/kotlin/model/`
+  - `Articulo.kt`, `Bancaria.kt`, `BancoMovimiento.kt`, `CuentaMovimiento.kt`, `Dependencia.kt`, `Setup.kt`, `Valor.kt`
+  - Actualización de `UbicacionArticulo.java` y `CuentaMovimientoAsiento.java`
+
+> Basado en análisis profundo de `git diff HEAD` (19 archivos modificados, +161/-146 líneas).
 
 ## Novedades 3.6.0 (verificado en código)
 - feat(hexagonal): Nuevo módulo Auth con arquitectura hexagonal para autenticación
@@ -510,7 +531,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.6.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.7.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -573,6 +594,17 @@ src/
 │   │                           │   └── mapper/       # Mappers
 │   │                           └── application/
 │   │                               └── service/      # Servicios de aplicación
+│   │                   ├── cuenta/           # Módulo Cuenta (v3.7.0)
+│   │                   │   ├── domain/
+│   │                   │   │   └── model/        # Entidad de dominio
+│   │                   │   ├── application/
+│   │                   │   │   └── service/      # Servicio de aplicación
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/     # Entidad JPA
+│   │                   │       │   └── repository/ # Adaptador JPA
+│   │                   │       └── web/
+│   │                   │           └── controller/ # Controlador REST
 │   │                   └── matriculacionContext/  # Módulo MatriculacionContext (v3.5.0)
 │   │                       ├── domain/
 │   │                       │   ├── model/        # Entidades de dominio

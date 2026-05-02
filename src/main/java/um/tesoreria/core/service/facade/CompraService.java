@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.exception.BancoMovimientoException;
 import um.tesoreria.core.exception.ProveedorValorException;
 import um.tesoreria.core.exception.facade.ContableException;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
@@ -413,7 +414,7 @@ public class CompraService {
             } catch (JsonProcessingException e) {
                 log.debug("Valor=JsonException");
             }
-            Cuenta cuenta = null;
+            CuentaEntity cuenta = null;
             if (valorMovimiento.getBancariaIdOrigen() == null) {
                 cuenta = valor.getCuenta();
             } else {
