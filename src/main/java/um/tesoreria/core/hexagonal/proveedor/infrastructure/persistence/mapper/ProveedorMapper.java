@@ -1,12 +1,20 @@
 package um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.mapper;
 
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.mapper.CuentaMapper;
 import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.proveedor.domain.model.ProveedorSearch;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorSearchEntity;
 
 @Component
 public class ProveedorMapper {
+
+    private final CuentaMapper cuentaMapper;
+
+    public ProveedorMapper(CuentaMapper cuentaMapper) {
+        this.cuentaMapper = cuentaMapper;
+    }
 
     public ProveedorEntity toEntity(Proveedor domain) {
         if (domain == null) return null;
@@ -45,10 +53,11 @@ public class ProveedorMapper {
                 .numeroCuenta(entity.getNumeroCuenta())
                 .habilitado(entity.getHabilitado())
                 .cbu(entity.getCbu())
+                .cuenta(cuentaMapper.toDomain(entity.getCuenta()))
                 .build();
     }
 
-    public ProveedorSearch toSearchDomain(um.tesoreria.core.model.view.ProveedorSearch viewEntity) {
+    public ProveedorSearch toSearchDomain(ProveedorSearchEntity viewEntity) {
         if (viewEntity == null) return null;
         return ProveedorSearch.builder()
                 .proveedorId(viewEntity.getProveedorId())

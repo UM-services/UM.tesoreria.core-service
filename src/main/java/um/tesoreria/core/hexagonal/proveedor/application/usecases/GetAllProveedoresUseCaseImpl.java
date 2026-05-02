@@ -11,10 +11,12 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class GetAllProveedoresUseCaseImpl implements GetAllProveedoresUseCase {
+
     private final ProveedorRepository repository;
 
     @Override
     public List<Proveedor> getAllProveedores() {
         return repository.findAll();
     }
+
 }

@@ -12,11 +12,13 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -33,6 +35,7 @@ import um.tesoreria.core.exception.ProveedorValorException;
 import um.tesoreria.core.exception.ValorMovimientoException;
 import um.tesoreria.core.exception.ValorException;
 import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
+import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.*;
@@ -44,36 +47,19 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class BalanceService {
 
-	@Autowired
-	private Environment env;
-
-	@Autowired
-	private CuentaService cuentaService;
-
-	@Autowired
-	private ContabilidadService contabilidadService;
-
-	@Autowired
-	private CuentaMovimientoService cuentaMovimientoService;
-
-	@Autowired
-	private ComprobanteService comprobanteService;
-
-	@Autowired
-	private ValorMovimientoService valorMovimientoService;
-
-	@Autowired
-	private ProveedorValorService proveedorValorService;
-
-	@Autowired
-	private ProveedorMovimientoService proveedorMovimientoService;
-
-	@Autowired
-	private ValorService valorService;
-    @Autowired
-    private ProveedorPagoService proveedorPagoService;
+	private final Environment env;
+	private final CuentaService cuentaService;
+	private final ContabilidadService contabilidadService;
+	private final CuentaMovimientoService cuentaMovimientoService;
+	private final ComprobanteService comprobanteService;
+	private final ValorMovimientoService valorMovimientoService;
+	private final ProveedorValorService proveedorValorService;
+	private final ProveedorMovimientoService proveedorMovimientoService;
+	private final ValorService valorService;
+    private final ProveedorPagoService proveedorPagoService;
 
 	public String makeSumasSaldos(OffsetDateTime desde, OffsetDateTime hasta) {
 		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
@@ -96,7 +82,7 @@ public class BalanceService {
 
 		Sheet sheet = book.createSheet("Balance");
 		Row row = null;
-		Integer fila = -1;
+		int fila = -1;
 		row = sheet.createRow(++fila);
 		this.setCellString(row, 0, "Desde " + format.format(desde), style_normal);
 		row = sheet.createRow(++fila);
@@ -111,11 +97,11 @@ public class BalanceService {
 		this.setCellString(row, 6, "Saldo Deudor", style_normal);
 		this.setCellString(row, 7, "Saldo Acreedor", style_normal);
 
-		List<CuentaEntity> cuentas = cuentaService.findAllGrado5();
+		List<Cuenta> cuentas = cuentaService.findAllGrado5();
 //		List<Cuenta> cuentas = cuentaService
 //				.findAllByCuentaIn(List.of(new BigDecimal(10102030001.0), new BigDecimal(10102040001.0)));
-		for (CuentaEntity cuenta : cuentas) {
-			Boolean show = false;
+		for (Cuenta cuenta : cuentas) {
+			boolean show = false;
 			show = true;
 			List<BigDecimal> iniciales = contabilidadService.saldoInicial(cuenta.getNumeroCuenta(), ejercicio, desde);
 			if (iniciales.get(0).compareTo(BigDecimal.ZERO) != 0)
@@ -153,7 +139,7 @@ public class BalanceService {
 			}
 		}
 
-		for (Integer column = 0; column < sheet.getRow(2).getPhysicalNumberOfCells(); column++)
+		for (int column = 0; column < sheet.getRow(2).getPhysicalNumberOfCells(); column++)
 			sheet.autoSizeColumn(column);
 
 		try {
@@ -165,7 +151,7 @@ public class BalanceService {
 			log.debug(file.getAbsolutePath());
 			book.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		return filename;
 	}
@@ -175,7 +161,8 @@ public class BalanceService {
 		if (ejercicio == null)
 			return "Error: SIN Ejercicio";
 
-		CuentaEntity cuenta = cuentaService.findByNumeroCuenta(numeroCuenta);
+		Cuenta cuenta = cuentaService.findByNumeroCuenta(numeroCuenta)
+				.orElse(null);
 		Map<Integer, Comprobante> comprobantes = comprobanteService.findAll().stream()
 				.collect(Collectors.toMap(Comprobante::getComprobanteId, Function.identity(), (comprobante, replacement) -> comprobante));
 
@@ -197,7 +184,7 @@ public class BalanceService {
 
 		Sheet sheet = book.createSheet("Mayor");
 		Row row = null;
-		Integer fila = -1;
+		int fila = -1;
 		row = sheet.createRow(++fila);
 		this.setCellString(row, 0, "Cuenta", style_bold);
 		this.setCellBigDecimal(row, 1, numeroCuenta, style_normal);
@@ -258,14 +245,14 @@ public class BalanceService {
             }
             row = sheet.createRow(++fila);
 			this.setCellString(row, columnaFecha,
-					format.format(cuentaMovimiento.getFechaContable().withOffsetSameInstant(ZoneOffset.UTC)), style_normal);
+					format.format(Objects.requireNonNull(cuentaMovimiento.getFechaContable()).withOffsetSameInstant(ZoneOffset.UTC)), style_normal);
 			this.setCellInteger(row, columnaAsiento, cuentaMovimiento.getOrdenContable(), style_normal);
 			Comprobante comprobante = comprobantes.get(cuentaMovimiento.getComprobanteId());
 			this.setCellString(row, columnaComprobante, comprobante.getDescripcion(), style_normal);
 
 			// proveedor de la operacion
 			if (cuentaMovimiento.getProveedorId() != null && cuentaMovimiento.getProveedorId() != 0) {
-				this.setCellString(row, columnaProveedor, cuentaMovimiento.getProveedor().getRazonSocial(), style_normal);
+				this.setCellString(row, columnaProveedor, Objects.requireNonNull(cuentaMovimiento.getProveedor()).getRazonSocial(), style_normal);
 			}
 
 			this.setCellString(row, columnaConcepto, cuentaMovimiento.getConcepto(), style_normal);
@@ -284,7 +271,8 @@ public class BalanceService {
                 } catch (JsonProcessingException e) {
                     log.debug("Sin proveedorMovimientoOP");
                 }
-				String ordenPago = proveedorMovimientoOP.getComprobante().getDescripcion() + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
+                assert proveedorMovimientoOP != null;
+                String ordenPago = Objects.requireNonNull(proveedorMovimientoOP.getComprobante()).getDescripcion() + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
 				this.setCellString(row, columnaOrdenPago, ordenPago, style_normal);
 				this.setCellString(row, columnaBeneficiario, proveedorMovimientoOP.getNombreBeneficiario(), style_normal);
             }
@@ -323,7 +311,7 @@ public class BalanceService {
 			}
 		}
 
-		for (Integer column = 0; column < sheet.getRow(4).getPhysicalNumberOfCells(); column++)
+		for (int column = 0; column < sheet.getRow(4).getPhysicalNumberOfCells(); column++)
 			sheet.autoSizeColumn(column);
 
 		try {
@@ -335,7 +323,7 @@ public class BalanceService {
 			log.debug(file.getAbsolutePath());
 			book.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.debug(e.getMessage());
 		}
 		return filename;
 	}

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.model.view;
+package um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -33,7 +33,7 @@ import um.tesoreria.core.kotlin.model.Auditable;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProveedorSearch extends Auditable implements Serializable {
+public class ProveedorSearchEntity extends Auditable implements Serializable {
 	/**
 	* 
 	*/

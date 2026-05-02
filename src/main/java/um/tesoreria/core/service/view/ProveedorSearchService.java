@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.model.view.ProveedorSearch;
-import um.tesoreria.core.repository.view.ProveedorSearchRepository;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorSearchEntity;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository.JpaProveedorSearchRepository;
 
 /**
  * @author daniel
@@ -17,13 +17,13 @@ import um.tesoreria.core.repository.view.ProveedorSearchRepository;
 @Service
 public class ProveedorSearchService {
 
-    private final ProveedorSearchRepository repository;
+    private final JpaProveedorSearchRepository repository;
 
-    public ProveedorSearchService(ProveedorSearchRepository repository) {
+    public ProveedorSearchService(JpaProveedorSearchRepository repository) {
         this.repository = repository;
     }
 
-    public List<ProveedorSearch> findAllByStrings(List<String> conditions) {
+    public List<ProveedorSearchEntity> findAllByStrings(List<String> conditions) {
         return repository.findAllByStrings(conditions);
     }
 

@@ -1,100 +1,88 @@
-/**
- * 
- */
 package um.tesoreria.core.hexagonal.cuenta.infrastructure.web.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import um.tesoreria.core.exception.CuentaException;
-import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
-import um.tesoreria.core.model.view.CuentaSearch;
 import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
+import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.web.dto.*;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.web.mapper.CuentaDtoMapper;
 
-/**
- * @author daniel
- *
- */
 @RestController
 @RequestMapping({"/cuenta", "/api/tesoreria/core/cuenta"})
+@RequiredArgsConstructor
 public class CuentaController {
 
-	private final CuentaService service;
+    private final CuentaService service;
+    private final CuentaDtoMapper mapper;
 
-	public CuentaController(CuentaService service) {
-		this.service = service;
-	}
+    @GetMapping("/")
+    public ResponseEntity<List<CuentaResponse>> findAll() {
+        return ResponseEntity.ok(service.findAll().stream().map(mapper::toResponse).collect(Collectors.toList()));
+    }
 
-	@GetMapping("/")
-	public ResponseEntity<List<CuentaEntity>> findAll() {
-		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
-	}
+    @GetMapping("/cierreresultado")
+    public ResponseEntity<List<CuentaResponse>> findAllByCierreResultado() {
+        return ResponseEntity.ok(service.findAllByCierreResultado().stream().map(mapper::toResponse).collect(Collectors.toList()));
+    }
 
-	@GetMapping("/cierreresultado")
-	public ResponseEntity<List<CuentaEntity>> findAllByCierreResultado() {
-		return new ResponseEntity<>(service.findAllByCierreResultado(), HttpStatus.OK);
-	}
+    @GetMapping("/cierreactivopasivo")
+    public ResponseEntity<List<CuentaResponse>> findAllByCierreActivoPasivo() {
+        return ResponseEntity.ok(service.findAllByCierreActivoPasivo().stream().map(mapper::toResponse).collect(Collectors.toList()));
+    }
 
-	@GetMapping("/cierreactivopasivo")
-	public ResponseEntity<List<CuentaEntity>> findAllByCierreActivoPasivo() {
-		return new ResponseEntity<>(service.findAllByCierreActivoPasivo(), HttpStatus.OK);
-	}
+    @PostMapping("/search/{visible}")
+    public ResponseEntity<List<CuentaSearchResponse>> findByStrings(@RequestBody List<String> conditions, @PathVariable Boolean visible) {
+        return ResponseEntity.ok(service.findByStrings(conditions, visible).stream().map(mapper::toSearchResponse).collect(Collectors.toList()));
+    }
 
-	@PostMapping("/search/{visible}")
-	public ResponseEntity<List<CuentaSearch>> findByStrings(@RequestBody List<String> conditions,
-			@PathVariable Boolean visible) {
-		return new ResponseEntity<>(service.findByStrings(conditions, visible), HttpStatus.OK);
-	}
+    @GetMapping("/{numeroCuenta}")
+    public ResponseEntity<CuentaResponse> findByCuenta(@PathVariable BigDecimal numeroCuenta) {
+        return service.findByNumeroCuenta(numeroCuenta)
+                .map(mapper::toResponse)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuenta no encontrada"));
+    }
 
-	@GetMapping("/{numeroCuenta}")
-	public ResponseEntity<CuentaEntity> findByCuenta(@PathVariable BigDecimal numeroCuenta) {
-		try {
-			return new ResponseEntity<>(service.findByNumeroCuenta(numeroCuenta), HttpStatus.OK);
-		} catch (CuentaException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-	}
+    @GetMapping("/id/{cuentaContableId}")
+    public ResponseEntity<CuentaResponse> findByCuentaContableId(@PathVariable Long cuentaContableId) {
+        return service.findByCuentaContableId(cuentaContableId)
+                .map(mapper::toResponse)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuenta no encontrada"));
+    }
 
-	@GetMapping("/id/{cuentaContableId}")
-	public ResponseEntity<CuentaEntity> findByCuentaContableId(@PathVariable Long cuentaContableId) {
-		try {
-			return new ResponseEntity<>(service.findByCuentaContableId(cuentaContableId), HttpStatus.OK);
-		} catch (CuentaException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-		}
-	}
+    @PostMapping("/")
+    public ResponseEntity<CuentaResponse> add(@RequestBody CuentaRequest request) {
+        Cuenta cuenta = mapper.toDomain(request);
+        return ResponseEntity.ok(mapper.toResponse(service.add(cuenta)));
+    }
 
-	@PostMapping("/")
-	public ResponseEntity<CuentaEntity> add(@RequestBody CuentaEntity cuenta) {
-		return new ResponseEntity<>(service.add(cuenta), HttpStatus.OK);
-	}
+    @PutMapping("/{numeroCuenta}")
+    public ResponseEntity<CuentaResponse> update(@RequestBody CuentaRequest request, @PathVariable BigDecimal numeroCuenta) {
+        Cuenta cuenta = mapper.toDomain(request);
+        return service.update(cuenta, numeroCuenta)
+                .map(mapper::toResponse)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cuenta no encontrada"));
+    }
 
-	@PutMapping("/{numeroCuenta}")
-	public ResponseEntity<CuentaEntity> update(@RequestBody CuentaEntity cuenta, @PathVariable BigDecimal numeroCuenta) {
-		return new ResponseEntity<>(service.update(cuenta, numeroCuenta), HttpStatus.OK);
-	}
+    @DeleteMapping("/{numeroCuenta}")
+    public ResponseEntity<Void> delete(@PathVariable BigDecimal numeroCuenta) {
+        service.delete(numeroCuenta);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
-	@DeleteMapping("/{numeroCuenta}")
-	public ResponseEntity<Void> delete(@PathVariable BigDecimal numeroCuenta) {
-		service.delete(numeroCuenta);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-	}
-
-	@GetMapping("/recalculagrados")
-	public ResponseEntity<String> recalculaGrados() {
-		return new ResponseEntity<>(service.recalculaGrados(), HttpStatus.OK);
-	}
+    @GetMapping("/recalculagrados")
+    public ResponseEntity<String> recalculaGrados() {
+        return new ResponseEntity<>(service.recalculaGrados(), HttpStatus.OK);
+    }
 
 }

@@ -4,7 +4,23 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.7.0**
+**Versión actual (SemVer): 3.8.0**
+
+## Novedades 3.8.0 (verificado en código)
+- feat(cuenta): Implementación completa de casos de uso CRUD para módulo Cuenta
+  - Nuevos casos de uso: `CreateCuentaUseCase`, `DeleteCuentaUseCase`, `GetAllCuentasUseCase`, `GetCuentaByCuentaContableIdUseCase`, `GetCuentaByNumeroCuentaUseCase`, `RecalculaGradosUseCase`, `SaveAllCuentasUseCase`, `SearchCuentasUseCase`, `UpdateCuentaUseCase`
+  - Nuevos DTOs: `CuentaRequest`, `CuentaResponse`, `CuentaSearchResponse`
+  - Nuevo mapper: `CuentaDtoMapper` para conversión dominio ↔ DTO
+  - Controlador `CuentaController` actualizado con todos los endpoints REST
+- feat(proveedor): Mejora de módulo Proveedor con búsqueda avanzada
+  - Nueva entidad `ProveedorSearchEntity` para búsquedas
+  - Nuevo repositorio `JpaProveedorSearchRepository` con consultas personalizadas
+  - Refactorización de paquetes: adaptador movido a `infrastructure/persistence/adapter/`
+  - Actualización de `ProveedorMapper` y `GetAllProveedoresUseCaseImpl`
+- refactor(service): Actualización de `BalanceService`, `ContabilidadService`, `SheetService` para usar nuevas estructuras hexagonales
+- refactor(model): Actualización de `Ejercicio.kt` con cambios en modelo
+
+> Basado en análisis profundo de `git diff HEAD` (47 archivos modificados, +894/-447 líneas).
 
 ## Novedades 3.7.0 (verificado en código)
 - feat(hexagonal): Nuevo módulo Cuenta con arquitectura hexagonal
@@ -531,7 +547,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.7.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.8.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -582,7 +598,7 @@ src/
 │   │                   │       │   └── repository/
 │   │                   │       └── web/
 │   │                   │           └── controller/
-│   │                   └── chequeraCuota/        # Módulo ChequeraCuota (v3.2.0)
+│   │                   └── chequeraCuota/        # Módulo ChequeraCuota (v3.8.0)
 │   │                       ├── domain/
 │   │                       │   ├── model/        # Entidades de dominio
 │   │                       │   └── ports/        # Puertos (interfaces)
@@ -594,7 +610,7 @@ src/
 │   │                           │   └── mapper/       # Mappers
 │   │                           └── application/
 │   │                               └── service/      # Servicios de aplicación
-│   │                   ├── cuenta/           # Módulo Cuenta (v3.7.0)
+│   │                   ├── cuenta/           # Módulo Cuenta (v3.8.0)
 │   │                   │   ├── domain/
 │   │                   │   │   └── model/        # Entidad de dominio
 │   │                   │   ├── application/
@@ -605,7 +621,7 @@ src/
 │   │                   │       │   └── repository/ # Adaptador JPA
 │   │                   │       └── web/
 │   │                   │           └── controller/ # Controlador REST
-│   │                   └── matriculacionContext/  # Módulo MatriculacionContext (v3.5.0)
+│   │                   └── matriculacionContext/  # Módulo MatriculacionContext (v3.8.0)
 │   │                       ├── domain/
 │   │                       │   ├── model/        # Entidades de dominio
 │   │                       │   └── ports/        # Puertos (interfaces)

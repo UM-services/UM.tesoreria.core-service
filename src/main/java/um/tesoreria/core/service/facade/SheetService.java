@@ -1385,7 +1385,7 @@ public class SheetService {
             this.setCellString(row, 9, proveedor.getEmail(), styleNormal);
             this.setCellString(row, 10, proveedor.getEmailInterno(), styleNormal);
             this.setCellBigDecimal(row, 11, proveedor.getNumeroCuenta(), styleNormal);
-//            this.setCellString(row, 12, proveedor.getCuenta().getNombre(), styleNormal);
+            this.setCellString(row, 12, proveedor.getCuenta().getNombre(), styleNormal);
             this.setCellString(row, 13, proveedor.getHabilitado() == 1 ? "Si" : "No", styleNormal);
             this.setCellString(row, 14, proveedor.getCbu(), styleNormal);
         }

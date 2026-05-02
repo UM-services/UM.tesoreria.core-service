@@ -1,4 +1,4 @@
-package um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository;
+package um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.adapter;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -7,6 +7,7 @@ import um.tesoreria.core.hexagonal.proveedor.domain.model.ProveedorSearch;
 import um.tesoreria.core.hexagonal.proveedor.domain.ports.out.ProveedorRepository;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.mapper.ProveedorMapper;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository.JpaProveedorRepository;
 import um.tesoreria.core.service.view.ProveedorSearchService;
 
 import java.util.List;

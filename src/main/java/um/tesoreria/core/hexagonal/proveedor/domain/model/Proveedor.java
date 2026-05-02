@@ -3,6 +3,7 @@ package um.tesoreria.core.hexagonal.proveedor.domain.model;
 import java.math.BigDecimal;
 
 import lombok.*;
+import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
 
 @Getter
 @Setter
@@ -25,5 +26,6 @@ public class Proveedor {
     private BigDecimal numeroCuenta;
     private Byte habilitado;
     private String cbu;
+    private Cuenta cuenta;
 
 }

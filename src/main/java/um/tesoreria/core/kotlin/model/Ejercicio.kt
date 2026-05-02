@@ -6,6 +6,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import um.tesoreria.core.util.Jsonifier
 import java.time.OffsetDateTime
 
 @Entity
@@ -33,4 +34,8 @@ data class Ejercicio(
     var ordenContableResultado: Int? = null,
     var ordenContableBienesUso: Int? = null
 
-) : Auditable()
+) : Auditable() {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build();
+    }
+}

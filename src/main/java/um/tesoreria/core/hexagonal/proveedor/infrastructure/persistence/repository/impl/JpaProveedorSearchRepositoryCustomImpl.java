@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.repository.view.impl;
+package um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,28 +14,28 @@ import jakarta.persistence.criteria.Root;
 
 import org.springframework.stereotype.Repository;
 
-import um.tesoreria.core.model.view.ProveedorSearch;
-import um.tesoreria.core.repository.view.ProveedorSearchRepositoryCustom;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorSearchEntity;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository.JpaProveedorSearchRepositoryCustom;
 
 /**
  * @author daniel
  *
  */
 @Repository
-public class ProveedorSearchRepositoryCustomImpl implements ProveedorSearchRepositoryCustom {
+public class JpaProveedorSearchRepositoryCustomImpl implements JpaProveedorSearchRepositoryCustom {
 
 	private final EntityManager entityManager;
 
-	public ProveedorSearchRepositoryCustomImpl(EntityManager entityManager) {
+	public JpaProveedorSearchRepositoryCustomImpl(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
 
 	@Override
-	public List<ProveedorSearch> findAllByStrings(List<String> conditions) {
+	public List<ProveedorSearchEntity> findAllByStrings(List<String> conditions) {
 
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<ProveedorSearch> criteriaQuery = criteriaBuilder.createQuery(ProveedorSearch.class);
-		Root<ProveedorSearch> root = criteriaQuery.from(ProveedorSearch.class);
+		CriteriaQuery<ProveedorSearchEntity> criteriaQuery = criteriaBuilder.createQuery(ProveedorSearchEntity.class);
+		Root<ProveedorSearchEntity> root = criteriaQuery.from(ProveedorSearchEntity.class);
 
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		conditions.forEach(condition -> {

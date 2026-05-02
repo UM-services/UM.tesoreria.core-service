@@ -5,6 +5,25 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.0] - 2026-05-02
+### Added
+- feat(cuenta): Implementación completa de casos de uso CRUD para módulo Cuenta
+  - Nuevos casos de uso: `CreateCuentaUseCase`, `DeleteCuentaUseCase`, `GetAllCuentasUseCase`, `GetCuentaByCuentaContableIdUseCase`, `GetCuentaByNumeroCuentaUseCase`, `RecalculaGradosUseCase`, `SaveAllCuentasUseCase`, `SearchCuentasUseCase`, `UpdateCuentaUseCase`
+  - Nuevos DTOs: `CuentaRequest`, `CuentaResponse`, `CuentaSearchResponse`
+  - Nuevo mapper: `CuentaDtoMapper` para conversión dominio ↔ DTO
+  - Controlador `CuentaController` actualizado con todos los endpoints REST
+- feat(proveedor): Mejora de módulo Proveedor con búsqueda avanzada
+  - Nueva entidad `ProveedorSearchEntity` para búsquedas
+  - Nuevo repositorio `JpaProveedorSearchRepository` con consultas personalizadas
+  - Refactorización de paquetes: adaptador movido a `infrastructure/persistence/adapter/`
+
+### Changed
+- refactor(service): Actualización de `BalanceService`, `ContabilidadService`, `SheetService` para usar nuevas estructuras hexagonales
+- refactor(proveedor): Reestructuración de paquetes de Proveedor (adaptador movido a `infrastructure/persistence/adapter/`)
+- refactor(model): Actualización de `Ejercicio.kt` con cambios en modelo
+
+> Basado en análisis profundo de `git diff HEAD` (47 archivos modificados, +894/-447 líneas).
+
 ## [3.7.0] - 2026-05-02
 ### Added
 - feat(hexagonal): Nuevo módulo Cuenta con arquitectura hexagonal
