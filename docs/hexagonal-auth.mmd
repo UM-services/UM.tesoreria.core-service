@@ -1,0 +1,53 @@
+---
+title: Arquitectura Hexagonal - Módulo Auth (v3.6.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        UA[UsuarioAuth<br/>Entidad de Dominio]
+        LUC[LoginUseCase<br/>Puerto de Entrada]
+        UAR[UsuarioAuthRepository<br/>Puerto de Salida]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        AS[AuthService<br/>Servicio de Aplicación]
+        LUCImpl[LoginUseCaseImpl<br/>Implementación de Caso de Uso]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        AC[AuthController<br/>Adaptador Web]
+        JPA[JpaUsuarioAuthRepositoryAdapter<br/>Adaptador JPA]
+        MAP[UsuarioAuthMapper<br/>Mapeo Entidad-Dominio]
+        DTO[LoginRequest<br/>LoginResponse]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+        HASH[Apache Commons Codec<br/>SHA-256 Hashing]
+    end
+
+    %% Flujo de Dependencias
+    AC -->|usa| LUC
+    AS -->|usa| LUC
+    
+    LUC -->|implementa| LUCImpl
+    LUCImpl -->|depende| UAR
+    LUCImpl -->|usa| HASH
+    LUCImpl -->|valida| UA
+    
+    UAR -->|implementa| JPA
+    JPA -->|usa| MAP
+    JPA -->|persiste| JPAR
+    JPA -->|gestiona| UA
+
+    AC -->|recibe| DTO
+    AC -->|envía| DTO
+
+    style UA fill:#e1f5fe
+    style LUC fill:#f3e5f5
+    style UAR fill:#f3e5f5
+    style AS fill:#fff3e0
+    style LUCImpl fill:#fff3e0
+    style AC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style MAP fill:#fff8e1
+    style DTO fill:#fff8e1

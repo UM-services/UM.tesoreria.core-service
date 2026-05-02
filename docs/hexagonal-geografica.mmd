@@ -1,0 +1,69 @@
+---
+title: Arquitectura Hexagonal - Módulo Geografica (v3.6.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        G[Geografica<br/>Entidad de Dominio]
+        GAU[GetAllGeograficasUseCase<br/>Puerto de Entrada]
+        GUI[GetGeograficaByIdUseCase<br/>Puerto de Entrada]
+        GBS[GetGeograficasBySedeUseCase<br/>Puerto de Entrada]
+        GR[GeograficaRepository<br/>Puerto de Salida]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        GS[GeograficaService<br/>Servicio de Aplicación]
+        GAUImpl[GetAllGeograficasUseCaseImpl<br/>Caso de Uso]
+        GUIImpl[GetGeograficaByIdUseCaseImpl<br/>Caso de Uso]
+        GBSImpl[GetGeograficasBySedeUseCaseImpl<br/>Caso de Uso]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        GC[GeograficaController<br/>Adaptador Web]
+        JPA[JpaGeograficaRepositoryAdapter<br/>Adaptador JPA]
+        MAP[GeograficaMapper<br/>Mapeo Entidad-Dominio]
+        ENT[GeograficaEntity<br/>Entidad JPA]
+        DTO[GeograficaResponse<br/>DTO de Respuesta]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+        GLS[GeograficaLectivoService<br/>Servicio Externo]
+    end
+
+    %% Flujo de Dependencias
+    GC -->|usa| GAU
+    GC -->|usa| GUI
+    GC -->|usa| GBS
+    
+    GAU -->|implementa| GAUImpl
+    GUI -->|implementa| GUIImpl
+    GBS -->|implementa| GBSImpl
+    
+    GAUImpl -->|depende| GR
+    GUIImpl -->|depende| GR
+    GBSImpl -->|depende| GR
+    
+    GAUImpl -->|usa| GLS
+    GBSImpl -->|usa| GLS
+    
+    GR -->|implementa| JPA
+    JPA -->|usa| MAP
+    JPA -->|persiste| JPAR
+    MAP -->|convierte| G
+    MAP -->|convierte| ENT
+
+    GC -->|envía| DTO
+
+    style G fill:#e1f5fe
+    style GAU fill:#f3e5f5
+    style GUI fill:#f3e5f5
+    style GBS fill:#f3e5f5
+    style GR fill:#f3e5f5
+    style GS fill:#fff3e0
+    style GAUImpl fill:#fff3e0
+    style GUIImpl fill:#fff3e0
+    style GBSImpl fill:#fff3e0
+    style GC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style MAP fill:#fff8e1
+    style DTO fill:#fff8e1

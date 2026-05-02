@@ -52,6 +52,11 @@ import um.tesoreria.core.extern.model.view.PersonaKeyFacultad;
 import um.tesoreria.core.extern.model.view.PreunivCarreraFacultad;
 import um.tesoreria.core.extern.model.view.PreunivMatricResumenFacultad;
 import um.tesoreria.core.extern.model.view.PreunivResumenFacultad;
+import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
+import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
+import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.view.FacturaPendiente;
 import um.tesoreria.core.model.*;
@@ -71,7 +76,6 @@ import um.tesoreria.core.service.ContratoPeriodoService;
 import um.tesoreria.core.service.CuentaMovimientoService;
 import um.tesoreria.core.service.EjercicioService;
 import um.tesoreria.core.service.FacultadService;
-import um.tesoreria.core.service.GeograficaService;
 import um.tesoreria.core.service.IngresoAsientoService;
 import um.tesoreria.core.service.LectivoService;
 import um.tesoreria.core.service.LegajoService;
@@ -136,6 +140,7 @@ public class SheetService {
     private final FacturacionElectronicaService facturacionElectronicaService;
     private final ProveedorService proveedorService;
     private final FacturaPendienteService facturaPendienteService;
+    private final GeograficaMapper geograficaMapper;
 
 
     public String generateIngresos(Integer anho, Integer mes) {
@@ -264,7 +269,7 @@ public class SheetService {
             if (tipos.containsKey(tipochequeraId)) {
                 tipoChequera = tipos.get(tipochequeraId);
                 if (tipoChequera.getGeografica() != null) {
-                    geografica = tipoChequera.getGeografica();
+                    geografica = geograficaMapper.toDomainModel(tipoChequera.getGeografica());
                 }
             }
             List<ChequeraSerie> chequeraList = chequeraSerieService.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipochequeraId);
@@ -1365,7 +1370,7 @@ public class SheetService {
         this.setCellString(row, 13, "Habilitado", styleBold);
         this.setCellString(row, 14, "CBU", styleBold);
 
-        for (Proveedor proveedor : proveedorService.findAll()) {
+        for (ProveedorEntity proveedor : proveedorService.findAll()) {
             row = sheet.createRow(++fila);
             this.setCellInteger(row, 0, proveedor.getProveedorId(), styleNormal);
             this.setCellString(row, 1, proveedor.getCuit(), styleNormal);

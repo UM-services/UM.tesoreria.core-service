@@ -1,17 +1,18 @@
 /**
  * 
  */
-package um.tesoreria.core.service;
+package um.tesoreria.core.hexagonal.proveedor.application.service;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ProveedorException;
-import um.tesoreria.core.model.Proveedor;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository.JpaProveedorRepository;
 import um.tesoreria.core.model.view.ProveedorSearch;
-import um.tesoreria.core.repository.ProveedorRepository;
 import um.tesoreria.core.service.view.ProveedorSearchService;
 
 /**
@@ -20,18 +21,13 @@ import um.tesoreria.core.service.view.ProveedorSearchService;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ProveedorService {
 
-	private final ProveedorRepository repository;
+	private final JpaProveedorRepository repository;
 	private final ProveedorSearchService proveedorSearchService;
 
-	public ProveedorService(ProveedorRepository repository,
-							ProveedorSearchService proveedorSearchService) {
-		this.repository = repository;
-		this.proveedorSearchService = proveedorSearchService;
-	}
-
-	public List<Proveedor> findAll() {
+    public List<ProveedorEntity> findAll() {
 		log.debug("Processing findAll");
 		return repository.findAll();
 	}
@@ -41,30 +37,30 @@ public class ProveedorService {
 		return proveedorSearchService.findAllByStrings(conditions);
 	}
 
-	public Proveedor findByProveedorId(Integer proveedorId) {
+	public ProveedorEntity findByProveedorId(Integer proveedorId) {
 		log.debug("Processing findByProveedorId");
 		return repository.findByProveedorId(proveedorId).orElseThrow(() -> new ProveedorException(proveedorId));
 	}
 
-	public Proveedor findByCuit(String cuit) {
+	public ProveedorEntity findByCuit(String cuit) {
 		log.debug("Processing findByCuit");
 		return repository.findTopByCuit(cuit).orElseThrow(() -> new ProveedorException(cuit));
 	}
 
-	public Proveedor findLast() {
+	public ProveedorEntity findLast() {
 		log.debug("Processing findLast");
 		return repository.findTopByOrderByProveedorIdDesc().orElseThrow(ProveedorException::new);
 	}
 
-	public Proveedor add(Proveedor proveedor) {
+	public ProveedorEntity add(ProveedorEntity proveedor) {
 		log.debug("Processing add");
 		return repository.save(proveedor);
 	}
 
-	public Proveedor update(Proveedor newProveedor, Integer proveedorId) {
+	public ProveedorEntity update(ProveedorEntity newProveedor, Integer proveedorId) {
 		log.debug("Processing update");
 		return repository.findByProveedorId(proveedorId).map(proveedor -> {
-			proveedor = Proveedor.builder()
+			proveedor = ProveedorEntity.builder()
 					.proveedorId(proveedorId)
 					.cuit(newProveedor.getCuit())
 					.nombreFantasia(newProveedor.getNombreFantasia())

@@ -1,6 +1,7 @@
 package um.tesoreria.core.kotlin.model
 
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import java.math.BigDecimal
 
 @Entity
@@ -21,7 +22,7 @@ data class Dependencia(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "geograficaId", insertable = false, updatable = false)
-    val geografica: Geografica? = null,
+    val geografica: GeograficaEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "cuentaHonorariosPagar", insertable = false, updatable = false)
@@ -53,7 +54,7 @@ data class Dependencia(
         var geograficaId: Int? = null
         var cuentaHonorariosPagar: BigDecimal? = null
         var facultad: Facultad? = null
-        var geografica: Geografica? = null
+        var geografica: GeograficaEntity? = null
         var cuenta: Cuenta? = null
 
         fun dependenciaId(dependenciaId: Int?) = apply { this.dependenciaId = dependenciaId }
@@ -63,7 +64,7 @@ data class Dependencia(
         fun geograficaId(geograficaId: Int?) = apply { this.geograficaId = geograficaId }
         fun cuentaHonorariosPagar(cuentaHonorariosPagar: BigDecimal?) = apply { this.cuentaHonorariosPagar = cuentaHonorariosPagar }
         fun facultad(facultad: Facultad?) = apply { this.facultad = facultad }
-        fun geografica(geografica: Geografica?) = apply { this.geografica = geografica }
+        fun geografica(geografica: GeograficaEntity?) = apply { this.geografica = geografica }
         fun cuenta(cuenta: Cuenta?) = apply { this.cuenta = cuenta }
 
         fun build() = Dependencia(this)

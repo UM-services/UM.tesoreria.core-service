@@ -1,0 +1,49 @@
+---
+title: Arquitectura Hexagonal - Módulo Proveedor (v3.6.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        P[ProveedorEntity<br/>Entidad de Persistencia]
+        PR[ProveedorRepository<br/>Puerto de Salida]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        PS[ProveedorService<br/>Servicio de Aplicación]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        PC[ProveedorController<br/>Adaptador Web]
+        JPA[JpaProveedorRepositoryAdapter<br/>Adaptador JPA]
+        ENT[ProveedorEntity<br/>Entidad JPA]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+        PSS[ProveedorSearchService<br/>Servicio de Búsqueda]
+    end
+
+    %% Flujo de Dependencias
+    PC -->|usa| PS
+    PS -->|depende| PR
+    PS -->|usa| PSS
+    
+    PR -->|implementa| JPA
+    JPA -->|persiste| JPAR
+    JPA -->|gestiona| ENT
+    JPA -->|usa| PSS
+
+    style P fill:#e1f5fe
+    style PR fill:#f3e5f5
+    style PS fill:#fff3e0
+    style PC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style ENT fill:#e8f5e8
+
+    %% Operaciones CRUD
+    PC -.->|findAll| PS
+    PC -.->|findByProveedorId| PS
+    PC -.->|findByCuit| PS
+    PC -.->|findLast| PS
+    PC -.->|add| PS
+    PC -.->|update| PS
+    PC -.->|delete| PS

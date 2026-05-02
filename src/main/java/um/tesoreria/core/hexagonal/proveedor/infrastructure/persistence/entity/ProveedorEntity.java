@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.model;
+package um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -24,14 +24,15 @@ import um.tesoreria.core.kotlin.model.Cuenta;
  * @author daniel
  *
  */
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "proveedores")
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Proveedor extends Auditable implements Serializable {
+public class ProveedorEntity extends Auditable implements Serializable {
 	/**
 	 * 
 	 */

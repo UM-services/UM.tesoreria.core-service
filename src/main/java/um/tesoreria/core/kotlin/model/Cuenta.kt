@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import java.time.OffsetDateTime
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 
 @Entity
 @Table(name = "plancta")
@@ -51,6 +52,6 @@ data class Cuenta(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "geograficaId", insertable = false, updatable = false)
-    var geografica: Geografica? = null
+    var geografica: GeograficaEntity? = null
 
 ) : Auditable()

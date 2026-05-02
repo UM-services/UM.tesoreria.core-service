@@ -1,11 +1,12 @@
 package um.tesoreria.core.service.facade;
 
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.exception.BancoMovimientoException;
 import um.tesoreria.core.exception.ProveedorValorException;
 import um.tesoreria.core.exception.facade.ContableException;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
-import um.tesoreria.core.model.Proveedor;
 import um.tesoreria.core.service.*;
 import um.tesoreria.core.util.Tool;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,6 +27,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CompraService {
 
     @PersistenceContext
@@ -42,30 +44,6 @@ public class CompraService {
     private final EjercicioService ejercicioService;
     private final ValorService valorService;
     private final BancariaService bancariaService;
-
-    public CompraService(ProveedorPagoService proveedorPagoService,
-                         ProveedorMovimientoService proveedorMovimientoService,
-                         ProveedorValorService proveedorValorService,
-                         ProveedorArticuloService proveedorArticuloService,
-                         ProveedorArticuloTrackService proveedorArticuloTrackService,
-                         ValorMovimientoService valorMovimientoService,
-                         BancoMovimientoService bancoMovimientoService,
-                         ContabilidadService contabilidadService,
-                         EjercicioService ejercicioService,
-                         ValorService valorService,
-                         BancariaService bancariaService) {
-        this.proveedorPagoService = proveedorPagoService;
-        this.proveedorMovimientoService = proveedorMovimientoService;
-        this.proveedorValorService = proveedorValorService;
-        this.proveedorArticuloService = proveedorArticuloService;
-        this.proveedorArticuloTrackService = proveedorArticuloTrackService;
-        this.valorMovimientoService = valorMovimientoService;
-        this.bancoMovimientoService = bancoMovimientoService;
-        this.contabilidadService = contabilidadService;
-        this.ejercicioService = ejercicioService;
-        this.valorService = valorService;
-        this.bancariaService = bancariaService;
-    }
 
     @Transactional
     public void deleteComprobante(Long proveedorMovimientoId) {
@@ -391,7 +369,7 @@ public class CompraService {
         }
         Comprobante comprobante = proveedorMovimiento.getComprobante();
         String datoProveedor = "";
-        Proveedor proveedor = proveedorMovimiento.getProveedor();
+        ProveedorEntity proveedor = proveedorMovimiento.getProveedor();
         Integer proveedorId = null;
         if (proveedor != null) {
             datoProveedor = proveedor.getRazonSocial() + " (" + proveedor.getCuit() + ")";

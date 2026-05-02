@@ -4,7 +4,37 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
 
-**Versión actual (SemVer): 3.5.2**
+**Versión actual (SemVer): 3.6.0**
+
+## Novedades 3.6.0 (verificado en código)
+- feat(hexagonal): Nuevo módulo Auth con arquitectura hexagonal para autenticación
+  - Modelo de dominio: `UsuarioAuth` con validación de login y password (SHA-256)
+  - Caso de uso: `LoginUseCaseImpl` con lógica de autenticación robusta
+  - Servicio de aplicación: `AuthService` como fachada del dominio
+  - Adaptador JPA: `JpaUsuarioAuthRepositoryAdapter` con mappers
+  - Controlador REST: `AuthController` con endpoints de login
+  - DTOs: `LoginRequest` y `LoginResponse` para entrada/salida
+- feat(hexagonal): Nuevo módulo Geografica con arquitectura hexagonal
+  - Modelo de dominio: `Geografica` para entidades geográficas
+  - Casos de uso: `GetAllGeograficasUseCase`, `GetGeograficaByIdUseCase`, `GetGeograficasBySedeUseCase`
+  - Servicio de aplicación: `GeograficaService` con integración a servicios existentes
+  - Adaptador JPA: `JpaGeograficaRepositoryAdapter` con `GeograficaEntity`
+  - Controlador REST: `GeograficaController` migrado a arquitectura hexagonal
+  - DTO: `GeograficaResponse` para respuestas HTTP
+- feat(hexagonal): Nuevo módulo Proveedor con arquitectura hexagonal
+  - Entidad de persistencia: `ProveedorEntity` con anotaciones Lombok
+  - Adaptador JPA: `JpaProveedorRepositoryAdapter` con operaciones CRUD
+  - Servicio de aplicación: `ProveedorService` con integración a `ProveedorSearchService`
+  - Migración de controlador existente a nueva estructura hexagonal
+- refactor(model): Migración de `Geografica.kt` (Kotlin) a `GeograficaEntity.java`
+  - Eliminación de modelo Kotlin en paquete `core/kotlin/model/`
+  - Creación de entidad JPA en `hexagonal/geografica/infrastructure/persistence/entity/`
+  - Actualización de `CursoHaberes.java` para usar `GeograficaEntity` en lugar de `Geografica`
+- refactor(proveedor): Reestructuración de paquetes de Proveedor
+  - Migración de servicios y repositorios al paquete `hexagonal/proveedor/`
+  - Nueva entidad `ProveedorEntity` con `@Builder` y validaciones
+
+> Basado en análisis profundo de `git diff HEAD` (55 archivos modificados).
 
 ## Novedades 3.5.2 (verificado en código)
 - chore(deps): Actualización de Spring Boot de 4.0.2 a 4.0.5
@@ -474,7 +504,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.5.2-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.6.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

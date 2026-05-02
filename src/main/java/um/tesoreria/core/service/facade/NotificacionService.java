@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -20,16 +21,16 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.ProveedorMovimientoException;
 import um.tesoreria.core.exception.ProveedorException;
+import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.PersonaSuspendido;
-import um.tesoreria.core.model.Proveedor;
 import um.tesoreria.core.service.ComprobanteService;
 import um.tesoreria.core.service.DomicilioService;
 import um.tesoreria.core.service.FacultadService;
 import um.tesoreria.core.service.PersonaSuspendidoService;
 import um.tesoreria.core.service.ProveedorComprobanteService;
 import um.tesoreria.core.service.ProveedorMovimientoService;
-import um.tesoreria.core.service.ProveedorService;
 import um.tesoreria.core.service.ProveedorValorService;
 import um.tesoreria.core.service.ValorMovimientoService;
 import um.tesoreria.core.service.ValorService;
@@ -41,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class NotificacionService {
 
 	@Value("${app.testing}")
@@ -57,30 +59,6 @@ public class NotificacionService {
 	private final ProveedorValorService proveedorValorService;
 	private final ValorMovimientoService valorMovimientoService;
 	private final ValorService valorService;
-
-	public NotificacionService(FacultadService facultadService,
-			DomicilioService domicilioService,
-			JavaMailSender sender,
-			PersonaSuspendidoService personaSuspendidoService,
-			ProveedorMovimientoService proveedorMovimientoService,
-			ProveedorService proveedorService,
-			ProveedorComprobanteService proveedorComprobanteService,
-			ComprobanteService comprobanteService,
-			ProveedorValorService proveedorValorService,
-			ValorMovimientoService valorMovimientoService,
-			ValorService valorService) {
-		this.facultadService = facultadService;
-		this.domicilioService = domicilioService;
-		this.sender = sender;
-		this.personaSuspendidoService = personaSuspendidoService;
-		this.proveedorMovimientoService = proveedorMovimientoService;
-		this.proveedorService = proveedorService;
-		this.proveedorComprobanteService = proveedorComprobanteService;
-		this.comprobanteService = comprobanteService;
-		this.proveedorValorService = proveedorValorService;
-		this.valorMovimientoService = valorMovimientoService;
-		this.valorService = valorService;
-	}
 
 	public String notifyDeudorSuspendido(PersonaSuspendido personaSuspendido) throws MessagingException {
 		String data = "";
@@ -158,7 +136,7 @@ public class NotificacionService {
 		} catch (ProveedorMovimientoException e) {
 			return "ERROR: No Existe Orden de Pago";
 		}
-		Proveedor proveedor = null;
+		ProveedorEntity proveedor = null;
 		try {
 			proveedor = proveedorService.findByProveedorId(proveedorMovimiento.getProveedorId());
 		} catch (ProveedorException e) {

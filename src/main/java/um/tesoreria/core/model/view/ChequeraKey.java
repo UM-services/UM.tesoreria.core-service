@@ -20,6 +20,7 @@ import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import lombok.AllArgsConstructor;
@@ -96,6 +97,6 @@ public class ChequeraKey extends Auditable implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "geograficaId", insertable = false, updatable = false)
-	private Geografica geografica;
+	private GeograficaEntity geografica;
 
 }

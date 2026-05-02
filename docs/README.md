@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.5.2**
+**Versión actual del servicio: 3.6.0**
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -8,6 +8,9 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `architecture.mmd`: Arquitectura general (controladores, servicios, repositorios, entidades).
 - `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado.
 - `hexagonal-chequeraCuota.mmd`: Arquitectura hexagonal del caso de uso Chequera Cuota (flujo de pago de cuotas).
+- `hexagonal-auth.mmd`: Arquitectura hexagonal del módulo Auth (autenticación de usuarios).
+- `hexagonal-geografica.mmd`: Arquitectura hexagonal del módulo Geografica (entidades geográficas).
+- `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores).
 - `hexagonal-mercadopago-context-history.mmd`: Historial de contexto de MercadoPago.
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 

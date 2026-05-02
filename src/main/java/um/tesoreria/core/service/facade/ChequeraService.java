@@ -11,15 +11,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import um.tesoreria.core.exception.ChequeraEliminadaException;
 import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DebitoException;
+import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.*;
@@ -40,6 +41,7 @@ import um.tesoreria.core.service.*;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ChequeraService {
 
     private final ChequeraEliminadaService chequeraEliminadaService;
@@ -63,36 +65,6 @@ public class ChequeraService {
     private final ProductoService productoService;
     private final DomicilioService domicilioService;
     private final MercadoPagoContextService mercadoPagoContextService;
-
-    @Autowired
-    public ChequeraService(ChequeraEliminadaService chequeraEliminadaService, ChequeraPagoAsientoService chequeraPagoAsientoService, ChequeraPagoService chequeraPagoService,
-                           ChequeraCuotaService chequeraCuotaService, ChequeraAlternativaService chequeraAlternativaService, ChequeraTotalService chequeraTotalService,
-                           ChequeraSerieService chequeraSerieService, ChequeraSerieControlService chequeraSerieControlService, ChequeraImpresionCabeceraService chequeraImpresionCabeceraService,
-                           ChequeraImpresionDetalleService chequeraImpresionDetalleService, DebitoService debitoService, ModelMapper modelMapper, FacultadService facultadService,
-                           TipoChequeraService tipoChequeraService, PersonaService personaService, LectivoService lectivoService, ArancelTipoService arancelTipoService, GeograficaService geograficaService,
-                           ProductoService productoService, DomicilioService domicilioService, MercadoPagoContextService mercadoPagoContextService) {
-        this.chequeraEliminadaService = chequeraEliminadaService;
-        this.chequeraPagoService = chequeraPagoService;
-        this.chequeraPagoAsientoService = chequeraPagoAsientoService;
-        this.chequeraCuotaService = chequeraCuotaService;
-        this.chequeraAlternativaService = chequeraAlternativaService;
-        this.chequeraTotalService = chequeraTotalService;
-        this.chequeraSerieService = chequeraSerieService;
-        this.chequeraSerieControlService = chequeraSerieControlService;
-        this.chequeraImpresionCabeceraService = chequeraImpresionCabeceraService;
-        this.chequeraImpresionDetalleService = chequeraImpresionDetalleService;
-        this.debitoService = debitoService;
-        this.modelMapper = modelMapper;
-        this.facultadService = facultadService;
-        this.tipoChequeraService = tipoChequeraService;
-        this.personaService = personaService;
-        this.lectivoService = lectivoService;
-        this.arancelTipoService = arancelTipoService;
-        this.geograficaService = geograficaService;
-        this.productoService = productoService;
-        this.domicilioService = domicilioService;
-        this.mercadoPagoContextService = mercadoPagoContextService;
-    }
 
     @Transactional
     public void deleteByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, String usuarioId) {

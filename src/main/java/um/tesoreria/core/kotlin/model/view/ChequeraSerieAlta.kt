@@ -3,6 +3,7 @@ package um.tesoreria.core.kotlin.model.view
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
 import org.hibernate.annotations.Immutable
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
 import um.tesoreria.core.kotlin.model.*
 import java.math.BigDecimal
@@ -111,6 +112,6 @@ data class ChequeraSerieAlta(
 
     @OneToOne
     @JoinColumn(name = "chs_geo_id", insertable = false, updatable = false)
-    var geografica: Geografica? = null
+    var geografica: GeograficaEntity? = null
 
 ) : Auditable()

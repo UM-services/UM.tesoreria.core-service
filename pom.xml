@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.5</version>
+        <version>4.0.6</version>
         <relativePath/>
         <!-- lookup parent from repository -->
     </parent>
     <groupId>ar.edu</groupId>
     <artifactId>um.tesoreria.core-service</artifactId>
-    <version>3.5.2</version>
+    <version>3.6.0</version>
     <name>UM.tesoreria.core-service</name>
     <description>Tesoreria API REST</description>
     <properties>

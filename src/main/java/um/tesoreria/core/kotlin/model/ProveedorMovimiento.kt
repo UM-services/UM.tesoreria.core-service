@@ -1,6 +1,5 @@
 package um.tesoreria.core.kotlin.model
 
-import um.tesoreria.core.model.Proveedor
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -12,6 +11,8 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -90,11 +91,11 @@ data class ProveedorMovimiento @JvmOverloads constructor(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "mvp_prv_id", insertable = false, updatable = false)
-    var proveedor: Proveedor? = null,
+    var proveedor: ProveedorEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "geograficaId", insertable = false, updatable = false)
-    var geografica: Geografica? = null,
+    var geografica: GeograficaEntity? = null,
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "fad_mvp_id", insertable = false, updatable = false)

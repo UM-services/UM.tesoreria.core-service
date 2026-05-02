@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.controller;
+package um.tesoreria.core.hexagonal.proveedor.infrastructure.web.controller;
 
 import java.util.List;
 
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.exception.ProveedorException;
-import um.tesoreria.core.model.Proveedor;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.model.view.ProveedorSearch;
-import um.tesoreria.core.service.ProveedorService;
+import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
 
 /**
  * @author daniel
@@ -37,7 +37,7 @@ public class ProveedorController {
 	}
 
 	@GetMapping("/")
-	public ResponseEntity<List<Proveedor>> findAll() {
+	public ResponseEntity<List<ProveedorEntity>> findAll() {
 		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
 	}
 
@@ -47,7 +47,7 @@ public class ProveedorController {
 	}
 
 	@GetMapping("/{proveedorId}")
-	public ResponseEntity<Proveedor> findByProveedorId(@PathVariable Integer proveedorId) {
+	public ResponseEntity<ProveedorEntity> findByProveedorId(@PathVariable Integer proveedorId) {
 		try {
 			return new ResponseEntity<>(service.findByProveedorId(proveedorId), HttpStatus.OK);
 		} catch (ProveedorException e) {
@@ -56,7 +56,7 @@ public class ProveedorController {
 	}
 
 	@GetMapping("/cuit/{cuit}")
-	public ResponseEntity<Proveedor> findByCuit(@PathVariable String cuit) {
+	public ResponseEntity<ProveedorEntity> findByCuit(@PathVariable String cuit) {
 		try {
 			return new ResponseEntity<>(service.findByCuit(cuit), HttpStatus.OK);
 		} catch (ProveedorException e) {
@@ -65,17 +65,17 @@ public class ProveedorController {
 	}
 
 	@GetMapping("/last")
-	public ResponseEntity<Proveedor> findLast() {
+	public ResponseEntity<ProveedorEntity> findLast() {
 		return new ResponseEntity<>(service.findLast(), HttpStatus.OK);
 	}
 
 	@PostMapping("/")
-	public ResponseEntity<Proveedor> add(@RequestBody Proveedor proveedor) {
+	public ResponseEntity<ProveedorEntity> add(@RequestBody ProveedorEntity proveedor) {
 		return new ResponseEntity<>(service.add(proveedor), HttpStatus.OK);
 	}
 
 	@PutMapping("/{proveedorId}")
-	public ResponseEntity<Proveedor> update(@RequestBody Proveedor proveedor, @PathVariable Integer proveedorId) {
+	public ResponseEntity<ProveedorEntity> update(@RequestBody ProveedorEntity proveedor, @PathVariable Integer proveedorId) {
 		return new ResponseEntity<>(service.update(proveedor, proveedorId), HttpStatus.OK);
 	}
 

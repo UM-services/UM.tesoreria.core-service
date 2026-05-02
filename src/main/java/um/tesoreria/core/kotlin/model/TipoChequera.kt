@@ -5,6 +5,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import um.tesoreria.core.util.Jsonifier
 
 @Entity
@@ -39,7 +40,7 @@ data class TipoChequera(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "tch_geo_id", insertable = false, updatable = false)
-    var geografica: Geografica? = null,
+    var geografica: GeograficaEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "tch_cch_id", insertable = false, updatable = false)

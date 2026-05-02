@@ -5,6 +5,39 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.0] - 2026-05-02
+### Added
+- feat(hexagonal): Nuevo módulo Auth con arquitectura hexagonal para autenticación
+  - Modelo de dominio: `UsuarioAuth` con validación de login/password (SHA-256)
+  - Caso de uso: `LoginUseCaseImpl` con lógica de autenticación robusta y manejo de mayúsculas/minúsculas
+  - Servicio de aplicación: `AuthService` como fachada del dominio
+  - Adaptador JPA: `JpaUsuarioAuthRepositoryAdapter` con `UsuarioAuthMapper`
+  - Controlador REST: `AuthController` con endpoint de login
+  - DTOs: `LoginRequest` y `LoginResponse` para entrada/salida
+- feat(hexagonal): Nuevo módulo Geografica con arquitectura hexagonal
+  - Modelo de dominio: `Geografica` para entidades geográficas
+  - Casos de uso: `GetAllGeograficasUseCase`, `GetGeograficaByIdUseCase`, `GetGeograficasBySedeUseCase`
+  - Servicio de aplicación: `GeograficaService` con integración a `GeograficaLectivoService`
+  - Adaptador JPA: `JpaGeograficaRepositoryAdapter` con `GeograficaEntity`
+  - Controlador REST: `GeograficaController` migrado a arquitectura hexagonal
+  - DTO: `GeograficaResponse` para respuestas HTTP
+- feat(hexagonal): Nuevo módulo Proveedor con arquitectura hexagonal
+  - Entidad de persistencia: `ProveedorEntity` con anotaciones Lombok (`@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Adaptador JPA: `JpaProveedorRepositoryAdapter` con operaciones CRUD completas
+  - Servicio de aplicación: `ProveedorService` con integración a `ProveedorSearchService`
+  - Migración de controlador existente a nueva estructura hexagonal
+
+### Changed
+- refactor(model): Migración de `Geografica.kt` (Kotlin) a `GeograficaEntity.java`
+  - Eliminación de modelo Kotlin en paquete `core/kotlin/model/`
+  - Creación de entidad JPA en `hexagonal/geografica/infrastructure/persistence/entity/`
+  - Actualización de `CursoHaberes.java` para usar `GeograficaEntity` en lugar de `Geografica`
+- refactor(proveedor): Reestructuración de paquetes de Proveedor
+  - Migración de servicios y repositorios al paquete `hexagonal/proveedor/`
+  - Nueva entidad `ProveedorEntity` con `@Builder` y validaciones
+
+> Basado en análisis profundo de `git diff HEAD` (55 archivos modificados, +776/-278 líneas).
+
 ## [3.5.2] - 2026-04-04
 ### Changed
 - chore(deps): Actualización de Spring Boot de 4.0.2 a 4.0.5

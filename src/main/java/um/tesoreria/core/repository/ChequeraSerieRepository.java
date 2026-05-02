@@ -81,10 +81,8 @@ public interface ChequeraSerieRepository extends JpaRepository<ChequeraSerie, Lo
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 
-    @Query("SELECT new um.tesoreria.core.model.internal.FacultadSedeChequeraDto(cs.facultadId, f.nombre, cs.geograficaId, g.nombre, COUNT(*)) " +
+    @Query("SELECT new um.tesoreria.core.model.internal.FacultadSedeChequeraDto(cs.facultadId, cs.facultad.nombre, cs.geograficaId, cs.geografica.nombre, COUNT(*)) " +
             "FROM ChequeraSerie cs " +
-            "JOIN Facultad f ON cs.facultadId = f.facultadId " +
-            "JOIN Geografica g on cs.geograficaId = g.geograficaId " +
             "WHERE cs.lectivoId = :lectivoId " +
             "GROUP BY cs.facultadId, cs.geograficaId " +
             "ORDER BY cs.facultadId, cs.geograficaId")

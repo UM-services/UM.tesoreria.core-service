@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 
@@ -96,6 +97,6 @@ public class ChequeraIncompleta implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "geograficaId", insertable = false, updatable = false)
-	private Geografica geografica;
+	private GeograficaEntity geografica;
 
 }
