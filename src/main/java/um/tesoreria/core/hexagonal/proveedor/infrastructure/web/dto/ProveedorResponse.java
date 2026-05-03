@@ -1,10 +1,17 @@
 package um.tesoreria.core.hexagonal.proveedor.infrastructure.web.dto;
 
-import lombok.Data;
+import lombok.*;
+import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
+
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProveedorResponse {
+
     private Integer proveedorId;
     private String cuit;
     private String nombreFantasia;
@@ -19,4 +26,6 @@ public class ProveedorResponse {
     private BigDecimal numeroCuenta;
     private Byte habilitado;
     private String cbu;
+    private Cuenta cuenta;
+
 }

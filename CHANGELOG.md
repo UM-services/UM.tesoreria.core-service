@@ -5,6 +5,22 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.0] - 2026-05-03
+### Added
+- feat(proveedor): Mejora de modelo de datos y refactorización de DTOs en módulo Proveedor
+  - Nuevo campo `cbu` en `ProveedorSearch`, `ProveedorSearchEntity`, `ProveedorResponse` y `ProveedorSearchResponse`
+  - Nuevo campo `Cuenta cuenta` (objeto dominio) en `ProveedorResponse` y `ProveedorSearchResponse` para incluir datos de cuenta asociada
+  - Renombrado de campo `cuenta` a `numeroCuenta` en `ProveedorSearch`, `ProveedorSearchEntity` y `ProveedorSearchResponse`
+
+### Changed
+- refactor(proveedor): Refactorización de DTOs para usar patrón Builder de Lombok
+  - `ProveedorResponse` y `ProveedorSearchResponse` ahora usan `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`
+  - `ProveedorDtoMapper.toResponse()` y `toSearchResponse()` refactorizados para usar `builder()` en lugar de setters manuales
+  - Cambio de `@Data` a `@Getter`/`@Setter` en `ProveedorSearchEntity`, `ProveedorResponse` y `ProveedorSearchResponse`
+  - `ProveedorMapper` actualizado para mapear nuevos campos (`numeroCuenta`, `cbu`)
+
+> Basado en análisis profundo de `git diff HEAD` (6 archivos modificados, +67/-44 líneas).
+
 ## [3.9.0] - 2026-05-02
 ### Added
 - feat(proveedor): Implementación de paginación en módulo Proveedor

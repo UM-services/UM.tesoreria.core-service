@@ -31,40 +31,42 @@ public class ProveedorDtoMapper {
 
     public ProveedorResponse toResponse(Proveedor domain) {
         if (domain == null) return null;
-        ProveedorResponse response = new ProveedorResponse();
-        response.setProveedorId(domain.getProveedorId());
-        response.setCuit(domain.getCuit());
-        response.setNombreFantasia(domain.getNombreFantasia());
-        response.setRazonSocial(domain.getRazonSocial());
-        response.setOrdenCheque(domain.getOrdenCheque());
-        response.setDomicilio(domain.getDomicilio());
-        response.setTelefono(domain.getTelefono());
-        response.setFax(domain.getFax());
-        response.setCelular(domain.getCelular());
-        response.setEmail(domain.getEmail());
-        response.setEmailInterno(domain.getEmailInterno());
-        response.setNumeroCuenta(domain.getNumeroCuenta());
-        response.setHabilitado(domain.getHabilitado());
-        response.setCbu(domain.getCbu());
-        return response;
+        return ProveedorResponse.builder()
+                .proveedorId(domain.getProveedorId())
+                .cuit(domain.getCuit())
+                .nombreFantasia(domain.getNombreFantasia())
+                .razonSocial(domain.getRazonSocial())
+                .ordenCheque(domain.getOrdenCheque())
+                .domicilio(domain.getDomicilio())
+                .telefono(domain.getTelefono())
+                .fax(domain.getFax())
+                .celular(domain.getCelular())
+                .email(domain.getEmail())
+                .emailInterno(domain.getEmailInterno())
+                .numeroCuenta(domain.getNumeroCuenta())
+                .habilitado(domain.getHabilitado())
+                .cbu(domain.getCbu())
+                .cuenta(domain.getCuenta())
+                .build();
     }
 
     public ProveedorSearchResponse toSearchResponse(ProveedorSearch domain) {
         if (domain == null) return null;
-        ProveedorSearchResponse response = new ProveedorSearchResponse();
-        response.setProveedorId(domain.getProveedorId());
-        response.setCuit(domain.getCuit());
-        response.setNombreFantasia(domain.getNombreFantasia());
-        response.setRazonSocial(domain.getRazonSocial());
-        response.setOrdenCheque(domain.getOrdenCheque());
-        response.setDomicilio(domain.getDomicilio());
-        response.setTelefono(domain.getTelefono());
-        response.setFax(domain.getFax());
-        response.setCelular(domain.getCelular());
-        response.setEmail(domain.getEmail());
-        response.setCuenta(domain.getCuenta());
-        response.setHabilitado(domain.getHabilitado());
-        response.setSearch(domain.getSearch());
-        return response;
+        return ProveedorSearchResponse.builder()
+                .proveedorId(domain.getProveedorId())
+                .cuit(domain.getCuit())
+                .nombreFantasia(domain.getNombreFantasia())
+                .razonSocial(domain.getRazonSocial())
+                .ordenCheque(domain.getOrdenCheque())
+                .domicilio(domain.getDomicilio())
+                .telefono(domain.getTelefono())
+                .fax(domain.getFax())
+                .celular(domain.getCelular())
+                .email(domain.getEmail())
+                .numeroCuenta(domain.getNumeroCuenta())
+                .habilitado(domain.getHabilitado())
+                .cbu(domain.getCbu())
+                .search(domain.getSearch())
+                .build();
     }
 }

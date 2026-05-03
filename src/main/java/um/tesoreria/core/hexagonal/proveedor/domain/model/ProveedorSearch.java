@@ -21,8 +21,9 @@ public class ProveedorSearch {
     private String fax;
     private String celular;
     private String email;
-    private BigDecimal cuenta;
+    private BigDecimal numeroCuenta;
     private Byte habilitado;
+    private String cbu;
     private String search;
 
 }

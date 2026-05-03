@@ -14,19 +14,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import lombok.*;
 import org.hibernate.annotations.Immutable;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import um.tesoreria.core.kotlin.model.Auditable;
 
 /**
  * @author daniel
  *
  */
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "vw_proveedor_search")
 @Immutable
@@ -73,10 +71,12 @@ public class ProveedorSearchEntity extends Auditable implements Serializable {
 	private String email;
 
 	@Column(name = "prv_cuenta")
-	private BigDecimal cuenta;
+	private BigDecimal numeroCuenta;
 
 	@Column(name = "prv_habilitado")
 	private Byte habilitado;
+
+	private String cbu;
 
 	private String search;
 

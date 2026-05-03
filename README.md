@@ -4,7 +4,19 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.9.0**
+**Versión actual (SemVer): 3.10.0**
+
+## Novedades 3.10.0 (verificado en código)
+- feat(proveedor): Mejora de modelo de datos y refactorización de DTOs en módulo Proveedor
+  - Renombrado de campo `cuenta` a `numeroCuenta` en `ProveedorSearch`, `ProveedorSearchEntity` y `ProveedorSearchResponse` para mayor claridad
+  - Nuevo campo `cbu` en `ProveedorSearch`, `ProveedorSearchEntity`, `ProveedorResponse` y `ProveedorSearchResponse`
+  - Nuevo campo `Cuenta cuenta` (objeto dominio) en `ProveedorResponse` y `ProveedorSearchResponse`
+  - Refactorización de DTOs (`ProveedorResponse`, `ProveedorSearchResponse`) para usar patrón Builder de Lombok (`@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Refactorización de `ProveedorDtoMapper` para usar `builder()` en lugar de setters manuales
+  - Actualización de `ProveedorMapper` para mapear nuevos campos (`numeroCuenta`, `cbu`)
+  - Cambio de anotación en `ProveedorSearchEntity` y DTOs: de `@Data` a `@Getter`/`@Setter` para mayor control
+
+> Basado en análisis profundo de `git diff HEAD` (6 archivos modificados, +67/-44 líneas).
 
 ## Novedades 3.9.0 (verificado en código)
 - feat(proveedor): Implementación de paginación en módulo Proveedor
@@ -558,7 +570,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.8.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.10.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

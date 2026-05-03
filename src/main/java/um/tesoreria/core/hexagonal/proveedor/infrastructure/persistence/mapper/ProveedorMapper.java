@@ -70,8 +70,9 @@ public class ProveedorMapper {
                 .fax(viewEntity.getFax())
                 .celular(viewEntity.getCelular())
                 .email(viewEntity.getEmail())
-                .cuenta(viewEntity.getCuenta())
+                .numeroCuenta(viewEntity.getNumeroCuenta())
                 .habilitado(viewEntity.getHabilitado())
+                .cbu(viewEntity.getCbu())
                 .search(viewEntity.getSearch())
                 .build();
     }
