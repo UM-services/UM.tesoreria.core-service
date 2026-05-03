@@ -4,7 +4,22 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.10.0**
+**Versión actual (SemVer): 3.11.0**
+
+## Novedades 3.11.0 (verificado en código)
+- feat(articulo): Migración de módulo Artículo a arquitectura hexagonal
+  - Nueva entidad JPA: `ArticuloEntity` en `hexagonal/articulo/infrastructure/persistence/entity/` con anotaciones Lombok (`@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Nuevo repositorio: `JpaArticuloRepository` en `hexagonal/articulo/infrastructure/persistence/repository/` con métodos `findByArticuloId`, `findTopByOrderByArticuloIdDesc`
+  - Nuevo servicio de aplicación: `ArticuloService` en `hexagonal/articulo/application/service/` con lógica de negocio
+  - Nuevo controlador REST: `ArticuloController` en `hexagonal/articulo/infrastructure/web/controller/` migrado con `@RequiredArgsConstructor`
+  - Eliminación de `Articulo.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `ArticuloRepository.java` del paquete `core/repository/`
+  - Eliminación de `ArticuloService.java` del paquete `core/service/`
+  - Eliminación de `ArticuloController.java` del paquete `core/controller/`
+  - Actualización de referencias en `EntregaDetalle.kt`, `ProveedorArticulo.kt`, `UbicacionArticulo.java`, `AsignacionCostoDto.java`, `CostoParameterDto.java`, `CostoParameterService.java`
+- fix(auth): Corrección de espacio extra en `ResponseStatusException` en `AuthController`
+
+> Basado en análisis profundo de `git diff HEAD` (14 archivos modificados, +156/-98 líneas).
 
 ## Novedades 3.10.0 (verificado en código)
 - feat(proveedor): Mejora de modelo de datos y refactorización de DTOs en módulo Proveedor
@@ -527,10 +542,19 @@ src/
 ├── main/
 │   ├── java/
 │   │   └── um/tesoreria/core/
-│   │       ├── controller/
-│   │       ├── service/
-│   │       ├── repository/
-│   │       ├── model/
+│   │       ├── hexagonal/
+│   │       │   ├── articulo/          # Módulo Artículo (v3.11.0)
+│   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
+│   │       │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
+│   │       │   ├── persona/           # Módulo Persona (v3.1.0)
+│   │       │   ├── auth/              # Módulo Auth (v3.6.0)
+│   │       │   ├── geografica/        # Módulo Geografica (v3.6.0)
+│   │       │   ├── proveedor/         # Módulo Proveedor (v3.9.0)
+│   │       │   └── matriculacionContext/
+│   │       ├── model/                 # Modelos legacy
+│   │       ├── service/               # Servicios legacy
+│   │       ├── controller/             # Controladores legacy
+│   │       └── repository/            # Repos legacy
 │   └── kotlin/
 │       └── um/tesoreria/core/
 │           └── model/
@@ -570,7 +594,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.10.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.11.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -633,6 +657,17 @@ src/
 │   │                           │   └── mapper/       # Mappers
 │   │                           └── application/
 │   │                               └── service/      # Servicios de aplicación
+│   │                   ├── articulo/          # Módulo Artículo (v3.11.0)
+│   │                   │   ├── domain/
+│   │                   │   │   └── model/        # Entidad de dominio
+│   │                   │   ├── application/
+│   │                   │   │   └── service/      # Servicio de aplicación
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/     # Entidad JPA
+│   │                   │       │   └── repository/ # Repositorio adaptador
+│   │                   │       └── web/
+│   │                   │           └── controller/ # Controlador REST
 │   │                   ├── cuenta/           # Módulo Cuenta (v3.8.0)
 │   │                   │   ├── domain/
 │   │                   │   │   └── model/        # Entidad de dominio

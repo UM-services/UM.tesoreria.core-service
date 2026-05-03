@@ -20,7 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import um.tesoreria.core.kotlin.model.Articulo;
+import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.kotlin.model.Ubicacion;
@@ -55,7 +55,7 @@ public class UbicacionArticulo extends Auditable implements Serializable {
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "articuloId", insertable = false, updatable = false)
-	private Articulo articulo;
+	private ArticuloEntity articulo;
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "cuenta_contable", insertable = false, updatable = false)

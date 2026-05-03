@@ -5,6 +5,26 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.0] - 2026-05-03
+### Added
+- feat(articulo): Migración de módulo Artículo a arquitectura hexagonal
+  - Nueva entidad JPA: `ArticuloEntity` en `hexagonal/articulo/infrastructure/persistence/entity/` con anotaciones Lombok
+  - Nuevo repositorio: `JpaArticuloRepository` con métodos `findByArticuloId`, `findTopByOrderByArticuloIdDesc`
+  - Nuevo servicio de aplicación: `ArticuloService` en `hexagonal/articulo/application/service/`
+  - Nuevo controlador REST: `ArticuloController` en `hexagonal/articulo/infrastructure/web/controller/` con `@RequiredArgsConstructor`
+  - Relación `@OneToOne` con `CuentaEntity` en `ArticuloEntity`
+
+### Changed
+- refactor(articulo): Migración completa de módulo Artículo a arquitectura hexagonal
+  - Eliminación de `Articulo.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `ArticuloRepository.java` del paquete `core/repository/`
+  - Eliminación de `ArticuloService.java` del paquete `core/service/`
+  - Eliminación de `ArticuloController.java` del paquete `core/controller/`
+  - Actualización de referencias en `EntregaDetalle.kt`, `ProveedorArticulo.kt`, `UbicacionArticulo.java`, `AsignacionCostoDto.java`, `CostoParameterDto.java`, `CostoParameterService.java`
+- fix(auth): Corrección de espacio extra en `ResponseStatusException` en `AuthController`
+
+> Basado en análisis profundo de `git diff HEAD` (14 archivos modificados, +156/-98 líneas).
+
 ## [3.10.0] - 2026-05-03
 ### Added
 - feat(proveedor): Mejora de modelo de datos y refactorización de DTOs en módulo Proveedor

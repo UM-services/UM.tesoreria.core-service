@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import um.tesoreria.core.kotlin.model.Articulo;
+import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity;
 import um.tesoreria.core.kotlin.model.Comprobante;
 import um.tesoreria.core.model.UbicacionArticulo;
 import lombok.AllArgsConstructor;
@@ -31,7 +31,7 @@ public class AsignacionCostoDto implements Serializable {
 
 	private ProveedorMovimiento proveedorMovimiento;
 	private ProveedorArticulo proveedorArticulo;
-	private Articulo articulo;
+	private ArticuloEntity articulo;
 	private Comprobante comprobante;
 	private UbicacionArticulo ubicacionArticulo;
 

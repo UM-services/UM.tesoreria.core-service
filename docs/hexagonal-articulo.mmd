@@ -1,0 +1,91 @@
+---
+title: Arquitectura Hexagonal - Módulo Artículo
+---
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Articulo {
+            +Long articuloId
+            +String nombre
+            +String descripcion
+            +String unidad
+            +BigDecimal precio
+            +Byte inventariable
+            +Long stockMinimo
+            +BigDecimal numeroCuenta
+            +String tipo
+            +Byte directo
+            +Byte habilitado
+        }
+
+        class ArticuloRepository {
+            <<interface>>
+            +findByArticuloId(Long) Optional~Articulo~
+            +findTopByOrderByArticuloIdDesc() Optional~Articulo~
+            +save(Articulo) Articulo
+            +findAll() List~Articulo~
+        }
+    }
+
+    namespace application {
+        class ArticuloService {
+            -ArticuloRepository repository
+            -ArticuloKeyService articuloKeyService
+            +findAll() List~Articulo~
+            +findByStrings(List~String~) List~ArticuloKey~
+            +findByArticuloId(Long) Articulo
+            +articuloNew() Articulo
+            +add(Articulo) Articulo
+            +update(Articulo, Long) Articulo
+        }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class ArticuloEntity {
+                +Long articuloId
+                +String nombre
+                +String descripcion
+                +String unidad
+                +BigDecimal precio
+                +Byte inventariable
+                +Long stockMinimo
+                +BigDecimal numeroCuenta
+                +String tipo
+                +Byte directo
+                +Byte habilitado
+                +CuentaEntity cuenta
+            }
+
+            class JpaArticuloRepository {
+                <<JpaRepository>>
+                +findByArticuloId(Long) Optional~ArticuloEntity~
+                +findTopByOrderByArticuloIdDesc() Optional~ArticuloEntity~
+            }
+
+            class ArticuloMapper {
+                +toDomain(ArticuloEntity) Articulo
+                +toEntity(Articulo) ArticuloEntity
+            }
+        }
+
+        namespace web {
+            class ArticuloController {
+                -ArticuloService service
+                +findAll() ResponseEntity~List~Articulo~~
+                +findByStrings(List~String~) ResponseEntity~List~ArticuloKey~~
+                +findByArticuloId(Long) ResponseEntity~Articulo~
+                +articuloNew() ResponseEntity~Articulo~
+                +add(Articulo) ResponseEntity~Articulo~
+                +update(Articulo, Long) ResponseEntity~Articulo~
+            }
+        }
+    }
+
+    ArticuloService --> ArticuloRepository : uses
+    JpaArticuloRepository ..|> ArticuloRepository : implements
+    ArticuloMapper --> Articulo : maps
+    ArticuloMapper --> ArticuloEntity : maps
+    JpaArticuloRepository --> ArticuloEntity : persists
+    ArticuloController --> ArticuloService : calls

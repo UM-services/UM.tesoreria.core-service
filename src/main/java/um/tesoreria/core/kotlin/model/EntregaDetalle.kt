@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Column
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity
 import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 
@@ -53,7 +54,7 @@ data class EntregaDetalle @JvmOverloads constructor(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "ned_art_id", insertable = false, updatable = false)
-    var articulo: Articulo? = null,
+    var articulo: ArticuloEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "ned_fad_mvp_id", insertable = false, updatable = false)
@@ -88,7 +89,7 @@ data class EntregaDetalle @JvmOverloads constructor(
         private var trackId: Long? = null
         private var proveedorArticuloId: Long? = null
         private var entrega: Entrega? = null
-        private var articulo: Articulo? = null
+        private var articulo: ArticuloEntity? = null
         private var proveedorMovimiento: ProveedorMovimiento? = null
         private var proveedorArticulo: ProveedorArticulo? = null
         private var track: Track? = null
@@ -103,7 +104,7 @@ data class EntregaDetalle @JvmOverloads constructor(
         fun trackId(id: Long?) = apply { this.trackId = id }
         fun proveedorArticuloId(id: Long?) = apply { this.proveedorArticuloId = id }
         fun entrega(entrega: Entrega?) = apply { this.entrega = entrega }
-        fun articulo(articulo: Articulo?) = apply { this.articulo = articulo }
+        fun articulo(articulo: ArticuloEntity?) = apply { this.articulo = articulo }
         fun proveedorMovimiento(proveedorMovimiento: ProveedorMovimiento?) = apply { this.proveedorMovimiento = proveedorMovimiento }
         fun proveedorArticulo(proveedorArticulo: ProveedorArticulo?) = apply { this.proveedorArticulo = proveedorArticulo }
         fun track(track: Track?) = apply { this.track = track }
