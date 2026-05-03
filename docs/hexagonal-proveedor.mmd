@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Proveedor (v3.8.0)
+title: Arquitectura Hexagonal - Módulo Proveedor (v3.9.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -18,6 +18,7 @@ flowchart TD
         UC6[GetProveedorByIdUseCase]
         UC7[SearchProveedoresUseCase]
         UC8[UpdateProveedorUseCase]
+        UC9[GetPaginatedProveedoresUseCase]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
@@ -28,6 +29,7 @@ flowchart TD
         Req[ProveedorRequest<br/>DTO Entrada]
         Resp[ProveedorResponse<br/>DTO Salida]
         Resp2[ProveedorSearchResponse<br/>DTO Búsqueda]
+        Resp3[PaginatedResponse<br/>DTO Paginación]
         ENT[ProveedorEntity<br/>Entidad JPA]
     end
 
@@ -41,6 +43,7 @@ flowchart TD
     PC -->|recibe| Req
     PC -->|envía| Resp
     PC -->|envía| Resp2
+    PC -->|envía| Resp3
     PC -->|usa| DM
 
     Svc -->|depende| PR
@@ -52,6 +55,7 @@ flowchart TD
     Svc -->|ejecuta| UC6
     Svc -->|ejecuta| UC7
     Svc -->|ejecuta| UC8
+    Svc -->|ejecuta| UC9
 
     PR -->|implementa| JPA
     JPA -->|persiste| JPAR
@@ -66,6 +70,7 @@ flowchart TD
     DM -->|convierte| Req
     DM -->|convierte| Resp
     DM -->|convierte| Resp2
+    DM -->|convierte| Resp3
     DM -->|convierte| P
     DM -->|convierte| PS
 
@@ -78,3 +83,4 @@ flowchart TD
     style PM fill:#e8f5e8
     style DM fill:#e8f5e8
     style ENT fill:#e8f5e8
+    style Resp3 fill:#e8f5e8

@@ -5,6 +5,19 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.0] - 2026-05-02
+### Added
+- feat(proveedor): Implementación de paginación en módulo Proveedor
+  - Nuevo puerto de entrada: `GetPaginatedProveedoresUseCase` con método `getPaginatedProveedores(int page, int size)`
+  - Nuevo modelo genérico: `PaginatedResponse<T>` para respuestas paginadas (data, totalElements, totalPages, currentPage, pageSize)
+  - Nuevo caso de uso: `GetPaginatedProveedoresUseCaseImpl` con implementación de paginación
+  - Nuevo método en puerto de salida `ProveedorRepository`: `findAll(Pageable pageable)`
+  - Actualización de `JpaProveedorRepositoryAdapter` con soporte para paginación vía `Page<ProveedorEntity>`
+  - Nuevo endpoint en `ProveedorController`: `GET /proveedor/page?page=X&size=Y` que retorna `PaginatedResponse<ProveedorResponse>`
+  - Actualización de `ProveedorService` con método `getPaginated(int page, int size)`
+
+> Basado en análisis profundo de `git diff HEAD` (7 archivos modificados, +101 líneas).
+
 ## [3.8.0] - 2026-05-02
 ### Added
 - feat(cuenta): Implementación completa de casos de uso CRUD para módulo Cuenta

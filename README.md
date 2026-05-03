@@ -4,7 +4,18 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.8.0**
+**Versión actual (SemVer): 3.9.0**
+
+## Novedades 3.9.0 (verificado en código)
+- feat(proveedor): Implementación de paginación en módulo Proveedor
+  - Nuevo puerto de entrada: `GetPaginatedProveedoresUseCase` con método `getPaginatedProveedores(int page, int size)`
+  - Nuevo modelo genérico: `PaginatedResponse<T>` en `core/model/` para respuestas paginadas
+  - Nuevo caso de uso: `GetPaginatedProveedoresUseCaseImpl` con implementación de paginación usando `Pageable`
+  - Actualización de puerto de salida `ProveedorRepository` con método `findAll(Pageable pageable)`
+  - Nuevo endpoint en `ProveedorController`: `GET /proveedor/page?page=X&size=Y` que retorna `PaginatedResponse<ProveedorResponse>`
+  - Actualización de `ProveedorService` con método `getPaginated(int page, int size)`
+
+> Basado en análisis profundo de `git diff HEAD` (7 archivos modificados, +101 líneas).
 
 ## Novedades 3.8.0 (verificado en código)
 - feat(cuenta): Implementación completa de casos de uso CRUD para módulo Cuenta

@@ -1,5 +1,6 @@
 package um.tesoreria.core.hexagonal.proveedor.infrastructure.web.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,17 +15,28 @@ import um.tesoreria.core.hexagonal.proveedor.infrastructure.web.mapper.Proveedor
 
 import java.util.List;
 import java.util.stream.Collectors;
+import um.tesoreria.core.model.PaginatedResponse;
+import um.tesoreria.core.model.PaginatedResponse;
 
 @RestController
 @RequestMapping({"/proveedor", "/api/tesoreria/core/proveedor"})
+@RequiredArgsConstructor
 public class ProveedorController {
 
     private final ProveedorService proveedorService;
     private final ProveedorDtoMapper proveedorDtoMapper;
 
-    public ProveedorController(ProveedorService proveedorService, ProveedorDtoMapper proveedorDtoMapper) {
-        this.proveedorService = proveedorService;
-        this.proveedorDtoMapper = proveedorDtoMapper;
+    @GetMapping("/page")
+    public ResponseEntity<PaginatedResponse<ProveedorResponse>> findPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size) {
+        PaginatedResponse<Proveedor> result = proveedorService.getPaginated(page, size);
+        List<ProveedorResponse> responses = result.getData().stream()
+                .map(proveedorDtoMapper::toResponse)
+                .collect(Collectors.toList());
+        PaginatedResponse<ProveedorResponse> paginatedResponse = new PaginatedResponse<>(
+                responses, result.getTotalElements(), result.getTotalPages(), result.getCurrentPage(), result.getPageSize());
+        return new ResponseEntity<>(paginatedResponse, HttpStatus.OK);
     }
 
     @GetMapping("/")

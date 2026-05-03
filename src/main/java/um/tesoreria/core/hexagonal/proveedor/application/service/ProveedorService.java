@@ -8,6 +8,7 @@ import um.tesoreria.core.hexagonal.proveedor.domain.ports.in.*;
 
 import java.util.List;
 import java.util.Optional;
+import um.tesoreria.core.model.PaginatedResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,8 @@ public class ProveedorService {
     private final SearchProveedoresUseCase searchProveedoresUseCase;
     private final UpdateProveedorUseCase updateProveedorUseCase;
     private final DeleteProveedorUseCase deleteProveedorUseCase;
+    private final GetPaginatedProveedoresUseCase getPaginatedProveedoresUseCase;
+
 
     public Proveedor create(Proveedor proveedor) {
         return createProveedorUseCase.createProveedor(proveedor);
@@ -36,6 +39,10 @@ public class ProveedorService {
 
     public Optional<Proveedor> getLast() {
         return getLastProveedorUseCase.getLastProveedor();
+    }
+
+    public PaginatedResponse<Proveedor> getPaginated(int page, int size) {
+        return getPaginatedProveedoresUseCase.getPaginatedProveedores(page, size);
     }
 
     public List<Proveedor> getAll() {

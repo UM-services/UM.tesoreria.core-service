@@ -13,6 +13,11 @@ import um.tesoreria.core.service.view.ProveedorSearchService;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import um.tesoreria.core.model.PaginatedResponse;
+
 
 @Component
 @RequiredArgsConstructor
@@ -52,6 +57,16 @@ public class JpaProveedorRepositoryAdapter implements ProveedorRepository {
         return jpaProveedorRepository.findAll().stream()
                 .map(proveedorMapper::toDomainModel)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PaginatedResponse<Proveedor> findAllPaginated(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("razonSocial").ascending());
+        Page<ProveedorEntity> entityPage = jpaProveedorRepository.findAll(pageRequest);
+        List<Proveedor> domainList = entityPage.getContent().stream()
+                .map(proveedorMapper::toDomainModel)
+                .collect(Collectors.toList());
+        return new PaginatedResponse<>(domainList, entityPage.getTotalElements(), entityPage.getTotalPages(), entityPage.getNumber(), entityPage.getSize());
     }
 
     @Override

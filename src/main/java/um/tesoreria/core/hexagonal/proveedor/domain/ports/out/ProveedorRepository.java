@@ -12,6 +12,7 @@ public interface ProveedorRepository {
     Optional<Proveedor> findByCuit(String cuit);
     Optional<Proveedor> findLast();
     List<Proveedor> findAll();
+    um.tesoreria.core.model.PaginatedResponse<Proveedor> findAllPaginated(int page, int size);
     List<ProveedorSearch> findAllByStrings(List<String> conditions);
     Optional<Proveedor> update(Integer proveedorId, Proveedor proveedor);
     boolean deleteById(Integer proveedorId);
