@@ -4,7 +4,23 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.11.0**
+**Versión actual (SemVer): 3.12.0**
+
+## Novedades 3.12.0 (verificado en código)
+- feat(articulo): Completitud de migración de módulo Artículo a arquitectura hexagonal
+  - Nuevos modelos de dominio: `Articulo` y `ArticuloSearch` con Lombok (`@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Puertos de entrada: `CreateArticuloUseCase`, `DeleteArticuloUseCase`, `GetAllArticulosUseCase`, `GetArticuloByIdUseCase`, `GetNewArticuloUseCase`, `SearchArticulosUseCase`, `UpdateArticuloUseCase`
+  - Puerto de salida: `ArticuloRepository` con métodos `create`, `findById`, `findAll`, `update`, `deleteById`, `findLast`
+  - Casos de uso: Implementaciones completas en `application/usecases/` (`CreateArticuloUseCaseImpl`, `DeleteArticuloUseCaseImpl`, etc.)
+  - Servicio de aplicación: `ArticuloService` refactorizado con inyección de casos de uso y `Optional<Articulo>` en retornos
+  - Adaptador JPA: `JpaArticuloRepositoryAdapter` con implementación completa de `ArticuloRepository`
+  - Mappers: `ArticuloMapper` (dominio ↔ JPA Entity) y `ArticuloDtoMapper` (dominio ↔ DTO)
+  - DTOs: `ArticuloRequest`, `ArticuloResponse`, `ArticuloSearchResponse` para entrada/salida
+  - Controlador REST: `ArticuloController` migrado con endpoints CRUD y manejo de `ResponseEntity`
+  - `JpaArticuloRepository` simplificado a solo consultas específicas
+- refactor(core): `CostoParameterDto` y `CostoParameterService` actualizados para usar modelo de dominio `Articulo`
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados).
 
 ## Novedades 3.11.0 (verificado en código)
 - feat(articulo): Migración de módulo Artículo a arquitectura hexagonal
@@ -543,7 +559,7 @@ src/
 │   ├── java/
 │   │   └── um/tesoreria/core/
 │   │       ├── hexagonal/
-│   │       │   ├── articulo/          # Módulo Artículo (v3.11.0)
+│   │       │   ├── articulo/          # Módulo Artículo (v3.12.0)
 │   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
 │   │       │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
 │   │       │   ├── persona/           # Módulo Persona (v3.1.0)
@@ -594,7 +610,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.11.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.12.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -657,7 +673,7 @@ src/
 │   │                           │   └── mapper/       # Mappers
 │   │                           └── application/
 │   │                               └── service/      # Servicios de aplicación
-│   │                   ├── articulo/          # Módulo Artículo (v3.11.0)
+│   │                   ├── articulo/          # Módulo Artículo (v3.12.0)
 │   │                   │   ├── domain/
 │   │                   │   │   └── model/        # Entidad de dominio
 │   │                   │   ├── application/

@@ -5,6 +5,27 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.12.0] - 2026-05-04
+### Added
+- feat(articulo): Completitud de migración de módulo Artículo a arquitectura hexagonal
+  - Nuevos modelos de dominio: `Articulo` y `ArticuloSearch` con Lombok
+  - Puertos de entrada: `CreateArticuloUseCase`, `DeleteArticuloUseCase`, `GetAllArticulosUseCase`, `GetArticuloByIdUseCase`, `GetNewArticuloUseCase`, `SearchArticulosUseCase`, `UpdateArticuloUseCase`
+  - Puerto de salida: `ArticuloRepository` con métodos CRUD completos
+  - Casos de uso: Implementaciones completas en `application/usecases/`
+  - Servicio de aplicación: `ArticuloService` refactorizado con inyección de casos de uso
+  - Adaptador JPA: `JpaArticuloRepositoryAdapter` con implementación completa
+  - Mappers: `ArticuloMapper` (dominio ↔ JPA) y `ArticuloDtoMapper` (dominio ↔ DTO)
+  - DTOs: `ArticuloRequest`, `ArticuloResponse`, `ArticuloSearchResponse`
+  - Controlador REST: `ArticuloController` migrado con endpoints CRUD y manejo de `ResponseEntity`
+- refactor(core): `CostoParameterDto` y `CostoParameterService` actualizados para usar modelo de dominio `Articulo`
+
+### Changed
+- refactor(articulo): Reestructuración de paquetes a arquitectura hexagonal
+- `JpaArticuloRepository` simplificado a solo consultas específicas
+- `ArticuloController` migrado a DTOs y `ArticuloDtoMapper`
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados).
+
 ## [3.11.0] - 2026-05-03
 ### Added
 - feat(articulo): Migración de módulo Artículo a arquitectura hexagonal

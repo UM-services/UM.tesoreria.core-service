@@ -1,64 +1,47 @@
-/**
- * 
- */
 package um.tesoreria.core.hexagonal.articulo.application.service;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import um.tesoreria.core.hexagonal.articulo.domain.model.Articulo;
+import um.tesoreria.core.hexagonal.articulo.domain.ports.in.*;
+import um.tesoreria.core.hexagonal.articulo.domain.ports.out.ArticuloRepository;
 
-import um.tesoreria.core.exception.ArticuloException;
-import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity;
-import um.tesoreria.core.model.view.ArticuloKey;
-import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.repository.JpaArticuloRepository;
-import um.tesoreria.core.service.view.ArticuloKeyService;
+import java.util.List;
+import java.util.Optional;
 
-/**
- * @author daniel
- *
- */
 @Service
+@RequiredArgsConstructor
 public class ArticuloService {
 
-	@Autowired
-	private JpaArticuloRepository repository;
+    private final CreateArticuloUseCase createArticuloUseCase;
+    private final GetArticuloByIdUseCase getArticuloByIdUseCase;
+    private final GetAllArticulosUseCase getAllArticulosUseCase;
+    private final UpdateArticuloUseCase updateArticuloUseCase;
+    private final DeleteArticuloUseCase deleteArticuloUseCase;
+    private final GetNewArticuloUseCase getNewArticuloUseCase;
 
-	@Autowired
-	private ArticuloKeyService articuloKeyService;
+    public Articulo createArticulo(Articulo articulo) {
+        return createArticuloUseCase.createArticulo(articulo);
+    }
 
-	public List<ArticuloEntity> findAll() {
-		return repository.findAll();
-	}
+    public Optional<Articulo> getArticuloById(Long id) {
+        return getArticuloByIdUseCase.getArticuloById(id);
+    }
 
-	public List<ArticuloKey> findByStrings(List<String> conditions) {
-		return articuloKeyService.findAllByStrings(conditions);
-	}
+    public List<Articulo> getAllArticulos() {
+        return getAllArticulosUseCase.getAllArticulos();
+    }
 
-	public ArticuloEntity articuloNew() {
-		ArticuloEntity articulo = repository.findTopByOrderByArticuloIdDesc()
-				.orElse(new ArticuloEntity(0L, "", "", "", BigDecimal.ZERO, (byte) 0, 0L, null, "", (byte) 0, (byte) 0, null));
-		return new ArticuloEntity(1L + articulo.getArticuloId(), "", "", "", BigDecimal.ZERO, (byte) 0, 0L, null, "",
-				(byte) 0, (byte) 0, null);
-	}
+    public Optional<Articulo> updateArticulo(Long id, Articulo articulo) {
+        return updateArticuloUseCase.updateArticulo(id, articulo);
+    }
 
-	public ArticuloEntity findByArticuloId(Long articuloId) {
-		return repository.findByArticuloId(articuloId).orElseThrow(() -> new ArticuloException(articuloId));
-	}
+    public boolean deleteArticulo(Long id) {
+        return deleteArticuloUseCase.deleteArticulo(id);
+    }
 
-	public ArticuloEntity add(ArticuloEntity articulo) {
-		return repository.save(articulo);
-	}
-
-	public ArticuloEntity update(ArticuloEntity newArticulo, Long articuloId) {
-		return repository.findByArticuloId(articuloId).map(articulo -> {
-			articulo = new ArticuloEntity(articuloId, newArticulo.getNombre(), newArticulo.getDescripcion(),
-					newArticulo.getUnidad(), newArticulo.getPrecio(), newArticulo.getInventariable(),
-					newArticulo.getStockMinimo(), newArticulo.getNumeroCuenta(), newArticulo.getTipo(),
-					newArticulo.getDirecto(), newArticulo.getHabilitado(), null);
-			return repository.save(articulo);
-		}).orElseThrow(() -> new ArticuloException(articuloId));
-	}
+    public Articulo getNewArticulo() {
+        return getNewArticuloUseCase.getNewArticulo();
+    }
 
 }

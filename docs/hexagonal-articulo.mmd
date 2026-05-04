@@ -1,6 +1,7 @@
 ---
-title: Arquitectura Hexagonal - Módulo Artículo
+title: Arquitectura Hexagonal - Módulo Artículo (v3.12.0)
 ---
+
 classDiagram
     direction TB
 
@@ -17,27 +18,116 @@ classDiagram
             +String tipo
             +Byte directo
             +Byte habilitado
+            +Cuenta cuenta
+        }
+
+        class ArticuloSearch {
+            +Long articuloId
+            +String nombre
+            +String descripcion
+            +String unidad
+            +BigDecimal precio
+            +Byte inventariable
+            +Long stockMinimo
+            +BigDecimal cuenta
+            +String tipo
+            +Byte directo
+            +Byte habilitado
+            +String search
         }
 
         class ArticuloRepository {
             <<interface>>
-            +findByArticuloId(Long) Optional~Articulo~
-            +findTopByOrderByArticuloIdDesc() Optional~Articulo~
-            +save(Articulo) Articulo
+            +create(Articulo) Articulo
+            +findById(Long) Optional~Articulo~
             +findAll() List~Articulo~
+            +update(Long, Articulo) Optional~Articulo~
+            +deleteById(Long) boolean
+            +findLast() Optional~Articulo~
         }
     }
 
     namespace application {
         class ArticuloService {
-            -ArticuloRepository repository
-            -ArticuloKeyService articuloKeyService
-            +findAll() List~Articulo~
-            +findByStrings(List~String~) List~ArticuloKey~
-            +findByArticuloId(Long) Articulo
-            +articuloNew() Articulo
-            +add(Articulo) Articulo
-            +update(Articulo, Long) Articulo
+            -CreateArticuloUseCase createArticuloUseCase
+            -GetArticuloByIdUseCase getArticuloByIdUseCase
+            -GetAllArticulosUseCase getAllArticulosUseCase
+            -UpdateArticuloUseCase updateArticuloUseCase
+            -DeleteArticuloUseCase deleteArticuloUseCase
+            -GetNewArticuloUseCase getNewArticuloUseCase
+            +createArticulo(Articulo) Articulo
+            +getArticuloById(Long) Optional~Articulo~
+            +getAllArticulos() List~Articulo~
+            +updateArticulo(Long, Articulo) Optional~Articulo~
+            +deleteArticulo(Long) boolean
+            +getNewArticulo() Articulo
+        }
+
+        namespace usecases {
+            class CreateArticuloUseCaseImpl {
+                -ArticuloRepository repository
+                +createArticulo(Articulo) Articulo
+            }
+
+            class GetArticuloByIdUseCaseImpl {
+                -ArticuloRepository repository
+                +getArticuloById(Long) Optional~Articulo~
+            }
+
+            class GetAllArticulosUseCaseImpl {
+                -ArticuloRepository repository
+                +getAllArticulos() List~Articulo~
+            }
+
+            class UpdateArticuloUseCaseImpl {
+                -ArticuloRepository repository
+                +updateArticulo(Long, Articulo) Optional~Articulo~
+            }
+
+            class DeleteArticuloUseCaseImpl {
+                -ArticuloRepository repository
+                +deleteArticulo(Long) boolean
+            }
+
+            class GetNewArticuloUseCaseImpl {
+                -ArticuloRepository repository
+                +getNewArticulo() Articulo
+            }
+        }
+
+        class CreateArticuloUseCase {
+            <<interface>>
+            +createArticulo(Articulo) Articulo
+        }
+
+        class GetArticuloByIdUseCase {
+            <<interface>>
+            +getArticuloById(Long) Optional~Articulo~
+        }
+
+        class GetAllArticulosUseCase {
+            <<interface>>
+            +getAllArticulos() List~Articulo~
+        }
+
+        class UpdateArticuloUseCase {
+            <<interface>>
+            +updateArticulo(Long, Articulo) Optional~Articulo~
+        }
+
+        class DeleteArticuloUseCase {
+            <<interface>>
+            +deleteArticulo(Long) boolean
+        }
+
+        class GetNewArticuloUseCase {
+            <<interface>>
+            +getNewArticulo() Articulo
+        }
+
+        class SearchArticulosUseCase {
+            <<interface>>
+            +searchArticulos(List~String~) List~ArticuloSearch~
         }
     }
 
@@ -60,32 +150,122 @@ classDiagram
 
             class JpaArticuloRepository {
                 <<JpaRepository>>
-                +findByArticuloId(Long) Optional~ArticuloEntity~
                 +findTopByOrderByArticuloIdDesc() Optional~ArticuloEntity~
             }
 
+            class JpaArticuloRepositoryAdapter {
+                -JpaArticuloRepository jpaArticuloRepository
+                -ArticuloMapper articuloMapper
+                +create(Articulo) Articulo
+                +findById(Long) Optional~Articulo~
+                +findAll() List~Articulo~
+                +update(Long, Articulo) Optional~Articulo~
+                +deleteById(Long) boolean
+                +findLast() Optional~Articulo~
+            }
+
             class ArticuloMapper {
-                +toDomain(ArticuloEntity) Articulo
+                -CuentaMapper cuentaMapper
+                +toDomainModel(ArticuloEntity) Articulo
                 +toEntity(Articulo) ArticuloEntity
+                +toSearchDomain(ArticuloKey) ArticuloSearch
             }
         }
 
         namespace web {
             class ArticuloController {
-                -ArticuloService service
-                +findAll() ResponseEntity~List~Articulo~~
-                +findByStrings(List~String~) ResponseEntity~List~ArticuloKey~~
-                +findByArticuloId(Long) ResponseEntity~Articulo~
-                +articuloNew() ResponseEntity~Articulo~
-                +add(Articulo) ResponseEntity~Articulo~
-                +update(Articulo, Long) ResponseEntity~Articulo~
+                -ArticuloService articuloService
+                -ArticuloDtoMapper articuloDtoMapper
+                +createArticulo(ArticuloRequest) ResponseEntity~ArticuloResponse~
+                +getArticuloById(Long) ResponseEntity~ArticuloResponse~
+                +getAllArticulos() ResponseEntity~List~ArticuloResponse~~
+                +updateArticulo(Long, ArticuloRequest) ResponseEntity~ArticuloResponse~
+                +deleteArticulo(Long) ResponseEntity~Void~
+                +getNewArticulo() ResponseEntity~ArticuloResponse~
+            }
+
+            class ArticuloRequest {
+                +String nombre
+                +String descripcion
+                +String unidad
+                +BigDecimal precio
+                +Byte inventariable
+                +Long stockMinimo
+                +BigDecimal numeroCuenta
+                +String tipo
+                +Byte directo
+                +Byte habilitado
+            }
+
+            class ArticuloResponse {
+                +Long articuloId
+                +String nombre
+                +String descripcion
+                +String unidad
+                +BigDecimal precio
+                +Byte inventariable
+                +Long stockMinimo
+                +BigDecimal numeroCuenta
+                +String tipo
+                +Byte directo
+                +Byte habilitado
+                +Cuenta cuenta
+            }
+
+            class ArticuloSearchResponse {
+                +Long articuloId
+                +String nombre
+                +String descripcion
+                +String unidad
+                +BigDecimal precio
+                +Byte inventariable
+                +Long stockMinimo
+                +BigDecimal cuenta
+                +String tipo
+                +Byte directo
+                +Byte habilitado
+                +String search
+            }
+
+            class ArticuloDtoMapper {
+                +toDomain(ArticuloRequest) Articulo
+                +toResponse(Articulo) ArticuloResponse
+                +toSearchResponse(ArticuloSearch) ArticuloSearchResponse
             }
         }
     }
 
-    ArticuloService --> ArticuloRepository : uses
-    JpaArticuloRepository ..|> ArticuloRepository : implements
+    ArticuloService --> CreateArticuloUseCase : uses
+    ArticuloService --> GetArticuloByIdUseCase : uses
+    ArticuloService --> GetAllArticulosUseCase : uses
+    ArticuloService --> UpdateArticuloUseCase : uses
+    ArticuloService --> DeleteArticuloUseCase : uses
+    ArticuloService --> GetNewArticuloUseCase : uses
+
+    CreateArticuloUseCaseImpl ..|> CreateArticuloUseCase : implements
+    GetArticuloByIdUseCaseImpl ..|> GetArticuloByIdUseCase : implements
+    GetAllArticulosUseCaseImpl ..|> GetAllArticulosUseCase : implements
+    UpdateArticuloUseCaseImpl ..|> UpdateArticuloUseCase : implements
+    DeleteArticuloUseCaseImpl ..|> DeleteArticuloUseCase : implements
+    GetNewArticuloUseCaseImpl ..|> GetNewArticuloUseCase : implements
+
+    CreateArticuloUseCaseImpl --> ArticuloRepository : uses
+    GetArticuloByIdUseCaseImpl --> ArticuloRepository : uses
+    GetAllArticulosUseCaseImpl --> ArticuloRepository : uses
+    UpdateArticuloUseCaseImpl --> ArticuloRepository : uses
+    DeleteArticuloUseCaseImpl --> ArticuloRepository : uses
+    GetNewArticuloUseCaseImpl --> ArticuloRepository : uses
+
+    JpaArticuloRepositoryAdapter ..|> ArticuloRepository : implements
+    JpaArticuloRepositoryAdapter --> JpaArticuloRepository : uses
+    JpaArticuloRepositoryAdapter --> ArticuloMapper : uses
+
     ArticuloMapper --> Articulo : maps
     ArticuloMapper --> ArticuloEntity : maps
     JpaArticuloRepository --> ArticuloEntity : persists
+
     ArticuloController --> ArticuloService : calls
+    ArticuloController --> ArticuloDtoMapper : uses
+    ArticuloDtoMapper --> Articulo : maps
+    ArticuloDtoMapper --> ArticuloResponse : maps
+    ArticuloDtoMapper --> ArticuloSearchResponse : maps
