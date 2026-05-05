@@ -72,7 +72,6 @@ public class ProveedorMapper {
                 .email(viewEntity.getEmail())
                 .numeroCuenta(viewEntity.getNumeroCuenta())
                 .habilitado(viewEntity.getHabilitado())
-                .cbu(viewEntity.getCbu())
                 .search(viewEntity.getSearch())
                 .build();
     }

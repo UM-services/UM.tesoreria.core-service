@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Artículo (v3.12.0)
+title: Arquitectura Hexagonal - Módulo Artículo (v3.13.0)
 ---
 
 classDiagram
@@ -55,12 +55,16 @@ classDiagram
             -UpdateArticuloUseCase updateArticuloUseCase
             -DeleteArticuloUseCase deleteArticuloUseCase
             -GetNewArticuloUseCase getNewArticuloUseCase
+            -GetPaginatedArticulosUseCase getPaginatedArticulosUseCase
+            -SearchArticulosUseCase searchArticulosUseCase
             +createArticulo(Articulo) Articulo
             +getArticuloById(Long) Optional~Articulo~
             +getAllArticulos() List~Articulo~
             +updateArticulo(Long, Articulo) Optional~Articulo~
             +deleteArticulo(Long) boolean
             +getNewArticulo() Articulo
+            +getPaginated(int, int) PaginatedResponse~Articulo~
+            +searchArticulos(String) List~ArticuloSearch~
         }
 
         namespace usecases {
@@ -89,10 +93,20 @@ classDiagram
                 +deleteArticulo(Long) boolean
             }
 
-            class GetNewArticuloUseCaseImpl {
-                -ArticuloRepository repository
-                +getNewArticulo() Articulo
-            }
+        class GetNewArticuloUseCaseImpl {
+            -ArticuloRepository repository
+            +getNewArticulo() Articulo
+        }
+
+        class GetPaginatedArticulosUseCaseImpl {
+            -ArticuloRepository repository
+            +getPaginated(int, int) PaginatedResponse~Articulo~
+        }
+
+        class SearchArticulosUseCaseImpl {
+            -ArticuloRepository repository
+            +searchArticulos(String) List~ArticuloSearch~
+        }
         }
 
         class CreateArticuloUseCase {
@@ -125,9 +139,24 @@ classDiagram
             +getNewArticulo() Articulo
         }
 
+        class GetPaginatedArticulosUseCaseImpl {
+            -ArticuloRepository repository
+            +getPaginated(int, int) PaginatedResponse~Articulo~
+        }
+
+        class SearchArticulosUseCaseImpl {
+            -ArticuloRepository repository
+            +searchArticulos(String) List~ArticuloSearch~
+        }
+
+        class GetPaginatedArticulosUseCase {
+            <<interface>>
+            +getPaginated(int, int) PaginatedResponse~Articulo~
+        }
+
         class SearchArticulosUseCase {
             <<interface>>
-            +searchArticulos(List~String~) List~ArticuloSearch~
+            +searchArticulos(String) List~ArticuloSearch~
         }
     }
 
@@ -182,6 +211,8 @@ classDiagram
                 +updateArticulo(Long, ArticuloRequest) ResponseEntity~ArticuloResponse~
                 +deleteArticulo(Long) ResponseEntity~Void~
                 +getNewArticulo() ResponseEntity~ArticuloResponse~
+                +getPaginatedArticulos(int, int) ResponseEntity~PaginatedResponse~ArticuloResponse~~
+                +searchArticulos(String) ResponseEntity~List~ArticuloSearchResponse~~
             }
 
             class ArticuloRequest {
@@ -241,6 +272,8 @@ classDiagram
     ArticuloService --> UpdateArticuloUseCase : uses
     ArticuloService --> DeleteArticuloUseCase : uses
     ArticuloService --> GetNewArticuloUseCase : uses
+    ArticuloService --> GetPaginatedArticulosUseCase : uses
+    ArticuloService --> SearchArticulosUseCase : uses
 
     CreateArticuloUseCaseImpl ..|> CreateArticuloUseCase : implements
     GetArticuloByIdUseCaseImpl ..|> GetArticuloByIdUseCase : implements
@@ -248,6 +281,8 @@ classDiagram
     UpdateArticuloUseCaseImpl ..|> UpdateArticuloUseCase : implements
     DeleteArticuloUseCaseImpl ..|> DeleteArticuloUseCase : implements
     GetNewArticuloUseCaseImpl ..|> GetNewArticuloUseCase : implements
+    GetPaginatedArticulosUseCaseImpl ..|> GetPaginatedArticulosUseCase : implements
+    SearchArticulosUseCaseImpl ..|> SearchArticulosUseCase : implements
 
     CreateArticuloUseCaseImpl --> ArticuloRepository : uses
     GetArticuloByIdUseCaseImpl --> ArticuloRepository : uses
@@ -255,6 +290,8 @@ classDiagram
     UpdateArticuloUseCaseImpl --> ArticuloRepository : uses
     DeleteArticuloUseCaseImpl --> ArticuloRepository : uses
     GetNewArticuloUseCaseImpl --> ArticuloRepository : uses
+    GetPaginatedArticulosUseCaseImpl --> ArticuloRepository : uses
+    SearchArticulosUseCaseImpl --> ArticuloRepository : uses
 
     JpaArticuloRepositoryAdapter ..|> ArticuloRepository : implements
     JpaArticuloRepositoryAdapter --> JpaArticuloRepository : uses

@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Proveedor (v3.10.0)
+title: Arquitectura Hexagonal - Módulo Proveedor (v3.13.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -29,14 +29,14 @@ flowchart TD
         DM[ProveedorDtoMapper<br/>Mapeador DTO]
         Req[ProveedorRequest<br/>DTO Entrada]
         Resp[ProveedorResponse<br/>DTO Salida<br/>+cbu, +Cuenta]
-        Resp2[ProveedorSearchResponse<br/>DTO Búsqueda<br/>+cbu, +Cuenta, +numeroCuenta]
+        Resp2[ProveedorSearchResponse<br/>DTO Búsqueda<br/>+fechaAuditoria, +usuarioAuditoria, +Cuenta, +numeroCuenta]
         Resp3[PaginatedResponse<br/>DTO Paginación]
         ENT[ProveedorEntity<br/>Entidad JPA]
     end
 
     subgraph Externo ["Externo (External)"]
         JPAR[JpaRepository<br/>Spring Data]
-        PSS[ProveedorSearchService<br/>Servicio de Búsqueda]
+        JPSR[JpaProveedorSearchRepository<br/>Repositorio de Búsqueda]
     end
 
     %% Flujo de Dependencias
@@ -62,7 +62,7 @@ flowchart TD
     JPA -->|persiste| JPAR
     JPA -->|gestiona| ENT
     JPA -->|usa| PM
-    JPA -->|usa| PSS
+    JPA -->|usa| JPSR
 
     PM -->|convierte| P
     PM -->|convierte| PS

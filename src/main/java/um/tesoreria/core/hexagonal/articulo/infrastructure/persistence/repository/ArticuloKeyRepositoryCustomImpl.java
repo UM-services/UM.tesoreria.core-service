@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.repository.view.impl;
+package um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +14,8 @@ import jakarta.persistence.criteria.Root;
 
 import org.springframework.stereotype.Repository;
 
-import um.tesoreria.core.model.view.ArticuloKey;
-import um.tesoreria.core.repository.view.ArticuloKeyRepositoryCustom;
+import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloKey;
+import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.repository.ArticuloKeyRepositoryCustom;
 
 /**
  * @author daniel

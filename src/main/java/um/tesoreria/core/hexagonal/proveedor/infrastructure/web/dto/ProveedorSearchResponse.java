@@ -28,4 +28,6 @@ public class ProveedorSearchResponse {
     private Cuenta cuenta;
     private String search;
 
+    private java.time.OffsetDateTime fechaAuditoria;
+    private String usuarioAuditoria;
 }

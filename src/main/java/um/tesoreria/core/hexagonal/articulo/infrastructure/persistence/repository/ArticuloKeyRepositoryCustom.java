@@ -1,11 +1,11 @@
 /**
  * 
  */
-package um.tesoreria.core.repository.view;
+package um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.repository;
 
 import java.util.List;
 
-import um.tesoreria.core.model.view.ArticuloKey;
+import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloKey;
 
 /**
  * @author daniel

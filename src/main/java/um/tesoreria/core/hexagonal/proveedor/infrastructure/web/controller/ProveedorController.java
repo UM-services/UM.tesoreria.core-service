@@ -11,6 +11,9 @@ import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.web.dto.ProveedorRequest;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.web.dto.ProveedorResponse;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.web.dto.ProveedorSearchResponse;
+
+
+
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.web.mapper.ProveedorDtoMapper;
 
 import java.util.List;
@@ -25,6 +28,8 @@ public class ProveedorController {
 
     private final ProveedorService proveedorService;
     private final ProveedorDtoMapper proveedorDtoMapper;
+    
+    
 
     @GetMapping("/page")
     public ResponseEntity<PaginatedResponse<ProveedorResponse>> findPaginated(

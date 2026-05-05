@@ -23,7 +23,8 @@ public class ProveedorSearch {
     private String email;
     private BigDecimal numeroCuenta;
     private Byte habilitado;
-    private String cbu;
     private String search;
 
+    private java.time.OffsetDateTime fechaAuditoria;
+    private String usuarioAuditoria;
 }

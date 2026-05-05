@@ -4,7 +4,27 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.12.0**
+**Versión actual (SemVer): 3.13.0**
+
+## Novedades 3.13.0 (verificado en código)
+- feat(articulo): Implementación de paginación y búsqueda en módulo Artículo
+  - Nuevo puerto de entrada: `GetPaginatedArticulosUseCase` con método `getPaginated(int page, int size)`
+  - Nuevo caso de uso: `GetPaginatedArticulosUseCaseImpl` con implementación de paginación usando `Pageable`
+  - Nuevo caso de uso: `SearchArticulosUseCaseImpl` para búsqueda de artículos por criterio
+  - Nuevo modelo: `ArticuloSearch` para criterios de búsqueda con campo `search`
+  - Nuevos métodos en `ArticuloRepository`: `findPaginated(Pageable)`, `search(String criterio)`
+  - Nuevo endpoint en `ArticuloController`: `GET /articulo/page?page=X&size=Y` que retorna `PaginatedResponse<ArticuloResponse>`
+  - Nuevo endpoint en `ArticuloController`: `GET /articulo/search?criterio=X` para búsqueda
+  - Nuevo DTO: `ArticuloSearchResponse` para respuestas de búsqueda
+- feat(proveedor): Mejoras en módulo Proveedor
+  - Actualización de `ProveedorSearch` con nuevos campos para búsquedas avanzadas
+  - Nuevos endpoints en `ProveedorController` para búsquedas
+- feat(articulo): Completitud de migración hexagonal (commit afbeb02)
+  - `ArticuloKeyService.java` eliminado (funcionalidad movida a casos de uso específicos)
+  - `ArticuloKey.java`, `ArticuloKeyRepository.java`, `ArticuloKeyRepositoryCustom.java` movidos a `persistence/repository/`
+  - Mappers actualizados para soportar nuevos modelos
+
+> Basado en análisis profundo de `git diff HEAD` (24 archivos modificados, +160/-45 líneas) y commits afbeb02, 4b9e84e.
 
 ## Novedades 3.12.0 (verificado en código)
 - feat(articulo): Completitud de migración de módulo Artículo a arquitectura hexagonal
@@ -559,7 +579,7 @@ src/
 │   ├── java/
 │   │   └── um/tesoreria/core/
 │   │       ├── hexagonal/
-│   │       │   ├── articulo/          # Módulo Artículo (v3.12.0)
+│       │   │       ├── articulo/          # Módulo Artículo (v3.13.0)
 │   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
 │   │       │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
 │   │       │   ├── persona/           # Módulo Persona (v3.1.0)
@@ -610,7 +630,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.12.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.13.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -673,7 +693,7 @@ src/
 │   │                           │   └── mapper/       # Mappers
 │   │                           └── application/
 │   │                               └── service/      # Servicios de aplicación
-│   │                   ├── articulo/          # Módulo Artículo (v3.12.0)
+│   │                   ├── articulo/          # Módulo Artículo (v3.13.0)
 │   │                   │   ├── domain/
 │   │                   │   │   └── model/        # Entidad de dominio
 │   │                   │   ├── application/

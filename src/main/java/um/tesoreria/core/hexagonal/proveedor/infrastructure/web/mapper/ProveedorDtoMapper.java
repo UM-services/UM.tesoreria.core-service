@@ -65,8 +65,9 @@ public class ProveedorDtoMapper {
                 .email(domain.getEmail())
                 .numeroCuenta(domain.getNumeroCuenta())
                 .habilitado(domain.getHabilitado())
-                .cbu(domain.getCbu())
                 .search(domain.getSearch())
+                .fechaAuditoria(domain.getFechaAuditoria())
+                .usuarioAuditoria(domain.getUsuarioAuditoria())
                 .build();
     }
 }

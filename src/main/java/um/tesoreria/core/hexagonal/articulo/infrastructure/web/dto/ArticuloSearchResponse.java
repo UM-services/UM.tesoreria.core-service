@@ -23,4 +23,6 @@ public class ArticuloSearchResponse {
     private Byte directo;
     private Byte habilitado;
     private String search;
+    private java.time.OffsetDateTime fechaAuditoria;
+    private String usuarioAuditoria;
 }

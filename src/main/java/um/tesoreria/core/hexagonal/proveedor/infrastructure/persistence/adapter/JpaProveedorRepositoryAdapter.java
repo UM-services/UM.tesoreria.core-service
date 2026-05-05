@@ -8,7 +8,7 @@ import um.tesoreria.core.hexagonal.proveedor.domain.ports.out.ProveedorRepositor
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.mapper.ProveedorMapper;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository.JpaProveedorRepository;
-import um.tesoreria.core.service.view.ProveedorSearchService;
+import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository.JpaProveedorSearchRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +24,7 @@ import um.tesoreria.core.model.PaginatedResponse;
 public class JpaProveedorRepositoryAdapter implements ProveedorRepository {
 
     private final JpaProveedorRepository jpaProveedorRepository;
-    private final ProveedorSearchService proveedorSearchService;
+    private final JpaProveedorSearchRepository jpaProveedorSearchRepository;
     private final ProveedorMapper proveedorMapper;
 
     @Override
@@ -71,7 +71,7 @@ public class JpaProveedorRepositoryAdapter implements ProveedorRepository {
 
     @Override
     public List<ProveedorSearch> findAllByStrings(List<String> conditions) {
-        return proveedorSearchService.findAllByStrings(conditions).stream()
+        return jpaProveedorSearchRepository.findAllByStrings(conditions).stream()
                 .map(proveedorMapper::toSearchDomain)
                 .collect(Collectors.toList());
     }

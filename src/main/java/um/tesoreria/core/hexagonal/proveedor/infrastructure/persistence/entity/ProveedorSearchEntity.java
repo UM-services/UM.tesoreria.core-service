@@ -76,8 +76,6 @@ public class ProveedorSearchEntity extends Auditable implements Serializable {
 	@Column(name = "prv_habilitado")
 	private Byte habilitado;
 
-	private String cbu;
-
 	private String search;
 
 }

@@ -59,6 +59,8 @@ public class ArticuloDtoMapper {
                 .directo(domain.getDirecto())
                 .habilitado(domain.getHabilitado())
                 .search(domain.getSearch())
+                .fechaAuditoria(domain.getFechaAuditoria())
+                .usuarioAuditoria(domain.getUsuarioAuditoria())
                 .build();
     }
 }

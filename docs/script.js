@@ -79,6 +79,7 @@ Promise.all([
 const diagrams = [
   { id: 'architecture', file: 'architecture.mmd', title: '🏛️ Arquitectura General del Servicio' },
   { id: 'hexagonal-architecture', file: 'hexagonal-architecture.mmd', title: '🔷 Arquitectura Hexagonal - Caso de Uso Curso Cargo Contratado' },
+  { id: 'hexagonal-articulo', file: 'hexagonal-articulo.mmd', title: '🔷 Arquitectura Hexagonal - Artículo' },
   { id: 'hexagonal-chequeraCuota', file: 'hexagonal-chequeraCuota.mmd', title: '🔷 Arquitectura Hexagonal - Chequera Cuota' },
   { id: 'hexagonal-auth', file: 'hexagonal-auth.mmd', title: '🔷 Arquitectura Hexagonal - Auth (Autenticación)' },
   { id: 'hexagonal-geografica', file: 'hexagonal-geografica.mmd', title: '🔷 Arquitectura Hexagonal - Geografica' },

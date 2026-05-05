@@ -1,17 +1,39 @@
 ---
-title: Consulta de Artículos (Arquitectura Hexagonal)
+title: Consulta de Artículos (Arquitectura Hexagonal v3.13.0)
 ---
 sequenceDiagram
     participant C as Cliente
     participant Ctrl as ArticuloController
     participant S as ArticuloService
-    participant R as JpaArticuloRepository
+    participant R as JpaArticuloRepositoryAdapter
     participant DB as BaseDeDatos
+
+    %% Consulta paginada
+    C->>Ctrl: GET /articulo/page?page=0&size=10
+    Ctrl->>S: getPaginated(0, 10)
+    S->>R: findPaginated(Pageable)
+    R->>DB: SELECT * FROM articulos LIMIT 10 OFFSET 0
+    DB-->>R: Page~ArticuloEntity~
+    R-->>S: PaginatedResponse~Articulo~
+    S-->>Ctrl: PaginatedResponse~ArticuloResponse~
+    Ctrl-->>C: ResponseEntity~PaginatedResponse~ 200 OK
+
+    %% Búsqueda por criterio
+    C->>Ctrl: GET /articulo/search?criterio=nombre
+    Ctrl->>S: searchArticulos("nombre")
+    S->>R: search("nombre")
+    R->>DB: SELECT * FROM articulos WHERE nombre LIKE '%nombre%'
+    DB-->>R: List~ArticuloSearch~
+    R-->>S: List~ArticuloSearch~
+    S-->>Ctrl: List~ArticuloSearchResponse~
+    Ctrl-->>C: ResponseEntity~List~ArticuloSearchResponse~~ 200 OK
+
+    %% Consulta general (legacy)
     C->>Ctrl: GET /articulo/
-    Ctrl->>S: findAll()
+    Ctrl->>S: getAllArticulos()
     S->>R: findAll()
     R->>DB: SELECT * FROM articulos
-    DB-->>R: lista ArticuloEntity
-    R-->>S: List~ArticuloEntity~
-    S-->>Ctrl: List~ArticuloEntity~
-    Ctrl-->>C: ResponseEntity~List~ArticuloEntity~~ 200 OK
+    DB-->>R: List~ArticuloEntity~
+    R-->>S: List~Articulo~
+    S-->>Ctrl: List~ArticuloResponse~
+    Ctrl-->>C: ResponseEntity~List~ArticuloResponse~~ 200 OK

@@ -7,11 +7,14 @@ import org.springframework.web.bind.annotation.*;
 import um.tesoreria.core.hexagonal.articulo.application.service.ArticuloService;
 import um.tesoreria.core.hexagonal.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.web.dto.ArticuloRequest;
+import um.tesoreria.core.hexagonal.articulo.infrastructure.web.dto.ArticuloSearchResponse;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.web.dto.ArticuloResponse;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.web.mapper.ArticuloDtoMapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import um.tesoreria.core.model.PaginatedResponse;
+
 
 @RestController
 @RequestMapping({"/articulo", "/api/tesoreria/core/articulo"})
@@ -20,6 +23,7 @@ public class ArticuloController {
 
     private final ArticuloService articuloService;
     private final ArticuloDtoMapper articuloDtoMapper;
+    
 
     @PostMapping("/")
     public ResponseEntity<ArticuloResponse> createArticulo(@RequestBody ArticuloRequest articuloRequest) {
@@ -35,12 +39,43 @@ public class ArticuloController {
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @PostMapping("/search")
+    public ResponseEntity<List<ArticuloSearchResponse>> findByStrings(@RequestBody List<String> conditions) {
+        List<ArticuloSearchResponse> responses = articuloService.searchArticulos(conditions).stream()
+                .map(articuloDtoMapper::toSearchResponse)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
+
     @GetMapping("/")
     public ResponseEntity<List<ArticuloResponse>> getAllArticulos() {
         List<ArticuloResponse> responses = articuloService.getAllArticulos().stream()
                 .map(articuloDtoMapper::toResponse)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(responses, HttpStatus.OK);
+    }
+
+    @GetMapping("/tipo/{tipo}/page")
+    public ResponseEntity<PaginatedResponse<ArticuloResponse>> getPaginatedByTipo(
+            @PathVariable String tipo,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+            
+        PaginatedResponse<Articulo> domainPage = articuloService.getPaginatedArticulosByTipo(tipo, page, size);
+        
+        List<ArticuloResponse> responseList = domainPage.getData().stream()
+                .map(articuloDtoMapper::toResponse)
+                .collect(Collectors.toList());
+                
+        PaginatedResponse<ArticuloResponse> paginatedResponse = new PaginatedResponse<>(
+                responseList,
+                domainPage.getTotalElements(),
+                domainPage.getTotalPages(),
+                domainPage.getCurrentPage(),
+                domainPage.getPageSize()
+        );
+        
+        return new ResponseEntity<>(paginatedResponse, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")

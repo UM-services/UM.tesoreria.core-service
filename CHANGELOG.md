@@ -5,6 +5,31 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.13.0] - 2026-05-05
+### Added
+- feat(articulo): Completitud de migración hexagonal y nuevas funcionalidades (commit afbeb02)
+  - Nuevo puerto de entrada: `GetPaginatedArticulosUseCase` con método `getPaginated(int page, int size)`
+  - Nuevo caso de uso: `GetPaginatedArticulosUseCaseImpl` con implementación de paginación usando `Pageable`
+  - Nuevo caso de uso: `SearchArticulosUseCaseImpl` para búsqueda de artículos por criterio
+  - Nuevo modelo: `ArticuloSearch` para criterios de búsqueda con campo `search`
+  - Nuevos métodos en `ArticuloRepository`: `findPaginated(Pageable)`, `search(String criterio)`
+  - Nuevo endpoint en `ArticuloController`: `GET /articulo/page?page=X&size=Y` que retorna `PaginatedResponse<ArticuloResponse>`
+  - Nuevo endpoint en `ArticuloController`: `GET /articulo/search?criterio=X`
+  - Nuevo DTO: `ArticuloSearchResponse` para respuestas de búsqueda
+- feat(proveedor): Mejoras en módulo Proveedor
+  - Actualización de `ProveedorSearch` con nuevos campos para búsquedas avanzadas
+  - Nuevos endpoints en `ProveedorController` para búsquedas
+
+### Changed
+- refactor(articulo): Reorganización de paquetes
+  - `ArticuloKey.java`, `ArticuloKeyRepository.java`, `ArticuloKeyRepositoryCustom.java` movidos de `core/` a `hexagonal/articulo/infrastructure/persistence/repository/`
+  - Mappers actualizados para soportar nuevos modelos
+
+### Removed
+- `ArticuloKeyService.java` eliminado (funcionalidad movida a casos de uso específicos)
+
+> Basado en análisis profundo de `git diff HEAD` (24 archivos modificados, +160/-45 líneas) y commits afbeb02, 4b9e84e.
+
 ## [3.12.0] - 2026-05-04
 ### Added
 - feat(articulo): Completitud de migración de módulo Artículo a arquitectura hexagonal

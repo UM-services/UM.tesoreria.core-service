@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.articulo.domain.model.ArticuloSearch;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity;
-import um.tesoreria.core.model.view.ArticuloKey;
+import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloKey;
 import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.mapper.CuentaMapper;
 
 @Component

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.model.view;
+package um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

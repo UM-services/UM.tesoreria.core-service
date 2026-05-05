@@ -1,12 +1,12 @@
 /**
  * 
  */
-package um.tesoreria.core.repository.view;
+package um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import um.tesoreria.core.model.view.ArticuloKey;
+import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloKey;
 
 /**
  * @author daniel
