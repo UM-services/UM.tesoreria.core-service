@@ -1,10 +1,12 @@
 package um.tesoreria.core.kotlin.model.view
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.google.gson.Gson
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import org.hibernate.annotations.Immutable
+import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -26,4 +28,8 @@ data class FacturaPendiente(
     val importeFactura: BigDecimal,
     val importePagado: BigDecimal?
 
-)
+) {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
+}

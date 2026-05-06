@@ -4,7 +4,37 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.13.0**
+**Versión actual (SemVer): 3.14.0**
+
+## Novedades 3.14.0 (verificado en código)
+- feat(ubicacion): Nuevo módulo Ubicacion con arquitectura hexagonal
+  - Modelo de dominio: `Ubicacion` con campos `ubicacionId`, `nombre`, `dependenciaId`, `geograficaId`
+  - Puertos de entrada: `GetAllUbicacionesUseCase`, `GetUbicacionesBySedeUseCase`
+  - Puerto de salida: `UbicacionRepository` con métodos `findAll()`, `findAllByGeograficaId(Integer)`
+  - Casos de uso: `GetAllUbicacionesUseCaseImpl`, `GetUbicacionesBySedeUseCaseImpl`
+  - Servicio de aplicación: `UbicacionService` con métodos `findAll()`, `findAllBySede(Integer)`
+  - Adaptador JPA: `JpaUbicacionRepositoryAdapter` con mapeo a entidad JPA
+  - Mapper: `UbicacionMapper` para conversión dominio ↔ entidad
+  - Entidad JPA: `UbicacionEntity` con anotaciones Lombok
+  - Controlador REST: `UbicacionController` con endpoints GET
+  - DTO: `UbicacionResponse` para respuestas HTTP
+- feat(ubicacionArticulo): Nuevo módulo UbicacionArticulo con arquitectura hexagonal
+  - Modelo de dominio: `UbicacionArticulo` con relaciones a `Ubicacion`, `Articulo`, `Cuenta`
+  - Puertos de entrada: `GetAllUbicacionArticulosUseCase`, `GetUbicacionArticuloUseCase`, `GetUbicacionArticulosByArticuloUseCase`, `SaveUbicacionArticuloUseCase`
+  - Puerto de salida: `UbicacionArticuloRepository` con métodos CRUD y búsquedas
+  - Casos de uso: `GetAllUbicacionArticulosUseCaseImpl`, `GetUbicacionArticuloUseCaseImpl`, `GetUbicacionArticulosByArticuloUseCaseImpl`, `SaveUbicacionArticuloUseCaseImpl`
+  - Servicio de aplicación: `UbicacionArticuloService` con métodos `findAll()`, `save()`, `findAllByArticuloId()`, `getByUbicacionAndArticulo()`
+  - Adaptador JPA: `JpaUbicacionArticuloRepositoryAdapter` con lógica de upsert
+  - Mapper: `UbicacionArticuloMapper` para conversión dominio ↔ entidad
+  - Entidad JPA: `UbicacionArticuloEntity` con restricción única `(ubicacionId, articuloId)`
+  - Controlador REST: `UbicacionArticuloController` con endpoints CRUD
+  - DTOs: `UbicacionArticuloRequest`, `UbicacionArticuloResponse`
+- refactor(core): `SheetService` actualizado para usar nuevos modelos de dominio
+- refactor(model): `Entrega.kt` actualizado con cambios en modelo
+- refactor(model): `FacturaPendiente.kt` actualizado con nuevos campos
+- refactor(dto): `AsignacionCostoDto` y `CostoParameterDto` actualizados
+
+> Basado en análisis profundo de `git diff HEAD` (47 archivos modificados, +723/-246 líneas).
 
 ## Novedades 3.13.0 (verificado en código)
 - feat(articulo): Implementación de paginación y búsqueda en módulo Artículo
@@ -579,7 +609,9 @@ src/
 │   ├── java/
 │   │   └── um/tesoreria/core/
 │   │       ├── hexagonal/
-│       │   │       ├── articulo/          # Módulo Artículo (v3.13.0)
+│   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
+│   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
+│   │       │   ├── articulo/          # Módulo Artículo (v3.13.0)
 │   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
 │   │       │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
 │   │       │   ├── persona/           # Módulo Persona (v3.1.0)
@@ -630,7 +662,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.13.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.14.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -693,6 +725,58 @@ src/
 │   │                           │   └── mapper/       # Mappers
 │   │                           └── application/
 │   │                               └── service/      # Servicios de aplicación
+│   │                   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/
+│   │                   │   │   └── ports/
+│   │                   │   │       ├── in/
+│   │                   │   │       └── out/
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/
+│   │                   │       │   ├── repository/
+│   │                   │       │   └── mapper/
+│   │                   │       └── web/
+│   │                   │           └── controller/
+│   │                   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/
+│   │                   │   │   └── ports/
+│   │                   │   │       ├── in/
+│   │                   │   │       └── out/
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/
+│   │                   │       │   ├── repository/
+│   │                   │       │   └── mapper/
+│   │                   │       └── web/
+│   │                   │           └── controller/
+│   │                   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/
+│   │                   │   │   └── ports/
+│   │                   │   │       ├── in/
+│   │                   │   │       └── out/
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/
+│   │                   │       │   ├── repository/
+│   │                   │       │   └── mapper/
+│   │                   │       └── web/
+│   │                   │           └── controller/
+│   │                   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/
+│   │                   │   │   └── ports/
+│   │                   │   │       ├── in/
+│   │                   │   │       └── out/
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/
+│   │                   │       │   ├── repository/
+│   │                   │       │   └── mapper/
+│   │                   │       └── web/
+│   │                   │           └── controller/
 │   │                   ├── articulo/          # Módulo Artículo (v3.13.0)
 │   │                   │   ├── domain/
 │   │                   │   │   └── model/        # Entidad de dominio

@@ -1437,28 +1437,30 @@ public class SheetService {
 
         int columnaRazonSocial = 0;
         int columnaCUIT = 1;
-        int columnaFechaComprobante = 2;
-        int columnaTipoComprobante = 3;
-        int columnaComprobantePrefijo = 4;
-        int columnaComprobanteNumero = 5;
-        int columnaImporteFactura = 6;
-        int columnaSaldo = 7;
+        int columnaCBU = 2;
+        int columnaFechaComprobante = 3;
+        int columnaTipoComprobante = 4;
+        int columnaComprobantePrefijo = 5;
+        int columnaComprobanteNumero = 6;
+        int columnaImporteFactura = 7;
+        int columnaSaldo = 8;
+        int columnaVencimiento = 9;
+        int columnaObservaciones = 10;
         row = sheet.createRow(++fila);
         this.setCellString(row, columnaRazonSocial, "Razón Social", styleBold);
         this.setCellString(row, columnaCUIT, "CUIT", styleBold);
+        this.setCellString(row, columnaCBU, "CBU", styleBold);
         this.setCellString(row, columnaFechaComprobante, "Fecha Comprobante", styleBold);
         this.setCellString(row, columnaTipoComprobante, "Tipo Comprobante", styleBold);
         this.setCellString(row, columnaComprobantePrefijo, "Prefijo", styleBold);
         this.setCellString(row, columnaComprobanteNumero, "Numero", styleBold);
         this.setCellString(row, columnaImporteFactura, "Importe Factura", styleBold);
         this.setCellString(row, columnaSaldo, "Saldo al " + format.format(fechaHasta.withOffsetSameInstant(ZoneOffset.UTC)), styleBold);
+        this.setCellString(row, columnaVencimiento, "Fecha Vencimiento", styleBold);
+        this.setCellString(row, columnaObservaciones, "Observaciones", styleBold);
 
         for (FacturaPendiente facturaPendiente : facturaPendienteService.findAllFacturasPendientesBetweenDates(fechaDesde, fechaHasta)) {
-            try {
-                log.debug("FacturaPendiente -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(facturaPendiente));
-            } catch (JsonProcessingException e) {
-                log.debug("FacturaPendiente error -> {}", e.getMessage());
-            }
+            log.debug("FacturaPendiente -> {}", facturaPendiente.jsonify());
             BigDecimal importeFactura = facturaPendiente.getImporteFactura();
             BigDecimal importePagado = BigDecimal.ZERO;
             if (facturaPendiente.getImportePagado() != null) {
@@ -1470,7 +1472,8 @@ public class SheetService {
                 row = sheet.createRow(++fila);
                 this.setCellString(row, columnaRazonSocial, facturaPendiente.getRazonSocial(), styleNormal);
                 this.setCellString(row, columnaCUIT, facturaPendiente.getCuit(), styleNormal);
-                this.setCellString(row, columnaFechaComprobante, format.format(facturaPendiente.getFechaComprobante().withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
+                this.setCellString(row, columnaCBU, facturaPendiente);
+                this.setCellString(row, columnaFechaComprobante, format.format(Objects.requireNonNull(facturaPendiente.getFechaComprobante()).withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
                 this.setCellString(row, columnaTipoComprobante, facturaPendiente.getComprobante(), styleNormal);
                 this.setCellInteger(row, columnaComprobantePrefijo, facturaPendiente.getPrefijo(), styleNormal);
                 this.setCellLong(row, columnaComprobanteNumero, facturaPendiente.getNumeroComprobante(), styleNormal);

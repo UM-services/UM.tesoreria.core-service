@@ -1,8 +1,9 @@
 /**
  * 
  */
-package um.tesoreria.core.model;
+package um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.entity;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -16,28 +17,27 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
-import um.tesoreria.core.kotlin.model.Ubicacion;
+import um.tesoreria.core.hexagonal.ubicacion.infrastructure.persistence.entity.UbicacionEntity;
 
 /**
  * @author daniel
  *
  */
-@Data
+@Getter
+@Setter
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "ubicacionId", "articuloId" }) })
+@Table(name = "ubicacion_articulo", uniqueConstraints = { @UniqueConstraint(columnNames = { "ubicacionId", "articuloId" }) })
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class UbicacionArticulo extends Auditable implements Serializable {
+public class UbicacionArticuloEntity extends Auditable implements Serializable {
 
-	private static final long serialVersionUID = -8633226884908426808L;
+	@Serial
+    private static final long serialVersionUID = -8633226884908426808L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,7 +51,7 @@ public class UbicacionArticulo extends Auditable implements Serializable {
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "ubicacionId", insertable = false, updatable = false)
-	private Ubicacion ubicacion;
+	private UbicacionEntity ubicacion;
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "articuloId", insertable = false, updatable = false)

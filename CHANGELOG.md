@@ -5,6 +5,42 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.14.0] - 2026-05-06
+### Added
+- feat(ubicacion): Nuevo módulo Ubicacion con arquitectura hexagonal
+  - Modelo de dominio: `Ubicacion` con campos `ubicacionId`, `nombre`, `dependenciaId`, `geograficaId`
+  - Puertos de entrada: `GetAllUbicacionesUseCase`, `GetUbicacionesBySedeUseCase`
+  - Puerto de salida: `UbicacionRepository` con métodos `findAll()`, `findAllByGeograficaId(Integer)`
+  - Casos de uso: `GetAllUbicacionesUseCaseImpl`, `GetUbicacionesBySedeUseCaseImpl`
+  - Servicio de aplicación: `UbicacionService` con métodos `findAll()`, `findAllBySede(Integer)`
+  - Adaptador JPA: `JpaUbicacionRepositoryAdapter` con mapeo a entidad JPA
+  - Mapper: `UbicacionMapper` para conversión dominio ↔ entidad
+  - Entidad JPA: `UbicacionEntity` con anotaciones Lombok y relación a `DependenciaEntity`
+  - Controlador REST: `UbicacionController` con endpoints GET
+  - DTO: `UbicacionResponse` para respuestas HTTP
+- feat(ubicacionArticulo): Nuevo módulo UbicacionArticulo con arquitectura hexagonal
+  - Modelo de dominio: `UbicacionArticulo` con relaciones a `Ubicacion`, `Articulo`, `Cuenta`
+  - Puertos de entrada: `GetAllUbicacionArticulosUseCase`, `GetUbicacionArticuloUseCase`, `GetUbicacionArticulosByArticuloUseCase`, `SaveUbicacionArticuloUseCase`
+  - Puerto de salida: `UbicacionArticuloRepository` con métodos CRUD y búsquedas
+  - Casos de uso: `GetAllUbicacionArticulosUseCaseImpl`, `GetUbicacionArticuloUseCaseImpl`, `GetUbicacionArticulosByArticuloUseCaseImpl`, `SaveUbicacionArticuloUseCaseImpl`
+  - Servicio de aplicación: `UbicacionArticuloService` con métodos `findAll()`, `save()`, `findAllByArticuloId()`, `getByUbicacionAndArticulo()`
+  - Adaptador JPA: `JpaUbicacionArticuloRepositoryAdapter` con lógica de upsert usando `findByUbicacionIdAndArticuloId`
+  - Mapper: `UbicacionArticuloMapper` con mapeo de relaciones anidadas
+  - Entidad JPA: `UbicacionArticuloEntity` con restricción única `(ubicacionId, articuloId)`
+  - Controlador REST: `UbicacionArticuloController` con endpoints CRUD
+  - DTOs: `UbicacionArticuloRequest`, `UbicacionArticuloResponse`
+
+### Changed
+- refactor(core): `SheetService` actualizado para usar nuevos modelos de dominio
+- refactor(model): `Entrega.kt` actualizado con cambios en modelo
+- refactor(model): `FacturaPendiente.kt` actualizado con nuevos campos
+- refactor(dto): `AsignacionCostoDto` y `CostoParameterDto` actualizados para usar modelos de dominio
+- refactor(legacy): Eliminación de controladores legacy `UbicacionController.java` y `UbicacionArticuloController.java` del paquete `core/controller/`
+- refactor(legacy): Eliminación de servicios legacy `UbicacionService.java` y `UbicacionArticuloService.java` del paquete `core/service/`
+- refactor(legacy): Eliminación de repositorios legacy `UbicacionRepository.java` y `UbicacionArticuloRepository.java` del paquete `core/repository/`
+
+> Basado en análisis profundo de `git diff HEAD` (47 archivos modificados, +723/-246 líneas).
+
 ## [3.13.0] - 2026-05-05
 ### Added
 - feat(articulo): Completitud de migración hexagonal y nuevas funcionalidades (commit afbeb02)

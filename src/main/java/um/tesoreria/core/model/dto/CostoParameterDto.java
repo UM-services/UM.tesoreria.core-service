@@ -8,9 +8,10 @@ import java.io.Serializable;
 import java.util.List;
 
 import um.tesoreria.core.hexagonal.articulo.domain.model.Articulo;
+import um.tesoreria.core.hexagonal.ubicacion.domain.model.Ubicacion;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.kotlin.model.Comprobante;
-import um.tesoreria.core.kotlin.model.Ubicacion;
-import um.tesoreria.core.model.UbicacionArticulo;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.entity.UbicacionArticuloEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,0 +1,59 @@
+---
+title: Arquitectura Hexagonal - Módulo UbicacionArticulo (v3.14.0)
+---
+
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        UA[UbicacionArticulo<br/>Entidad de Dominio]
+        UAR[UbicacionArticuloRepository<br/>Puerto de Salida]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        UAS[UbicacionArticuloService<br/>Servicio de Aplicación]
+        GA[GetAllUbicacionArticulosUseCaseImpl]
+        GG[GetUbicacionArticuloUseCaseImpl]
+        GB[GetUbicacionArticulosByArticuloUseCaseImpl]
+        SV[SaveUbicacionArticuloUseCaseImpl]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        UAC[UbicacionArticuloController<br/>Adaptador Web]
+        JPA[JpaUbicacionArticuloRepositoryAdapter<br/>Adaptador JPA]
+        ENT[UbicacionArticuloEntity<br/>Entidad JPA]
+        M[UbicacionArticuloMapper<br/>Mapper]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+    end
+
+    %% Flujo de Dependencias
+    UAC -->|usa| UAS
+    UAC -->|recibe/envía| UA
+
+    UAS -->|depende| GA
+    UAS -->|depende| GG
+    UAS -->|depende| GB
+    UAS -->|depende| SV
+
+    GA -->|usa| UAR
+    GG -->|usa| UAR
+    GB -->|usa| UAR
+    SV -->|usa| UAR
+
+    UAR -->|implementa| JPA
+    JPA -->|persiste| JPAR
+    JPA -->|gestiona| ENT
+    JPA -->|usa| M
+
+    style UA fill:#e1f5fe
+    style UAR fill:#f3e5f5
+    style UAS fill:#fff3e0
+    style GA fill:#fff3e0
+    style GG fill:#fff3e0
+    style GB fill:#fff3e0
+    style SV fill:#fff3e0
+    style UAC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style ENT fill:#e8f5e8
+    style M fill:#e8f5e8

@@ -4,14 +4,13 @@
 package um.tesoreria.core.service.dto;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.dto.CostoParameterDto;
 import um.tesoreria.core.hexagonal.articulo.application.service.ArticuloService;
 import um.tesoreria.core.service.ComprobanteService;
-import um.tesoreria.core.service.UbicacionArticuloService;
-import um.tesoreria.core.service.UbicacionService;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.application.service.UbicacionArticuloService;
+import um.tesoreria.core.hexagonal.ubicacion.application.service.UbicacionService;
 
 /**
  * @author daniel

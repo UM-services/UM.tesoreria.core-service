@@ -1,0 +1,50 @@
+---
+title: Arquitectura Hexagonal - Módulo Ubicacion (v3.14.0)
+---
+
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        U[Ubicacion<br/>Entidad de Dominio]
+        UR[UbicacionRepository<br/>Puerto de Salida]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        US[UbicacionService<br/>Servicio de Aplicación]
+        GA[GetAllUbicacionesUseCaseImpl]
+        GS[GetUbicacionesBySedeUseCaseImpl]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        UC[UbicacionController<br/>Adaptador Web]
+        JPA[JpaUbicacionRepositoryAdapter<br/>Adaptador JPA]
+        ENT[UbicacionEntity<br/>Entidad JPA]
+        M[UbicacionMapper<br/>Mapper]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+    end
+
+    %% Flujo de Dependencias
+    UC -->|usa| US
+    UC -->|recibe/envía| U
+
+    US -->|depende| GA
+    US -->|depende| GS
+    GA -->|usa| UR
+    GS -->|usa| UR
+
+    UR -->|implementa| JPA
+    JPA -->|persiste| JPAR
+    JPA -->|gestiona| ENT
+    JPA -->|usa| M
+
+    style U fill:#e1f5fe
+    style UR fill:#f3e5f5
+    style US fill:#fff3e0
+    style GA fill:#fff3e0
+    style GS fill:#fff3e0
+    style UC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style ENT fill:#e8f5e8
+    style M fill:#e8f5e8
