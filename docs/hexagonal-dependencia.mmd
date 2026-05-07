@@ -1,0 +1,174 @@
+---
+title: Arquitectura Hexagonal - Módulo Dependencia (v3.17.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Dependencia {
+            +Integer dependenciaId
+            +String nombre
+            +String acronimo
+            +Integer facultadId
+            +Integer geograficaId
+            +BigDecimal cuentaHonorariosPagar
+            +OffsetDateTime fechaAuditoria
+            +String usuarioAuditoria
+            +Facultad facultad
+            +Geografica geografica
+            +Cuenta cuenta
+            +getSedeKey() String
+        }
+
+        class DependenciaRepository {
+            <<interface>>
+            +findAll() List~Dependencia~
+            +findById(Integer) Optional~Dependencia~
+            +save(Dependencia) Dependencia
+        }
+    }
+
+    namespace application {
+        class DependenciaService {
+            -GetAllDependenciasUseCase getAllDependenciasUseCase
+            -GetDependenciaByIdUseCase getDependenciaByIdUseCase
+            -UpdateDependenciaUseCase updateDependenciaUseCase
+            +findAll() List~Dependencia~
+            +findByDependenciaId(Integer) Dependencia
+            +update(Integer, Dependencia) Dependencia
+        }
+
+        namespace usecases {
+            class GetAllDependenciasUseCaseImpl {
+                -DependenciaRepository repository
+                +getAll() List~Dependencia~
+            }
+
+            class GetDependenciaByIdUseCaseImpl {
+                -DependenciaRepository repository
+                +getById(Integer) Optional~Dependencia~
+            }
+
+            class UpdateDependenciaUseCaseImpl {
+                -DependenciaRepository repository
+                +update(Integer, Dependencia) Dependencia
+            }
+        }
+
+        class GetAllDependenciasUseCase {
+            <<interface>>
+            +getAll() List~Dependencia~
+        }
+
+        class GetDependenciaByIdUseCase {
+            <<interface>>
+            +getById(Integer) Optional~Dependencia~
+        }
+
+        class UpdateDependenciaUseCase {
+            <<interface>>
+            +update(Integer, Dependencia) Dependencia
+        }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class DependenciaEntity {
+                +Integer dependenciaId
+                +String nombre
+                +String acronimo
+                +Integer facultadId
+                +Integer geograficaId
+                +BigDecimal cuentaHonorariosPagar
+                +Facultad facultad
+                +GeograficaEntity geografica
+                +CuentaEntity cuenta
+                +getSedeKey() String
+            }
+
+            class JpaDependenciaRepository {
+                <<JpaRepository>>
+                +findAllByOrderByNombre() List~DependenciaEntity~
+                +findByDependenciaId(Integer) Optional~DependenciaEntity~
+            }
+
+            class JpaDependenciaRepositoryAdapter {
+                -JpaDependenciaRepository repository
+                -DependenciaMapper mapper
+                +findAll() List~Dependencia~
+                +findById(Integer) Optional~Dependencia~
+                +save(Dependencia) Dependencia
+            }
+
+            class DependenciaMapper {
+                -GeograficaMapper geograficaMapper
+                -CuentaMapper cuentaMapper
+                +toDomain(DependenciaEntity) Dependencia
+                +toEntity(Dependencia) DependenciaEntity
+            }
+        }
+
+        namespace web {
+            class DependenciaController {
+                -DependenciaService service
+                -DependenciaDtoMapper mapper
+                +findAll() ResponseEntity~List~DependenciaResponse~~
+                +findByDependenciaId(Integer) ResponseEntity~DependenciaResponse~
+                +update(Integer, DependenciaRequest) ResponseEntity~DependenciaResponse~
+            }
+
+            class DependenciaRequest {
+                +Integer dependenciaId
+                +String nombre
+                +String acronimo
+                +Integer facultadId
+                +Integer geograficaId
+                +BigDecimal cuentaHonorariosPagar
+            }
+
+            class DependenciaResponse {
+                +Integer dependenciaId
+                +String nombre
+                +String acronimo
+                +Integer facultadId
+                +Integer geograficaId
+                +BigDecimal cuentaHonorariosPagar
+                +OffsetDateTime fechaAuditoria
+                +String usuarioAuditoria
+                +Facultad facultad
+                +Geografica geografica
+                +Cuenta cuenta
+            }
+
+            class DependenciaDtoMapper {
+                +toDomain(DependenciaRequest) Dependencia
+                +toResponse(Dependencia) DependenciaResponse
+            }
+        }
+    }
+
+    DependenciaService --> GetAllDependenciasUseCase : uses
+    DependenciaService --> GetDependenciaByIdUseCase : uses
+    DependenciaService --> UpdateDependenciaUseCase : uses
+
+    GetAllDependenciasUseCaseImpl ..|> GetAllDependenciasUseCase : implements
+    GetDependenciaByIdUseCaseImpl ..|> GetDependenciaByIdUseCase : implements
+    UpdateDependenciaUseCaseImpl ..|> UpdateDependenciaUseCase : implements
+
+    GetAllDependenciasUseCaseImpl --> DependenciaRepository : uses
+    GetDependenciaByIdUseCaseImpl --> DependenciaRepository : uses
+    UpdateDependenciaUseCaseImpl --> DependenciaRepository : uses
+
+    JpaDependenciaRepositoryAdapter ..|> DependenciaRepository : implements
+    JpaDependenciaRepositoryAdapter --> JpaDependenciaRepository : uses
+    JpaDependenciaRepositoryAdapter --> DependenciaMapper : uses
+
+    DependenciaMapper --> Dependencia : maps
+    DependenciaMapper --> DependenciaEntity : maps
+    JpaDependenciaRepository --> DependenciaEntity : persists
+
+    DependenciaController --> DependenciaService : calls
+    DependenciaController --> DependenciaDtoMapper : uses
+    DependenciaDtoMapper --> Dependencia : maps
+    DependenciaDtoMapper --> DependenciaResponse : maps

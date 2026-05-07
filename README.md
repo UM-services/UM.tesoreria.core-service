@@ -4,7 +4,27 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.16.0**
+**Versión actual (SemVer): 3.17.0**
+
+## Novedades 3.17.0 (verificado en código)
+- feat(dependencia): Nuevo módulo Dependencia con arquitectura hexagonal completa
+  - Modelo de dominio: `Dependencia` con campos `dependenciaId`, `nombre`, `acronimo`, `facultadId`, `geograficaId`, `cuentaHonorariosPagar`, y relaciones a `Facultad`, `Geografica`, `Cuenta`
+  - Puertos de entrada: `GetAllDependenciasUseCase`, `GetDependenciaByIdUseCase`, `UpdateDependenciaUseCase`
+  - Puerto de salida: `DependenciaRepository` con métodos `findAll()`, `findById(Integer)`, `save(Dependencia)`
+  - Casos de uso: `GetAllDependenciasUseCaseImpl`, `GetDependenciaByIdUseCaseImpl`, `UpdateDependenciaUseCaseImpl`
+  - Servicio de aplicación: `DependenciaService` con métodos `findAll()`, `findByDependenciaId(Integer)`, `update(Integer, Dependencia)`
+  - Adaptador JPA: `JpaDependenciaRepositoryAdapter` con mapeo dominio ↔ entidad y relaciones `@OneToOne`
+  - Repositorio JPA: `JpaDependenciaRepository` con `findAllByOrderByNombre()` y `findByDependenciaId(Integer)`
+  - Controlador REST: `DependenciaController` con endpoints `GET /dependencia/`, `GET /dependencia/{dependenciaId}`, `PUT /dependencia/{dependenciaId}`
+  - DTOs: `DependenciaRequest` y `DependenciaResponse`
+  - DTO Mapper: `DependenciaDtoMapper` para conversión DTO ↔ dominio
+- refactor(dependencia): Migración completa de módulo Dependencia a arquitectura hexagonal
+  - Eliminación de `Dependencia.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `DependenciaRepository.java` del paquete `core/repository/`
+  - Eliminación de `DependenciaService.java` del paquete `core/service/`
+  - Eliminación de `DependenciaController.java` del paquete `core/controller/`
+
+> Basado en análisis profundo de `git diff HEAD` (22 archivos modificados, +408/-194 líneas).
 
 ## Novedades 3.16.0 (verificado en código)
 - feat(articulo): Enriquecimiento de respuestas con objeto `Cuenta` vía `CuentaService`
@@ -647,6 +667,7 @@ src/
 │   │       ├── hexagonal/
 │   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
 │   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
+│   │       │   ├── dependencia/       # Módulo Dependencia (v3.17.0)
 │   │       │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
 │   │       │   ├── articulo/          # Módulo Artículo (v3.13.0)
 │   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
@@ -699,7 +720,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.16.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.17.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -762,6 +783,20 @@ src/
 │   │                   │       │   └── mapper/       # Mappers
 │   │                   │       └── application/
 │   │                   │           └── service/      # Servicios de aplicación
+│   │                   ├── dependencia/      # Módulo Dependencia (v3.17.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/
+│   │                   │   │   └── ports/
+│   │                   │   │       ├── in/
+│   │                   │   │       └── out/
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/
+│   │                   │       │   ├── repository/
+│   │                   │       │   └── mapper/
+│   │                   │       └── web/
+│   │                   │           ├── controller/
+│   │                   │           └── dto/
 │   │                   ├── facturaPendiente/ # Módulo FacturaPendiente (v3.15.0)
 │   │                   │   ├── domain/
 │   │                   │   │   ├── model/

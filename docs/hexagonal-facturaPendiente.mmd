@@ -1,0 +1,87 @@
+---
+title: Arquitectura Hexagonal - Módulo FacturaPendiente (v3.15.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class FacturaPendiente {
+            +Long proveedorMovimientoId
+            +String razonSocial
+            +String cuit
+            +String cbu
+            +OffsetDateTime fechaComprobante
+            +OffsetDateTime fechaVencimiento
+            +String observaciones
+            +String comprobante
+            +Byte debita
+            +Integer prefijo
+            +Long numeroComprobante
+            +BigDecimal importeFactura
+            +BigDecimal importePagado
+        }
+
+        class FacturaPendienteRepository {
+            <<interface>>
+            +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
+            +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+        }
+    }
+
+    namespace application {
+        class FacturaPendienteService {
+            -GetFacturasPendientesUseCase getFacturasPendientesUseCase
+            +findAllFacturasPendientesBetweenDates(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+        }
+
+        class GetFacturasPendientesUseCaseImpl {
+            -FacturaPendienteRepository repository
+            +getFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+        }
+
+        class GetFacturasPendientesUseCase {
+            <<interface>>
+            +getFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+        }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class FacturaPendienteEntity {
+                <<Immutable>>
+                +Long proveedorMovimientoId
+                +String razonSocial
+                +String cuit
+                +String cbu
+                +OffsetDateTime fechaComprobante
+                +OffsetDateTime fechaVencimiento
+                +String observaciones
+                +String comprobante
+                +Byte debita
+                +Integer prefijo
+                +Long numeroComprobante
+                +BigDecimal importeFactura
+                +BigDecimal importePagado
+            }
+
+            class JpaFacturaPendienteRepository {
+                <<JpaRepository>>
+                +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
+                +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendienteEntity~
+            }
+
+            class JpaFacturaPendienteRepositoryAdapter {
+                -JpaFacturaPendienteRepository repository
+                +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
+                +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+            }
+        }
+    }
+
+    FacturaPendienteService --> GetFacturasPendientesUseCase : uses
+    GetFacturasPendientesUseCaseImpl ..|> GetFacturasPendientesUseCase : implements
+    GetFacturasPendientesUseCaseImpl --> FacturaPendienteRepository : uses
+    JpaFacturaPendienteRepositoryAdapter ..|> FacturaPendienteRepository : implements
+    JpaFacturaPendienteRepositoryAdapter --> JpaFacturaPendienteRepository : uses
+    JpaFacturaPendienteRepository --> FacturaPendienteEntity : persists

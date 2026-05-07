@@ -2,6 +2,32 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.17.0] - 2026-05-07
+### Added
+- feat(dependencia): Nuevo módulo Dependencia con arquitectura hexagonal completa
+  - Modelo de dominio: `Dependencia` con campos `dependenciaId`, `nombre`, `acronimo`, `facultadId`, `geograficaId`, `cuentaHonorariosPagar`, `fechaAuditoria`, `usuarioAuditoria`, relaciones a `Facultad`, `Geografica`, `Cuenta`, y método `getSedeKey()`
+  - Puertos de entrada: `GetAllDependenciasUseCase`, `GetDependenciaByIdUseCase`, `UpdateDependenciaUseCase`
+  - Puerto de salida: `DependenciaRepository` con métodos `findAll()`, `findById(Integer)`, `save(Dependencia)`
+  - Casos de uso: `GetAllDependenciasUseCaseImpl`, `GetDependenciaByIdUseCaseImpl`, `UpdateDependenciaUseCaseImpl`
+  - Servicio de aplicación: `DependenciaService` con métodos `findAll()`, `findByDependenciaId(Integer)`, `update(Integer, Dependencia)`
+  - Adaptador JPA: `JpaDependenciaRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `DependenciaEntity` con anotaciones Lombok, relaciones `@OneToOne` a `Facultad`, `GeograficaEntity`, `CuentaEntity`, y herencia de `Auditable`
+  - Repositorio JPA: `JpaDependenciaRepository` con métodos `findAllByOrderByNombre()` y `findByDependenciaId(Integer)`
+  - Mapper: `DependenciaMapper` para conversión dominio ↔ entidad con inyección de `GeograficaMapper` y `CuentaMapper`
+  - Controlador REST: `DependenciaController` con endpoints `GET /dependencia/`, `GET /dependencia/{dependenciaId}`, `PUT /dependencia/{dependenciaId}`
+  - DTOs: `DependenciaRequest` para entrada y `DependenciaResponse` para respuestas HTTP con datos completos de relaciones
+  - DTO Mapper: `DependenciaDtoMapper` para conversión entre DTOs y modelo de dominio
+  - Refactorización de `UbicacionEntity` para usar nueva estructura
+
+### Changed
+- refactor(dependencia): Migración completa de módulo Dependencia a arquitectura hexagonal
+  - Eliminación de `Dependencia.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `DependenciaRepository.java` del paquete `core/repository/`
+  - Eliminación de `DependenciaService.java` del paquete `core/service/`
+  - Eliminación de `DependenciaController.java` del paquete `core/controller/`
+
+> Basado en análisis profundo de `git diff HEAD` (22 archivos modificados, +408/-194 líneas).
+
 ## [3.16.0] - 2026-05-07
 ### Added
 - feat(articulo): Enriquecimiento de respuestas con objeto `Cuenta` vía `CuentaService`
