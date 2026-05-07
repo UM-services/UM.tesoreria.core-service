@@ -4,7 +4,31 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.14.0**
+**Versión actual (SemVer): 3.15.0**
+
+## Novedades 3.15.0 (verificado en código)
+- feat(facturaPendiente): Nuevo módulo FacturaPendiente con arquitectura hexagonal completa
+  - Modelo de dominio: `FacturaPendiente` con campos `proveedorMovimientoId`, `razonSocial`, `cuit`, `cbu`, `fechaComprobante`, `fechaVencimiento`, `observaciones`, `comprobante`, `debita`, `prefijo`, `numeroComprobante`, `importeFactura`, `importePagado`
+  - Puertos de entrada: `GetFacturasPendientesUseCase` con método `getFacturasPendientes(OffsetDateTime, OffsetDateTime)`
+  - Puerto de salida: `FacturaPendienteRepository` con métodos `updateFechaPagoInProveedorPago()`, `findFacturasPendientes(OffsetDateTime, OffsetDateTime)`
+  - Caso de uso: `GetFacturasPendientesUseCaseImpl` con lógica de negocio
+  - Servicio de aplicación: `FacturaPendienteService` con método `findAllFacturasPendientesBetweenDates`
+  - Adaptador JPA: `JpaFacturaPendienteRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `FacturaPendienteEntity` con anotaciones Lombok e `@Immutable`
+  - Repositorio JPA: `JpaFacturaPendienteRepository` con consultas nativas
+- feat(sheet): Actualización de `SheetService` para nuevos campos en hojas de cálculo
+  - Agregado campo `cbu` en generación de hojas
+  - Agregado campo `fechaVencimiento` con formato UTC
+  - Agregado campo `observaciones` (concepto de factura)
+  - Migración de uso de `jsonify()` a utilitaria `Jsonifier`
+- refactor(facturaPendiente): Migración completa a arquitectura hexagonal
+  - Eliminación de `FacturaPendiente.kt` (Kotlin) de `core/kotlin/model/view/`
+  - Eliminación de `FacturaPendienteService.java` de `core/service/view/`
+  - Migración de `FacturaPendienteRepository.kt` a Java en `hexagonal/facturaPendiente/infrastructure/persistence/repository/`
+  - Actualización de `SheetService` para usar nuevo servicio hexagonal
+- Removed: Eliminación de tests obsoletos `ChequeraCuotaControllerTest.java`, `ProveedorMovimientoControllerTest.java`
+
+> Basado en análisis profundo de `git diff HEAD` (13 archivos modificados, +120/-156 líneas).
 
 ## Novedades 3.14.0 (verificado en código)
 - feat(ubicacion): Nuevo módulo Ubicacion con arquitectura hexagonal
@@ -611,6 +635,7 @@ src/
 │   │       ├── hexagonal/
 │   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
 │   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
+│   │       │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
 │   │       │   ├── articulo/          # Módulo Artículo (v3.13.0)
 │   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
 │   │       │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
@@ -662,7 +687,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.14.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.15.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -704,7 +729,7 @@ src/
 │   │               ├── model/            # Modelos de datos
 │   │               ├── configuration/    # Configuraciones
 │   │               └── hexagonal/        # Arquitectura hexagonal
-│   │                   ├── persona/
+│   │                   ├── persona/           # Módulo Persona (v3.1.0)
 │   │                   │   ├── application/
 │   │                   │   │   └── service/
 │   │                   │   └── infrastructure/
@@ -713,19 +738,19 @@ src/
 │   │                   │       │   └── repository/
 │   │                   │       └── web/
 │   │                   │           └── controller/
-│   │                   └── chequeraCuota/        # Módulo ChequeraCuota (v3.8.0)
-│   │                       ├── domain/
-│   │                       │   ├── model/        # Entidades de dominio
-│   │                       │   └── ports/        # Puertos (interfaces)
-│   │                       │       ├── in/       # Puertos de entrada
-│   │                       │       └── out/      # Puertos de salida
-│   │                       └── infrastructure/
-│   │                           ├── persistence/
-│   │                           │   ├── repository/   # Adaptadores JPA
-│   │                           │   └── mapper/       # Mappers
-│   │                           └── application/
-│   │                               └── service/      # Servicios de aplicación
-│   │                   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
+│   │                   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/        # Entidades de dominio
+│   │                   │   │   └── ports/        # Puertos (interfaces)
+│   │                   │   │       ├── in/       # Puertos de entrada
+│   │                   │   │       └── out/      # Puertos de salida
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── repository/   # Adaptadores JPA
+│   │                   │       │   └── mapper/       # Mappers
+│   │                   │       └── application/
+│   │                   │           └── service/      # Servicios de aplicación
+│   │                   ├── facturaPendiente/ # Módulo FacturaPendiente (v3.15.0)
 │   │                   │   ├── domain/
 │   │                   │   │   ├── model/
 │   │                   │   │   └── ports/
@@ -736,21 +761,8 @@ src/
 │   │                   │       │   ├── entity/
 │   │                   │       │   ├── repository/
 │   │                   │       │   └── mapper/
-│   │                   │       └── web/
-│   │                   │           └── controller/
-│   │                   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
-│   │                   │   ├── domain/
-│   │                   │   │   ├── model/
-│   │                   │   │   └── ports/
-│   │                   │   │       ├── in/
-│   │                   │   │       └── out/
-│   │                   │   └── infrastructure/
-│   │                   │       ├── persistence/
-│   │                   │       │   ├── entity/
-│   │                   │       │   ├── repository/
-│   │                   │       │   └── mapper/
-│   │                   │       └── web/
-│   │                   │           └── controller/
+│   │                   │       └── application/
+│   │                   │           └── service/
 │   │                   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
 │   │                   │   ├── domain/
 │   │                   │   │   ├── model/
@@ -788,7 +800,7 @@ src/
 │   │                   │       │   └── repository/ # Repositorio adaptador
 │   │                   │       └── web/
 │   │                   │           └── controller/ # Controlador REST
-│   │                   ├── cuenta/           # Módulo Cuenta (v3.8.0)
+│   │                   ├── cuenta/            # Módulo Cuenta (v3.8.0)
 │   │                   │   ├── domain/
 │   │                   │   │   └── model/        # Entidad de dominio
 │   │                   │   ├── application/
@@ -799,6 +811,9 @@ src/
 │   │                   │       │   └── repository/ # Adaptador JPA
 │   │                   │       └── web/
 │   │                   │           └── controller/ # Controlador REST
+│   │                   ├── auth/              # Módulo Auth (v3.6.0)
+│   │                   ├── geografica/        # Módulo Geografica (v3.6.0)
+│   │                   ├── proveedor/         # Módulo Proveedor (v3.9.0)
 │   │                   └── matriculacionContext/  # Módulo MatriculacionContext (v3.8.0)
 │   │                       ├── domain/
 │   │                       │   ├── model/        # Entidades de dominio

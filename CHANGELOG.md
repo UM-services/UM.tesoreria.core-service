@@ -2,6 +2,37 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.15.0] - 2026-05-07
+### Added
+- feat(facturaPendiente): Nuevo módulo FacturaPendiente con arquitectura hexagonal completa
+  - Modelo de dominio: `FacturaPendiente` con campos `proveedorMovimientoId`, `razonSocial`, `cuit`, `cbu`, `fechaComprobante`, `fechaVencimiento`, `observaciones`, `comprobante`, `debita`, `prefijo`, `numeroComprobante`, `importeFactura`, `importePagado`
+  - Puerto de entrada: `GetFacturasPendientesUseCase` con método `getFacturasPendientes(OffsetDateTime, OffsetDateTime)`
+  - Puerto de salida: `FacturaPendienteRepository` con métodos `updateFechaPagoInProveedorPago()`, `findFacturasPendientes(OffsetDateTime, OffsetDateTime)`
+  - Caso de uso: `GetFacturasPendientesUseCaseImpl` con lógica de negocio
+  - Servicio de aplicación: `FacturaPendienteService` con método `findAllFacturasPendientesBetweenDates`
+  - Adaptador JPA: `JpaFacturaPendienteRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `FacturaPendienteEntity` con anotaciones Lombok e `@Immutable`
+  - Repositorio JPA: `JpaFacturaPendienteRepository` con consultas nativas SQL
+- feat(sheet): Actualización de `SheetService` para nuevos campos en hojas de cálculo
+  - Agregado campo `cbu` en generación de hojas de facturas pendientes
+  - Agregado campo `fechaVencimiento` con formato UTC
+  - Agregado campo `observaciones` (concepto de factura)
+
+### Changed
+- refactor(facturaPendiente): Migración completa a arquitectura hexagonal
+  - Eliminación de `FacturaPendiente.kt` (Kotlin) de `core/kotlin/model/view/`
+  - Eliminación de `FacturaPendienteService.java` de `core/service/view/`
+  - Migración de `FacturaPendienteRepository.kt` a Java en `hexagonal/facturaPendiente/infrastructure/persistence/repository/`
+  - Actualización de `SheetService` para usar nuevo servicio hexagonal `FacturaPendienteService`
+  - Migración de uso de `jsonify()` a utilitaria `Jsonifier` en `SheetService`
+
+### Removed
+- Eliminación de tests obsoletos `ChequeraCuotaControllerTest.java`, `ProveedorMovimientoControllerTest.java`
+
+> Basado en análisis profundo de `git diff HEAD` (13 archivos modificados, +120/-156 líneas).
+
+## [3.14.0] - 2026-05-06
+
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 

@@ -52,14 +52,14 @@ import um.tesoreria.core.extern.model.view.PersonaKeyFacultad;
 import um.tesoreria.core.extern.model.view.PreunivCarreraFacultad;
 import um.tesoreria.core.extern.model.view.PreunivMatricResumenFacultad;
 import um.tesoreria.core.extern.model.view.PreunivResumenFacultad;
+import um.tesoreria.core.hexagonal.facturaPendiente.application.service.FacturaPendienteService;
+import um.tesoreria.core.hexagonal.facturaPendiente.domain.model.FacturaPendiente;
 import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
 import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
 import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
-import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.kotlin.model.*;
-import um.tesoreria.core.kotlin.model.view.FacturaPendiente;
 import um.tesoreria.core.model.*;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.model.view.CarreraKey;
@@ -91,6 +91,7 @@ import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
 import um.tesoreria.core.util.ChequeraSerieMapper;
 import um.tesoreria.core.service.*;
+import um.tesoreria.core.util.Jsonifier;
 
 /**
  * @author daniel
@@ -1444,7 +1445,7 @@ public class SheetService {
         int columnaComprobanteNumero = 6;
         int columnaImporteFactura = 7;
         int columnaSaldo = 8;
-        int columnaVencimiento = 9;
+        int columnaFechaVencimiento = 9;
         int columnaObservaciones = 10;
         row = sheet.createRow(++fila);
         this.setCellString(row, columnaRazonSocial, "Razón Social", styleBold);
@@ -1456,11 +1457,11 @@ public class SheetService {
         this.setCellString(row, columnaComprobanteNumero, "Numero", styleBold);
         this.setCellString(row, columnaImporteFactura, "Importe Factura", styleBold);
         this.setCellString(row, columnaSaldo, "Saldo al " + format.format(fechaHasta.withOffsetSameInstant(ZoneOffset.UTC)), styleBold);
-        this.setCellString(row, columnaVencimiento, "Fecha Vencimiento", styleBold);
+        this.setCellString(row, columnaFechaVencimiento, "Fecha Vencimiento", styleBold);
         this.setCellString(row, columnaObservaciones, "Observaciones", styleBold);
 
         for (FacturaPendiente facturaPendiente : facturaPendienteService.findAllFacturasPendientesBetweenDates(fechaDesde, fechaHasta)) {
-            log.debug("FacturaPendiente -> {}", facturaPendiente.jsonify());
+            log.debug("FacturaPendiente -> {}", Jsonifier.builder(facturaPendiente).build());
             BigDecimal importeFactura = facturaPendiente.getImporteFactura();
             BigDecimal importePagado = BigDecimal.ZERO;
             if (facturaPendiente.getImportePagado() != null) {
@@ -1472,13 +1473,15 @@ public class SheetService {
                 row = sheet.createRow(++fila);
                 this.setCellString(row, columnaRazonSocial, facturaPendiente.getRazonSocial(), styleNormal);
                 this.setCellString(row, columnaCUIT, facturaPendiente.getCuit(), styleNormal);
-                this.setCellString(row, columnaCBU, facturaPendiente);
+                this.setCellString(row, columnaCBU, facturaPendiente.getCbu(), styleNormal);
                 this.setCellString(row, columnaFechaComprobante, format.format(Objects.requireNonNull(facturaPendiente.getFechaComprobante()).withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
                 this.setCellString(row, columnaTipoComprobante, facturaPendiente.getComprobante(), styleNormal);
                 this.setCellInteger(row, columnaComprobantePrefijo, facturaPendiente.getPrefijo(), styleNormal);
                 this.setCellLong(row, columnaComprobanteNumero, facturaPendiente.getNumeroComprobante(), styleNormal);
                 this.setCellBigDecimal(row, columnaImporteFactura, facturaPendiente.getImporteFactura(), styleNormal);
                 this.setCellBigDecimal(row, columnaSaldo, saldo, styleNormal);
+                this.setCellString(row, columnaFechaVencimiento, format.format(Objects.requireNonNull(facturaPendiente.getFechaVencimiento()).withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
+                this.setCellString(row, columnaObservaciones, facturaPendiente.getObservaciones(), styleNormal);
             }
         }
 
