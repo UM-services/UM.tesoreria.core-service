@@ -1,9 +1,10 @@
 ---
-title: Consulta de Artículos (Arquitectura Hexagonal v3.13.0)
+title: Consulta de Artículos (Arquitectura Hexagonal v3.16.0)
 ---
 sequenceDiagram
     participant C as Cliente
     participant Ctrl as ArticuloController
+    participant CS as CuentaService
     participant S as ArticuloService
     participant R as JpaArticuloRepositoryAdapter
     participant DB as BaseDeDatos
@@ -16,19 +17,23 @@ sequenceDiagram
     DB-->>R: Page~ArticuloEntity~
     R-->>S: PaginatedResponse~Articulo~
     S-->>Ctrl: PaginatedResponse~ArticuloResponse~
+    Ctrl->>CS: findByNumeroCuenta(numeroCuenta)
+    CS-->>Ctrl: Optional~Cuenta~
     Ctrl-->>C: ResponseEntity~PaginatedResponse~ 200 OK
 
     %% Búsqueda por criterio
-    C->>Ctrl: GET /articulo/search?criterio=nombre
-    Ctrl->>S: searchArticulos("nombre")
-    S->>R: search("nombre")
-    R->>DB: SELECT * FROM articulos WHERE nombre LIKE '%nombre%'
+    C->>Ctrl: POST /articulo/search
+    Ctrl->>S: searchArticulos(conditions)
+    S->>R: search(criterio)
+    R->>DB: SELECT * FROM articulos WHERE condiciones
     DB-->>R: List~ArticuloSearch~
     R-->>S: List~ArticuloSearch~
     S-->>Ctrl: List~ArticuloSearchResponse~
+    Ctrl->>CS: findByNumeroCuenta(numeroCuenta)
+    CS-->>Ctrl: Optional~Cuenta~
     Ctrl-->>C: ResponseEntity~List~ArticuloSearchResponse~~ 200 OK
 
-    %% Consulta general (legacy)
+    %% Consulta general
     C->>Ctrl: GET /articulo/
     Ctrl->>S: getAllArticulos()
     S->>R: findAll()

@@ -2,6 +2,22 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.16.0] - 2026-05-07
+### Added
+- feat(articulo): Enriquecimiento de respuestas con objeto `Cuenta` vía `CuentaService`
+  - Nuevo campo `Cuenta cuenta` en `ArticuloSearchResponse` para incluir datos de cuenta asociada
+  - Nuevo campo `articuloId` en `ArticuloRequest` para especificar ID en creación
+  - Los endpoints `GET /articulo/{id}`, `POST /articulo/search` y `GET /articulo/page` ahora resuelven y adjuntan el objeto `Cuenta` completo cuando `numeroCuenta` está presente
+
+### Changed
+- refactor(articulo): Cambio de `@Data` a `@Getter`/`@Setter` en `Articulo` para mayor control de mutabilidad
+- refactor(articulo): Renombrado de campo `cuenta` a `numeroCuenta` en `ArticuloSearch`, `ArticuloKey`, `ArticuloSearchResponse` y mappers para claridad semántica
+  - Compatibilidad BD asegurada vía `@Column(name = "cuenta")` en `ArticuloKey`
+- refactor(articulo): Migración de `@Data` a `@Getter`/`@Setter` + `@Serial` en `ArticuloKey`
+- refactor(dto): Uso de importación `OffsetDateTime` en lugar de FQCN en `ArticuloSearch` y `ArticuloSearchResponse`
+
+> Basado en análisis profundo de `git diff HEAD` (8 archivos modificados, +72/-27 líneas).
+
 ## [3.15.0] - 2026-05-07
 ### Added
 - feat(facturaPendiente): Nuevo módulo FacturaPendiente con arquitectura hexagonal completa

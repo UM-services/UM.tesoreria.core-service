@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import um.tesoreria.core.hexagonal.articulo.application.service.ArticuloService;
+import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.web.dto.ArticuloRequest;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.web.dto.ArticuloSearchResponse;
@@ -23,6 +24,7 @@ public class ArticuloController {
 
     private final ArticuloService articuloService;
     private final ArticuloDtoMapper articuloDtoMapper;
+    private final CuentaService cuentaService;
     
 
     @PostMapping("/")
@@ -35,14 +37,28 @@ public class ArticuloController {
     @GetMapping("/{id}")
     public ResponseEntity<ArticuloResponse> getArticuloById(@PathVariable Long id) {
         return articuloService.getArticuloById(id)
-                .map(articulo -> new ResponseEntity<>(articuloDtoMapper.toResponse(articulo), HttpStatus.OK))
+                .map(domain -> {
+                    ArticuloResponse dto = articuloDtoMapper.toResponse(domain);
+                    if (dto.getNumeroCuenta() != null) {
+                        cuentaService.findByNumeroCuenta(dto.getNumeroCuenta())
+                                .ifPresent(dto::setCuenta);
+                    }
+                    return new ResponseEntity<>(dto, HttpStatus.OK);
+                })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/search")
     public ResponseEntity<List<ArticuloSearchResponse>> findByStrings(@RequestBody List<String> conditions) {
         List<ArticuloSearchResponse> responses = articuloService.searchArticulos(conditions).stream()
-                .map(articuloDtoMapper::toSearchResponse)
+                .map(domain -> {
+                    ArticuloSearchResponse dto = articuloDtoMapper.toSearchResponse(domain);
+                    if (dto.getNumeroCuenta() != null) {
+                        cuentaService.findByNumeroCuenta(dto.getNumeroCuenta())
+                                .ifPresent(dto::setCuenta);
+                    }
+                    return dto;
+                })
                 .collect(Collectors.toList());
         return new ResponseEntity<>(responses, HttpStatus.OK);
     }
@@ -64,7 +80,14 @@ public class ArticuloController {
         PaginatedResponse<Articulo> domainPage = articuloService.getPaginatedArticulosByTipo(tipo, page, size);
         
         List<ArticuloResponse> responseList = domainPage.getData().stream()
-                .map(articuloDtoMapper::toResponse)
+                .map(domain -> {
+                    ArticuloResponse dto = articuloDtoMapper.toResponse(domain);
+                    if (dto.getNumeroCuenta() != null) {
+                        cuentaService.findByNumeroCuenta(dto.getNumeroCuenta())
+                                .ifPresent(dto::setCuenta);
+                    }
+                    return dto;
+                })
                 .collect(Collectors.toList());
                 
         PaginatedResponse<ArticuloResponse> paginatedResponse = new PaginatedResponse<>(

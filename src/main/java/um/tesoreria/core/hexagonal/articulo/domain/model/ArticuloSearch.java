@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -18,11 +19,11 @@ public class ArticuloSearch {
     private BigDecimal precio;
     private Byte inventariable;
     private Long stockMinimo;
-    private BigDecimal cuenta;
+    private BigDecimal numeroCuenta;
     private String tipo;
     private Byte directo;
     private Byte habilitado;
     private String search;
-    private java.time.OffsetDateTime fechaAuditoria;
+    private OffsetDateTime fechaAuditoria;
     private String usuarioAuditoria;
 }

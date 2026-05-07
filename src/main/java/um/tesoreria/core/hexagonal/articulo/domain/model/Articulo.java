@@ -1,13 +1,11 @@
 package um.tesoreria.core.hexagonal.articulo.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
