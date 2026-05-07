@@ -3,9 +3,8 @@
  */
 package um.tesoreria.core.service.facade;
 
-import um.tesoreria.core.controller.EntregaDetalleController;
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.exception.AsientoException;
-import um.tesoreria.core.exception.CuentaMovimientoException;
 import um.tesoreria.core.exception.EjercicioBloqueadoException;
 import um.tesoreria.core.exception.EjercicioException;
 import um.tesoreria.core.exception.facade.ContableException;
@@ -14,6 +13,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
+import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.service.*;
@@ -23,7 +25,6 @@ import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +34,7 @@ import java.util.Objects;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ContabilidadService {
 
     private final AsientoService asientoService;
@@ -43,17 +45,6 @@ public class ContabilidadService {
     private final ProveedorMovimientoService proveedorMovimientoService;
     private final EntregaDetalleService entregaDetalleService;
     private final EntregaService entregaService;
-
-    public ContabilidadService(AsientoService asientoService, CuentaService cuentaService, EjercicioService ejercicioService, CuentaMovimientoService cuentaMovimientoService, ComprobanteService comprobanteService, ProveedorMovimientoService proveedorMovimientoService, EntregaDetalleService entregaDetalleService, EntregaService entregaService) {
-        this.asientoService = asientoService;
-        this.cuentaService = cuentaService;
-        this.ejercicioService = ejercicioService;
-        this.cuentaMovimientoService = cuentaMovimientoService;
-        this.comprobanteService = comprobanteService;
-        this.proveedorMovimientoService = proveedorMovimientoService;
-        this.entregaDetalleService = entregaDetalleService;
-        this.entregaService = entregaService;
-    }
 
     public static Boolean isSaldoDeudor(BigDecimal cuenta) {
         List<Integer> digitos = List.of(1, 4);
@@ -86,7 +77,7 @@ public class ContabilidadService {
         Ejercicio ejercicio = null;
         try {
             ejercicio = ejercicioService.findByFecha(desde);
-            logEjercicio(ejercicio);
+            log.debug("Ejercicio -> {}", ejercicio.jsonify());
             OffsetDateTime fechaInicio = Objects.requireNonNull(ejercicio.getFechaInicio()).withOffsetSameInstant(ZoneOffset.UTC);
             OffsetDateTime fechaFinal = Objects.requireNonNull(ejercicio.getFechaFinal()).withOffsetSameInstant(ZoneOffset.UTC);
             if (desde.isBefore(fechaInicio)) {
@@ -96,6 +87,7 @@ public class ContabilidadService {
                 ejercicio = null;
             }
         } catch (EjercicioException e) {
+            log.debug(e.getMessage());
         }
         return ejercicio;
     }
@@ -119,8 +111,8 @@ public class ContabilidadService {
 
     public List<BigDecimal> saldoPeriodo(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
         List<CuentaMovimiento> saldos = cuentaMovimientoService.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, apertura);
-        BigDecimal saldoDeudor = saldos.stream().filter(total -> total.getDebita() == 1).map(total -> total.getImporte()).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal saldoAcreedor = saldos.stream().filter(total -> total.getDebita() == 0).map(total -> total.getImporte()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal saldoDeudor = saldos.stream().filter(total -> total.getDebita() == 1).map(CuentaMovimiento::getImporte).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal saldoAcreedor = saldos.stream().filter(total -> total.getDebita() == 0).map(CuentaMovimiento::getImporte).reduce(BigDecimal.ZERO, BigDecimal::add);
         return Arrays.asList(saldoDeudor, saldoAcreedor);
     }
 
@@ -162,19 +154,17 @@ public class ContabilidadService {
             // Delete asiento if exists
             try {
                 Asiento asiento = asientoService.findByAsiento(fechaContable, ordenContable);
-                logAsiento(asiento);
-                if (asiento != null) {
-                    asientoService.deleteByAsientoId(asiento.getAsientoId());
-                }
+                log.debug("Asiento -> {}", asiento.jsonify());
+                asientoService.deleteByAsientoId(asiento.getAsientoId());
             } catch (AsientoException ignored) {
-                // No need to handle - asiento doesn't exist
+                log.debug(ignored.getMessage());
             }
 
             // Batch delete cuenta movimientos
             List<Long> cuentaMovimientoIds = cuentaMovimientoService
                 .findAllByAsiento(fechaContable, ordenContable, item, 2)
                 .stream()
-                .peek(this::logCuentaMovimiento)
+//                .peek(this::logCuentaMovimiento)
                 .map(CuentaMovimiento::getCuentaMovimientoId)
                 .toList();
             
@@ -188,24 +178,6 @@ public class ContabilidadService {
         } catch (Exception e) {
             log.error("Unexpected error in deleteAsientoDesde", e);
             return false;
-        }
-    }
-
-    private void logAsiento(Asiento asiento) {
-        log.debug("Processing logAsiento");
-        try {
-            log.debug("Asiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asiento));
-        } catch (JsonProcessingException e) {
-            log.debug("Asiento jsonify error -> {}", e.getMessage());
-        }
-    }
-
-    private void logCuentaMovimiento(CuentaMovimiento movimiento) {
-        log.debug("Processing logCuentaMovimiento");
-        try {
-            log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(movimiento));
-        } catch (JsonProcessingException e) {
-            log.debug("CuentaMovimiento jsonify error -> {}", e.getMessage());
         }
     }
 
@@ -257,6 +229,7 @@ public class ContabilidadService {
                 return true;
             }
         } catch (AsientoException e) {
+            log.debug(e.getMessage());
         }
         return false;
     }
@@ -267,42 +240,17 @@ public class ContabilidadService {
         if (ejercicio.getBloqueado() == 1) {
             throw new EjercicioBloqueadoException(fechaContable);
         }
-        Integer item = 0;
+        int item = 0;
 
         Asiento asiento = new Asiento(null, fechaContable, ordenContable, vinculo, null, null, null, null);
-        try {
-            log.debug("Asiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asiento));
-        } catch (JsonProcessingException e) {
-            log.debug("Asiento=JsonException");
-        }
         asiento = asientoService.add(asiento);
-        try {
-            log.debug("Asiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asiento));
-        } catch (JsonProcessingException e) {
-            log.debug("Asiento=JsonException");
-        }
 
         for (CuentaMovimiento cuentaMovimiento : cuentaMovimientos) {
-            try {
-                log.debug("CuentaMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("CuentaMovimiento=JsonException");
-            }
             cuentaMovimiento.setFechaContable(fechaContable);
             cuentaMovimiento.setOrdenContable(ordenContable);
             cuentaMovimiento.setItem(++item);
             cuentaMovimiento.setProveedorMovimientoId(proveedorMovimientoId);
-            try {
-                log.debug("CuentaMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("CuentaMovimiento=JsonException");
-            }
             cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
-            try {
-                log.debug("CuentaMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("CuentaMovimiento=JsonException");
-            }
         }
         deleteAsientoDesde(fechaContable, ordenContable, item + 1);
 
@@ -318,30 +266,14 @@ public class ContabilidadService {
 
 //            ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoIdFactura);
             ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
-            try {
-                log.debug("ProveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("ProveedorMovimiento -> error");
-            }
-            if (proveedorMovimiento.getFechaComprobante().isBefore(OffsetDateTime.of(2023, 3, 1, 0, 0, 0, 0, ZoneOffset.UTC))) {
+            if (Objects.requireNonNull(proveedorMovimiento.getFechaComprobante()).isBefore(OffsetDateTime.of(2023, 3, 1, 0, 0, 0, 0, ZoneOffset.UTC))) {
                 log.debug("Movimiento previo al 01/03/2023");
                 continue;
 //                return false;
             }
-            for (ProveedorArticulo proveedorArticulo : proveedorMovimiento.getProveedorArticulos()) {
-                try {
-                    log.debug("ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
-                } catch (JsonProcessingException e) {
-                    log.debug("ProveedorArticulo -> error");
-                }
-
+            for (ProveedorArticulo proveedorArticulo : Objects.requireNonNull(proveedorMovimiento.getProveedorArticulos())) {
                 for (EntregaDetalle entregaDetalle : entregaDetalleService.findAllByProveedorArticuloId(proveedorArticulo.getProveedorArticuloId())) {
-                    try {
-                        log.debug("EntregaDetalle -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(entregaDetalle));
-                    } catch (JsonProcessingException e) {
-                        log.debug("EntregaDetalle -> error");
-                    }
-                    if (entregaDetalle.getEntrega().getFechaContable().compareTo(proveedorMovimiento.getFechaComprobante()) == 0) {
+                    if (Objects.requireNonNull(Objects.requireNonNull(entregaDetalle.getEntrega()).getFechaContable()).isEqual(proveedorMovimiento.getFechaComprobante())) {
                         log.debug("Fecha de comprobante y de asiento de asignación de costos iguales");
                         continue;
 //                        return false;
@@ -350,7 +282,7 @@ public class ContabilidadService {
                     OffsetDateTime targetDate = proveedorMovimiento.getFechaComprobante();
                     Integer sourceNumber = entregaDetalle.getEntrega().getOrdenContable();
                     var next = this.nextAsiento(targetDate, null);
-                    Integer targetNumber = next.getOrdenContable();
+                    int targetNumber = next.getOrdenContable();
                     // Anulando relación con el asiento
                     log.debug("Anulando relación con el asiento");
                     var entrega = entregaDetalle.getEntrega();
@@ -359,12 +291,12 @@ public class ContabilidadService {
                     entrega = entregaService.update(entrega, entrega.getEntregaId());
                     // Actualizando el asiento
                     for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService.findAllByAsiento(sourceDate, sourceNumber, 0, 2)) {
-                        logCuentaMovimiento(cuentaMovimiento);
+                        log.debug("CuentaMovimiento -> {}", cuentaMovimiento.jsonify());
                         log.debug("Actualizando el asiento");
                         cuentaMovimiento.setFechaContable(targetDate);
                         cuentaMovimiento.setOrdenContable(targetNumber);
                         cuentaMovimiento = cuentaMovimientoService.update(cuentaMovimiento, cuentaMovimiento.getCuentaMovimientoId());
-                        logCuentaMovimiento(cuentaMovimiento);
+                        log.debug("CuentaMovimiento -> {}", cuentaMovimiento.jsonify());
                     }
                     // Actualizando relación con el asiento
                     log.debug("Actualizando relación con el asiento");
@@ -375,14 +307,6 @@ public class ContabilidadService {
             }
         }
         return true;
-    }
-
-    private void logEjercicio(Ejercicio ejercicio) {
-        try {
-            log.debug("Ejercicio -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(ejercicio));
-        } catch (JsonProcessingException e) {
-            log.debug("Ejercicio jsonify error -> {}", e.getMessage());
-        }
     }
 
 }

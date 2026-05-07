@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -108,6 +109,6 @@ data class ChequeraSerieReemplazo(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "CSR_Geo_ID", insertable = false, updatable = false)
-    var geografica: Geografica? = null
+    var geografica: GeograficaEntity? = null
 
 ) : Auditable()

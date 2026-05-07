@@ -2,9 +2,210 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.5.2**
+**Versión actual (SemVer): 3.15.0**
+
+## Novedades 3.15.0 (verificado en código)
+- feat(facturaPendiente): Nuevo módulo FacturaPendiente con arquitectura hexagonal completa
+  - Modelo de dominio: `FacturaPendiente` con campos `proveedorMovimientoId`, `razonSocial`, `cuit`, `cbu`, `fechaComprobante`, `fechaVencimiento`, `observaciones`, `comprobante`, `debita`, `prefijo`, `numeroComprobante`, `importeFactura`, `importePagado`
+  - Puertos de entrada: `GetFacturasPendientesUseCase` con método `getFacturasPendientes(OffsetDateTime, OffsetDateTime)`
+  - Puerto de salida: `FacturaPendienteRepository` con métodos `updateFechaPagoInProveedorPago()`, `findFacturasPendientes(OffsetDateTime, OffsetDateTime)`
+  - Caso de uso: `GetFacturasPendientesUseCaseImpl` con lógica de negocio
+  - Servicio de aplicación: `FacturaPendienteService` con método `findAllFacturasPendientesBetweenDates`
+  - Adaptador JPA: `JpaFacturaPendienteRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `FacturaPendienteEntity` con anotaciones Lombok e `@Immutable`
+  - Repositorio JPA: `JpaFacturaPendienteRepository` con consultas nativas
+- feat(sheet): Actualización de `SheetService` para nuevos campos en hojas de cálculo
+  - Agregado campo `cbu` en generación de hojas
+  - Agregado campo `fechaVencimiento` con formato UTC
+  - Agregado campo `observaciones` (concepto de factura)
+  - Migración de uso de `jsonify()` a utilitaria `Jsonifier`
+- refactor(facturaPendiente): Migración completa a arquitectura hexagonal
+  - Eliminación de `FacturaPendiente.kt` (Kotlin) de `core/kotlin/model/view/`
+  - Eliminación de `FacturaPendienteService.java` de `core/service/view/`
+  - Migración de `FacturaPendienteRepository.kt` a Java en `hexagonal/facturaPendiente/infrastructure/persistence/repository/`
+  - Actualización de `SheetService` para usar nuevo servicio hexagonal
+- Removed: Eliminación de tests obsoletos `ChequeraCuotaControllerTest.java`, `ProveedorMovimientoControllerTest.java`
+
+> Basado en análisis profundo de `git diff HEAD` (13 archivos modificados, +120/-156 líneas).
+
+## Novedades 3.14.0 (verificado en código)
+- feat(ubicacion): Nuevo módulo Ubicacion con arquitectura hexagonal
+  - Modelo de dominio: `Ubicacion` con campos `ubicacionId`, `nombre`, `dependenciaId`, `geograficaId`
+  - Puertos de entrada: `GetAllUbicacionesUseCase`, `GetUbicacionesBySedeUseCase`
+  - Puerto de salida: `UbicacionRepository` con métodos `findAll()`, `findAllByGeograficaId(Integer)`
+  - Casos de uso: `GetAllUbicacionesUseCaseImpl`, `GetUbicacionesBySedeUseCaseImpl`
+  - Servicio de aplicación: `UbicacionService` con métodos `findAll()`, `findAllBySede(Integer)`
+  - Adaptador JPA: `JpaUbicacionRepositoryAdapter` con mapeo a entidad JPA
+  - Mapper: `UbicacionMapper` para conversión dominio ↔ entidad
+  - Entidad JPA: `UbicacionEntity` con anotaciones Lombok
+  - Controlador REST: `UbicacionController` con endpoints GET
+  - DTO: `UbicacionResponse` para respuestas HTTP
+- feat(ubicacionArticulo): Nuevo módulo UbicacionArticulo con arquitectura hexagonal
+  - Modelo de dominio: `UbicacionArticulo` con relaciones a `Ubicacion`, `Articulo`, `Cuenta`
+  - Puertos de entrada: `GetAllUbicacionArticulosUseCase`, `GetUbicacionArticuloUseCase`, `GetUbicacionArticulosByArticuloUseCase`, `SaveUbicacionArticuloUseCase`
+  - Puerto de salida: `UbicacionArticuloRepository` con métodos CRUD y búsquedas
+  - Casos de uso: `GetAllUbicacionArticulosUseCaseImpl`, `GetUbicacionArticuloUseCaseImpl`, `GetUbicacionArticulosByArticuloUseCaseImpl`, `SaveUbicacionArticuloUseCaseImpl`
+  - Servicio de aplicación: `UbicacionArticuloService` con métodos `findAll()`, `save()`, `findAllByArticuloId()`, `getByUbicacionAndArticulo()`
+  - Adaptador JPA: `JpaUbicacionArticuloRepositoryAdapter` con lógica de upsert
+  - Mapper: `UbicacionArticuloMapper` para conversión dominio ↔ entidad
+  - Entidad JPA: `UbicacionArticuloEntity` con restricción única `(ubicacionId, articuloId)`
+  - Controlador REST: `UbicacionArticuloController` con endpoints CRUD
+  - DTOs: `UbicacionArticuloRequest`, `UbicacionArticuloResponse`
+- refactor(core): `SheetService` actualizado para usar nuevos modelos de dominio
+- refactor(model): `Entrega.kt` actualizado con cambios en modelo
+- refactor(model): `FacturaPendiente.kt` actualizado con nuevos campos
+- refactor(dto): `AsignacionCostoDto` y `CostoParameterDto` actualizados
+
+> Basado en análisis profundo de `git diff HEAD` (47 archivos modificados, +723/-246 líneas).
+
+## Novedades 3.13.0 (verificado en código)
+- feat(articulo): Implementación de paginación y búsqueda en módulo Artículo
+  - Nuevo puerto de entrada: `GetPaginatedArticulosUseCase` con método `getPaginated(int page, int size)`
+  - Nuevo caso de uso: `GetPaginatedArticulosUseCaseImpl` con implementación de paginación usando `Pageable`
+  - Nuevo caso de uso: `SearchArticulosUseCaseImpl` para búsqueda de artículos por criterio
+  - Nuevo modelo: `ArticuloSearch` para criterios de búsqueda con campo `search`
+  - Nuevos métodos en `ArticuloRepository`: `findPaginated(Pageable)`, `search(String criterio)`
+  - Nuevo endpoint en `ArticuloController`: `GET /articulo/page?page=X&size=Y` que retorna `PaginatedResponse<ArticuloResponse>`
+  - Nuevo endpoint en `ArticuloController`: `GET /articulo/search?criterio=X` para búsqueda
+  - Nuevo DTO: `ArticuloSearchResponse` para respuestas de búsqueda
+- feat(proveedor): Mejoras en módulo Proveedor
+  - Actualización de `ProveedorSearch` con nuevos campos para búsquedas avanzadas
+  - Nuevos endpoints en `ProveedorController` para búsquedas
+- feat(articulo): Completitud de migración hexagonal (commit afbeb02)
+  - `ArticuloKeyService.java` eliminado (funcionalidad movida a casos de uso específicos)
+  - `ArticuloKey.java`, `ArticuloKeyRepository.java`, `ArticuloKeyRepositoryCustom.java` movidos a `persistence/repository/`
+  - Mappers actualizados para soportar nuevos modelos
+
+> Basado en análisis profundo de `git diff HEAD` (24 archivos modificados, +160/-45 líneas) y commits afbeb02, 4b9e84e.
+
+## Novedades 3.12.0 (verificado en código)
+- feat(articulo): Completitud de migración de módulo Artículo a arquitectura hexagonal
+  - Nuevos modelos de dominio: `Articulo` y `ArticuloSearch` con Lombok (`@Data`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Puertos de entrada: `CreateArticuloUseCase`, `DeleteArticuloUseCase`, `GetAllArticulosUseCase`, `GetArticuloByIdUseCase`, `GetNewArticuloUseCase`, `SearchArticulosUseCase`, `UpdateArticuloUseCase`
+  - Puerto de salida: `ArticuloRepository` con métodos `create`, `findById`, `findAll`, `update`, `deleteById`, `findLast`
+  - Casos de uso: Implementaciones completas en `application/usecases/` (`CreateArticuloUseCaseImpl`, `DeleteArticuloUseCaseImpl`, etc.)
+  - Servicio de aplicación: `ArticuloService` refactorizado con inyección de casos de uso y `Optional<Articulo>` en retornos
+  - Adaptador JPA: `JpaArticuloRepositoryAdapter` con implementación completa de `ArticuloRepository`
+  - Mappers: `ArticuloMapper` (dominio ↔ JPA Entity) y `ArticuloDtoMapper` (dominio ↔ DTO)
+  - DTOs: `ArticuloRequest`, `ArticuloResponse`, `ArticuloSearchResponse` para entrada/salida
+  - Controlador REST: `ArticuloController` migrado con endpoints CRUD y manejo de `ResponseEntity`
+  - `JpaArticuloRepository` simplificado a solo consultas específicas
+- refactor(core): `CostoParameterDto` y `CostoParameterService` actualizados para usar modelo de dominio `Articulo`
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados).
+
+## Novedades 3.11.0 (verificado en código)
+- feat(articulo): Migración de módulo Artículo a arquitectura hexagonal
+  - Nueva entidad JPA: `ArticuloEntity` en `hexagonal/articulo/infrastructure/persistence/entity/` con anotaciones Lombok (`@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Nuevo repositorio: `JpaArticuloRepository` en `hexagonal/articulo/infrastructure/persistence/repository/` con métodos `findByArticuloId`, `findTopByOrderByArticuloIdDesc`
+  - Nuevo servicio de aplicación: `ArticuloService` en `hexagonal/articulo/application/service/` con lógica de negocio
+  - Nuevo controlador REST: `ArticuloController` en `hexagonal/articulo/infrastructure/web/controller/` migrado con `@RequiredArgsConstructor`
+  - Eliminación de `Articulo.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `ArticuloRepository.java` del paquete `core/repository/`
+  - Eliminación de `ArticuloService.java` del paquete `core/service/`
+  - Eliminación de `ArticuloController.java` del paquete `core/controller/`
+  - Actualización de referencias en `EntregaDetalle.kt`, `ProveedorArticulo.kt`, `UbicacionArticulo.java`, `AsignacionCostoDto.java`, `CostoParameterDto.java`, `CostoParameterService.java`
+- fix(auth): Corrección de espacio extra en `ResponseStatusException` en `AuthController`
+
+> Basado en análisis profundo de `git diff HEAD` (14 archivos modificados, +156/-98 líneas).
+
+## Novedades 3.10.0 (verificado en código)
+- feat(proveedor): Mejora de modelo de datos y refactorización de DTOs en módulo Proveedor
+  - Renombrado de campo `cuenta` a `numeroCuenta` en `ProveedorSearch`, `ProveedorSearchEntity` y `ProveedorSearchResponse` para mayor claridad
+  - Nuevo campo `cbu` en `ProveedorSearch`, `ProveedorSearchEntity`, `ProveedorResponse` y `ProveedorSearchResponse`
+  - Nuevo campo `Cuenta cuenta` (objeto dominio) en `ProveedorResponse` y `ProveedorSearchResponse`
+  - Refactorización de DTOs (`ProveedorResponse`, `ProveedorSearchResponse`) para usar patrón Builder de Lombok (`@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Refactorización de `ProveedorDtoMapper` para usar `builder()` en lugar de setters manuales
+  - Actualización de `ProveedorMapper` para mapear nuevos campos (`numeroCuenta`, `cbu`)
+  - Cambio de anotación en `ProveedorSearchEntity` y DTOs: de `@Data` a `@Getter`/`@Setter` para mayor control
+
+> Basado en análisis profundo de `git diff HEAD` (6 archivos modificados, +67/-44 líneas).
+
+## Novedades 3.9.0 (verificado en código)
+- feat(proveedor): Implementación de paginación en módulo Proveedor
+  - Nuevo puerto de entrada: `GetPaginatedProveedoresUseCase` con método `getPaginatedProveedores(int page, int size)`
+  - Nuevo modelo genérico: `PaginatedResponse<T>` en `core/model/` para respuestas paginadas
+  - Nuevo caso de uso: `GetPaginatedProveedoresUseCaseImpl` con implementación de paginación usando `Pageable`
+  - Actualización de puerto de salida `ProveedorRepository` con método `findAll(Pageable pageable)`
+  - Nuevo endpoint en `ProveedorController`: `GET /proveedor/page?page=X&size=Y` que retorna `PaginatedResponse<ProveedorResponse>`
+  - Actualización de `ProveedorService` con método `getPaginated(int page, int size)`
+
+> Basado en análisis profundo de `git diff HEAD` (7 archivos modificados, +101 líneas).
+
+## Novedades 3.8.0 (verificado en código)
+- feat(cuenta): Implementación completa de casos de uso CRUD para módulo Cuenta
+  - Nuevos casos de uso: `CreateCuentaUseCase`, `DeleteCuentaUseCase`, `GetAllCuentasUseCase`, `GetCuentaByCuentaContableIdUseCase`, `GetCuentaByNumeroCuentaUseCase`, `RecalculaGradosUseCase`, `SaveAllCuentasUseCase`, `SearchCuentasUseCase`, `UpdateCuentaUseCase`
+  - Nuevos DTOs: `CuentaRequest`, `CuentaResponse`, `CuentaSearchResponse`
+  - Nuevo mapper: `CuentaDtoMapper` para conversión dominio ↔ DTO
+  - Controlador `CuentaController` actualizado con todos los endpoints REST
+- feat(proveedor): Mejora de módulo Proveedor con búsqueda avanzada
+  - Nueva entidad `ProveedorSearchEntity` para búsquedas
+  - Nuevo repositorio `JpaProveedorSearchRepository` con consultas personalizadas
+  - Refactorización de paquetes: adaptador movido a `infrastructure/persistence/adapter/`
+  - Actualización de `ProveedorMapper` y `GetAllProveedoresUseCaseImpl`
+- refactor(service): Actualización de `BalanceService`, `ContabilidadService`, `SheetService` para usar nuevas estructuras hexagonales
+- refactor(model): Actualización de `Ejercicio.kt` con cambios en modelo
+
+> Basado en análisis profundo de `git diff HEAD` (47 archivos modificados, +894/-447 líneas).
+
+## Novedades 3.7.0 (verificado en código)
+- feat(hexagonal): Nuevo módulo Cuenta con arquitectura hexagonal
+  - Entidad JPA: `CuentaEntity` con anotaciones Lombok (`@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Repositorio: `CuentaRepository` con métodos `findAllByGradoAndNumeroCuentaGreaterThan`, `findAllByNumeroCuentaIn`, `findAllByGradoAndNumeroCuentaBetween`
+  - Servicio de aplicación: `CuentaService` con lógica de negocio y método `recalculaGrados()`
+  - Controlador REST: `CuentaController` con endpoints CRUD y búsquedas
+  - Integración con `CuentaSearchService` para búsquedas avanzadas por condiciones
+  - Relación `@OneToOne` con `GeograficaEntity`
+- refactor(cuenta): Migración completa de módulo Cuenta a arquitectura hexagonal
+  - Eliminación de `Cuenta.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `CuentaRepository.java` del paquete `core/repository/`
+  - Eliminación de `CuentaService.java` del paquete `core/service/`
+  - Eliminación de `CuentaController.java` del paquete `core/controller/`
+  - Nueva estructura en `hexagonal/cuenta/` con capas domain, application, infrastructure
+  - Actualización de servicios externos (`BalanceService`, `CompraService`, `ContabilidadService`) para usar nueva estructura
+- refactor(model): Migración de modelos Kotlin a Java en paquete `core/kotlin/model/`
+  - `Articulo.kt`, `Bancaria.kt`, `BancoMovimiento.kt`, `CuentaMovimiento.kt`, `Dependencia.kt`, `Setup.kt`, `Valor.kt`
+  - Actualización de `UbicacionArticulo.java` y `CuentaMovimientoAsiento.java`
+
+> Basado en análisis profundo de `git diff HEAD` (19 archivos modificados, +161/-146 líneas).
+
+## Novedades 3.6.0 (verificado en código)
+- feat(hexagonal): Nuevo módulo Auth con arquitectura hexagonal para autenticación
+  - Modelo de dominio: `UsuarioAuth` con validación de login y password (SHA-256)
+  - Caso de uso: `LoginUseCaseImpl` con lógica de autenticación robusta
+  - Servicio de aplicación: `AuthService` como fachada del dominio
+  - Adaptador JPA: `JpaUsuarioAuthRepositoryAdapter` con mappers
+  - Controlador REST: `AuthController` con endpoints de login
+  - DTOs: `LoginRequest` y `LoginResponse` para entrada/salida
+- feat(hexagonal): Nuevo módulo Geografica con arquitectura hexagonal
+  - Modelo de dominio: `Geografica` para entidades geográficas
+  - Casos de uso: `GetAllGeograficasUseCase`, `GetGeograficaByIdUseCase`, `GetGeograficasBySedeUseCase`
+  - Servicio de aplicación: `GeograficaService` con integración a servicios existentes
+  - Adaptador JPA: `JpaGeograficaRepositoryAdapter` con `GeograficaEntity`
+  - Controlador REST: `GeograficaController` migrado a arquitectura hexagonal
+  - DTO: `GeograficaResponse` para respuestas HTTP
+- feat(hexagonal): Implementación completa del módulo Proveedor con arquitectura hexagonal
+  - Modelos de dominio: `Proveedor` y `ProveedorSearch` con Lombok
+  - Puertos de entrada: `CreateProveedorUseCase`, `DeleteProveedorUseCase`, `GetAllProveedoresUseCase`, `GetLastProveedorUseCase`, `GetProveedorByCuitUseCase`, `GetProveedorByIdUseCase`, `SearchProveedoresUseCase`, `UpdateProveedorUseCase`
+  - Puerto de salida: `ProveedorRepository` con métodos CRUD completos
+  - Casos de uso: Implementaciones completas en `application/usecases/`
+  - Servicio de aplicación: `ProveedorService` refactorizado con `Optional<Proveedor>` en retornos
+  - Adaptador JPA: `JpaProveedorRepositoryAdapter` con implementación completa
+  - Mappers: `ProveedorMapper` (dominio ↔ JPA) y `ProveedorDtoMapper` (dominio ↔ DTO)
+  - DTOs: `ProveedorRequest`, `ProveedorResponse`, `ProveedorSearchResponse`
+  - Controlador REST: `ProveedorController` migrado con manejo de `ResponseEntity` y `Optional`
+- refactor(model): Migración de `Geografica.kt` (Kotlin) a `GeograficaEntity.java`
+  - Eliminación de modelo Kotlin en paquete `core/kotlin/model/`
+  - Creación de entidad JPA en `hexagonal/geografica/infrastructure/persistence/entity/`
+  - Actualización de `CursoHaberes.java` para usar `GeograficaEntity` en lugar de `Geografica`
+- refactor(proveedor): Reestructuración completa de paquetes de Proveedor a arquitectura hexagonal
+  - Migración de servicios y repositorios al paquete `hexagonal/proveedor/`
+  - Nuevos modelos de dominio reemplazando entidades en capa de dominio
+  - Mappers agregados para conversión entre capas
+
+> Basado en análisis profundo de `git diff HEAD` (55 archivos modificados).
 
 ## Novedades 3.5.2 (verificado en código)
 - chore(deps): Actualización de Spring Boot de 4.0.2 a 4.0.5
@@ -221,7 +422,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.2
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.0.5
+- Spring Boot: 4.0.6
 - Spring Cloud: 2025.1.0
 - Kotlin: 2.3.20
 - MySQL Connector: 9.6.0
@@ -431,10 +632,22 @@ src/
 ├── main/
 │   ├── java/
 │   │   └── um/tesoreria/core/
-│   │       ├── controller/
-│   │       ├── service/
-│   │       ├── repository/
-│   │       ├── model/
+│   │       ├── hexagonal/
+│   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
+│   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
+│   │       │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
+│   │       │   ├── articulo/          # Módulo Artículo (v3.13.0)
+│   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
+│   │       │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
+│   │       │   ├── persona/           # Módulo Persona (v3.1.0)
+│   │       │   ├── auth/              # Módulo Auth (v3.6.0)
+│   │       │   ├── geografica/        # Módulo Geografica (v3.6.0)
+│   │       │   ├── proveedor/         # Módulo Proveedor (v3.9.0)
+│   │       │   └── matriculacionContext/
+│   │       ├── model/                 # Modelos legacy
+│   │       ├── service/               # Servicios legacy
+│   │       ├── controller/             # Controladores legacy
+│   │       └── repository/            # Repos legacy
 │   └── kotlin/
 │       └── um/tesoreria/core/
 │           └── model/
@@ -470,11 +683,11 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 # UM Tesorería Core Service
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.5.2-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.15.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -494,7 +707,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 
 ## Tecnologías Utilizadas
 - Java 25
-- Spring Boot 4.0.5
+- Spring Boot 4.0.6
 - Spring Cloud 2025.1.0
 - Kotlin 2.3.20
 - JPA/Hibernate
@@ -516,7 +729,7 @@ src/
 │   │               ├── model/            # Modelos de datos
 │   │               ├── configuration/    # Configuraciones
 │   │               └── hexagonal/        # Arquitectura hexagonal
-│   │                   ├── persona/
+│   │                   ├── persona/           # Módulo Persona (v3.1.0)
 │   │                   │   ├── application/
 │   │                   │   │   └── service/
 │   │                   │   └── infrastructure/
@@ -525,19 +738,83 @@ src/
 │   │                   │       │   └── repository/
 │   │                   │       └── web/
 │   │                   │           └── controller/
-│   │                   └── chequeraCuota/        # Módulo ChequeraCuota (v3.2.0)
-│   │                       ├── domain/
-│   │                       │   ├── model/        # Entidades de dominio
-│   │                       │   └── ports/        # Puertos (interfaces)
-│   │                       │       ├── in/       # Puertos de entrada
-│   │                       │       └── out/      # Puertos de salida
-│   │                       └── infrastructure/
-│   │                           ├── persistence/
-│   │                           │   ├── repository/   # Adaptadores JPA
-│   │                           │   └── mapper/       # Mappers
-│   │                           └── application/
-│   │                               └── service/      # Servicios de aplicación
-│   │                   └── matriculacionContext/  # Módulo MatriculacionContext (v3.5.0)
+│   │                   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/        # Entidades de dominio
+│   │                   │   │   └── ports/        # Puertos (interfaces)
+│   │                   │   │       ├── in/       # Puertos de entrada
+│   │                   │   │       └── out/      # Puertos de salida
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── repository/   # Adaptadores JPA
+│   │                   │       │   └── mapper/       # Mappers
+│   │                   │       └── application/
+│   │                   │           └── service/      # Servicios de aplicación
+│   │                   ├── facturaPendiente/ # Módulo FacturaPendiente (v3.15.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/
+│   │                   │   │   └── ports/
+│   │                   │   │       ├── in/
+│   │                   │   │       └── out/
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/
+│   │                   │       │   ├── repository/
+│   │                   │       │   └── mapper/
+│   │                   │       └── application/
+│   │                   │           └── service/
+│   │                   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/
+│   │                   │   │   └── ports/
+│   │                   │   │       ├── in/
+│   │                   │   │       └── out/
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/
+│   │                   │       │   ├── repository/
+│   │                   │       │   └── mapper/
+│   │                   │       └── web/
+│   │                   │           └── controller/
+│   │                   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
+│   │                   │   ├── domain/
+│   │                   │   │   ├── model/
+│   │                   │   │   └── ports/
+│   │                   │   │       ├── in/
+│   │                   │   │       └── out/
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/
+│   │                   │       │   ├── repository/
+│   │                   │       │   └── mapper/
+│   │                   │       └── web/
+│   │                   │           └── controller/
+│   │                   ├── articulo/          # Módulo Artículo (v3.13.0)
+│   │                   │   ├── domain/
+│   │                   │   │   └── model/        # Entidad de dominio
+│   │                   │   ├── application/
+│   │                   │   │   └── service/      # Servicio de aplicación
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/     # Entidad JPA
+│   │                   │       │   └── repository/ # Repositorio adaptador
+│   │                   │       └── web/
+│   │                   │           └── controller/ # Controlador REST
+│   │                   ├── cuenta/            # Módulo Cuenta (v3.8.0)
+│   │                   │   ├── domain/
+│   │                   │   │   └── model/        # Entidad de dominio
+│   │                   │   ├── application/
+│   │                   │   │   └── service/      # Servicio de aplicación
+│   │                   │   └── infrastructure/
+│   │                   │       ├── persistence/
+│   │                   │       │   ├── entity/     # Entidad JPA
+│   │                   │       │   └── repository/ # Adaptador JPA
+│   │                   │       └── web/
+│   │                   │           └── controller/ # Controlador REST
+│   │                   ├── auth/              # Módulo Auth (v3.6.0)
+│   │                   ├── geografica/        # Módulo Geografica (v3.6.0)
+│   │                   ├── proveedor/         # Módulo Proveedor (v3.9.0)
+│   │                   └── matriculacionContext/  # Módulo MatriculacionContext (v3.8.0)
 │   │                       ├── domain/
 │   │                       │   ├── model/        # Entidades de dominio
 │   │                       │   └── ports/        # Puertos (interfaces)

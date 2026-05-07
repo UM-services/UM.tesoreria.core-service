@@ -16,9 +16,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.kotlin.model.Facultad;
-import um.tesoreria.core.kotlin.model.Geografica;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.util.Jsonifier;
 
@@ -110,7 +110,7 @@ public class Contrato extends Auditable implements Serializable {
 
     @OneToOne(optional = true)
 	@JoinColumn(name = "con_geo_id", insertable = false, updatable = false)
-	private Geografica geografica;
+	private GeograficaEntity geografica;
 
     @OneToOne(optional = true)
     @JoinColumns({

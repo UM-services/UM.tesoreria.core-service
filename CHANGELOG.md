@@ -2,493 +2,258 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
-El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [3.5.2] - 2026-04-04
-### Changed
-- chore(deps): Actualización de Spring Boot de 4.0.2 a 4.0.5
-- chore(deps): Actualización de Kotlin de 2.3.10 a 2.3.20
-- chore(deps): Actualización de log4j2 de 4.0.2 a 4.0.5
-- chore(deps): Actualización de springdoc-openapi de 3.0.1 a 3.0.2
-- chore(deps): Actualización de openpdf de 3.0.0 a 3.0.3
-- chore(deps): Actualización de json-path de 2.10.0 a 3.0.0
-- chore(ci): Actualización de GitHub Actions (checkout v4→v6, setup-java v4→v5, cache v4→v5, login-action v3→v4, metadata-action v5→v6, buildx-action v3→v4, build-push-action v6→v7, deploy-pages v4→v5)
-- feat(deps): Nueva dependencia commons-fileupload 1.6.0
-
-> Basado en análisis de `git diff HEAD` (cambios staged) y `pom.xml`.
-
-## [3.5.1] - 2026-03-14
-### Changed
-- refactor(model): Migración de FacturacionElectronica de Kotlin a Java
-  - Eliminación de `FacturacionElectronica.kt` (modelo Kotlin)
-  - Creación de `FacturacionElectronica.java` con anotaciones Lombok (@Getter, @Setter, @Builder, @NoArgsConstructor, @AllArgsConstructor)
-  - Nuevo método `jsonify()` para logging estructurado
-- refactor(controller): Uso de `ResponseEntity.ok()` en lugar de `new ResponseEntity<>()` en FacturacionElectronicaController
-  - Simplificación del código y mejor legibilidad
-- refactor(service): Uso de utilitaria `Jsonifier` en lugar de `JsonMapper` directamente
-  - FacturacionElectronicaService ahora usa `Jsonifier.builder()` para logging
-  - ChequeraPagoService eliminación de import `JsonMapper` sin usar
-- refactor(config): Nueva configuración de Jackson en bootstrap.yml
-  - `spring.jackson.deserialization.fail-on-null-for-primitives: false`
-
-> Basado en análisis profundo de `git diff HEAD` (cambios staged).
-
-## [3.5.0] - 2026-03-13
+## [3.15.0] - 2026-05-07
 ### Added
-- feat(model): Agregado campo `hpum` (Byte) en PersonaEntity para nuevo indicador de persona
-- feat(model): Nuevos campos de becario en ChequeraImpresionCabecera y ChequeraSerie
-  - `hpum`: Byte (indicador)
-  - `becaPorcentaje`: BigDecimal (porcentaje de beca)
-  - `becaResolucion`: String (número de resolución)
-  - `becaFecha`: OffsetDateTime (fecha de resolución)
-  - `becaUserId`: Long (usuario que registra la beca)
-- feat(hexagonal): Nueva estructura skeleton MatriculacionContext con arquitectura hexagonal
-  - Nuevo paquete: `um.tesoreria.core.hexagonal.matriculacionContext`
-  - Servicios, puertos y controladores base
+- feat(facturaPendiente): Nuevo módulo FacturaPendiente con arquitectura hexagonal completa
+  - Modelo de dominio: `FacturaPendiente` con campos `proveedorMovimientoId`, `razonSocial`, `cuit`, `cbu`, `fechaComprobante`, `fechaVencimiento`, `observaciones`, `comprobante`, `debita`, `prefijo`, `numeroComprobante`, `importeFactura`, `importePagado`
+  - Puerto de entrada: `GetFacturasPendientesUseCase` con método `getFacturasPendientes(OffsetDateTime, OffsetDateTime)`
+  - Puerto de salida: `FacturaPendienteRepository` con métodos `updateFechaPagoInProveedorPago()`, `findFacturasPendientes(OffsetDateTime, OffsetDateTime)`
+  - Caso de uso: `GetFacturasPendientesUseCaseImpl` con lógica de negocio
+  - Servicio de aplicación: `FacturaPendienteService` con método `findAllFacturasPendientesBetweenDates`
+  - Adaptador JPA: `JpaFacturaPendienteRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `FacturaPendienteEntity` con anotaciones Lombok e `@Immutable`
+  - Repositorio JPA: `JpaFacturaPendienteRepository` con consultas nativas SQL
+- feat(sheet): Actualización de `SheetService` para nuevos campos en hojas de cálculo
+  - Agregado campo `cbu` en generación de hojas de facturas pendientes
+  - Agregado campo `fechaVencimiento` con formato UTC
+  - Agregado campo `observaciones` (concepto de factura)
 
 ### Changed
-- refactor(deps): Actualización de Kotlin de 2.3.0 a 2.3.10
-  - Actualización en pom.xml: `<kotlin.version>2.3.10</kotlin.version>`
-- refactor(http): Migración masiva de RestTemplate a RestClient en consumers externos
-  - AlumnoExamenFacultadConsumer
-  - BajaFacultadConsumer
-  - CarreraFacultadConsumer
-  - DomicilioFacultadConsumer
-  - InscripcionDetalleFacultadConsumer
-  - InscripcionFacultadConsumer
-  - LegajoFacultadConsumer
-  - LocalidadFacultadConsumer
-  - PersonaFacultadConsumer
-  - PlanFacultadConsumer
-  - PreInscripcionFacultadConsumer
-  - PreTurnoFacultadConsumer
-  - ProvinciaFacultadConsumer
-  - Consumers en paquete view: InscriptoCurso, LegajoKey, PersonaKey, PreunivCarrera, PreunivMatricResumen, PreunivResumen
-- refactor(controller): Migración de EjercicioController a inyección con @RequiredArgsConstructor
-  - Uso de ResponseEntity.ok() en lugar de new ResponseEntity<>()
-  - Mejor manejo de excepciones con ResponseStatusException
-
-### Fixed
-- fix(exception): Renombrado BajaFacultadNotFoundException a BajaFacultadException
-  - Actualización en BajaFacultadConsumer
-- fix(api): Mejora en manejo de errores en endpoints de EjercicioController
-  - Cambiado HttpStatus.BAD_REQUEST a NOT_FOUND para excepciones de negocio
+- refactor(facturaPendiente): Migración completa a arquitectura hexagonal
+  - Eliminación de `FacturaPendiente.kt` (Kotlin) de `core/kotlin/model/view/`
+  - Eliminación de `FacturaPendienteService.java` de `core/service/view/`
+  - Migración de `FacturaPendienteRepository.kt` a Java en `hexagonal/facturaPendiente/infrastructure/persistence/repository/`
+  - Actualización de `SheetService` para usar nuevo servicio hexagonal `FacturaPendienteService`
+  - Migración de uso de `jsonify()` a utilitaria `Jsonifier` en `SheetService`
 
 ### Removed
-- chore(cleanup): Eliminación de código obsoleto
-  - MatriculaController.java eliminado
-  - MatriculaRepository.java eliminado
-  - Matricula.java (modelo) eliminado
-  - Endpoint sincronizeMatricula en SincronizeController eliminado
-  - Dependencia de MatriculaService en SincronizeController eliminada
+- Eliminación de tests obsoletos `ChequeraCuotaControllerTest.java`, `ProveedorMovimientoControllerTest.java`
 
-> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados).
+> Basado en análisis profundo de `git diff HEAD` (13 archivos modificados, +120/-156 líneas).
 
-## [3.4.0] - 2026-03-02
-### Added
-- feat(api): Nuevo endpoint `/habilitados` en ArancelTipoController para obtener tipos de arancel habilitados
-  - Nuevo método `findAllHabilitados()` en ArancelTipoService
-  - Nuevo método `findAllByHabilitado()` en ArancelTipoRepository
-  - Retorna solo registros con campo `habilitado = 1`
-
-### Changed
-- refactor(controller): Migración a inyección por constructor con `@RequiredArgsConstructor` en ArancelTipoService
-  - Reemplazo de `@Resource` por campos `final` + constructor Lombok
-  - Uso de `ResponseEntity.ok()` en lugar de `new ResponseEntity<>()` en CostoController
-- refactor(model): Agregado campo `habilitado` (Byte) en ArancelTipo.kt
-  - Agregado método `jsonify()` para logging estructurado
-  - Actualización de método `update()` en ArancelTipoService para mantener el campo habilitado
-- refactor(logging): Mejoras en logging con `jsonify()` en ArancelTipoService
-
-### Fixed
-- fix(validation): Agregado `assert` en CostoService para validación de objeto Entrega en deleteDesignacion
-
-> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados).
-
-## [3.3.2] - 2026-02-19
-### Changed
-- refactor(controller): Migración a inyección por constructor con `@RequiredArgsConstructor` en ArancelTipoController, FacultadController y TipoChequeraSedeController
-  - Reemplazo de `@Resource`/`@Autowired` por `final` + constructor Lombok
-  - Uso de `ResponseEntity.ok()` en lugar de `new ResponseEntity<>()`
-  - Simplificación de código y mejor testabilidad
-
-### Fixed
-- fix(api): Agregado manejo de excepciones con `ResponseStatusException` en ArancelTipoController, FacultadController y TipoChequeraSedeController
-  - Nuevo manejo de excepciones para findByArancelTipoId, findByArancelTipoIdCompleto, findByFacultadId, findByTipoChequeraId
-  - Devolución de HTTP 400 Bad Request en lugar de 200 para errores de negocio
-- fix(transaction): Agregado `@Transactional` en MercadoPagoContextService.processPaymentEvent()
-  - Corrección del manejo transaccional para procesamiento de eventos de pago
-  - Asegura consistencia en la actualización de contextos de MercadoPago
-
-> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados).
-
-## [3.3.1] - 2026-02-19
-### Fixed
-- fix(performance): Optimización de rendimiento en actualización de último login de usuario
-  - Nuevo método `updateLastLog()` en `UsuarioRepository` con `@Modifying` y `@Query` para actualización directa
-  - Refactorización de `UsuarioService.updateLastLog()` para usar query directa en lugar de cargar/guardar entidad completa
-  - Reducción de overhead de persistencia al actualizar solo el campo `lastLog`
-- fix(transaction): Corrección de manejo transaccional en procesamiento de eventos de pago
-  - Eliminación de `@Transactional` en `MercadoPagoContextService.processPaymentEvent()`
-  - El procesamiento de eventos hereda la transacción del contexto de ejecución de Kafka
-
-> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados).
-
-## [3.3.0] - 2026-02-18
-### Added
-- feat(performance): Implementación de batch processing y optimizaciones de rendimiento en PersonaService
-  - Nuevo método `findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIds()` en ChequeraCuotaRepository para consultas batch
-  - Nuevo método `findAllByChequeraIdIn()` en ChequeraCuotaRepository para carga masiva por IDs de chequera
-  - Nuevo método `findAllByChequeraCuotaIds()` en MercadoPagoContextService para recuperación batch de contextos
-  - Implementación de "Self-Healing" para corregir chequeraId nulos en cuotas
-  - Procesamiento batch de cuotas con agrupación por facultad y tipo de chequera
-  - Reducción de N+1 queries mediante carga masiva de contextos de MercadoPago
-  - Optimización en creación de preferencias con reutilización de contextos existentes
-- feat(api): Nuevo método sobrecargado `makeContext(ChequeraCuota, MercadoPagoContext)` en MercadoPagoCoreService
-  - Permite reutilizar contextos existentes evitando duplicados
-  - Validación inteligente para evitar actualizaciones innecesarias
-
-### Changed
-- refactor(kafka): Migración de configuración de deserialización Jackson en KafkaConsumerConfig
-  - Cambio de `JsonDeserializer` a `JacksonJsonDeserializer` (nueva API de Spring Kafka)
-  - Actualización de `DefaultJackson2JavaTypeMapper` a `DefaultJacksonJavaTypeMapper`
-  - Migración de paquetes `com.fasterxml.jackson` a `tools.jackson`
-  - Simplificación de configuración del ObjectMapper usando `JsonMapper.builder()`
-- refactor(service): Mejoras en arquitectura hexagonal de PersonaService
-  - Inyección de contextos pre-cargados en lugar de consultas individuales
-  - Mejor separación de concerns entre lógica de negocio y acceso a datos
-  - Optimización de ordenamiento y filtrado de cuotas en memoria
-
-### Fixed
-- fix(data-integrity): Corrección automática de cuotas con chequeraId nulo
-  - Detección y reparación batch de registros inconsistentes
-  - Relación automática entre cuotas y series mediante business keys
-
-> Basado en análisis profundo de `git diff HEAD` (cambios no commiteados), estructura de repositorios y servicios.
-
-## [3.2.0] - 2026-02-17
-### Added
-- feat(hexagonal): Implementación completa del módulo ChequeraCuota con Arquitectura Hexagonal
-  - Creación de modelo de dominio: `ChequeraCuota`, `ChequeraPago`, `ChequeraTotal`, `DeudaData`, `ChequeraSerie`
-  - Definición de puertos (interfaces): `CalculateDeudaUseCase` (entrada), `ChequeraCuotaRepository` (salida)
-  - Implementación de servicio de aplicación: `ChequeraCuotaService` con métodos `calculateDeuda()` y `calculateDeudaExtended()`
-  - Adaptador de persistencia: `JpaChequeraCuotaRepositoryAdapter` con mapeo entre entidades JPA y modelos de dominio
-  - Mappers: `ChequeraCuotaMapper` para conversión entre capas, `ChequeraSerieMapper` para integración
-- feat(api): Integración del nuevo caso de uso en controladores y servicios existentes
-  - `ChequeraCuotaController`: Uso de `CalculateDeudaUseCase` en endpoint `/deuda/{facultadId}/{tipoChequeraId}/{chequeraSerieId}`
-  - `PersonaService`: Migración de cálculo de deudas al nuevo servicio hexagonal
-  - `ChequeraSerieService`: Integración para seteo automático de deuda en chequeras
-  - `SheetService`: Actualización para usar el nuevo caso de uso
-
-### Changed
-- refactor(hexagonal): Migración de lógica de negocio desde `ChequeraCuotaService` tradicional a arquitectura hexagonal
-  - Eliminación de métodos `calculateDeuda()` y `calculateDeudaExtended()` del servicio tradicional (~210 líneas)
-  - Separación de concerns: lógica de negocio aislada en capa de dominio
-  - Mejora en testeabilidad mediante inyección de dependencias por interfaces
-
-### Fixed
-- fix(circular-deps): Eliminación de dependencia circular en `LectivoService`
-  - Reemplazo de `ChequeraSerieService` por `ChequeraSerieRepository` directamente
-  - Resolución de acoplamiento entre servicios de dominio
-
-### Removed
-- chore(cleanup): Limpieza de código obsoleto
-  - Eliminación de comentario de código muerto en `ChequeraCuotaController`
-  - Remoción de imports no utilizados en `ChequeraCuotaService`
-
-> Basado en análisis profundo de `git diff HEAD`, estructura de archivos y dependencias en `pom.xml`.
-
-## [3.1.2] - 2026-02-17
-- fix: Refinamiento de corrección de timezone en pagos de MercadoPago
-  - Simplificación de la lógica de ajuste de timezone en `ChequeraPagoService`
-  - Ajuste directo de -3 horas al guardar fechas de pago y acreditación en `PagoService`
-  - Eliminación de lógica condicional compleja basada en fechas específicas
-- refactor: Uso consistente de `minusHours(3)` para normalización de fechas UTC a Argentina
-
-> Based on deep analysis of git diff HEAD (uncommitted changes) en `ChequeraPagoService.java` y `PagoService.java`.
-
-## [3.1.1] - 2026-02-16
-- fix: Corrección de timezone en consultas de pagos de MercadoPago (`ChequeraPagoService.findAllByTipoPagoIdAndFechaPago`)
-  - Ajuste de +3 horas para fechas posteriores a febrero 2026
-  - Ajuste especial para el 31 de enero de 2026 (+2h 59m)
-  - Nueva constante `TIPO_MERCADO_PAGO = 18` para identificar pagos de MercadoPago
-- refactor: Uso de `@RequiredArgsConstructor` en `ChequeraPagoService` en lugar de constructor manual
-- chore: Eliminación de campo `jsonMapper` no utilizado en `ChequeraPagoService`
-
-> Based on deep analysis of git diff HEAD (uncommitted changes).
-
-## [3.1.0] - 2026-02-05
-- refactor: Migración del módulo Persona a arquitectura hexagonal
-  - Renombramiento de `Persona.kt` a `PersonaEntity.java`
-  - Reubicación de servicios y repositorios a paquete `um.tesoreria.core.hexagonal.persona`
-  - Actualización de dependencias en todos los servicios que usan Persona
-- feat: Implementación de Kafka Consumer Config para manejo de eventos de pago
-- refactor: Mejoras en KafkaProducerConfig usando string serializer class name
-- feat: Actualización de PaymentEventListener con containerFactory específico
-- refactor: Modificación de PreferenceClient para usar MercadoPagoContextDto importado
-- chore: Actualización de logging en bootstrap.yml para incluir debug de Kafka
-
-> Based on deep analysis of git diff HEAD (staged changes).
-
-## [3.0.0] - 2026-02-03
-- chore(deps): Actualización de Spring Boot de 3.5.8 a 4.0.2
-- chore(deps): Actualización de Java de 24 a 25
-- chore(deps): Actualización de Kotlin de 2.2.21 a 2.3.0
-- chore(deps): Actualización de Spring Cloud de 2025.0.0 a 2025.1.0
-- chore(deps): Actualización de mysql-connector-j de 9.4.0 a 9.6.0
-- chore(deps): Actualización de springdoc-openapi de 2.8.10 a 3.0.1
-- chore(deps): Actualización de Apache POI de 5.4.1 a 5.5.1
-- chore(deps): Actualización de guava de 33.4.8-jre a 33.5.0-jre
-- chore(deps): Actualización de commons-lang3 de 3.18.0 a 3.20.0
-- chore(deps): Actualización de modelmapper de 3.2.4 a 3.2.6
-- chore(deps): Actualización de json-path de 2.9.0 a 2.10.0
-- chore: Actualización de GitHub Actions para usar JDK 25
-- chore: Actualización de Dockerfile para usar JDK 25
-
-> Based on deep analysis of git diff (staged changes) and pom.xml.
-
-## [2.5.0] - 2025-12-14
-- feat: Implementación de envío asíncrono de chequeras mediante Kafka y `SendChequeraEvent`.
-- feat: Configuración de productor de Kafka en `KafkaProducerConfig`.
-- refactor: Modificación de `MailChequeraService` para publicar eventos en lugar de procesamiento síncrono.
-- chore(deps): Actualización de Spring Boot de 3.5.6 a 3.5.8.
-
-> Based on deep analysis of git diff HEAD (Kafka integration) and pom.xml (Spring Boot update).
-
-## [2.4.0] - 2025-11-16
-- feat: Added @Builder.Default to various model fields for improved object instantiation (MercadoPagoContext, Proveedor, TipoChequeraMercadoPagoCreditCard, MercadoPagoContextDto)
-- refactor: Extracted common logic into private helper methods (setDeuda, setUltimoEnvio) in ChequeraSerieService to reduce code duplication and improve readability
-- refactor: Updated update methods in ChequeraSerieService, DomicilioService, and TipoChequeraService to modify existing entities directly instead of creating new instances
-- refactor: Simplified add, setPayPerTic, setEnviado methods in ChequeraSerieService by directly returning repository.save() results and removing redundant logging
-- refactor: Replaced manual constructor with @RequiredArgsConstructor in PersonaService
-- refactor: Improved DomicilioService.capture method by extracting province and locality synchronization into a helper method and handling default IDs
-- refactor: Removed redundant logging in MercadoPagoContextService, PersonaService, TipoChequeraService, and MercadoPagoCoreService
-- fix: Excluded compensated quotas from pending MercadoPago preference creation in PersonaService
-- fix: Improved error logging in ChequeraSerieService.setUltimoEnvio from debug to error
-
-> Based on deep analysis of git diff HEAD.
-
-## [2.3.2] - 2025-11-15
-- refactor: Replaced manual constructors with @RequiredArgsConstructor in ChequeraController and MercadoPagoCoreController
-
-> Based on deep analysis of git diff HEAD.
-
-## [2.3.1] - 2025-11-11
-- fix: Added compensada filter to ChequeraCuotaRepository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndCompensadaAndImporte1GreaterThan to exclude compensated cuotas from pending queries
-- Updated ChequeraCuotaService.findAllPendientes to include compensada parameter
-
-> Based on deep analysis of git diff HEAD.
-
-## [2.3.0] - 2025-11-11
-- feat: Added MercadoPagoContextHistory module for tracking history of MercadoPago contexts
-- refactor: Replaced @Autowired with @RequiredArgsConstructor in PagarFileController and PagarFileService
-- refactor: Updated Collectors.toList() to .toList() in JpaCursoCargoContratadoRepositoryAdapter
-- refactor: Integrated MercadoPagoContextHistory into MercadoPagoContextService for automatic history creation on add, saveAll, and update operations
-
-> Based on deep analysis of code changes in git diff HEAD and pom.xml.
-
-## [2.2.2] - 2025-10-28
-- fix: Improved acreditacion date logic in PagoService for dates after September 1, 2025
-- refactor: Updated test persona ID in ChequeraSerieService.findAllByLectivoIdAndFacultadIdTest
-- chore(deps): Updated Kotlin version to 2.2.21
-- docs: Fixed Mermaid comment syntax in entities.mmd diagram
-- docs: Corrected flow arrows in hexagonal-architecture.mmd diagram
-
-> Based on deep analysis of code changes in git diff HEAD and pom.xml.
-
-## [2.2.1] - 2025-10-05
-- refactor: Added debug logging in CursoCargoContratadoService.findAllByCurso method
-- refactor: Improved formatting in CursoCargoContratadoEntity annotations
-- refactor: Removed unused imports in CursoCargoContratadoResponse
-- docs: Enhanced script.js for better Mermaid diagram handling (frontmatter stripping and validation fixes)
-
-> Based on deep analysis of code changes in git diff HEAD.
-
-## [2.2.0] - 2025-10-01
-- feat: Agregar relación contratadoPersona en modelo CursoCargoContratado
-- feat: Agregar método jsonify() en modelo Debito para logging estructurado
-- refactor: Refactorización de DebitoController para usar @RequiredArgsConstructor y simplificar respuestas HTTP
-- refactor: Mejoras en DebitoService con logging JSON y inyección por constructor
-- refactor: Actualizaciones en ContratoToolService con mejoras en manejo de datos
-- docs: Actualización de diagramas Mermaid (dependencies.mmd y sequence-chequera-serie-sede.mmd)
-
-> Based on deep analysis of code changes in git diff HEAD and pom.xml.
-
-## [2.1.0] - 2025-09-29
-- refactor: Improved dependency injection with @RequiredArgsConstructor in CostoController and CostoService
-- feat: Added jsonify() methods to Asiento, CuentaMovimiento, Entrega, and AsignacionCostoDto models for structured JSON logging
-- refactor: Enhanced logging throughout services with JSON serialization using Jsonifier utility
-- refactor: Removed unnecessary public modifiers in AsientoRepository methods
-- fix: Improved error handling in CostoService by deleting previous asiento before adding new one
-- chore: Minor code cleanups and logging improvements
-
-> Based on deep analysis of code changes in git diff HEAD and pom.xml.
-
-## [2.0.0] - 2025-09-28
-- refactor: remove ContratadoController and references to contratado model across services and controllers
-- chore(deps): update Spring Boot to 3.5.6, Kotlin to 2.2.20, openpdf to 3.0.0
-- refactor: replace @Autowired with @RequiredArgsConstructor in multiple services and controllers
-- feat: add Jsonifier utility class for structured JSON logging
-- refactor: update imports for openpdf library change from com.lowagie to org.openpdf
-- refactor: remove ContratoAutoFixService and related dependencies
-- fix: improve logging with jsonify() methods in various services
-
-> Based on deep analysis of code changes in git diff HEAD, commit history, and pom.xml.
-
-## [1.6.0] - 2025-09-11
-- feat(controller,repository,service): agregar endpoint de resumen por lectivo (`/resumen/lectivo/{lectivoId}`) que devuelve la cantidad de chequeras agrupadas por facultad y sede
-- refactor(controller,service): reemplazar constructores con inyección de dependencias por `@RequiredArgsConstructor` en `ChequeraSerieController` y `ChequeraSerieService`
-- feat(model): crear nuevo DTO `FacultadSedeChequeraDto` para representar los datos del resumen
-
-> Basado en análisis de código (`git diff HEAD`), historial de commits y `pom.xml`.
-
-## [1.5.0] - 2025-09-07
-- feat: Añadido nuevo endpoint para buscar `ChequeraSerie` por sede (`/sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}`).
-- refactor: Refactorizados `GeograficaController` y `LegajoController` para usar inyección de dependencias por constructor, `ResponseEntity.ok()` y manejo de excepciones mejorado.
-- refactor: Añadido nuevo alias de endpoint en `GeograficaController` (`/api/tesoreria/core/geografica`).
-
-## [1.4.0] - 2025-09-05
-- feat(controller): nuevos endpoints y refactor en ChequeraSerieController (más métodos REST, simplificación de respuestas).
-- feat(service): nuevos servicios de búsqueda y consulta (`ProveedorSearchService`, `TipoChequeraSearchService`, etc.).
-- feat(util): nueva clase utilitaria `Tool` para manejo de fechas, archivos y conversiones.
-- refactor(model/repository): eliminación de campo `productoId` en `CuotaPeriodoDto` y ajuste de queries asociadas.
-- refactor: migración y renombrado de servicios y repositorios a nuevos paquetes (`um.tesoreria.core`).
-- chore(deps): actualización de dependencias principales:
-  - Spring Boot: 3.5.4 a 3.5.5
-  - Kotlin: 2.2.0 a 2.2.10
-  - SpringDoc OpenAPI: 2.8.9 a 2.8.10
-  - OpenPDF: 2.2.4 a 2.4.0
-- test: nuevos tests unitarios para controladores y servicios.
-- docs: actualización de diagramas Mermaid y documentación automática (`docs/`), eliminación de archivos obsoletos (`application.yml`, `logback-spring.xml`).
-> Basado en análisis de código (`git diff HEAD`), historial de commits y `pom.xml`.
-# Changelog
-
-Todos los cambios notables en este proyecto serán documentados en este archivo.
+## [3.14.0] - 2026-05-06
 
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-## [1.3.0] - 2025-08-19
-- refactor(controller): simplificación de respuestas HTTP en ChequeraCuotaController (uso de ResponseEntity.ok).
-- feat(model/repository): `productoId` agregado a `CuotaPeriodoDto` y ajustada la query en ChequeraCuotaRepository.
-- docs: nueva generación de documentación automática y pipeline local (`generate-docs-local.sh`), nuevos archivos en `docs/`.
-- docs: actualización de `index.html`, `script.js` y `style.css` para documentación dinámica y visual.
-> Basado en análisis de código (`git diff HEAD`), historial de commits y `pom.xml`.
-
-## [1.2.0] - 2025-08-18
-- feat(controller): nuevos endpoints REST en ChequeraPagoController para consulta por facultad/tipoChequera/lectivo.
-- feat(repository/service): métodos para búsqueda avanzada de pagos por facultad, tipo de chequera y lectivo.
-- refactor(controller): simplificación de respuestas HTTP en FacultadController y TipoChequeraController (uso de ResponseEntity.ok).
-- docs(ci): mejoras en el workflow de documentación automática y despliegue en GitHub Pages.
-- docs: diagramas Mermaid y documentación sincronizados con la funcionalidad actual.
-> Basado en análisis de código (`git diff HEAD`), historial de commits y `pom.xml`.
-
-## [1.1.0] - 2025-08-14
-- feat(core/mercadopago): nuevo endpoint `GET /api/tesoreria/core/mercadoPagoContext/all/active/to/change` para listar `chequeraCuotaId` activos con vencimientos en los últimos 90 días.
-- feat(model): campo `lastVencimientoUpdated` en `MercadoPagoContext` con `@JsonFormat` y método `jsonify()` para logging estructurado.
-- feat(repository): `findAllByActivoAndFechaVencimientoBetween(...)` para consultas por rango de fechas.
-- refactor(service): `update(...)` ahora actualiza la entidad gestionada y es `@Transactional`, con logs JSON de entrada/salida.
-- docs(ci): workflow de documentación mejorado; agregado render dinámico de diagramas Mermaid y árbol de dependencias; nuevos archivos en `docs/`.
-- docs: agregados diagramas `architecture.mmd`, `entities.mmd`, `deployment.mmd` y múltiples `sequence-*.mmd`.
-
-> Basado en `git diff --cached` y `pom.xml` (versión previa 1.0.0).
-
-## [1.0.0] - 2025-08-11
+## [3.14.0] - 2026-05-06
 ### Added
-- Nuevos endpoints: búsqueda por id de MercadoPago, reseteo de marca temporal de contratos, búsqueda optimizada de tipos de chequera, proveedores y pagos.
-- Nuevos servicios: `ContratoAutoFixService`, `ProveedorSearchService`, `TipoChequeraSearchService`, `TipoPagoFechaAcreditacionService`, `TipoPagoFechaPagoService`, entre otros.
-- Métodos `jsonify()` en modelos y DTOs para trazabilidad y logging estructurado.
-- Test unitario para `ProveedorMovimientoController`.
+- feat(ubicacion): Nuevo módulo Ubicacion con arquitectura hexagonal
+  - Modelo de dominio: `Ubicacion` con campos `ubicacionId`, `nombre`, `dependenciaId`, `geograficaId`
+  - Puertos de entrada: `GetAllUbicacionesUseCase`, `GetUbicacionesBySedeUseCase`
+  - Puerto de salida: `UbicacionRepository` con métodos `findAll()`, `findAllByGeograficaId(Integer)`
+  - Casos de uso: `GetAllUbicacionesUseCaseImpl`, `GetUbicacionesBySedeUseCaseImpl`
+  - Servicio de aplicación: `UbicacionService` con métodos `findAll()`, `findAllBySede(Integer)`
+  - Adaptador JPA: `JpaUbicacionRepositoryAdapter` con mapeo a entidad JPA
+  - Mapper: `UbicacionMapper` para conversión dominio ↔ entidad
+  - Entidad JPA: `UbicacionEntity` con anotaciones Lombok y relación a `DependenciaEntity`
+  - Controlador REST: `UbicacionController` con endpoints GET
+  - DTO: `UbicacionResponse` para respuestas HTTP
+- feat(ubicacionArticulo): Nuevo módulo UbicacionArticulo con arquitectura hexagonal
+  - Modelo de dominio: `UbicacionArticulo` con relaciones a `Ubicacion`, `Articulo`, `Cuenta`
+  - Puertos de entrada: `GetAllUbicacionArticulosUseCase`, `GetUbicacionArticuloUseCase`, `GetUbicacionArticulosByArticuloUseCase`, `SaveUbicacionArticuloUseCase`
+  - Puerto de salida: `UbicacionArticuloRepository` con métodos CRUD y búsquedas
+  - Casos de uso: `GetAllUbicacionArticulosUseCaseImpl`, `GetUbicacionArticuloUseCaseImpl`, `GetUbicacionArticulosByArticuloUseCaseImpl`, `SaveUbicacionArticuloUseCaseImpl`
+  - Servicio de aplicación: `UbicacionArticuloService` con métodos `findAll()`, `save()`, `findAllByArticuloId()`, `getByUbicacionAndArticulo()`
+  - Adaptador JPA: `JpaUbicacionArticuloRepositoryAdapter` con lógica de upsert usando `findByUbicacionIdAndArticuloId`
+  - Mapper: `UbicacionArticuloMapper` con mapeo de relaciones anidadas
+  - Entidad JPA: `UbicacionArticuloEntity` con restricción única `(ubicacionId, articuloId)`
+  - Controlador REST: `UbicacionArticuloController` con endpoints CRUD
+  - DTOs: `UbicacionArticuloRequest`, `UbicacionArticuloResponse`
 
 ### Changed
-- Refactor completo de inyección de dependencias: eliminación de `@Autowired` en favor de constructores explícitos.
-- Refactor de repositorios: eliminación del prefijo 'I' en interfaces, siguiendo convenciones de Spring.
-- Mejoras de logging: uso de `Slf4j` y serialización JSON en logs.
-- Optimizaciones de rendimiento: uso de `CompletableFuture` para consultas paralelas.
-- Actualización de dependencias principales: Spring Boot 3.5.4, Kotlin 2.2.0, MySQL Connector 9.4.0.
-- Actualización de diagramas de dependencias y documentación automática.
+- refactor(core): `SheetService` actualizado para usar nuevos modelos de dominio
+- refactor(model): `Entrega.kt` actualizado con cambios en modelo
+- refactor(model): `FacturaPendiente.kt` actualizado con nuevos campos
+- refactor(dto): `AsignacionCostoDto` y `CostoParameterDto` actualizados para usar modelos de dominio
+- refactor(legacy): Eliminación de controladores legacy `UbicacionController.java` y `UbicacionArticuloController.java` del paquete `core/controller/`
+- refactor(legacy): Eliminación de servicios legacy `UbicacionService.java` y `UbicacionArticuloService.java` del paquete `core/service/`
+- refactor(legacy): Eliminación de repositorios legacy `UbicacionRepository.java` y `UbicacionArticuloRepository.java` del paquete `core/repository/`
+
+> Basado en análisis profundo de `git diff HEAD` (47 archivos modificados, +723/-246 líneas).
+
+## [3.13.0] - 2026-05-05
+### Added
+- feat(articulo): Completitud de migración hexagonal y nuevas funcionalidades (commit afbeb02)
+  - Nuevo puerto de entrada: `GetPaginatedArticulosUseCase` con método `getPaginated(int page, int size)`
+  - Nuevo caso de uso: `GetPaginatedArticulosUseCaseImpl` con implementación de paginación usando `Pageable`
+  - Nuevo caso de uso: `SearchArticulosUseCaseImpl` para búsqueda de artículos por criterio
+  - Nuevo modelo: `ArticuloSearch` para criterios de búsqueda con campo `search`
+  - Nuevos métodos en `ArticuloRepository`: `findPaginated(Pageable)`, `search(String criterio)`
+  - Nuevo endpoint en `ArticuloController`: `GET /articulo/page?page=X&size=Y` que retorna `PaginatedResponse<ArticuloResponse>`
+  - Nuevo endpoint en `ArticuloController`: `GET /articulo/search?criterio=X`
+  - Nuevo DTO: `ArticuloSearchResponse` para respuestas de búsqueda
+- feat(proveedor): Mejoras en módulo Proveedor
+  - Actualización de `ProveedorSearch` con nuevos campos para búsquedas avanzadas
+  - Nuevos endpoints en `ProveedorController` para búsquedas
+
+### Changed
+- refactor(articulo): Reorganización de paquetes
+  - `ArticuloKey.java`, `ArticuloKeyRepository.java`, `ArticuloKeyRepositoryCustom.java` movidos de `core/` a `hexagonal/articulo/infrastructure/persistence/repository/`
+  - Mappers actualizados para soportar nuevos modelos
 
 ### Removed
-- Archivos y configuraciones obsoletas: `TransactionConfig.java`, `RabbitMQConfig.java`, `JpaConfig.java`, `ChequeraMessageDto.kt`, `CuotaPeriodo.java`, `ChequeraCuotaDto.java`, `IChequeraPagoRepository.java`, `application.yml`, `logback-spring.xml`, y tests antiguos.
+- `ArticuloKeyService.java` eliminado (funcionalidad movida a casos de uso específicos)
 
-> Versión y cambios verificados en `pom.xml`, `git diff`, y código fuente.
+> Basado en análisis profundo de `git diff HEAD` (24 archivos modificados, +160/-45 líneas) y commits afbeb02, 4b9e84e.
 
-## [0.0.1-SNAPSHOT] - Versión actual según pom.xml
-## [0.1.0] - 2025-08-06
-### Changed
-- Actualización de dependencias:
-  - Spring Boot: 3.5.3 → 3.5.4
-  - Spring Boot Log4j2: 3.5.3 → 3.5.4
-  - MySQL Connector: 9.3.0 → 9.4.0
-- Dockerfile: Se otorgan permisos explícitos al usuario de la aplicación sobre el directorio `/app`.
-- `bootstrap.yml`: Se agrega sección de health check para mail y ajustes en métricas.
-- `FacultadService`: Se amplía el array de facultades soportadas (ahora incluye la facultad 6).
-
-### Fixed
-- Correcciones menores en configuración y permisos para mejorar despliegue y monitoreo.
-
-> Versión actualizada a 0.1.0, basado en `pom.xml` y los cambios en `git diff HEAD`.
-
-## [Unreleased] - Cambios verificables del git log
-
+## [3.12.0] - 2026-05-04
 ### Added
-...existing code...
-## [0.0.1-SNAPSHOT] - Versión actual según pom.xml
-### Nota
-La versión actual del proyecto es 0.0.1-SNAPSHOT según el pom.xml. Esta es la única versión que puede ser verificada directamente del código fuente.
+- feat(articulo): Completitud de migración de módulo Artículo a arquitectura hexagonal
+  - Nuevos modelos de dominio: `Articulo` y `ArticuloSearch` con Lombok
+  - Puertos de entrada: `CreateArticuloUseCase`, `DeleteArticuloUseCase`, `GetAllArticulosUseCase`, `GetArticuloByIdUseCase`, `GetNewArticuloUseCase`, `SearchArticulosUseCase`, `UpdateArticuloUseCase`
+  - Puerto de salida: `ArticuloRepository` con métodos CRUD completos
+  - Casos de uso: Implementaciones completas en `application/usecases/`
+  - Servicio de aplicación: `ArticuloService` refactorizado con inyección de casos de uso
+  - Adaptador JPA: `JpaArticuloRepositoryAdapter` con implementación completa
+  - Mappers: `ArticuloMapper` (dominio ↔ JPA) y `ArticuloDtoMapper` (dominio ↔ DTO)
+  - DTOs: `ArticuloRequest`, `ArticuloResponse`, `ArticuloSearchResponse`
+  - Controlador REST: `ArticuloController` migrado con endpoints CRUD y manejo de `ResponseEntity`
+- refactor(core): `CostoParameterDto` y `CostoParameterService` actualizados para usar modelo de dominio `Articulo`
 
-### Dependencias Principales (verificado en pom.xml)
-- Spring Boot: 3.5.0
-- Spring Cloud: 2025.0.0
-- Kotlin: 2.1.21
-- Java: 21
-- MySQL Connector: 9.3.0
-- SpringDoc OpenAPI: 2.8.9
-- Apache POI: 5.4.1
-- OpenPDF: 2.2.1
-- ModelMapper: 3.2.3
-- Guava: 33.4.8-jre
+### Changed
+- refactor(articulo): Reestructuración de paquetes a arquitectura hexagonal
+- `JpaArticuloRepository` simplificado a solo consultas específicas
+- `ArticuloController` migrado a DTOs y `ArticuloDtoMapper`
 
-### Características Implementadas (verificado en código)
-- Gestión de chequeras y pagos con optimizaciones de rendimiento
-- Cálculo de deudas con computación paralela
-- Integración con Mercado Pago para tarjetas de crédito
-- Gestión de inscripciones y personas
-- Gestión de domicilios y documentos
-- Documentación automática con OpenAPI/Swagger
-- CI/CD con GitHub Actions
-- Soporte para Docker
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados).
 
-### Optimizaciones de Rendimiento (verificado en código)
-- **Computación paralela**: La función `calculateDeuda` utiliza `CompletableFuture` para ejecutar consultas en paralelo
-- **Validación temprana**: Verificación de parámetros nulos antes del procesamiento
-- **Optimización de memoria**: Uso de `Map<String, BigDecimal>` en lugar de objetos completos
-- **Eliminación de objetos innecesarios**: Evita crear instancias vacías de `ChequeraPago`
+## [3.11.0] - 2026-05-03
+### Added
+- feat(articulo): Migración de módulo Artículo a arquitectura hexagonal
+  - Nueva entidad JPA: `ArticuloEntity` en `hexagonal/articulo/infrastructure/persistence/entity/` con anotaciones Lombok
+  - Nuevo repositorio: `JpaArticuloRepository` con métodos `findByArticuloId`, `findTopByOrderByArticuloIdDesc`
+  - Nuevo servicio de aplicación: `ArticuloService` en `hexagonal/articulo/application/service/`
+  - Nuevo controlador REST: `ArticuloController` en `hexagonal/articulo/infrastructure/web/controller/` con `@RequiredArgsConstructor`
+  - Relación `@OneToOne` con `CuentaEntity` en `ArticuloEntity`
 
-### Commits de Optimización Verificables (git log)
-- `447b4b2` - Merge PR #141: Refactoring de repositorios y optimización de rendimiento (17 de junio 2025)
-- `3d6fd9d` - refactor(controllers): remove hardcoded request mappings and optimize imports (17 de junio 2025)
-- `9cab730` - Merge PR #139: Refactoring eliminación de prefijo 'I' en repositorios y actualización de documentación (17 de junio 2025)
-- `5f3d934` - refactor(repositories): remove 'I' prefix from repository interfaces (17 de junio 2025)
-- `8a93581` - Merge PR #137: Optimización de rendimiento en calculatedeuda con computación paralela (10 de junio 2025)
-- `c6632e9` - perf(calculateDeuda): implement parallel computation with CompletableFuture (10 de junio 2025)
-- `a7e078b` - Merge PR #135: Actualización de documentación y limpieza de código (3 de junio 2025)
-- `cc5be90` - docs(changelog): actualiza documentación con cambios verificables (3 de junio 2025)
-- `ab3bc99` - Merge PR #133: Cambio emailpagador inicial
-- `62acf40` - fix emailPagador
-- `1e8a299` - Merge PR #131: Limpieza de código y mejoras en gestión de domicilios
-- `42b667c` - chore(cleanup): remove obsolete files and improve SpoterService
-- `1cc4146` - Merge PR #129: Refactorización y mejoras en gestión de domicilios y documentos
-- `a8b9de1` - refactor(domicilio): improve dependency injection and add pagador endpoint
-- `7ddfee9` - Merge PR #127: Feature implementación de endpoint para obtener información completa de inscripciones
-- `833a92b` - feat(inscripcion): add full endpoint for complete inscription information
+### Changed
+- refactor(articulo): Migración completa de módulo Artículo a arquitectura hexagonal
+  - Eliminación de `Articulo.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `ArticuloRepository.java` del paquete `core/repository/`
+  - Eliminación de `ArticuloService.java` del paquete `core/service/`
+  - Eliminación de `ArticuloController.java` del paquete `core/controller/`
+  - Actualización de referencias en `EntregaDetalle.kt`, `ProveedorArticulo.kt`, `UbicacionArticulo.java`, `AsignacionCostoDto.java`, `CostoParameterDto.java`, `CostoParameterService.java`
+- fix(auth): Corrección de espacio extra en `ResponseStatusException` en `AuthController`
 
-### Información No Verificable
-Las siguientes versiones mencionadas en el CHANGELOG anterior no pueden ser verificadas directamente del código fuente y han sido removidas:
-- Versión 1.0.0 (2024-03-19)
-- Versión 0.2.0 (2024-03-11) 
-- Versión 0.1.0 (2024-01-01)
+> Basado en análisis profundo de `git diff HEAD` (14 archivos modificados, +156/-98 líneas).
 
-Estas versiones no aparecen en el historial de git ni en el pom.xml actual, por lo que no pueden ser confirmadas como verificables.
+## [3.10.0] - 2026-05-03
+### Added
+- feat(proveedor): Mejora de modelo de datos y refactorización de DTOs en módulo Proveedor
+  - Nuevo campo `cbu` en `ProveedorSearch`, `ProveedorSearchEntity`, `ProveedorResponse` y `ProveedorSearchResponse`
+  - Nuevo campo `Cuenta cuenta` (objeto dominio) en `ProveedorResponse` y `ProveedorSearchResponse` para incluir datos de cuenta asociada
+  - Renombrado de campo `cuenta` a `numeroCuenta` en `ProveedorSearch`, `ProveedorSearchEntity` y `ProveedorSearchResponse`
+
+### Changed
+- refactor(proveedor): Refactorización de DTOs para usar patrón Builder de Lombok
+  - `ProveedorResponse` y `ProveedorSearchResponse` ahora usan `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`
+  - `ProveedorDtoMapper.toResponse()` y `toSearchResponse()` refactorizados para usar `builder()` en lugar de setters manuales
+  - Cambio de `@Data` a `@Getter`/`@Setter` en `ProveedorSearchEntity`, `ProveedorResponse` y `ProveedorSearchResponse`
+  - `ProveedorMapper` actualizado para mapear nuevos campos (`numeroCuenta`, `cbu`)
+
+> Basado en análisis profundo de `git diff HEAD` (6 archivos modificados, +67/-44 líneas).
+
+## [3.9.0] - 2026-05-02
+### Added
+- feat(proveedor): Implementación de paginación en módulo Proveedor
+  - Nuevo puerto de entrada: `GetPaginatedProveedoresUseCase` con método `getPaginatedProveedores(int page, int size)`
+  - Nuevo modelo genérico: `PaginatedResponse<T>` para respuestas paginadas (data, totalElements, totalPages, currentPage, pageSize)
+  - Nuevo caso de uso: `GetPaginatedProveedoresUseCaseImpl` con implementación de paginación
+  - Nuevo método en puerto de salida `ProveedorRepository`: `findAll(Pageable pageable)`
+  - Actualización de `JpaProveedorRepositoryAdapter` con soporte para paginación vía `Page<ProveedorEntity>`
+  - Nuevo endpoint en `ProveedorController`: `GET /proveedor/page?page=X&size=Y` que retorna `PaginatedResponse<ProveedorResponse>`
+  - Actualización de `ProveedorService` con método `getPaginated(int page, int size)`
+
+> Basado en análisis profundo de `git diff HEAD` (7 archivos modificados, +101 líneas).
+
+## [3.8.0] - 2026-05-02
+### Added
+- feat(cuenta): Implementación completa de casos de uso CRUD para módulo Cuenta
+  - Nuevos casos de uso: `CreateCuentaUseCase`, `DeleteCuentaUseCase`, `GetAllCuentasUseCase`, `GetCuentaByCuentaContableIdUseCase`, `GetCuentaByNumeroCuentaUseCase`, `RecalculaGradosUseCase`, `SaveAllCuentasUseCase`, `SearchCuentasUseCase`, `UpdateCuentaUseCase`
+  - Nuevos DTOs: `CuentaRequest`, `CuentaResponse`, `CuentaSearchResponse`
+  - Nuevo mapper: `CuentaDtoMapper` para conversión dominio ↔ DTO
+  - Controlador `CuentaController` actualizado con todos los endpoints REST
+- feat(proveedor): Mejora de módulo Proveedor con búsqueda avanzada
+  - Nueva entidad `ProveedorSearchEntity` para búsquedas
+  - Nuevo repositorio `JpaProveedorSearchRepository` con consultas personalizadas
+  - Refactorización de paquetes: adaptador movido a `infrastructure/persistence/adapter/`
+
+### Changed
+- refactor(service): Actualización de `BalanceService`, `ContabilidadService`, `SheetService` para usar nuevas estructuras hexagonales
+- refactor(proveedor): Reestructuración de paquetes de Proveedor (adaptador movido a `infrastructure/persistence/adapter/`)
+- refactor(model): Actualización de `Ejercicio.kt` con cambios en modelo
+
+> Basado en análisis profundo de `git diff HEAD` (47 archivos modificados, +894/-447 líneas).
+
+## [3.7.0] - 2026-05-02
+### Added
+- feat(hexagonal): Nuevo módulo Cuenta con arquitectura hexagonal
+  - Entidad JPA: `CuentaEntity` en `hexagonal/cuenta/infrastructure/persistence/entity/` con anotaciones Lombok
+  - Repositorio: `CuentaRepository` en `hexagonal/cuenta/infrastructure/persistence/repository/` con métodos de consulta personalizados
+  - Servicio de aplicación: `CuentaService` en `hexagonal/cuenta/application/service/` con lógica de negocio
+  - Controlador REST: `CuentaController` en `hexagonal/cuenta/infrastructure/web/controller/` con endpoints REST
+  - Métodos de consulta: `findAllByGradoAndNumeroCuentaGreaterThan`, `findAllByNumeroCuentaIn`, `findAllByGradoAndNumeroCuentaBetween`
+  - Métodos de búsqueda: `findByNumeroCuenta`, `findByCuentaContableId`
+  - Operaciones CRUD: `add`, `update`, `delete`, `saveAll`
+  - Utilidad: `recalculaGrados()` para recalcular grados de cuentas
+  - Integración con `CuentaSearchService` para búsquedas avanzadas
+
+### Changed
+- refactor(cuenta): Migración de módulo Cuenta a arquitectura hexagonal
+  - Eliminación de `Cuenta.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `CuentaRepository.java` del paquete `core/repository/`
+  - Eliminación de `CuentaService.java` del paquete `core/service/`
+  - Eliminación de `CuentaController.java` del paquete `core/controller/`
+  - Creación de estructura hexagonal en `hexagonal/cuenta/` con capas domain, application, infrastructure
+  - Actualización de `BalanceService`, `CompraService`, `ContabilidadService` para usar nueva estructura
+  - Migración de modelos Kotlin a Java: `Articulo.kt`, `Bancaria.kt`, `BancoMovimiento.kt`, `CuentaMovimiento.kt`, `Dependencia.kt`, `Setup.kt`, `Valor.kt`
+  - Actualización de `UbicacionArticulo.java` y `CuentaMovimientoAsiento.java` para usar nuevas entidades
+  - `CuentaEntity` con relación `@OneToOne` a `GeograficaEntity`
+  - Uso de `Auditable` como clase base para auditoría
+
+> Basado en análisis profundo de `git diff HEAD` (19 archivos modificados, +161/-146 líneas).
+
+## [3.6.0] - 2026-05-02
+### Added
+- feat(hexagonal): Nuevo módulo Auth con arquitectura hexagonal para autenticación
+  - Modelo de dominio: `UsuarioAuth` con validación de login/password (SHA-256)
+  - Caso de uso: `LoginUseCaseImpl` con lógica de autenticación robusta y manejo de mayúsculas/minúsculas
+  - Servicio de aplicación: `AuthService` como fachada del dominio
+  - Adaptador JPA: `JpaUsuarioAuthRepositoryAdapter` con `UsuarioAuthMapper`
+  - Controlador REST: `AuthController` con endpoint de login
+  - DTOs: `LoginRequest` y `LoginResponse` para entrada/salida
+- feat(hexagonal): Nuevo módulo Geografica con arquitectura hexagonal
+  - Modelo de dominio: `Geografica` para entidades geográficas
+  - Casos de uso: `GetAllGeograficasUseCase`, `GetGeograficaByIdUseCase`, `GetGeograficasBySedeUseCase`
+  - Servicio de aplicación: `GeograficaService` con integración a `GeograficaLectivoService`
+  - Adaptador JPA: `JpaGeograficaRepositoryAdapter` con `GeograficaEntity`
+  - Controlador REST: `GeograficaController` migrado a arquitectura hexagonal
+  - DTO: `GeograficaResponse` para respuestas HTTP
+- feat(hexagonal): Implementación completa del módulo Proveedor con arquitectura hexagonal
+  - Modelos de dominio: `Proveedor` y `ProveedorSearch` con Lombok (`@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Puertos de entrada (Input Ports): `CreateProveedorUseCase`, `DeleteProveedorUseCase`, `GetAllProveedoresUseCase`, `GetLastProveedorUseCase`, `GetProveedorByCuitUseCase`, `GetProveedorByIdUseCase`, `SearchProveedoresUseCase`, `UpdateProveedorUseCase`
+  - Puerto de salida (Output Port): `ProveedorRepository` con métodos `create`, `findByProveedorId`, `findByCuit`, `findLast`, `findAll`, `findAllByStrings`, `update`, `deleteById`
+  - Casos de uso (Use Cases): Implementaciones completas en `application/usecases/` con inyección de dependencias
+  - Servicio de aplicación: `ProveedorService` refactorizado para usar casos de uso con `Optional<Proveedor>` en retornos
+  - Adaptador JPA: `JpaProveedorRepositoryAdapter` con implementación completa de `ProveedorRepository`
+  - Mapper de persistencia: `ProveedorMapper` para conversión entre `Proveedor`/`ProveedorSearch` y entidades JPA
+  - Mapper de DTO: `ProveedorDtoMapper` para conversión entre dominio y DTOs
+  - DTOs: `ProveedorRequest`, `ProveedorResponse`, `ProveedorSearchResponse` para entrada/salida
+  - Controlador REST: `ProveedorController` migrado completamente con manejo de `ResponseEntity<ProveedorResponse>` y `Optional`
+
+### Changed
+- refactor(model): Migración de `Geografica.kt` (Kotlin) a `GeograficaEntity.java`
+  - Eliminación de modelo Kotlin en paquete `core/kotlin/model/`
+  - Creación de entidad JPA en `hexagonal/geografica/infrastructure/persistence/entity/`
+  - Actualización de `CursoHaberes.java` para usar `GeograficaEntity` en lugar de `Geografica`
+- refactor(proveedor): Reestructuración completa de paquetes de Proveedor a arquitectura hexagonal
+  - Migración de servicios y repositorios al paquete `hexagonal/proveedor/`
+  - Nuevos modelos de dominio (`Proveedor`, `ProveedorSearch`) reemplazando `ProveedorEntity` en capa de dominio
+  - `ProveedorService` refactorizado: retornos cambiados a `Optional<Proveedor>`, uso de casos de uso
+  - `ProveedorController` refactorizado: uso de DTOs (`ProveedorRequest`, `ProveedorResponse`, `ProveedorSearchResponse`) y `ProveedorDtoMapper`
+  - `JpaProveedorRepository` simplificado: solo interfaces de consulta, lógica movida a `JpaProveedorRepositoryAdapter`
+  - Mappers agregados: `ProveedorMapper` (dominio ↔ JPA), `ProveedorDtoMapper` (dominio ↔ DTO)
+  - Servicios externos (`NotificacionService`, `SheetService`) actualizados para usar nueva estructura
+
+> Basado en análisis profundo de `git diff HEAD` (30 archivos modificados, +699/-165 líneas).

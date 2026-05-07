@@ -52,8 +52,14 @@ import um.tesoreria.core.extern.model.view.PersonaKeyFacultad;
 import um.tesoreria.core.extern.model.view.PreunivCarreraFacultad;
 import um.tesoreria.core.extern.model.view.PreunivMatricResumenFacultad;
 import um.tesoreria.core.extern.model.view.PreunivResumenFacultad;
+import um.tesoreria.core.hexagonal.facturaPendiente.application.service.FacturaPendienteService;
+import um.tesoreria.core.hexagonal.facturaPendiente.domain.model.FacturaPendiente;
+import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
+import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
+import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
+import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.kotlin.model.*;
-import um.tesoreria.core.kotlin.model.view.FacturaPendiente;
 import um.tesoreria.core.model.*;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.model.view.CarreraKey;
@@ -71,7 +77,6 @@ import um.tesoreria.core.service.ContratoPeriodoService;
 import um.tesoreria.core.service.CuentaMovimientoService;
 import um.tesoreria.core.service.EjercicioService;
 import um.tesoreria.core.service.FacultadService;
-import um.tesoreria.core.service.GeograficaService;
 import um.tesoreria.core.service.IngresoAsientoService;
 import um.tesoreria.core.service.LectivoService;
 import um.tesoreria.core.service.LegajoService;
@@ -86,6 +91,7 @@ import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
 import um.tesoreria.core.util.ChequeraSerieMapper;
 import um.tesoreria.core.service.*;
+import um.tesoreria.core.util.Jsonifier;
 
 /**
  * @author daniel
@@ -136,6 +142,7 @@ public class SheetService {
     private final FacturacionElectronicaService facturacionElectronicaService;
     private final ProveedorService proveedorService;
     private final FacturaPendienteService facturaPendienteService;
+    private final GeograficaMapper geograficaMapper;
 
 
     public String generateIngresos(Integer anho, Integer mes) {
@@ -264,7 +271,7 @@ public class SheetService {
             if (tipos.containsKey(tipochequeraId)) {
                 tipoChequera = tipos.get(tipochequeraId);
                 if (tipoChequera.getGeografica() != null) {
-                    geografica = tipoChequera.getGeografica();
+                    geografica = geograficaMapper.toDomainModel(tipoChequera.getGeografica());
                 }
             }
             List<ChequeraSerie> chequeraList = chequeraSerieService.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipochequeraId);
@@ -1365,7 +1372,7 @@ public class SheetService {
         this.setCellString(row, 13, "Habilitado", styleBold);
         this.setCellString(row, 14, "CBU", styleBold);
 
-        for (Proveedor proveedor : proveedorService.findAll()) {
+        for (Proveedor proveedor : proveedorService.getAll()) {
             row = sheet.createRow(++fila);
             this.setCellInteger(row, 0, proveedor.getProveedorId(), styleNormal);
             this.setCellString(row, 1, proveedor.getCuit(), styleNormal);
@@ -1431,28 +1438,30 @@ public class SheetService {
 
         int columnaRazonSocial = 0;
         int columnaCUIT = 1;
-        int columnaFechaComprobante = 2;
-        int columnaTipoComprobante = 3;
-        int columnaComprobantePrefijo = 4;
-        int columnaComprobanteNumero = 5;
-        int columnaImporteFactura = 6;
-        int columnaSaldo = 7;
+        int columnaCBU = 2;
+        int columnaFechaComprobante = 3;
+        int columnaTipoComprobante = 4;
+        int columnaComprobantePrefijo = 5;
+        int columnaComprobanteNumero = 6;
+        int columnaImporteFactura = 7;
+        int columnaSaldo = 8;
+        int columnaFechaVencimiento = 9;
+        int columnaObservaciones = 10;
         row = sheet.createRow(++fila);
         this.setCellString(row, columnaRazonSocial, "Razón Social", styleBold);
         this.setCellString(row, columnaCUIT, "CUIT", styleBold);
+        this.setCellString(row, columnaCBU, "CBU", styleBold);
         this.setCellString(row, columnaFechaComprobante, "Fecha Comprobante", styleBold);
         this.setCellString(row, columnaTipoComprobante, "Tipo Comprobante", styleBold);
         this.setCellString(row, columnaComprobantePrefijo, "Prefijo", styleBold);
         this.setCellString(row, columnaComprobanteNumero, "Numero", styleBold);
         this.setCellString(row, columnaImporteFactura, "Importe Factura", styleBold);
         this.setCellString(row, columnaSaldo, "Saldo al " + format.format(fechaHasta.withOffsetSameInstant(ZoneOffset.UTC)), styleBold);
+        this.setCellString(row, columnaFechaVencimiento, "Fecha Vencimiento", styleBold);
+        this.setCellString(row, columnaObservaciones, "Observaciones", styleBold);
 
         for (FacturaPendiente facturaPendiente : facturaPendienteService.findAllFacturasPendientesBetweenDates(fechaDesde, fechaHasta)) {
-            try {
-                log.debug("FacturaPendiente -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(facturaPendiente));
-            } catch (JsonProcessingException e) {
-                log.debug("FacturaPendiente error -> {}", e.getMessage());
-            }
+            log.debug("FacturaPendiente -> {}", Jsonifier.builder(facturaPendiente).build());
             BigDecimal importeFactura = facturaPendiente.getImporteFactura();
             BigDecimal importePagado = BigDecimal.ZERO;
             if (facturaPendiente.getImportePagado() != null) {
@@ -1464,12 +1473,15 @@ public class SheetService {
                 row = sheet.createRow(++fila);
                 this.setCellString(row, columnaRazonSocial, facturaPendiente.getRazonSocial(), styleNormal);
                 this.setCellString(row, columnaCUIT, facturaPendiente.getCuit(), styleNormal);
-                this.setCellString(row, columnaFechaComprobante, format.format(facturaPendiente.getFechaComprobante().withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
+                this.setCellString(row, columnaCBU, facturaPendiente.getCbu(), styleNormal);
+                this.setCellString(row, columnaFechaComprobante, format.format(Objects.requireNonNull(facturaPendiente.getFechaComprobante()).withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
                 this.setCellString(row, columnaTipoComprobante, facturaPendiente.getComprobante(), styleNormal);
                 this.setCellInteger(row, columnaComprobantePrefijo, facturaPendiente.getPrefijo(), styleNormal);
                 this.setCellLong(row, columnaComprobanteNumero, facturaPendiente.getNumeroComprobante(), styleNormal);
                 this.setCellBigDecimal(row, columnaImporteFactura, facturaPendiente.getImporteFactura(), styleNormal);
                 this.setCellBigDecimal(row, columnaSaldo, saldo, styleNormal);
+                this.setCellString(row, columnaFechaVencimiento, format.format(Objects.requireNonNull(facturaPendiente.getFechaVencimiento()).withOffsetSameInstant(ZoneOffset.UTC)), styleNormal);
+                this.setCellString(row, columnaObservaciones, facturaPendiente.getObservaciones(), styleNormal);
             }
         }
 

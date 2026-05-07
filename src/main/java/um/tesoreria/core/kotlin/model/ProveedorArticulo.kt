@@ -9,6 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity
 import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 
@@ -53,7 +54,7 @@ data class ProveedorArticulo(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "fad_art_id", insertable = false, updatable = false)
-    var articulo: Articulo? = null
+    var articulo: ArticuloEntity? = null
 
 ) : Auditable() {
     fun jsonify(): String {

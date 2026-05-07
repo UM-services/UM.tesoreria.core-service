@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.kotlin.model.Facultad;
-import um.tesoreria.core.kotlin.model.Geografica;
 
 @Data
 @Builder
@@ -20,6 +20,6 @@ public class CursoHaberes {
     private Byte semestre2;
     private Byte adicionalCargaHoraria;
     private Facultad facultad;
-    private Geografica geografica;
+    private GeograficaEntity geografica;
 
 }
