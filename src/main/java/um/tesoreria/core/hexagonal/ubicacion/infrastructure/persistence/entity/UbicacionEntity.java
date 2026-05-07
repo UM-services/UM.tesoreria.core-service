@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import um.tesoreria.core.kotlin.model.Auditable;
-import um.tesoreria.core.kotlin.model.Dependencia;
+import um.tesoreria.core.hexagonal.dependencia.infrastructure.persistence.entity.DependenciaEntity;
 
 @Getter
 @Setter
@@ -28,6 +28,6 @@ public class UbicacionEntity extends Auditable {
 
     @OneToOne(optional = true)
     @JoinColumn(name = "dependenciaId", insertable = false, updatable = false)
-    private Dependencia dependencia;
+    private DependenciaEntity dependencia;
 
 }

@@ -88,6 +88,8 @@ const diagrams = [
   { id: 'hexagonal-ubicacion', file: 'hexagonal-ubicacion.mmd', title: '🔷 Arquitectura Hexagonal - Ubicacion' },
   { id: 'hexagonal-ubicacionArticulo', file: 'hexagonal-ubicacionArticulo.mmd', title: '🔷 Arquitectura Hexagonal - UbicacionArticulo' },
   { id: 'hexagonal-mercadopago', file: 'hexagonal-mercadopago-context-history.mmd', title: '🔷 Arquitectura Hexagonal - MercadoPago Context History' },
+  { id: 'hexagonal-dependencia', file: 'hexagonal-dependencia.mmd', title: '🔷 Arquitectura Hexagonal - Dependencia' },
+  { id: 'hexagonal-facturaPendiente', file: 'hexagonal-facturaPendiente.mmd', title: '🔷 Arquitectura Hexagonal - Factura Pendiente' },
   { id: 'dependencies-diagram', file: 'dependencies.mmd', title: '📦 Diagrama de Dependencias' },
   { id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },
   { id: 'deployment-diagram', file: 'deployment.mmd', title: '🚀 Diagrama de Despliegue' },
