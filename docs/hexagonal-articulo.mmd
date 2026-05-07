@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Artículo (v3.13.0)
+title: Arquitectura Hexagonal - Módulo Artículo (v3.16.0)
 ---
 
 classDiagram
@@ -29,11 +29,13 @@ classDiagram
             +BigDecimal precio
             +Byte inventariable
             +Long stockMinimo
-            +BigDecimal cuenta
+            +BigDecimal numeroCuenta
             +String tipo
             +Byte directo
             +Byte habilitado
             +String search
+            +OffsetDateTime fechaAuditoria
+            +String usuarioAuditoria
         }
 
         class ArticuloRepository {
@@ -205,6 +207,7 @@ classDiagram
             class ArticuloController {
                 -ArticuloService articuloService
                 -ArticuloDtoMapper articuloDtoMapper
+                -CuentaService cuentaService
                 +createArticulo(ArticuloRequest) ResponseEntity~ArticuloResponse~
                 +getArticuloById(Long) ResponseEntity~ArticuloResponse~
                 +getAllArticulos() ResponseEntity~List~ArticuloResponse~~
@@ -212,10 +215,11 @@ classDiagram
                 +deleteArticulo(Long) ResponseEntity~Void~
                 +getNewArticulo() ResponseEntity~ArticuloResponse~
                 +getPaginatedArticulos(int, int) ResponseEntity~PaginatedResponse~ArticuloResponse~~
-                +searchArticulos(String) ResponseEntity~List~ArticuloSearchResponse~~
+                +searchArticulos(List~String~) ResponseEntity~List~ArticuloSearchResponse~~
             }
 
             class ArticuloRequest {
+                +Long articuloId
                 +String nombre
                 +String descripcion
                 +String unidad
@@ -251,11 +255,14 @@ classDiagram
                 +BigDecimal precio
                 +Byte inventariable
                 +Long stockMinimo
-                +BigDecimal cuenta
+                +BigDecimal numeroCuenta
+                +Cuenta cuenta
                 +String tipo
                 +Byte directo
                 +Byte habilitado
                 +String search
+                +OffsetDateTime fechaAuditoria
+                +String usuarioAuditoria
             }
 
             class ArticuloDtoMapper {
@@ -263,6 +270,8 @@ classDiagram
                 +toResponse(Articulo) ArticuloResponse
                 +toSearchResponse(ArticuloSearch) ArticuloSearchResponse
             }
+
+            ArticuloController --> CuentaService : calls
         }
     }
 

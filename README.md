@@ -4,7 +4,19 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.15.0**
+**Versión actual (SemVer): 3.16.0**
+
+## Novedades 3.16.0 (verificado en código)
+- feat(articulo): Enriquecimiento de respuestas con objeto `Cuenta` vía `CuentaService`
+  - Nuevo campo `Cuenta cuenta` en `ArticuloSearchResponse` para incluir datos de cuenta asociada
+  - Nuevo campo `articuloId` en `ArticuloRequest` para especificar ID en creación
+  - Los endpoints `GET /articulo/{id}`, `POST /articulo/search` y `GET /articulo/page` ahora resuelven y adjuntan el objeto `Cuenta` completo
+- refactor(articulo): Cambio de `@Data` a `@Getter`/`@Setter` en `Articulo` para mayor control de mutabilidad
+- refactor(articulo): Renombrado de campo `cuenta` a `numeroCuenta` en `ArticuloSearch`, `ArticuloKey`, `ArticuloSearchResponse` y mappers
+  - Compatibilidad BD asegurada vía `@Column(name = "cuenta")`
+- refactor(dto): Uso de importación `OffsetDateTime` en lugar de FQCN en `ArticuloSearch` y `ArticuloSearchResponse`
+
+> Basado en análisis profundo de `git diff HEAD` (8 archivos modificados, +72/-27 líneas).
 
 ## Novedades 3.15.0 (verificado en código)
 - feat(facturaPendiente): Nuevo módulo FacturaPendiente con arquitectura hexagonal completa
@@ -424,7 +436,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
 - Spring Boot: 4.0.6
 - Spring Cloud: 2025.1.0
-- Kotlin: 2.3.20
+- Kotlin: 2.3.21
 - MySQL Connector: 9.6.0
 - SpringDoc OpenAPI: 3.0.2
 - Apache POI: 5.5.1
@@ -685,9 +697,9 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.15.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.16.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -709,7 +721,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 - Java 25
 - Spring Boot 4.0.6
 - Spring Cloud 2025.1.0
-- Kotlin 2.3.20
+- Kotlin 2.3.21
 - JPA/Hibernate
 - ModelMapper
 - MySQL

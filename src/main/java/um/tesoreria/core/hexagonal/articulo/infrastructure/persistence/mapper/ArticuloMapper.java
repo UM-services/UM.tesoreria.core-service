@@ -61,7 +61,7 @@ public class ArticuloMapper {
                 .precio(entity.getPrecio())
                 .inventariable(entity.getInventariable())
                 .stockMinimo(entity.getStockMinimo())
-                .cuenta(entity.getCuenta())
+                .numeroCuenta(entity.getNumeroCuenta())
                 .tipo(entity.getTipo())
                 .directo(entity.getDirecto())
                 .habilitado(entity.getHabilitado())

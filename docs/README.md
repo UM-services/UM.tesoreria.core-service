@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.13.0**
+**Versión actual del servicio: 3.16.0**
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -14,6 +14,8 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores).
 - `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta (gestión de cuentas contables) - v3.8.0.
 - `hexagonal-mercadopago-context-history.mmd`: Historial de contexto de MercadoPago.
+- `hexagonal-ubicacion.mmd`: Arquitectura hexagonal del módulo Ubicacion (gestión de ubicaciones) - v3.14.0.
+- `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v3.14.0.
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 
 ## Diagramas de Datos

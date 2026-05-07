@@ -13,6 +13,7 @@ public class ArticuloDtoMapper {
     public Articulo toDomain(ArticuloRequest request) {
         if (request == null) return null;
         return Articulo.builder()
+                .articuloId(request.getArticuloId())
                 .nombre(request.getNombre())
                 .descripcion(request.getDescripcion())
                 .unidad(request.getUnidad())
@@ -36,11 +37,10 @@ public class ArticuloDtoMapper {
                 .precio(domain.getPrecio())
                 .inventariable(domain.getInventariable())
                 .stockMinimo(domain.getStockMinimo())
-                .numeroCuenta(domain.getNumeroCuenta())
                 .tipo(domain.getTipo())
                 .directo(domain.getDirecto())
                 .habilitado(domain.getHabilitado())
-                .cuenta(domain.getCuenta())
+                .numeroCuenta(domain.getNumeroCuenta())
                 .build();
     }
 
@@ -54,7 +54,7 @@ public class ArticuloDtoMapper {
                 .precio(domain.getPrecio())
                 .inventariable(domain.getInventariable())
                 .stockMinimo(domain.getStockMinimo())
-                .cuenta(domain.getCuenta())
+                .numeroCuenta(domain.getNumeroCuenta())
                 .tipo(domain.getTipo())
                 .directo(domain.getDirecto())
                 .habilitado(domain.getHabilitado())

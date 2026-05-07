@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 
 @Data
 public class ArticuloRequest {
+    private Long articuloId;
     private String nombre;
     private String descripcion;
     private String unidad;

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
+import java.time.OffsetDateTime;
 
 @Data
 @Builder
@@ -18,11 +20,12 @@ public class ArticuloSearchResponse {
     private BigDecimal precio;
     private Byte inventariable;
     private Long stockMinimo;
-    private BigDecimal cuenta;
+    private BigDecimal numeroCuenta;
+    private Cuenta cuenta;
     private String tipo;
     private Byte directo;
     private Byte habilitado;
     private String search;
-    private java.time.OffsetDateTime fechaAuditoria;
+    private OffsetDateTime fechaAuditoria;
     private String usuarioAuditoria;
 }

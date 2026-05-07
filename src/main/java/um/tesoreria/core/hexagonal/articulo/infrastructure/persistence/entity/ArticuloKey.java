@@ -3,9 +3,11 @@
  */
 package um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -31,7 +33,8 @@ import um.tesoreria.core.kotlin.model.Auditable;
 @AllArgsConstructor
 public class ArticuloKey extends Auditable implements Serializable {
 
-	private static final long serialVersionUID = -8530914093311572829L;
+	@Serial
+    private static final long serialVersionUID = -8530914093311572829L;
 
 	@Id
 	private Long articuloId;
@@ -42,7 +45,9 @@ public class ArticuloKey extends Auditable implements Serializable {
 	private BigDecimal precio;
 	private Byte inventariable;
 	private Long stockMinimo;
-	private BigDecimal cuenta;
+
+	@Column(name = "cuenta")
+	private BigDecimal numeroCuenta;
 	private String tipo;
 	private Byte directo;
 	private Byte habilitado;
