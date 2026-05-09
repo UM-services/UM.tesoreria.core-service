@@ -15,6 +15,12 @@ public class UpdateProveedorUseCaseImpl implements UpdateProveedorUseCase {
 
     @Override
     public Optional<Proveedor> updateProveedor(Integer id, Proveedor proveedor) {
+        if (proveedor.getEmailInterno() == null) {
+            proveedor.setEmailInterno("");
+        }
+        if (proveedor.getHabilitado() == null) {
+            proveedor.setHabilitado((byte) 0);
+        }
         return repository.update(id, proveedor);
     }
 }

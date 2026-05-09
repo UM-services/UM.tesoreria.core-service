@@ -24,7 +24,18 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6
   - Eliminación de `DependenciaService.java` del paquete `core/service/`
   - Eliminación de `DependenciaController.java` del paquete `core/controller/`
 
-> Basado en análisis profundo de `git diff HEAD` (22 archivos modificados, +408/-194 líneas).
+### Fixed
+- fix(proveedor): Manejo de campos nulos en creación y actualización de proveedores
+  - Validación de `emailInterno` en `CreateProveedorUseCaseImpl.createProveedor()` con asignación a string vacío si es nulo
+  - Validación de `emailInterno` en `UpdateProveedorUseCaseImpl.updateProveedor()` con asignación a string vacío si es nulo
+  - Validación de `habilitado` en `CreateProveedorUseCaseImpl.createProveedor()` con asignación a `(byte) 0` si es nulo
+  - Validación de `habilitado` en `UpdateProveedorUseCaseImpl.updateProveedor()` con asignación a `(byte) 0` si es nulo
+
+### Changed
+- refactor(proveedor): Migración de `ProveedorRequest` de `@Data` a `@Getter`/`@Setter`/`@Builder` para consistencia
+  - Nuevas anotaciones: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder` reemplazando `@Data`
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados, +421/-197 líneas, incluyendo cambios locales no commiteados).
 
 ## Novedades 3.16.0 (verificado en código)
 - feat(articulo): Enriquecimiento de respuestas con objeto `Cuenta` vía `CuentaService`
@@ -726,155 +737,6 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
 - [Wiki del Proyecto](https://github.com/UM-services/UM.tesoreria.core-service/wiki)
 
-## Características Principales
-- Gestión de chequeras y sus cuotas
-- Manejo de legajos y sus relaciones con carreras
-- Procesamiento de pagos y acreditaciones
-- Integración con sistemas externos
-- Generación de reportes y documentos
-- Validación de mensajes
-- Integración con Mercado Pago
-- Gestión de tarjetas de crédito de Mercado Pago
-- Sistema de logging mejorado
-- Validación de correos electrónicos
-
-## Tecnologías Utilizadas
-- Java 25
-- Spring Boot 4.0.6
-- Spring Cloud 2025.1.0
-- Kotlin 2.3.21
-- JPA/Hibernate
-- ModelMapper
-- MySQL
-- Mercado Pago SDK
-
-## Estructura del Proyecto
-```
-src/
-├── main/
-│   ├── java/
-│   │   └── um/
-│   │       └── tesoreria/
-│   │           └── core/
-│   │               ├── controller/       # Controladores REST
-│   │               ├── service/          # Lógica de negocio
-│   │               ├── repository/       # Acceso a datos
-│   │               ├── model/            # Modelos de datos
-│   │               ├── configuration/    # Configuraciones
-│   │               └── hexagonal/        # Arquitectura hexagonal
-│   │                   ├── persona/           # Módulo Persona (v3.1.0)
-│   │                   │   ├── application/
-│   │                   │   │   └── service/
-│   │                   │   └── infrastructure/
-│   │                   │       ├── persistence/
-│   │                   │       │   ├── entity/
-│   │                   │       │   └── repository/
-│   │                   │       └── web/
-│   │                   │           └── controller/
-│   │                   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
-│   │                   │   ├── domain/
-│   │                   │   │   ├── model/        # Entidades de dominio
-│   │                   │   │   └── ports/        # Puertos (interfaces)
-│   │                   │   │       ├── in/       # Puertos de entrada
-│   │                   │   │       └── out/      # Puertos de salida
-│   │                   │   └── infrastructure/
-│   │                   │       ├── persistence/
-│   │                   │       │   ├── repository/   # Adaptadores JPA
-│   │                   │       │   └── mapper/       # Mappers
-│   │                   │       └── application/
-│   │                   │           └── service/      # Servicios de aplicación
-│   │                   ├── dependencia/      # Módulo Dependencia (v3.17.0)
-│   │                   │   ├── domain/
-│   │                   │   │   ├── model/
-│   │                   │   │   └── ports/
-│   │                   │   │       ├── in/
-│   │                   │   │       └── out/
-│   │                   │   └── infrastructure/
-│   │                   │       ├── persistence/
-│   │                   │       │   ├── entity/
-│   │                   │       │   ├── repository/
-│   │                   │       │   └── mapper/
-│   │                   │       └── web/
-│   │                   │           ├── controller/
-│   │                   │           └── dto/
-│   │                   ├── facturaPendiente/ # Módulo FacturaPendiente (v3.15.0)
-│   │                   │   ├── domain/
-│   │                   │   │   ├── model/
-│   │                   │   │   └── ports/
-│   │                   │   │       ├── in/
-│   │                   │   │       └── out/
-│   │                   │   └── infrastructure/
-│   │                   │       ├── persistence/
-│   │                   │       │   ├── entity/
-│   │                   │       │   ├── repository/
-│   │                   │       │   └── mapper/
-│   │                   │       └── application/
-│   │                   │           └── service/
-│   │                   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
-│   │                   │   ├── domain/
-│   │                   │   │   ├── model/
-│   │                   │   │   └── ports/
-│   │                   │   │       ├── in/
-│   │                   │   │       └── out/
-│   │                   │   └── infrastructure/
-│   │                   │       ├── persistence/
-│   │                   │       │   ├── entity/
-│   │                   │       │   ├── repository/
-│   │                   │       │   └── mapper/
-│   │                   │       └── web/
-│   │                   │           └── controller/
-│   │                   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
-│   │                   │   ├── domain/
-│   │                   │   │   ├── model/
-│   │                   │   │   └── ports/
-│   │                   │   │       ├── in/
-│   │                   │   │       └── out/
-│   │                   │   └── infrastructure/
-│   │                   │       ├── persistence/
-│   │                   │       │   ├── entity/
-│   │                   │       │   ├── repository/
-│   │                   │       │   └── mapper/
-│   │                   │       └── web/
-│   │                   │           └── controller/
-│   │                   ├── articulo/          # Módulo Artículo (v3.13.0)
-│   │                   │   ├── domain/
-│   │                   │   │   └── model/        # Entidad de dominio
-│   │                   │   ├── application/
-│   │                   │   │   └── service/      # Servicio de aplicación
-│   │                   │   └── infrastructure/
-│   │                   │       ├── persistence/
-│   │                   │       │   ├── entity/     # Entidad JPA
-│   │                   │       │   └── repository/ # Repositorio adaptador
-│   │                   │       └── web/
-│   │                   │           └── controller/ # Controlador REST
-│   │                   ├── cuenta/            # Módulo Cuenta (v3.8.0)
-│   │                   │   ├── domain/
-│   │                   │   │   └── model/        # Entidad de dominio
-│   │                   │   ├── application/
-│   │                   │   │   └── service/      # Servicio de aplicación
-│   │                   │   └── infrastructure/
-│   │                   │       ├── persistence/
-│   │                   │       │   ├── entity/     # Entidad JPA
-│   │                   │       │   └── repository/ # Adaptador JPA
-│   │                   │       └── web/
-│   │                   │           └── controller/ # Controlador REST
-│   │                   ├── auth/              # Módulo Auth (v3.6.0)
-│   │                   ├── geografica/        # Módulo Geografica (v3.6.0)
-│   │                   ├── proveedor/         # Módulo Proveedor (v3.9.0)
-│   │                   └── matriculacionContext/  # Módulo MatriculacionContext (v3.8.0)
-│   │                       ├── domain/
-│   │                       │   ├── model/        # Entidades de dominio
-│   │                       │   └── ports/        # Puertos (interfaces)
-│   │                       │       ├── in/       # Puertos de entrada
-│   │                       │       └── out/      # Puertos de salida
-│   │                       └── infrastructure/
-│   │                           ├── persistence/
-│   │                           │   └── repository/   # Adaptadores JPA
-│   │                           └── web/
-│   │                               └── controller/  # Controladores REST
-│   └── resources/
-└── test/                                # Pruebas unitarias
-```
 
 ## Convenciones de Código
 - Los DTOs siguen la convención de nomenclatura con sufijo "Dto" (ej: ChequeraSerieDto)

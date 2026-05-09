@@ -2,7 +2,7 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
-## [3.17.0] - 2026-05-07
+## [3.17.0] - 2026-05-08
 ### Added
 - feat(dependencia): Nuevo módulo Dependencia con arquitectura hexagonal completa
   - Modelo de dominio: `Dependencia` con campos `dependenciaId`, `nombre`, `acronimo`, `facultadId`, `geograficaId`, `cuentaHonorariosPagar`, `fechaAuditoria`, `usuarioAuditoria`, relaciones a `Facultad`, `Geografica`, `Cuenta`, y método `getSedeKey()`
@@ -26,7 +26,18 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
   - Eliminación de `DependenciaService.java` del paquete `core/service/`
   - Eliminación de `DependenciaController.java` del paquete `core/controller/`
 
-> Basado en análisis profundo de `git diff HEAD` (22 archivos modificados, +408/-194 líneas).
+### Fixed
+- fix(proveedor): Manejo de campos nulos en creación y actualización de proveedores
+  - Validación de `emailInterno` en `CreateProveedorUseCaseImpl.createProveedor()` con asignación a string vacío si es nulo
+  - Validación de `emailInterno` en `UpdateProveedorUseCaseImpl.updateProveedor()` con asignación a string vacío si es nulo
+  - Validación de `habilitado` en `CreateProveedorUseCaseImpl.createProveedor()` con asignación a `(byte) 0` si es nulo
+  - Validación de `habilitado` en `UpdateProveedorUseCaseImpl.updateProveedor()` con asignación a `(byte) 0` si es nulo
+
+### Changed
+- refactor(proveedor): Migración de `ProveedorRequest` de `@Data` a `@Getter`/`@Setter`/`@Builder` para consistencia
+  - Nuevas anotaciones: `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder` reemplazando `@Data`
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados, +421/-197 líneas, incluyendo cambios locales no commiteados).
 
 ## [3.16.0] - 2026-05-07
 ### Added

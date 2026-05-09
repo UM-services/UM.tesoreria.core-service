@@ -1,9 +1,14 @@
 package um.tesoreria.core.hexagonal.proveedor.infrastructure.web.dto;
 
-import lombok.Data;
+import lombok.*;
+
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProveedorRequest {
     private String cuit;
     private String nombreFantasia;
