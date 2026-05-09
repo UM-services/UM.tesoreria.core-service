@@ -13,6 +13,12 @@ public class CreateProveedorUseCaseImpl implements CreateProveedorUseCase {
 
     @Override
     public Proveedor createProveedor(Proveedor proveedor) {
+        if (proveedor.getEmailInterno() == null) {
+            proveedor.setEmailInterno("");
+        }
+        if (proveedor.getHabilitado() == null) {
+            proveedor.setHabilitado((byte) 0);
+        }
         return repository.create(proveedor);
     }
 }
