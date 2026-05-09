@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -93,7 +94,7 @@ data class ChequeraCuotaReemplazo(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "ccr_fac_id", insertable = false, updatable = false)
-    var facultad: Facultad? = null,
+    var facultad: FacultadEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "ccr_tch_id", insertable = false, updatable = false)

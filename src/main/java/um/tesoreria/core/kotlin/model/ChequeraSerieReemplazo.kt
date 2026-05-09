@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
 import java.math.BigDecimal
@@ -69,7 +70,7 @@ data class ChequeraSerieReemplazo(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "CSR_Fac_ID", insertable = false, updatable = false)
-    var facultad: Facultad? = null,
+    var facultad: FacultadEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "CSR_TCh_ID", insertable = false, updatable = false)

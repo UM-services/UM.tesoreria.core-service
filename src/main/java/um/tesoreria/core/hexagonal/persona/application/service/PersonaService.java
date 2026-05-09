@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.client.tesoreria.mercadopago.PreferenceClient;
 import um.tesoreria.core.exception.ChequeraSerieException;
-import um.tesoreria.core.exception.MercadoPagoContextException;
 import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
 import um.tesoreria.core.extern.consumer.LegajoFacultadConsumer;
@@ -27,6 +26,9 @@ import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
 import um.tesoreria.core.extern.model.kotlin.PreInscripcionFacultad;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
+import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
+import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.MercadoPagoContext;

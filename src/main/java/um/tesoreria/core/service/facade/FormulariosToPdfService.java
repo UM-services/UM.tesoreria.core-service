@@ -29,12 +29,14 @@ import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
 
+import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.CarreraService;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.service.ChequeraSerieService;
-import um.tesoreria.core.service.FacultadService;
+import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.LectivoAlternativaService;
 import um.tesoreria.core.service.LectivoService;
 import um.tesoreria.core.service.LegajoService;

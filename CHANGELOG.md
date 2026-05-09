@@ -2,6 +2,32 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.18.0] - 2026-05-09
+### Added
+- feat(facultad): Nuevo módulo Facultad con arquitectura hexagonal completa
+  - Modelo de dominio: `Facultad` con campos `facultadId`, `nombre`, `codigoempresa`, `server`, `dbadm`, `dsn`, `cuentacontable`, `apiserver`, `apiport`, `fechaAuditoria`, `usuarioAuditoria`
+  - Puertos de entrada: `GetAllFacultadesUseCase`, `GetFacultadByIdUseCase`, `GetFacultadesFiltradasUseCase`
+  - Puerto de salida: `FacultadRepository` con métodos `findAll()`, `findAllIn(List<Integer>)`, `findById(Integer)`
+  - Casos de uso: `GetAllFacultadesUseCaseImpl`, `GetFacultadByIdUseCaseImpl`, `GetFacultadesFiltradasUseCaseImpl`
+  - Servicio de aplicación: `FacultadService` con métodos `findAll()`, `findFacultades()`, `findByFacultadId(Integer)`, y métodos legacy view `findAllByLectivoId`, `findAllByPersona`, `findAllByDisenho`
+  - Adaptador JPA: `JpaFacultadRepositoryAdapter` con mapeo dominio ↔ entidad y orden por `facultadId`
+  - Entidad JPA: `FacultadEntity` con anotaciones Lombok, herencia de `Auditable`, y mapeo a tabla `facultad`
+  - Repositorio JPA: `JpaFacultadRepository` con métodos `findAllByFacultadIdIn(List<Integer>)` y `findByFacultadId(Integer)`
+  - Mapper: `FacultadMapper` para conversión entidad → dominio
+  - Controlador REST: `FacultadController` con endpoints `GET /facultad/`, `GET /facultad/facultades`, `GET /facultad/{facultadId}`, y legacy view endpoints `GET /facultad/lectivo/{lectivoId}`, `GET /facultad/bypersona/{personaId}/{documentoId}/{lectivoId}`, `GET /facultad/disenho/{lectivoId}/{geograficaId}`
+  - DTO: `FacultadResponse` para respuestas HTTP con datos completos de facultad
+  - DTO Mapper: `FacultadDtoMapper` para conversión dominio → DTO
+
+### Changed
+- refactor(facultad): Migración completa de módulo Facultad a arquitectura hexagonal
+  - Eliminación de `Facultad.kt` (modelo Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `FacultadRepository.java` del paquete `core/repository/`
+  - Eliminación de `FacultadService.java` del paquete `core/service/`
+  - Eliminación de `FacultadController.java` del paquete `core/controller/`
+  - Actualización de referencias de `um.tesoreria.core.kotlin.model.Facultad` a `um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity` en todos los modelos, servicios y controladores que dependían de la entidad legacy (~20+ archivos afectados)
+
+> Basado en análisis profundo de `git diff HEAD` (archivos creados, eliminados y modificados, incluyendo cambios locales no commiteados).
+
 ## [3.17.0] - 2026-05-08
 ### Added
 - feat(dependencia): Nuevo módulo Dependencia con arquitectura hexagonal completa

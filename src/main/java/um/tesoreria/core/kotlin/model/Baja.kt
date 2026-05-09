@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumns
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -54,7 +55,7 @@ data class Baja(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "baj_fac_id", insertable = false, updatable = false)
-    var facultad: Facultad? = null,
+    var facultad: FacultadEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "baj_tch_id", insertable = false, updatable = false)
