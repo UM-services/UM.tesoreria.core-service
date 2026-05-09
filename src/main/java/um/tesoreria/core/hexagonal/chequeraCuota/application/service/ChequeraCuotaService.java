@@ -13,11 +13,8 @@ import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.DeudaData;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.out.ChequeraCuotaRepository;
-import um.tesoreria.core.kotlin.model.Facultad;
-import um.tesoreria.core.kotlin.model.Lectivo;
-import um.tesoreria.core.kotlin.model.TipoChequera;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
-import um.tesoreria.core.service.FacultadService;
+import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.LectivoService;
 import um.tesoreria.core.service.TipoChequeraService;
 
@@ -26,9 +23,7 @@ import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 import java.util.AbstractMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service("hexagonalChequeraCuotaService")

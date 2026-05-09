@@ -4,7 +4,6 @@
 package um.tesoreria.core.service.facade;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,11 +17,7 @@ import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.exception.InfoLdapException;
 import um.tesoreria.core.exception.LegajoException;
-import um.tesoreria.core.exception.MatriculaException;
-import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.exception.PlanException;
-import um.tesoreria.core.exception.UsuarioLdapException;
-import um.tesoreria.core.exception.view.ChequeraClaseException;
 import um.tesoreria.core.extern.consumer.CarreraFacultadConsumer;
 import um.tesoreria.core.extern.consumer.InscripcionDetalleFacultadConsumer;
 import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
@@ -31,15 +26,14 @@ import um.tesoreria.core.extern.consumer.PersonaFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PlanFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.*;
-import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
+import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.InfoLdap;
-import um.tesoreria.core.model.UsuarioLdap;
-import um.tesoreria.core.model.view.ChequeraClase;
 import um.tesoreria.core.service.CarreraService;
 import um.tesoreria.core.service.ChequeraSerieService;
 import um.tesoreria.core.service.DomicilioService;
-import um.tesoreria.core.service.FacultadService;
+import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.InfoLdapService;
 import um.tesoreria.core.service.LegajoService;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;

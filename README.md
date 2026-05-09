@@ -4,7 +4,30 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.17.0**
+**Versión actual (SemVer): 3.18.0**
+
+## Novedades 3.18.0 (verificado en código)
+- feat(facultad): Nuevo módulo Facultad con arquitectura hexagonal completa
+  - Modelo de dominio: `Facultad` con campos `facultadId`, `nombre`, `codigoempresa`, `server`, `dbadm`, `dsn`, `cuentacontable`, `apiserver`, `apiport`, `fechaAuditoria`, `usuarioAuditoria`
+  - Puertos de entrada: `GetAllFacultadesUseCase`, `GetFacultadByIdUseCase`, `GetFacultadesFiltradasUseCase`
+  - Puerto de salida: `FacultadRepository` con métodos `findAll()`, `findAllIn(List<Integer>)`, `findById(Integer)`
+  - Casos de uso: `GetAllFacultadesUseCaseImpl`, `GetFacultadByIdUseCaseImpl`, `GetFacultadesFiltradasUseCaseImpl`
+  - Servicio de aplicación: `FacultadService` con métodos `findAll()`, `findFacultades()`, `findByFacultadId(Integer)`, y métodos legacy `findAllByLectivoId`, `findAllByPersona`, `findAllByDisenho`
+  - Adaptador JPA: `JpaFacultadRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `FacultadEntity` con anotaciones Lombok, `@Table(name = "facultad")`, herencia de `Auditable`
+  - Repositorio JPA: `JpaFacultadRepository` con `findAllByFacultadIdIn` y `findByFacultadId`
+  - Mapper: `FacultadMapper` para conversión entidad → dominio
+  - Controlador REST: `FacultadController` con endpoints `GET /facultad/`, `GET /facultad/facultades`, `GET /facultad/{facultadId}`, y legacy `GET /facultad/lectivo/{lectivoId}`, `GET /facultad/bypersona/{personaId}/{documentoId}/{lectivoId}`, `GET /facultad/disenho/{lectivoId}/{geograficaId}`
+  - DTO: `FacultadResponse` para respuestas HTTP
+  - DTO Mapper: `FacultadDtoMapper` para conversión dominio → DTO
+- refactor(facultad): Migración completa de módulo Facultad a arquitectura hexagonal
+  - Eliminación de `Facultad.kt` (Kotlin) del paquete `core/kotlin/model/`
+  - Eliminación de `FacultadRepository.java` del paquete `core/repository/`
+  - Eliminación de `FacultadService.java` del paquete `core/service/`
+  - Eliminación de `FacultadController.java` del paquete `core/controller/`
+  - Actualización de ~20+ archivos que referenciaban `um.tesoreria.core.kotlin.model.Facultad` para usar `FacultadEntity` del nuevo módulo hexagonal
+
+> Basado en análisis profundo de `git diff HEAD` (nuevos archivos creados y eliminaciones de legacy).
 
 ## Novedades 3.17.0 (verificado en código)
 - feat(dependencia): Nuevo módulo Dependencia con arquitectura hexagonal completa
@@ -679,6 +702,7 @@ src/
 │   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
 │   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
 │   │       │   ├── dependencia/       # Módulo Dependencia (v3.17.0)
+│   │       │   ├── facultad/          # Módulo Facultad (v3.18.0)
 │   │       │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
 │   │       │   ├── articulo/          # Módulo Artículo (v3.13.0)
 │   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
@@ -731,7 +755,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.17.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.18.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

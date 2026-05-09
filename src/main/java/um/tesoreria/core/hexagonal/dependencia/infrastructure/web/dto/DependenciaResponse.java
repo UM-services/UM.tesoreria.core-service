@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
 import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
 import java.math.BigDecimal;
@@ -22,7 +23,7 @@ public class DependenciaResponse {
     private BigDecimal cuentaHonorariosPagar;
     private OffsetDateTime fechaAuditoria;
     private String usuarioAuditoria;
-    private um.tesoreria.core.kotlin.model.Facultad facultad;
+    private FacultadEntity facultad;
     private Geografica geografica;
     private Cuenta cuenta;
 }

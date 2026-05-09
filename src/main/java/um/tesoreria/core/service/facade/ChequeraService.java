@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.exception.ChequeraEliminadaException;
 import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DebitoException;
+import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.kotlin.model.*;

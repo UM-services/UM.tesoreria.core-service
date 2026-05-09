@@ -1,9 +1,8 @@
 package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.json.JsonMapper
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -97,7 +96,7 @@ data class ChequeraCuota(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chc_fac_id", insertable = false, updatable = false)
-    var facultad: Facultad? = null,
+    var facultad: FacultadEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chc_tch_id", insertable = false, updatable = false)
@@ -154,7 +153,7 @@ data class ChequeraCuota(
         private var manual: Byte = 0
         private var compensada: Byte = 0
         private var tramoId: Int = 0
-        private var facultad: Facultad? = null
+        private var facultad: FacultadEntity? = null
         private var tipoChequera: TipoChequera? = null
         private var producto: Producto? = null
         private var chequeraSerie: ChequeraSerie? = null
@@ -186,7 +185,7 @@ data class ChequeraCuota(
         fun manual(manual: Byte) = apply { this.manual = manual }
         fun compensada(compensada: Byte) = apply { this.compensada = compensada }
         fun tramoId(tramoId: Int) = apply { this.tramoId = tramoId }
-        fun facultad(facultad: Facultad?) = apply { this.facultad = facultad }
+        fun facultad(facultad: FacultadEntity?) = apply { this.facultad = facultad }
         fun tipoChequera(tipoChequera: TipoChequera?) = apply { this.tipoChequera = tipoChequera }
         fun producto(producto: Producto?) = apply { this.producto = producto }
         fun chequeraSerie(chequeraSerie: ChequeraSerie?) = apply { this.chequeraSerie = chequeraSerie }

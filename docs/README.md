@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.17.0**
+**Versión actual del servicio: 3.18.0**
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -18,6 +18,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v3.14.0.
 - `hexagonal-dependencia.mmd`: Arquitectura hexagonal del módulo Dependencia (gestión de dependencias) - v3.17.0.
 - `hexagonal-facturaPendiente.mmd`: Arquitectura hexagonal del módulo FacturaPendiente (gestión de facturas pendientes) - v3.15.0.
+- `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.18.0.
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 
 ## Diagramas de Datos

@@ -9,7 +9,6 @@ import java.text.DecimalFormat;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,10 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraCuotaException;
-import um.tesoreria.core.exception.ChequeraSerieException;
-import um.tesoreria.core.exception.FacultadException;
-import um.tesoreria.core.exception.LectivoException;
-import um.tesoreria.core.exception.TipoChequeraException;
+import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.model.internal.CuotaPeriodoDto;

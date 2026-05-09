@@ -19,6 +19,7 @@ import org.hibernate.annotations.Immutable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
@@ -58,7 +59,7 @@ public class ChequeraPreuniv implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "facultadId", insertable = false, updatable = false)
-	private Facultad facultad;
+	private FacultadEntity facultad;
 
 	@OneToOne
 	@JoinColumn(name = "tipoChequeraId", insertable = false, updatable = false)
