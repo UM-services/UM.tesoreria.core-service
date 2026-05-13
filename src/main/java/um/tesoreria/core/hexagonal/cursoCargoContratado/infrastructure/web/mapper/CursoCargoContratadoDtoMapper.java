@@ -5,9 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.client.haberes.core.CargoTipoClient;
 import um.tesoreria.core.client.haberes.core.CursoClient;
+import um.tesoreria.core.exception.ContratoException;
 import um.tesoreria.core.hexagonal.cursoCargoContratado.domain.model.CursoCargoContratado;
 import um.tesoreria.core.hexagonal.cursoCargoContratado.infrastructure.web.dto.CursoCargoContratadoResponse;
-import um.tesoreria.core.service.ContratoService;
+import um.tesoreria.core.hexagonal.contrato.application.service.ContratoService;
 
 @Component
 @Slf4j
@@ -24,7 +25,8 @@ public class CursoCargoContratadoDtoMapper {
         }
         var curso = cursoClient.findByCursoId(cursoCargoContratado.getCursoId());
         var cargoTipo = cargoTipoClient.findByCargoTipoId(cursoCargoContratado.getCargoTipoId());
-        var contrato = contratoService.findByContratoId(cursoCargoContratado.getContratoId());
+        var contrato = contratoService.getContratoById(cursoCargoContratado.getContratoId())
+                .orElseThrow(() -> new ContratoException(cursoCargoContratado.getContratoId()));
         var cursoCargoContratadoResponse = CursoCargoContratadoResponse.builder()
                 .cursoCargoContratadoId(cursoCargoContratado.getCursoCargoContratadoId())
                 .curso(curso)

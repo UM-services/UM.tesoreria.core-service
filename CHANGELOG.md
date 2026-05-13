@@ -2,6 +2,35 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.19.0] - 2026-05-13
+### Added
+- feat(contrato): Nuevo módulo Contrato con arquitectura hexagonal completa
+  - Modelo de dominio: `Contrato` con campos `contratoId`, `personaId`, `documentoId`, `desde`, `facultadId`, `planId`, `materiaId`, `geograficaId`, `cargoMateriaId`, `primerVencimiento`, `cargo`, `montoFijo`, `canonMensual`, `canonMensualSinAjuste`, `hasta`, `canonMensualLetras`, `canonTotal`, `canonTotalLetras`, `meses`, `mesesLetras`, `ajuste`, y método `jsonify()`
+  - Puertos de entrada (9): `CreateContratoUseCase`, `DeleteContratoUseCase`, `GetAllContratosAjustablesUseCase`, `GetAllContratosByFacultadUseCase`, `GetAllContratosByPersonaUseCase`, `GetAllContratosVigentesUseCase`, `GetContratoByIdUseCase`, `SaveAllContratosUseCase`, `UpdateContratoUseCase`
+  - Puerto de salida: `ContratoRepository` con métodos `create`, `findById`, `findAllByFacultad`, `findAllAjustable`, `findAllVigente`, `findAllByPersona`, `update`, `saveAll`, `deleteById`
+  - Casos de uso: Implementaciones completas en `application/usecases/` con inyección de dependencias
+  - Servicio de aplicación: `ContratoService` con delegación a casos de uso y retornos `Optional`
+  - Adaptador JPA: `JpaContratoRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `ContratoEntity` con anotaciones Lombok (`@Getter`, `@Setter`, `@Builder`), herencia de `Auditable`, y `@Builder.Default` para campos con valores por defecto
+  - Repositorio JPA: `JpaContratoRepository` con consultas por facultad, persona, ajustable, vigente
+  - Mapper: `ContratoMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `ContratoController` con endpoints `GET /contrato/ajustable/{referencia}`, `GET /contrato/vigente/{referencia}`, `GET /contrato/persona/{personaId}/{documentoId}`, `GET /contrato/{contratoId}`, `PUT /contrato/{contratoId}`, `PUT /contrato/`
+  - DTOs: `ContratoRequest` para entrada y `ContratoResponse` para respuestas HTTP
+  - DTO Mapper: `ContratoDtoMapper` para conversión DTO ↔ dominio
+
+### Changed
+- refactor(contrato): Migración completa de módulo Contrato a arquitectura hexagonal
+  - Eliminación de `Contrato.java` (modelo legacy) del paquete `core/model/` → renombrado a `ContratoEntity.java` en `hexagonal/contrato/infrastructure/persistence/entity/`
+  - Eliminación de `ContratoRepository.java` del paquete `core/repository/`
+  - Eliminación de `ContratoService.java` del paquete `core/service/`
+  - Eliminación de `ContratoController.java` del paquete `core/controller/`
+  - Actualización de referencias en `ContratoPeriodo.java`, `ContratoFacturaService.java`, `ContratoToolService.java`, `SheetService.java`, `CursoCargoContratadoResponse.java`, `CursoCargoContratadoDtoMapper.java` para usar la nueva estructura hexagonal
+  - `ContratoToolService` y `ContratoFacturaService` actualizados para usar `ContratoService` hexagonal con `Optional` y manejo de `ContratoException`
+  - `SheetService`: líneas comentadas de datos de persona reactivadas usando `contratoPeriodo.getContrato().getPersonaEntity()`
+- refactor(contrato): Migración de `ContratoEntity` de `@Data` a `@Getter`/`@Setter`/`@Builder` para consistencia con otros módulos hexagonales
+
+> Basado en análisis profundo de `git diff HEAD` (39 archivos, +793/-229 líneas).
+
 ## [3.18.0] - 2026-05-09
 ### Added
 - feat(facultad): Nuevo módulo Facultad con arquitectura hexagonal completa

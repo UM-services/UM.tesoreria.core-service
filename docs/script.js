@@ -90,6 +90,7 @@ const diagrams = [
   { id: 'hexagonal-mercadopago', file: 'hexagonal-mercadopago-context-history.mmd', title: '🔷 Arquitectura Hexagonal - MercadoPago Context History' },
   { id: 'hexagonal-dependencia', file: 'hexagonal-dependencia.mmd', title: '🔷 Arquitectura Hexagonal - Dependencia' },
   { id: 'hexagonal-facturaPendiente', file: 'hexagonal-facturaPendiente.mmd', title: '🔷 Arquitectura Hexagonal - Factura Pendiente' },
+  { id: 'hexagonal-contrato', file: 'hexagonal-contrato.mmd', title: '🔷 Arquitectura Hexagonal - Contrato' },
   { id: 'dependencies-diagram', file: 'dependencies.mmd', title: '📦 Diagrama de Dependencias' },
   { id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },
   { id: 'deployment-diagram', file: 'deployment.mmd', title: '🚀 Diagrama de Despliegue' },

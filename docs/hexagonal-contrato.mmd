@@ -1,0 +1,311 @@
+---
+title: Arquitectura Hexagonal - Módulo Contrato (v3.19.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Contrato {
+            +Long contratoId
+            +BigDecimal personaId
+            +Integer documentoId
+            +OffsetDateTime desde
+            +Integer facultadId
+            +Integer planId
+            +String materiaId
+            +Integer geograficaId
+            +Integer cargoMateriaId
+            +OffsetDateTime primerVencimiento
+            +String cargo
+            +BigDecimal montoFijo
+            +BigDecimal canonMensual
+            +BigDecimal canonMensualSinAjuste
+            +OffsetDateTime hasta
+            +String canonMensualLetras
+            +BigDecimal canonTotal
+            +String canonTotalLetras
+            +Integer meses
+            +String mesesLetras
+            +Byte ajuste
+        }
+
+        class ContratoRepository {
+            <<interface>>
+            +create(Contrato) Contrato
+            +findById(Long) Optional~Contrato~
+            +findAllByFacultad(Integer, Integer) List~Contrato~
+            +findAllAjustable(OffsetDateTime) List~Contrato~
+            +findAllVigente(OffsetDateTime) List~Contrato~
+            +findAllByPersona(BigDecimal, Integer) List~Contrato~
+            +update(Long, Contrato) Optional~Contrato~
+            +saveAll(List~Contrato~) List~Contrato~
+            +deleteById(Long) boolean
+        }
+    }
+
+    namespace application {
+        class ContratoService {
+            -CreateContratoUseCase createContratoUseCase
+            -DeleteContratoUseCase deleteContratoUseCase
+            -GetAllContratosAjustablesUseCase getAllContratosAjustablesUseCase
+            -GetAllContratosByFacultadUseCase getAllContratosByFacultadUseCase
+            -GetAllContratosByPersonaUseCase getAllContratosByPersonaUseCase
+            -GetAllContratosVigentesUseCase getAllContratosVigentesUseCase
+            -GetContratoByIdUseCase getContratoByIdUseCase
+            -SaveAllContratosUseCase saveAllContratosUseCase
+            -UpdateContratoUseCase updateContratoUseCase
+            +createContrato(Contrato) Contrato
+            +getContratosAjustables(OffsetDateTime) List~Contrato~
+            +getContratosByFacultad(Integer, Integer) List~Contrato~
+            +getContratosByPersona(BigDecimal, Integer) List~Contrato~
+            +getContratosVigentes(OffsetDateTime) List~Contrato~
+            +getContratoById(Long) Optional~Contrato~
+            +updateContrato(Long, Contrato) Optional~Contrato~
+            +saveAllContratos(List~Contrato~) List~Contrato~
+            +deleteContrato(Long) boolean
+        }
+
+        namespace usecases {
+            class CreateContratoUseCaseImpl {
+                -ContratoRepository repository
+                +createContrato(Contrato) Contrato
+            }
+            class DeleteContratoUseCaseImpl {
+                -ContratoRepository repository
+                +deleteContrato(Long) boolean
+            }
+            class GetAllContratosAjustablesUseCaseImpl {
+                -ContratoRepository repository
+                +getContratosAjustables(OffsetDateTime) List~Contrato~
+            }
+            class GetAllContratosByFacultadUseCaseImpl {
+                -ContratoRepository repository
+                +getContratosByFacultad(Integer, Integer) List~Contrato~
+            }
+            class GetAllContratosByPersonaUseCaseImpl {
+                -ContratoRepository repository
+                +getContratosByPersona(BigDecimal, Integer) List~Contrato~
+            }
+            class GetAllContratosVigentesUseCaseImpl {
+                -ContratoRepository repository
+                +getContratosVigentes(OffsetDateTime) List~Contrato~
+            }
+            class GetContratoByIdUseCaseImpl {
+                -ContratoRepository repository
+                +getContratoById(Long) Optional~Contrato~
+            }
+            class SaveAllContratosUseCaseImpl {
+                -ContratoRepository repository
+                +saveAllContratos(List~Contrato~) List~Contrato~
+            }
+            class UpdateContratoUseCaseImpl {
+                -ContratoRepository repository
+                +updateContrato(Long, Contrato) Optional~Contrato~
+            }
+        }
+
+        class CreateContratoUseCase {
+            <<interface>>
+            +createContrato(Contrato) Contrato
+        }
+        class DeleteContratoUseCase {
+            <<interface>>
+            +deleteContrato(Long) boolean
+        }
+        class GetAllContratosAjustablesUseCase {
+            <<interface>>
+            +getContratosAjustables(OffsetDateTime) List~Contrato~
+        }
+        class GetAllContratosByFacultadUseCase {
+            <<interface>>
+            +getContratosByFacultad(Integer, Integer) List~Contrato~
+        }
+        class GetAllContratosByPersonaUseCase {
+            <<interface>>
+            +getContratosByPersona(BigDecimal, Integer) List~Contrato~
+        }
+        class GetAllContratosVigentesUseCase {
+            <<interface>>
+            +getContratosVigentes(OffsetDateTime) List~Contrato~
+        }
+        class GetContratoByIdUseCase {
+            <<interface>>
+            +getContratoById(Long) Optional~Contrato~
+        }
+        class SaveAllContratosUseCase {
+            <<interface>>
+            +saveAllContratos(List~Contrato~) List~Contrato~
+        }
+        class UpdateContratoUseCase {
+            <<interface>>
+            +updateContrato(Long, Contrato) Optional~Contrato~
+        }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class ContratoEntity {
+                +Long contratoId
+                +BigDecimal personaId
+                +Integer documentoId
+                +OffsetDateTime desde
+                +Integer facultadId
+                +Integer planId
+                +String materiaId
+                +Integer geograficaId
+                +Integer cargoMateriaId
+                +OffsetDateTime primerVencimiento
+                +String cargo
+                +BigDecimal montoFijo
+                +BigDecimal canonMensual
+                +BigDecimal canonMensualSinAjuste
+                +OffsetDateTime hasta
+                +String canonMensualLetras
+                +BigDecimal canonTotal
+                +String canonTotalLetras
+                +Integer meses
+                +String mesesLetras
+                +Byte ajuste
+            }
+
+            class JpaContratoRepository {
+                <<JpaRepository>>
+                +findAllByFacultadIdAndGeograficaId(Integer, Integer) List~ContratoEntity~
+                +findAllByAjusteAndHastaGreaterThanEqual(Byte, OffsetDateTime) List~ContratoEntity~
+                +findAllByHastaGreaterThanEqual(OffsetDateTime) List~ContratoEntity~
+                +findAllByPersonaIdAndDocumentoIdOrderByDesdeDesc(BigDecimal, Integer) List~ContratoEntity~
+                +findByContratoId(Long) Optional~ContratoEntity~
+                +deleteByContratoId(Long) void
+                +existsByContratoId(Long) boolean
+            }
+
+            class JpaContratoRepositoryAdapter {
+                -JpaContratoRepository repository
+                -ContratoMapper mapper
+                +create(Contrato) Contrato
+                +findById(Long) Optional~Contrato~
+                +findAllByFacultad(Integer, Integer) List~Contrato~
+                +findAllAjustable(OffsetDateTime) List~Contrato~
+                +findAllVigente(OffsetDateTime) List~Contrato~
+                +findAllByPersona(BigDecimal, Integer) List~Contrato~
+                +update(Long, Contrato) Optional~Contrato~
+                +saveAll(List~Contrato~) List~Contrato~
+                +deleteById(Long) boolean
+            }
+
+            class ContratoMapper {
+                +toEntity(Contrato) ContratoEntity
+                +toDomainModel(ContratoEntity) Contrato
+            }
+        }
+
+        namespace web {
+            class ContratoController {
+                -ContratoService contratoService
+                -ContratoDtoMapper contratoDtoMapper
+                +findAllAjustable(OffsetDateTime) ResponseEntity~List~ContratoResponse~~
+                +findAllVigente(OffsetDateTime) ResponseEntity~List~ContratoResponse~~
+                +findAllByPersona(BigDecimal, Integer) ResponseEntity~List~ContratoResponse~~
+                +findByContratoId(Long) ResponseEntity~ContratoResponse~
+                +update(Long, ContratoRequest) ResponseEntity~ContratoResponse~
+                +saveAll(List~ContratoRequest~) ResponseEntity~List~ContratoResponse~~
+            }
+
+            class ContratoRequest {
+                +BigDecimal personaId
+                +Integer documentoId
+                +OffsetDateTime desde
+                +Integer facultadId
+                +Integer planId
+                +String materiaId
+                +Integer geograficaId
+                +Integer cargoMateriaId
+                +OffsetDateTime primerVencimiento
+                +String cargo
+                +BigDecimal montoFijo
+                +BigDecimal canonMensual
+                +BigDecimal canonMensualSinAjuste
+                +OffsetDateTime hasta
+                +String canonMensualLetras
+                +BigDecimal canonTotal
+                +String canonTotalLetras
+                +Integer meses
+                +String mesesLetras
+                +Byte ajuste
+            }
+
+            class ContratoResponse {
+                +Long contratoId
+                +BigDecimal personaId
+                +Integer documentoId
+                +OffsetDateTime desde
+                +Integer facultadId
+                +Integer planId
+                +String materiaId
+                +Integer geograficaId
+                +Integer cargoMateriaId
+                +OffsetDateTime primerVencimiento
+                +String cargo
+                +BigDecimal montoFijo
+                +BigDecimal canonMensual
+                +BigDecimal canonMensualSinAjuste
+                +OffsetDateTime hasta
+                +String canonMensualLetras
+                +BigDecimal canonTotal
+                +String canonTotalLetras
+                +Integer meses
+                +String mesesLetras
+                +Byte ajuste
+            }
+
+            class ContratoDtoMapper {
+                +toDomain(ContratoRequest) Contrato
+                +toResponse(Contrato) ContratoResponse
+            }
+        }
+    }
+
+    ContratoService --> CreateContratoUseCase : uses
+    ContratoService --> DeleteContratoUseCase : uses
+    ContratoService --> GetAllContratosAjustablesUseCase : uses
+    ContratoService --> GetAllContratosByFacultadUseCase : uses
+    ContratoService --> GetAllContratosByPersonaUseCase : uses
+    ContratoService --> GetAllContratosVigentesUseCase : uses
+    ContratoService --> GetContratoByIdUseCase : uses
+    ContratoService --> SaveAllContratosUseCase : uses
+    ContratoService --> UpdateContratoUseCase : uses
+
+    CreateContratoUseCaseImpl ..|> CreateContratoUseCase : implements
+    DeleteContratoUseCaseImpl ..|> DeleteContratoUseCase : implements
+    GetAllContratosAjustablesUseCaseImpl ..|> GetAllContratosAjustablesUseCase : implements
+    GetAllContratosByFacultadUseCaseImpl ..|> GetAllContratosByFacultadUseCase : implements
+    GetAllContratosByPersonaUseCaseImpl ..|> GetAllContratosByPersonaUseCase : implements
+    GetAllContratosVigentesUseCaseImpl ..|> GetAllContratosVigentesUseCase : implements
+    GetContratoByIdUseCaseImpl ..|> GetContratoByIdUseCase : implements
+    SaveAllContratosUseCaseImpl ..|> SaveAllContratosUseCase : implements
+    UpdateContratoUseCaseImpl ..|> UpdateContratoUseCase : implements
+
+    CreateContratoUseCaseImpl --> ContratoRepository : uses
+    DeleteContratoUseCaseImpl --> ContratoRepository : uses
+    GetAllContratosAjustablesUseCaseImpl --> ContratoRepository : uses
+    GetAllContratosByFacultadUseCaseImpl --> ContratoRepository : uses
+    GetAllContratosByPersonaUseCaseImpl --> ContratoRepository : uses
+    GetAllContratosVigentesUseCaseImpl --> ContratoRepository : uses
+    GetContratoByIdUseCaseImpl --> ContratoRepository : uses
+    SaveAllContratosUseCaseImpl --> ContratoRepository : uses
+    UpdateContratoUseCaseImpl --> ContratoRepository : uses
+
+    JpaContratoRepositoryAdapter ..|> ContratoRepository : implements
+    JpaContratoRepositoryAdapter --> JpaContratoRepository : uses
+    JpaContratoRepositoryAdapter --> ContratoMapper : uses
+
+    ContratoMapper --> Contrato : maps
+    ContratoMapper --> ContratoEntity : maps
+    JpaContratoRepository --> ContratoEntity : persists
+
+    ContratoController --> ContratoService : calls
+    ContratoController --> ContratoDtoMapper : uses
+    ContratoDtoMapper --> Contrato : maps
+    ContratoDtoMapper --> ContratoRequest : maps
+    ContratoDtoMapper --> ContratoResponse : maps

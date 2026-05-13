@@ -17,13 +17,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import um.tesoreria.core.exception.ContratoException;
+import um.tesoreria.core.hexagonal.contrato.domain.model.Contrato;
 import um.tesoreria.core.hexagonal.cursoCargoContratado.infrastructure.persistence.entity.CursoCargoContratadoEntity;
-import um.tesoreria.core.model.Contrato;
+import um.tesoreria.core.hexagonal.contrato.infrastructure.persistence.entity.ContratoEntity;
 import um.tesoreria.core.model.ContratoFactura;
 import um.tesoreria.core.model.ContratoPeriodo;
 import um.tesoreria.core.service.ContratoFacturaService;
 import um.tesoreria.core.service.ContratoPeriodoService;
-import um.tesoreria.core.service.ContratoService;
+import um.tesoreria.core.hexagonal.contrato.application.service.ContratoService;
 import um.tesoreria.core.hexagonal.cursoCargoContratado.application.service.CursoCargoContratadoService;
 import um.tesoreria.core.util.Jsonifier;
 import um.tesoreria.core.util.Periodo;
@@ -79,14 +81,15 @@ public class ContratoToolService {
 			log.debug("ContratoPeriodo -> {}", periodo.jsonify());
 			contratoPeriodoService.deleteByContratoPeriodoId(periodo.getContratoPeriodoId());
 		}
-		contratoService.deleteByContratoId(contratoId);
+		contratoService.deleteContrato(contratoId);
 		return true;
 	}
 
 	@Transactional
 	public Boolean depuraContrato(Long contratoId) {
         log.debug("Processing ContratoToolService.depuraContrato");
-		Contrato contrato = contratoService.findByContratoId(contratoId);
+		Contrato contrato = contratoService.getContratoById(contratoId)
+				.orElseThrow(() -> new ContratoException(contratoId));
 		long desde = contrato.getDesde().getYear() * 100L + contrato.getDesde().getMonthValue();
 		long hasta = contrato.getHasta().getYear() * 100L + contrato.getHasta().getMonthValue();
 		for (ContratoPeriodo periodo : contratoPeriodoService.findAllPendienteByContrato(contratoId)) {
@@ -124,9 +127,11 @@ public class ContratoToolService {
 		contrato.setMesesLetras(Tool.number2TextEntero(new BigDecimal(contrato.getMeses())));
 		// Agrega o actualiza el contrato
 		if (contrato.getContratoId() == null) {
-			contrato = contratoService.add(contrato);
+			contrato = contratoService.createContrato(contrato);
 		} else {
-			contrato = contratoService.update(contrato, contrato.getContratoId());
+			var contratoId = contrato.getContratoId();
+			contrato = contratoService.updateContrato(contratoId, contrato)
+					.orElseThrow(() -> new ContratoException(contratoId));
 		}
 		// Carga los períodos ya registrados
 		Map<String, ContratoPeriodo> periodoKeys = contratoPeriodoService.findAllByContrato(contrato.getContratoId())
@@ -170,7 +175,8 @@ public class ContratoToolService {
 	public Boolean saveCurso(Long cursoId, Long contratoId, Integer cargoTipoId, BigDecimal horasSemanales) {
 		log.debug("Processing ContratoToolService.saveCurso");
 		log.debug("ContratoToolService.saveCurso - Leyendo contrato -> {}",  contratoId);
-        var contrato = contratoService.findByContratoId(contratoId);
+        var contrato = contratoService.getContratoById(contratoId)
+				.orElseThrow(() -> new ContratoException(contratoId));
         log.debug("Contrato -> {}",  contrato.jsonify());
 		OffsetDateTime desde = contrato.getDesde().withOffsetSameInstant(ZoneOffset.UTC);
 		OffsetDateTime hasta = contrato.getHasta().withOffsetSameInstant(ZoneOffset.UTC);
