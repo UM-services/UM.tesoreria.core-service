@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.model;
+package um.tesoreria.core.hexagonal.contrato.infrastructure.persistence.entity;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,10 +12,7 @@ import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
@@ -26,12 +23,15 @@ import um.tesoreria.core.util.Jsonifier;
  * @author daniel
  *
  */
-@Data
+@Getter
+@Setter
 @Entity
+@Table(name = "contrato")
+@Builder
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Contrato extends Auditable implements Serializable {
+public class ContratoEntity extends Auditable implements Serializable {
 	/**
 	 * 
 	 */
@@ -71,14 +71,18 @@ public class Contrato extends Auditable implements Serializable {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
 	private OffsetDateTime primerVencimiento;
 
+	@Builder.Default
 	@Column(name = "con_cargo")
 	private String cargo = "";
 
+	@Builder.Default
 	private BigDecimal montoFijo = BigDecimal.ZERO;
 
+	@Builder.Default
 	@Column(name = "con_canonmensual")
 	private BigDecimal canonMensual = BigDecimal.ZERO;
 
+	@Builder.Default
 	@Column(name = "con_canonmensualsa")
 	private BigDecimal canonMensualSinAjuste = BigDecimal.ZERO;
 
@@ -86,21 +90,27 @@ public class Contrato extends Auditable implements Serializable {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
 	private OffsetDateTime hasta;
 
+	@Builder.Default
 	@Column(name = "con_canonmensualletras")
 	private String canonMensualLetras = "";
 
+	@Builder.Default
 	@Column(name = "con_canontotal")
 	private BigDecimal canonTotal = BigDecimal.ZERO;
 
+	@Builder.Default
 	@Column(name = "con_canontotalletras")
 	private String canonTotalLetras = "";
 
+	@Builder.Default
 	@Column(name = "con_meses")
 	private Integer meses = 0;
 
+	@Builder.Default
 	@Column(name = "con_mesesletras")
 	private String mesesLetras = "";
 
+	@Builder.Default
 	@Column(name = "con_ajuste")
 	private Byte ajuste = 0;
 

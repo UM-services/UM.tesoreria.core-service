@@ -4,7 +4,30 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.18.0**
+**Versión actual (SemVer): 3.19.0**
+
+## Novedades 3.19.0 (verificado en código)
+- feat(contrato): Nuevo módulo Contrato con arquitectura hexagonal completa
+  - Modelo de dominio: `Contrato` con campos `contratoId`, `personaId`, `documentoId`, `desde`, `facultadId`, `planId`, `materiaId`, `geograficaId`, `cargoMateriaId`, `primerVencimiento`, `cargo`, `montoFijo`, `canonMensual`, `canonMensualSinAjuste`, `hasta`, `canonMensualLetras`, `canonTotal`, `canonTotalLetras`, `meses`, `mesesLetras`, `ajuste`
+  - Puertos de entrada (9): `CreateContratoUseCase`, `DeleteContratoUseCase`, `GetAllContratosAjustablesUseCase`, `GetAllContratosByFacultadUseCase`, `GetAllContratosByPersonaUseCase`, `GetAllContratosVigentesUseCase`, `GetContratoByIdUseCase`, `SaveAllContratosUseCase`, `UpdateContratoUseCase`
+  - Puerto de salida: `ContratoRepository` con métodos CRUD y búsquedas por facultad, persona, ajustable y vigente
+  - Casos de uso: Implementaciones completas en `application/usecases/` con inyección de dependencias
+  - Servicio de aplicación: `ContratoService` con delegación a casos de uso y retornos `Optional`
+  - Adaptador JPA: `JpaContratoRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Repositorio JPA: `JpaContratoRepository` con consultas especializadas
+  - Mapper: `ContratoMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `ContratoController` con endpoints `GET /contrato/ajustable/{referencia}`, `GET /contrato/vigente/{referencia}`, `GET /contrato/persona/{personaId}/{documentoId}`, `GET /contrato/{contratoId}`, `PUT /contrato/{contratoId}`, `PUT /contrato/`
+  - DTOs: `ContratoRequest` y `ContratoResponse`
+  - DTO Mapper: `ContratoDtoMapper` para conversión DTO ↔ dominio
+- refactor(contrato): Migración completa de módulo Contrato a arquitectura hexagonal
+  - Eliminación de `Contrato.java` (modelo legacy) del paquete `core/model/`
+  - Eliminación de `ContratoRepository.java` del paquete `core/repository/`
+  - Eliminación de `ContratoService.java` del paquete `core/service/`
+  - Eliminación de `ContratoController.java` del paquete `core/controller/`
+  - Actualización de ~10+ archivos que referenciaban `um.tesoreria.core.model.Contrato` para usar la nueva estructura hexagonal
+  - Migración de `ContratoEntity` de `@Data` a `@Getter`/`@Setter`/`@Builder` para consistencia
+
+> Basado en análisis profundo de `git diff HEAD` (39 archivos, +793/-229 líneas).
 
 ## Novedades 3.18.0 (verificado en código)
 - feat(facultad): Nuevo módulo Facultad con arquitectura hexagonal completa
@@ -701,7 +724,8 @@ src/
 │   │       ├── hexagonal/
 │   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
 │   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
-│   │       │   ├── dependencia/       # Módulo Dependencia (v3.17.0)
+│   │   │       ├── contrato/          # Módulo Contrato (v3.19.0)
+│   │       ├── dependencia/       # Módulo Dependencia (v3.17.0)
 │   │       │   ├── facultad/          # Módulo Facultad (v3.18.0)
 │   │       │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
 │   │       │   ├── articulo/          # Módulo Artículo (v3.13.0)
@@ -755,7 +779,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.18.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.19.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

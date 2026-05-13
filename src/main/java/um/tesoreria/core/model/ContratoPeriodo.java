@@ -21,6 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.contrato.infrastructure.persistence.entity.ContratoEntity;
 import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.util.Jsonifier;
 
@@ -70,7 +71,7 @@ public class ContratoPeriodo extends Auditable implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "cfp_con_clave", insertable = false, updatable = false)
-	private Contrato contrato;
+	private ContratoEntity contrato;
 
 	public String periodoKey() {
 		return this.anho + "." + this.mes;

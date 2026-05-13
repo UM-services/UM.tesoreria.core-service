@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.contrato.domain.model.Contrato;
 import um.tesoreria.core.hexagonal.cursoCargoContratado.domain.model.CargoTipo;
 import um.tesoreria.core.hexagonal.cursoCargoContratado.domain.model.CursoHaberes;
-import um.tesoreria.core.model.Contrato;
+import um.tesoreria.core.hexagonal.contrato.infrastructure.persistence.entity.ContratoEntity;
 import um.tesoreria.core.util.Jsonifier;
 
 import java.math.BigDecimal;
