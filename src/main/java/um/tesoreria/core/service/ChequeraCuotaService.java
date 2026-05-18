@@ -104,9 +104,15 @@ public class ChequeraCuotaService {
 
         // Encuentra todas las cuotas filtradas por facultad, tipo de chequera, serie de
         // chequera, alternativa y con importe > 0, con ordenación
+//        List<ChequeraCuota> cuotasFiltradas = repository
+//                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndImporte1GreaterThan(
+//                        facultadId, tipoChequeraId, chequeraSerieId, alternativaId, BigDecimal.ZERO,
+//                        Sort.by("vencimiento1").ascending()
+//                                .and(Sort.by("productoId").ascending().and(Sort.by("cuotaId").ascending())));
+
         List<ChequeraCuota> cuotasFiltradas = repository
-                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndImporte1GreaterThan(
-                        facultadId, tipoChequeraId, chequeraSerieId, alternativaId, BigDecimal.ZERO,
+                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndImporte1GreaterThan(
+                        facultadId, tipoChequeraId, chequeraSerieId, alternativaId, (byte) 0, BigDecimal.ZERO,
                         Sort.by("vencimiento1").ascending()
                                 .and(Sort.by("productoId").ascending().and(Sort.by("cuotaId").ascending())));
 
