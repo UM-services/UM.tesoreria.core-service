@@ -2,6 +2,16 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.19.1] - 2026-05-18
+### Fixed
+- fix(chequeraCuota): Agregado filtro `baja=0` en consulta de cuotas filtradas para excluir registros soft-deleted
+  - Nueva query `findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndImporte1GreaterThan` en `ChequeraCuotaRepository`
+  - `ChequeraCuotaService.findAllCuotasFiltradas()` actualizado para usar la nueva query con `baja = (byte) 0`
+  - La query anterior sin filtro `baja` podía retornar registros con soft-delete, causando resultados inconsistentes
+  - Método anterior comentado y reemplazado por nueva implementación con filtro de baja
+
+> Basado en análisis profundo de `git diff HEAD` (2 archivos modificados, +12/-2 líneas).
+
 ## [3.19.0] - 2026-05-13
 ### Added
 - feat(contrato): Nuevo módulo Contrato con arquitectura hexagonal completa

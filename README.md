@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.19.0**
+**Versión actual (SemVer): 3.19.1**
+
+## Novedades 3.19.1 (verificado en código)
+- fix(chequeraCuota): Agregado filtro `baja=0` en consulta de cuotas filtradas para excluir registros soft-deleted
+  - Nueva query `findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndImporte1GreaterThan` en `ChequeraCuotaRepository`
+  - `ChequeraCuotaService` actualizado para usar la nueva query con `baja = (byte) 0`
+  - Previene retorno de registros con soft-delete en resultados de cuotas
+
+> Basado en análisis profundo de `git diff HEAD` (2 archivos modificados, +12/-2 líneas).
 
 ## Novedades 3.19.0 (verificado en código)
 - feat(contrato): Nuevo módulo Contrato con arquitectura hexagonal completa
@@ -779,7 +787,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.19.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.19.1-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
