@@ -127,7 +127,7 @@ public class ContratoEntity extends Auditable implements Serializable {
             @JoinColumn(name = "con_per_id", referencedColumnName = "per_id", insertable = false, updatable = false),
             @JoinColumn(name = "con_doc_id", referencedColumnName = "per_doc_id", insertable = false, updatable = false)
     })
-    private PersonaEntity personaEntity = null;
+    private PersonaEntity persona;
 
     public String jsonify() {
         return Jsonifier.builder(this).build();
