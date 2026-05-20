@@ -2,6 +2,17 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.20.0] - 2026-05-20
+### Changed
+- refactor(contrato): Renombrado de campo `personaEntity` a `persona` en `ContratoEntity`
+  - Campo de relación `@ManyToOne` renombrado de `personaEntity` a `persona` para consistencia de nomenclatura
+  - Actualización de `SheetService` para usar `getPersona()` en lugar de `getPersonaEntity()` al generar hojas de cálculo de contratos
+- refactor(chequeraSerie): Renombrado de campo `personaEntity` a `persona` en vistas `ChequeraSerieAlta` y `ChequeraSerieAltaFull`
+  - Campo de relación renombrado en ambos modelos Kotlin para consistencia con `ContratoEntity`
+  - `ChequeraSerieAltaFullService` actualizado con null-safe `Objects.requireNonNull(getPersona())` en logging
+
+> Basado en análisis profundo de `git diff HEAD` (5 archivos modificados, +8/-7 líneas).
+
 ## [3.19.1] - 2026-05-18
 ### Fixed
 - fix(chequeraCuota): Agregado filtro `baja=0` en consulta de cuotas filtradas para excluir registros soft-deleted

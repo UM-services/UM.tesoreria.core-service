@@ -55,7 +55,7 @@ data class ChequeraSerieAltaFull(
         JoinColumn(name = "personaId", referencedColumnName = "per_id", insertable = false, updatable = false),
         JoinColumn(name = "documentoId", referencedColumnName = "per_doc_id", insertable = false, updatable = false)
     )
-    var personaEntity: PersonaEntity? = null,
+    var persona: PersonaEntity? = null,
 
     @OneToOne
     @JoinColumns(

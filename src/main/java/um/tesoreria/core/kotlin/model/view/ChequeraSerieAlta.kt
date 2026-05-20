@@ -90,7 +90,7 @@ data class ChequeraSerieAlta(
         JoinColumn(name = "chs_per_id", referencedColumnName = "per_id", insertable = false, updatable = false),
         JoinColumn(name = "chs_doc_id", referencedColumnName = "per_doc_id", insertable = false, updatable = false)
     )
-    var personaEntity: PersonaEntity? = null,
+    var persona: PersonaEntity? = null,
 
     @OneToOne
     @JoinColumns(
