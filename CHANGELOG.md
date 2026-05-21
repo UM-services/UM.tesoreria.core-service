@@ -2,6 +2,29 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.21.0] - 2026-05-21
+### Changed
+- refactor(chequeraSerie): Migración completa del módulo ChequeraSerie a arquitectura hexagonal con Java
+  - Eliminación de `ChequeraSerie.kt` (Kotlin) del paquete `core/kotlin/model/`
+  - Creación de `ChequeraSerieEntity.java` en `hexagonal/chequeraSerie/infrastructure/persistence/entity/` con anotaciones Lombok (`@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Creación de `JpaChequeraSerieRepository.java` en `hexagonal/chequeraSerie/infrastructure/persistence/repository/`
+  - `ChequeraSerieService` movido de `core/service/` a `hexagonal/chequeraSerie/application/service/`
+  - `ChequeraSerieController` movido de `core/controller/` a `hexagonal/chequeraSerie/infrastructure/web/controller/`
+  - Eliminación de `ChequeraSerieRepository.java` legacy del paquete `core/repository/`
+  - Actualización de referencias de `ChequeraSerie` a `ChequeraSerieEntity` en `PersonaService`, `ChequeraCuota.kt`, `ChequeraCuotaReemplazo.kt`, `ChequeraCuotaDeuda.kt`, `ChequeraCuotaService`, `ChequeraPagoService`, `LectivoService`, y servicios facade (`SheetService`, `ChequeraService`, `FormulariosToPdfService`, `MailChequeraService`, `PayPerTicFileService`, `ProcessBajaService`, `SincronizeService`, `SpoterService`, `TipoChequeraSedeService`)
+  - Actualización de `ChequeraSerieMapper` para mapear desde `ChequeraSerieEntity`
+  - Actualización de `Debito.java` para usar `ChequeraSerieEntity`
+- refactor(baja): Migración completa del módulo Baja a arquitectura hexagonal con Java
+  - Eliminación de `Baja.kt` (Kotlin) del paquete `core/kotlin/model/`
+  - Creación de `BajaEntity.java` en `hexagonal/baja/infrastructure/persistence/entity/` con anotaciones Lombok
+  - Creación de `JpaBajaRepository.java` en `hexagonal/baja/infrastructure/persistence/repository/`
+  - `BajaService` movido de `core/service/` a `hexagonal/baja/application/service/`
+  - `BajaController` movido de `core/controller/` a `hexagonal/baja/infrastructure/web/controller/`
+  - Eliminación de `BajaRepository.java` legacy del paquete `core/repository/`
+  - Actualización de referencias en `ChequeraCuotaController`, `ProcessBajaController`, `ProcessBajaService`, `ChequeraService`
+
+> Basado en análisis profundo de `git diff HEAD` (34 archivos modificados, +598/-554 líneas).
+
 ## [3.20.0] - 2026-05-20
 ### Changed
 - refactor(contrato): Renombrado de campo `personaEntity` a `persona` en `ContratoEntity`

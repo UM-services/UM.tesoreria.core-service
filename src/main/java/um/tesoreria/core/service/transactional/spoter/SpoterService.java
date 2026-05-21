@@ -10,6 +10,8 @@ import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PersonaException;
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
@@ -45,8 +47,8 @@ public class SpoterService {
     private final ChequeraCuotaService chequeraCuotaService;
 
     @Transactional
-    public ChequeraSerie makeChequeraSpoter(SpoterData spoterData, Integer lectivoId, Curso curso,
-                                            CarreraChequera carreraChequera) {
+    public ChequeraSerieEntity makeChequeraSpoter(SpoterData spoterData, Integer lectivoId, Curso curso,
+                                                  CarreraChequera carreraChequera) {
         log.debug("Processing SpoterService.makeChequeraSpoter");
         Build build = buildService.findLast();
         PersonaEntity personaEntity;
@@ -97,7 +99,7 @@ public class SpoterService {
         logChequeraSerieControl(chequeraSerieControl);
 
         // Generar ChequeraSerie
-        ChequeraSerie chequeraSerie = chequeraSerieService.add(new ChequeraSerie(null,
+        ChequeraSerieEntity chequeraSerie = chequeraSerieService.add(new ChequeraSerieEntity(null,
                 chequeraSerieControl.getFacultadId(),
                 chequeraSerieControl.getTipoChequeraId(),
                 chequeraSerieControl.getChequeraSerieId(),
@@ -275,7 +277,7 @@ public class SpoterService {
 
     }
 
-    private void logChequeraSerie(ChequeraSerie chequeraSerie) {
+    private void logChequeraSerie(ChequeraSerieEntity chequeraSerie) {
         try {
             log.debug("ChequeraSerie -> {}", JsonMapper
                     .builder()

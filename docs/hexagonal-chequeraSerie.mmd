@@ -1,0 +1,34 @@
+---
+title: Arquitectura Hexagonal - ChequeraSerie
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        D["ChequeraSerie<br/>Reglas de Negocio<br/>Cálculo de Deuda"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        S["ChequeraSerieService<br/>(Servicio de Aplicación)"]
+        M["ChequeraSerieMapper<br/>(Mapper Dominio ↔ Entidad)"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        C["ChequeraSerieController<br/>(Controlador REST)"]
+        R["JpaChequeraSerieRepository<br/>(Repositorio JPA)"]
+        E["ChequeraSerieEntity<br/>(Entidad JPA)"]
+        DTO["DTOs<br/>Response/Request"]
+    end
+
+    C --> S
+    S --> M
+    M --> R
+    R --> E
+    S --> D
+    D --> M
+
+    style D fill:#e1f5fe
+    style S fill:#f3e5f5
+    style M fill:#f3e5f5
+    style C fill:#e8f5e8
+    style R fill:#e8f5e8
+    style E fill:#e8f5e8
+    style DTO fill:#fff3e0

@@ -26,12 +26,12 @@ import um.tesoreria.core.extern.consumer.PersonaFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PlanFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.*;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.InfoLdap;
 import um.tesoreria.core.service.CarreraService;
-import um.tesoreria.core.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.service.DomicilioService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.InfoLdapService;
@@ -71,7 +71,7 @@ public class SincronizeService {
 
 	@Transactional
 	public void sincronizeInstitucional(Integer lectivoId, Integer facultadId) {
-		for (ChequeraSerie serie : chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId)) {
+		for (ChequeraSerieEntity serie : chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId)) {
 			InfoLdap usuario;
 			try {
 				usuario = infoLdapService.findByPersonaId(serie.getPersonaId());

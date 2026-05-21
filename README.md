@@ -4,7 +4,20 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.20.0**
+**Versión actual (SemVer): 3.21.0**
+
+## Novedades 3.21.0 (verificado en código)
+- refactor(chequeraSerie): Migración completa del módulo ChequeraSerie a arquitectura hexagonal con Java
+  - Eliminación de `ChequeraSerie.kt` (Kotlin) y creación de `ChequeraSerieEntity.java` con anotaciones Lombok
+  - `ChequeraSerieService` y `ChequeraSerieController` movidos a `hexagonal/chequeraSerie/`
+  - Actualización de referencias en +25 archivos (`PersonaService`, `ChequeraCuota`/`ChequeraCuotaReemplazo`/`ChequeraCuotaDeuda` en Kotlin, todos los servicios facade)
+  - Eliminación de repositorio legacy `ChequeraSerieRepository.java`
+- refactor(baja): Migración completa del módulo Baja a arquitectura hexagonal con Java
+  - Eliminación de `Baja.kt` (Kotlin) y creación de `BajaEntity.java` con anotaciones Lombok
+  - `BajaService` y `BajaController` movidos a `hexagonal/baja/`
+  - Eliminación de repositorio legacy `BajaRepository.java`
+
+> Basado en análisis profundo de `git diff HEAD` (34 archivos modificados, +598/-554 líneas).
 
 ## Novedades 3.20.0 (verificado en código)
 - refactor(contrato): Renombrado de campo `personaEntity` a `persona` en `ContratoEntity`
@@ -742,7 +755,9 @@ src/
 │   │       ├── hexagonal/
 │   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
 │   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
-│   │   │       ├── contrato/          # Módulo Contrato (v3.19.0)
+│   │   │   ├── contrato/          # Módulo Contrato (v3.19.0)
+│   │       ├── chequeraSerie/     # Módulo ChequeraSerie (v3.21.0)
+│   │       ├── baja/              # Módulo Baja (v3.21.0)
 │   │       ├── dependencia/       # Módulo Dependencia (v3.17.0)
 │   │       │   ├── facultad/          # Módulo Facultad (v3.18.0)
 │   │       │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
@@ -797,7 +812,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.20.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.21.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

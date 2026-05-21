@@ -8,6 +8,8 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.service.*;
@@ -62,8 +64,8 @@ public class ChequeraCuotaDeudaService {
 
     public List<ChequeraCuotaDeuda> findQuinterosByRango(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced, Pageable pageable, ChequeraCuotaService chequeraCuotaService) {
         List<Long> chequeraIds = new ArrayList<>();
-        chequeraIds.addAll(chequeraSerieService.findAllByPersona(new BigDecimal(45719365), 1).stream().map(ChequeraSerie::getChequeraId).toList());
-        chequeraIds.addAll(chequeraSerieService.findAllByPersona(new BigDecimal(50478688), 1).stream().map(ChequeraSerie::getChequeraId).toList());
+        chequeraIds.addAll(chequeraSerieService.findAllByPersona(new BigDecimal(45719365), 1).stream().map(ChequeraSerieEntity::getChequeraId).toList());
+        chequeraIds.addAll(chequeraSerieService.findAllByPersona(new BigDecimal(50478688), 1).stream().map(ChequeraSerieEntity::getChequeraId).toList());
         return repository.findAllByVencimiento1BetweenAndChequeraIdIn(Tool.firstTime(desde), Tool.lastTime(hasta), pageable, chequeraIds).stream().map(cuotaDeuda -> {
             if (cuotaDeuda.getChequeraId() == null) {
                 ChequeraCuota chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(cuotaDeuda.getChequeraCuotaId());

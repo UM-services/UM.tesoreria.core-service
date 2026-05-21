@@ -1,10 +1,10 @@
 /**
  * 
  */
-package um.tesoreria.core.controller;
+package um.tesoreria.core.hexagonal.baja.infrastructure.web.controller;
 
 import lombok.RequiredArgsConstructor;
-import um.tesoreria.core.kotlin.model.Baja;
+import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.exception.BajaException;
-import um.tesoreria.core.service.BajaService;
+import um.tesoreria.core.hexagonal.baja.application.service.BajaService;
 
 /**
  * @author daniel
@@ -32,8 +32,8 @@ public class BajaController {
 	private final BajaService service;
 
 	@GetMapping("/unique/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
-	public ResponseEntity<Baja> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
-											 @PathVariable Long chequeraSerieId) {
+	public ResponseEntity<BajaEntity> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
+	                                               @PathVariable Long chequeraSerieId) {
 		try {
             return ResponseEntity.ok(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId));
 		} catch (BajaException e) {
@@ -42,12 +42,12 @@ public class BajaController {
 	}
 
 	@PostMapping("/")
-	public ResponseEntity<Baja> add(@RequestBody Baja baja) {
+	public ResponseEntity<BajaEntity> add(@RequestBody BajaEntity baja) {
         return ResponseEntity.ok(service.add(baja));
 	}
 
 	@PutMapping("/{bajaId}")
-	public ResponseEntity<Baja> update(@RequestBody Baja baja, @PathVariable Long bajaId) {
+	public ResponseEntity<BajaEntity> update(@RequestBody BajaEntity baja, @PathVariable Long bajaId) {
         return ResponseEntity.ok(service.update(baja, bajaId));
 	}
 

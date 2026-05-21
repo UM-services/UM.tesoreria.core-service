@@ -3,7 +3,7 @@ package um.tesoreria.core.controller.facade;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import um.tesoreria.core.kotlin.model.Baja;
+import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
 import um.tesoreria.core.service.facade.ProcessBajaService;
 
 @RestController
@@ -23,7 +23,7 @@ public class ProcessBajaController {
     }
 
     @PostMapping("/make")
-    public ResponseEntity<Boolean> makeBaja(@RequestBody Baja baja) {
+    public ResponseEntity<Boolean> makeBaja(@RequestBody BajaEntity baja) {
         return new ResponseEntity<>(service.makeBaja(baja), HttpStatus.OK);
     }
 

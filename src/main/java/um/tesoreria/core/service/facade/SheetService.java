@@ -52,10 +52,11 @@ import um.tesoreria.core.extern.model.view.PersonaKeyFacultad;
 import um.tesoreria.core.extern.model.view.PreunivCarreraFacultad;
 import um.tesoreria.core.extern.model.view.PreunivMatricResumenFacultad;
 import um.tesoreria.core.extern.model.view.PreunivResumenFacultad;
+import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facturaPendiente.application.service.FacturaPendienteService;
 import um.tesoreria.core.hexagonal.facturaPendiente.domain.model.FacturaPendiente;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
 import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
@@ -72,9 +73,9 @@ import um.tesoreria.core.model.view.LegajoKey;
 import um.tesoreria.core.model.view.PersonaKey;
 import um.tesoreria.core.model.view.TipoPagoFechaAcreditacion;
 import um.tesoreria.core.service.ArancelTipoService;
-import um.tesoreria.core.service.BajaService;
+import um.tesoreria.core.hexagonal.baja.application.service.BajaService;
 import um.tesoreria.core.service.CarreraService;
-import um.tesoreria.core.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.service.ContratoPeriodoService;
 import um.tesoreria.core.service.CuentaMovimientoService;
 import um.tesoreria.core.service.EjercicioService;
@@ -276,16 +277,16 @@ public class SheetService {
                     geografica = geograficaMapper.toDomainModel(tipoChequera.getGeografica());
                 }
             }
-            List<ChequeraSerie> chequeraList = chequeraSerieService.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipochequeraId);
-            Map<String, ChequeraSerie> chequeras = chequeraList.stream().collect(Collectors.toMap(ChequeraSerie::getPersonaKey, Function.identity(), (chequera, replacement) -> chequera));
-            Map<Long, Baja> bajas = bajaService.findAllByChequeraIdIn(chequeraList.stream().map(ChequeraSerie::getChequeraId).collect(Collectors.toList())).stream().collect(Collectors.toMap(Baja::getChequeraId, Function.identity(), (baja, replacement) -> baja));
+            List<ChequeraSerieEntity> chequeraList = chequeraSerieService.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipochequeraId);
+            Map<String, ChequeraSerieEntity> chequeras = chequeraList.stream().collect(Collectors.toMap(ChequeraSerieEntity::getPersonaKey, Function.identity(), (chequera, replacement) -> chequera));
+            Map<Long, BajaEntity> bajas = bajaService.findAllByChequeraIdIn(chequeraList.stream().map(ChequeraSerieEntity::getChequeraId).collect(Collectors.toList())).stream().collect(Collectors.toMap(BajaEntity::getChequeraId, Function.identity(), (baja, replacement) -> baja));
             List<String> keys = new ArrayList<>(chequeras.keySet());
             Map<String, LegajoKey> legajos = legajoKeyService.findAllByFacultadIdAndUnifiedIn(facultadId, keys).stream().collect(Collectors.toMap(LegajoKey::getUnified, Function.identity(), (legajo, replacement) -> legajo));
             Map<String, LegajoKeyFacultad> legajosFacultad = legajoKeyFacultadConsumer.findAllByFacultadAndKeys(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), keys).stream().collect(Collectors.toMap(LegajoKeyFacultad::getPersonakey, Function.identity(), (legajo, replacement) -> legajo));
             Map<String, DomicilioKey> domicilios = domicilioKeyService.findAllByUnifiedIn(keys).stream().collect(Collectors.toMap(DomicilioKey::getUnified, domicilio -> domicilio));
 
             for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()))) {
-                ChequeraSerie chequeraSerie = chequeras.get(persona.getUnified());
+                ChequeraSerieEntity chequeraSerie = chequeras.get(persona.getUnified());
                 DeudaChequeraDto deudaChequeraDto = calculateDeudaUseCase.calculateDeuda(ChequeraSerieMapper.toHexagonal(chequeraSerie));
                 boolean show = true;
                 if (soloDeudores) {
@@ -332,7 +333,7 @@ public class SheetService {
                     this.setCellLong(row, 3, chequeraSerie.getChequeraSerieId(), styleNormal);
                     // Baja Tsoreria
                     if (bajas.containsKey(chequeraSerie.getChequeraId())) {
-                        Baja baja = bajas.get(chequeraSerie.getChequeraId());
+                        BajaEntity baja = bajas.get(chequeraSerie.getChequeraId());
                         this.setCellOffsetDateTime(row, 4, Objects.requireNonNull(baja.getFecha()).withOffsetSameInstant(ZoneOffset.UTC), styleDate);
                     }
                     // Baja Facultad
@@ -885,7 +886,7 @@ public class SheetService {
         Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
         Map<String, PlanFacultad> planes = planFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(PlanFacultad::getPlanKey, plan -> plan));
         Map<String, CarreraFacultad> carreras = carreraFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
-        Map<String, ChequeraSerie> chequeras = chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId).stream().collect(Collectors.toMap(ChequeraSerie::getFacultadKey, Function.identity(), (chequera, replacement) -> chequera));
+        Map<String, ChequeraSerieEntity> chequeras = chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId).stream().collect(Collectors.toMap(ChequeraSerieEntity::getFacultadKey, Function.identity(), (chequera, replacement) -> chequera));
         Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream().collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
         Map<Integer, ArancelTipo> aranceles = arancelTipoService.findAll().stream().collect(Collectors.toMap(ArancelTipo::getArancelTipoId, arancelTipo -> arancelTipo));
         for (InscripcionFacultad inscripcion : inscriptos) {
@@ -909,7 +910,7 @@ public class SheetService {
 
             String facultadKey = facultadId + "." + lectivoId + "." + inscripcion.getGeograficaId() + "." + inscripcion.getPersonaKey();
             if (chequeras.containsKey(facultadKey)) {
-                ChequeraSerie chequera = chequeras.get(facultadKey);
+                ChequeraSerieEntity chequera = chequeras.get(facultadKey);
                 this.setCellString(row, 7, tipos.get(chequera.getTipoChequeraId()).getNombre(), styleNormal);
                 this.setCellString(row, 8, aranceles.get(getArancel(inscripcion.getPersonaId(), chequera.getArancelTipoId())).getDescripcion(), styleNormal);
                 this.setCellLong(row, 9, chequera.getChequeraSerieId(), styleNormal);
@@ -1162,7 +1163,7 @@ public class SheetService {
             }
             // Lista la deuda
             boolean deudor = false;
-            for (ChequeraSerie serie : chequeraSerieService.findAllByPersona(suspendido.getPersonaId(), suspendido.getDocumentoId())) {
+            for (ChequeraSerieEntity serie : chequeraSerieService.findAllByPersona(suspendido.getPersonaId(), suspendido.getDocumentoId())) {
                 DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeuda(ChequeraSerieMapper.toHexagonal(serie));
                 if (deuda.getCuotas() > 0) {
                     deudor = true;
@@ -1298,7 +1299,7 @@ public class SheetService {
         this.setCellString(row, 15, "Periodo", styleBold);
 
         for (FacturacionElectronica facturacionElectronica : facturacionElectronicaService.findAllByPeriodo(fechaDesde, fechaHasta)) {
-            ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facturacionElectronica.getChequeraPago().getFacultadId(), facturacionElectronica.getChequeraPago().getTipoChequeraId(), facturacionElectronica.getChequeraPago().getChequeraSerieId());
+            ChequeraSerieEntity chequeraSerie = chequeraSerieService.findByUnique(facturacionElectronica.getChequeraPago().getFacultadId(), facturacionElectronica.getChequeraPago().getTipoChequeraId(), facturacionElectronica.getChequeraPago().getChequeraSerieId());
             row = sheet.createRow(++fila);
             this.setCellOffsetDateTime(row, 0, facturacionElectronica.getFechaRecibo(), styleDate);
             this.setCellString(row, 1, facturacionElectronica.getComprobante().getDescripcion(), styleNormal);

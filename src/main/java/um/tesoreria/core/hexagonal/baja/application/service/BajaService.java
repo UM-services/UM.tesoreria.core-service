@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.service;
+package um.tesoreria.core.hexagonal.baja.application.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -12,8 +12,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.BajaException;
-import um.tesoreria.core.kotlin.model.Baja;
-import um.tesoreria.core.repository.BajaRepository;
+import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
+import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.repository.JpaBajaRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,17 +24,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BajaService {
 
-	private final BajaRepository repository;
+	private final JpaBajaRepository repository;
 
-	public BajaService(BajaRepository repository) {
+	public BajaService(JpaBajaRepository repository) {
 		this.repository = repository;
 	}
 
-	public List<Baja> findAllByChequeraIdIn(List<Long> chequeraIds) {
+	public List<BajaEntity> findAllByChequeraIdIn(List<Long> chequeraIds) {
 		return repository.findAllByChequeraIdIn(chequeraIds);
 	}
 
-	public Baja findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+	public BajaEntity findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
 		log.debug("Processing BajaService.findByUnique");
 		return repository
 				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
@@ -45,17 +45,17 @@ public class BajaService {
 				.orElseThrow(() -> new BajaException(facultadId, tipoChequeraId, chequeraSerieId));
 	}
 
-	public Baja add(Baja baja) {
+	public BajaEntity add(BajaEntity baja) {
 		log.debug("Processing add");
 		baja = repository.save(baja);
 		logBaja(baja);
 		return baja;
 	}
 
-	public Baja update(Baja newBaja, Long bajaId) {
+	public BajaEntity update(BajaEntity newBaja, Long bajaId) {
 		log.debug("Processing update");
 		return repository.findByBajaId(bajaId).map(baja -> {
-			baja = new Baja(newBaja.getBajaId(), newBaja.getFacultadId(), newBaja.getTipoChequeraId(),
+			baja = new BajaEntity(newBaja.getBajaId(), newBaja.getFacultadId(), newBaja.getTipoChequeraId(),
 					newBaja.getChequeraSerieId(), newBaja.getChequeraId(), newBaja.getLectivoId(),
 					newBaja.getPersonaId(), newBaja.getDocumentoId(), newBaja.getFecha(), newBaja.getObservaciones(),
 					newBaja.getEgresado(), null, null, null, null, null);
@@ -71,7 +71,7 @@ public class BajaService {
 		repository.deleteByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
 	}
 
-	private void logBaja(Baja baja) {
+	private void logBaja(BajaEntity baja) {
 		try {
 			log.debug("Baja -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(baja));
 		} catch (JsonProcessingException e) {

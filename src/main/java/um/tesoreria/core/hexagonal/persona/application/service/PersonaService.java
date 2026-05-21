@@ -26,9 +26,10 @@ import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
 import um.tesoreria.core.extern.model.kotlin.PreInscripcionFacultad;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.MercadoPagoContext;
@@ -80,7 +81,7 @@ public class PersonaService {
         var deudaCuotas = 0;
         var deudaTotal = BigDecimal.ZERO;
         List<DeudaChequeraDto> deudas = new ArrayList<>();
-        for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
+        for (ChequeraSerieEntity chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
                 null)) {
             DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeuda(toDomain(chequera));
             if (deuda.getCuotas() > 0) {
@@ -107,20 +108,20 @@ public class PersonaService {
         List<VencimientoDto> vencimientoDtos = new ArrayList<>();
 
         // 1. Fetch all series for the person
-        List<ChequeraSerie> series = chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId, null);
+        List<ChequeraSerieEntity> series = chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId, null);
 
         // 2. Fetch all cuotas using business keys (Facultad, Tipo, Serie) to ensure we get them even if chequeraId is null
         List<ChequeraCuota> allCuotas = new ArrayList<>();
-        Map<String, List<ChequeraSerie>> seriesByGroup = series.stream()
+        Map<String, List<ChequeraSerieEntity>> seriesByGroup = series.stream()
                 .collect(Collectors.groupingBy(s -> s.getFacultadId() + "-" + s.getTipoChequeraId()));
 
-        for (Map.Entry<String, List<ChequeraSerie>> entry : seriesByGroup.entrySet()) {
-            List<ChequeraSerie> groupSeries = entry.getValue();
+        for (Map.Entry<String, List<ChequeraSerieEntity>> entry : seriesByGroup.entrySet()) {
+            List<ChequeraSerieEntity> groupSeries = entry.getValue();
             if (groupSeries.isEmpty()) continue;
             
             Integer facultadId = groupSeries.get(0).getFacultadId();
             Integer tipoChequeraId = groupSeries.get(0).getTipoChequeraId();
-            List<Long> serieIds = groupSeries.stream().map(ChequeraSerie::getChequeraSerieId).collect(Collectors.toList());
+            List<Long> serieIds = groupSeries.stream().map(ChequeraSerieEntity::getChequeraSerieId).collect(Collectors.toList());
 
             allCuotas.addAll(chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIds(
                     facultadId, tipoChequeraId, serieIds));
@@ -129,7 +130,7 @@ public class PersonaService {
         // 3. Batch "Self-Healing": Update chequeraId if null
         List<ChequeraCuota> cuotasToUpdate = new ArrayList<>();
         // Create a lookup map for series: key = "fac-tipo-serie"
-        Map<String, ChequeraSerie> seriesMap = series.stream()
+        Map<String, ChequeraSerieEntity> seriesMap = series.stream()
                 .collect(Collectors.toMap(
                         s -> s.getFacultadId() + "-" + s.getTipoChequeraId() + "-" + s.getChequeraSerieId(),
                         Function.identity(),
@@ -138,7 +139,7 @@ public class PersonaService {
 
         for (ChequeraCuota cuota : allCuotas) {
             String key = cuota.getFacultadId() + "-" + cuota.getTipoChequeraId() + "-" + cuota.getChequeraSerieId();
-            ChequeraSerie serie = seriesMap.get(key);
+            ChequeraSerieEntity serie = seriesMap.get(key);
             
             if (serie != null) {
                 // Ensure relationship is set in memory for processing
@@ -172,7 +173,7 @@ public class PersonaService {
                 .collect(Collectors.toMap(MercadoPagoContext::getChequeraCuotaId, Function.identity(), (a, b) -> a));
 
         // 6. Process debts
-        for (ChequeraSerie chequera : series) {
+        for (ChequeraSerieEntity chequera : series) {
             DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeudaExtended(toDomain(chequera));
             if (deuda.getCuotas() > 0) {
                 deudas.add(deuda);
@@ -244,7 +245,7 @@ public class PersonaService {
                 .build();
     }
     
-    private um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraSerie toDomain(ChequeraSerie chequera) {
+    private um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraSerie toDomain(ChequeraSerieEntity chequera) {
         if (chequera == null) {
             return null;
         }
@@ -273,7 +274,7 @@ public class PersonaService {
         for (InscripcionFacultad inscripto : inscriptos.values()) {
             boolean add = true;
             try {
-                ChequeraSerie chequeraSerie;
+                ChequeraSerieEntity chequeraSerie;
                 if (facultadId == 15) {
                     chequeraSerie = chequeraSerieService
                             .findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
@@ -395,7 +396,7 @@ public class PersonaService {
     public List<PersonaKey> findAllDeudorByLectivoId(Integer facultadId, Integer lectivoId, Integer geograficaId,
             Integer cuotas) {
         List<String> unifieds = new ArrayList<String>();
-        for (ChequeraSerie serie : chequeraSerieService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId,
+        for (ChequeraSerieEntity serie : chequeraSerieService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId,
                 facultadId, geograficaId)) {
             if (cuotas <= chequeraCuotaService.findAllDebidas(facultadId, serie.getTipoChequeraId(),
                     serie.getChequeraSerieId(), serie.getAlternativaId()).size()) {

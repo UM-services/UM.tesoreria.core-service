@@ -1,10 +1,11 @@
 package um.tesoreria.core.util;
 
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 
 public class ChequeraSerieMapper {
 
-    public static ChequeraSerie toHexagonal(um.tesoreria.core.kotlin.model.ChequeraSerie legacy) {
+    public static ChequeraSerie toHexagonal(ChequeraSerieEntity legacy) {
         if (legacy == null) {
             return null;
         }

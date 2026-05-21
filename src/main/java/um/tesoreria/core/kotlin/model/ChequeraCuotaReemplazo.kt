@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -106,6 +107,6 @@ data class ChequeraCuotaReemplazo(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "ccr_chs_id", referencedColumnName = "clave", insertable = false, updatable = false)
-    var chequeraSerie: ChequeraSerie? = null
+    var chequeraSerie: ChequeraSerieEntity? = null
 
 ) : Auditable()

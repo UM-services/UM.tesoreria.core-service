@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.LectivoException;
 import um.tesoreria.core.kotlin.model.Lectivo;
 import um.tesoreria.core.repository.LectivoRepository;
-import um.tesoreria.core.repository.ChequeraSerieRepository;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.repository.JpaChequeraSerieRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -32,7 +32,7 @@ public class LectivoService {
 	private LectivoRepository repository;
 
 	@Autowired
-	private ChequeraSerieRepository chequeraSerieRepository;
+	private JpaChequeraSerieRepository chequeraSerieRepository;
 
 	public List<Lectivo> findAll() {
 		return repository.findAll(Sort.by("lectivoId").ascending());

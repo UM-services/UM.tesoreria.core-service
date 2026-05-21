@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ChequeraPagoException;
 import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
-import um.tesoreria.core.kotlin.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.model.FacturacionElectronica;
 import um.tesoreria.core.repository.ChequeraPagoRepository;
 
@@ -141,7 +141,7 @@ public class ChequeraPagoService {
     private boolean isValidChequeraPago(ChequeraPago pago) {
         return Optional.ofNullable(pago.getChequeraCuota())
             .map(ChequeraCuota::getChequeraSerie)
-            .map(ChequeraSerie::getPersona)
+            .map(ChequeraSerieEntity::getPersona)
             .isPresent();
     }
 
