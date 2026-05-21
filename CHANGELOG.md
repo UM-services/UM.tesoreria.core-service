@@ -2,6 +2,21 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.21.1] - 2026-05-21
+### Fixed
+- fix(tables): Add missing `@Table(name = ...)` annotations to `BajaEntity` and `ChequeraSerieEntity` for explicit table mapping
+  - `BajaEntity` now has `@Table(name = "baja")` for consistent ORM mapping
+  - `ChequeraSerieEntity` now has `@Table(name = "chequera_serie")` for explicit table reference
+- fix(chequeraSerie): Exclude soft-deleted chequeras in `findLastPreuniversitario` query
+  - Method changed from `findFirstBy...` (single result) to `findAllBy...` (list)
+  - Filters out chequeras with associated baja records via `BajaService.findAllByChequeraIdIn()`
+  - Prevents returning "dada de baja" chequeras as the last preuniversitario record
+
+### Changed
+- chore(deps): Remove explicit version pin for `commons-lang3` (managed by Spring Boot parent POM 4.0.6)
+
+> Basado en análisis profundo de `git diff HEAD` (5 archivos modificados, +21/-10 líneas) y cambios en `pom.xml`, `BajaEntity`, `ChequeraSerieEntity`, `ChequeraSerieService`, `JpaChequeraSerieRepository`.
+
 ## [3.21.0] - 2026-05-21
 ### Changed
 - refactor(chequeraSerie): Migración completa del módulo ChequeraSerie a arquitectura hexagonal con Java

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.ChequeraSerieException;
+import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.kotlin.model.TipoChequera;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAlta;
@@ -27,6 +28,7 @@ import um.tesoreria.core.model.internal.FacultadSedeChequeraDto;
 import um.tesoreria.core.model.view.ChequeraIncompleta;
 import um.tesoreria.core.model.view.ChequeraKey;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.repository.JpaChequeraSerieRepository;
+import um.tesoreria.core.hexagonal.baja.application.service.BajaService;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.service.ChequeraImpresionCabeceraService;
 import um.tesoreria.core.service.DebitoService;
@@ -56,6 +58,7 @@ public class ChequeraSerieService {
     private final ChequeraKeyService chequeraKeyService;
     private final ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
     private final CalculateDeudaUseCase calculateDeudaUseCase;
+    private final BajaService bajaService;
 
     public List<ChequeraSerieEntity> findAllByPersona(BigDecimal personaId, Integer documentoId) {
         return repository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, Sort.by("lectivoId").descending());
@@ -227,7 +230,7 @@ public class ChequeraSerieService {
 
     public ChequeraSerieEntity findLastPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadId(BigDecimal personaId,
                                                                                               Integer documentoId, Integer facultadId) {
-        return repository.findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdIn(
+        List<ChequeraSerieEntity> chequeras = repository.findAllByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdIn(
                 personaId,
                 documentoId,
                 facultadId,
@@ -239,7 +242,15 @@ public class ChequeraSerieService {
                                 .by("chequeraSerieId")
                                 .descending()
                         )
-        ).orElseThrow(() -> new ChequeraSerieException(personaId, documentoId, facultadId));
+        );
+
+        List<Long> chequeraIds = chequeras.stream().map(ChequeraSerieEntity::getChequeraId).toList();
+        List<Long> bajas = bajaService.findAllByChequeraIdIn(chequeraIds).stream().map(BajaEntity::getChequeraId).toList();
+
+        return chequeras.stream()
+                .filter(chequera -> !bajas.contains(chequera.getChequeraId()))
+                .findFirst()
+                .orElseThrow(() -> new ChequeraSerieException(personaId, documentoId, facultadId));
     }
 
     @Transactional

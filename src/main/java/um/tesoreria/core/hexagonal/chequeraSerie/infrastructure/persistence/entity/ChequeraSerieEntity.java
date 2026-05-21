@@ -19,7 +19,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"chs_fac_id", "chs_tch_id", "chs_id"})})
+@Table(name = "chequera_serie", uniqueConstraints = {@UniqueConstraint(columnNames = {"chs_fac_id", "chs_tch_id", "chs_id"})})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

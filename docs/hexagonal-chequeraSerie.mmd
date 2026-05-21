@@ -18,12 +18,17 @@ flowchart TD
         DTO["DTOs<br/>Response/Request"]
     end
 
+    subgraph Externa ["Módulos Externos"]
+        BS["BajaService<br/>(Filtro de Bajas)"]
+    end
+
     C --> S
     S --> M
     M --> R
     R --> E
     S --> D
     D --> M
+    S -.->|"v3.21.1: filtra<br/>bajas"| BS
 
     style D fill:#e1f5fe
     style S fill:#f3e5f5
@@ -32,3 +37,4 @@ flowchart TD
     style R fill:#e8f5e8
     style E fill:#e8f5e8
     style DTO fill:#fff3e0
+    style BS fill:#ffe0b2
