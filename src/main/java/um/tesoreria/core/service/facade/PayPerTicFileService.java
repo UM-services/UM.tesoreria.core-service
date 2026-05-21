@@ -34,12 +34,12 @@ import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.PayPerTicException;
 import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.kotlin.model.ChequeraAlternativa;
-import um.tesoreria.core.kotlin.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.kotlin.model.Domicilio;
 import um.tesoreria.core.model.PayPerTic;
 import um.tesoreria.core.model.view.CuotaDeudaPayPerTic;
 import um.tesoreria.core.service.ChequeraAlternativaService;
-import um.tesoreria.core.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.service.DomicilioService;
 import um.tesoreria.core.service.PayPerTicService;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
@@ -118,12 +118,12 @@ public class PayPerTicFileService {
 		this.setCellString(row, 22, "payer_id_number", style_normal);
 
 		for (CuotaDeudaPayPerTic cuota : cuotaDeudaPayPerTicService.findAllByVencimiento1Between(desde, hasta)) {
-			ChequeraSerie chequeraSerie = null;
+			ChequeraSerieEntity chequeraSerie = null;
 			try {
 				chequeraSerie = chequeraSerieService.findByUnique(cuota.getFacultadId(), cuota.getTipoChequeraId(),
 						cuota.getChequeraSerieId());
 			} catch (ChequeraSerieException e) {
-				chequeraSerie = new ChequeraSerie();
+				chequeraSerie = new ChequeraSerieEntity();
 			}
 
 			PersonaEntity personaEntity = null;

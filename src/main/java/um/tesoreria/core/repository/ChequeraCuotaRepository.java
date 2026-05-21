@@ -64,7 +64,7 @@ public interface ChequeraCuotaRepository extends JpaRepository<ChequeraCuota, Lo
 
 	@Query("SELECT new um.tesoreria.core.model.internal.CuotaPeriodoDto(cc.mes, cc.anho, COUNT(*)) " +
 		   "FROM ChequeraCuota cc " +
-		   "JOIN ChequeraSerie cs ON cc.chequeraId = cs.chequeraId " +
+		   "JOIN ChequeraSerieEntity cs ON cc.chequeraId = cs.chequeraId " +
 		   "WHERE cs.lectivoId = :lectivoId " +
 		   "AND cc.importe1 > 0 " +
 		   "GROUP BY cc.mes, cc.anho " +

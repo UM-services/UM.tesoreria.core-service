@@ -29,13 +29,13 @@ import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
 
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.CarreraService;
 import um.tesoreria.core.service.ChequeraCuotaService;
-import um.tesoreria.core.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.LectivoAlternativaService;
 import um.tesoreria.core.service.LectivoService;
@@ -86,7 +86,7 @@ public class FormulariosToPdfService {
 
     public String generateChequeraPdf(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
                                       Integer alternativaId) {
-        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         List<ChequeraCuota> cuotas = chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId());
@@ -306,7 +306,7 @@ public class FormulariosToPdfService {
     }
 
     public String generateCuotaPdf(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId) {
-        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         ChequeraCuota cuota = chequeraCuotaService
                 .findByUnique(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId(), productoId, cuotaId);

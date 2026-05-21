@@ -7,17 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import um.tesoreria.core.exception.BajaException;
-import um.tesoreria.core.kotlin.model.Baja;
+import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
 import um.tesoreria.core.kotlin.model.ChequeraCuota;
 import um.tesoreria.core.model.Debito;
-import um.tesoreria.core.service.BajaService;
+import um.tesoreria.core.hexagonal.baja.application.service.BajaService;
 import um.tesoreria.core.service.ChequeraCuotaService;
-import um.tesoreria.core.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.service.DebitoService;
 import um.tesoreria.core.util.Periodo;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Service class for processing baja (withdrawal) operations.
@@ -77,7 +76,7 @@ public class ProcessBajaService {
      * @return true if the operation was successful
      */
     @Transactional
-    public Boolean makeBaja(Baja baja) {
+    public Boolean makeBaja(BajaEntity baja) {
         Assert.notNull(baja, "Baja object cannot be null");
         Assert.notNull(baja.getFecha(), "Baja fecha cannot be null");
         
@@ -122,7 +121,7 @@ public class ProcessBajaService {
         });
     }
 
-    private Baja updateBajaWithExistingId(Baja baja) {
+    private BajaEntity updateBajaWithExistingId(BajaEntity baja) {
         log.debug("Processing updateBajaWithExistingId");
         Long bajaId = null;
         try {
@@ -138,7 +137,7 @@ public class ProcessBajaService {
         return bajaService.update(baja, bajaId);
     }
 
-    private Periodo calculatePeriodo(Baja baja) {
+    private Periodo calculatePeriodo(BajaEntity baja) {
         Periodo periodo = Periodo.builder()
                 .anho(baja.getFecha().getYear())
                 .mes(baja.getFecha().getMonthValue())
@@ -150,14 +149,14 @@ public class ProcessBajaService {
         return periodo;
     }
 
-    private void ensureChequeraSerieIsSet(Baja baja) {
+    private void ensureChequeraSerieIsSet(BajaEntity baja) {
         if (baja.getChequeraSerie() == null) {
             baja.setChequeraSerie(chequeraSerieService.findByUnique(
                     baja.getFacultadId(), baja.getTipoChequeraId(), baja.getChequeraSerieId()));
         }
     }
 
-    private void processPendingCuotas(Baja baja, Periodo periodo) {
+    private void processPendingCuotas(BajaEntity baja, Periodo periodo) {
         List<ChequeraCuota> pendingCuotas = chequeraCuotaService.findAllPendientesBaja(
                 baja.getFacultadId(), baja.getTipoChequeraId(), baja.getChequeraSerieId(),
                 baja.getChequeraSerie().getAlternativaId());
@@ -165,7 +164,7 @@ public class ProcessBajaService {
         pendingCuotas.forEach(cuota -> processPendingCuota(cuota, periodo, baja));
     }
 
-    private void processPendingCuota(ChequeraCuota cuota, Periodo periodo, Baja baja) {
+    private void processPendingCuota(ChequeraCuota cuota, Periodo periodo, BajaEntity baja) {
         int mes = normalizeMonth(cuota.getMes());
         if (shouldProcessCuota(periodo, cuota.getAnho(), mes)) {
             cuota.setBaja(BAJA_ACTIVE);
@@ -183,7 +182,7 @@ public class ProcessBajaService {
         return periodo.getAnho() * 100 + periodo.getMes() <= cuotaAnho * 100 + cuotaMes;
     }
 
-    private void processDebitosBaja(ChequeraCuota cuota, Baja baja) {
+    private void processDebitosBaja(ChequeraCuota cuota, BajaEntity baja) {
         List<Debito> debitos = debitoService.findAllAsociados(
                 cuota.getFacultadId(), cuota.getTipoChequeraId(), cuota.getChequeraSerieId(),
                 cuota.getProductoId(), cuota.getAlternativaId(), cuota.getCuotaId());

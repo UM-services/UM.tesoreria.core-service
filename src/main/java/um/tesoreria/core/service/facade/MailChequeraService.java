@@ -28,9 +28,10 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import um.tesoreria.core.exception.CarreraChequeraException;
 import um.tesoreria.core.exception.DomicilioException;
 import um.tesoreria.core.exception.SpoterDataException;
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.*;
@@ -175,7 +176,7 @@ public class MailChequeraService {
         }
 
         // Genera la chequera nueva con los datos encontrados
-        ChequeraSerie chequeraSerie = spoterService.makeChequeraSpoter(spoterData, lectivoId, curso, carreraChequera);
+        ChequeraSerieEntity chequeraSerie = spoterService.makeChequeraSpoter(spoterData, lectivoId, curso, carreraChequera);
         logChequeraSerie(chequeraSerie);
 
         // Enviar chequera
@@ -258,7 +259,7 @@ public class MailChequeraService {
             throws MessagingException {
         String data;
 
-        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
 
         Domicilio domicilio;
         try {
@@ -299,7 +300,7 @@ public class MailChequeraService {
     }
 
     public String notaDeudorChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
-        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         Facultad facultad = facultadService.findByFacultadId(facultadId);
         PersonaEntity personaEntity = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
 
@@ -418,7 +419,7 @@ public class MailChequeraService {
         }
     }
 
-    private void logChequeraSerie(ChequeraSerie chequeraSerie) {
+    private void logChequeraSerie(ChequeraSerieEntity chequeraSerie) {
         try {
             log.debug("ChequeraSerie -> {}", JsonMapper
                     .builder()

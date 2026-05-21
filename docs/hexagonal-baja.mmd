@@ -1,0 +1,22 @@
+---
+title: Arquitectura Hexagonal - Baja
+---
+flowchart TD
+    subgraph Aplicacion ["Aplicación (Application)"]
+        S["BajaService<br/>(Servicio de Aplicación)"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        C["BajaController<br/>(Controlador REST)"]
+        R["JpaBajaRepository<br/>(Repositorio JPA)"]
+        E["BajaEntity<br/>(Entidad JPA)"]
+    end
+
+    C --> S
+    S --> R
+    R --> E
+
+    style S fill:#f3e5f5
+    style C fill:#e8f5e8
+    style R fill:#e8f5e8
+    style E fill:#e8f5e8

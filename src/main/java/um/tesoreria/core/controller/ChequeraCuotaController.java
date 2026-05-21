@@ -24,7 +24,7 @@ import um.tesoreria.core.exception.ChequeraCuotaException;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.service.ChequeraCuotaService;
 
-import um.tesoreria.core.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
 import um.tesoreria.core.util.ChequeraSerieMapper;
 
