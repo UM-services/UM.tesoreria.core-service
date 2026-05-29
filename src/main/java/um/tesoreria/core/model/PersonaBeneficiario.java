@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -35,7 +36,8 @@ public class PersonaBeneficiario extends Auditable implements Serializable {
 	/**
 	* 
 	*/
-	private static final long serialVersionUID = 4529768518427197870L;
+	@Serial
+    private static final long serialVersionUID = 4529768518427197870L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,6 +51,6 @@ public class PersonaBeneficiario extends Auditable implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "personaUniqueId", insertable = false, updatable = false)
-	private PersonaEntity personaEntity;
+	private PersonaEntity persona;
 
 }

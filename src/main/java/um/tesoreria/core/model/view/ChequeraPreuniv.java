@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model.view;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
@@ -38,7 +39,8 @@ public class ChequeraPreuniv implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -5081653677665140152L;
+	@Serial
+    private static final long serialVersionUID = -5081653677665140152L;
 
 	@Id
 	private Long chequeraId;
@@ -81,6 +83,6 @@ public class ChequeraPreuniv implements Serializable {
 	@JoinColumns({
 			@JoinColumn(name = "personaId", referencedColumnName = "per_id", insertable = false, updatable = false),
 			@JoinColumn(name = "documentoId", referencedColumnName = "per_doc_id", insertable = false, updatable = false) })
-	private PersonaEntity personaEntity;
+	private PersonaEntity persona;
 
 }

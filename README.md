@@ -4,7 +4,17 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
 
-**Versión actual (SemVer): 3.21.1**
+**Versión actual (SemVer): 3.21.2**
+
+## Novedades 3.21.2 (verificado en código)
+- fix(model): Agregada anotación `@Serial` a `serialVersionUID` en clases serializables
+  - `PersonaBeneficiario`, `ChequeraIncompleta`, `ChequeraKey`, `ChequeraPreuniv` ahora usan `@Serial` para metadatos de serialización
+- refactor(model): Renombrado de campo `personaEntity` a `persona` en clases de modelo para consistencia de nomenclatura
+  - `PersonaBeneficiario`, `ChequeraIncompleta`, `ChequeraKey`, `ChequeraPreuniv`: campo `personaEntity` → `persona`
+  - `SheetService`: Referencias actualizadas de `getPersonaEntity()` → `getPersona()`
+  - Consistencia con la convención de `ContratoEntity` establecida en v3.20.0
+
+> Basado en análisis profundo de `git diff HEAD` (5 archivos modificados, +17/-9 líneas).
 
 ## Novedades 3.21.1 (verificado en código)
 - fix(tables): Agregadas anotaciones `@Table(name = ...)` faltantes en `BajaEntity` y `ChequeraSerieEntity`
@@ -824,7 +834,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.21.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.21.2-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

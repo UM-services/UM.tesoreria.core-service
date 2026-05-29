@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model.view;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -40,7 +41,8 @@ public class ChequeraIncompleta implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6073097611183861167L;
+	@Serial
+    private static final long serialVersionUID = 6073097611183861167L;
 
 	@Id
 	private Long chequeraId;
@@ -80,7 +82,7 @@ public class ChequeraIncompleta implements Serializable {
 	@JoinColumns({
 			@JoinColumn(name = "personaId", referencedColumnName = "per_id", insertable = false, updatable = false),
 			@JoinColumn(name = "documentoId", referencedColumnName = "per_doc_id", insertable = false, updatable = false) })
-	private PersonaEntity personaEntity;
+	private PersonaEntity persona;
 
 	@OneToOne
 	@JoinColumns({

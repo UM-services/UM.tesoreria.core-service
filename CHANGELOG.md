@@ -2,6 +2,19 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.21.2] - 2026-05-28
+### Fixed
+- fix(model): Add `@Serial` annotation to `serialVersionUID` in serializable model classes
+  - `PersonaBeneficiario`, `ChequeraIncompleta`, `ChequeraKey`, `ChequeraPreuniv` now use `@Serial` for proper serialization metadata
+
+### Changed
+- refactor(model): Rename `personaEntity` field to `persona` in model classes for naming consistency
+  - `PersonaBeneficiario`, `ChequeraIncompleta`, `ChequeraKey`, `ChequeraPreuniv`: field `personaEntity` → `persona`
+  - `SheetService`: Updated references from `getPersonaEntity()` → `getPersona()` to match renamed field
+  - Consistency with `ContratoEntity` naming convention established in v3.20.0
+
+> Basado en análisis profundo de `git diff HEAD` (5 archivos modificados, +17/-9 líneas).
+
 ## [3.21.1] - 2026-05-21
 ### Fixed
 - fix(tables): Add missing `@Table(name = ...)` annotations to `BajaEntity` and `ChequeraSerieEntity` for explicit table mapping
