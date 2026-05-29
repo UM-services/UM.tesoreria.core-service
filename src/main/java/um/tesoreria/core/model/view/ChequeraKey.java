@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.model.view;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -44,7 +45,8 @@ public class ChequeraKey extends Auditable implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 6401541993132700141L;
+	@Serial
+    private static final long serialVersionUID = 6401541993132700141L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -86,7 +88,7 @@ public class ChequeraKey extends Auditable implements Serializable {
 	@JoinColumns({
 			@JoinColumn(name = "personaId", referencedColumnName = "per_id", insertable = false, updatable = false),
 			@JoinColumn(name = "documentoId", referencedColumnName = "per_doc_id", insertable = false, updatable = false) })
-	private PersonaEntity personaEntity;
+	private PersonaEntity persona;
 
 	@OneToOne
 	@JoinColumn(name = "lectivoId", insertable = false, updatable = false)
