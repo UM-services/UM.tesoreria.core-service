@@ -1,0 +1,175 @@
+---
+title: Arquitectura Hexagonal - Módulo Campanha (v3.22.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Campanha {
+            +UUID campanhaId
+            +String nombre
+            +Byte activa
+        }
+
+        class CampanhaRepository {
+            <<interface>>
+            +create(Campanha) Campanha
+            +findById(UUID) Optional~Campanha~
+            +findAll() List~Campanha~
+            +update(UUID, Campanha) Optional~Campanha~
+            +deleteByCampanhaId(UUID) boolean
+        }
+    }
+
+    namespace application {
+        class CampanhaService {
+            -CreateCampanhaUseCase createCampanhaUseCase
+            -GetCampanhaByIdUseCase getCampanhaByIdUseCase
+            -GetAllCampanhasUseCase getAllCampanhasUseCase
+            -UpdateCampanhaUseCase updateCampanhaUseCase
+            -DeleteCampanhaUseCase deleteCampanhaUseCase
+            +createCampanha(Campanha) Campanha
+            +getCampanhaById(UUID) Optional~Campanha~
+            +getAllCampanhas() List~Campanha~
+            +updateCampanha(UUID, Campanha) Optional~Campanha~
+            +deleteCampanha(UUID) boolean
+        }
+
+        namespace usecases {
+            class CreateCampanhaUseCaseImpl {
+                -CampanhaRepository repository
+                +createCampanha(Campanha) Campanha
+            }
+            class GetCampanhaByIdUseCaseImpl {
+                -CampanhaRepository repository
+                +getCampanhaById(UUID) Optional~Campanha~
+            }
+            class GetAllCampanhasUseCaseImpl {
+                -CampanhaRepository repository
+                +getAllCampanhas() List~Campanha~
+            }
+            class UpdateCampanhaUseCaseImpl {
+                -CampanhaRepository repository
+                +updateCampanha(UUID, Campanha) Optional~Campanha~
+            }
+            class DeleteCampanhaUseCaseImpl {
+                -CampanhaRepository repository
+                +deleteCampanha(UUID) boolean
+            }
+        }
+
+        class CreateCampanhaUseCase {
+            <<interface>>
+            +createCampanha(Campanha) Campanha
+        }
+        class GetCampanhaByIdUseCase {
+            <<interface>>
+            +getCampanhaById(UUID) Optional~Campanha~
+        }
+        class GetAllCampanhasUseCase {
+            <<interface>>
+            +getAllCampanhas() List~Campanha~
+        }
+        class UpdateCampanhaUseCase {
+            <<interface>>
+            +updateCampanha(UUID, Campanha) Optional~Campanha~
+        }
+        class DeleteCampanhaUseCase {
+            <<interface>>
+            +deleteCampanha(UUID) boolean
+        }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class CampanhaEntity {
+                +UUID campanhaId
+                +String nombre
+                +Byte activa
+            }
+
+            class JpaCampanhaRepository {
+                <<JpaRepository>>
+                +findByCampanhaId(UUID) Optional~CampanhaEntity~
+                +existsByCampanhaId(UUID) boolean
+                +deleteByCampanhaId(UUID) void
+            }
+
+            class JpaCampanhaRepositoryAdapter {
+                -JpaCampanhaRepository repository
+                -CampanhaMapper mapper
+                +create(Campanha) Campanha
+                +findById(UUID) Optional~Campanha~
+                +findAll() List~Campanha~
+                +update(UUID, Campanha) Optional~Campanha~
+                +deleteByCampanhaId(UUID) boolean
+            }
+
+            class CampanhaMapper {
+                +toEntity(Campanha) CampanhaEntity
+                +toDomainModel(CampanhaEntity) Campanha
+            }
+        }
+
+        namespace web {
+            class CampanhaController {
+                -CampanhaService campanhaService
+                -CampanhaDtoMapper campanhaDtoMapper
+                +findByCampanhaId(UUID) ResponseEntity~CampanhaResponse~
+                +add(CampanhaRequest) ResponseEntity~CampanhaResponse~
+                +getAll() ResponseEntity~List~CampanhaResponse~~
+                +update(UUID, CampanhaRequest) ResponseEntity~CampanhaResponse~
+                +delete(UUID) ResponseEntity~Void~
+            }
+
+            class CampanhaRequest {
+                +UUID campanhaId
+                +String nombre
+                +Byte activa
+            }
+
+            class CampanhaResponse {
+                +UUID campanhaId
+                +String nombre
+                +Byte activa
+            }
+
+            class CampanhaDtoMapper {
+                +toDomain(CampanhaRequest) Campanha
+                +toResponse(Campanha) CampanhaResponse
+            }
+        }
+    }
+
+    CampanhaService --> CreateCampanhaUseCase : uses
+    CampanhaService --> GetCampanhaByIdUseCase : uses
+    CampanhaService --> GetAllCampanhasUseCase : uses
+    CampanhaService --> UpdateCampanhaUseCase : uses
+    CampanhaService --> DeleteCampanhaUseCase : uses
+
+    CreateCampanhaUseCaseImpl ..|> CreateCampanhaUseCase : implements
+    GetCampanhaByIdUseCaseImpl ..|> GetCampanhaByIdUseCase : implements
+    GetAllCampanhasUseCaseImpl ..|> GetAllCampanhasUseCase : implements
+    UpdateCampanhaUseCaseImpl ..|> UpdateCampanhaUseCase : implements
+    DeleteCampanhaUseCaseImpl ..|> DeleteCampanhaUseCase : implements
+
+    CreateCampanhaUseCaseImpl --> CampanhaRepository : uses
+    GetCampanhaByIdUseCaseImpl --> CampanhaRepository : uses
+    GetAllCampanhasUseCaseImpl --> CampanhaRepository : uses
+    UpdateCampanhaUseCaseImpl --> CampanhaRepository : uses
+    DeleteCampanhaUseCaseImpl --> CampanhaRepository : uses
+
+    JpaCampanhaRepositoryAdapter ..|> CampanhaRepository : implements
+    JpaCampanhaRepositoryAdapter --> JpaCampanhaRepository : uses
+    JpaCampanhaRepositoryAdapter --> CampanhaMapper : uses
+
+    CampanhaMapper --> Campanha : maps
+    CampanhaMapper --> CampanhaEntity : maps
+    JpaCampanhaRepository --> CampanhaEntity : persists
+
+    CampanhaController --> CampanhaService : calls
+    CampanhaController --> CampanhaDtoMapper : uses
+    CampanhaDtoMapper --> Campanha : maps
+    CampanhaDtoMapper --> CampanhaRequest : maps
+    CampanhaDtoMapper --> CampanhaResponse : maps

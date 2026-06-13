@@ -2,9 +2,28 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.21.2**
+**Versión actual (SemVer): 3.22.0**
+
+## Novedades 3.22.0 (verificado en código)
+- feat(campanha): Nuevo módulo Campanha con arquitectura hexagonal completa bajo `hexagonal/umhub/campanha/`
+  - Modelo de dominio: `Campanha` con campos `campanhaId` (UUID), `nombre`, `activa`
+  - Puertos de entrada: `CreateCampanhaUseCase`, `GetCampanhaByIdUseCase`, `GetAllCampanhasUseCase`, `UpdateCampanhaUseCase`, `DeleteCampanhaUseCase`
+  - Puerto de salida: `CampanhaRepository` con métodos CRUD
+  - Casos de uso: `CreateCampanhaUseCaseImpl`, `GetCampanhaByIdUseCaseImpl`, `GetAllCampanhasUseCaseImpl`, `UpdateCampanhaUseCaseImpl`, `DeleteCampanhaUseCaseImpl`
+  - Servicio de aplicación: `CampanhaService` con delegación a casos de uso
+  - Adaptador JPA: `JpaCampanhaRepositoryAdapter` con `CampanhaMapper` para conversión dominio ↔ entidad
+  - Entidad JPA: `CampanhaEntity` extends `Auditable`, mapeo a tabla `campanha`
+  - Repositorio JPA: `JpaCampanhaRepository` con consultas por ID
+  - Controlador REST: `CampanhaController` con endpoints CRUD bajo `GET/POST/PUT/DELETE /api/tesoreria/umhub/campanha/`
+  - DTOs: `CampanhaRequest`, `CampanhaResponse`
+  - DTO Mapper: `CampanhaDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `CampanhaException`
+- chore(deps): Actualización de Spring Boot 4.0.6 → 4.1.0, Kotlin 2.3.21 → 2.4.0, Spring Cloud 2025.1.0 → 2025.1.2
+- refactor(service): Migración de `ChequeraIncompletaService` a inyección por constructor con `@RequiredArgsConstructor`
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados, +488/-6 líneas).
 
 ## Novedades 3.21.2 (verificado en código)
 - fix(model): Agregada anotación `@Serial` a `serialVersionUID` en clases serializables
@@ -564,9 +583,9 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.0.6
-- Spring Cloud: 2025.1.0
-- Kotlin: 2.3.21
+- Spring Boot: 4.1.0
+- Spring Cloud: 2025.1.2
+- Kotlin: 2.4.0
 - MySQL Connector: 9.6.0
 - SpringDoc OpenAPI: 3.0.2
 - Apache POI: 5.5.1
@@ -777,6 +796,7 @@ src/
 │   │       ├── hexagonal/
 │   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
 │   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
+│   │   │   ├── umhub/campanha/    # Módulo Campanha (v3.22.0)
 │   │   │   ├── contrato/          # Módulo Contrato (v3.19.0)
 │   │       ├── chequeraSerie/     # Módulo ChequeraSerie (v3.21.0)
 │   │       ├── baja/              # Módulo Baja (v3.21.0)
@@ -830,11 +850,11 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 # UM Tesorería Core Service
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-purple.svg)](https://kotlinlang.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.21.2-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.22.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

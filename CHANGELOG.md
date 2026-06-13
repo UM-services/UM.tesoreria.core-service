@@ -2,6 +2,31 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.22.0] - 2026-06-13
+### Added
+- feat(campanha): Nuevo módulo Campanha con arquitectura hexagonal completa
+  - Modelo de dominio: `Campanha` con campos `campanhaId` (UUID), `nombre`, `activa`
+  - Puertos de entrada (5): `CreateCampanhaUseCase`, `GetCampanhaByIdUseCase`, `GetAllCampanhasUseCase`, `UpdateCampanhaUseCase`, `DeleteCampanhaUseCase`
+  - Puerto de salida: `CampanhaRepository` con métodos CRUD completos
+  - Casos de uso: Implementaciones completas en `application/usecases/` con inyección de dependencias
+  - Servicio de aplicación: `CampanhaService` con delegación a casos de uso y retornos `Optional`
+  - Adaptador JPA: `JpaCampanhaRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `CampanhaEntity` con herencia de `Auditable` y mapeo a tabla `campanha`
+  - Repositorio JPA: `JpaCampanhaRepository` con consultas por identificación
+  - Mapper: `CampanhaMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `CampanhaController` con endpoints CRUD bajo `GET/POST/PUT/DELETE /api/tesoreria/umhub/campanha/`
+  - DTOs: `CampanhaRequest` y `CampanhaResponse`
+  - DTO Mapper: `CampanhaDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `CampanhaException` para manejo de errores del dominio
+
+### Changed
+- chore(deps): Actualización de Spring Boot de 4.0.6 a 4.1.0
+- chore(deps): Actualización de Kotlin de 2.3.21 a 2.4.0
+- chore(deps): Actualización de Spring Cloud de 2025.1.0 a 2025.1.2
+- refactor(service): Migración de `ChequeraIncompletaService` de inyección `@Autowired` a `@RequiredArgsConstructor` con campo `final`
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados, +488/-6 líneas) y cambios en `pom.xml`, `ChequeraIncompletaService`, y nuevo módulo `hexagonal/umhub/campanha/`.
+
 ## [3.21.2] - 2026-05-28
 ### Fixed
 - fix(model): Add `@Serial` annotation to `serialVersionUID` in serializable model classes
