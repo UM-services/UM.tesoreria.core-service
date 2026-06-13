@@ -2,9 +2,38 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.21.2**
+**Versión actual (SemVer): 3.23.0**
+
+## Novedades 3.23.0 (verificado en código)
+- feat(campanha): Nuevo campo `created` (LocalDateTime) en modelo `Campanha`
+  - `Campanha.domain.model.Campanha`: nuevo campo `created` para fecha de creación
+  - `CampanhaResponse`: expone el campo `created` en respuestas REST
+  - `CampanhaMapper` y `CampanhaDtoMapper`: mapeo bidireccional del campo `created`
+- refactor(campanha): Actualización parcial (partial update) en `JpaCampanhaRepositoryAdapter.update()`
+  - Cambio de reemplazo completo de entidad a carga de entidad existente con actualización selectiva de campos no nulos
+
+> Basado en análisis profundo de `git diff HEAD` (5 archivos modificados, +20/-8 líneas).
+
+## Novedades 3.22.0 (verificado en código)
+- feat(campanha): Nuevo módulo Campanha con arquitectura hexagonal completa bajo `hexagonal/umhub/campanha/`
+  - Modelo de dominio: `Campanha` con campos `campanhaId` (UUID), `nombre`, `activa`
+  - Puertos de entrada: `CreateCampanhaUseCase`, `GetCampanhaByIdUseCase`, `GetAllCampanhasUseCase`, `UpdateCampanhaUseCase`, `DeleteCampanhaUseCase`
+  - Puerto de salida: `CampanhaRepository` con métodos CRUD
+  - Casos de uso: `CreateCampanhaUseCaseImpl`, `GetCampanhaByIdUseCaseImpl`, `GetAllCampanhasUseCaseImpl`, `UpdateCampanhaUseCaseImpl`, `DeleteCampanhaUseCaseImpl`
+  - Servicio de aplicación: `CampanhaService` con delegación a casos de uso
+  - Adaptador JPA: `JpaCampanhaRepositoryAdapter` con `CampanhaMapper` para conversión dominio ↔ entidad
+  - Entidad JPA: `CampanhaEntity` extends `Auditable`, mapeo a tabla `campanha`
+  - Repositorio JPA: `JpaCampanhaRepository` con consultas por ID
+  - Controlador REST: `CampanhaController` con endpoints CRUD bajo `GET/POST/PUT/DELETE /api/tesoreria/umhub/campanha/`
+  - DTOs: `CampanhaRequest`, `CampanhaResponse`
+  - DTO Mapper: `CampanhaDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `CampanhaException`
+- chore(deps): Actualización de Spring Boot 4.0.6 → 4.1.0, Kotlin 2.3.21 → 2.4.0, Spring Cloud 2025.1.0 → 2025.1.2
+- refactor(service): Migración de `ChequeraIncompletaService` a inyección por constructor con `@RequiredArgsConstructor`
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados, +488/-6 líneas).
 
 ## Novedades 3.21.2 (verificado en código)
 - fix(model): Agregada anotación `@Serial` a `serialVersionUID` en clases serializables
@@ -564,9 +593,9 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.0.6
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.0.6
-- Spring Cloud: 2025.1.0
-- Kotlin: 2.3.21
+- Spring Boot: 4.1.0
+- Spring Cloud: 2025.1.2
+- Kotlin: 2.4.0
 - MySQL Connector: 9.6.0
 - SpringDoc OpenAPI: 3.0.2
 - Apache POI: 5.5.1
@@ -777,19 +806,20 @@ src/
 │   │       ├── hexagonal/
 │   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
 │   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
-│   │   │   ├── contrato/          # Módulo Contrato (v3.19.0)
-│   │       ├── chequeraSerie/     # Módulo ChequeraSerie (v3.21.0)
-│   │       ├── baja/              # Módulo Baja (v3.21.0)
-│   │       ├── dependencia/       # Módulo Dependencia (v3.17.0)
-│   │       │   ├── facultad/          # Módulo Facultad (v3.18.0)
-│   │       │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
-│   │       │   ├── articulo/          # Módulo Artículo (v3.13.0)
-│   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
-│   │       │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
-│   │       │   ├── persona/           # Módulo Persona (v3.1.0)
-│   │       │   ├── auth/              # Módulo Auth (v3.6.0)
-│   │       │   ├── geografica/        # Módulo Geografica (v3.6.0)
-│   │       │   ├── proveedor/         # Módulo Proveedor (v3.9.0)
+│   │       │   ├── umhub/campanha/    # Módulo Campanha (v3.23.0)
+│   │       │   ├── contrato/          # Módulo Contrato (v3.19.0)
+│   │       │   ├── chequeraSerie/     # Módulo ChequeraSerie (v3.21.0)
+│   │       │   ├── baja/              # Módulo Baja (v3.21.0)
+│   │   ├── dependencia/       # Módulo Dependencia (v3.17.0)
+│   │   ├── facultad/          # Módulo Facultad (v3.18.0)
+│   │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
+│   │   ├── articulo/          # Módulo Artículo (v3.13.0)
+│   │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
+│   │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
+│   │   ├── persona/           # Módulo Persona (v3.1.0)
+│   │   ├── auth/              # Módulo Auth (v3.6.0)
+│   │   ├── geografica/        # Módulo Geografica (v3.6.0)
+│   │   │   ├── proveedor/         # Módulo Proveedor (v3.9.0)
 │   │       │   └── matriculacionContext/
 │   │       ├── model/                 # Modelos legacy
 │   │       ├── service/               # Servicios legacy
@@ -830,11 +860,11 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 # UM Tesorería Core Service
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.0-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-purple.svg)](https://kotlinlang.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.21.2-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.23.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

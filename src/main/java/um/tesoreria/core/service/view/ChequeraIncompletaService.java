@@ -5,6 +5,7 @@ package um.tesoreria.core.service.view;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,10 @@ import um.tesoreria.core.repository.view.ChequeraIncompletaRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class ChequeraIncompletaService {
 
-	@Autowired
-	private ChequeraIncompletaRepository repository;
+	private final ChequeraIncompletaRepository repository;
 
 	public List<ChequeraIncompleta> findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer lectivoId,
                                                                                    Integer facultadId, Integer geograficaId) {
