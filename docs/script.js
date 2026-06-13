@@ -94,6 +94,7 @@ const diagrams = [
   { id: 'hexagonal-contrato', file: 'hexagonal-contrato.mmd', title: '🔷 Arquitectura Hexagonal - Contrato' },
   { id: 'hexagonal-chequeraSerie', file: 'hexagonal-chequeraSerie.mmd', title: '🔷 Arquitectura Hexagonal - ChequeraSerie' },
   { id: 'hexagonal-baja', file: 'hexagonal-baja.mmd', title: '🔷 Arquitectura Hexagonal - Baja' },
+  { id: 'hexagonal-campanha', file: 'hexagonal-campanha.mmd', title: '🔷 Arquitectura Hexagonal - Campanha (UM Hub)' },
   { id: 'dependencies-diagram', file: 'dependencies.mmd', title: '📦 Diagrama de Dependencias' },
   { id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },
   { id: 'deployment-diagram', file: 'deployment.mmd', title: '🚀 Diagrama de Despliegue' },

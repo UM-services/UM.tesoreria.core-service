@@ -13,15 +13,18 @@ public class CampanhaMapper {
                 .campanhaId(entity.getCampanhaId())
                 .nombre(entity.getNombre())
                 .activa(entity.getActiva())
+                .created(entity.getCreated())
                 .build();
     }
 
     public CampanhaEntity toEntity(Campanha domain) {
         if (domain == null) return null;
-        return CampanhaEntity.builder()
+        CampanhaEntity entity = CampanhaEntity.builder()
                 .campanhaId(domain.getCampanhaId())
                 .nombre(domain.getNombre())
                 .activa(domain.getActiva())
                 .build();
+        entity.setCreated(domain.getCreated());
+        return entity;
     }
 }

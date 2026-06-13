@@ -4,7 +4,17 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.22.0**
+**Versión actual (SemVer): 3.23.0**
+
+## Novedades 3.23.0 (verificado en código)
+- feat(campanha): Nuevo campo `created` (LocalDateTime) en modelo `Campanha`
+  - `Campanha.domain.model.Campanha`: nuevo campo `created` para fecha de creación
+  - `CampanhaResponse`: expone el campo `created` en respuestas REST
+  - `CampanhaMapper` y `CampanhaDtoMapper`: mapeo bidireccional del campo `created`
+- refactor(campanha): Actualización parcial (partial update) en `JpaCampanhaRepositoryAdapter.update()`
+  - Cambio de reemplazo completo de entidad a carga de entidad existente con actualización selectiva de campos no nulos
+
+> Basado en análisis profundo de `git diff HEAD` (5 archivos modificados, +20/-8 líneas).
 
 ## Novedades 3.22.0 (verificado en código)
 - feat(campanha): Nuevo módulo Campanha con arquitectura hexagonal completa bajo `hexagonal/umhub/campanha/`
@@ -796,20 +806,20 @@ src/
 │   │       ├── hexagonal/
 │   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
 │   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
-│   │   │   ├── umhub/campanha/    # Módulo Campanha (v3.22.0)
-│   │   │   ├── contrato/          # Módulo Contrato (v3.19.0)
-│   │       ├── chequeraSerie/     # Módulo ChequeraSerie (v3.21.0)
-│   │       ├── baja/              # Módulo Baja (v3.21.0)
-│   │       ├── dependencia/       # Módulo Dependencia (v3.17.0)
-│   │       │   ├── facultad/          # Módulo Facultad (v3.18.0)
-│   │       │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
-│   │       │   ├── articulo/          # Módulo Artículo (v3.13.0)
-│   │       │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
-│   │       │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
-│   │       │   ├── persona/           # Módulo Persona (v3.1.0)
-│   │       │   ├── auth/              # Módulo Auth (v3.6.0)
-│   │       │   ├── geografica/        # Módulo Geografica (v3.6.0)
-│   │       │   ├── proveedor/         # Módulo Proveedor (v3.9.0)
+│   │       │   ├── umhub/campanha/    # Módulo Campanha (v3.23.0)
+│   │       │   ├── contrato/          # Módulo Contrato (v3.19.0)
+│   │       │   ├── chequeraSerie/     # Módulo ChequeraSerie (v3.21.0)
+│   │       │   ├── baja/              # Módulo Baja (v3.21.0)
+│   │   ├── dependencia/       # Módulo Dependencia (v3.17.0)
+│   │   ├── facultad/          # Módulo Facultad (v3.18.0)
+│   │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
+│   │   ├── articulo/          # Módulo Artículo (v3.13.0)
+│   │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
+│   │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
+│   │   ├── persona/           # Módulo Persona (v3.1.0)
+│   │   ├── auth/              # Módulo Auth (v3.6.0)
+│   │   ├── geografica/        # Módulo Geografica (v3.6.0)
+│   │   │   ├── proveedor/         # Módulo Proveedor (v3.9.0)
 │   │       │   └── matriculacionContext/
 │   │       ├── model/                 # Modelos legacy
 │   │       ├── service/               # Servicios legacy
@@ -854,7 +864,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.22.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.23.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

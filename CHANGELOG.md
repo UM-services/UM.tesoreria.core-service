@@ -2,6 +2,21 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.23.0] - 2026-06-13
+### Added
+- feat(campanha): Nuevo campo `created` (LocalDateTime) en modelo de dominio `Campanha`
+  - `Campanha.domain.model.Campanha`: nuevo campo `created` para fecha de creación
+  - `CampanhaResponse`: expone el campo `created` en respuestas REST
+  - `CampanhaMapper`: mapeo bidireccional del campo `created` entre entidad y dominio
+  - `CampanhaDtoMapper`: mapeo del campo `created` de dominio a DTO de respuesta
+
+### Changed
+- refactor(campanha): Actualización parcial (partial update) en `JpaCampanhaRepositoryAdapter.update()`
+  - Cambio de reemplazo completo de entidad a carga de entidad existente con actualización selectiva de campos no nulos
+  - `CampanhaEntity.setCreated()` invocado explícitamente en `CampanhaMapper.toEntity()` para preservar el campo `created`
+
+> Basado en análisis profundo de `git diff HEAD` (5 archivos modificados, +20/-8 líneas).
+
 ## [3.22.0] - 2026-06-13
 ### Added
 - feat(campanha): Nuevo módulo Campanha con arquitectura hexagonal completa

@@ -42,13 +42,17 @@ public class JpaCampanhaRepositoryAdapter implements CampanhaRepository {
 
     @Override
     public Optional<Campanha> update(UUID campanhaId, Campanha campanha) {
-        if (jpaCampanhaRepository.existsById(campanhaId)) {
-            CampanhaEntity entity = campanhaMapper.toEntity(campanha);
-            entity.setCampanhaId(campanhaId);
-            CampanhaEntity updated = jpaCampanhaRepository.save(entity);
-            return Optional.of(campanhaMapper.toDomainModel(updated));
-        }
-        return Optional.empty();
+        return jpaCampanhaRepository.findById(campanhaId)
+                .map(existingEntity -> {
+                    if (campanha.getNombre() != null) {
+                        existingEntity.setNombre(campanha.getNombre());
+                    }
+                    if (campanha.getActiva() != null) {
+                        existingEntity.setActiva(campanha.getActiva());
+                    }
+                    CampanhaEntity updated = jpaCampanhaRepository.save(existingEntity);
+                    return campanhaMapper.toDomainModel(updated);
+                });
     }
 
     @Override

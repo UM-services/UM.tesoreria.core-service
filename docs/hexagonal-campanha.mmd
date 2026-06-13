@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Campanha (v3.22.0)
+title: Arquitectura Hexagonal - Módulo Campanha (v3.23.0)
 ---
 
 classDiagram
@@ -10,6 +10,7 @@ classDiagram
             +UUID campanhaId
             +String nombre
             +Byte activa
+            +LocalDateTime created
         }
 
         class CampanhaRepository {
@@ -87,6 +88,7 @@ classDiagram
                 +UUID campanhaId
                 +String nombre
                 +Byte activa
+                +LocalDateTime created
             }
 
             class JpaCampanhaRepository {
@@ -133,6 +135,7 @@ classDiagram
                 +UUID campanhaId
                 +String nombre
                 +Byte activa
+                +LocalDateTime created
             }
 
             class CampanhaDtoMapper {

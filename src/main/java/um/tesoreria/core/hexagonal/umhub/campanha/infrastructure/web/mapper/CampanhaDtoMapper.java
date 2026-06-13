@@ -23,6 +23,7 @@ public class CampanhaDtoMapper {
                 .campanhaId(domain.getCampanhaId())
                 .nombre(domain.getNombre())
                 .activa(domain.getActiva())
+                .created(domain.getCreated())
                 .build();
     }
 }
