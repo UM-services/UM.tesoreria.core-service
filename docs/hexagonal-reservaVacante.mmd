@@ -1,0 +1,155 @@
+---
+title: Arquitectura Hexagonal - Módulo ReservaVacante (v3.24.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class ReservaVacante {
+            +UUID reservaVacanteId
+            +Long personaUniqueId
+            +UUID campanhaId
+            +String estado
+            +BigDecimal importe
+            +OffsetDateTime vencimiento
+            +Persona persona
+            +Domicilio domicilio
+            +LocalDateTime created
+            +LocalDateTime updated
+            +jsonify() String
+        }
+
+        class ReservaVacanteRepository {
+            <<interface>>
+            +create(ReservaVacante) ReservaVacante
+            +findByReservaVacanteId(UUID) Optional~ReservaVacante~
+        }
+    }
+
+    namespace application {
+        class ReservaVacanteService {
+            -CreateReservaVacanteUseCase createReservaVacanteUseCase
+            -FindReservaVacanteUseCase findReservaVacanteUseCase
+            +createReservaVacante(ReservaVacanteRequest) ReservaVacante
+            +findReservaVacante(UUID) ReservaVacante
+        }
+
+        namespace usecases {
+            class CreateReservaVacanteUseCaseImpl {
+                -ReservaVacanteRepository repository
+                -PersonaService personaService
+                -DomicilioService domicilioService
+                -CampanhaService campanhaService
+                +createReservaVacante(ReservaVacanteRequest) ReservaVacante
+            }
+            class FindReservaVacanteUseCaseImpl {
+                -ReservaVacanteRepository repository
+                -PersonaService personaService
+                -DomicilioService domicilioService
+                +findByReservaVacanteId(UUID) ReservaVacante
+            }
+        }
+
+        class CreateReservaVacanteUseCase {
+            <<interface>>
+            +createReservaVacante(ReservaVacanteRequest) ReservaVacante
+        }
+        class FindReservaVacanteUseCase {
+            <<interface>>
+            +findByReservaVacanteId(UUID) ReservaVacante
+        }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class ReservaVacanteEntity {
+                +UUID reservaVacanteId
+                +Long personaUniqueId
+                +UUID campanhaId
+                +String estado
+                +BigDecimal importe
+                +OffsetDateTime vencimiento
+                +LocalDateTime created
+                +LocalDateTime updated
+            }
+
+            class JpaReservaVacanteRepository {
+                <<JpaRepository>>
+                +findByReservaVacanteId(UUID) Optional~ReservaVacanteEntity~
+            }
+
+            class JpaReservaVacanteRepositoryAdapter {
+                -JpaReservaVacanteRepository repository
+                -ReservaVacanteMapper mapper
+                +create(ReservaVacante) ReservaVacante
+                +findByReservaVacanteId(UUID) Optional~ReservaVacante~
+            }
+
+            class ReservaVacanteMapper {
+                +toEntity(ReservaVacante) ReservaVacanteEntity
+                +toDomainModel(ReservaVacanteEntity) ReservaVacante
+            }
+        }
+
+        namespace web {
+            class ReservaVacanteController {
+                -ReservaVacanteService reservaVacanteService
+                -ReservaVacanteDtoMapper reservaVacanteDtoMapper
+                +add(ReservaVacanteRequest) ResponseEntity~ReservaVacanteResponse~
+                +get(UUID) ResponseEntity~ReservaVacanteResponse~
+            }
+
+            class ReservaVacanteRequest {
+                +Integer tipoDocumento
+                +String numeroDocumento
+                +String nombre
+                +String apellido
+                +String email
+                +UUID campanhaId
+            }
+
+            class ReservaVacanteResponse {
+                +UUID reservaVacanteId
+                +Integer tipoDocumento
+                +String numeroDocumento
+                +String nombre
+                +String apellido
+                +String email
+                +UUID campanhaId
+                +BigDecimal importe
+                +OffsetDateTime vencimiento
+                +LocalDateTime created
+                +String estado
+                +LocalDateTime updated
+            }
+
+            class ReservaVacanteDtoMapper {
+                +toDomain(ReservaVacanteRequest) ReservaVacante
+                +toResponse(ReservaVacante) ReservaVacanteResponse
+            }
+        }
+    }
+
+    ReservaVacanteService --> CreateReservaVacanteUseCase : uses
+    ReservaVacanteService --> FindReservaVacanteUseCase : uses
+
+    CreateReservaVacanteUseCaseImpl ..|> CreateReservaVacanteUseCase : implements
+    FindReservaVacanteUseCaseImpl ..|> FindReservaVacanteUseCase : implements
+
+    CreateReservaVacanteUseCaseImpl --> ReservaVacanteRepository : uses
+    FindReservaVacanteUseCaseImpl --> ReservaVacanteRepository : uses
+
+    JpaReservaVacanteRepositoryAdapter ..|> ReservaVacanteRepository : implements
+    JpaReservaVacanteRepositoryAdapter --> JpaReservaVacanteRepository : uses
+    JpaReservaVacanteRepositoryAdapter --> ReservaVacanteMapper : uses
+
+    ReservaVacanteMapper --> ReservaVacante : maps
+    ReservaVacanteMapper --> ReservaVacanteEntity : maps
+    JpaReservaVacanteRepository --> ReservaVacanteEntity : persists
+
+    ReservaVacanteController --> ReservaVacanteService : calls
+    ReservaVacanteController --> ReservaVacanteDtoMapper : uses
+    ReservaVacanteDtoMapper --> ReservaVacante : maps
+    ReservaVacanteDtoMapper --> ReservaVacanteRequest : maps
+    ReservaVacanteDtoMapper --> ReservaVacanteResponse : maps

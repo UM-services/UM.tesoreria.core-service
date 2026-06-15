@@ -141,16 +141,6 @@ classDiagram
             +getNewArticulo() Articulo
         }
 
-        class GetPaginatedArticulosUseCaseImpl {
-            -ArticuloRepository repository
-            +getPaginated(int, int) PaginatedResponse~Articulo~
-        }
-
-        class SearchArticulosUseCaseImpl {
-            -ArticuloRepository repository
-            +searchArticulos(String) List~ArticuloSearch~
-        }
-
         class GetPaginatedArticulosUseCase {
             <<interface>>
             +getPaginated(int, int) PaginatedResponse~Articulo~

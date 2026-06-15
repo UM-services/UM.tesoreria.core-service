@@ -35,9 +35,9 @@ flowchart TD
     GC -->|usa| GUI
     GC -->|usa| GBS
     
-    GAU -->|implementa| GAUImpl
-    GUI -->|implementa| GUIImpl
-    GBS -->|implementa| GBSImpl
+    GAUImpl -->|implementa| GAU
+    GUIImpl -->|implementa| GUI
+    GBSImpl -->|implementa| GBS
     
     GAUImpl -->|depende| GR
     GUIImpl -->|depende| GR

@@ -50,6 +50,9 @@ public class JpaCampanhaRepositoryAdapter implements CampanhaRepository {
                     if (campanha.getActiva() != null) {
                         existingEntity.setActiva(campanha.getActiva());
                     }
+                    if (campanha.getValorReserva() != null) {
+                        existingEntity.setValorReserva(campanha.getValorReserva());
+                    }
                     CampanhaEntity updated = jpaCampanhaRepository.save(existingEntity);
                     return campanhaMapper.toDomainModel(updated);
                 });

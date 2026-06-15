@@ -95,6 +95,7 @@ const diagrams = [
   { id: 'hexagonal-chequeraSerie', file: 'hexagonal-chequeraSerie.mmd', title: '🔷 Arquitectura Hexagonal - ChequeraSerie' },
   { id: 'hexagonal-baja', file: 'hexagonal-baja.mmd', title: '🔷 Arquitectura Hexagonal - Baja' },
   { id: 'hexagonal-campanha', file: 'hexagonal-campanha.mmd', title: '🔷 Arquitectura Hexagonal - Campanha (UM Hub)' },
+  { id: 'hexagonal-reservaVacante', file: 'hexagonal-reservaVacante.mmd', title: '🔷 Arquitectura Hexagonal - ReservaVacante (UM Hub)' },
   { id: 'hexagonal-domicilio', file: 'hexagonal-domicilio.mmd', title: '🔷 Arquitectura Hexagonal - Domicilio' },
   { id: 'hexagonal-persona', file: 'hexagonal-persona.mmd', title: '🔷 Arquitectura Hexagonal - Persona' },
   { id: 'hexagonal-mercadoPagoContext', file: 'hexagonal-mercadoPagoContext.mmd', title: '🔷 Arquitectura Hexagonal - MercadoPagoContext' },

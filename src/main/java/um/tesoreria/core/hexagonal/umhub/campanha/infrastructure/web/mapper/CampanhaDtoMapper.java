@@ -14,6 +14,7 @@ public class CampanhaDtoMapper {
                 .campanhaId(request.getCampanhaId())
                 .nombre(request.getNombre())
                 .activa(request.getActiva())
+                .valorReserva(request.getValorReserva())
                 .build();
     }
 
@@ -23,6 +24,7 @@ public class CampanhaDtoMapper {
                 .campanhaId(domain.getCampanhaId())
                 .nombre(domain.getNombre())
                 .activa(domain.getActiva())
+                .valorReserva(domain.getValorReserva())
                 .created(domain.getCreated())
                 .build();
     }

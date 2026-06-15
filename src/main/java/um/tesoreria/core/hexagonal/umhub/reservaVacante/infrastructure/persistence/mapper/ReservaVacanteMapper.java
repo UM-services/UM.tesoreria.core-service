@@ -14,6 +14,8 @@ public class ReservaVacanteMapper {
                 .personaUniqueId(entity.getPersonaUniqueId())
                 .campanhaId(entity.getCampanhaId())
                 .estado(entity.getEstado())
+                .importe(entity.getImporte())
+                .vencimiento(entity.getVencimiento())
                 .created(entity.getCreated())
                 .updated(entity.getUpdated())
                 .build();
@@ -26,6 +28,8 @@ public class ReservaVacanteMapper {
                 .personaUniqueId(domain.getPersonaUniqueId())
                 .campanhaId(domain.getCampanhaId())
                 .estado(domain.getEstado())
+                .importe(domain.getImporte())
+                .vencimiento(domain.getVencimiento())
                 .build();
     }
 }

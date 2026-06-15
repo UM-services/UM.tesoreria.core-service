@@ -7,6 +7,14 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 **Versión actual (SemVer): 3.24.0**
 
 ## Novedades 3.24.0 (verificado en código)
+- feat(reservaVacante): Nuevo `FindReservaVacanteUseCase` con endpoint `GET /{reservaVacanteId}`
+  - Nuevo puerto de entrada: `FindReservaVacanteUseCase` con método `findByReservaVacanteId(UUID)`
+  - Nuevo caso de uso: `FindReservaVacanteUseCaseImpl` que busca reserva + persona + domicilio
+  - Nuevo endpoint en `ReservaVacanteController`: `GET /api/tesoreria/core/umhub/reservaVacante/{reservaVacanteId}`
+  - Integración con `PersonaService` y `DomicilioService` para enriquecer respuesta
+- feat(reservaVacante): Nuevos campos `importe` (BigDecimal) y `vencimiento` (OffsetDateTime)
+  - `CreateReservaVacanteUseCaseImpl`: importe desde `Campanha.getValorReserva()`, vencimiento a 2 días UTC-3
+- feat(campanha): Nuevo campo `valorReserva` (BigDecimal) en modelo `Campanha`, entity, mappers, DTOs y adaptador
 - refactor(domicilio): Migración completa del módulo Domicilio a arquitectura hexagonal
   - `Domicilio` (Kotlin) → `Domicilio` (dominio Java) en `hexagonal/domicilio/domain/model/`
   - `DomicilioService` movido a `hexagonal/domicilio/application/service/`
@@ -22,8 +30,9 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 - refactor(payPerTic): `PayPerTicFileService` migrado a `@RequiredArgsConstructor`, tipos `Integer` → `int`
 - refactor(sincronize): Actualizado para nueva API `DomicilioService` hexagonal (create/update)
 - chore(banner): Simplificación de banner.txt
+- chore(deps): Actualización de dependencias: log4j2 4.0.5→4.1.0, mysql-connector 9.6.0→9.7.0, guava 33.5.0→33.6.0-jre, springdoc 3.0.2→3.0.3, openpdf 3.0.3→3.0.5, nueva propiedad lombok.version 1.18.38
 
-> Basado en análisis profundo de `git diff HEAD` (20+ archivos modificados) y `pom.xml`.
+> Basado en análisis profundo de `git diff HEAD` (20+ archivos modificados), `pom.xml` y cambios locales no commiteados.
 
 ## Novedades 3.23.0 (verificado en código)
 - feat(campanha): Nuevo campo `created` (LocalDateTime) en modelo `Campanha`
@@ -615,12 +624,12 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 - Spring Boot: 4.1.0
 - Spring Cloud: 2025.1.2
 - Kotlin: 2.4.0
-- MySQL Connector: 9.6.0
-- SpringDoc OpenAPI: 3.0.2
+- MySQL Connector: 9.7.0
+- SpringDoc OpenAPI: 3.0.3
 - Apache POI: 5.5.1
-- OpenPDF: 3.0.3
+- OpenPDF: 3.0.5
 - ModelMapper: 3.2.6
-- Guava: 33.5.0-jre
+- Guava: 33.6.0-jre
 - json-path: 3.0.0
 
 ## Optimizaciones de Rendimiento (verificado en código)
@@ -839,7 +848,8 @@ src/
 │   │       │   ├── proveedor/                # Módulo Proveedor (v3.9.0)
 │   │       │   ├── ubicacion/                # Módulo Ubicacion (v3.14.0)
 │   │       │   ├── ubicacionArticulo/        # Módulo UbicacionArticulo (v3.14.0)
-│   │       │   ├── umhub/campanha/           # Módulo Campanha (v3.23.0)
+│   │       │   ├── umhub/campanha/           # Módulo Campanha (v3.24.0)
+│   │       │   ├── umhub/reservaVacante/     # Módulo ReservaVacante (v3.24.0)
 │   │       │   └── matriculacionContext/
 │   │       ├── model/                 # Modelos legacy
 │   │       ├── service/               # Servicios legacy

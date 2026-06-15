@@ -6,6 +6,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 import um.tesoreria.core.model.Auditable;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
@@ -21,5 +22,6 @@ public class CampanhaEntity extends Auditable {
     private UUID campanhaId;
     private String nombre;
     private Byte activa;
+    private BigDecimal valorReserva;
 
 }

@@ -13,6 +13,7 @@ public class CampanhaMapper {
                 .campanhaId(entity.getCampanhaId())
                 .nombre(entity.getNombre())
                 .activa(entity.getActiva())
+                .valorReserva(entity.getValorReserva())
                 .created(entity.getCreated())
                 .build();
     }
@@ -23,6 +24,7 @@ public class CampanhaMapper {
                 .campanhaId(domain.getCampanhaId())
                 .nombre(domain.getNombre())
                 .activa(domain.getActiva())
+                .valorReserva(domain.getValorReserva())
                 .build();
         entity.setCreated(domain.getCreated());
         return entity;

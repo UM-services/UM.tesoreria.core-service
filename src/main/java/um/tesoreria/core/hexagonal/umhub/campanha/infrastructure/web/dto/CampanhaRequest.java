@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
@@ -12,4 +13,5 @@ public class CampanhaRequest {
     private UUID campanhaId;
     private String nombre;
     private Byte activa;
+    private BigDecimal valorReserva;
 }
