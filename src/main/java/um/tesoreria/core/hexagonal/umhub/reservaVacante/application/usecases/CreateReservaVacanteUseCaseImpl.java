@@ -10,13 +10,18 @@ import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioServic
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
+import um.tesoreria.core.hexagonal.umhub.campanha.application.service.CampanhaService;
+import um.tesoreria.core.hexagonal.umhub.campanha.domain.model.Campanha;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.application.exception.ReservaVacanteException;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.CreateReservaVacanteUseCase;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.out.ReservaVacanteRepository;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.web.dto.ReservaVacanteRequest;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Component
 @Slf4j
@@ -26,6 +31,7 @@ public class CreateReservaVacanteUseCaseImpl implements CreateReservaVacanteUseC
     private final ReservaVacanteRepository repository;
     private final PersonaService personaService;
     private final DomicilioService domicilioService;
+    private final CampanhaService campanhaService;
 
     @Override
     @Transactional
@@ -75,11 +81,19 @@ public class CreateReservaVacanteUseCaseImpl implements CreateReservaVacanteUseC
             domicilio = domicilioService.create(domicilio);
         }
         log.debug("Domicilio -> {}", domicilio.jsonify());
+        // Obtener campanha para importe
+        Campanha campanha = campanhaService.getCampanhaById(reservaVacanteRequest.getCampanhaId())
+                .orElseThrow(() -> new ReservaVacanteException(reservaVacanteRequest.getCampanhaId()));
         // Crea reservaVacante
+        OffsetDateTime vencimiento = OffsetDateTime.now(ZoneOffset.ofHours(-3))
+                .plusDays(2)
+                .with(LocalTime.MAX);
         ReservaVacante reservaVacante = ReservaVacante.builder()
                 .personaUniqueId(persona.getUniqueId())
                 .campanhaId(reservaVacanteRequest.getCampanhaId())
                 .estado("pendiente")
+                .importe(campanha.getValorReserva())
+                .vencimiento(vencimiento)
                 .build();
         reservaVacante = repository.create(reservaVacante);
         reservaVacante.setPersona(persona);

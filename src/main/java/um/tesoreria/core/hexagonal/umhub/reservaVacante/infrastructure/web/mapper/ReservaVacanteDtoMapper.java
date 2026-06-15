@@ -25,6 +25,8 @@ public class ReservaVacanteDtoMapper {
                 .apellido(domain.getPersona().getApellido())
                 .email(domain.getDomicilio().getEmailPersonal())
                 .campanhaId(domain.getCampanhaId())
+                .importe(domain.getImporte())
+                .vencimiento(domain.getVencimiento())
                 .created(domain.getCreated())
                 .estado(domain.getEstado())
                 .updated(domain.getUpdated())

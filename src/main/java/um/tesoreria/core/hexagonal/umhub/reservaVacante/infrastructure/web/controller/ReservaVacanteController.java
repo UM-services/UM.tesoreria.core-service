@@ -10,6 +10,8 @@ import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.web.dto.R
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.web.dto.ReservaVacanteResponse;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.web.mapper.ReservaVacanteDtoMapper;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/tesoreria/core/umhub/reservaVacante")
 @RequiredArgsConstructor
@@ -22,6 +24,12 @@ public class ReservaVacanteController {
     public ResponseEntity<ReservaVacanteResponse> add(@RequestBody ReservaVacanteRequest request) {
         ReservaVacante created = reservaVacanteService.createReservaVacante(request);
         return new ResponseEntity<>(reservaVacanteDtoMapper.toResponse(created), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{reservaVacanteId}")
+    public ResponseEntity<ReservaVacanteResponse> get(@PathVariable UUID reservaVacanteId) {
+        ReservaVacante reservaVacante = reservaVacanteService.findReservaVacante(reservaVacanteId);
+        return ResponseEntity.ok(reservaVacanteDtoMapper.toResponse(reservaVacante));
     }
 
 }

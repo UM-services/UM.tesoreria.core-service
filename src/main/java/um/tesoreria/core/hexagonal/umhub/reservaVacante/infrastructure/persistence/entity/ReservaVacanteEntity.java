@@ -10,6 +10,8 @@ import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.Per
 import um.tesoreria.core.hexagonal.umhub.campanha.infrastructure.persistence.entity.CampanhaEntity;
 import um.tesoreria.core.model.Auditable;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -28,6 +30,8 @@ public class ReservaVacanteEntity extends Auditable {
     private Long personaUniqueId;
     private UUID campanhaId;
     private String estado;
+    private BigDecimal importe;
+    private OffsetDateTime vencimiento;
 
     @OneToOne(optional = true)
     @JoinColumn(name = "personaUniqueId", referencedColumnName = "clave", insertable = false, updatable = false)

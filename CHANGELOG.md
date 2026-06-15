@@ -2,7 +2,27 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
-## [3.24.0] - 2026-06-14
+## [3.24.0] - 2026-06-15
+### Added
+- feat(reservaVacante): Nuevo `FindReservaVacanteUseCase` con endpoint `GET /{reservaVacanteId}`
+  - Nuevo puerto de entrada: `FindReservaVacanteUseCase` con método `findByReservaVacanteId(UUID)`
+  - Nuevo caso de uso: `FindReservaVacanteUseCaseImpl` que busca reserva + persona + domicilio
+  - Nuevo endpoint en `ReservaVacanteController`: `GET /api/tesoreria/core/umhub/reservaVacante/{reservaVacanteId}`
+  - Integración con `PersonaService` y `DomicilioService` para enriquecer respuesta
+- feat(reservaVacante): Nuevos campos `importe` (BigDecimal) y `vencimiento` (OffsetDateTime) en modelo de dominio `ReservaVacante`
+  - `ReservaVacante.domain.model.ReservaVacante`: nuevos campos `importe` y `vencimiento`
+  - `ReservaVacanteEntity`: persistencia de `importe` y `vencimiento`
+  - `ReservaVacanteMapper`: mapeo bidireccional de `importe` y `vencimiento`
+  - `ReservaVacanteResponse`: expone `importe` y `vencimiento` en respuestas REST
+  - `CreateReservaVacanteUseCaseImpl`: importe obtenido de `Campanha.getValorReserva()`, vencimiento calculado como 2 días desde ahora (fin del día, UTC-3)
+- feat(campanha): Nuevo campo `valorReserva` (BigDecimal) en modelo de dominio `Campanha`
+  - `Campanha.domain.model.Campanha`: nuevo campo `valorReserva` para importe de reserva
+  - `CampanhaEntity`: persistencia del campo `valorReserva`
+  - `CampanhaMapper`: mapeo bidireccional de `valorReserva` entre entidad y dominio
+  - `CampanhaRequest`/`CampanhaResponse`: exponen `valorReserva` en API REST
+  - `CampanhaDtoMapper`: mapeo de `valorReserva` entre DTOs y dominio
+  - `JpaCampanhaRepositoryAdapter.update()`: actualización parcial del campo `valorReserva`
+
 ### Changed
 - refactor(domicilio): Migración completa del módulo Domicilio a arquitectura hexagonal
   - `Domicilio` (modelo Kotlin) reemplazado por `Domicilio` (modelo de dominio Java) en `hexagonal/domicilio/domain/model/`
@@ -36,8 +56,16 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
   - `DomicilioException` importado desde nuevo paquete hexagonal
   - `Domicilio` importado desde modelo de dominio hexagonal
   - `DomicilioEntity` importado desde entidad JPA hexagonal
+- chore(deps): Actualización de dependencias principales
+  - `spring-boot-starter-log4j2`: 4.0.5 → 4.1.0
+  - `mysql-connector-j`: 9.6.0 → 9.7.0
+  - `guava`: 33.5.0-jre → 33.6.0-jre
+  - `springdoc-openapi`: 3.0.2 → 3.0.3
+  - `openpdf`: 3.0.3 → 3.0.5
+  - Nueva propiedad `lombok.version`: 1.18.38
+  - Eliminado `commons-lang3` de `dependencyManagement` (gestionado por Spring Boot parent POM)
 
-> Basado en análisis profundo de `git diff HEAD` (20+ archivos modificados), `git log` y `pom.xml` (versión 3.23.0 → 3.24.0).
+> Basado en análisis profundo de `git diff HEAD` (archivos modificados en working tree), `git log` y `pom.xml` (versión 3.23.0 → 3.24.0).
 
 ## [3.23.0] - 2026-06-13
 ### Added

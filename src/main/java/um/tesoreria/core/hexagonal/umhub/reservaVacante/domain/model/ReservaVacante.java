@@ -5,7 +5,9 @@ import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.util.Jsonifier;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -19,6 +21,8 @@ public class ReservaVacante {
     private Long personaUniqueId;
     private UUID campanhaId;
     private String estado;
+    private BigDecimal importe;
+    private OffsetDateTime vencimiento;
     private Persona persona;
     private Domicilio domicilio;
     private LocalDateTime created;
