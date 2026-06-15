@@ -16,7 +16,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import lombok.*;
-import um.tesoreria.core.kotlin.model.Auditable;
 
 /**
  * @author daniel

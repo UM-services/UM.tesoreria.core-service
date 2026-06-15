@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.23.0**
+**Versión actual del servicio: 3.24.0**
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -23,6 +23,9 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-chequeraSerie.mmd`: Arquitectura hexagonal del módulo ChequeraSerie (gestión de series de chequeras) - v3.21.0.
 - `hexagonal-baja.mmd`: Arquitectura hexagonal del módulo Baja (gestión de bajas de chequeras) - v3.21.0.
 - `hexagonal-campanha.mmd`: Arquitectura hexagonal del módulo Campanha (gestión de campañas UM Hub) - v3.23.0.
+- `hexagonal-domicilio.mmd`: Arquitectura hexagonal del módulo Domicilio (gestión de domicilios) - v3.24.0.
+- `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona (gestión de personas) - v3.24.0.
+- `hexagonal-mercadoPagoContext.mmd`: Arquitectura hexagonal del módulo MercadoPagoContext (contexto de pagos MP) - v3.24.0.
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 
 ## Diagramas de Datos

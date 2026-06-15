@@ -1,6 +1,7 @@
 package um.tesoreria.core.kotlin.model
 
 import jakarta.persistence.*
+import um.tesoreria.core.model.Auditable
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["cha_fac_id", "cha_tch_id", "cha_chs_id", "cha_pro_id", "cha_alt_id"])])

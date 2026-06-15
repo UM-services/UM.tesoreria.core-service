@@ -4,7 +4,26 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.23.0**
+**Versión actual (SemVer): 3.24.0**
+
+## Novedades 3.24.0 (verificado en código)
+- refactor(domicilio): Migración completa del módulo Domicilio a arquitectura hexagonal
+  - `Domicilio` (Kotlin) → `Domicilio` (dominio Java) en `hexagonal/domicilio/domain/model/`
+  - `DomicilioService` movido a `hexagonal/domicilio/application/service/`
+  - Método `add(Domicilio, boolean)` → `create(Domicilio)`, `update(Domicilio, Long, boolean)` → `update(Long, Domicilio)`
+  - `DomicilioException` movido a `hexagonal/domicilio/application/exception/`
+- refactor(persona): Migración del modelo `PersonaEntity` → `Persona` domain model en `hexagonal/persona/`
+  - Método `add(PersonaEntity)` → `create(Persona)` con retorno `Persona`
+- refactor(mercadoPagoContext): Migración completa a hexagonal
+  - `MercadoPagoContext` → `hexagonal/mercadoPagoContext/domain/model/`
+  - `MercadoPagoContextService` → `hexagonal/mercadoPagoContext/application/service/`
+- refactor(chequeraCuota): Renombrado `ChequeraCuota` (Kotlin) → `ChequeraCuotaEntity` (Java) en servicios
+- refactor(logging): Eliminación de 15 métodos privados `log*()` con Jackson manual → `jsonify()` inline
+- refactor(payPerTic): `PayPerTicFileService` migrado a `@RequiredArgsConstructor`, tipos `Integer` → `int`
+- refactor(sincronize): Actualizado para nueva API `DomicilioService` hexagonal (create/update)
+- chore(banner): Simplificación de banner.txt
+
+> Basado en análisis profundo de `git diff HEAD` (20+ archivos modificados) y `pom.xml`.
 
 ## Novedades 3.23.0 (verificado en código)
 - feat(campanha): Nuevo campo `created` (LocalDateTime) en modelo `Campanha`
@@ -804,22 +823,23 @@ src/
 │   ├── java/
 │   │   └── um/tesoreria/core/
 │   │       ├── hexagonal/
-│   │       │   ├── ubicacion/         # Módulo Ubicacion (v3.14.0)
-│   │       │   ├── ubicacionArticulo/ # Módulo UbicacionArticulo (v3.14.0)
-│   │       │   ├── umhub/campanha/    # Módulo Campanha (v3.23.0)
-│   │       │   ├── contrato/          # Módulo Contrato (v3.19.0)
-│   │       │   ├── chequeraSerie/     # Módulo ChequeraSerie (v3.21.0)
-│   │       │   ├── baja/              # Módulo Baja (v3.21.0)
-│   │   ├── dependencia/       # Módulo Dependencia (v3.17.0)
-│   │   ├── facultad/          # Módulo Facultad (v3.18.0)
-│   │   ├── facturaPendiente/  # Módulo FacturaPendiente (v3.15.0)
-│   │   ├── articulo/          # Módulo Artículo (v3.13.0)
-│   │   ├── cuenta/            # Módulo Cuenta (v3.8.0)
-│   │   ├── chequeraCuota/     # Módulo ChequeraCuota (v3.2.0)
-│   │   ├── persona/           # Módulo Persona (v3.1.0)
-│   │   ├── auth/              # Módulo Auth (v3.6.0)
-│   │   ├── geografica/        # Módulo Geografica (v3.6.0)
-│   │   │   ├── proveedor/         # Módulo Proveedor (v3.9.0)
+│   │       │   ├── auth/                     # Módulo Auth (v3.6.0)
+│   │       │   ├── baja/                     # Módulo Baja (v3.21.0)
+│   │       │   ├── chequeraCuota/            # Módulo ChequeraCuota (v3.2.0)
+│   │       │   ├── chequeraSerie/            # Módulo ChequeraSerie (v3.21.0)
+│   │       │   ├── contrato/                 # Módulo Contrato (v3.19.0)
+│   │       │   ├── cuenta/                   # Módulo Cuenta (v3.8.0)
+│   │       │   ├── dependencia/              # Módulo Dependencia (v3.17.0)
+│   │       │   ├── domicilio/                # Módulo Domicilio (v3.24.0)
+│   │       │   ├── facultad/                 # Módulo Facultad (v3.18.0)
+│   │       │   ├── facturaPendiente/         # Módulo FacturaPendiente (v3.15.0)
+│   │       │   ├── geografica/               # Módulo Geografica (v3.6.0)
+│   │       │   ├── mercadoPagoContext/       # Módulo MercadoPagoContext (v3.24.0)
+│   │       │   ├── persona/                  # Módulo Persona (v3.24.0)
+│   │       │   ├── proveedor/                # Módulo Proveedor (v3.9.0)
+│   │       │   ├── ubicacion/                # Módulo Ubicacion (v3.14.0)
+│   │       │   ├── ubicacionArticulo/        # Módulo UbicacionArticulo (v3.14.0)
+│   │       │   ├── umhub/campanha/           # Módulo Campanha (v3.23.0)
 │   │       │   └── matriculacionContext/
 │   │       ├── model/                 # Modelos legacy
 │   │       ├── service/               # Servicios legacy
@@ -864,7 +884,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.23.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.24.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

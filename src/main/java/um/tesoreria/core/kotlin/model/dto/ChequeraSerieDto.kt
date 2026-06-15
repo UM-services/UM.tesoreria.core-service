@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model.dto
 
 import java.time.OffsetDateTime
 import com.fasterxml.jackson.annotation.JsonFormat
+import um.tesoreria.core.util.Jsonifier
 
 data class ChequeraSerieDto(
 
@@ -19,4 +20,8 @@ data class ChequeraSerieDto(
     var geografica: GeograficaDto? = null,
     var chequeraCuotas: List<ChequeraCuotaDto>? = null
 
-)
+) {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
+}

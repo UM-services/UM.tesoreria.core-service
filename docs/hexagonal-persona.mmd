@@ -1,0 +1,196 @@
+---
+title: Arquitectura Hexagonal - Módulo Persona (v3.24.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Persona {
+            +Long uniqueId
+            +BigDecimal personaId
+            +Integer documentoId
+            +String apellido
+            +String nombre
+            +String sexo
+            +String primero
+            +String cuit
+            +String cbu
+            +String password
+            +Byte hpum
+            +jsonify() String
+        }
+
+        class PersonaRepository {
+            <<interface>>
+            +findByPersonaIdAndDocumentoId(BigDecimal, Integer) Optional~Persona~
+            +findTopByPersonaId(BigDecimal) Optional~Persona~
+            +findByUniqueId(Long) Optional~Persona~
+            +findAllByCbuLike(String) List~Persona~
+            +save(Persona) Persona
+        }
+    }
+
+    namespace application {
+        class PersonaService {
+            -GetPersonaByUniqueUseCase getPersonaByUniqueUseCase
+            -GetPersonaByIdUseCase getPersonaByIdUseCase
+            -GetPersonaByUniqueIdUseCase getPersonaByUniqueIdUseCase
+            -FindAllSantanderUseCase findAllSantanderUseCase
+            -SavePersonaUseCase savePersonaUseCase
+            -FindInscriptosSinChequeraUseCase findInscriptosSinChequeraUseCase
+            -FindInscriptosSinChequeraDefaultUseCase findInscriptosSinChequeraDefaultUseCase
+            -FindPreInscriptosSinChequeraUseCase findPreInscriptosSinChequeraUseCase
+            -FindDeudoresByLectivoUseCase findDeudoresByLectivoUseCase
+            -FindUnifiedsUseCase findUnifiedsUseCase
+            -FindByStringsUseCase findByStringsUseCase
+            -GetDeudaPersonaUseCase getDeudaPersonaUseCase
+            -GetInscripcionFullUseCase getInscripcionFullUseCase
+            +findByUnique(BigDecimal, Integer) Persona
+            +findTopByPersonaId(BigDecimal) Optional~Persona~
+            +findByUniqueId(Long) Optional~Persona~
+            +findAllSantander() List~Persona~
+            +findInscriptosSinChequera(...) List~Persona~
+            +findDeudoresByLectivo(...) List~Persona~
+            +findUnifieds(String) List~Persona~
+            +findByStrings(String, String, Integer) List~Persona~
+            +getDeudaPersona(...) DeudaPersonaDto
+            +getInscripcionFull(...) InscripcionFullDto
+            +create(Persona) Persona
+            +update(Persona) Persona
+        }
+
+        namespace usecases {
+            class GetPersonaByUniqueUseCaseImpl
+            class GetPersonaByIdUseCaseImpl
+            class GetPersonaByUniqueIdUseCaseImpl
+            class FindAllSantanderUseCaseImpl
+            class SavePersonaUseCaseImpl
+            class FindInscriptosSinChequeraUseCaseImpl
+            class FindInscriptosSinChequeraDefaultUseCaseImpl
+            class FindPreInscriptosSinChequeraUseCaseImpl
+            class FindDeudoresByLectivoUseCaseImpl
+            class FindUnifiedsUseCaseImpl
+            class FindByStringsUseCaseImpl
+            class GetDeudaPersonaUseCaseImpl
+            class GetInscripcionFullUseCaseImpl
+        }
+
+        class GetPersonaByUniqueUseCase { <<interface>> }
+        class GetPersonaByIdUseCase { <<interface>> }
+        class GetPersonaByUniqueIdUseCase { <<interface>> }
+        class FindAllSantanderUseCase { <<interface>> }
+        class SavePersonaUseCase { <<interface>> }
+        class FindInscriptosSinChequeraUseCase { <<interface>> }
+        class FindInscriptosSinChequeraDefaultUseCase { <<interface>> }
+        class FindPreInscriptosSinChequeraUseCase { <<interface>> }
+        class FindDeudoresByLectivoUseCase { <<interface>> }
+        class FindUnifiedsUseCase { <<interface>> }
+        class FindByStringsUseCase { <<interface>> }
+        class GetDeudaPersonaUseCase { <<interface>> }
+        class GetInscripcionFullUseCase { <<interface>> }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class PersonaEntity {
+                +Long uniqueId
+                +Integer personaId
+                +Integer documentoId
+                +String apellido
+                +String nombre
+            }
+
+            class JpaPersonaRepository {
+                <<JpaRepository>>
+                +findByPersonaIdAndDocumentoId(BigDecimal, Integer) Optional~PersonaEntity~
+                +findTopByPersonaId(BigDecimal) Optional~PersonaEntity~
+                +findByUniqueId(Long) Optional~PersonaEntity~
+                +findAllByCbuLike(String) List~PersonaEntity~
+            }
+
+            class JpaPersonaRepositoryAdapter {
+                -JpaPersonaRepository repository
+                -PersonaMapper mapper
+                +findByPersonaIdAndDocumentoId(BigDecimal, Integer) Optional~Persona~
+                +findTopByPersonaId(BigDecimal) Optional~Persona~
+                +findByUniqueId(Long) Optional~Persona~
+                +findAllByCbuLike(String) List~Persona~
+                +save(Persona) Persona
+            }
+
+            class PersonaMapper {
+                +toEntity(Persona) PersonaEntity
+                +toDomain(PersonaEntity) Persona
+            }
+        }
+
+        namespace web {
+            class PersonaController {
+                -PersonaService personaService
+                -PersonaDtoMapper dtoMapper
+                +findUnique(BigDecimal, Integer) ResponseEntity~PersonaResponse~
+                +findTopByPersonaId(BigDecimal) ResponseEntity~PersonaResponse~
+                +findByUniqueId(Long) ResponseEntity~PersonaResponse~
+                +findAllSantander() ResponseEntity~List~PersonaResponse~~
+                +findInscriptosSinChequera(...) ResponseEntity~List~PersonaResponse~~
+                +findDeudoresByLectivo(...) ResponseEntity~List~PersonaResponse~~
+                +findUnifieds(String) ResponseEntity~List~PersonaResponse~~
+                +findByStrings(...) ResponseEntity~List~PersonaResponse~~
+                +getDeudaPersona(...) ResponseEntity~DeudaPersonaDto~
+                +getInscripcionFull(...) ResponseEntity~InscripcionFullDto~
+                +create(PersonaRequest) ResponseEntity~PersonaResponse~
+                +update(PersonaRequest) ResponseEntity~PersonaResponse~
+            }
+
+            class PersonaRequest
+            class PersonaResponse
+            class PersonaDtoMapper {
+                +toDomain(PersonaRequest) Persona
+                +toResponse(Persona) PersonaResponse
+            }
+        }
+    }
+
+    PersonaService --> GetPersonaByUniqueUseCase : uses
+    PersonaService --> GetPersonaByIdUseCase : uses
+    PersonaService --> GetPersonaByUniqueIdUseCase : uses
+    PersonaService --> FindAllSantanderUseCase : uses
+    PersonaService --> SavePersonaUseCase : uses
+    PersonaService --> FindInscriptosSinChequeraUseCase : uses
+    PersonaService --> FindDeudoresByLectivoUseCase : uses
+    PersonaService --> FindUnifiedsUseCase : uses
+    PersonaService --> FindByStringsUseCase : uses
+    PersonaService --> GetDeudaPersonaUseCase : uses
+    PersonaService --> GetInscripcionFullUseCase : uses
+
+    GetPersonaByUniqueUseCaseImpl ..|> GetPersonaByUniqueUseCase : implements
+    GetPersonaByIdUseCaseImpl ..|> GetPersonaByIdUseCase : implements
+    GetPersonaByUniqueIdUseCaseImpl ..|> GetPersonaByUniqueIdUseCase : implements
+    FindAllSantanderUseCaseImpl ..|> FindAllSantanderUseCase : implements
+    SavePersonaUseCaseImpl ..|> SavePersonaUseCase : implements
+    FindInscriptosSinChequeraUseCaseImpl ..|> FindInscriptosSinChequeraUseCase : implements
+    FindDeudoresByLectivoUseCaseImpl ..|> FindDeudoresByLectivoUseCase : implements
+    FindUnifiedsUseCaseImpl ..|> FindUnifiedsUseCase : implements
+    FindByStringsUseCaseImpl ..|> FindByStringsUseCase : implements
+    GetDeudaPersonaUseCaseImpl ..|> GetDeudaPersonaUseCase : implements
+    GetInscripcionFullUseCaseImpl ..|> GetInscripcionFullUseCase : implements
+
+    GetPersonaByUniqueUseCaseImpl --> PersonaRepository : uses
+    GetPersonaByIdUseCaseImpl --> PersonaRepository : uses
+    SavePersonaUseCaseImpl --> PersonaRepository : uses
+    FindAllSantanderUseCaseImpl --> PersonaRepository : uses
+
+    JpaPersonaRepositoryAdapter ..|> PersonaRepository : implements
+    JpaPersonaRepositoryAdapter --> JpaPersonaRepository : uses
+    JpaPersonaRepositoryAdapter --> PersonaMapper : uses
+
+    PersonaMapper --> Persona : maps
+    PersonaMapper --> PersonaEntity : maps
+    JpaPersonaRepository --> PersonaEntity : persists
+
+    PersonaController --> PersonaService : calls
+    PersonaController --> PersonaDtoMapper : uses
+    PersonaDtoMapper --> Persona : maps
+    PersonaDtoMapper --> PersonaRequest : maps
+    PersonaDtoMapper --> PersonaResponse : maps

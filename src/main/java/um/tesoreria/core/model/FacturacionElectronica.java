@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import lombok.*;
-import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.kotlin.model.Comprobante;
 import um.tesoreria.core.util.Jsonifier;

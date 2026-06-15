@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/tesoreria/umhub/campanha")
+@RequestMapping("/api/tesoreria/core/umhub/campanha")
 @RequiredArgsConstructor
 public class CampanhaController {
 

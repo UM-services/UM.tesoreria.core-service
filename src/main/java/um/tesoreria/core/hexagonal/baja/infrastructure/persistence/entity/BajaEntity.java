@@ -6,7 +6,7 @@ import lombok.*;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
-import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.kotlin.model.Lectivo;
 import um.tesoreria.core.kotlin.model.TipoChequera;
 

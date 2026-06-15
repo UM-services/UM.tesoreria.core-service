@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.event.PaymentProcessedEvent;
-import um.tesoreria.core.service.MercadoPagoContextService;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
 
 import jakarta.annotation.PostConstruct;
 

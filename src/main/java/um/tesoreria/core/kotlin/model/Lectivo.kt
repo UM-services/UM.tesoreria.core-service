@@ -5,6 +5,8 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import um.tesoreria.core.model.Auditable
+import um.tesoreria.core.util.Jsonifier
 import java.time.OffsetDateTime
 
 @Entity
@@ -25,4 +27,8 @@ data class Lectivo(
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
     var fechaFinal: OffsetDateTime? = null
 
-) : Auditable()
+) : Auditable() {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
+}

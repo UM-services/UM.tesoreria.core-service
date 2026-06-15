@@ -5,6 +5,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity
+import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 
 @Entity

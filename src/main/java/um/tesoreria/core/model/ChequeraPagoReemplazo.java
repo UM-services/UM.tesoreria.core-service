@@ -19,7 +19,6 @@ import jakarta.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.*;
-import um.tesoreria.core.kotlin.model.Auditable;
 
 /**
  * @author daniel

@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.Immutable;
 
-import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.model.Auditable;
 
 /**
  * @author daniel

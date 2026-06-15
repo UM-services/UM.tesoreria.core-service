@@ -14,6 +14,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
 import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity
+import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.util.Jsonifier
 
 @Entity

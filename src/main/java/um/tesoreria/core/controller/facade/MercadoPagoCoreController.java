@@ -6,8 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.exception.MercadoPagoContextException;
-import um.tesoreria.core.kotlin.model.dto.UMPreferenceMPDto;
-import um.tesoreria.core.model.MercadoPagoContext;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
+import um.tesoreria.core.model.dto.UMPreferenceMPDto;
 import um.tesoreria.core.service.facade.MercadoPagoCoreService;
 
 @RestController

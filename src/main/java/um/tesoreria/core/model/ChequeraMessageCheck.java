@@ -3,7 +3,6 @@ package um.tesoreria.core.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.*;
-import um.tesoreria.core.kotlin.model.Auditable;
 
 import java.util.UUID;
 

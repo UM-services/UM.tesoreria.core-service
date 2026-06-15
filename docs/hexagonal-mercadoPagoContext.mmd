@@ -1,0 +1,206 @@
+---
+title: Arquitectura Hexagonal - Módulo MercadoPagoContext (v3.24.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class MercadoPagoContext {
+            +Long mercadoPagoContextId
+            +Long chequeraCuotaId
+            +String initPoint
+            +OffsetDateTime fechaVencimiento
+            +BigDecimal importe
+            +Boolean changed
+            +OffsetDateTime lastVencimientoUpdated
+            +String preferenceId
+            +String preference
+            +Byte activo
+            +Long chequeraPagoId
+            +Long idMercadoPago
+            +String status
+            +OffsetDateTime fechaPago
+            +OffsetDateTime fechaAcreditacion
+            +BigDecimal importePagado
+            +String payment
+            +jsonify() String
+        }
+
+        class MercadoPagoContextRepository {
+            <<interface>>
+            +findByMercadoPagoContextId(Long) Optional~MercadoPagoContext~
+            +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContext~
+            +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContext~
+            +findAllActiveChequeraCuota() List~Long~
+            +findAllActiveToChange(OffsetDateTime, OffsetDateTime) List~MercadoPagoContext~
+            +findAllByChequeraCuotaIds(List~Long~) List~MercadoPagoContext~
+            +findAllSinImputar() List~MercadoPagoContext~
+            +save(MercadoPagoContext) MercadoPagoContext
+            +saveAll(List~MercadoPagoContext~) List~MercadoPagoContext~
+        }
+    }
+
+    namespace application {
+        class MercadoPagoContextService {
+            -AddMercadoPagoContextUseCase addUseCase
+            -FindByMercadoPagoContextIdUseCase findByIdUseCase
+            -FindActiveByChequeraCuotaIdUseCase findActiveByCcIdUseCase
+            -FindAllActiveChequeraCuotaUseCase findAllActiveCcUseCase
+            -FindAllActiveToChangeUseCase findAllActiveToChangeUseCase
+            -FindAllByChequeraCuotaIdAndActivoUseCase findAllByCcIdAndActivoUseCase
+            -FindAllByChequeraCuotaIdsUseCase findAllByCcIdsUseCase
+            -FindAllSinImputarUseCase findAllSinImputarUseCase
+            -ProcessPaymentEventUseCase processPaymentEventUseCase
+            -SaveAllMercadoPagoContextsUseCase saveAllUseCase
+            -UpdateMercadoPagoContextUseCase updateUseCase
+            +add(MercadoPagoContext) MercadoPagoContext
+            +findById(Long) Optional~MercadoPagoContext~
+            +findActiveByChequeraCuotaId(Long) Optional~MercadoPagoContext~
+            +findAllActiveChequeraCuota() List~Long~
+            +findAllActiveToChange() List~MercadoPagoContext~
+            +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContext~
+            +findAllByChequeraCuotaIds(List~Long~) List~MercadoPagoContext~
+            +findAllSinImputar() List~MercadoPagoContext~
+            +processPaymentEvent(Long, Long) void
+            +saveAll(List~MercadoPagoContext~) List~MercadoPagoContext~
+            +update(MercadoPagoContext) MercadoPagoContext
+        }
+
+        namespace usecases {
+            class AddMercadoPagoContextUseCaseImpl
+            class FindByMercadoPagoContextIdUseCaseImpl
+            class FindActiveByChequeraCuotaIdUseCaseImpl
+            class FindAllActiveChequeraCuotaUseCaseImpl
+            class FindAllActiveToChangeUseCaseImpl
+            class FindAllByChequeraCuotaIdAndActivoUseCaseImpl
+            class FindAllByChequeraCuotaIdsUseCaseImpl
+            class FindAllSinImputarUseCaseImpl
+            class ProcessPaymentEventUseCaseImpl
+            class SaveAllMercadoPagoContextsUseCaseImpl
+            class UpdateMercadoPagoContextUseCaseImpl
+        }
+
+        class AddMercadoPagoContextUseCase { <<interface>> }
+        class FindByMercadoPagoContextIdUseCase { <<interface>> }
+        class FindActiveByChequeraCuotaIdUseCase { <<interface>> }
+        class FindAllActiveChequeraCuotaUseCase { <<interface>> }
+        class FindAllActiveToChangeUseCase { <<interface>> }
+        class FindAllByChequeraCuotaIdAndActivoUseCase { <<interface>> }
+        class FindAllByChequeraCuotaIdsUseCase { <<interface>> }
+        class FindAllSinImputarUseCase { <<interface>> }
+        class ProcessPaymentEventUseCase { <<interface>> }
+        class SaveAllMercadoPagoContextsUseCase { <<interface>> }
+        class UpdateMercadoPagoContextUseCase { <<interface>> }
+
+        class MercadoPagoContextException
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class MercadoPagoContextEntity {
+                +Long mercadoPagoContextId
+                +Long chequeraCuotaId
+                +String initPoint
+                +OffsetDateTime fechaVencimiento
+                +BigDecimal importe
+                +Byte activo
+                +String preferenceId
+                +String status
+            }
+
+            class JpaMercadoPagoContextRepository {
+                <<JpaRepository>>
+                +findByMercadoPagoContextId(Long) Optional~MercadoPagoContextEntity~
+                +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContextEntity~
+                +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContextEntity~
+                +findAllByActivoAndFechaVencimientoBetween(OffsetDateTime, OffsetDateTime) List~MercadoPagoContextEntity~
+                +findAllByChequeraCuotaIdInAndActivo(List~Long~, Byte) List~MercadoPagoContextEntity~
+                +findAllByActivoOrderByMercadoPagoContextIdDesc() List~MercadoPagoContextEntity~
+                +findAllByStatusAndChequeraPagoIdIsNull(String) List~MercadoPagoContextEntity~
+            }
+
+            class JpaMercadoPagoContextRepositoryAdapter {
+                -JpaMercadoPagoContextRepository repository
+                -MercadoPagoContextMapper mapper
+                +findByMercadoPagoContextId(Long) Optional~MercadoPagoContext~
+                +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContext~
+                +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContext~
+                +findAllActiveChequeraCuota() List~Long~
+                +findAllActiveToChange(OffsetDateTime, OffsetDateTime) List~MercadoPagoContext~
+                +findAllByChequeraCuotaIds(List~Long~) List~MercadoPagoContext~
+                +findAllSinImputar() List~MercadoPagoContext~
+                +save(MercadoPagoContext) MercadoPagoContext
+                +saveAll(List~MercadoPagoContext~) List~MercadoPagoContext~
+            }
+
+            class MercadoPagoContextMapper {
+                +toEntity(MercadoPagoContext) MercadoPagoContextEntity
+                +toDomain(MercadoPagoContextEntity) MercadoPagoContext
+            }
+        }
+
+        namespace web {
+            class MercadoPagoContextController {
+                -MercadoPagoContextService service
+                -MercadoPagoContextDtoMapper dtoMapper
+                +findByChequeraCuotaIdAndActivo(Long) ResponseEntity~MercadoPagoContextResponse~
+                +findById(Long) ResponseEntity~MercadoPagoContextResponse~
+                +findAllActiveChequeraCuota() ResponseEntity~List~Long~~
+                +findAllActiveToChange() ResponseEntity~List~MercadoPagoContextResponse~~
+                +findAllSinImputar() ResponseEntity~List~MercadoPagoContextResponse~~
+            }
+
+            class MercadoPagoContextRequest
+            class MercadoPagoContextResponse
+            class MercadoPagoContextDtoMapper {
+                +toDomain(MercadoPagoContextRequest) MercadoPagoContext
+                +toResponse(MercadoPagoContext) MercadoPagoContextResponse
+            }
+        }
+    }
+
+    MercadoPagoContextService --> AddMercadoPagoContextUseCase : uses
+    MercadoPagoContextService --> FindByMercadoPagoContextIdUseCase : uses
+    MercadoPagoContextService --> FindActiveByChequeraCuotaIdUseCase : uses
+    MercadoPagoContextService --> FindAllActiveChequeraCuotaUseCase : uses
+    MercadoPagoContextService --> FindAllActiveToChangeUseCase : uses
+    MercadoPagoContextService --> FindAllByChequeraCuotaIdAndActivoUseCase : uses
+    MercadoPagoContextService --> FindAllByChequeraCuotaIdsUseCase : uses
+    MercadoPagoContextService --> FindAllSinImputarUseCase : uses
+    MercadoPagoContextService --> ProcessPaymentEventUseCase : uses
+    MercadoPagoContextService --> SaveAllMercadoPagoContextsUseCase : uses
+    MercadoPagoContextService --> UpdateMercadoPagoContextUseCase : uses
+
+    AddMercadoPagoContextUseCaseImpl ..|> AddMercadoPagoContextUseCase : implements
+    FindByMercadoPagoContextIdUseCaseImpl ..|> FindByMercadoPagoContextIdUseCase : implements
+    FindActiveByChequeraCuotaIdUseCaseImpl ..|> FindActiveByChequeraCuotaIdUseCase : implements
+    FindAllActiveChequeraCuotaUseCaseImpl ..|> FindAllActiveChequeraCuotaUseCase : implements
+    FindAllActiveToChangeUseCaseImpl ..|> FindAllActiveToChangeUseCase : implements
+    FindAllByChequeraCuotaIdAndActivoUseCaseImpl ..|> FindAllByChequeraCuotaIdAndActivoUseCase : implements
+    FindAllByChequeraCuotaIdsUseCaseImpl ..|> FindAllByChequeraCuotaIdsUseCase : implements
+    FindAllSinImputarUseCaseImpl ..|> FindAllSinImputarUseCase : implements
+    ProcessPaymentEventUseCaseImpl ..|> ProcessPaymentEventUseCase : implements
+    SaveAllMercadoPagoContextsUseCaseImpl ..|> SaveAllMercadoPagoContextsUseCase : implements
+    UpdateMercadoPagoContextUseCaseImpl ..|> UpdateMercadoPagoContextUseCase : implements
+
+    AddMercadoPagoContextUseCaseImpl --> MercadoPagoContextRepository : uses
+    FindByMercadoPagoContextIdUseCaseImpl --> MercadoPagoContextRepository : uses
+    FindActiveByChequeraCuotaIdUseCaseImpl --> MercadoPagoContextRepository : uses
+    FindAllActiveToChangeUseCaseImpl --> MercadoPagoContextRepository : uses
+    UpdateMercadoPagoContextUseCaseImpl --> MercadoPagoContextRepository : uses
+    ProcessPaymentEventUseCaseImpl --> MercadoPagoContextRepository : uses
+
+    JpaMercadoPagoContextRepositoryAdapter ..|> MercadoPagoContextRepository : implements
+    JpaMercadoPagoContextRepositoryAdapter --> JpaMercadoPagoContextRepository : uses
+    JpaMercadoPagoContextRepositoryAdapter --> MercadoPagoContextMapper : uses
+
+    MercadoPagoContextMapper --> MercadoPagoContext : maps
+    MercadoPagoContextMapper --> MercadoPagoContextEntity : maps
+    JpaMercadoPagoContextRepository --> MercadoPagoContextEntity : persists
+
+    MercadoPagoContextController --> MercadoPagoContextService : calls
+    MercadoPagoContextController --> MercadoPagoContextDtoMapper : uses
+    MercadoPagoContextDtoMapper --> MercadoPagoContext : maps
+    MercadoPagoContextDtoMapper --> MercadoPagoContextRequest : maps
+    MercadoPagoContextDtoMapper --> MercadoPagoContextResponse : maps

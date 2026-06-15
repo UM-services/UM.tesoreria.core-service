@@ -5,6 +5,8 @@ import jakarta.persistence.*
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
+import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity
+import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -98,7 +100,7 @@ data class ChequeraSerieReemplazo(
             updatable = false
         )
     )
-    var domicilio: Domicilio? = null,
+    var domicilio: DomicilioEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "CSR_Lec_ID", insertable = false, updatable = false)

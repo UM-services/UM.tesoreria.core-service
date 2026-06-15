@@ -19,7 +19,7 @@ import org.hibernate.annotations.Immutable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
-import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.kotlin.model.Comprobante;
 import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import lombok.AllArgsConstructor;

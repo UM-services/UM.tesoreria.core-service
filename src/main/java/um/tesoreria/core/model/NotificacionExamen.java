@@ -14,7 +14,6 @@ import jakarta.persistence.Table;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import um.tesoreria.core.kotlin.model.Auditable;
 
 /**
  * @author daniel

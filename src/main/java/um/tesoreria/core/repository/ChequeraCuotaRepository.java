@@ -8,62 +8,61 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.jetbrains.annotations.Nullable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import um.tesoreria.core.kotlin.model.ChequeraCuota;
+import um.tesoreria.core.kotlin.model.ChequeraCuotaEntity;
 import um.tesoreria.core.model.internal.CuotaPeriodoDto;
 
 /**
  * @author daniel
  *
  */
-public interface ChequeraCuotaRepository extends JpaRepository<ChequeraCuota, Long> {
+public interface ChequeraCuotaRepository extends JpaRepository<ChequeraCuotaEntity, Long> {
 
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId);
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId);
 
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Sort sort);
 
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndPagadoAndVencimiento1LessThanEqualAndImporte1GreaterThan(
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndPagadoAndVencimiento1LessThanEqualAndImporte1GreaterThan(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Byte baja,
 			Byte pagado, OffsetDateTime referencia, BigDecimal importe);
 
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndImporte1GreaterThan(
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndImporte1GreaterThan(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, BigDecimal importe1,
 			Sort sort);
 
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndImporte1GreaterThan(
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndImporte1GreaterThan(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Byte baja, BigDecimal importe1,
 			Sort sort);
 
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndBaja(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Byte baja);
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndBaja(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Byte baja);
 
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndPagado(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Byte pagado);
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndPagado(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Byte pagado);
 
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndCompensadaAndImporte1GreaterThan(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Byte pagado, Byte baja, Byte compensada, BigDecimal zero);
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndCompensadaAndImporte1GreaterThan(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Byte pagado, Byte baja, Byte compensada, BigDecimal zero);
 
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBaja(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Byte pagado, Byte baja);
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBaja(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Byte pagado, Byte baja);
 
-	Optional<ChequeraCuota> findByChequeraCuotaId(Long chequeraCuotaId);
+	Optional<ChequeraCuotaEntity> findByChequeraCuotaId(Long chequeraCuotaId);
 
-	Optional<ChequeraCuota> findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(
+	Optional<ChequeraCuotaEntity> findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId,
 			Integer cuotaId);
 
-	Optional<ChequeraCuota> findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndPagadoAndImporte1GreaterThanAndVencimiento1LessThanOrderByVencimiento1Desc(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Byte baja, Byte pagado, BigDecimal importe1, OffsetDateTime vencimiento1);
+	Optional<ChequeraCuotaEntity> findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndBajaAndPagadoAndImporte1GreaterThanAndVencimiento1LessThanOrderByVencimiento1Desc(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Byte baja, Byte pagado, BigDecimal importe1, OffsetDateTime vencimiento1);
 
-	Optional<ChequeraCuota> findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndCuotaIdOrderByProductoIdDesc(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer cuotaId);
+	Optional<ChequeraCuotaEntity> findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndCuotaIdOrderByProductoIdDesc(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer cuotaId);
 
 	@Modifying
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 
 	@Query("SELECT new um.tesoreria.core.model.internal.CuotaPeriodoDto(cc.mes, cc.anho, COUNT(*)) " +
-		   "FROM ChequeraCuota cc " +
+		   "FROM ChequeraCuotaEntity cc " +
 		   "JOIN ChequeraSerieEntity cs ON cc.chequeraId = cs.chequeraId " +
 		   "WHERE cs.lectivoId = :lectivoId " +
 		   "AND cc.importe1 > 0 " +
@@ -71,10 +70,10 @@ public interface ChequeraCuotaRepository extends JpaRepository<ChequeraCuota, Lo
 		   "ORDER BY cc.anho, cc.mes")
 	List<CuotaPeriodoDto> findCuotaPeriodosByLectivoId(@Param("lectivoId") Integer lectivoId);
 
-	@Query("SELECT c FROM ChequeraCuota c LEFT JOIN FETCH c.producto WHERE c.chequeraId IN :chequeraIds")
-	List<ChequeraCuota> findAllByChequeraIdIn(@Param("chequeraIds") List<Long> chequeraIds);
+	@Query("SELECT c FROM ChequeraCuotaEntity c LEFT JOIN FETCH c.producto WHERE c.chequeraId IN :chequeraIds")
+	List<ChequeraCuotaEntity> findAllByChequeraIdIn(@Param("chequeraIds") List<Long> chequeraIds);
 
-	@Query("SELECT c FROM ChequeraCuota c LEFT JOIN FETCH c.producto WHERE c.facultadId = :facultadId AND c.tipoChequeraId = :tipoChequeraId AND c.chequeraSerieId IN :chequeraSerieIds")
-	List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdIn(@Param("facultadId") Integer facultadId, @Param("tipoChequeraId") Integer tipoChequeraId, @Param("chequeraSerieIds") List<Long> chequeraSerieIds);
+	@Query("SELECT c FROM ChequeraCuotaEntity c LEFT JOIN FETCH c.producto WHERE c.facultadId = :facultadId AND c.tipoChequeraId = :tipoChequeraId AND c.chequeraSerieId IN :chequeraSerieIds")
+	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdIn(@Param("facultadId") Integer facultadId, @Param("tipoChequeraId") Integer tipoChequeraId, @Param("chequeraSerieIds") List<Long> chequeraSerieIds);
 
 }

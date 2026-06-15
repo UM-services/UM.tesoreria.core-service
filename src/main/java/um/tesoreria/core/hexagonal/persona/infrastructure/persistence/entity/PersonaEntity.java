@@ -13,7 +13,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import lombok.*;
-import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.model.Auditable;
+import um.tesoreria.core.util.Jsonifier;
 
 @Getter
 @Setter
@@ -60,5 +61,9 @@ public class PersonaEntity extends Auditable implements Serializable {
 
     public String getApellidoNombre() {
         return MessageFormat.format("{0}, {1}", apellido, nombre);
+    }
+
+    public String jsonify() {
+        return Jsonifier.builder(this).build();
     }
 }

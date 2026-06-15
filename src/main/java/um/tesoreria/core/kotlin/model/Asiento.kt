@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType
 import java.time.OffsetDateTime
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.util.Jsonifier
 
 @Entity

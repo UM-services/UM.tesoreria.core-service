@@ -22,15 +22,17 @@ import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DebitoException;
 import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.*;
 import um.tesoreria.core.model.ChequeraSerieControl;
 import um.tesoreria.core.model.ChequeraTotal;
 import um.tesoreria.core.model.Debito;
-import um.tesoreria.core.model.MercadoPagoContext;
 import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
 import um.tesoreria.core.model.dto.ChequeraDetailDto;
 import um.tesoreria.core.model.dto.ChequeraPagoDto;
@@ -148,7 +150,7 @@ public class ChequeraService {
                         lastDebito.getDebitoTipoId())
                 .stream().collect(Collectors.toMap(Debito::cuotaKey, debito -> debito));
         List<Debito> newDebitos = new ArrayList<>();
-        for (ChequeraCuota cuota : chequeraCuotaService
+        for (ChequeraCuotaEntity cuota : chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId, tipoChequeraId,
                         chequeraSerieId, serie.getAlternativaId())) {
             if (!debitos.containsKey(cuota.cuotaKey())) {
@@ -183,7 +185,7 @@ public class ChequeraService {
                         serie.getAlternativaId())
                 .stream().collect(Collectors.toMap(ChequeraAlternativa::getProductoId, alternativa -> alternativa));
         List<ChequeraImpresionDetalle> detalles = new ArrayList<ChequeraImpresionDetalle>();
-        for (ChequeraCuota cuota : chequeraCuotaService
+        for (ChequeraCuotaEntity cuota : chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId())) {
             ChequeraTotal total = totales.get(cuota.getProductoId());
@@ -209,7 +211,7 @@ public class ChequeraService {
 
     public ChequeraSerieDto constructChequeraDataDTO(ChequeraSerieEntity chequeraSerie) {
         log.debug("\n\nConstructing ChequeraService.constructChequeraDataDTO\n\n");
-        List<ChequeraCuota> chequeraCuotas = chequeraCuotaService
+        List<ChequeraCuotaEntity> chequeraCuotas = chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdConImporte(
                         chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
                         chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId());
@@ -291,7 +293,7 @@ public class ChequeraService {
     }
 
     public List<ChequeraCuotaPagosDto> findAllCuotaPagosByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
-        List<ChequeraCuota> cuotas = chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
+        List<ChequeraCuotaEntity> cuotas = chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
         List<ChequeraPago> pagos = chequeraPagoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService);
         
         return cuotas.stream()

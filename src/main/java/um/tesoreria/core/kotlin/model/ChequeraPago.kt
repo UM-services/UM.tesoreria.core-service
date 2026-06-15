@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -86,7 +87,7 @@ data class ChequeraPago(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chequeraCuotaId", referencedColumnName = "chc_id", insertable = false, updatable = false)
-    var chequeraCuota: ChequeraCuota? = null
+    var chequeraCuota: ChequeraCuotaEntity? = null
 
 ) : Auditable() {
 
@@ -124,7 +125,7 @@ data class ChequeraPago(
         private var idMercadoPago: String? = null
         private var tipoPago: TipoPago? = null
         private var producto: Producto? = null
-        private var chequeraCuota: ChequeraCuota? = null
+        private var chequeraCuota: ChequeraCuotaEntity? = null
 
         fun chequeraPagoId(chequeraPagoId: Long?) = apply { this.chequeraPagoId = chequeraPagoId }
         fun chequeraCuotaId(chequeraCuotaId: Long?) = apply { this.chequeraCuotaId = chequeraCuotaId }
@@ -150,7 +151,7 @@ data class ChequeraPago(
         fun idMercadoPago(idMercadoPago: String?) = apply { this.idMercadoPago = idMercadoPago }
         fun tipoPago(tipoPago: TipoPago?) = apply { this.tipoPago = tipoPago }
         fun producto(producto: Producto?) = apply { this.producto = producto }
-        fun chequeraCuota(chequeraCuota: ChequeraCuota?) = apply { this.chequeraCuota = chequeraCuota }
+        fun chequeraCuota(chequeraCuota: ChequeraCuotaEntity?) = apply { this.chequeraCuota = chequeraCuota }
 
         fun build() = ChequeraPago(
             chequeraPagoId = chequeraPagoId,

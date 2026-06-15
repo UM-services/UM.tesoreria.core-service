@@ -2,6 +2,43 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.24.0] - 2026-06-14
+### Changed
+- refactor(domicilio): Migración completa del módulo Domicilio a arquitectura hexagonal
+  - `Domicilio` (modelo Kotlin) reemplazado por `Domicilio` (modelo de dominio Java) en `hexagonal/domicilio/domain/model/`
+  - `DomicilioService` movido de `core/service/` a `hexagonal/domicilio/application/service/`
+  - Método `add(Domicilio, boolean)` renombrado a `create(Domicilio)` con firma simplificada
+  - Método `update(Domicilio, Long, boolean)` cambiado a `update(Long, Domicilio)` (cambio de orden de parámetros)
+  - `DomicilioException` movido de `core/exception/` a `hexagonal/domicilio/application/exception/`
+  - Actualización de referencias en `MailChequeraService`, `NotificacionService`, `PayPerTicFileService`, `SincronizeService`, `SpoterService`
+- refactor(persona): Migración del modelo `PersonaEntity` a modelo de dominio `Persona` en arquitectura hexagonal
+  - `PersonaEntity` → `Persona` domain model en `hexagonal/persona/domain/model/`
+  - Método `add(PersonaEntity)` renombrado a `create(Persona)` con retorno `Persona`
+  - Actualización de referencias en `PayPerTicFileService`, `SpoterService`
+- refactor(mercadoPagoContext): Migración completa del módulo MercadoPagoContext a arquitectura hexagonal
+  - `MercadoPagoContext` movido de `core/model/` a `hexagonal/mercadoPagoContext/domain/model/`
+  - `MercadoPagoContextService` movido de `core/service/` a `hexagonal/mercadoPagoContext/application/service/`
+  - Actualización de referencias en `MercadoPagoCoreService`, `PagoService`
+- refactor(chequeraCuota): Renombrado de `ChequeraCuota` (Kotlin) a `ChequeraCuotaEntity` (Java) en múltiples servicios
+  - `ProcessBajaService`, `ChequeraCuotaDeudaService`, `ChequeraSerieAltaFullService`, `SpoterService` actualizados
+- refactor(logging): Eliminación de métodos privados de logging con serialización Jackson manual
+  - `MailChequeraService`: 7 métodos `log*()` eliminados, reemplazados por `jsonify()` inline
+  - `SpoterService`: 8 métodos `log*()` eliminados, reemplazados por `Jsonifier` utilitaria
+- refactor(payPerTic): Migración de `PayPerTicFileService` de inyección `@Autowired` a `@RequiredArgsConstructor`
+  - Mejora de tipos: `Integer` → `int` en variables de bucle y contadores
+  - Reemplazo de `e.printStackTrace()` por `log.error(e.getMessage())`
+  - Simplificación de catch: unificación de excepciones `FileNotFoundException` + `IOException` → solo `IOException`
+- refactor(sincronize): `SincronizeService` actualizado para usar nueva API de `DomicilioService` hexagonal
+  - Cambio de `findFirstByPersonaId()` (retorno directo) a `orElse(new Domicilio())`
+  - Cambio de `add(domicilio, true)` a `create(domicilio)` y `update(domicilio, domicilioId, true)` a `update(domicilioId, domicilio)`
+- chore(banner): Simplificación del banner de texto de consola en `banner.txt`
+- refactor(notificacion): `NotificacionService` actualizado para usar modelos de dominio hexagonales
+  - `DomicilioException` importado desde nuevo paquete hexagonal
+  - `Domicilio` importado desde modelo de dominio hexagonal
+  - `DomicilioEntity` importado desde entidad JPA hexagonal
+
+> Basado en análisis profundo de `git diff HEAD` (20+ archivos modificados), `git log` y `pom.xml` (versión 3.23.0 → 3.24.0).
+
 ## [3.23.0] - 2026-06-13
 ### Added
 - feat(campanha): Nuevo campo `created` (LocalDateTime) en modelo de dominio `Campanha`

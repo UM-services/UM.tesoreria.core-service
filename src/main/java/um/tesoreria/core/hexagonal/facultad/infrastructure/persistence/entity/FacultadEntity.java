@@ -2,7 +2,7 @@ package um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.model.Auditable;
 import java.math.BigDecimal;
 
 @Getter

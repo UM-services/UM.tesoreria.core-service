@@ -18,17 +18,18 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.exception.DomicilioException;
+import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.ProveedorMovimientoException;
 import um.tesoreria.core.exception.ProveedorException;
+import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
 import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.PersonaSuspendido;
 import um.tesoreria.core.service.ComprobanteService;
-import um.tesoreria.core.service.DomicilioService;
+import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.PersonaSuspendidoService;
 import um.tesoreria.core.service.ProveedorComprobanteService;
@@ -65,7 +66,7 @@ public class NotificacionService {
 	public String notifyDeudorSuspendido(PersonaSuspendido personaSuspendido) throws MessagingException {
 		String data = "";
 
-		Domicilio domicilio = null;
+		Domicilio domicilio;
 		try {
 			domicilio = domicilioService.findByUnique(personaSuspendido.getPersonaId(),
 					personaSuspendido.getDocumentoId());
