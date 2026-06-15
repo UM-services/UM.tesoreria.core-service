@@ -2,6 +2,42 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.26.0] - 2026-06-15
+### Added
+- feat(mercadopagoContext): New `FindActiveByReservaVacanteIdUseCase` for retrieving active MP context by `reservaVacanteId` (UUID)
+  - New input port: `FindActiveByReservaVacanteIdUseCase` with method `findActiveByReservaVacanteId(UUID)`
+  - New use case: `FindActiveByReservaVacanteIdUseCaseImpl` with delegation to repository
+  - New repository method: `findByReservaVacanteIdAndActivo(UUID, Byte)` in `MercadoPagoContextRepository`
+  - New JPA method: `findByReservaVacanteId(UUID)` in `JpaMercadoPagoContextRepository`
+  - Adapter method: `findByReservaVacanteIdAndActivo()` in `JpaMercadoPagoContextRepositoryAdapter`
+- feat(mercadopagoContext): New `PreferenceVacanteClient` Feign client for creating vacante preferences via `tesoreria-mercadopago-service`
+- feat(mercadopagoContext): Added `jsonify()` method to `MercadoPagoContext` domain model for structured logging
+- feat(reservaVacante): MercadoPago integration on reservation creation
+  - `CreateReservaVacanteUseCaseImpl` now creates MP context via `MercadoPagoCoreService.createContextVacante()` and preference via `PreferenceVacanteClient.createPreference()`
+  - New `createContextVacante()` and `buildResponseVacante()` methods in `MercadoPagoCoreService`
+- feat(reservaVacante): Added `Campanha campanha` domain field to `ReservaVacante` model for enriched responses
+- feat(reservaVacante): Enhanced `ReservaVacanteResponse` with `initPoint` from MercadoPagoContext and reorganized `estado` field
+  - `ReservaVacanteDtoMapper` injects `MercadoPagoContextService` to resolve `initPoint` for each response
+  - Field order: `estado` moved before `importe`, new `initPoint` field added
+- feat(reservaVacante): `FindReservaVacanteUseCaseImpl` enriches domain model with `Campanha` association and structured `jsonify()` logging
+
+### Changed
+- refactor(mercadopagoContext): Renamed `makeContext()` → `makeContextCuota()` in both `MercadoPagoCoreService` and `MercadoPagoCoreController` for semantic clarity
+  - Updated `MercadoPagoCoreController.makeContext()` caller
+  - Updated `GetDeudaPersonaUseCaseImpl` reference
+- fix(chequeraCuota): Consolidated ISO 8601 date format pattern from `yyyy-MM-dd'T'HH:mm:ssZ` to `yyyy-MM-dd'T'HH:mm:ssXX` across all entities
+  - `ChequeraCuotaEntity`: 3 `@JsonFormat` patterns updated
+  - `MercadoPagoContext`: 4 `@JsonFormat` patterns updated (fechaVencimiento, lastVencimientoUpdated, fechaPago, fechaAcreditacion)
+  - `MercadoPagoContextDto`: 1 `@JsonFormat` pattern updated
+  - `ReservaVacante`, `ReservaVacanteEntity`, `ReservaVacanteResponse`: new `@JsonFormat` with correct pattern
+- fix(mercadopagoContext): Corrected `isCuotaAvailable()` logic from `!=` to `==` comparisons for `pagado`, `baja`, `compensada` fields
+- refactor(reservaVacante): Removed `@Transactional` from `CreateReservaVacanteUseCaseImpl`
+- refactor(dto): `UMPreferenceMPDto` extended with `ReservaVacante` field alongside `ChequeraCuotaEntity`
+- refactor(reservaVacante): `PreferenceClient.createPreference()` method signature simplified to single line
+- chore(logging): Added `@Slf4j` and structured `jsonify()` logging in `ReservaVacanteDtoMapper`
+
+> Basado en análisis profundo de `git diff HEAD` (21 archivos modificados, +166/-19 líneas) y `pom.xml` (versión actual 3.25.0).
+
 ## [3.25.0] - 2026-06-15
 ### Added
 - feat(mercadoPagoContext): New `reservaVacanteId` (UUID) field and domain associations `ChequeraCuota`/`ReservaVacante`

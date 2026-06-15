@@ -1,13 +1,14 @@
 package um.tesoreria.core.hexagonal.umhub.reservaVacante.application.usecases;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.client.tesoreria.mercadopago.PreferenceVacanteClient;
 import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.hexagonal.umhub.campanha.application.service.CampanhaService;
@@ -17,6 +18,7 @@ import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVaca
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.CreateReservaVacanteUseCase;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.out.ReservaVacanteRepository;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.web.dto.ReservaVacanteRequest;
+import um.tesoreria.core.service.facade.MercadoPagoCoreService;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -32,9 +34,10 @@ public class CreateReservaVacanteUseCaseImpl implements CreateReservaVacanteUseC
     private final PersonaService personaService;
     private final DomicilioService domicilioService;
     private final CampanhaService campanhaService;
+    private final MercadoPagoCoreService mercadoPagoCoreService;
+    private final PreferenceVacanteClient preferenceVacanteClient;
 
     @Override
-    @Transactional
     public ReservaVacante createReservaVacante(ReservaVacanteRequest reservaVacanteRequest) {
         log.debug("\n\nProcessing CreateReservaVacanteUseCaseImpl.createReservaVacante\n\n");
         // Verificar persona
@@ -98,7 +101,10 @@ public class CreateReservaVacanteUseCaseImpl implements CreateReservaVacanteUseC
         reservaVacante = repository.create(reservaVacante);
         reservaVacante.setPersona(persona);
         reservaVacante.setDomicilio(domicilio);
+        reservaVacante.setCampanha(campanha);
         log.debug("ReservaVacante -> {}", reservaVacante.jsonify());
+        var umPreferenceMPDto = mercadoPagoCoreService.createContextVacante(reservaVacante);
+        preferenceVacanteClient.createPreference(umPreferenceMPDto);
         return reservaVacante;
     }
 }

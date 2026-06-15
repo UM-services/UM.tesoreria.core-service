@@ -1,5 +1,6 @@
 package um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.persistence.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,6 +32,8 @@ public class ReservaVacanteEntity extends Auditable {
     private UUID campanhaId;
     private String estado;
     private BigDecimal importe;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime vencimiento;
 
     @OneToOne(optional = true)

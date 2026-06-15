@@ -4,6 +4,7 @@ import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoCo
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface MercadoPagoContextRepository {
 
@@ -16,6 +17,8 @@ public interface MercadoPagoContextRepository {
     Optional<MercadoPagoContext> findByMercadoPagoContextId(Long mercadoPagoContextId);
 
     Optional<MercadoPagoContext> findByChequeraCuotaIdAndActivo(Long chequeraCuotaId, Byte activo);
+
+    Optional<MercadoPagoContext> findByReservaVacanteIdAndActivo(UUID reservaVacanteId, Byte activo);
 
     List<MercadoPagoContext> findAllByActivoOrderByMercadoPagoContextIdDesc(Byte activo);
 

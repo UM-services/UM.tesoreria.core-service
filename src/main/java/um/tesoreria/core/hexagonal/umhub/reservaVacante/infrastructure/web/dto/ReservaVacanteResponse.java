@@ -1,6 +1,8 @@
 package um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import um.tesoreria.core.util.Jsonifier;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,9 +22,15 @@ public class ReservaVacanteResponse {
     private String apellido;
     private String email;
     private UUID campanhaId;
-    private BigDecimal importe;
-    private OffsetDateTime vencimiento;
-    private LocalDateTime created;
     private String estado;
+    private BigDecimal importe;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
+    private OffsetDateTime vencimiento;
+    private String initPoint;
+    private LocalDateTime created;
     private LocalDateTime updated;
+
+    public String jsonify() {
+        return Jsonifier.builder(this).build();
+    }
 }

@@ -10,6 +10,7 @@ import um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistence
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -52,6 +53,12 @@ public class JpaMercadoPagoContextRepositoryAdapter implements MercadoPagoContex
     @Override
     public Optional<MercadoPagoContext> findByChequeraCuotaIdAndActivo(Long chequeraCuotaId, Byte activo) {
         return repository.findByChequeraCuotaIdAndActivo(chequeraCuotaId, activo)
+                .map(mapper::toDomainModel);
+    }
+
+    @Override
+    public Optional<MercadoPagoContext> findByReservaVacanteIdAndActivo(UUID reservaVacanteId, Byte activo) {
+        return repository.findByReservaVacanteId(reservaVacanteId)
                 .map(mapper::toDomainModel);
     }
 

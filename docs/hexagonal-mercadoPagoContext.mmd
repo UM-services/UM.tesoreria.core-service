@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo MercadoPagoContext (v3.25.0)
+title: Arquitectura Hexagonal - Módulo MercadoPagoContext (v3.26.0)
 ---
 
 classDiagram
@@ -34,6 +34,7 @@ classDiagram
             <<interface>>
             +findByMercadoPagoContextId(Long) Optional~MercadoPagoContext~
             +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContext~
+            +findByReservaVacanteIdAndActivo(UUID, Byte) Optional~MercadoPagoContext~
             +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContext~
             +findAllActiveChequeraCuota() List~Long~
             +findAllActiveToChange(OffsetDateTime, OffsetDateTime) List~MercadoPagoContext~
@@ -60,6 +61,7 @@ classDiagram
             +add(MercadoPagoContext) MercadoPagoContext
             +findById(Long) Optional~MercadoPagoContext~
             +findActiveByChequeraCuotaId(Long) Optional~MercadoPagoContext~
+            +findActiveByReservaVacanteId(UUID) MercadoPagoContext
             +findAllActiveChequeraCuota() List~Long~
             +findAllActiveToChange() List~MercadoPagoContext~
             +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContext~
@@ -74,6 +76,7 @@ classDiagram
             class AddMercadoPagoContextUseCaseImpl
             class FindByMercadoPagoContextIdUseCaseImpl
             class FindActiveByChequeraCuotaIdUseCaseImpl
+            class FindActiveByReservaVacanteIdUseCaseImpl
             class FindAllActiveChequeraCuotaUseCaseImpl
             class FindAllActiveToChangeUseCaseImpl
             class FindAllByChequeraCuotaIdAndActivoUseCaseImpl
@@ -87,6 +90,7 @@ classDiagram
         class AddMercadoPagoContextUseCase { <<interface>> }
         class FindByMercadoPagoContextIdUseCase { <<interface>> }
         class FindActiveByChequeraCuotaIdUseCase { <<interface>> }
+        class FindActiveByReservaVacanteIdUseCase { <<interface>> }
         class FindAllActiveChequeraCuotaUseCase { <<interface>> }
         class FindAllActiveToChangeUseCase { <<interface>> }
         class FindAllByChequeraCuotaIdAndActivoUseCase { <<interface>> }
@@ -119,6 +123,7 @@ classDiagram
                 <<JpaRepository>>
                 +findByMercadoPagoContextId(Long) Optional~MercadoPagoContextEntity~
                 +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContextEntity~
+                +findByReservaVacanteId(UUID) Optional~MercadoPagoContextEntity~
                 +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContextEntity~
                 +findAllByActivoAndFechaVencimientoBetween(OffsetDateTime, OffsetDateTime) List~MercadoPagoContextEntity~
                 +findAllByChequeraCuotaIdInAndActivo(List~Long~, Byte) List~MercadoPagoContextEntity~
@@ -131,6 +136,7 @@ classDiagram
                 -MercadoPagoContextMapper mapper
                 +findByMercadoPagoContextId(Long) Optional~MercadoPagoContext~
                 +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContext~
+                +findByReservaVacanteIdAndActivo(UUID, Byte) Optional~MercadoPagoContext~
                 +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContext~
                 +findAllActiveChequeraCuota() List~Long~
                 +findAllActiveToChange(OffsetDateTime, OffsetDateTime) List~MercadoPagoContext~
@@ -189,6 +195,7 @@ classDiagram
     MercadoPagoContextService --> AddMercadoPagoContextUseCase : uses
     MercadoPagoContextService --> FindByMercadoPagoContextIdUseCase : uses
     MercadoPagoContextService --> FindActiveByChequeraCuotaIdUseCase : uses
+    MercadoPagoContextService --> FindActiveByReservaVacanteIdUseCase : uses
     MercadoPagoContextService --> FindAllActiveChequeraCuotaUseCase : uses
     MercadoPagoContextService --> FindAllActiveToChangeUseCase : uses
     MercadoPagoContextService --> FindAllByChequeraCuotaIdAndActivoUseCase : uses
@@ -201,6 +208,7 @@ classDiagram
     AddMercadoPagoContextUseCaseImpl ..|> AddMercadoPagoContextUseCase : implements
     FindByMercadoPagoContextIdUseCaseImpl ..|> FindByMercadoPagoContextIdUseCase : implements
     FindActiveByChequeraCuotaIdUseCaseImpl ..|> FindActiveByChequeraCuotaIdUseCase : implements
+    FindActiveByReservaVacanteIdUseCaseImpl ..|> FindActiveByReservaVacanteIdUseCase : implements
     FindAllActiveChequeraCuotaUseCaseImpl ..|> FindAllActiveChequeraCuotaUseCase : implements
     FindAllActiveToChangeUseCaseImpl ..|> FindAllActiveToChangeUseCase : implements
     FindAllByChequeraCuotaIdAndActivoUseCaseImpl ..|> FindAllByChequeraCuotaIdAndActivoUseCase : implements
@@ -213,6 +221,7 @@ classDiagram
     AddMercadoPagoContextUseCaseImpl --> MercadoPagoContextRepository : uses
     FindByMercadoPagoContextIdUseCaseImpl --> MercadoPagoContextRepository : uses
     FindActiveByChequeraCuotaIdUseCaseImpl --> MercadoPagoContextRepository : uses
+    FindActiveByReservaVacanteIdUseCaseImpl --> MercadoPagoContextRepository : uses
     FindAllActiveToChangeUseCaseImpl --> MercadoPagoContextRepository : uses
     UpdateMercadoPagoContextUseCaseImpl --> MercadoPagoContextRepository : uses
     ProcessPaymentEventUseCaseImpl --> MercadoPagoContextRepository : uses
