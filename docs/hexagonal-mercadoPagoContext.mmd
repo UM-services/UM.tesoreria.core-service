@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo MercadoPagoContext (v3.24.0)
+title: Arquitectura Hexagonal - Módulo MercadoPagoContext (v3.25.0)
 ---
 
 classDiagram
@@ -9,6 +9,7 @@ classDiagram
         class MercadoPagoContext {
             +Long mercadoPagoContextId
             +Long chequeraCuotaId
+            +UUID reservaVacanteId
             +String initPoint
             +OffsetDateTime fechaVencimiento
             +BigDecimal importe
@@ -24,6 +25,8 @@ classDiagram
             +OffsetDateTime fechaAcreditacion
             +BigDecimal importePagado
             +String payment
+            +ChequeraCuota chequeraCuota
+            +ReservaVacante reservaVacante
             +jsonify() String
         }
 
@@ -101,12 +104,15 @@ classDiagram
             class MercadoPagoContextEntity {
                 +Long mercadoPagoContextId
                 +Long chequeraCuotaId
+                +UUID reservaVacanteId
                 +String initPoint
                 +OffsetDateTime fechaVencimiento
                 +BigDecimal importe
                 +Byte activo
                 +String preferenceId
                 +String status
+                +ChequeraCuotaEntity chequeraCuota
+                +ReservaVacanteEntity reservaVacante
             }
 
             class JpaMercadoPagoContextRepository {
@@ -135,6 +141,8 @@ classDiagram
             }
 
             class MercadoPagoContextMapper {
+                -ChequeraCuotaMapper chequeraCuotaMapper
+                -ReservaVacanteMapper reservaVacanteMapper
                 +toEntity(MercadoPagoContext) MercadoPagoContextEntity
                 +toDomain(MercadoPagoContextEntity) MercadoPagoContext
             }
@@ -151,8 +159,26 @@ classDiagram
                 +findAllSinImputar() ResponseEntity~List~MercadoPagoContextResponse~~
             }
 
-            class MercadoPagoContextRequest
-            class MercadoPagoContextResponse
+            class MercadoPagoContextRequest {
+                +Long chequeraCuotaId
+                +UUID reservaVacanteId
+                +String initPoint
+                +OffsetDateTime fechaVencimiento
+                +BigDecimal importe
+            }
+            class MercadoPagoContextResponse {
+                +Long mercadoPagoContextId
+                +Long chequeraCuotaId
+                +UUID reservaVacanteId
+                +String initPoint
+                +OffsetDateTime fechaVencimiento
+                +BigDecimal importe
+                +String status
+                +BigDecimal importePagado
+                +String payment
+                +ChequeraCuota chequeraCuota
+                +ReservaVacante reservaVacante
+            }
             class MercadoPagoContextDtoMapper {
                 +toDomain(MercadoPagoContextRequest) MercadoPagoContext
                 +toResponse(MercadoPagoContext) MercadoPagoContextResponse

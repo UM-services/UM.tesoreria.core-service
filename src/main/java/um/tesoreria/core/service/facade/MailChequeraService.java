@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import um.tesoreria.core.exception.CarreraChequeraException;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;

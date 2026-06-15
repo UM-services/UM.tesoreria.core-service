@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity
 import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 import java.time.OffsetDateTime

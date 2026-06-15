@@ -20,10 +20,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraCuotaException;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
-import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.model.internal.CuotaPeriodoDto;
 import um.tesoreria.core.repository.ChequeraCuotaRepository;
@@ -357,7 +357,7 @@ public class ChequeraCuotaService {
 
     public ChequeraCuotaEntity update(ChequeraCuotaEntity newChequeraCuota, Long chequeraCuotaId) {
         return repository.findByChequeraCuotaId(chequeraCuotaId).map(chequeraCuota -> {
-            chequeraCuota = new ChequeraCuotaEntity.Builder()
+            chequeraCuota = ChequeraCuotaEntity.builder()
                     .chequeraCuotaId(chequeraCuotaId)
                     .chequeraId(newChequeraCuota.getChequeraId())
                     .facultadId(newChequeraCuota.getFacultadId())

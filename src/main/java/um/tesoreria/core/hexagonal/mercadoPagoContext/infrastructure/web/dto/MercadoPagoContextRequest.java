@@ -3,6 +3,7 @@ package um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.web.dto;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,6 +13,7 @@ import java.time.OffsetDateTime;
 public class MercadoPagoContextRequest {
 
     private Long chequeraCuotaId;
+    private UUID reservaVacanteId;
     private String initPoint;
     private OffsetDateTime fechaVencimiento;
     private BigDecimal importe;

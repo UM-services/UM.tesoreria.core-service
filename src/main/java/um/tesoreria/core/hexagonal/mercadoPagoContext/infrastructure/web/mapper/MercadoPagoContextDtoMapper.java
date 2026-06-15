@@ -12,6 +12,7 @@ public class MercadoPagoContextDtoMapper {
         if (request == null) return null;
         return MercadoPagoContext.builder()
                 .chequeraCuotaId(request.getChequeraCuotaId())
+                .reservaVacanteId(request.getReservaVacanteId())
                 .initPoint(request.getInitPoint())
                 .fechaVencimiento(request.getFechaVencimiento())
                 .importe(request.getImporte())
@@ -35,6 +36,7 @@ public class MercadoPagoContextDtoMapper {
         return MercadoPagoContextResponse.builder()
                 .mercadoPagoContextId(domain.getMercadoPagoContextId())
                 .chequeraCuotaId(domain.getChequeraCuotaId())
+                .reservaVacanteId(domain.getReservaVacanteId())
                 .initPoint(domain.getInitPoint())
                 .fechaVencimiento(domain.getFechaVencimiento())
                 .importe(domain.getImporte())
@@ -50,6 +52,8 @@ public class MercadoPagoContextDtoMapper {
                 .fechaAcreditacion(domain.getFechaAcreditacion())
                 .importePagado(domain.getImportePagado())
                 .payment(domain.getPayment())
+                .chequeraCuota(domain.getChequeraCuota())
+                .reservaVacante(domain.getReservaVacante())
                 .build();
     }
 

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.exception.ChequeraEliminadaException;
 import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DebitoException;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;

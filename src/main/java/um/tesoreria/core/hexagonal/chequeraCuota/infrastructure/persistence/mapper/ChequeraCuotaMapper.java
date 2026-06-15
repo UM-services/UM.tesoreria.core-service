@@ -4,11 +4,12 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraPago;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraTotal;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 
 @Component
 public class ChequeraCuotaMapper {
 
-    public ChequeraCuota toDomain(um.tesoreria.core.kotlin.model.ChequeraCuotaEntity entity) {
+    public ChequeraCuota toDomain(ChequeraCuotaEntity entity) {
         if (entity == null) {
             return null;
         }

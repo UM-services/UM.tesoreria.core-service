@@ -8,7 +8,7 @@ import um.tesoreria.core.exception.LectivoException;
 import um.tesoreria.core.exception.TipoChequeraException;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraPago;
-import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.DeudaData;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;

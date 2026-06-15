@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.exception.ChequeraSerieControlException;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PersonaException;

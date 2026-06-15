@@ -1,8 +1,12 @@
 package um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model;
 
 import lombok.*;
+import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,6 +17,7 @@ public class MercadoPagoContext {
 
     private Long mercadoPagoContextId;
     private Long chequeraCuotaId;
+    private UUID reservaVacanteId;
     private String initPoint;
     private OffsetDateTime fechaVencimiento;
 
@@ -39,5 +44,8 @@ public class MercadoPagoContext {
     private BigDecimal importePagado = BigDecimal.ZERO;
 
     private String payment;
+
+    private ChequeraCuota chequeraCuota;
+    private ReservaVacante reservaVacante;
 
 }

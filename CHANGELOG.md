@@ -2,6 +2,33 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.25.0] - 2026-06-15
+### Added
+- feat(mercadoPagoContext): New `reservaVacanteId` (UUID) field and domain associations `ChequeraCuota`/`ReservaVacante`
+  - `MercadoPagoContext.domain.model.MercadoPagoContext`: new fields `reservaVacanteId`, `chequeraCuota` (domain), `reservaVacante` (domain)
+  - `MercadoPagoContextEntity`: new field `reservaVacanteId`, `@OneToOne` associations to `ChequeraCuotaEntity` and `ReservaVacanteEntity`
+  - `MercadoPagoContextMapper`: bidirectional mapping of new fields, injection of `ChequeraCuotaMapper` and `ReservaVacanteMapper`
+  - `MercadoPagoContextRequest`/`MercadoPagoContextResponse`: expose `reservaVacanteId` in API
+  - `MercadoPagoContextDtoMapper`: mapping of `reservaVacanteId` and domain associations between DTOs and domain
+- feat(chequeraCuota): New Java `ChequeraCuotaEntity` replacing Kotlin `ChequeraCuotaEntity.kt`
+  - `ChequeraCuotaEntity.java` in `hexagonal/chequeraCuota/infrastructure/persistence/entity/` with Lombok annotations (`@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`)
+  - Extends `Auditable`, maps to `chequera_cuota` table with `@Table` and `@UniqueConstraint`
+  - `ChequeraCuotaMapper.toDomain()` updated to use the new Java entity instead of Kotlin entity
+  - All references updated across 20+ files (services, controllers, facade services)
+
+### Changed
+- refactor(chequeraSerie): Moved `ChequeraSerie` domain model from `hexagonal/chequeraCuota/domain/model/` to correct module `hexagonal/chequeraSerie/domain/model/`
+  - Package renamed from `um.tesoreria.core.hexagonal.chequeraCuota.domain.model` to `um.tesoreria.core.hexagonal.chequeraSerie.domain.model`
+  - Updated imports in `ChequeraCuotaService`, `CalculateDeudaUseCase`, `GetDeudaPersonaUseCaseImpl`, `ChequeraSerieMapper`
+  - Resolves cross-module domain model misplacement
+- refactor(chequeraCuota): Replace all legacy Kotlin imports (`ChequeraCuotaEntity.kt`) with new Java entity imports across ~30 files
+  - `ChequeraCuotaService`, `ChequeraPagoService`, `ChequeraSerieAltaFullService`, `ChequeraCuotaDeudaService`
+  - `ChequeraService`, `FormulariosToPdfService`, `MailChequeraService`, `MercadoPagoCoreService`, `ProcessBajaService`, `SpoterService`
+  - `ChequeraCuotaRepository`, `UMPreferenceMPDto`, `ClickPagosEntity`, `ChequeraCuotaDeuda.kt`, `ChequeraPago.kt`
+- refactor(chequeraCuota): `ChequeraCuotaService.update()` migrated from `.Builder()` pattern to Lombok `.builder()` pattern
+
+> Basado en análisis profundo de `git diff HEAD` (30+ archivos modificados/renombrados, +410/-230 líneas), `pom.xml` (versión 3.24.0 → 3.25.0) y cambios locales staged no commiteados.
+
 ## [3.24.0] - 2026-06-15
 ### Added
 - feat(reservaVacante): Nuevo `FindReservaVacanteUseCase` con endpoint `GET /{reservaVacanteId}`

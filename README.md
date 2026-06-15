@@ -4,7 +4,25 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.24.0**
+**Versión actual (SemVer): 3.25.0**
+
+## Novedades 3.25.0 (verificado en código)
+- feat(mercadoPagoContext): New `reservaVacanteId` (UUID) field and domain associations `ChequeraCuota`/`ReservaVacante`
+  - `MercadoPagoContext.domain.model.MercadoPagoContext`: nuevos campos `reservaVacanteId`, `chequeraCuota`, `reservaVacante`
+  - `MercadoPagoContextEntity`: nuevo campo `reservaVacanteId`, relaciones `@OneToOne` a `ChequeraCuotaEntity` y `ReservaVacanteEntity`
+  - `MercadoPagoContextMapper`: mapeo bidireccional con inyección de `ChequeraCuotaMapper` y `ReservaVacanteMapper`
+  - `MercadoPagoContextRequest`/`MercadoPagoContextResponse`: exponen `reservaVacanteId` en API REST
+  - `MercadoPagoContextDtoMapper`: mapeo de `reservaVacanteId` y asociaciones de dominio
+- feat(chequeraCuota): Nueva entidad Java `ChequeraCuotaEntity` reemplazando `ChequeraCuotaEntity.kt` (Kotlin)
+  - `ChequeraCuotaEntity.java` en `hexagonal/chequeraCuota/infrastructure/persistence/entity/` con Lombok
+  - Extiende `Auditable`, mapeo a tabla `chequera_cuota` con `@UniqueConstraint`
+  - `ChequeraCuotaMapper.toDomain()` actualizado para usar nueva entidad Java
+  - +20 archivos actualizados (servicios, controladores, facade)
+- refactor(chequeraSerie): Modelo `ChequeraSerie` movido al módulo hexagonal correcto
+  - De `hexagonal/chequeraCuota/domain/model/` a `hexagonal/chequeraSerie/domain/model/`
+  - Imports actualizados en `ChequeraCuotaService`, `CalculateDeudaUseCase`, `GetDeudaPersonaUseCaseImpl`, `ChequeraSerieMapper`
+
+> Basado en análisis profundo de `git diff HEAD` (30+ archivos modificados, +410/-230 líneas) y `pom.xml` (versión 3.24.0 → 3.25.0).
 
 ## Novedades 3.24.0 (verificado en código)
 - feat(reservaVacante): Nuevo `FindReservaVacanteUseCase` con endpoint `GET /{reservaVacanteId}`
@@ -894,7 +912,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.24.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.25.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ChequeraCuotaException;
 import um.tesoreria.core.exception.MercadoPagoContextException;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
-import um.tesoreria.core.kotlin.model.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.model.dto.UMPreferenceMPDto;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;

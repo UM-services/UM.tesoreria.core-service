@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraPagoException;
-import um.tesoreria.core.kotlin.model.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.model.FacturacionElectronica;

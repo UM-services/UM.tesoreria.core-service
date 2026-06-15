@@ -1,17 +1,25 @@
 package um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistence.mapper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.mapper.ChequeraCuotaMapper;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistence.entity.MercadoPagoContextEntity;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.persistence.mapper.ReservaVacanteMapper;
 
 @Component
+@RequiredArgsConstructor
 public class MercadoPagoContextMapper {
+
+    private final ChequeraCuotaMapper chequeraCuotaMapper;
+    private final ReservaVacanteMapper reservaVacanteMapper;
 
     public MercadoPagoContextEntity toEntity(MercadoPagoContext domain) {
         if (domain == null) return null;
         return MercadoPagoContextEntity.builder()
                 .mercadoPagoContextId(domain.getMercadoPagoContextId())
                 .chequeraCuotaId(domain.getChequeraCuotaId())
+                .reservaVacanteId(domain.getReservaVacanteId())
                 .initPoint(domain.getInitPoint())
                 .fechaVencimiento(domain.getFechaVencimiento())
                 .importe(domain.getImporte())
@@ -35,6 +43,7 @@ public class MercadoPagoContextMapper {
         return MercadoPagoContext.builder()
                 .mercadoPagoContextId(entity.getMercadoPagoContextId())
                 .chequeraCuotaId(entity.getChequeraCuotaId())
+                .reservaVacanteId(entity.getReservaVacanteId())
                 .initPoint(entity.getInitPoint())
                 .fechaVencimiento(entity.getFechaVencimiento())
                 .importe(entity.getImporte())
@@ -50,6 +59,8 @@ public class MercadoPagoContextMapper {
                 .fechaAcreditacion(entity.getFechaAcreditacion())
                 .importePagado(entity.getImportePagado())
                 .payment(entity.getPayment())
+                .chequeraCuota(chequeraCuotaMapper.toDomain(entity.getChequeraCuota()))
+                .reservaVacante(reservaVacanteMapper.toDomainModel(entity.getReservaVacante()))
                 .build();
     }
 }
