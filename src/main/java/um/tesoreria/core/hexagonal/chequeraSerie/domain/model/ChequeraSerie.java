@@ -1,4 +1,4 @@
-package um.tesoreria.core.hexagonal.chequeraCuota.domain.model;
+package um.tesoreria.core.hexagonal.chequeraSerie.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

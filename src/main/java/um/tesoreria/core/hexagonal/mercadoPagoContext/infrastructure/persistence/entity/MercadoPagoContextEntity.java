@@ -1,17 +1,16 @@
 package um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistence.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.persistence.entity.ReservaVacanteEntity;
 import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.util.Jsonifier;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -27,6 +26,7 @@ public class MercadoPagoContextEntity extends Auditable {
     private Long mercadoPagoContextId;
 
     private Long chequeraCuotaId;
+    private UUID reservaVacanteId;
     private String initPoint;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
@@ -61,6 +61,14 @@ public class MercadoPagoContextEntity extends Auditable {
     private BigDecimal importePagado = BigDecimal.ZERO;
 
     private String payment;
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "chequeraCuotaId", referencedColumnName = "chc_id", insertable = false, updatable = false)
+    private ChequeraCuotaEntity chequeraCuota;
+
+    @OneToOne(optional = true)
+    @JoinColumn(name  = "reservaVacanteId", insertable = false, updatable = false)
+    private ReservaVacanteEntity reservaVacante;
 
     public String jsonify() {
         return Jsonifier.builder(this).build();

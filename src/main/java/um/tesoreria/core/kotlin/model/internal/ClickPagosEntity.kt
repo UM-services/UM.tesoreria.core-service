@@ -1,7 +1,7 @@
 package um.tesoreria.core.kotlin.model.internal
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import um.tesoreria.core.kotlin.model.ChequeraCuotaEntity
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity
 import java.math.BigDecimal
 import java.time.LocalTime
 import java.time.OffsetDateTime

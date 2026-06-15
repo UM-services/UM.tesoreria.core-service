@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.24.0** (actualizada: 2026-06-15)
+**Versión actual del servicio: 3.25.0** (actualizada: 2026-06-15)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -8,7 +8,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `architecture.mmd`: Arquitectura general (controladores, servicios, repositorios, entidades).
 - `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado.
 - `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v3.13.0.
-- `hexagonal-chequeraCuota.mmd`: Arquitectura hexagonal del caso de uso Chequera Cuota (flujo de pago de cuotas).
+- `hexagonal-chequeraCuota.mmd`: Arquitectura hexagonal del caso de uso Chequera Cuota (flujo de pago de cuotas) - v3.25.0.
 - `hexagonal-auth.mmd`: Arquitectura hexagonal del módulo Auth (autenticación de usuarios).
 - `hexagonal-geografica.mmd`: Arquitectura hexagonal del módulo Geografica (entidades geográficas).
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores).
@@ -26,7 +26,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-reservaVacante.mmd`: Arquitectura hexagonal del módulo ReservaVacante (gestión de reservas de vacantes UM Hub) - v3.24.0.
 - `hexagonal-domicilio.mmd`: Arquitectura hexagonal del módulo Domicilio (gestión de domicilios) - v3.24.0.
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona (gestión de personas) - v3.24.0.
-- `hexagonal-mercadoPagoContext.mmd`: Arquitectura hexagonal del módulo MercadoPagoContext (contexto de pagos MP) - v3.24.0.
+- `hexagonal-mercadoPagoContext.mmd`: Arquitectura hexagonal del módulo MercadoPagoContext (contexto de pagos MP) - v3.25.0.
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 
 ## Diagramas de Datos

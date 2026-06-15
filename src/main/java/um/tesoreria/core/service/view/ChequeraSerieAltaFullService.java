@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.ChequeraCuotaException;
-import um.tesoreria.core.kotlin.model.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAltaFull;
 import um.tesoreria.core.kotlin.repository.view.ChequeraSerieAltaFullRepository;
 import um.tesoreria.core.service.ChequeraCuotaService;

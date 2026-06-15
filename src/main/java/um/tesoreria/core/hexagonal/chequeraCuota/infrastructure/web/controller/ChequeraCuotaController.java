@@ -1,13 +1,13 @@
 /**
  *
  */
-package um.tesoreria.core.controller;
+package um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.web.controller;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-import um.tesoreria.core.kotlin.model.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.model.internal.CuotaPeriodoDto;
 import um.tesoreria.core.service.view.ChequeraCuotaDeudaService;

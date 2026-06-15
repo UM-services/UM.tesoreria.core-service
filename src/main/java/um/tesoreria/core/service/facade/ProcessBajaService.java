@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import um.tesoreria.core.exception.BajaException;
 import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
-import um.tesoreria.core.kotlin.model.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.model.Debito;
 import um.tesoreria.core.hexagonal.baja.application.service.BajaService;
 import um.tesoreria.core.service.ChequeraCuotaService;

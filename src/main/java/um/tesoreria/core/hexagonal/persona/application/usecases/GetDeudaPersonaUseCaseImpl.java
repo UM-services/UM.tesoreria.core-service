@@ -6,10 +6,11 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.client.tesoreria.mercadopago.PreferenceClient;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
 import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.GetDeudaPersonaUseCase;
-import um.tesoreria.core.kotlin.model.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.model.dto.DeudaPersonaDto;
 import um.tesoreria.core.model.dto.VencimientoDto;
@@ -206,11 +207,11 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
                 .build();
     }
 
-    private um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraSerie toDomain(ChequeraSerieEntity chequera) {
+    private ChequeraSerie toDomain(ChequeraSerieEntity chequera) {
         if (chequera == null) {
             return null;
         }
-        return um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraSerie.builder()
+        return ChequeraSerie.builder()
                 .chequeraId(chequera.getChequeraId())
                 .facultadId(chequera.getFacultadId())
                 .tipoChequeraId(chequera.getTipoChequeraId())

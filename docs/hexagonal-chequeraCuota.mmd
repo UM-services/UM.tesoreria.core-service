@@ -1,15 +1,18 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.8.0)
+title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.25.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
         CC[ChequeraCuota<br/>Entidad de Dominio]
         CP[ChequeraPago<br/>Entidad de Dominio]
         CT[ChequeraTotal<br/>Entidad de Dominio]
-        CS[ChequeraSerie<br/>Entidad de Dominio]
         DD[DeudaData<br/>Agregado]
         CDU[CalculateDeudaUseCase<br/>Puerto de Entrada]
         CCR[ChequeraCuotaRepository<br/>Puerto de Salida]
+    end
+
+    subgraph ModuloExterno ["Módulo ChequeraSerie"]
+        CS[ChequeraSerie<br/>Domain Model]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
@@ -58,11 +61,12 @@ flowchart TD
     CC -->|compone| DD
     CP -->|compone| DD
     CT -->|compone| DD
+    CDU -.->|usa| CS
 
     style CC fill:#e1f5fe
     style CP fill:#e1f5fe
     style CT fill:#e1f5fe
-    style CS fill:#e1f5fe
+    style CS fill:#b3e5fc
     style DD fill:#e3f2fd
     style CDU fill:#f3e5f5
     style CCR fill:#f3e5f5
