@@ -10,6 +10,7 @@ import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoCo
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.in.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -18,6 +19,7 @@ public class MercadoPagoContextService {
 
     private final AddMercadoPagoContextUseCase addMercadoPagoContextUseCase;
     private final FindActiveByChequeraCuotaIdUseCase findActiveByChequeraCuotaIdUseCase;
+    private final FindActiveByReservaVacanteIdUseCase findActiveByReservaVacanteIdUseCase;
     private final FindAllActiveChequeraCuotaUseCase findAllActiveChequeraCuotaUseCase;
     private final FindAllActiveToChangeUseCase findAllActiveToChangeUseCase;
     private final FindAllByChequeraCuotaIdAndActivoUseCase findAllByChequeraCuotaIdAndActivoUseCase;
@@ -48,6 +50,18 @@ public class MercadoPagoContextService {
         log.debug("\n\nProcessing MercadoPagoContextService.findActiveByChequeraCuotaId\n\n");
         try {
             return findActiveByChequeraCuotaIdUseCase.findActiveByChequeraCuotaId(chequeraCuotaId);
+        } catch (MercadoPagoContextException e) {
+            log.debug("\n\nNo se encontró contexto activo\n\n");
+            return null;
+        }
+    }
+
+    public MercadoPagoContext findActiveByReservaVacanteId(UUID reservaVacanteId) {
+        log.debug("\n\nProcessing MercadoPagoContextService.findActiveByReservaVacanteId\n\n");
+        try {
+            var context = findActiveByReservaVacanteIdUseCase.findActiveByReservaVacanteId(reservaVacanteId);
+            log.debug("MercadoPagoContext -> {}", context.jsonify());
+            return context;
         } catch (MercadoPagoContextException e) {
             log.debug("\n\nNo se encontró contexto activo\n\n");
             return null;

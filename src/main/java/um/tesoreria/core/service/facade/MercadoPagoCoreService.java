@@ -8,6 +8,7 @@ import um.tesoreria.core.exception.ChequeraCuotaException;
 import um.tesoreria.core.exception.MercadoPagoContextException;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
 import um.tesoreria.core.model.dto.UMPreferenceMPDto;
 import um.tesoreria.core.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
@@ -32,7 +33,7 @@ public class MercadoPagoCoreService {
     }
 
     @Transactional
-    public UMPreferenceMPDto makeContext(Long chequeraCuotaId) {
+    public UMPreferenceMPDto makeContextCuota(Long chequeraCuotaId) {
         log.debug("\n\nProcessing MercadoPagoCoreService.makeContext\n\n");
 
         var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
@@ -53,7 +54,7 @@ public class MercadoPagoCoreService {
     }
 
     @Transactional
-    public UMPreferenceMPDto makeContext(ChequeraCuotaEntity chequeraCuota, MercadoPagoContext existingContext) {
+    public UMPreferenceMPDto makeContextCuota(ChequeraCuotaEntity chequeraCuota, MercadoPagoContext existingContext) {
         var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
         if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
 
@@ -67,7 +68,7 @@ public class MercadoPagoCoreService {
 
     private boolean isCuotaAvailable(ChequeraCuotaEntity chequeraCuota) {
         log.debug("\n\nProcessing MercadoPagoCoreService.isCuotaAvailable\n\n");
-        var result = chequeraCuota.getPagado() != 1 && chequeraCuota.getBaja() != 1 && chequeraCuota.getCompensada() != 1;
+        var result = chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0 && chequeraCuota.getCompensada() == 0;
         log.debug("ChequeraCuota available result -> {}", result);
         return result;
     }
@@ -156,6 +157,30 @@ public class MercadoPagoCoreService {
     public MercadoPagoContext findContextByMercadoPagoContextId(Long mercadoPagoContextId) {
         log.debug("Processing MercadoPagoCoreService.findContextByMercadoPagoContextId");
         return mercadoPagoContextService.findByMercadoPagoContextId(mercadoPagoContextId);
+    }
+
+    @Transactional
+    public UMPreferenceMPDto createContextVacante(ReservaVacante reservaVacante) {
+        log.debug("\n\nProcessing MercadoPagoCoreService.makeContextVacante\n\n");
+        MercadoPagoContext mercadoPagoContext = MercadoPagoContext.builder()
+                .reservaVacanteId(reservaVacante.getReservaVacanteId())
+                .fechaVencimiento(reservaVacante.getVencimiento())
+                .importe(reservaVacante.getImporte())
+                .changed((byte) 0)
+                .activo((byte) 1)
+                .build();
+        mercadoPagoContext = mercadoPagoContextService.add(mercadoPagoContext);
+        var response = buildResponseVacante(mercadoPagoContext, reservaVacante);
+        log.debug("\n\nUMPreferenceMPDto -> {}\n\n", response.jsonify());
+        return response;
+    }
+
+    private UMPreferenceMPDto buildResponseVacante(MercadoPagoContext context, ReservaVacante reservaVacante) {
+        log.debug("\n\nProcessing MercadoPagoCoreService.buildResponseVacante\n\n");
+        return UMPreferenceMPDto.builder()
+                .mercadoPagoContext(context)
+                .reservaVacante(reservaVacante)
+                .build();
     }
 
 }

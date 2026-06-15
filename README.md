@@ -4,7 +4,25 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.25.0**
+**Versión actual (SemVer): 3.26.0**
+
+## Novedades 3.26.0 (verificado en código)
+- feat(mercadopagoContext): Nuevo `FindActiveByReservaVacanteIdUseCase` para recuperar contexto MP activo por `reservaVacanteId` (UUID)
+  - Nuevo puerto de entrada, implementación, método en repositorio (`findByReservaVacanteIdAndActivo`), método JPA y adaptador
+- feat(mercadopagoContext): Nuevo `PreferenceVacanteClient` Feign client para crear preferencias de vacantes
+- feat(mercadopagoContext): `MercadoPagoContext` domain model con `jsonify()` para logging estructurado
+- feat(reservaVacante): Integración con MercadoPago al crear reserva — nuevo `MercadoPagoCoreService.createContextVacante()` y `PreferenceVacanteClient.createPreference()`
+- feat(reservaVacante): Nuevo campo `Campanha campanha` en modelo de dominio `ReservaVacante`
+- feat(reservaVacante): `ReservaVacanteResponse` mejorado con `initPoint` desde MercadoPagoContext
+  - `ReservaVacanteDtoMapper` ahora inyecta `MercadoPagoContextService` para resolver `initPoint`
+- feat(reservaVacante): `FindReservaVacanteUseCaseImpl` ahora enriquece con `Campanha` y logging con `jsonify()`
+- fix(chequeraCuota/mercadopagoContext): Formato de fecha ISO 8601 unificado a `yyyy-MM-dd'T'HH:mm:ssXX` en todas las entidades
+- fix(mercadopagoContext): Corregida lógica `isCuotaAvailable()` — comparación `!=` → `==` para campos `pagado`, `baja`, `compensada`
+- refactor(mercadopagoContext): Renombrado `makeContext()` → `makeContextCuota()` en `MercadoPagoCoreService` y `MercadoPagoCoreController`
+- refactor(reservaVacante): Eliminado `@Transactional` de `CreateReservaVacanteUseCaseImpl`
+- refactor(dto): `UMPreferenceMPDto` extendido con campo `ReservaVacante`
+
+> Basado en análisis profundo de `git diff HEAD` (21 archivos modificados, +166/-19 líneas) y `pom.xml` (versión 3.25.0 → 3.26.0).
 
 ## Novedades 3.25.0 (verificado en código)
 - feat(mercadoPagoContext): New `reservaVacanteId` (UUID) field and domain associations `ChequeraCuota`/`ReservaVacante`

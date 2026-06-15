@@ -6,6 +6,7 @@ import um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistence
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface JpaMercadoPagoContextRepository extends JpaRepository<MercadoPagoContextEntity, Long> {
 
@@ -14,6 +15,8 @@ public interface JpaMercadoPagoContextRepository extends JpaRepository<MercadoPa
     List<MercadoPagoContextEntity> findAllByStatusAndChequeraPagoIdIsNull(String status);
 
     Optional<MercadoPagoContextEntity> findByChequeraCuotaIdAndActivo(Long chequeraCuotaId, Byte activo);
+
+    Optional<MercadoPagoContextEntity> findByReservaVacanteId(UUID reservaVacanteId);
 
     Optional<MercadoPagoContextEntity> findByMercadoPagoContextId(Long mercadoPagoContextId);
 

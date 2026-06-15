@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ReservaVacante (v3.24.0)
+title: Arquitectura Hexagonal - Módulo ReservaVacante (v3.26.0)
 ---
 
 classDiagram
@@ -13,6 +13,7 @@ classDiagram
             +String estado
             +BigDecimal importe
             +OffsetDateTime vencimiento
+            +Campanha campanha
             +Persona persona
             +Domicilio domicilio
             +LocalDateTime created
@@ -41,12 +42,15 @@ classDiagram
                 -PersonaService personaService
                 -DomicilioService domicilioService
                 -CampanhaService campanhaService
+                -MercadoPagoCoreService mercadoPagoCoreService
+                -PreferenceVacanteClient preferenceVacanteClient
                 +createReservaVacante(ReservaVacanteRequest) ReservaVacante
             }
             class FindReservaVacanteUseCaseImpl {
                 -ReservaVacanteRepository repository
                 -PersonaService personaService
                 -DomicilioService domicilioService
+                -CampanhaService campanhaService
                 +findByReservaVacanteId(UUID) ReservaVacante
             }
         }
@@ -117,14 +121,16 @@ classDiagram
                 +String apellido
                 +String email
                 +UUID campanhaId
+                +String estado
                 +BigDecimal importe
                 +OffsetDateTime vencimiento
+                +String initPoint
                 +LocalDateTime created
-                +String estado
                 +LocalDateTime updated
             }
 
             class ReservaVacanteDtoMapper {
+                -MercadoPagoContextService mercadoPagoContextService
                 +toDomain(ReservaVacanteRequest) ReservaVacante
                 +toResponse(ReservaVacante) ReservaVacanteResponse
             }

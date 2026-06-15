@@ -58,7 +58,7 @@ public class ChequeraCuotaEntity extends Auditable {
     private Integer arancelTipoId;
 
     @Column(name = "chc_1er_vencimiento")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime vencimiento1;
 
     @Builder.Default
@@ -70,7 +70,7 @@ public class ChequeraCuotaEntity extends Auditable {
     private BigDecimal importe1Original = BigDecimal.ZERO;
 
     @Column(name = "chc_2do_vencimiento")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime vencimiento2;
 
     @Builder.Default
@@ -82,7 +82,7 @@ public class ChequeraCuotaEntity extends Auditable {
     private BigDecimal importe2Original = BigDecimal.ZERO;
 
     @Column(name = "chc_3er_vencimiento")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime vencimiento3;
 
     @Builder.Default

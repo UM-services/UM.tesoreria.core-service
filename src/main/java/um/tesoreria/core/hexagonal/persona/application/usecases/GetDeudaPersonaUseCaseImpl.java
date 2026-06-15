@@ -81,8 +81,8 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
             List<ChequeraSerieEntity> groupSeries = entry.getValue();
             if (groupSeries.isEmpty()) continue;
             
-            Integer facultadId = groupSeries.get(0).getFacultadId();
-            Integer tipoChequeraId = groupSeries.get(0).getTipoChequeraId();
+            Integer facultadId = groupSeries.getFirst().getFacultadId();
+            Integer tipoChequeraId = groupSeries.getFirst().getTipoChequeraId();
             List<Long> serieIds = groupSeries.stream().map(ChequeraSerieEntity::getChequeraSerieId).collect(Collectors.toList());
 
             allCuotas.addAll(chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIds(
@@ -157,7 +157,7 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
                         && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
 
                     MercadoPagoContext existingContext = contextsByCuotaId.get(chequeraCuota.getChequeraCuotaId());
-                    var umPreferenceMPDto = mercadoPagoCoreService.makeContext(chequeraCuota, existingContext);
+                    var umPreferenceMPDto = mercadoPagoCoreService.makeContextCuota(chequeraCuota, existingContext);
 
                     if (umPreferenceMPDto != null) {
                         var context = umPreferenceMPDto.getMercadoPagoContext();

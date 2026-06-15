@@ -20,7 +20,7 @@ public class MercadoPagoCoreController {
     @GetMapping("/makeContext/{chequeraCuotaId}")
     public ResponseEntity<UMPreferenceMPDto> makeContext(@PathVariable Long chequeraCuotaId) {
         try {
-            return ResponseEntity.ok(service.makeContext(chequeraCuotaId));
+            return ResponseEntity.ok(service.makeContextCuota(chequeraCuotaId));
         } catch (MercadoPagoContextException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
