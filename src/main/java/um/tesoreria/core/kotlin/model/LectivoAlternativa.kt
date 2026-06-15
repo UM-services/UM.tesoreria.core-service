@@ -1,6 +1,7 @@
 package um.tesoreria.core.kotlin.model
 
 import jakarta.persistence.*
+import um.tesoreria.core.model.Auditable
 
 @Entity
 @Table(

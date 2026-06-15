@@ -5,6 +5,8 @@ import jakarta.persistence.Table
 import jakarta.persistence.Id
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
+import um.tesoreria.core.model.Auditable
+import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 
 @Entity
@@ -33,4 +35,8 @@ data class SpoterData(
 	var alternativaId: Int? = null
 
 
-) : Auditable()
+) : Auditable() {
+    fun jsonify(): String {
+		return Jsonifier.builder(this).build()
+	}
+}

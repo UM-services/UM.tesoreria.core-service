@@ -22,7 +22,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.hexagonal.contrato.infrastructure.persistence.entity.ContratoEntity;
-import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.util.Jsonifier;
 
 /**

@@ -8,7 +8,7 @@ import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraTotal;
 @Component
 public class ChequeraCuotaMapper {
 
-    public ChequeraCuota toDomain(um.tesoreria.core.kotlin.model.ChequeraCuota entity) {
+    public ChequeraCuota toDomain(um.tesoreria.core.kotlin.model.ChequeraCuotaEntity entity) {
         if (entity == null) {
             return null;
         }

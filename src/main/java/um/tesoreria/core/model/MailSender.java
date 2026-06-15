@@ -16,7 +16,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import um.tesoreria.core.kotlin.model.Auditable;
 
 /**
  * @author daniel

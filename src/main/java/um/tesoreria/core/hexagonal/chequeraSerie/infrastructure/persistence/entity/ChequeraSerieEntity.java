@@ -7,8 +7,8 @@ import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.Fa
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.kotlin.model.ArancelTipo;
-import um.tesoreria.core.kotlin.model.Auditable;
-import um.tesoreria.core.kotlin.model.Domicilio;
+import um.tesoreria.core.model.Auditable;
+import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity;
 import um.tesoreria.core.kotlin.model.Lectivo;
 import um.tesoreria.core.kotlin.model.TipoChequera;
 import um.tesoreria.core.util.Jsonifier;
@@ -138,7 +138,7 @@ public class ChequeraSerieEntity extends Auditable {
             @JoinColumn(name = "chs_per_id", referencedColumnName = "dom_per_id", insertable = false, updatable = false),
             @JoinColumn(name = "chs_doc_id", referencedColumnName = "dom_doc_id", insertable = false, updatable = false)
     })
-    private Domicilio domicilio;
+    private DomicilioEntity domicilio;
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chs_lec_id", insertable = false, updatable = false)

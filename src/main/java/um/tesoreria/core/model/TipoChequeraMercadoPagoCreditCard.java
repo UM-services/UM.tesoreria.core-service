@@ -2,7 +2,6 @@ package um.tesoreria.core.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import um.tesoreria.core.kotlin.model.Auditable;
 import um.tesoreria.core.kotlin.model.TipoChequera;
 
 import java.util.UUID;

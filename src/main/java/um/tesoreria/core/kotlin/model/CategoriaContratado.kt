@@ -3,6 +3,7 @@ package um.tesoreria.core.kotlin.model
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 
 @Entity

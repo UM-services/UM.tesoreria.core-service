@@ -5,6 +5,7 @@ import jakarta.persistence.Table
 import jakarta.persistence.Id
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
+import um.tesoreria.core.model.Auditable
 
 @Entity
 @Table

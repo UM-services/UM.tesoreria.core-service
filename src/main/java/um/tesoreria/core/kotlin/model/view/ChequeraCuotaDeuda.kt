@@ -108,6 +108,6 @@ data class ChequeraCuotaDeuda(
     @OneToOne
     @JoinColumn(name = "chc_id", insertable = false, updatable = false)
     @JsonIgnore
-    var chequeraCuota: ChequeraCuota? = null
+    var chequeraCuota: ChequeraCuotaEntity? = null
 
 )

@@ -6,6 +6,7 @@ import jakarta.persistence.UniqueConstraint
 import jakarta.persistence.Id
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
+import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 
 @Entity

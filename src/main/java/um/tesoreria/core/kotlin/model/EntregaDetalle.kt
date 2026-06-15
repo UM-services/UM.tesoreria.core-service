@@ -10,6 +10,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
 import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity
+import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
 

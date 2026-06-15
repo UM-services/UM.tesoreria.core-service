@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
+import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity;
 import um.tesoreria.core.kotlin.model.*;
 
 /**
@@ -88,7 +89,7 @@ public class ChequeraIncompleta implements Serializable {
 	@JoinColumns({
 			@JoinColumn(name = "personaId", referencedColumnName = "dom_per_id", insertable = false, updatable = false),
 			@JoinColumn(name = "documentoId", referencedColumnName = "dom_doc_id", insertable = false, updatable = false) })
-	private Domicilio domicilio;
+	private DomicilioEntity domicilio;
 
 	@OneToOne
 	@JoinColumn(name = "lectivoId", insertable = false, updatable = false)

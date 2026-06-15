@@ -2,7 +2,7 @@ package um.tesoreria.core.hexagonal.cursoCargoContratado.infrastructure.persiste
 
 import jakarta.persistence.*;
 import lombok.*;
-import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.kotlin.model.view.ContratadoPersona;
 import um.tesoreria.core.util.Jsonifier;
 

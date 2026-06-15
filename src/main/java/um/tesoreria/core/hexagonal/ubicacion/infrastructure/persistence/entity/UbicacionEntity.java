@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.hexagonal.dependencia.infrastructure.persistence.entity.DependenciaEntity;
 
 @Getter

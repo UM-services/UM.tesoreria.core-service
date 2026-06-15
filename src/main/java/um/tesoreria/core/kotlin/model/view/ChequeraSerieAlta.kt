@@ -6,7 +6,9 @@ import org.hibernate.annotations.Immutable
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
+import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity
 import um.tesoreria.core.kotlin.model.*
+import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -101,7 +103,7 @@ data class ChequeraSerieAlta(
             updatable = false
         ), JoinColumn(name = "chs_doc_id", referencedColumnName = "dom_doc_id", insertable = false, updatable = false)
     )
-    var domicilio: Domicilio? = null,
+    var domicilio: DomicilioEntity? = null,
 
     @OneToOne
     @JoinColumn(name = "chs_lec_id", insertable = false, updatable = false)

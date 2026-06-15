@@ -6,6 +6,8 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
+import um.tesoreria.core.model.Auditable
+import um.tesoreria.core.util.Jsonifier
 
 @Entity
 @Table(
@@ -35,6 +37,10 @@ data class CarreraChequera(
 
 	fun getCarreraKey(): String {
 		return "$facultadId.$planId.$carreraId"
+	}
+
+    fun jsonify(): String {
+		return Jsonifier.builder(this).build()
 	}
 
 }

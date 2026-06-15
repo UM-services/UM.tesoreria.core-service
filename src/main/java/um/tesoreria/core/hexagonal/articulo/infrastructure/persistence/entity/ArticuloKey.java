@@ -18,7 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.model.Auditable;
 
 /**
  * @author daniel

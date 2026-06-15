@@ -1,14 +1,11 @@
-/**
- * 
- */
 package um.tesoreria.core.hexagonal.persona.infrastructure.web.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
-import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,24 +18,28 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.exception.PersonaException;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
+import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaRequest;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaResponse;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.mapper.PersonaDtoMapper;
 import um.tesoreria.core.model.dto.DeudaPersonaDto;
 import um.tesoreria.core.model.view.PersonaKey;
-import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 
-/**
- * @author daniel
- *
- */
 @RestController
 @RequestMapping({"/persona", "/api/tesoreria/core/persona"})
 @RequiredArgsConstructor
 public class PersonaController {
 
 	private final PersonaService service;
+	private final PersonaDtoMapper dtoMapper;
 
 	@GetMapping("/santander")
-	public ResponseEntity<List<PersonaEntity>> findAllSantander() {
-		return ResponseEntity.ok(service.findAllSantander());
+	public ResponseEntity<List<PersonaResponse>> findAllSantander() {
+		List<PersonaResponse> responses = service.findAllSantander().stream()
+				.map(dtoMapper::toResponse)
+				.collect(Collectors.toList());
+		return ResponseEntity.ok(responses);
 	}
 
 	@GetMapping("/inscriptossinchequera/{facultadId}/{lectivoId}/{geograficaId}/{curso}")
@@ -77,27 +78,30 @@ public class PersonaController {
 	}
 
 	@GetMapping("/unique/{personaId}/{documentoId}")
-	public ResponseEntity<PersonaEntity> findByUnique(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
+	public ResponseEntity<PersonaResponse> findByUnique(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
 		try {
-			return ResponseEntity.ok(service.findByUnique(personaId, documentoId));
+			Persona domain = service.findByUnique(personaId, documentoId);
+			return ResponseEntity.ok(dtoMapper.toResponse(domain));
 		} catch (PersonaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
 
 	@GetMapping("/bypersonaId/{personaId}")
-	public ResponseEntity<PersonaEntity> findByPersonaId(@PathVariable BigDecimal personaId) {
+	public ResponseEntity<PersonaResponse> findByPersonaId(@PathVariable BigDecimal personaId) {
 		try {
-			return ResponseEntity.ok(service.findByPersonaId(personaId));
+			Persona domain = service.findByPersonaId(personaId);
+			return ResponseEntity.ok(dtoMapper.toResponse(domain));
 		} catch (PersonaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
 	}
 
 	@GetMapping("/{uniqueId}")
-	public ResponseEntity<PersonaEntity> findByUniqueId(@PathVariable Long uniqueId) {
+	public ResponseEntity<PersonaResponse> findByUniqueId(@PathVariable Long uniqueId) {
 		try {
-			return ResponseEntity.ok(service.findByUniqueId(uniqueId));
+			Persona domain = service.findByUniqueId(uniqueId);
+			return ResponseEntity.ok(dtoMapper.toResponse(domain));
 		} catch (PersonaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -116,13 +120,17 @@ public class PersonaController {
 	}
 
 	@PostMapping("/")
-	public ResponseEntity<PersonaEntity> add(@RequestBody PersonaEntity personaEntity) {
-		return ResponseEntity.ok(service.add(personaEntity));
+	public ResponseEntity<PersonaResponse> add(@RequestBody PersonaRequest personaRequest) {
+		Persona domain = dtoMapper.toDomain(personaRequest);
+		Persona created = service.create(domain);
+		return ResponseEntity.ok(dtoMapper.toResponse(created));
 	}
 
 	@PutMapping("/{uniqueId}")
-	public ResponseEntity<PersonaEntity> update(@RequestBody PersonaEntity personaEntity, @PathVariable Long uniqueId) {
-		return ResponseEntity.ok(service.update(personaEntity, uniqueId));
+	public ResponseEntity<PersonaResponse> update(@RequestBody PersonaRequest personaRequest, @PathVariable Long uniqueId) {
+		Persona domain = dtoMapper.toDomain(personaRequest);
+		Persona updated = service.update(domain, uniqueId);
+		return ResponseEntity.ok(dtoMapper.toResponse(updated));
 	}
 
 	@GetMapping("/inscripcion/full/{facultadId}/{personaId}/{documentoId}/{lectivoId}")

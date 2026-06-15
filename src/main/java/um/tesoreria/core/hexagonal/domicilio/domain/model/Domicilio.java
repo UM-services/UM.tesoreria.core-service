@@ -1,0 +1,40 @@
+package um.tesoreria.core.hexagonal.domicilio.domain.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import um.tesoreria.core.util.Jsonifier;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Domicilio {
+    private Long domicilioId;
+    private BigDecimal personaId;
+    private Integer documentoId;
+    private OffsetDateTime fecha;
+    private String calle;
+    private String puerta;
+    private String piso;
+    private String dpto;
+    private String telefono;
+    private String movil;
+    private String observaciones;
+    private String codigoPostal;
+    private Integer facultadId;
+    private Integer provinciaId;
+    private Integer localidadId;
+    private String emailPersonal;
+    private String emailInstitucional;
+    private String laboral;
+    private String emailPagador;
+
+    public String jsonify() {
+        return Jsonifier.builder(this).build();
+    }
+}

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
+import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 

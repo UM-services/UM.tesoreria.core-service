@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CarreraException;
-import um.tesoreria.core.exception.DomicilioException;
+import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.exception.InfoLdapException;
 import um.tesoreria.core.exception.LegajoException;
@@ -27,12 +27,14 @@ import um.tesoreria.core.extern.consumer.PlanFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.*;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.InfoLdap;
 import um.tesoreria.core.service.CarreraService;
 import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
-import um.tesoreria.core.service.DomicilioService;
+import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.InfoLdapService;
 import um.tesoreria.core.service.LegajoService;
@@ -79,20 +81,15 @@ public class SincronizeService {
 				usuario = new InfoLdap();
 			}
 			if (usuario.getPersonaId() != null) {
-				Domicilio domicilio;
-				try {
-					domicilio = domicilioService.findFirstByPersonaId(serie.getPersonaId());
-
-				} catch (DomicilioException e) {
-					domicilio = new Domicilio();
-				}
+				Domicilio domicilio = domicilioService.findFirstByPersonaId(serie.getPersonaId())
+						.orElse(new Domicilio());
 				domicilio.setEmailInstitucional(usuario.getEmailInstitucional());
 				if (domicilio.getDomicilioId() == null) {
 					domicilio.setPersonaId(serie.getPersonaId());
 					domicilio.setDocumentoId(serie.getDocumentoId());
-					domicilioService.add(domicilio, true);
+					domicilioService.create(domicilio);
 				} else {
-					domicilioService.update(domicilio, domicilio.getDomicilioId(), true);
+					domicilioService.update(domicilio.getDomicilioId(), domicilio);
 				}
 			}
 		}

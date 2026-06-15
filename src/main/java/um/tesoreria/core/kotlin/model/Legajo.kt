@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinColumns
 import jakarta.persistence.OneToOne
+import um.tesoreria.core.model.Auditable
+import um.tesoreria.core.util.Jsonifier
 
 @Entity
 @Table(
@@ -71,4 +73,8 @@ data class Legajo(
     )
     var carrera: Carrera? = null
 
-) : Auditable()
+) : Auditable() {
+    fun jsonify(): String {
+        return Jsonifier.builder(this).build()
+    }
+}

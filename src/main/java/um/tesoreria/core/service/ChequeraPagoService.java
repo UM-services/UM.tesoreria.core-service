@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraPagoException;
-import um.tesoreria.core.kotlin.model.ChequeraCuota;
+import um.tesoreria.core.kotlin.model.ChequeraCuotaEntity;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.model.FacturacionElectronica;
@@ -140,7 +140,7 @@ public class ChequeraPagoService {
 
     private boolean isValidChequeraPago(ChequeraPago pago) {
         return Optional.ofNullable(pago.getChequeraCuota())
-            .map(ChequeraCuota::getChequeraSerie)
+            .map(ChequeraCuotaEntity::getChequeraSerie)
             .map(ChequeraSerieEntity::getPersona)
             .isPresent();
     }

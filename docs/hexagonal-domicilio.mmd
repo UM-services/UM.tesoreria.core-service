@@ -1,0 +1,190 @@
+---
+title: Arquitectura Hexagonal - Módulo Domicilio (v3.24.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Domicilio {
+            +Long domicilioId
+            +BigDecimal personaId
+            +Integer documentoId
+            +OffsetDateTime fecha
+            +String calle
+            +String puerta
+            +String piso
+            +String dpto
+            +String telefono
+            +String movil
+            +String observaciones
+            +String codigoPostal
+            +Integer facultadId
+            +Integer provinciaId
+            +Integer localidadId
+            +String emailPersonal
+            +String emailInstitucional
+            +String laboral
+            +String emailPagador
+            +jsonify() String
+        }
+
+        class DomicilioRepository {
+            <<interface>>
+            +create(Domicilio) Domicilio
+            +findById(Long) Optional~Domicilio~
+            +findByUnique(Integer, Integer) Optional~Domicilio~
+            +findFirstByPersonaId(Integer) Optional~Domicilio~
+            +update(Long, Domicilio) Optional~Domicilio~
+            +deleteById(Long) void
+        }
+    }
+
+    namespace application {
+        class DomicilioService {
+            -CreateDomicilioUseCase createDomicilioUseCase
+            -GetDomicilioByIdUseCase getDomicilioByIdUseCase
+            -GetDomicilioByUniqueUseCase getDomicilioByUniqueUseCase
+            -GetDomicilioWithPagadorUseCase getDomicilioWithPagadorUseCase
+            -CaptureDomicilioUseCase captureDomicilioUseCase
+            -SincronizeDomicilioUseCase sincronizeDomicilioUseCase
+            -DeleteDomicilioUseCase deleteDomicilioUseCase
+            -GetAllDomiciliosByUnifiedsUseCase getAllDomiciliosByUnifiedsUseCase
+            -GetDomicilioByPersonaIdUseCase getDomicilioByPersonaIdUseCase
+            +findByDomicilioId(Long) Optional~Domicilio~
+            +findByUnique(Integer, Integer) Domicilio
+            +findWithPagador(Integer, Integer, Integer) Domicilio
+            +findFirstByPersonaId(Integer) Optional~Domicilio~
+            +create(Domicilio) Domicilio
+            +update(Long, Domicilio) Optional~Domicilio~
+            +sincronize(Domicilio) Domicilio
+            +capture(Integer, Integer) Domicilio
+            +findAllByUnifieds(String) List~Domicilio~
+            +delete(Long) void
+        }
+
+        namespace usecases {
+            class CreateDomicilioUseCaseImpl
+            class GetDomicilioByIdUseCaseImpl
+            class GetDomicilioByUniqueUseCaseImpl
+            class GetDomicilioWithPagadorUseCaseImpl
+            class CaptureDomicilioUseCaseImpl
+            class SincronizeDomicilioUseCaseImpl
+            class DeleteDomicilioUseCaseImpl
+            class GetAllDomiciliosByUnifiedsUseCaseImpl
+            class GetDomicilioByPersonaIdUseCaseImpl
+        }
+
+        class CreateDomicilioUseCase { <<interface>> }
+        class GetDomicilioByIdUseCase { <<interface>> }
+        class GetDomicilioByUniqueUseCase { <<interface>> }
+        class GetDomicilioWithPagadorUseCase { <<interface>> }
+        class CaptureDomicilioUseCase { <<interface>> }
+        class SincronizeDomicilioUseCase { <<interface>> }
+        class DeleteDomicilioUseCase { <<interface>> }
+        class GetAllDomiciliosByUnifiedsUseCase { <<interface>> }
+        class GetDomicilioByPersonaIdUseCase { <<interface>> }
+
+        class DomicilioException
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class DomicilioEntity {
+                +Long domicilioId
+                +Integer personaId
+                +Integer documentoId
+                +OffsetDateTime fecha
+                +String calle
+                +String emailPersonal
+                +String emailInstitucional
+            }
+
+            class JpaDomicilioRepository {
+                <<JpaRepository>>
+                +findByDomicilioId(Long) Optional~DomicilioEntity~
+                +findByPersonaIdAndDocumentoId(Integer, Integer) Optional~DomicilioEntity~
+                +findFirstByPersonaId(Integer) Optional~DomicilioEntity~
+            }
+
+            class JpaDomicilioRepositoryAdapter {
+                -JpaDomicilioRepository repository
+                -DomicilioMapper mapper
+                +create(Domicilio) Domicilio
+                +findById(Long) Optional~Domicilio~
+                +findByUnique(Integer, Integer) Optional~Domicilio~
+                +findFirstByPersonaId(Integer) Optional~Domicilio~
+                +update(Long, Domicilio) Optional~Domicilio~
+                +deleteById(Long) void
+            }
+
+            class DomicilioMapper {
+                +toEntity(Domicilio) DomicilioEntity
+                +toDomain(DomicilioEntity) Domicilio
+            }
+        }
+
+        namespace web {
+            class DomicilioController {
+                -DomicilioService domicilioService
+                -DomicilioDtoMapper dtoMapper
+                +findById(Long) ResponseEntity~DomicilioResponse~
+                +findUnique(Integer, Integer) ResponseEntity~DomicilioResponse~
+                +findWithPagador(Integer, Integer, Integer) ResponseEntity~DomicilioResponse~
+                +create(DomicilioRequest) ResponseEntity~DomicilioResponse~
+                +update(Long, DomicilioRequest) ResponseEntity~DomicilioResponse~
+                +sincronize(DomicilioRequest) ResponseEntity~DomicilioResponse~
+                +capture(Integer, Integer) ResponseEntity~DomicilioResponse~
+                +findByUnifieds(String) ResponseEntity~List~DomicilioResponse~~
+                +delete(Long) ResponseEntity~Void~
+            }
+
+            class DomicilioRequest
+            class DomicilioResponse
+            class DomicilioDtoMapper {
+                +toDomain(DomicilioRequest) Domicilio
+                +toResponse(Domicilio) DomicilioResponse
+            }
+        }
+    }
+
+    DomicilioService --> CreateDomicilioUseCase : uses
+    DomicilioService --> GetDomicilioByIdUseCase : uses
+    DomicilioService --> GetDomicilioByUniqueUseCase : uses
+    DomicilioService --> GetDomicilioWithPagadorUseCase : uses
+    DomicilioService --> CaptureDomicilioUseCase : uses
+    DomicilioService --> SincronizeDomicilioUseCase : uses
+    DomicilioService --> DeleteDomicilioUseCase : uses
+    DomicilioService --> GetAllDomiciliosByUnifiedsUseCase : uses
+    DomicilioService --> GetDomicilioByPersonaIdUseCase : uses
+
+    CreateDomicilioUseCaseImpl ..|> CreateDomicilioUseCase : implements
+    GetDomicilioByIdUseCaseImpl ..|> GetDomicilioByIdUseCase : implements
+    GetDomicilioByUniqueUseCaseImpl ..|> GetDomicilioByUniqueUseCase : implements
+    GetDomicilioWithPagadorUseCaseImpl ..|> GetDomicilioWithPagadorUseCase : implements
+    CaptureDomicilioUseCaseImpl ..|> CaptureDomicilioUseCase : implements
+    SincronizeDomicilioUseCaseImpl ..|> SincronizeDomicilioUseCase : implements
+    DeleteDomicilioUseCaseImpl ..|> DeleteDomicilioUseCase : implements
+    GetAllDomiciliosByUnifiedsUseCaseImpl ..|> GetAllDomiciliosByUnifiedsUseCase : implements
+    GetDomicilioByPersonaIdUseCaseImpl ..|> GetDomicilioByPersonaIdUseCase : implements
+
+    CreateDomicilioUseCaseImpl --> DomicilioRepository : uses
+    GetDomicilioByIdUseCaseImpl --> DomicilioRepository : uses
+    GetDomicilioByUniqueUseCaseImpl --> DomicilioRepository : uses
+    SincronizeDomicilioUseCaseImpl --> DomicilioRepository : uses
+    DeleteDomicilioUseCaseImpl --> DomicilioRepository : uses
+    GetDomicilioByPersonaIdUseCaseImpl --> DomicilioRepository : uses
+
+    JpaDomicilioRepositoryAdapter ..|> DomicilioRepository : implements
+    JpaDomicilioRepositoryAdapter --> JpaDomicilioRepository : uses
+    JpaDomicilioRepositoryAdapter --> DomicilioMapper : uses
+
+    DomicilioMapper --> Domicilio : maps
+    DomicilioMapper --> DomicilioEntity : maps
+    JpaDomicilioRepository --> DomicilioEntity : persists
+
+    DomicilioController --> DomicilioService : calls
+    DomicilioController --> DomicilioDtoMapper : uses
+    DomicilioDtoMapper --> Domicilio : maps
+    DomicilioDtoMapper --> DomicilioRequest : maps
+    DomicilioDtoMapper --> DomicilioResponse : maps

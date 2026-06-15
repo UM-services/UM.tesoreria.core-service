@@ -17,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -30,17 +31,19 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraAlternativaException;
 import um.tesoreria.core.exception.ChequeraSerieException;
-import um.tesoreria.core.exception.DomicilioException;
+import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.PayPerTicException;
 import um.tesoreria.core.exception.PersonaException;
+import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
+import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.ChequeraAlternativa;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
-import um.tesoreria.core.kotlin.model.Domicilio;
+import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity;
 import um.tesoreria.core.model.PayPerTic;
 import um.tesoreria.core.model.view.CuotaDeudaPayPerTic;
 import um.tesoreria.core.service.ChequeraAlternativaService;
 import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
-import um.tesoreria.core.service.DomicilioService;
+import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.service.PayPerTicService;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.service.view.CuotaDeudaPayPerTicService;
@@ -55,28 +58,16 @@ import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.Per
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PayPerTicFileService {
 
-	@Autowired
-	private CuotaDeudaPayPerTicService cuotaDeudaPayPerTicService;
-
-	@Autowired
-	private ChequeraSerieService chequeraSerieService;
-
-	@Autowired
-	private PersonaService personaService;
-
-	@Autowired
-	private ChequeraAlternativaService chequeraAlternativaService;
-
-	@Autowired
-	private DomicilioService domicilioService;
-
-	@Autowired
-	private PayPerTicService payPerTicService;
-
-	@Autowired
-	private Environment env;
+	private final CuotaDeudaPayPerTicService cuotaDeudaPayPerTicService;
+	private final ChequeraSerieService chequeraSerieService;
+	private final PersonaService personaService;
+	private final ChequeraAlternativaService chequeraAlternativaService;
+	private final DomicilioService domicilioService;
+	private final PayPerTicService payPerTicService;
+	private final Environment env;
 
 	public String generate(OffsetDateTime desde, OffsetDateTime hasta) throws IOException {
 		String path = env.getProperty("path.files");
@@ -126,14 +117,14 @@ public class PayPerTicFileService {
 				chequeraSerie = new ChequeraSerieEntity();
 			}
 
-			PersonaEntity personaEntity = null;
+			Persona persona = null;
 			try {
-				personaEntity = personaService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId());
+				persona = personaService.findByUnique(chequeraSerie.getPersonaId(), chequeraSerie.getDocumentoId());
 			} catch (PersonaException e) {
-				personaEntity = new PersonaEntity();
+				persona = new Persona();
 			}
 
-			if (personaEntity.getUniqueId() != null) {
+			if (persona.getUniqueId() != null) {
 				row = sheet.createRow(++fila);
 				this.setCellString(row, 0, cuota.getKey(), style_normal); // external_transaction_id
 				this.setCellString(row, 1, cuota.getKey(), style_normal); // external_reference
@@ -167,16 +158,16 @@ public class PayPerTicFileService {
 				BigDecimal payer_reference = chequeraSerie.getPersonaId();
 				this.setCellBigDecimal(row, 16, payer_reference, style_normal);
 
-				String payer_name = personaEntity.getApellido() + ", " + personaEntity.getNombre();
+				String payer_name = persona.getApellido() + ", " + persona.getNombre();
 				this.setCellString(row, 17, payer_name, style_normal);
 
-				Domicilio domicilio = null;
+				Domicilio domicilio;
 				try {
-					domicilio = domicilioService.findByUnique(personaEntity.getPersonaId(), personaEntity.getDocumentoId());
+					domicilio = domicilioService.findByUnique(persona.getPersonaId(), persona.getDocumentoId());
 				} catch (DomicilioException e) {
 					domicilio = new Domicilio();
 				}
-				String payer_email = domicilio.getEmailPersonal();
+                String payer_email = domicilio.getEmailPersonal();
 				this.setCellString(row, 18, payer_email, style_normal);
 				String payer_id_country = "ARG";
 				this.setCellString(row, 20, payer_id_country, style_normal);
@@ -187,7 +178,7 @@ public class PayPerTicFileService {
 			}
 		}
 
-		for (Integer column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
+		for (int column = 0; column < sheet.getRow(0).getPhysicalNumberOfCells(); column++)
 			sheet.autoSizeColumn(column);
 
 		try {
@@ -199,7 +190,7 @@ public class PayPerTicFileService {
 			log.debug(file.getAbsolutePath());
 			book.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		return filename;
 	}
@@ -230,15 +221,15 @@ public class PayPerTicFileService {
 		try {
 			InputStream input = new FileInputStream(file);
 			Workbook workbook = new XSSFWorkbook(input);
-			Integer sheet_count = workbook.getNumberOfSheets();
-			log.debug("Sheets -> " + sheet_count.toString());
-			for (Integer counter = 0; counter < sheet_count; counter++) {
+			int sheet_count = workbook.getNumberOfSheets();
+			log.debug("Sheets -> " + Integer.toString(sheet_count));
+			for (int counter = 0; counter < sheet_count; counter++) {
 				Sheet sheet = workbook.getSheetAt(counter);
 				log.debug("Sheet -> " + sheet.getSheetName());
-				Integer rows = sheet.getLastRowNum();
-				for (Integer row_number = 1; row_number < rows; row_number++) {
+				int rows = sheet.getLastRowNum();
+				for (int row_number = 1; row_number < rows; row_number++) {
 					Row row = sheet.getRow(row_number);
-					Integer column = 0;
+					int column = 0;
 					if (row.getCell(column) != null) {
 						String payperticId = row.getCell(column).getStringCellValue();
 						PayPerTic rendicion = null;
@@ -305,10 +296,8 @@ public class PayPerTicFileService {
 			}
 			workbook.close();
 			input.close();
-		} catch (FileNotFoundException e) {
-			log.debug(e.getMessage());
 		} catch (IOException e) {
-			log.debug(e.getMessage());
+			log.error(e.getMessage());
 		}
 		payPerTicService.saveAll(pagos);
 	}

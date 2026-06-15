@@ -7,19 +7,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.exception.ChequeraSerieControlException;
-import um.tesoreria.core.exception.DomicilioException;
+import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
+import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
-import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
+import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.ChequeraSerieControl;
 import um.tesoreria.core.model.ChequeraTotal;
 import um.tesoreria.core.model.LectivoCuota;
 import um.tesoreria.core.model.LectivoTotal;
 import um.tesoreria.core.service.*;
+import um.tesoreria.core.util.Jsonifier;
 import um.tesoreria.core.util.Tool;
 
 import java.math.BigDecimal;
@@ -51,23 +54,23 @@ public class SpoterService {
                                                   CarreraChequera carreraChequera) {
         log.debug("Processing SpoterService.makeChequeraSpoter");
         Build build = buildService.findLast();
-        PersonaEntity personaEntity;
+        Persona persona;
         try {
-            personaEntity = personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
+            persona = personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
         } catch (PersonaException e) {
-            personaEntity = personaService.add(new PersonaEntity(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
+            persona = personaService.create(new Persona(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
                     spoterData.getApellido(), spoterData.getNombre(), "", (byte) 0, "", "", "", (byte) 0));
         }
-        logPersona(personaEntity);
+        log.debug("PersonaEntity: {}", persona.jsonify());
         Domicilio domicilio;
         try {
             domicilio = domicilioService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
         } catch (DomicilioException e) {
-            domicilio = domicilioService.add(new Domicilio(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
+            domicilio = domicilioService.create(new Domicilio(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
                     Tool.hourAbsoluteArgentina(), "", "", "", "", "", spoterData.getCelular(), "", "",
-                    spoterData.getFacultadId(), null, null, spoterData.getEmailPersonal(), "", "", ""), false);
+                    spoterData.getFacultadId(), null, null, spoterData.getEmailPersonal(), "", "", ""));
         }
-        logDomicilio(domicilio);
+        log.debug("Domicilio -> {}", domicilio.jsonify());
 
         // Determinar el número usando ChequeraSerieControl
         ChequeraSerieControl chequeraSerieControl;
@@ -90,13 +93,13 @@ public class SpoterService {
                     spoterData.getFacultadId(), 0L, Tool.dateAbsoluteArgentina(), lectivoId, spoterData.getPlanId(),
                     spoterData.getCarreraId(), (byte) 1, spoterData.getGeograficaId(), "", (byte) 0, null));
         }
-        logLegajo(legajo);
+        log.debug("Legajo -> {}", legajo.jsonify());
 
         // Generar ChequeraSerieControl
         chequeraSerieControl = chequeraSerieControlService
                 .add(new ChequeraSerieControl(null, carreraChequera.getFacultadId(),
                         carreraChequera.getTipoChequeraId(), chequeraSerieId, (byte) 0, 0, 0, 0L, (byte) 0));
-        logChequeraSerieControl(chequeraSerieControl);
+        log.debug("ChequeraSerieControl -> {}", chequeraSerieControl.jsonify());
 
         // Generar ChequeraSerie
         ChequeraSerieEntity chequeraSerie = chequeraSerieService.add(new ChequeraSerieEntity(null,
@@ -136,7 +139,7 @@ public class SpoterService {
                 null,
                 null,
                 null));
-        logChequeraSerie(chequeraSerie);
+        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
 
         // Generar ChequeraTotal
         List<ChequeraTotal> chequeraTotals = new ArrayList<>();
@@ -147,7 +150,7 @@ public class SpoterService {
                     BigDecimal.ZERO));
         }
         chequeraTotals = chequeraTotalService.saveAll(chequeraTotals);
-        logChequeraTotals(chequeraTotals);
+        log.debug("ChequeraTotals -> {}", Jsonifier.builder(chequeraTotals).build());
 
         // Generar ChequeraAlternativa
         List<ChequeraAlternativa> chequeraAlternativas = new ArrayList<>();
@@ -161,9 +164,10 @@ public class SpoterService {
                     Objects.requireNonNull(lectivoAlternativa.getCuotas())));
         }
         chequeraAlternativas = chequeraAlternativaService.saveAll(chequeraAlternativas);
-        logChequeraAlternativas(chequeraAlternativas);
+        log.debug("ChequeraAlternativas -> {}", Jsonifier.builder(chequeraAlternativas).build());
+
         // Generar Cuotas
-        List<ChequeraCuota> chequeraCuotas = new ArrayList<>();
+        List<ChequeraCuotaEntity> chequeraCuotas = new ArrayList<>();
         int offset = 0;
         for (LectivoCuota lectivoCuota : lectivoCuotaService.findAllByTipo(chequeraSerie.getFacultadId(),
                 chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(), chequeraSerie.getAlternativaId())) {
@@ -176,7 +180,7 @@ public class SpoterService {
                 vencimiento3 = Tool.dateAbsoluteArgentina().plusDays(40 + 30L * offset);
                 offset++;
             }
-            ChequeraCuota chequeraCuota = new ChequeraCuota(null, chequeraSerie.getChequeraId(), chequeraSerie.getFacultadId(),
+            ChequeraCuotaEntity chequeraCuota = new ChequeraCuotaEntity(null, chequeraSerie.getChequeraId(), chequeraSerie.getFacultadId(),
                     chequeraSerie.getTipoChequeraId(), chequeraSerie.getChequeraSerieId(), lectivoCuota.getProductoId(),
                     lectivoCuota.getAlternativaId(), lectivoCuota.getCuotaId(), lectivoCuota.getMes(),
                     lectivoCuota.getAnho(), chequeraSerie.getArancelTipoId(), vencimiento1, lectivoCuota.getImporte1(),
@@ -194,113 +198,8 @@ public class SpoterService {
             chequeraCuotas.add(chequeraCuota);
         }
         chequeraCuotas = chequeraCuotaService.saveAll(chequeraCuotas);
-        logChequeraCuotas(chequeraCuotas);
+        log.debug("ChequeraCuotas -> {}", Jsonifier.builder(chequeraCuotas).build());
         return chequeraSerie;
-    }
-
-    private void logLegajo(Legajo legajo) {
-        try {
-            log.debug("Legajo -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(legajo));
-        } catch (JsonProcessingException e) {
-            log.debug("Legajo jsonify error -> {}", e.getMessage());
-        }
-    }
-
-    private void logDomicilio(Domicilio domicilio) {
-        try {
-            log.debug("Domicilio -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(domicilio));
-        } catch (JsonProcessingException e) {
-            log.debug("Domicilio jsonify error -> {}", e.getMessage());
-        }
-    }
-
-    private void logPersona(PersonaEntity personaEntity) {
-        try {
-            log.debug("Persona -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(personaEntity));
-        } catch (JsonProcessingException e) {
-            log.debug("Persona jsonify error -> {}", e.getMessage());
-        }
-    }
-
-    private void logChequeraCuotas(List<ChequeraCuota> chequeraCuotas) {
-        try {
-            log.debug("ChequeraCuota -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(chequeraCuotas));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraCuota jsonify error -> {}", e.getMessage());
-        }
-    }
-
-    private void logChequeraAlternativas(List<ChequeraAlternativa> chequeraAlternativas) {
-        try {
-            log.debug("ChequeraAlternativa -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(chequeraAlternativas));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraAlternativa jsonify error -> {}", e.getMessage());
-        }
-    }
-
-    private void logChequeraTotals(List<ChequeraTotal> chequeraTotals) {
-        try {
-            log.debug("ChequeraTotal -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(chequeraTotals));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraTotal jsonify error -> {}", e.getMessage());
-        }
-
-    }
-
-    private void logChequeraSerie(ChequeraSerieEntity chequeraSerie) {
-        try {
-            log.debug("ChequeraSerie -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(chequeraSerie));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerie jsonify error -> {}", e.getMessage());
-        }
-    }
-
-    private void logChequeraSerieControl(ChequeraSerieControl chequeraSerieControl) {
-        try {
-            log.debug("ChequeraSerieControl -> {}", JsonMapper
-                    .builder()
-                    .findAndAddModules()
-                    .build()
-                    .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(chequeraSerieControl));
-        } catch (JsonProcessingException e) {
-            log.debug("ChequeraSerieControl jsonify error -> {}", e.getMessage());
-        }
     }
 
 }

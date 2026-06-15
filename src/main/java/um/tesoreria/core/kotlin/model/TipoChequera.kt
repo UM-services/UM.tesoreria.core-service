@@ -6,6 +6,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
+import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.util.Jsonifier
 
 @Entity

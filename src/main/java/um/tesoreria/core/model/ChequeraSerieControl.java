@@ -17,7 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import um.tesoreria.core.kotlin.model.Auditable;
+import um.tesoreria.core.util.Jsonifier;
 
 /**
  * @author daniel
@@ -64,4 +64,7 @@ public class ChequeraSerieControl extends Auditable implements Serializable {
 
 	private Byte eliminada = 0;
 
+    public String jsonify() {
+        return Jsonifier.builder(this).build();
+    }
 }
