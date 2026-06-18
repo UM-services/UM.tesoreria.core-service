@@ -2,6 +2,23 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.26.1] - 2026-06-18
+### Fixed
+- fix(core): Extendida corrección ISO 8601 a todas las entidades del proyecto (61 archivos)
+  - Migración del patrón `@JsonFormat` de `yyyy-MM-dd'T'HH:mm:ssZ` a `yyyy-MM-dd'T'HH:mm:ssXX` en todos los modelos Java y Kotlin del proyecto
+  - Afecta modelos de dominio, entidades JPA, DTOs y vistas en los paquetes `model/`, `kotlin/model/` y `hexagonal/*/entity/`
+  - Garantiza cumplimiento completo con el estándar ISO 8601 (incluye el separador `:` en el offset de zona horaria)
+
+### Changed
+- refactor(core): Unificado formato de fecha ISO 8601 en modelos restantes no cubiertos en v3.26.0
+  - `model/`: ChequeraClase, ChequeraCuotaPersona, ChequeraIncompleta, ChequeraKey, ChequeraPagoReemplazo, ContratoFactura, CuentaMovimientoAsiento, CuentaSearch, CuotaDeuda, CuotaDeudaPayPerTic, Debito, DomicilioHistorico, DomicilioKey, FacturacionElectronica, IngresoAsiento, LegajoKey, LectivoCuota, PayPerTic, TipoPagoFechaAcreditacion, TipoPagoFechaPago
+  - `kotlin/model/`: Asiento, BancoMovimiento, ChequeraCuotaReemplazo, ChequeraEliminada, ChequeraImpresionCabecera, ChequeraImpresionDetalle, ChequeraPago, ChequeraPagoAsiento, ChequeraSerieReemplazo, CuentaMovimiento, Ejercicio, Entrega, Lectivo, Legajo, Plan, ProveedorMovimiento, ProveedorPago, Usuario, ValorMovimiento, ChequeraCuotaDto, ChequeraSerieDto, LectivoDto, AsientoInternal, ClickPagosEntity, ChequeraCuotaDeuda, ChequeraSerieAlta, ChequeraSerieAltaFull
+  - `kotlin/model/dto/`: ChequeraCuotaDto, ChequeraSerieDto, LectivoDto
+  - `extern/model/dto/`: InscripcionDto
+  - Entidades hexagonales: BajaEntity, ChequeraSerieEntity, ContratoEntity, CuentaEntity, DomicilioEntity, MercadoPagoContextEntity
+
+> Basado en análisis profundo de `git diff HEAD` (61 archivos modificados, +115/-115 líneas) y `pom.xml` (versión 3.26.0 → 3.26.1).
+
 ## [3.26.0] - 2026-06-15
 ### Added
 - feat(mercadopagoContext): New `FindActiveByReservaVacanteIdUseCase` for retrieving active MP context by `reservaVacanteId` (UUID)

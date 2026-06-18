@@ -20,7 +20,7 @@ data class BancoMovimiento(
     var bancariaId: Long? = null,
 
     @Column(name = "lib_fecha")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fecha: OffsetDateTime? = null,
 
     @Column(name = "lib_orden")
@@ -45,14 +45,14 @@ data class BancoMovimiento(
     var debita: Byte = 0,
 
     @Column(name = "lib_fechaconciliacion")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaConciliacion: OffsetDateTime? = null,
 
     @Column(name = "lib_anulado")
     var anulado: Byte = 0,
 
     @Column(name = "lib_fechaasiento")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaContable: OffsetDateTime? = null,
 
     @Column(name = "lib_numeroasiento")

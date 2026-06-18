@@ -45,7 +45,7 @@ data class ChequeraCuotaReemplazo(
     var arancelTipoId: Int? = null,
 
     @Column(name = "ccr_1er_Vencimiento")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var vencimiento1: OffsetDateTime? = null,
 
     @Column(name = "ccr_1er_Importe")
@@ -55,7 +55,7 @@ data class ChequeraCuotaReemplazo(
     var importe1Original: BigDecimal = BigDecimal.ZERO,
 
     @Column(name = "ccr_2do_Vencimiento")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var vencimiento2: OffsetDateTime? = null,
 
     @Column(name = "ccr_2do_Importe")
@@ -65,7 +65,7 @@ data class ChequeraCuotaReemplazo(
     var importe2Original: BigDecimal = BigDecimal.ZERO,
 
     @Column(name = "ccr_3er_Vencimiento")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var vencimiento3: OffsetDateTime? = null,
 
     @Column(name = "ccr_3er_Importe")

@@ -44,7 +44,7 @@ public class DeudaChequeraDto implements Serializable {
 	private Integer cuotas;
 	private Long chequeraId;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento1;
 
 	private BigDecimal importe1;

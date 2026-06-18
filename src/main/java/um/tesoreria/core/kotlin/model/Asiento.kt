@@ -25,13 +25,13 @@ data class Asiento(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var asientoId: Long? = null,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fecha: OffsetDateTime? = null,
 
     var orden: Int = 0,
     var vinculo: String = "",
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaContra: OffsetDateTime? = null,
 
     var ordenContra: Int? = null,

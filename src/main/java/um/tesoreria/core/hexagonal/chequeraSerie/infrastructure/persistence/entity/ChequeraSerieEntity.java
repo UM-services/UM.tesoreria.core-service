@@ -61,7 +61,7 @@ public class ChequeraSerieEntity extends Auditable {
     private Integer geograficaId;
 
     @Column(name = "chs_fecha")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime fecha;
 
     @Column(name = "chs_cuotasp")
@@ -101,7 +101,7 @@ public class ChequeraSerieEntity extends Auditable {
 
     private String becaResolucion;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime becaFecha;
 
     private Long becaUserId;
@@ -115,7 +115,7 @@ public class ChequeraSerieEntity extends Auditable {
     private BigDecimal importeDeuda = BigDecimal.ZERO;
 
     @Transient
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime ultimoEnvio;
 
     @OneToOne(optional = true)

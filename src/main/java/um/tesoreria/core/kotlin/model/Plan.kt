@@ -24,7 +24,7 @@ data class Plan(
     var nombre: String = "",
 
     @Column(name = "pla_fecha")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fecha: OffsetDateTime,
 
     @Column(name = "pla_publicar")

@@ -24,7 +24,7 @@ data class Usuario(
     var habilitaOpEliminacion: Byte? = 0,
     var eliminaChequera: Byte? = 0,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var lastLog: OffsetDateTime? = null,
 
     var googleMail: String? = null,
