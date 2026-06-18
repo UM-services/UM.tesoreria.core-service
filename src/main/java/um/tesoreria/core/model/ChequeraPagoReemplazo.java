@@ -75,11 +75,11 @@ public class ChequeraPagoReemplazo extends Auditable implements Serializable {
 	private Integer anho = 0;
 	
 	@Column(name = "cpr_fecha")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime fecha;
 	
 	@Column(name = "cpr_acred")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime acreditacion;
 
     @Builder.Default

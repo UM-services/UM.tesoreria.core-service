@@ -76,7 +76,7 @@ public class ChequeraCuotaPersona extends Auditable implements Serializable {
 	private Integer anho = 0;
 
 	@Column(name = "chc_1er_vencimiento")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento1;
 
 	@Column(name = "chc_1er_importe")
@@ -86,7 +86,7 @@ public class ChequeraCuotaPersona extends Auditable implements Serializable {
 	private BigDecimal importe1Original = BigDecimal.ZERO;
 
 	@Column(name = "chc_2do_vencimiento")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento2;
 
 	@Column(name = "chc_2do_importe")
@@ -96,7 +96,7 @@ public class ChequeraCuotaPersona extends Auditable implements Serializable {
 	private BigDecimal importe2Original;
 
 	@Column(name = "chc_3er_vencimiento")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento3;
 
 	@Column(name = "chc_3er_importe")

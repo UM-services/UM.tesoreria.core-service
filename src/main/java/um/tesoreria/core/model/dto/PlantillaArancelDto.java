@@ -36,15 +36,15 @@ public class PlantillaArancelDto implements Serializable {
 	private Integer mes;
 	private Integer anho;
 	private BigDecimal porcentaje;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento1;
 	private BigDecimal importe1;
 	private BigDecimal importe1original;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento2;
 	private BigDecimal importe2;
 	private BigDecimal importe2original;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento3;
 	private BigDecimal importe3;
 	private BigDecimal importe3original;

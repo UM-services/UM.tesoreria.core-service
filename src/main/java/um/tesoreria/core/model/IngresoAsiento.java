@@ -46,7 +46,7 @@ public class IngresoAsiento extends Auditable implements Serializable {
 	private Integer tipoPagoId;
 
 	@Column(name = "ina_fecha")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime fechaContable;
 	
 	@Column(name = "ina_nrocomp")

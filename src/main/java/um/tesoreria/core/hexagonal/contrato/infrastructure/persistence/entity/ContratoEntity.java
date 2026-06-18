@@ -49,7 +49,7 @@ public class ContratoEntity extends Auditable implements Serializable {
 	private Integer documentoId;
 
 	@Column(name = "con_desde")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime desde;
 
 	@Column(name = "con_fac_id")
@@ -68,7 +68,7 @@ public class ContratoEntity extends Auditable implements Serializable {
 	private Integer cargoMateriaId;
 
 	@Column(name = "con_primervenc")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime primerVencimiento;
 
 	@Builder.Default
@@ -87,7 +87,7 @@ public class ContratoEntity extends Auditable implements Serializable {
 	private BigDecimal canonMensualSinAjuste = BigDecimal.ZERO;
 
 	@Column(name = "con_hasta")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime hasta;
 
 	@Builder.Default

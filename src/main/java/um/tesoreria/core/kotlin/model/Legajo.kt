@@ -41,7 +41,7 @@ data class Legajo(
     var numeroLegajo: Long = 0L,
 
     @Column(name = "ale_fecha")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fecha: OffsetDateTime? = null,
 
     @Column(name = "ale_lec_id")

@@ -33,21 +33,21 @@ data class ChequeraImpresionDetalle(
     var arancelTipoId: Int? = null,
 
     @Column(name = "vencimiento_1")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var vencimiento1: OffsetDateTime? = null,
 
     @Column(name = "importe_1")
     var importe1: BigDecimal = BigDecimal.ZERO,
 
     @Column(name = "vencimiento_2")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var vencimiento2: OffsetDateTime? = null,
 
     @Column(name = "importe_2")
     var importe2: BigDecimal = BigDecimal.ZERO,
 
     @Column(name = "vencimiento_3")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var vencimiento3: OffsetDateTime? = null,
 
     @Column(name = "importe_3")

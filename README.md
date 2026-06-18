@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.26.0**
+**Versión actual (SemVer): 3.26.1**
+
+## Novedades 3.26.1 (verificado en código)
+- fix(core): Extendida corrección ISO 8601 a todas las entidades del proyecto (61 archivos)
+  - Migración del patrón `@JsonFormat` de `yyyy-MM-dd'T'HH:mm:ssZ` a `yyyy-MM-dd'T'HH:mm:ssXX` en todos los modelos Java y Kotlin
+  - Afecta modelos de dominio, entidades JPA, DTOs y vistas en `model/`, `kotlin/model/` y `hexagonal/*/entity/`
+  - Garantiza cumplimiento completo con el estándar ISO 8601 en todas las fechas serializadas
+
+> Basado en análisis profundo de `git diff HEAD` (61 archivos modificados, +115/-115 líneas) y `pom.xml` (versión 3.26.0 → 3.26.1).
 
 ## Novedades 3.26.0 (verificado en código)
 - feat(mercadopagoContext): Nuevo `FindActiveByReservaVacanteIdUseCase` para recuperar contexto MP activo por `reservaVacanteId` (UUID)
@@ -930,7 +938,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.25.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.26.1-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

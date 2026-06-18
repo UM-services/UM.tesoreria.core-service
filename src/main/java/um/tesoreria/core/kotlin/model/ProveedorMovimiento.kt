@@ -36,11 +36,11 @@ data class ProveedorMovimiento @JvmOverloads constructor(
     var comprobanteId: Int? = null,
 
     @Column(name = "mvp_fechacomprob")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaComprobante: OffsetDateTime? = null,
 
     @Column(name = "mvp_fechavenc")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaVencimiento: OffsetDateTime? = null,
 
     @Column(name = "mvp_prefijo")
@@ -65,7 +65,7 @@ data class ProveedorMovimiento @JvmOverloads constructor(
     var cancelado: BigDecimal = BigDecimal.ZERO,
 
     @Column(name = "mvp_fechareg")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaContable: OffsetDateTime? = null,
 
     @Column(name = "mvp_nrocomp")
@@ -75,7 +75,7 @@ data class ProveedorMovimiento @JvmOverloads constructor(
     var concepto: String? = null,
 
     @Column(name = "mvp_anulado")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaAnulacion: OffsetDateTime? = null,
 
     @Column(name = "mvp_concargo")

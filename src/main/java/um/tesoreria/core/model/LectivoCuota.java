@@ -69,21 +69,21 @@ public class LectivoCuota extends Auditable implements Serializable {
 	private Integer anho;
 
 	@Column(name = "lec_1er_vencimiento")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento1;
 
 	@Column(name = "lec_1er_importe")
 	private BigDecimal importe1;
 
 	@Column(name = "lec_2do_vencimiento")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento2;
 
 	@Column(name = "lec_2do_importe")
 	private BigDecimal importe2;
 
 	@Column(name = "lec_3er_vencimiento")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime vencimiento3;
 
 	@Column(name = "lec_3er_importe")

@@ -27,7 +27,7 @@ data class ProveedorPago(
     @Column(name = "opc_importe")
     var importeAplicado: BigDecimal = BigDecimal.ZERO,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaPago: OffsetDateTime? = null,
 
     var trazaContable: Byte = 0,

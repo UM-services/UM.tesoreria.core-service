@@ -22,11 +22,11 @@ data class Ejercicio(
     var nombre: String? = null,
 
     @Column(name = "eje_fechainicio")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaInicio: OffsetDateTime? = Tool.dateAbsoluteArgentina(),
 
     @Column(name = "eje_fechafin")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaFinal: OffsetDateTime? = Tool.dateAbsoluteArgentina(),
 
     @Column(name = "eje_bloqueado")

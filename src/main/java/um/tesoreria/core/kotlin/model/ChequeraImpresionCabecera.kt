@@ -27,7 +27,7 @@ data class ChequeraImpresionCabecera(
     @Column(name = "chequeraserie_id")
     var chequeraSerieId: Long? = null,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fecha: OffsetDateTime? = null,
 
     var personaId: BigDecimal? = null,
@@ -45,7 +45,7 @@ data class ChequeraImpresionCabecera(
     var becaPorcentaje: BigDecimal = BigDecimal.ZERO,
     var becaResolucion: String? = null,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var becaFecha: OffsetDateTime? = null,
 
     var becaUserId: Long? = null

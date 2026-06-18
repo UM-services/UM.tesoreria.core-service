@@ -57,7 +57,7 @@ public class ContratoFactura extends Auditable implements Serializable {
 	private Long numerocomprobante;
 
 	@Column(name = "cfa_fecha")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime fecha;
 
 	@Column(name = "cfa_importe")
@@ -70,7 +70,7 @@ public class ContratoFactura extends Auditable implements Serializable {
 	private Byte excluido = 0;
 
 	@Column(name = "cfa_acreditacion")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime acreditacion;
 
 	@Column(name = "cfa_envio")

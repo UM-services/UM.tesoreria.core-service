@@ -19,7 +19,7 @@ data class ValorMovimiento(
     var valorId: Int? = null,
 
     @Column(name = "val_fechaemision")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaEmision: OffsetDateTime? = null,
 
     @Column(name = "val_numero")
@@ -29,7 +29,7 @@ data class ValorMovimiento(
     var bancariaIdOrigen: Long? = null,
 
     @Column(name = "val_fechaefectivizacion")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaEfectivizacion: OffsetDateTime? = null,
 
     @Column(name = "val_importe")
@@ -48,13 +48,13 @@ data class ValorMovimiento(
     var reemplazo: Long = 0L,
 
     @Column(name = "val_fechaasiento")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaContable: OffsetDateTime? = null,
 
     @Column(name = "val_numeroasiento")
     var ordenContable: Int? = null,
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaContableAnulacion: OffsetDateTime? = null,
 
     var ordenContableAnulacion: Int? = null,

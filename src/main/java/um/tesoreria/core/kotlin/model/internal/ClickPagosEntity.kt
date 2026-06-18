@@ -12,9 +12,9 @@ data class ClickPagosEntity(
 
     // Header
     var codigoBoton: Int = 0,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaProceso: OffsetDateTime? = null,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaEnvio: OffsetDateTime? = null,
     var numeroLote: Int = 0,
 
@@ -48,12 +48,12 @@ data class ClickPagosEntity(
     var relleno6: Int = 0,
     var relleno7: Int = 0,
     var relleno8: Int = 0,
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaLiquidacion: OffsetDateTime? = null,
     var adicional6: Long = 0,
     var relleno9: Int = 0,
     var codigoBarra: String = "",
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     var fechaPago: OffsetDateTime? = null,
     var modoPago: String = "",
     var adicional7: Long = 0,

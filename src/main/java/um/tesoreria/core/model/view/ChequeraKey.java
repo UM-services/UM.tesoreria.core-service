@@ -64,7 +64,7 @@ public class ChequeraKey extends Auditable implements Serializable {
 	private Integer asentado;
 	private Integer geograficaId;
 
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
 	private OffsetDateTime fecha;
 
 	private Integer cuotasPagadas;
