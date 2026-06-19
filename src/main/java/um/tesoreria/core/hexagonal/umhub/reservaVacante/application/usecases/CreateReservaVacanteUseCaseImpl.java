@@ -40,6 +40,7 @@ public class CreateReservaVacanteUseCaseImpl implements CreateReservaVacanteUseC
     @Override
     public ReservaVacante createReservaVacante(ReservaVacanteRequest reservaVacanteRequest) {
         log.debug("\n\nProcessing CreateReservaVacanteUseCaseImpl.createReservaVacante\n\n");
+        log.debug("ReservaVacanteRequest : {}", reservaVacanteRequest.jsonify());
         // Verificar persona
         Persona persona;
         var personaId = new BigDecimal(reservaVacanteRequest.getNumeroDocumento().replaceAll("\\D+", ""));
@@ -89,13 +90,13 @@ public class CreateReservaVacanteUseCaseImpl implements CreateReservaVacanteUseC
                 .orElseThrow(() -> new ReservaVacanteException(reservaVacanteRequest.getCampanhaId()));
         // Crea reservaVacante
         OffsetDateTime vencimiento = OffsetDateTime.now(ZoneOffset.ofHours(-3))
-                .plusDays(2)
+                .plusDays(60)
                 .with(LocalTime.MAX);
         ReservaVacante reservaVacante = ReservaVacante.builder()
                 .personaUniqueId(persona.getUniqueId())
                 .campanhaId(reservaVacanteRequest.getCampanhaId())
                 .estado("pendiente")
-                .importe(campanha.getValorReserva())
+                .importe(reservaVacanteRequest.getImporte() != null && reservaVacanteRequest.getImporte().compareTo(BigDecimal.ZERO) != 0 ? reservaVacanteRequest.getImporte() : campanha.getValorReserva())
                 .vencimiento(vencimiento)
                 .build();
         reservaVacante = repository.create(reservaVacante);
