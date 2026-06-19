@@ -4,7 +4,21 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.26.1**
+**Versión actual (SemVer): 3.27.0**
+
+## Novedades 3.27.0 (verificado en código)
+- feat(reservaVacante): Extendido `vencimiento` de 2 a 60 días en la creación de reserva de vacante
+  - Cambio de `plusDays(2)` a `plusDays(60)` en `CreateReservaVacanteUseCaseImpl.createReservaVacante()`
+  - Proporciona ventana más flexible para completar el pago de la reserva
+- feat(reservaVacante): `importe` personalizable desde `ReservaVacanteRequest`
+  - Nuevo campo `BigDecimal importe` en `ReservaVacanteRequest`
+  - Si se especifica y es distinto de cero, sobreescribe `Campanha.getValorReserva()`
+- feat(reservaVacante): Nuevo método `jsonify()` en `ReservaVacanteRequest` para logging estructurado
+- feat(reservaVacante): Nuevo log debug con `jsonify()` de `ReservaVacanteRequest` en `CreateReservaVacanteUseCaseImpl`
+- fix(domicilio): Agregado `@JsonFormat` faltante en campo `fecha` de `Domicilio`, `DomicilioRequest` y `DomicilioResponse`
+  - Completa la corrección ISO 8601 iniciada en v3.26.1 para el módulo Domicilio
+
+> Basado en análisis profundo de `git diff HEAD --cached` (5 archivos modificados) y `pom.xml` (versión 3.26.1 → 3.27.0).
 
 ## Novedades 3.26.1 (verificado en código)
 - fix(core): Extendida corrección ISO 8601 a todas las entidades del proyecto (61 archivos)

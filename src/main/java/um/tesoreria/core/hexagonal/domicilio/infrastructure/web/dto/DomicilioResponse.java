@@ -1,5 +1,6 @@
 package um.tesoreria.core.hexagonal.domicilio.infrastructure.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class DomicilioResponse {
     private Long domicilioId;
     private BigDecimal personaId;
     private Integer documentoId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime fecha;
     private String calle;
     private String puerta;

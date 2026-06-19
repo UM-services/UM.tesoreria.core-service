@@ -2,6 +2,23 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.27.0] - 2026-06-19
+### Added
+- feat(reservaVacante): Extended `vencimiento` from 2 to 60 days in `CreateReservaVacanteUseCaseImpl.createReservaVacante()`
+  - `plusDays(2)` → `plusDays(60)` for more flexible reservation window
+- feat(reservaVacante): Custom `importe` override from `ReservaVacanteRequest`
+  - If `importe` is non-null and non-zero in the request, it overrides `Campanha.getValorReserva()`
+  - New `BigDecimal importe` field in `ReservaVacanteRequest` DTO
+  - Enables manual importe specification per reservation
+- feat(reservaVacante): Added `jsonify()` structured logging method to `ReservaVacanteRequest` DTO
+- chore(logging): Added `jsonify()` debug log of `ReservaVacanteRequest` in `CreateReservaVacanteUseCaseImpl`
+
+### Fixed
+- fix(domicilio): Added missing `@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXX")` annotation to `fecha` field in `Domicilio`, `DomicilioRequest`, and `DomicilioResponse`
+  - Completes ISO 8601 compliance for Domicilio module (was missed in v3.26.1)
+
+> Basado en análisis profundo de `git diff HEAD --cached` (5 archivos modificados, +15/-2 líneas) y `pom.xml` (versión 3.26.1 → 3.27.0).
+
 ## [3.26.1] - 2026-06-18
 ### Fixed
 - fix(core): Extendida corrección ISO 8601 a todas las entidades del proyecto (61 archivos)
