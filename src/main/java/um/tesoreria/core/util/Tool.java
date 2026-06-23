@@ -18,6 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.dto.ChequeraContextFromGuaraniInternal;
 import um.tesoreria.core.util.transfer.FileInfo;
 import lombok.extern.slf4j.Slf4j;
 
@@ -244,6 +245,35 @@ public class Tool {
         headers.add("Expires", "0");
         return ResponseEntity.ok().headers(headers).contentLength(file.length())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+    }
+
+    public static ChequeraContextFromGuaraniInternal convert2Tesium(Integer ubicacion, Integer propuesta) {
+        // deteminar geograficaId
+        int geograficaId = switch (ubicacion) {
+            case 1 -> 1;
+            case 2 -> 5;
+            case 3 -> 2;
+            default -> 0;
+        };
+        int facultadId = switch (propuesta) {
+            case 69 -> 14;
+            case 70, 109 -> 1;
+            case 72, 73 -> 2;
+            case 74 -> 3;
+            case 75 -> 4;
+            case 108 -> 5;
+            default -> 0;
+        };
+        int tipoChequeraId = switch (geograficaId) {
+            case 1 -> 1;
+            case 2 -> 101;
+            default -> 0;
+        };
+        return ChequeraContextFromGuaraniInternal.builder()
+                .geograficaId(geograficaId)
+                .facultadId(facultadId)
+                .tipoChequeraId(tipoChequeraId)
+                .build();
     }
 
 }

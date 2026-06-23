@@ -1,0 +1,195 @@
+---
+title: Arquitectura Hexagonal - Módulo AlumnoGuarani (v3.28.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class AlumnoGuarani {
+            +Long alumnoId
+            +String legajo
+            +PersonaGuarani persona
+            +PropuestaGuarani propuesta
+            +UbicacionGuarani ubicacion
+            +String planVersion
+            +String modalidad
+            +String division
+            +Integer anioCursada
+            +String regular
+            +String calidad
+            +BigDecimal coeficiente
+            +jsonify() String
+        }
+
+        class PersonaGuarani {
+            +Long personaId
+            +String apellido
+            +String nombres
+            +String sexo
+            +String fechaNacimiento
+            +String nacionalidad
+            +DocumentoPrincipalGuarani documentoPrincipal
+            +List~ContactoGuarani~ contactos
+        }
+
+        class DocumentoPrincipalGuarani {
+            +Long documento
+            +TipoDocumentoGuarani tipoDocumento
+            +String nroDocumento
+            +String fechaOtorgamiento
+            +String fechaVencimiento
+            +Boolean validadoConRenaper
+        }
+
+        class TipoDocumentoGuarani {
+            +Long tipoDocumento
+            +String descripcion
+            +String descAbreviada
+            +String expRegularValidacion
+        }
+
+        class ContactoGuarani {
+            +Long personaContacto
+            +Long persona
+            +String contactoTipo
+            +String email
+            +String telefonoCodigoArea
+            +String telefonoNumero
+        }
+
+        class UbicacionGuarani {
+            +Integer ubicacionId
+            +String nombre
+            +String ubicacionTipo
+            +String localidad
+            +String calle
+            +String numero
+            +String codigoPostal
+            +Double latitud
+            +Double longitud
+        }
+
+        class PropuestaGuarani {
+            +Integer propuestaId
+            +String nombre
+            +String codigo
+            +PropuestaTipoGuarani propuestaTipo
+        }
+
+        class PropuestaTipoGuarani {
+            +Integer propuestaTipoId
+            +String descripcion
+            +Boolean otorgaTitulo
+            +Boolean reportaAraucano
+        }
+
+        class CreatePreuniversitarioUseCase {
+            <<interface>>
+            +createPreuniversitario(AlumnoGuarani) AlumnoGuarani
+        }
+
+        class CheckAllPreuniversitarioWithoutChequeraUseCase {
+            <<interface>>
+            +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+        }
+    }
+
+    namespace application {
+        class AlumnoGuaraniService {
+            -CreatePreuniversitarioUseCase createPreuniversitarioUseCase
+            -CheckAllPreuniversitarioWithoutChequeraUseCase checkAllPreuniversitarioWithoutChequeraUseCase
+            +createPreuniversitario(AlumnoGuarani) AlumnoGuarani
+            +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+        }
+
+        namespace usecases {
+            class CreatePreuniversitarioUseCaseImpl {
+                -PersonaService personaService
+                -DomicilioService domicilioService
+                -ChequeraSerieControlService chequeraSerieControlService
+                -LegajoService legajoService
+                -LectivoService lectivoService
+                -ChequeraSerieService chequeraSerieService
+                -BuildService buildService
+                -LectivoTotalService lectivoTotalService
+                -ChequeraTotalService chequeraTotalService
+                -LectivoAlternativaService lectivoAlternativaService
+                -ChequeraAlternativaService chequeraAlternativaService
+                -LectivoCuotaService lectivoCuotaService
+                -ChequeraCuotaService chequeraCuotaService
+                +createPreuniversitario(AlumnoGuarani) AlumnoGuarani
+                +createChequeraPreuniversitario() void
+            }
+
+            class CheckAllPreuniversitarioWithoutChequeraUseCaseImpl {
+                -ChequeraSerieService chequeraSerieService
+                -LectivoService lectivoService
+                +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+            }
+        }
+    }
+
+    namespace infrastructure {
+        namespace web {
+            class AlumnoGuaraniController {
+                -AlumnoGuaraniService alumnoGuaraniService
+                +createPreuniversitario(AlumnoGuaraniRequest) AlumnoGuarani
+                +desmarcarEnviadas(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+            }
+
+            namespace dto {
+                class AlumnoGuaraniRequest
+                class AlumnoDeteccionRequest {
+                    +Integer ubicacion
+                    +Integer propuesta
+                    +Long nroDocumento
+                    +Integer tipoDocumento
+                    +String pendiente
+                }
+                class ChequeraContextFromGuaraniInternal {
+                    +Integer facultadId
+                    +Integer geograficaId
+                    +Integer tipoChequeraId
+                }
+                class PersonaGuaraniDTO
+                class DocumentoPrincipalGuaraniDTO
+                class TipoDocumentoGuaraniDTO
+                class ContactoGuaraniDTO
+                class UbicacionGuaraniDTO
+                class PropuestaGuaraniDTO
+                class PropuestaTipoGuaraniDTO
+            }
+
+            class AlumnoGuaraniDtoMapper {
+                +toDomain(AlumnoGuaraniRequest) AlumnoGuarani
+                +toPersonaGuarani(PersonaGuaraniDTO) PersonaGuarani
+                +toDocumentoPrincipalGuarani(DocumentoPrincipalGuaraniDTO) DocumentoPrincipalGuarani
+                +toTipoDocumentoGuarani(TipoDocumentoGuaraniDTO) TipoDocumentoGuarani
+                +toContactoGuarani(ContactoGuaraniDTO) ContactoGuarani
+                +toPropuestaGuarani(PropuestaGuaraniDTO) PropuestaGuarani
+                +toPropuestaTipoGuarani(PropuestaTipoGuaraniDTO) PropuestaTipoGuarani
+                +toUbicacionGuarani(UbicacionGuaraniDTO) UbicacionGuarani
+            }
+        }
+    }
+
+    AlumnoGuarani --> PersonaGuarani
+    AlumnoGuarani --> PropuestaGuarani
+    AlumnoGuarani --> UbicacionGuarani
+    PersonaGuarani --> DocumentoPrincipalGuarani
+    PersonaGuarani --> ContactoGuarani
+    DocumentoPrincipalGuarani --> TipoDocumentoGuarani
+    PropuestaGuarani --> PropuestaTipoGuarani
+
+    CreatePreuniversitarioUseCaseImpl ..|> CreatePreuniversitarioUseCase
+    CheckAllPreuniversitarioWithoutChequeraUseCaseImpl ..|> CheckAllPreuniversitarioWithoutChequeraUseCase
+
+    AlumnoGuaraniService --> CreatePreuniversitarioUseCase
+    AlumnoGuaraniService --> CheckAllPreuniversitarioWithoutChequeraUseCase
+
+    AlumnoGuaraniController --> AlumnoGuaraniService
+    AlumnoGuaraniDtoMapper ..> AlumnoGuaraniRequest : maps from
+    AlumnoGuaraniDtoMapper ..> AlumnoGuarani : maps to
+    AlumnoGuaraniDtoMapper ..> PersonaGuaraniDTO : reads
+    AlumnoGuaraniDtoMapper ..> PersonaGuarani : creates

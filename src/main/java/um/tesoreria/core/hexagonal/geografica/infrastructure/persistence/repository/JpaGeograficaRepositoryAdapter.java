@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
 import um.tesoreria.core.hexagonal.geografica.domain.ports.out.GeograficaRepository;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 
 import java.util.List;
@@ -12,15 +11,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class JpaGeograficaRepositoryAdapter implements GeograficaRepository {
 
     private final JpaGeograficaRepository jpaGeograficaRepository;
     private final GeograficaMapper geograficaMapper;
-
-    public JpaGeograficaRepositoryAdapter(JpaGeograficaRepository jpaGeograficaRepository, GeograficaMapper geograficaMapper) {
-        this.jpaGeograficaRepository = jpaGeograficaRepository;
-        this.geograficaMapper = geograficaMapper;
-    }
 
     @Override
     public List<Geografica> findAll() {
