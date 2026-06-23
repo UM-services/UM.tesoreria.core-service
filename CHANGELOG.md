@@ -2,6 +2,30 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.28.0] - 2026-06-23
+### Added
+- feat(guarani): Nuevo módulo `alumnoGuarani` con arquitectura hexagonal para integración con sistema Guarani
+  - Nuevo modelo de dominio `AlumnoGuarani` (aggregate root) con relaciones a `PersonaGuarani`, `PropuestaGuarani`, `UbicacionGuarani`
+  - Nuevos modelos de dominio: `PersonaGuarani`, `DocumentoPrincipalGuarani`, `TipoDocumentoGuarani`, `ContactoGuarani`, `UbicacionGuarani`, `PropuestaGuarani`, `PropuestaTipoGuarani`
+  - Nuevo puerto de entrada: `CreatePreuniversitarioUseCase` con método `createPreuniversitario(AlumnoGuarani)`
+  - Nuevo puerto de entrada: `CheckAllPreuniversitarioWithoutChequeraUseCase` con método `desmarcarEnviados(List<AlumnoDeteccionRequest>)`
+  - Nuevo caso de uso: `CreatePreuniversitarioUseCaseImpl` con orquestación completa de creación de chequera preuniversitaria (Persona, Domicilio, ChequeraSerie, ChequeraTotal, ChequeraAlternativa, ChequeraCuota)
+  - Nuevo caso de uso: `CheckAllPreuniversitarioWithoutChequeraUseCaseImpl` para detección de preuniversitarios sin chequera
+  - Nuevo servicio de aplicación: `AlumnoGuaraniService` como fachada de casos de uso
+  - Nuevo controlador REST: `AlumnoGuaraniController` con endpoints:
+    - `POST /api/tesoreria/core/guarani/alumno/create/preuniversitario`
+    - `POST /api/tesoreria/core/guarani/alumno/desmarcar/enviadas`
+  - Nuevos DTOs: `AlumnoGuaraniRequest`, `AlumnoDeteccionRequest`, `ChequeraContextFromGuaraniInternal`, y DTOs para cada sub-modelo Guarani
+  - Nuevo mapper: `AlumnoGuaraniDtoMapper` para conversión DTO ↔ dominio (202 líneas, mapeo recursivo de árbol anidado)
+- feat(guarani): Nueva utilidad `Tool.convert2Tesium()` para conversión de ubicación/propuesta Guarani a contexto Tesoreria (geograficaId, facultadId, tipoChequeraId)
+
+### Changed
+- chore(deps): Eliminada dependencia `spring-boot-starter-log4j2` (versionada explícitamente 4.1.0) — gestionada por Spring Boot parent POM 4.1.0
+- refactor(geografica): Actualización en `JpaGeograficaRepositoryAdapter` para compatibilidad con nuevo módulo
+- refactor(mail): Ajuste menor en `MailChequeraService` (3 líneas modificadas)
+
+> Basado en análisis profundo de `git diff HEAD` (29 archivos modificados, +1205/-12 líneas) y `pom.xml` (versión 3.27.0 → 3.28.0).
+
 ## [3.27.0] - 2026-06-19
 ### Added
 - feat(reservaVacante): Extended `vencimiento` from 2 to 60 days in `CreateReservaVacanteUseCaseImpl.createReservaVacante()`

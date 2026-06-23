@@ -4,7 +4,21 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.27.0**
+**Versión actual (SemVer): 3.28.0**
+
+## Novedades 3.28.0 (verificado en código)
+- feat(guarani): Nuevo módulo `alumnoGuarani` con arquitectura hexagonal para integración con sistema Guarani
+  - Modelo de dominio `AlumnoGuarani` (aggregate root) con sub-modelos `PersonaGuarani`, `DocumentoPrincipalGuarani`, `TipoDocumentoGuarani`, `ContactoGuarani`, `UbicacionGuarani`, `PropuestaGuarani`, `PropuestaTipoGuarani`
+  - Puertos de entrada: `CreatePreuniversitarioUseCase`, `CheckAllPreuniversitarioWithoutChequeraUseCase`
+  - Casos de uso: `CreatePreuniversitarioUseCaseImpl` (orquestación completa de creación de chequera preuniversitaria) y `CheckAllPreuniversitarioWithoutChequeraUseCaseImpl` (detección de preuniversitarios sin chequera)
+  - Servicio de aplicación: `AlumnoGuaraniService`
+  - Controlador REST: `AlumnoGuaraniController` con endpoints `POST /api/tesoreria/core/guarani/alumno/create/preuniversitario` y `POST /api/tesoreria/core/guarani/alumno/desmarcar/enviadas`
+  - DTOs: `AlumnoGuaraniRequest`, `AlumnoDeteccionRequest`, `ChequeraContextFromGuaraniInternal`, y DTOs para cada sub-modelo
+  - Mapper: `AlumnoGuaraniDtoMapper` con mapeo recursivo del árbol anidado DTO ↔ dominio
+- feat(guarani): Nueva utilidad `Tool.convert2Tesium()` para conversión de ubicación/propuesta Guarani a contexto Tesoreria
+- chore(deps): Eliminada dependencia explícita `spring-boot-starter-log4j2` (gestionada por Spring Boot parent POM)
+
+> Basado en análisis profundo de `git diff HEAD` (29 archivos modificados, +1205/-12 líneas) y `pom.xml` (versión 3.27.0 → 3.28.0).
 
 ## Novedades 3.27.0 (verificado en código)
 - feat(reservaVacante): Extendido `vencimiento` de 2 a 60 días en la creación de reserva de vacante
@@ -901,6 +915,7 @@ src/
 │   │       │   ├── facultad/                 # Módulo Facultad (v3.18.0)
 │   │       │   ├── facturaPendiente/         # Módulo FacturaPendiente (v3.15.0)
 │   │       │   ├── geografica/               # Módulo Geografica (v3.6.0)
+│   │       │   ├── guarani/alumnoGuarani/    # Módulo AlumnoGuarani (v3.28.0)
 │   │       │   ├── mercadoPagoContext/       # Módulo MercadoPagoContext (v3.24.0)
 │   │       │   ├── persona/                  # Módulo Persona (v3.24.0)
 │   │       │   ├── proveedor/                # Módulo Proveedor (v3.9.0)
@@ -952,7 +967,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.26.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.28.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

@@ -97,6 +97,7 @@ const diagrams = [
   { id: 'hexagonal-campanha', file: 'hexagonal-campanha.mmd', title: '🔷 Arquitectura Hexagonal - Campanha (UM Hub)' },
   { id: 'hexagonal-reservaVacante', file: 'hexagonal-reservaVacante.mmd', title: '🔷 Arquitectura Hexagonal - ReservaVacante (UM Hub)' },
   { id: 'hexagonal-domicilio', file: 'hexagonal-domicilio.mmd', title: '🔷 Arquitectura Hexagonal - Domicilio' },
+  { id: 'hexagonal-alumnoGuarani', file: 'hexagonal-alumnoGuarani.mmd', title: '🔷 Arquitectura Hexagonal - AlumnoGuarani (Guarani)' },
   { id: 'hexagonal-persona', file: 'hexagonal-persona.mmd', title: '🔷 Arquitectura Hexagonal - Persona' },
   { id: 'hexagonal-mercadoPagoContext', file: 'hexagonal-mercadoPagoContext.mmd', title: '🔷 Arquitectura Hexagonal - MercadoPagoContext' },
   { id: 'dependencies-diagram', file: 'dependencies.mmd', title: '📦 Diagrama de Dependencias' },

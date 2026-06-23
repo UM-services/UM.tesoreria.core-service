@@ -22,6 +22,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import um.tesoreria.core.event.SendChequeraEvent;
 import um.tesoreria.core.exception.CarreraChequeraException;
 import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
@@ -71,7 +72,7 @@ public class MailChequeraService {
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
             Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
         log.debug("Processing MailChequeraService.sendChequera");
-        var event = um.tesoreria.core.event.SendChequeraEvent.builder()
+        var event = SendChequeraEvent.builder()
                 .facultadId(facultadId)
                 .tipoChequeraId(tipoChequeraId)
                 .chequeraSerieId(chequeraSerieId)
