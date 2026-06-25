@@ -39,7 +39,7 @@ import um.tesoreria.core.service.view.ChequeraSerieAltaFullService;
 import um.tesoreria.core.service.view.ChequeraSerieAltaService;
 
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
-import um.tesoreria.core.util.ChequeraSerieMapper;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.web.mapper.ChequeraSerieMapper;
 
 /**
  * @author daniel

@@ -52,6 +52,7 @@ import um.tesoreria.core.extern.model.view.PersonaKeyFacultad;
 import um.tesoreria.core.extern.model.view.PreunivCarreraFacultad;
 import um.tesoreria.core.extern.model.view.PreunivMatricResumenFacultad;
 import um.tesoreria.core.extern.model.view.PreunivResumenFacultad;
+import um.tesoreria.core.hexagonal.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
 import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
 import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facturaPendiente.application.service.FacturaPendienteService;
@@ -72,7 +73,7 @@ import um.tesoreria.core.model.view.IngresoPeriodo;
 import um.tesoreria.core.model.view.LegajoKey;
 import um.tesoreria.core.model.view.PersonaKey;
 import um.tesoreria.core.model.view.TipoPagoFechaAcreditacion;
-import um.tesoreria.core.service.ArancelTipoService;
+import um.tesoreria.core.hexagonal.arancelTipo.application.service.ArancelTipoService;
 import um.tesoreria.core.hexagonal.baja.application.service.BajaService;
 import um.tesoreria.core.service.CarreraService;
 import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
@@ -92,7 +93,7 @@ import um.tesoreria.core.service.view.*;
 import um.tesoreria.core.model.PersonaSuspendido;
 import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
-import um.tesoreria.core.util.ChequeraSerieMapper;
+import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.web.mapper.ChequeraSerieMapper;
 import um.tesoreria.core.service.*;
 import um.tesoreria.core.util.Jsonifier;
 
@@ -321,7 +322,7 @@ public class SheetService {
                                 legajoFacultad.getIntercambio(),
                                 null));
                     }
-                    ArancelTipo arancelTipo = chequeraSerie.getArancelTipo();
+                    ArancelTipoEntity arancelTipo = chequeraSerie.getArancelTipo();
                     CarreraKey carrera = null;
                     if (legajo != null)
                         carrera = carreras.get(legajo.getFacultadId() + "." + legajo.getPlanId() + "." + legajo.getCarreraId());
@@ -695,7 +696,7 @@ public class SheetService {
         this.setCellString(row, 10, "Turno", styleBold);
         this.setCellString(row, 11, "Carrera", styleBold);
 
-        Map<Integer, ArancelTipo> aranceles = arancelTipoService.findAll().stream().collect(Collectors.toMap(ArancelTipo::getArancelTipoId, arancelTipo -> arancelTipo));
+        Map<Integer, ArancelTipoEntity> aranceles = arancelTipoService.findAll().stream().collect(Collectors.toMap(ArancelTipoEntity::getArancelTipoId, arancelTipo -> arancelTipo));
         Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream().collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
         Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
         Map<String, CarreraKey> carreras = carreraKeyService.findAllByFacultadId(facultad.getFacultadId()).stream().collect(Collectors.toMap(CarreraKey::getUnified, carrera -> carrera));
@@ -728,7 +729,7 @@ public class SheetService {
         for (ChequeraPreuniv chequera : chequeras.values()) {
             Geografica geografica = geograficas.get(chequera.getGeograficaId());
             TipoChequera tipoChequera = tipos.get(chequera.getTipoChequeraId());
-            ArancelTipo arancelTipo = aranceles.get(chequera.getArancelTipoId());
+            ArancelTipoEntity arancelTipo = aranceles.get(chequera.getArancelTipoId());
             CarreraKey carrera = null;
             PersonaKey persona = new PersonaKey();
             Boolean show = false;
@@ -769,7 +770,7 @@ public class SheetService {
         for (ChequeraPreuniv chequera : chequeras.values()) {
             Geografica geografica = geograficas.get(chequera.getGeograficaId());
             TipoChequera tipoChequera = tipos.get(chequera.getTipoChequeraId());
-            ArancelTipo arancelTipo = aranceles.get(chequera.getArancelTipoId());
+            ArancelTipoEntity arancelTipo = aranceles.get(chequera.getArancelTipoId());
             CarreraKey carrera = null;
             PersonaKey persona = new PersonaKey();
             Boolean show = false;
@@ -888,7 +889,7 @@ public class SheetService {
         Map<String, CarreraFacultad> carreras = carreraFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
         Map<String, ChequeraSerieEntity> chequeras = chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId).stream().collect(Collectors.toMap(ChequeraSerieEntity::getFacultadKey, Function.identity(), (chequera, replacement) -> chequera));
         Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream().collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
-        Map<Integer, ArancelTipo> aranceles = arancelTipoService.findAll().stream().collect(Collectors.toMap(ArancelTipo::getArancelTipoId, arancelTipo -> arancelTipo));
+        Map<Integer, ArancelTipoEntity> aranceles = arancelTipoService.findAll().stream().collect(Collectors.toMap(ArancelTipoEntity::getArancelTipoId, arancelTipo -> arancelTipo));
         for (InscripcionFacultad inscripcion : inscriptos) {
             row = sheet.createRow(++fila);
             this.setCellString(row, 0, inscripcion.getPersonaKey(), styleNormal);

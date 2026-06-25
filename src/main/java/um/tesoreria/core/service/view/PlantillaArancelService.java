@@ -10,10 +10,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.kotlin.model.ArancelPorcentaje;
+import um.tesoreria.core.hexagonal.arancelPorcentaje.infrastructure.persistence.entity.ArancelPorcentajeEntity;
 import um.tesoreria.core.model.LectivoCuota;
 import um.tesoreria.core.model.dto.PlantillaArancelDto;
-import um.tesoreria.core.repository.ArancelPorcentajeRepository;
+import um.tesoreria.core.hexagonal.arancelPorcentaje.infrastructure.persistence.repository.JpaArancelPorcentajeRepository;
 import um.tesoreria.core.repository.LectivoCuotaRepository;
 
 /**
@@ -27,16 +27,16 @@ public class PlantillaArancelService {
 	private LectivoCuotaRepository lectivoCuotaRepository;
 
 	@Autowired
-	private ArancelPorcentajeRepository arancelPorcentajeRepository;
+	private JpaArancelPorcentajeRepository arancelPorcentajeRepository;
 
 	public List<PlantillaArancelDto> findAllByPlantilla(Integer facultadId, Integer lectivoId, Integer tipoChequeraId,
                                                         Integer arancelTipoId) {
 		List<PlantillaArancelDto> cuotas = new ArrayList<PlantillaArancelDto>();
 		for (LectivoCuota modelo : lectivoCuotaRepository.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId,
 				lectivoId, tipoChequeraId)) {
-			ArancelPorcentaje porcentaje = arancelPorcentajeRepository
+			ArancelPorcentajeEntity porcentaje = arancelPorcentajeRepository
 					.findByAranceltipoIdAndProductoId(arancelTipoId, modelo.getProductoId())
-					.orElse(new ArancelPorcentaje());
+					.orElse(new ArancelPorcentajeEntity());
 			BigDecimal importe1 = modelo.getImporte1().multiply(porcentaje.getPorcentaje()).divide(new BigDecimal(100));
 			BigDecimal importe2 = modelo.getImporte2().multiply(porcentaje.getPorcentaje()).divide(new BigDecimal(100));
 			BigDecimal importe3 = modelo.getImporte3().multiply(porcentaje.getPorcentaje()).divide(new BigDecimal(100));

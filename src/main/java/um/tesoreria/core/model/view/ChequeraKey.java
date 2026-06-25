@@ -21,6 +21,7 @@ import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import um.tesoreria.core.hexagonal.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
@@ -97,7 +98,7 @@ public class ChequeraKey extends Auditable implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "arancelTipoId", insertable = false, updatable = false)
-	private ArancelTipo arancelTipo;
+	private ArancelTipoEntity arancelTipo;
 
 	@OneToOne
 	@JoinColumn(name = "geograficaId", insertable = false, updatable = false)

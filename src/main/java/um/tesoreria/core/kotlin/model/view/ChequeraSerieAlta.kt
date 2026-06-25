@@ -3,6 +3,7 @@ package um.tesoreria.core.kotlin.model.view
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
 import org.hibernate.annotations.Immutable
+import um.tesoreria.core.hexagonal.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
@@ -111,7 +112,7 @@ data class ChequeraSerieAlta(
 
     @OneToOne
     @JoinColumn(name = "chs_art_id", insertable = false, updatable = false)
-    var arancelTipo: ArancelTipo? = null,
+    var arancelTipo: ArancelTipoEntity? = null,
 
     @OneToOne
     @JoinColumn(name = "chs_geo_id", insertable = false, updatable = false)

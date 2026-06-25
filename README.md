@@ -4,7 +4,29 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.28.0**
+**Versión actual (SemVer): 3.29.0**
+
+## Novedades 3.29.0 (verificado en código)
+- refactor(arancelTipo): Migración completa del módulo ArancelTipo a arquitectura hexagonal
+  - Eliminación de `ArancelTipo.kt` (Kotlin) y creación de `ArancelTipoEntity.java` con Lombok
+  - `ArancelTipoService` y `ArancelTipoController` movidos a `hexagonal/arancelTipo/`
+  - Actualización de referencias en todas las vistas JPA y servicios facade
+- refactor(arancelPorcentaje): Migración completa del módulo ArancelPorcentaje a arquitectura hexagonal
+  - Eliminación de `ArancelPorcentaje.kt` (Kotlin) y creación de `ArancelPorcentajeEntity.java`
+  - Nuevos `ArancelPorcentajeService` y `ArancelPorcentajeController` en `hexagonal/arancelPorcentaje/`
+- refactor(asiento): Migración completa del módulo Asiento a arquitectura hexagonal
+  - Eliminación de `Asiento.kt` (Kotlin) y creación de `AsientoEntity.java` con Lombok Builder
+  - `AsientoService` y `AsientoException` movidos a `hexagonal/asiento/`
+  - `ContabilidadService` y `CostoService` actualizados para usar `AsientoEntity`
+- refactor(alumnoGuarani): Simplificación del mapper DTO y extracción de lógica de chequera
+  - Eliminación de 7 DTOs de infraestructura (ContactoGuarani, DocumentoPrincipalGuarani, PersonaGuarani, PropuestaGuarani, PropuestaTipoGuarani, TipoDocumentoGuarani, UbicacionGuarani)
+  - `AlumnoGuaraniDtoMapper` simplificado: eliminados 7 métodos de mapeo recursivo
+  - Nueva lógica de creación de chequera extraída a `PreuniversitarioChequeraService`
+- refactor(baja): `BajaException` migrado a `hexagonal/baja/application/exception/`
+- refactor(chequeraSerie): `ChequeraSerieMapper` movido a `hexagonal/chequeraSerie/infrastructure/web/mapper/`
+- chore(docs): Nuevos diagramas Mermaid para módulos ArancelTipo, ArancelPorcentaje y Asiento
+
+> Basado en análisis profundo de `git diff HEAD` (63 archivos modificados, +688/-1070 líneas) y `pom.xml` (versión 3.28.0).
 
 ## Novedades 3.28.0 (verificado en código)
 - feat(guarani): Nuevo módulo `alumnoGuarani` con arquitectura hexagonal para integración con sistema Guarani

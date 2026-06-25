@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.*;
+import um.tesoreria.core.hexagonal.asiento.application.service.AsientoService;
+import um.tesoreria.core.hexagonal.asiento.infrastructure.persistence.entity.AsientoEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.model.dto.AsignacionCostoDto;
@@ -67,7 +69,7 @@ public class CostoService {
                 log.debug("Error Ejercicio : {}", e.getMessage());
                 return false;
             }
-            var asiento = new Asiento.Builder()
+            var asiento = AsientoEntity.builder()
                     .fecha(asientoInternal.getFechaContable())
                     .orden(asientoInternal.getOrdenContable())
                     .vinculo("Asignación Costos")

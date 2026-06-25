@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo AlumnoGuarani (v3.28.0)
+title: Arquitectura Hexagonal - Módulo AlumnoGuarani (v3.29.0)
 ---
 
 classDiagram
@@ -7,18 +7,22 @@ classDiagram
 
     namespace domain {
         class AlumnoGuarani {
-            +Long alumnoId
+            +Long alumno
             +String legajo
-            +PersonaGuarani persona
-            +PropuestaGuarani propuesta
-            +UbicacionGuarani ubicacion
-            +String planVersion
+            +Long persona
+            +Integer propuesta
+            +Integer planVersion
+            +Integer ubicacion
             +String modalidad
             +String division
             +Integer anioCursada
+            +Integer cantidadReadmisiones
             +String regular
             +String calidad
             +BigDecimal coeficiente
+            +PersonaGuarani personaRel
+            +PropuestaGuarani propuestaRel
+            +UbicacionGuarani ubicacionRel
             +jsonify() String
         }
 
@@ -105,21 +109,9 @@ classDiagram
 
         namespace usecases {
             class CreatePreuniversitarioUseCaseImpl {
-                -PersonaService personaService
-                -DomicilioService domicilioService
-                -ChequeraSerieControlService chequeraSerieControlService
-                -LegajoService legajoService
-                -LectivoService lectivoService
-                -ChequeraSerieService chequeraSerieService
-                -BuildService buildService
-                -LectivoTotalService lectivoTotalService
-                -ChequeraTotalService chequeraTotalService
-                -LectivoAlternativaService lectivoAlternativaService
-                -ChequeraAlternativaService chequeraAlternativaService
-                -LectivoCuotaService lectivoCuotaService
-                -ChequeraCuotaService chequeraCuotaService
+                -PreuniversitarioChequeraService preuniversitarioChequeraService
+                -MailChequeraService mailChequeraService
                 +createPreuniversitario(AlumnoGuarani) AlumnoGuarani
-                +createChequeraPreuniversitario() void
             }
 
             class CheckAllPreuniversitarioWithoutChequeraUseCaseImpl {
@@ -127,6 +119,10 @@ classDiagram
                 -LectivoService lectivoService
                 +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
             }
+        }
+
+        class PreuniversitarioChequeraService {
+            +create(AlumnoGuarani) ChequeraSerieEntity
         }
     }
 
@@ -152,24 +148,10 @@ classDiagram
                     +Integer geograficaId
                     +Integer tipoChequeraId
                 }
-                class PersonaGuaraniDTO
-                class DocumentoPrincipalGuaraniDTO
-                class TipoDocumentoGuaraniDTO
-                class ContactoGuaraniDTO
-                class UbicacionGuaraniDTO
-                class PropuestaGuaraniDTO
-                class PropuestaTipoGuaraniDTO
             }
 
             class AlumnoGuaraniDtoMapper {
                 +toDomain(AlumnoGuaraniRequest) AlumnoGuarani
-                +toPersonaGuarani(PersonaGuaraniDTO) PersonaGuarani
-                +toDocumentoPrincipalGuarani(DocumentoPrincipalGuaraniDTO) DocumentoPrincipalGuarani
-                +toTipoDocumentoGuarani(TipoDocumentoGuaraniDTO) TipoDocumentoGuarani
-                +toContactoGuarani(ContactoGuaraniDTO) ContactoGuarani
-                +toPropuestaGuarani(PropuestaGuaraniDTO) PropuestaGuarani
-                +toPropuestaTipoGuarani(PropuestaTipoGuaraniDTO) PropuestaTipoGuarani
-                +toUbicacionGuarani(UbicacionGuaraniDTO) UbicacionGuarani
             }
         }
     }
@@ -188,8 +170,8 @@ classDiagram
     AlumnoGuaraniService --> CreatePreuniversitarioUseCase
     AlumnoGuaraniService --> CheckAllPreuniversitarioWithoutChequeraUseCase
 
+    CreatePreuniversitarioUseCaseImpl --> PreuniversitarioChequeraService
+
     AlumnoGuaraniController --> AlumnoGuaraniService
     AlumnoGuaraniDtoMapper ..> AlumnoGuaraniRequest : maps from
     AlumnoGuaraniDtoMapper ..> AlumnoGuarani : maps to
-    AlumnoGuaraniDtoMapper ..> PersonaGuaraniDTO : reads
-    AlumnoGuaraniDtoMapper ..> PersonaGuarani : creates

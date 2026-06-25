@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class PropuestaTipoGuarani {
 
-    private Integer propuestaTipoId;
+    private Integer propuestaTipo;
     private String descripcion;
     private String otorgaTitulo;
     private String reportaAraucano;

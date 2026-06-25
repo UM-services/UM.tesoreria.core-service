@@ -1,0 +1,31 @@
+---
+title: Arquitectura Hexagonal - Asiento (v3.29.0)
+---
+flowchart TD
+    subgraph Aplicacion ["Aplicación (Application)"]
+        S["AsientoService<br/>(Servicio de Aplicación)"]
+        E["AsientoException<br/>(Excepción de Dominio)"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        R["JpaAsientoRepository<br/>(Repositorio JPA)"]
+        Ent["AsientoEntity<br/>(Entidad JPA)"]
+    end
+
+    subgraph Externa ["Módulos Externos"]
+        CS["ContabilidadService<br/>(Facade Contable)"]
+        CO["CostoService<br/>(Asignación Costos)"]
+    end
+
+    CS --> S
+    CO --> S
+    S --> R
+    R --> Ent
+    S -.->|"lanza"| E
+
+    style S fill:#f3e5f5
+    style E fill:#fce4ec
+    style CS fill:#ffe0b2
+    style CO fill:#ffe0b2
+    style R fill:#e8f5e8
+    style Ent fill:#e8f5e8

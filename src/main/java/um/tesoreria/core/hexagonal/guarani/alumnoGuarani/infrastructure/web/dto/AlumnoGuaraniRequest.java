@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.PersonaGuarani;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.PropuestaGuarani;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.UbicacionGuarani;
 
 import java.math.BigDecimal;
 
@@ -15,7 +18,7 @@ import java.math.BigDecimal;
 @Builder
 public class AlumnoGuaraniRequest {
 
-    private Long alumnoId;
+    private Long alumno;
     private String legajo;
     private Long persona;
     private Integer propuesta;

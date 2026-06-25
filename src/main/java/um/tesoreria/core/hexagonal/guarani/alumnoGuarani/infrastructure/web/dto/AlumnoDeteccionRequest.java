@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 public class AlumnoDeteccionRequest {
 
+    private Integer alumno;
     private Integer ubicacion;
     private Integer propuesta;
     private String nroDocumento;
