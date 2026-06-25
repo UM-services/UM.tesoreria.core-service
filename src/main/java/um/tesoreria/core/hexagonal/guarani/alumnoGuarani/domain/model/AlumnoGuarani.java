@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class AlumnoGuarani {
 
-    private Long alumnoId;
+    private Long alumno;
     private String legajo;
     private Long persona;
     private Integer propuesta;

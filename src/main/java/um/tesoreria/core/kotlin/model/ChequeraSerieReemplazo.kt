@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
@@ -108,7 +109,7 @@ data class ChequeraSerieReemplazo(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "CSR_ArT_ID", insertable = false, updatable = false)
-    var arancelTipo: ArancelTipo? = null,
+    var arancelTipo: ArancelTipoEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "CSR_Geo_ID", insertable = false, updatable = false)

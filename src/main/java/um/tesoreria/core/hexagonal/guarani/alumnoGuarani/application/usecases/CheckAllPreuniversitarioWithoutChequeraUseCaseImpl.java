@@ -46,6 +46,7 @@ public class CheckAllPreuniversitarioWithoutChequeraUseCaseImpl implements Check
             } catch (ChequeraSerieException e) {
                 log.error(e.getMessage());
                 pendientes.add(AlumnoDeteccionRequest.builder()
+                        .alumno(encontrado.getAlumno())
                         .ubicacion(encontrado.getUbicacion())
                         .propuesta(encontrado.getPropuesta())
                         .nroDocumento(encontrado.getNroDocumento())

@@ -1,0 +1,25 @@
+---
+title: Arquitectura Hexagonal - ArancelPorcentaje (v3.29.0)
+---
+flowchart TD
+    subgraph Aplicacion ["Aplicación (Application)"]
+        S["ArancelPorcentajeService<br/>(Servicio de Aplicación)"]
+        E["ArancelPorcentajeException<br/>(Excepción de Dominio)"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        C["ArancelPorcentajeController<br/>(Controlador REST)"]
+        R["JpaArancelPorcentajeRepository<br/>(Repositorio JPA)"]
+        Ent["ArancelPorcentajeEntity<br/>(Entidad JPA)"]
+    end
+
+    C --> S
+    S --> R
+    R --> Ent
+    S -.->|"lanza"| E
+
+    style S fill:#f3e5f5
+    style E fill:#fce4ec
+    style C fill:#e8f5e8
+    style R fill:#e8f5e8
+    style Ent fill:#e8f5e8

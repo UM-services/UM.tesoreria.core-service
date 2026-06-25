@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class UbicacionGuarani {
 
-    private Integer ubicacionId;
+    private Integer ubicacion;
     private String nombre;
     private Integer ubicacionTipo;
     private Integer localidad;

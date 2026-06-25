@@ -2,6 +2,52 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.29.0] - 2026-06-25
+### Added
+- feat(chequeraSerie): Nuevo `PreuniversitarioChequeraService` en `hexagonal/chequeraSerie/application/service/`
+  - Lógica de creación de chequera preuniversitaria extraída de `CreatePreuniversitarioUseCaseImpl`
+
+### Changed
+- refactor(arancelTipo): Migración completa del módulo ArancelTipo a arquitectura hexagonal (Java)
+  - Eliminación de `ArancelTipo.kt` (Kotlin) del paquete `core/kotlin/model/`
+  - Creación de `ArancelTipoEntity.java` con anotaciones Lombok (`@Getter`, `@Setter`, `@Builder`) en `hexagonal/arancelTipo/infrastructure/persistence/entity/`
+  - Creación de `JpaArancelTipoRepository.java` en `hexagonal/arancelTipo/infrastructure/persistence/repository/`
+  - `ArancelTipoService` movido de `core/service/` a `hexagonal/arancelTipo/application/service/`
+  - `ArancelTipoException` movido de `core/exception/` a `hexagonal/arancelTipo/application/exception/`
+  - `ArancelTipoController` movido de `core/controller/` a `hexagonal/arancelTipo/infrastructure/web/controller/`
+  - Referencias actualizadas en `ChequeraSerieReemplazo.kt`, `ChequeraSerieAlta.kt`, `ChequeraSerieAltaFull.kt`, `ChequeraIncompleta.java`, `ChequeraKey.java`, `ChequeraPreuniv.java`, `SheetService.java`, `ChequeraService.java`
+- refactor(arancelPorcentaje): Migración completa del módulo ArancelPorcentaje a arquitectura hexagonal (Java)
+  - Eliminación de `ArancelPorcentaje.kt` (Kotlin) del paquete `core/kotlin/model/`
+  - Creación de `ArancelPorcentajeEntity.java` en `hexagonal/arancelPorcentaje/infrastructure/persistence/entity/`
+  - Creación de `JpaArancelPorcentajeRepository.java` en `hexagonal/arancelPorcentaje/infrastructure/persistence/repository/`
+  - Nuevo `ArancelPorcentajeService` en `hexagonal/arancelPorcentaje/application/service/`
+  - Nuevo `ArancelPorcentajeController` en `hexagonal/arancelPorcentaje/infrastructure/web/controller/`
+  - Referencias actualizadas en `PlantillaArancelService.java`
+- refactor(asiento): Migración completa del módulo Asiento a arquitectura hexagonal (Java)
+  - Eliminación de `Asiento.kt` (Kotlin) del paquete `core/kotlin/model/`
+  - Creación de `AsientoEntity.java` con Lombok Builder en `hexagonal/asiento/infrastructure/persistence/entity/`
+  - Creación de `JpaAsientoRepository.java` en `hexagonal/asiento/infrastructure/persistence/repository/`
+  - `AsientoService` movido de `core/service/` a `hexagonal/asiento/application/service/`
+  - `AsientoException` movido de `core/exception/` a `hexagonal/asiento/application/exception/`
+  - Referencias actualizadas en `ContabilidadService.java`, `CostoService.java`
+  - Migración de `Asiento.Builder()` interno a `AsientoEntity.builder()` de Lombok
+- refactor(alumnoGuarani): Simplificación del mapper y extracción de lógica de creación de chequera
+  - Eliminación de 7 DTOs de infraestructura: `ContactoGuarani.java`, `DocumentoPrincipalGuarani.java`, `PersonaGuarani.java`, `PropuestaGuarani.java`, `PropuestaTipoGuarani.java`, `TipoDocumentoGuarani.java`, `UbicacionGuarani.java`
+  - `AlumnoGuaraniDtoMapper` simplificado: eliminados 7 métodos privados de mapeo recursivo DTO → dominio
+  - `CreatePreuniversitarioUseCaseImpl` delegado a `PreuniversitarioChequeraService`
+  - Modelo de dominio `AlumnoGuarani`: campo `alumnoId` renombrado a `alumno`; nuevo campo `cantidadReadmisiones`
+- refactor(baja): `BajaException` movido a `hexagonal/baja/application/exception/`
+- refactor(chequeraSerie): `ChequeraSerieMapper` movido de `core/util/` a `hexagonal/chequeraSerie/infrastructure/web/mapper/`
+- refactor(articulo): `ArticuloException` movido a `hexagonal/articulo/application/exception/`
+- chore(logging): Añadido `@Slf4j` y logging con `\n\n` en `AlumnoGuaraniDtoMapper`, `MailChequeraService`, `AsientoService`
+
+### Removed
+- Eliminación de repositorios legacy: `ArancelPorcentajeRepository.java`, `ArancelTipoRepository.java`, `AsientoRepository.java`
+- Eliminación de servicio legacy: `ArancelPorcentajeService.java`
+- Eliminación de controladores legacy: `ArancelPorcentajeController.java`
+
+> Basado en análisis profundo de `git diff HEAD` (63 archivos modificados, +688/-1070 líneas) y `pom.xml` (versión 3.28.0).
+
 ## [3.28.0] - 2026-06-23
 ### Added
 - feat(guarani): Nuevo módulo `alumnoGuarani` con arquitectura hexagonal para integración con sistema Guarani

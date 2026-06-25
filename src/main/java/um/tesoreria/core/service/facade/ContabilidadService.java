@@ -4,18 +4,17 @@
 package um.tesoreria.core.service.facade;
 
 import lombok.RequiredArgsConstructor;
-import um.tesoreria.core.exception.AsientoException;
+import um.tesoreria.core.hexagonal.asiento.application.exception.AsientoException;
 import um.tesoreria.core.exception.EjercicioBloqueadoException;
 import um.tesoreria.core.exception.EjercicioException;
 import um.tesoreria.core.exception.facade.ContableException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import um.tesoreria.core.hexagonal.asiento.application.service.AsientoService;
+import um.tesoreria.core.hexagonal.asiento.infrastructure.persistence.entity.AsientoEntity;
 import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
-import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.service.*;
@@ -153,7 +152,7 @@ public class ContabilidadService {
 
             // Delete asiento if exists
             try {
-                Asiento asiento = asientoService.findByAsiento(fechaContable, ordenContable);
+                AsientoEntity asiento = asientoService.findByAsiento(fechaContable, ordenContable);
                 log.debug("Asiento -> {}", asiento.jsonify());
                 asientoService.deleteByAsientoId(asiento.getAsientoId());
             } catch (AsientoException ignored) {
@@ -197,20 +196,20 @@ public class ContabilidadService {
         AsientoInternal mem = nextAsiento(asientoInternalContra.getFechaContable(), null);
         asientoInternalContra.setOrdenContable(mem.getOrdenContable());
 
-        Asiento asiento = null;
+        AsientoEntity asiento = null;
         try {
             asiento = asientoService.findByAsiento(fechaContable, ordenContable);
             asiento.setFechaContra(asientoInternalContra.getFechaContable());
             asiento.setOrdenContra(asientoInternalContra.getOrdenContable());
             asiento = asientoService.update(asiento, asiento.getAsientoId());
         } catch (AsientoException e) {
-            asiento = new Asiento(null, fechaContable, ordenContable, "contraasiento", asientoInternalContra.getFechaContable(), asientoInternalContra.getOrdenContable(), null, null);
+            asiento = new AsientoEntity(null, fechaContable, ordenContable, "contraasiento", asientoInternalContra.getFechaContable(), asientoInternalContra.getOrdenContable(), null, null);
             asiento = asientoService.add(asiento);
         }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String vinculo = MessageFormat.format("Contraasiento de ASIENTO {0} - {1}", fechaContable.format(formatter), ordenContable);
-        asiento = new Asiento(null, asientoInternalContra.getFechaContable(), asientoInternalContra.getOrdenContable(), vinculo, null, null, null, null);
+        asiento = new AsientoEntity(null, asientoInternalContra.getFechaContable(), asientoInternalContra.getOrdenContable(), vinculo, null, null, null, null);
         asiento = asientoService.add(asiento);
 
         for (CuentaMovimiento cuentaMovimiento : cuentaMovimientos) {
@@ -224,7 +223,7 @@ public class ContabilidadService {
 
     private Boolean tieneContraAsiento(OffsetDateTime fechaContable, Integer ordenContable) {
         try {
-            Asiento asiento = asientoService.findByAsiento(fechaContable, ordenContable);
+            AsientoEntity asiento = asientoService.findByAsiento(fechaContable, ordenContable);
             if (asiento.getFechaContra() != null) {
                 return true;
             }
@@ -242,7 +241,7 @@ public class ContabilidadService {
         }
         int item = 0;
 
-        Asiento asiento = new Asiento(null, fechaContable, ordenContable, vinculo, null, null, null, null);
+        AsientoEntity asiento = new AsientoEntity(null, fechaContable, ordenContable, vinculo, null, null, null, null);
         asiento = asientoService.add(asiento);
 
         for (CuentaMovimiento cuentaMovimiento : cuentaMovimientos) {

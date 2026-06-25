@@ -6,7 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import um.tesoreria.core.exception.BajaException;
+import um.tesoreria.core.hexagonal.baja.application.exception.BajaException;
 import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
 import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.model.Debito;

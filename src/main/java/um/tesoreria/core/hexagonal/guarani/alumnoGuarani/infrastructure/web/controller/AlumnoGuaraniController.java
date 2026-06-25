@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tesoreria/core/guarani/alumno")
 @RequiredArgsConstructor
+@Slf4j
 public class AlumnoGuaraniController {
 
     private final AlumnoGuaraniService alumnoGuaraniService;
@@ -24,6 +26,7 @@ public class AlumnoGuaraniController {
 
     @PostMapping("/create/preuniversitario")
     public ResponseEntity<AlumnoGuarani> createPreuniversitario(@RequestBody AlumnoGuaraniRequest request) {
+        log.debug("\n\nProcessing AlumnoGuaraniController.createPreuniversitario\n\n");
         AlumnoGuarani domain = dtoMapper.toDomain(request);
         AlumnoGuarani created = alumnoGuaraniService.createPreuniversitario(domain);
         return ResponseEntity.ok(created);

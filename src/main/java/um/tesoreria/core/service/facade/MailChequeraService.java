@@ -33,6 +33,7 @@ import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioServic
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.AlumnoGuarani;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.*;
@@ -71,7 +72,7 @@ public class MailChequeraService {
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
             Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
-        log.debug("Processing MailChequeraService.sendChequera");
+        log.debug("\n\nProcessing MailChequeraService.sendChequera\n\n");
         var event = SendChequeraEvent.builder()
                 .facultadId(facultadId)
                 .tipoChequeraId(tipoChequeraId)

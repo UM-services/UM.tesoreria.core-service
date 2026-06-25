@@ -11,7 +11,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.exception.BajaException;
+import um.tesoreria.core.hexagonal.baja.application.exception.BajaException;
 import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
 import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.repository.JpaBajaRepository;
 import lombok.extern.slf4j.Slf4j;

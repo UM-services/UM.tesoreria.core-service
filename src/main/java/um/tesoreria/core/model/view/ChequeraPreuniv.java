@@ -20,6 +20,7 @@ import org.hibernate.annotations.Immutable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
@@ -77,7 +78,7 @@ public class ChequeraPreuniv implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "arancelTipoId", insertable = false, updatable = false)
-	private ArancelTipo arancelTipo;
+	private ArancelTipoEntity arancelTipo;
 
 	@OneToOne
 	@JoinColumns({
