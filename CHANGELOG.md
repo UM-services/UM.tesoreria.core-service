@@ -2,8 +2,12 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
-## [3.29.0] - 2026-06-25
+## [3.29.0] - 2026-06-26
 ### Added
+- feat(Tool): Nuevos mappings de propuesta a facultadId en `Tool.convert2Tesium()`
+  - Nuevas propuestas: 70, 111, 125-134 → facultad 1; 72, 121-123 → facultad 2; 74, 120 → facultad 3; 75, 112-118 → facultad 4; 68, 124 → facultad 5
+  - Eliminados mappings legacy: propuestas 109, 73, 108 reemplazados por valores actualizados
+  - Amplía compatibilidad con nuevas sedes/carreras del sistema Guarani
 - feat(chequeraSerie): Nuevo `PreuniversitarioChequeraService` en `hexagonal/chequeraSerie/application/service/`
   - Lógica de creación de chequera preuniversitaria extraída de `CreatePreuniversitarioUseCaseImpl`
 
@@ -46,7 +50,7 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 - Eliminación de servicio legacy: `ArancelPorcentajeService.java`
 - Eliminación de controladores legacy: `ArancelPorcentajeController.java`
 
-> Basado en análisis profundo de `git diff HEAD` (63 archivos modificados, +688/-1070 líneas) y `pom.xml` (versión 3.28.0).
+> Basado en análisis profundo de `git diff HEAD` (64 archivos modificados, +693/-1075 líneas, incluyendo cambios locales en Tool.java) y `pom.xml` (versión 3.28.0 → 3.29.0).
 
 ## [3.28.0] - 2026-06-23
 ### Added

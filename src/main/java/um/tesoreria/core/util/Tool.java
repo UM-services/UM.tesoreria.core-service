@@ -256,12 +256,12 @@ public class Tool {
             default -> 0;
         };
         int facultadId = switch (propuesta) {
+            case 70, 111, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134 -> 1;
+            case 72, 121, 122, 123 -> 2;
+            case 74, 120 -> 3;
+            case 75, 112, 113, 114, 115, 116, 117, 118 -> 4;
+            case 68, 124 -> 5;
             case 69 -> 14;
-            case 70, 109 -> 1;
-            case 72, 73 -> 2;
-            case 74 -> 3;
-            case 75 -> 4;
-            case 108 -> 5;
             default -> 0;
         };
         int tipoChequeraId = switch (geograficaId) {
