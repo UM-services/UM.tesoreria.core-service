@@ -7,6 +7,10 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 **Versión actual (SemVer): 3.29.0**
 
 ## Novedades 3.29.0 (verificado en código)
+- feat(Tool): Actualizados mappings de propuesta a facultadId en `Tool.convert2Tesium()`
+  - Nuevas propuestas: 70, 111, 125-134 → facultad 1; 72, 121-123 → facultad 2; 74, 120 → facultad 3; 75, 112-118 → facultad 4; 68, 124 → facultad 5
+  - Eliminados mappings legacy (109, 73, 108) reemplazados por valores actualizados
+  - Amplía cobertura de carreras/sedes del sistema Guarani
 - refactor(arancelTipo): Migración completa del módulo ArancelTipo a arquitectura hexagonal
   - Eliminación de `ArancelTipo.kt` (Kotlin) y creación de `ArancelTipoEntity.java` con Lombok
   - `ArancelTipoService` y `ArancelTipoController` movidos a `hexagonal/arancelTipo/`
@@ -26,7 +30,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 - refactor(chequeraSerie): `ChequeraSerieMapper` movido a `hexagonal/chequeraSerie/infrastructure/web/mapper/`
 - chore(docs): Nuevos diagramas Mermaid para módulos ArancelTipo, ArancelPorcentaje y Asiento
 
-> Basado en análisis profundo de `git diff HEAD` (63 archivos modificados, +688/-1070 líneas) y `pom.xml` (versión 3.28.0).
+> Basado en análisis profundo de `git diff HEAD` (64 archivos modificados, +693/-1075 líneas, incluyendo cambios locales en Tool.java) y `pom.xml` (versión 3.28.0 → 3.29.0).
 
 ## Novedades 3.28.0 (verificado en código)
 - feat(guarani): Nuevo módulo `alumnoGuarani` con arquitectura hexagonal para integración con sistema Guarani
@@ -926,6 +930,9 @@ src/
 │   ├── java/
 │   │   └── um/tesoreria/core/
 │   │       ├── hexagonal/
+│   │       │   ├── arancelPorcentaje/        # Módulo ArancelPorcentaje (v3.29.0)
+│   │       │   ├── arancelTipo/              # Módulo ArancelTipo (v3.29.0)
+│   │       │   ├── asiento/                  # Módulo Asiento (v3.29.0)
 │   │       │   ├── auth/                     # Módulo Auth (v3.6.0)
 │   │       │   ├── baja/                     # Módulo Baja (v3.21.0)
 │   │       │   ├── chequeraCuota/            # Módulo ChequeraCuota (v3.2.0)
@@ -937,7 +944,7 @@ src/
 │   │       │   ├── facultad/                 # Módulo Facultad (v3.18.0)
 │   │       │   ├── facturaPendiente/         # Módulo FacturaPendiente (v3.15.0)
 │   │       │   ├── geografica/               # Módulo Geografica (v3.6.0)
-│   │       │   ├── guarani/alumnoGuarani/    # Módulo AlumnoGuarani (v3.28.0)
+│   │       │   ├── guarani/alumnoGuarani/    # Módulo AlumnoGuarani (v3.29.0)
 │   │       │   ├── mercadoPagoContext/       # Módulo MercadoPagoContext (v3.24.0)
 │   │       │   ├── persona/                  # Módulo Persona (v3.24.0)
 │   │       │   ├── proveedor/                # Módulo Proveedor (v3.9.0)
@@ -989,7 +996,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.28.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.29.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
