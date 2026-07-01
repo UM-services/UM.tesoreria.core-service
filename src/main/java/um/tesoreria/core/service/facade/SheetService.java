@@ -505,8 +505,8 @@ public class SheetService {
         styleDate.setDataFormat(book.getCreationHelper().createDataFormat().getFormat("dd-MM-yyyy"));
 
         Sheet sheet = book.createSheet("Eficiencia Pre");
-        Row row = null;
-        Lectivo lectivo = null;
+        Row row;
+        Lectivo lectivo;
         try {
             lectivo = lectivoService.findByLectivoId(lectivoId);
         } catch (EjercicioException e) {
@@ -667,8 +667,8 @@ public class SheetService {
         styleDate.setDataFormat(book.getCreationHelper().createDataFormat().getFormat("dd-MM-yyyy"));
 
         Sheet sheet = book.createSheet("Comparativo Pre");
-        Row row = null;
-        Lectivo lectivo = null;
+        Row row;
+        Lectivo lectivo;
         try {
             lectivo = lectivoService.findByLectivoId(lectivoId);
         } catch (EjercicioException e) {
@@ -855,8 +855,8 @@ public class SheetService {
         styleDate.setDataFormat(book.getCreationHelper().createDataFormat().getFormat("dd-MM-yyyy"));
 
         Sheet sheet = book.createSheet("Matriculados");
-        Row row = null;
-        Lectivo lectivo = null;
+        Row row;
+        Lectivo lectivo;
         try {
             lectivo = lectivoService.findByLectivoId(lectivoId);
         } catch (EjercicioException e) {
@@ -960,8 +960,8 @@ public class SheetService {
         styleDate.setDataFormat(book.getCreationHelper().createDataFormat().getFormat("dd-MM-yyyy"));
 
         Sheet sheet = book.createSheet("Inscriptos");
-        Row row = null;
-        Lectivo lectivo = null;
+        Row row;
+        Lectivo lectivo;
         try {
             lectivo = lectivoService.findByLectivoId(lectivoId);
         } catch (EjercicioException e) {
