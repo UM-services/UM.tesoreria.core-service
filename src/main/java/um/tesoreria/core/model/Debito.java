@@ -22,8 +22,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
-import um.tesoreria.core.kotlin.model.Producto;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.producto.infrastructure.persistence.entity.ProductoEntity;
 import um.tesoreria.core.util.Jsonifier;
 
 /**
@@ -80,7 +80,7 @@ public class Debito extends Auditable implements Serializable {
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "productoId", referencedColumnName = "pro_id", insertable = false, updatable = false)
-	private Producto producto;
+	private ProductoEntity producto;
 
 	public String chequeraKey() {
 		return this.facultadId + "." + this.tipoChequeraId + "." + this.chequeraSerieId;

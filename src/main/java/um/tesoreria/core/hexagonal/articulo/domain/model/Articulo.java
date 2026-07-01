@@ -1,7 +1,7 @@
 package um.tesoreria.core.hexagonal.articulo.domain.model;
 
 import lombok.*;
-import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import java.math.BigDecimal;
 
 @Getter

@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import org.hibernate.annotations.Immutable
-import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity
-import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity
-import um.tesoreria.core.kotlin.model.*
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity
+import um.tesoreria.core.hexagonal.chequera.producto.infrastructure.persistence.entity.ProductoEntity
 import java.math.BigDecimal
 import java.time.OffsetDateTime
 
@@ -100,7 +100,7 @@ data class ChequeraCuotaDeuda(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chc_pro_id", insertable = false, updatable = false)
-    var producto: Producto? = null,
+    var producto: ProductoEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chequeraId", referencedColumnName = "clave", insertable = false, updatable = false)

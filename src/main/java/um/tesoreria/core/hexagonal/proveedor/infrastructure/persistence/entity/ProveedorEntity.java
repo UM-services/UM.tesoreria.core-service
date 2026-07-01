@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 
 import lombok.*;
 import um.tesoreria.core.model.Auditable;
-import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
 
 /**
  * @author daniel

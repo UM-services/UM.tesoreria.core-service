@@ -10,10 +10,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.hexagonal.arancelPorcentaje.infrastructure.persistence.entity.ArancelPorcentajeEntity;
+import um.tesoreria.core.hexagonal.chequera.arancelPorcentaje.infrastructure.persistence.entity.ArancelPorcentajeEntity;
 import um.tesoreria.core.model.LectivoCuota;
 import um.tesoreria.core.model.dto.PlantillaArancelDto;
-import um.tesoreria.core.hexagonal.arancelPorcentaje.infrastructure.persistence.repository.JpaArancelPorcentajeRepository;
+import um.tesoreria.core.hexagonal.chequera.arancelPorcentaje.infrastructure.persistence.repository.JpaArancelPorcentajeRepository;
 import um.tesoreria.core.repository.LectivoCuotaRepository;
 
 /**

@@ -3,12 +3,12 @@ package um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
-import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.model.Auditable;
-import um.tesoreria.core.kotlin.model.Lectivo;
-import um.tesoreria.core.kotlin.model.TipoChequera;
+import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.entity.LectivoEntity;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -62,11 +62,11 @@ public class BajaEntity extends Auditable {
 
     @OneToOne(optional = true)
     @JoinColumn(name = "baj_tch_id", insertable = false, updatable = false)
-    private TipoChequera tipoChequera;
+    private TipoChequeraEntity tipoChequera;
 
     @OneToOne(optional = true)
     @JoinColumn(name = "baj_lec_id", insertable = false, updatable = false)
-    private Lectivo lectivo;
+    private LectivoEntity lectivo;
 
     @OneToOne(optional = true)
     @JoinColumns({

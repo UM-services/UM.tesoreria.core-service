@@ -8,9 +8,12 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
-import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
-import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persistence.entity.ClaseChequeraEntity;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.service.*;
@@ -20,8 +23,8 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.repository.view.ChequeraCuotaDeudaRepository;
 import um.tesoreria.core.util.Tool;
-import um.tesoreria.core.service.ClaseChequeraService;
-import um.tesoreria.core.service.TipoChequeraService;
+import um.tesoreria.core.hexagonal.chequera.claseChequera.application.service.ClaseChequeraService;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 
 /**
  * @author daniel
@@ -98,14 +101,14 @@ public class ChequeraCuotaDeudaService {
     }
 
     public List<ChequeraCuotaDeuda> findAllPosgradoByRango(OffsetDateTime desde, OffsetDateTime hasta, ChequeraCuotaService chequeraCuotaService) {
-        List<Integer> claseChequeraIds = claseChequeraService.findAllByPosgrado().stream().map(ClaseChequera::getClaseChequeraId).toList();
+        List<Integer> claseChequeraIds = claseChequeraService.findAllByPosgrado().stream().map(ClaseChequeraEntity::getClaseChequeraId).toList();
         return findAllByFilter(claseChequeraIds, desde, hasta, chequeraCuotaService);
     }
 
     public List<ChequeraCuotaDeuda> findAllMacroByRango(OffsetDateTime desde, OffsetDateTime hasta, ChequeraCuotaService chequeraCuotaService) {
-        List<Integer> claseChequeraIds = new ArrayList<>(claseChequeraService.findAllByPosgrado().stream().map(ClaseChequera::getClaseChequeraId).toList());
-        claseChequeraIds.addAll(claseChequeraService.findAllByCurso().stream().map(ClaseChequera::getClaseChequeraId).toList());
-        claseChequeraIds.addAll(claseChequeraService.findAllByTitulo().stream().map(ClaseChequera::getClaseChequeraId).toList());
+        List<Integer> claseChequeraIds = new ArrayList<>(claseChequeraService.findAllByPosgrado().stream().map(ClaseChequeraEntity::getClaseChequeraId).toList());
+        claseChequeraIds.addAll(claseChequeraService.findAllByCurso().stream().map(ClaseChequeraEntity::getClaseChequeraId).toList());
+        claseChequeraIds.addAll(claseChequeraService.findAllByTitulo().stream().map(ClaseChequeraEntity::getClaseChequeraId).toList());
         return findAllByFilter(claseChequeraIds, desde, hasta, chequeraCuotaService);
     }
 

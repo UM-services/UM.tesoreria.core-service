@@ -3,12 +3,13 @@ package um.tesoreria.core.kotlin.model.view
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
 import org.hibernate.annotations.Immutable
-import um.tesoreria.core.hexagonal.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity
+import um.tesoreria.core.hexagonal.chequera.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity
 import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity
-import um.tesoreria.core.kotlin.model.*
+import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.entity.LectivoEntity
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity
 import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -51,7 +52,7 @@ data class ChequeraSerieAltaFull(
 
     @OneToOne
     @JoinColumn(name = "tipoChequeraId", insertable = false, updatable = false)
-    var tipoChequera: TipoChequera? = null,
+    var tipoChequera: TipoChequeraEntity? = null,
 
     @OneToOne
     @JoinColumns(
@@ -69,7 +70,7 @@ data class ChequeraSerieAltaFull(
 
     @OneToOne
     @JoinColumn(name = "lectivoId", insertable = false, updatable = false)
-    var lectivo: Lectivo? = null,
+    var lectivo: LectivoEntity? = null,
 
     @OneToOne
     @JoinColumn(name = "arancelTipoId", insertable = false, updatable = false)

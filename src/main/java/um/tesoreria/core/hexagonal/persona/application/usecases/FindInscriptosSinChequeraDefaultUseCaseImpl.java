@@ -9,7 +9,7 @@ import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
 import um.tesoreria.core.extern.consumer.LegajoFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
-import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.FindInscriptosSinChequeraDefaultUseCase;

@@ -52,17 +52,22 @@ import um.tesoreria.core.extern.model.view.PersonaKeyFacultad;
 import um.tesoreria.core.extern.model.view.PreunivCarreraFacultad;
 import um.tesoreria.core.extern.model.view.PreunivMatricResumenFacultad;
 import um.tesoreria.core.extern.model.view.PreunivResumenFacultad;
-import um.tesoreria.core.hexagonal.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
+import um.tesoreria.core.hexagonal.chequera.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
 import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
-import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.facturaPendiente.application.service.FacturaPendienteService;
 import um.tesoreria.core.hexagonal.facturaPendiente.domain.model.FacturaPendiente;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
 import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
 import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
+import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
 import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
 import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.*;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
@@ -73,27 +78,27 @@ import um.tesoreria.core.model.view.IngresoPeriodo;
 import um.tesoreria.core.model.view.LegajoKey;
 import um.tesoreria.core.model.view.PersonaKey;
 import um.tesoreria.core.model.view.TipoPagoFechaAcreditacion;
-import um.tesoreria.core.hexagonal.arancelTipo.application.service.ArancelTipoService;
+import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.service.ArancelTipoService;
 import um.tesoreria.core.hexagonal.baja.application.service.BajaService;
 import um.tesoreria.core.service.CarreraService;
-import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.service.ContratoPeriodoService;
 import um.tesoreria.core.service.CuentaMovimientoService;
 import um.tesoreria.core.service.EjercicioService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.IngresoAsientoService;
-import um.tesoreria.core.service.LectivoService;
+import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.service.LegajoService;
 import um.tesoreria.core.service.PersonaSuspendidoService;
 import um.tesoreria.core.service.PlanService;
 import um.tesoreria.core.service.ProveedorMovimientoService;
-import um.tesoreria.core.service.TipoChequeraService;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import um.tesoreria.core.service.TipoPagoService;
 import um.tesoreria.core.service.view.*;
 import um.tesoreria.core.model.PersonaSuspendido;
 import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
-import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.web.mapper.ChequeraSerieMapper;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.mapper.ChequeraSerieMapper;
 import um.tesoreria.core.service.*;
 import um.tesoreria.core.util.Jsonifier;
 
@@ -275,7 +280,7 @@ public class SheetService {
             if (tipos.containsKey(tipochequeraId)) {
                 tipoChequera = tipos.get(tipochequeraId);
                 if (tipoChequera.getGeografica() != null) {
-                    geografica = geograficaMapper.toDomainModel(tipoChequera.getGeografica());
+                    geografica = tipoChequera.getGeografica();
                 }
             }
             List<ChequeraSerieEntity> chequeraList = chequeraSerieService.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipochequeraId);

@@ -2,7 +2,7 @@ package um.tesoreria.core.hexagonal.dependencia.infrastructure.persistence.entit
 
 import jakarta.persistence.*;
 import lombok.*;
-import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
