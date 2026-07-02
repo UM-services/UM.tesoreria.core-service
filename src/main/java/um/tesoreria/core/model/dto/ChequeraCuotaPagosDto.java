@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import um.tesoreria.core.hexagonal.chequera.producto.infrastructure.persistence.entity.ProductoEntity;
+import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
 
 @Data
 @Builder
@@ -50,7 +50,7 @@ public class ChequeraCuotaPagosDto {
     private Byte manual;
     private Byte compensada;
     private Integer tramoId;
-    private ProductoEntity producto;
+    private Producto producto;
 
     private List<ChequeraPagoDto> chequeraPagos;
 

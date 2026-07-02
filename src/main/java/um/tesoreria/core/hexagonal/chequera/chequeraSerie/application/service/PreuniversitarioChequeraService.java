@@ -8,8 +8,9 @@ import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
@@ -55,7 +56,7 @@ public class PreuniversitarioChequeraService {
     private final ChequeraCuotaService chequeraCuotaService;
 
     @Transactional
-    public ChequeraSerieEntity create(AlumnoGuarani alumnoGuarani) {
+    public ChequeraSerie create(AlumnoGuarani alumnoGuarani) {
         log.debug("\n\nProcessing PreuniversitarioChequeraService.create\n\n");
         int lectivoId = lectivoService.findByFecha(OffsetDateTime.now()).getLectivoId();
         Build build = buildService.findLast();
@@ -137,44 +138,32 @@ public class PreuniversitarioChequeraService {
                         context.getTipoChequeraId(), chequeraSerieId, (byte) 0, 0, 0, 0L, (byte) 0));
         log.debug("ChequeraSerieControl -> {}", chequeraSerieControl.jsonify());
 
-        ChequeraSerieEntity chequeraSerie = chequeraSerieService.add(new ChequeraSerieEntity(null,
-                chequeraSerieControl.getFacultadId(),
-                chequeraSerieControl.getTipoChequeraId(),
-                chequeraSerieControl.getChequeraSerieId(),
-                personaId,
-                documentoId,
-                lectivoId,
-                1,
-                7,
-                (byte) 0,
-                context.getGeograficaId(),
-                Tool.dateAbsoluteArgentina(),
-                0,
-                "Generated From Guaraní",
-                context.getFacultadId() == 14 ? 1 : 2,
-                (byte) 0,
-                2,
-                (byte) 0,
-                "guarani",
-                (byte) 0,
-                (byte) 0,
-                build.getBuild(),
-                (byte) 0,
-                BigDecimal.ZERO,
-                null,
-                null,
-                null,
-                0,
-                BigDecimal.ZERO,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null));
-        log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
+        ChequeraSerie chequeraSerie = chequeraSerieService.add(ChequeraSerie.builder()
+                .facultadId(chequeraSerieControl.getFacultadId())
+                .tipoChequeraId(chequeraSerieControl.getTipoChequeraId())
+                .chequeraSerieId(chequeraSerieControl.getChequeraSerieId())
+                .personaId(personaId)
+                .documentoId(documentoId)
+                .lectivoId(lectivoId)
+                .arancelTipoId(1)
+                .cursoId(7)
+                .asentado((byte) 0)
+                .geograficaId(context.getGeograficaId())
+                .fecha(Tool.dateAbsoluteArgentina())
+                .cuotasPagadas(0)
+                .observaciones("Generated From Guaraní")
+                .alternativaId(context.getFacultadId() == 14 ? 1 : 2)
+                .algoPagado((byte) 0)
+                .tipoImpresionId(2)
+                .flagPayperTic((byte) 0)
+                .usuarioId("guarani")
+                .enviado((byte) 0)
+                .retenida((byte) 0)
+                .version(build.getBuild())
+                .hpum((byte) 0)
+                .becaPorcentaje(BigDecimal.ZERO)
+                .build());
+        log.debug("ChequeraSerie -> {}", Jsonifier.builder(chequeraSerie).build());
 
         List<ChequeraTotal> chequeraTotals = new ArrayList<>();
         for (LectivoTotal lectivoTotal : lectivoTotalService.findAllByTipo(chequeraSerie.getFacultadId(),
@@ -199,7 +188,7 @@ public class PreuniversitarioChequeraService {
         chequeraAlternativas = chequeraAlternativaService.saveAll(chequeraAlternativas);
         log.debug("ChequeraAlternativas -> {}", Jsonifier.builder(chequeraAlternativas).build());
 
-        List<ChequeraCuotaEntity> chequeraCuotas = new ArrayList<>();
+        List<ChequeraCuota> chequeraCuotas = new ArrayList<>();
         int offset = 0;
         for (LectivoCuota lectivoCuota : lectivoCuotaService.findAllByTipo(chequeraSerie.getFacultadId(),
                 chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(), chequeraSerie.getAlternativaId())) {
@@ -212,13 +201,13 @@ public class PreuniversitarioChequeraService {
                 vencimiento3 = Tool.dateAbsoluteArgentina().plusDays(40 + 30L * offset);
                 offset++;
             }
-            ChequeraCuotaEntity chequeraCuota = new ChequeraCuotaEntity(null, chequeraSerie.getChequeraId(), chequeraSerie.getFacultadId(),
+            ChequeraCuota chequeraCuota = new ChequeraCuota(null, chequeraSerie.getChequeraId(), chequeraSerie.getFacultadId(),
                     chequeraSerie.getTipoChequeraId(), chequeraSerie.getChequeraSerieId(), lectivoCuota.getProductoId(),
                     lectivoCuota.getAlternativaId(), lectivoCuota.getCuotaId(), lectivoCuota.getMes(),
                     lectivoCuota.getAnho(), chequeraSerie.getArancelTipoId(), vencimiento1, lectivoCuota.getImporte1(),
                     lectivoCuota.getImporte1(), vencimiento2, lectivoCuota.getImporte2(), lectivoCuota.getImporte2(),
                     vencimiento3, lectivoCuota.getImporte3(), lectivoCuota.getImporte3(), "", "", (byte) 0, (byte) 0,
-                    (byte) 0, (byte) 0, 0, null, null, null, null);
+                    (byte) 0, (byte) 0, 0, null, null);
             log.debug("chequera_cuota -> {}", chequeraCuota.jsonify());
             chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
             chequeraCuotas.add(chequeraCuota);

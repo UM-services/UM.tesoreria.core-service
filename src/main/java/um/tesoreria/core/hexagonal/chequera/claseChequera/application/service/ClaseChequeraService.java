@@ -1,39 +1,36 @@
-/**
- *
- */
 package um.tesoreria.core.hexagonal.chequera.claseChequera.application.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import um.tesoreria.core.hexagonal.chequera.claseChequera.application.exception.ClaseChequeraException;
+import um.tesoreria.core.hexagonal.chequera.claseChequera.domain.model.ClaseChequera;
+import um.tesoreria.core.hexagonal.chequera.claseChequera.domain.ports.in.*;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persistence.entity.ClaseChequeraEntity;
-import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persistence.repository.JpaClaseChequeraRepository;
-
-/**
- * @author daniel
- */
 @Service
+@RequiredArgsConstructor
 public class ClaseChequeraService {
 
-    @Autowired
-    private JpaClaseChequeraRepository repository;
+    private final GetAllClaseChequeraUseCase getAllClaseChequeraUseCase;
+    private final GetAllClaseChequeraByPosgradoUseCase getAllClaseChequeraByPosgradoUseCase;
+    private final GetAllClaseChequeraByCursoUseCase getAllClaseChequeraByCursoUseCase;
+    private final GetAllClaseChequeraByTituloUseCase getAllClaseChequeraByTituloUseCase;
 
-    public List<ClaseChequeraEntity> findAll() {
-        return repository.findAll();
+    public List<ClaseChequera> findAll() {
+        return getAllClaseChequeraUseCase.getAllClaseChequera();
     }
 
-    public List<ClaseChequeraEntity> findAllByPosgrado() {
-        return repository.findAllByPosgrado((byte) 1);
+    public List<ClaseChequera> findAllByPosgrado() {
+        return getAllClaseChequeraByPosgradoUseCase.getAllClaseChequeraByPosgrado();
     }
 
-    public List<ClaseChequeraEntity> findAllByCurso() {
-        return repository.findAllByCurso((byte) 1);
+    public List<ClaseChequera> findAllByCurso() {
+        return getAllClaseChequeraByCursoUseCase.getAllClaseChequeraByCurso();
     }
 
-    public List<ClaseChequeraEntity> findAllByTitulo() {
-        return repository.findAllByTitulo((byte) 1);
+    public List<ClaseChequera> findAllByTitulo() {
+        return getAllClaseChequeraByTituloUseCase.getAllClaseChequeraByTitulo();
     }
 
 }

@@ -1,6 +1,6 @@
-package um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in;
+package um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in;
 
-import um.tesoreria.core.hexagonal.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
 
 public interface CalculateDeudaUseCase {

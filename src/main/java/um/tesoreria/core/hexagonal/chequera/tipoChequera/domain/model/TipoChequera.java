@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model;
 
 import lombok.*;
+import um.tesoreria.core.hexagonal.chequera.claseChequera.domain.model.ClaseChequera;
 import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
 import um.tesoreria.core.util.Jsonifier;
 
@@ -20,6 +21,7 @@ public class TipoChequera {
     private Byte multiple;
     private String emailCopia;
     private Geografica geografica;
+    private ClaseChequera claseChequera;
 
     public String jsonify() {
         return Jsonifier.builder(this).build();

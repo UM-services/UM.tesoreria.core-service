@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.web.dto.ClaseChequeraResponse;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.web.dto.GeograficaResponse;
 
 @Data
@@ -21,4 +22,5 @@ public class TipoChequeraResponse {
     private Byte multiple;
     private String emailCopia;
     private GeograficaResponse geografica;
+    private ClaseChequeraResponse claseChequera;
 }

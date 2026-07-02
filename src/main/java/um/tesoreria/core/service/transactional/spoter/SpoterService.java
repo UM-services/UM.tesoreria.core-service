@@ -1,14 +1,13 @@
 package um.tesoreria.core.service.transactional.spoter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PersonaException;
@@ -52,7 +51,7 @@ public class SpoterService {
     private final ChequeraCuotaService chequeraCuotaService;
 
     @Transactional
-    public ChequeraSerieEntity makeChequeraSpoter(SpoterData spoterData, Integer lectivoId, Curso curso,
+    public ChequeraSerie makeChequeraSpoter(SpoterData spoterData, Integer lectivoId, Curso curso,
                                                   CarreraChequera carreraChequera) {
         log.debug("Processing SpoterService.makeChequeraSpoter");
         Build build = buildService.findLast();
@@ -104,7 +103,7 @@ public class SpoterService {
         log.debug("ChequeraSerieControl -> {}", chequeraSerieControl.jsonify());
 
         // Generar ChequeraSerie
-        ChequeraSerieEntity chequeraSerie = chequeraSerieService.add(new ChequeraSerieEntity(null,
+        ChequeraSerie chequeraSerie = chequeraSerieService.add(new ChequeraSerie(null,
                 chequeraSerieControl.getFacultadId(),
                 chequeraSerieControl.getTipoChequeraId(),
                 chequeraSerieControl.getChequeraSerieId(),
@@ -131,15 +130,15 @@ public class SpoterService {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
                 0,
                 BigDecimal.ZERO,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
                 null));
         log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
 
@@ -169,7 +168,7 @@ public class SpoterService {
         log.debug("ChequeraAlternativas -> {}", Jsonifier.builder(chequeraAlternativas).build());
 
         // Generar Cuotas
-        List<ChequeraCuotaEntity> chequeraCuotas = new ArrayList<>();
+        List<ChequeraCuota> chequeraCuotas = new ArrayList<>();
         int offset = 0;
         for (LectivoCuota lectivoCuota : lectivoCuotaService.findAllByTipo(chequeraSerie.getFacultadId(),
                 chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(), chequeraSerie.getAlternativaId())) {
@@ -182,18 +181,14 @@ public class SpoterService {
                 vencimiento3 = Tool.dateAbsoluteArgentina().plusDays(40 + 30L * offset);
                 offset++;
             }
-            ChequeraCuotaEntity chequeraCuota = new ChequeraCuotaEntity(null, chequeraSerie.getChequeraId(), chequeraSerie.getFacultadId(),
+            ChequeraCuota chequeraCuota = new ChequeraCuota(null, chequeraSerie.getChequeraId(), chequeraSerie.getFacultadId(),
                     chequeraSerie.getTipoChequeraId(), chequeraSerie.getChequeraSerieId(), lectivoCuota.getProductoId(),
                     lectivoCuota.getAlternativaId(), lectivoCuota.getCuotaId(), lectivoCuota.getMes(),
                     lectivoCuota.getAnho(), chequeraSerie.getArancelTipoId(), vencimiento1, lectivoCuota.getImporte1(),
                     lectivoCuota.getImporte1(), vencimiento2, lectivoCuota.getImporte2(), lectivoCuota.getImporte2(),
                     vencimiento3, lectivoCuota.getImporte3(), lectivoCuota.getImporte3(), "", "", (byte) 0, (byte) 0,
-                    (byte) 0, (byte) 0, 0, null, null, null, null);
-            try {
-                log.debug("mail_chequera_service.make_chequera_spoter.chequera_cuota -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(chequeraCuota));
-            } catch (JsonProcessingException e) {
-                log.debug("mail_chequera_service.make_chequera_spoter.chequera_cuota -> error");
-            }
+                    (byte) 0, (byte) 0, 0, null, null);
+            log.debug("mail_chequera_service.make_chequera_spoter.chequera_cuota -> -> {}", chequeraCuota.jsonify());
             log.debug("mail_chequera_service.make_chequera_spoter - calling calculate_codigo_barras");
             chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
             log.debug("mail_chequera_service.make_chequera_spoter - after calculate_codigo_barras");

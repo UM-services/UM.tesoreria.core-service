@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.util.Jsonifier;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -24,15 +27,34 @@ public class ChequeraCuota {
     private Integer cuotaId;
     private Integer mes;
     private Integer anho;
-    private BigDecimal importe1;
+    private Integer arancelTipoId;
     private OffsetDateTime vencimiento1;
+    private BigDecimal importe1;
+    private BigDecimal importe1Original;
+    private OffsetDateTime vencimiento2;
+    private BigDecimal importe2;
+    private BigDecimal importe2Original;
+    private OffsetDateTime vencimiento3;
+    private BigDecimal importe3;
+    private BigDecimal importe3Original;
+    private String codigoBarras;
+    private String i2Of5;
     private Byte pagado;
     private Byte baja;
+    private Byte manual;
     private Byte compensada;
+    private Integer tramoId;
+
+    private Producto producto;
+    private ChequeraSerie chequeraSerie;
 
     public String cuotaKey() {
         return this.facultadId + "." + this.tipoChequeraId + "." + this.chequeraSerieId + "." + this.productoId + "."
                 + this.alternativaId + "." + this.cuotaId;
+    }
+
+    public String jsonify() {
+        return Jsonifier.builder(this).build();
     }
 
 }

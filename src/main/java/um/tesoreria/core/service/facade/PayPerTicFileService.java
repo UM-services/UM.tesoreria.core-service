@@ -5,7 +5,6 @@ package um.tesoreria.core.service.facade;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,12 +24,12 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraAlternativaException;
-import um.tesoreria.core.exception.ChequeraSerieException;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.ChequeraSerieException;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.PayPerTicException;
 import um.tesoreria.core.exception.PersonaException;
@@ -38,7 +37,6 @@ import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.ChequeraAlternativa;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
-import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity;
 import um.tesoreria.core.model.PayPerTic;
 import um.tesoreria.core.model.view.CuotaDeudaPayPerTic;
 import um.tesoreria.core.service.ChequeraAlternativaService;
@@ -50,7 +48,6 @@ import um.tesoreria.core.service.view.CuotaDeudaPayPerTicService;
 import um.tesoreria.core.util.Tool;
 import um.tesoreria.core.util.transfer.FileInfo;
 import lombok.extern.slf4j.Slf4j;
-import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
 
 /**
  * @author daniel
@@ -109,12 +106,12 @@ public class PayPerTicFileService {
 		this.setCellString(row, 22, "payer_id_number", style_normal);
 
 		for (CuotaDeudaPayPerTic cuota : cuotaDeudaPayPerTicService.findAllByVencimiento1Between(desde, hasta)) {
-			ChequeraSerieEntity chequeraSerie = null;
+			ChequeraSerie chequeraSerie;
 			try {
 				chequeraSerie = chequeraSerieService.findByUnique(cuota.getFacultadId(), cuota.getTipoChequeraId(),
 						cuota.getChequeraSerieId());
 			} catch (ChequeraSerieException e) {
-				chequeraSerie = new ChequeraSerieEntity();
+				chequeraSerie = new ChequeraSerie();
 			}
 
 			Persona persona = null;

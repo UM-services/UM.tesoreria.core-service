@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.exception;
+package um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception;
 
 import java.math.BigDecimal;
 

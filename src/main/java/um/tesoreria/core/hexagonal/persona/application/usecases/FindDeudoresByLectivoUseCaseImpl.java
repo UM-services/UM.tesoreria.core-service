@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.FindDeudoresByLectivoUseCase;
 import um.tesoreria.core.model.view.PersonaKey;
@@ -25,7 +26,7 @@ public class FindDeudoresByLectivoUseCaseImpl implements FindDeudoresByLectivoUs
     public List<PersonaKey> findAllDeudorByLectivoId(Integer facultadId, Integer lectivoId, Integer geograficaId,
             Integer cuotas) {
         List<String> unifieds = new ArrayList<>();
-        for (ChequeraSerieEntity serie : chequeraSerieService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId,
+        for (ChequeraSerie serie : chequeraSerieService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId,
                 facultadId, geograficaId)) {
             if (cuotas <= chequeraCuotaService.findAllDebidas(facultadId, serie.getTipoChequeraId(),
                     serie.getChequeraSerieId(), serie.getAlternativaId()).size()) {

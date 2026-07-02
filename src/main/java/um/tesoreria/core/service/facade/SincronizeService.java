@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CarreraException;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.exception.InfoLdapException;
@@ -73,7 +74,7 @@ public class SincronizeService {
 
 	@Transactional
 	public void sincronizeInstitucional(Integer lectivoId, Integer facultadId) {
-		for (ChequeraSerieEntity serie : chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId)) {
+		for (ChequeraSerie serie : chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId)) {
 			InfoLdap usuario;
 			try {
 				usuario = infoLdapService.findByPersonaId(serie.getPersonaId());

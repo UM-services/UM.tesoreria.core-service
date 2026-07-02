@@ -1,0 +1,206 @@
+---
+title: Arquitectura Hexagonal - Módulo TipoChequera (v3.30.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class TipoChequera {
+            +Integer tipoChequeraId
+            +String nombre
+            +String prefijo
+            +Integer geograficaId
+            +Integer claseChequeraId
+            +Byte imprimir
+            +Byte contado
+            +Byte multiple
+            +String emailCopia
+            +Geografica geografica
+            +ClaseChequera claseChequera
+            +jsonify() String
+        }
+
+        class TipoChequeraRepository {
+            <<interface>>
+            +findAll() List~TipoChequera~
+            +findAllAsignable(Integer, Integer, Integer, Integer) List~TipoChequera~
+            +findAllByFacultadIdAndGeograficaId(Integer, Integer) List~TipoChequera~
+            +findAllByClaseChequeraId(Integer) List~TipoChequera~
+            +findAllByClaseChequeraIds(List~Integer~) List~TipoChequera~
+            +findById(Integer) Optional~TipoChequera~
+            +findLast() Optional~TipoChequera~
+            +create(TipoChequera) TipoChequera
+            +update(TipoChequera) TipoChequera
+            +deleteById(Integer)
+            +unmark()
+            +mark(Integer, Byte) TipoChequera
+        }
+    }
+
+    namespace application {
+        class TipoChequeraService {
+            +findAll() List~TipoChequera~
+            +findAllAsignable(Integer, Integer, Integer, Integer) List~TipoChequera~
+            +findAllByFacultadIdAndGeograficaId(Integer, Integer) List~TipoChequera~
+            +findAllByClaseChequera(Integer) List~TipoChequera~
+            +findAllByClaseChequeraIds(List~Integer~) List~TipoChequera~
+            +findByTipoChequeraId(Integer) TipoChequera
+            +findLast() TipoChequera
+            +add(TipoChequera) TipoChequera
+            +update(TipoChequera, Integer) TipoChequera
+            +delete(Integer)
+            +unmark()
+            +mark(Integer, Byte) TipoChequera
+            +findAllByStrings(List~String~) List~TipoChequeraSearch~
+        }
+
+        namespace usecases {
+            class GetAllTipoChequeraUseCaseImpl
+            class GetAllTipoChequeraAsignableUseCaseImpl
+            class GetAllTipoChequeraByFacultadAndGeograficaUseCaseImpl
+            class GetAllTipoChequeraByClaseChequeraUseCaseImpl
+            class GetTipoChequeraByIdUseCaseImpl
+            class GetLastTipoChequeraUseCaseImpl
+            class CreateTipoChequeraUseCaseImpl
+            class UpdateTipoChequeraUseCaseImpl
+            class DeleteTipoChequeraUseCaseImpl
+            class MarkTipoChequeraUseCaseImpl
+            class UnmarkTipoChequeraUseCaseImpl
+        }
+
+        class TipoChequeraException
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class TipoChequeraEntity {
+                +Integer tipoChequeraId
+                +String nombre
+                +String prefijo
+                +Integer geograficaId
+                +Integer claseChequeraId
+                +Byte imprimir
+                +Byte contado
+                +Byte multiple
+                +String emailCopia
+                +GeograficaEntity geografica
+                +ClaseChequeraEntity claseChequera
+            }
+
+            class JpaTipoChequeraRepository {
+                <<JpaRepository>>
+                +findAllByTipoChequeraIdInAndGeograficaId(List~Integer~, Integer) List~TipoChequeraEntity~
+                +findAllByClaseChequeraId(Integer) List~TipoChequeraEntity~
+                +findAllByClaseChequeraIdIn(List~Integer~) List~TipoChequeraEntity~
+                +findTopByOrderByTipoChequeraIdDesc() Optional~TipoChequeraEntity~
+                +findByTipoChequeraId(Integer) Optional~TipoChequeraEntity~
+            }
+
+            class JpaTipoChequeraRepositoryAdapter {
+                -JpaTipoChequeraRepository repository
+                -LectivoTotalService lectivoTotalService
+                -TipoChequeraMapper mapper
+            }
+
+            class TipoChequeraMapper {
+                +toDomainModel(TipoChequeraEntity) TipoChequera
+                +toEntity(TipoChequera) TipoChequeraEntity
+            }
+        }
+
+        namespace web {
+            class TipoChequeraController {
+                -TipoChequeraService service
+                -TipoChequeraDtoMapper dtoMapper
+                +findAll() ResponseEntity~List~TipoChequeraResponse~~
+                +findByTipoChequeraId(Integer) ResponseEntity~TipoChequeraResponse~
+                +add(TipoChequeraRequest) ResponseEntity~TipoChequeraResponse~
+                +update(TipoChequeraRequest, Integer) ResponseEntity~TipoChequeraResponse~
+                +delete(Integer) ResponseEntity~Void~
+                +findAllAsignable(Integer, Integer, Integer, Integer) ResponseEntity~List~TipoChequeraResponse~~
+                +mark(Integer, Byte) ResponseEntity~Void~
+                +unmark() ResponseEntity~Void~
+            }
+
+            class TipoChequeraRequest {
+                +Integer tipoChequeraId
+                +String nombre
+                +String prefijo
+                +Integer geograficaId
+                +Integer claseChequeraId
+                +Byte imprimir
+                +Byte contado
+                +Byte multiple
+                +String emailCopia
+            }
+
+            class TipoChequeraResponse {
+                +Integer tipoChequeraId
+                +String nombre
+                +String prefijo
+                +Integer geograficaId
+                +Integer claseChequeraId
+                +Byte imprimir
+                +Byte contado
+                +Byte multiple
+                +String emailCopia
+                +GeograficaResponse geografica
+                +ClaseChequeraResponse claseChequera
+            }
+
+            class TipoChequeraDtoMapper {
+                +toDomain(TipoChequeraRequest) TipoChequera
+                +toResponse(TipoChequera) TipoChequeraResponse
+            }
+        }
+    }
+
+    TipoChequeraService --> GetAllTipoChequeraUseCaseImpl : uses
+    TipoChequeraService --> GetAllTipoChequeraAsignableUseCaseImpl : uses
+    TipoChequeraService --> GetAllTipoChequeraByFacultadAndGeograficaUseCaseImpl : uses
+    TipoChequeraService --> GetAllTipoChequeraByClaseChequeraUseCaseImpl : uses
+    TipoChequeraService --> GetTipoChequeraByIdUseCaseImpl : uses
+    TipoChequeraService --> GetLastTipoChequeraUseCaseImpl : uses
+    TipoChequeraService --> CreateTipoChequeraUseCaseImpl : uses
+    TipoChequeraService --> UpdateTipoChequeraUseCaseImpl : uses
+    TipoChequeraService --> DeleteTipoChequeraUseCaseImpl : uses
+    TipoChequeraService --> MarkTipoChequeraUseCaseImpl : uses
+    TipoChequeraService --> UnmarkTipoChequeraUseCaseImpl : uses
+
+    GetAllTipoChequeraUseCaseImpl ..|> GetAllTipoChequeraUseCase : implements
+    GetAllTipoChequeraAsignableUseCaseImpl ..|> GetAllTipoChequeraAsignableUseCase : implements
+    GetAllTipoChequeraByFacultadAndGeograficaUseCaseImpl ..|> GetAllTipoChequeraByFacultadAndGeograficaUseCase : implements
+    GetAllTipoChequeraByClaseChequeraUseCaseImpl ..|> GetAllTipoChequeraByClaseChequeraUseCase : implements
+    GetTipoChequeraByIdUseCaseImpl ..|> GetTipoChequeraByIdUseCase : implements
+    GetLastTipoChequeraUseCaseImpl ..|> GetLastTipoChequeraUseCase : implements
+    CreateTipoChequeraUseCaseImpl ..|> CreateTipoChequeraUseCase : implements
+    UpdateTipoChequeraUseCaseImpl ..|> UpdateTipoChequeraUseCase : implements
+    DeleteTipoChequeraUseCaseImpl ..|> DeleteTipoChequeraUseCase : implements
+    MarkTipoChequeraUseCaseImpl ..|> MarkTipoChequeraUseCase : implements
+    UnmarkTipoChequeraUseCaseImpl ..|> UnmarkTipoChequeraUseCase : implements
+
+    GetAllTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
+    GetAllTipoChequeraAsignableUseCaseImpl --> TipoChequeraRepository : uses
+    GetAllTipoChequeraByFacultadAndGeograficaUseCaseImpl --> TipoChequeraRepository : uses
+    GetAllTipoChequeraByClaseChequeraUseCaseImpl --> TipoChequeraRepository : uses
+    GetTipoChequeraByIdUseCaseImpl --> TipoChequeraRepository : uses
+    GetLastTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
+    CreateTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
+    UpdateTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
+    DeleteTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
+    MarkTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
+    UnmarkTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
+
+    JpaTipoChequeraRepositoryAdapter ..|> TipoChequeraRepository : implements
+    JpaTipoChequeraRepositoryAdapter --> JpaTipoChequeraRepository : uses
+    JpaTipoChequeraRepositoryAdapter --> TipoChequeraMapper : uses
+
+    TipoChequeraMapper --> TipoChequera : maps
+    TipoChequeraMapper --> TipoChequeraEntity : maps
+    JpaTipoChequeraRepository --> TipoChequeraEntity : persists
+
+    TipoChequeraController --> TipoChequeraService : calls
+    TipoChequeraController --> TipoChequeraDtoMapper : uses
+    TipoChequeraDtoMapper --> TipoChequera : maps
+    TipoChequeraDtoMapper --> TipoChequeraResponse : maps

@@ -1,0 +1,121 @@
+---
+title: Arquitectura Hexagonal - Módulo Producto (v3.30.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Producto {
+            +Integer productoId
+            +String nombre
+            +jsonify() String
+        }
+
+        class ProductoRepository {
+            <<interface>>
+            +findAll() List~Producto~
+            +findById(Integer) Optional~Producto~
+        }
+
+        class GetAllProductosUseCase {
+            <<interface>>
+            +getAllProductos() List~Producto~
+        }
+
+        class GetProductoByIdUseCase {
+            <<interface>>
+            +getProductoById(Integer) Optional~Producto~
+        }
+    }
+
+    namespace application {
+        class ProductoService {
+            -GetAllProductosUseCase getAllProductosUseCase
+            -GetProductoByIdUseCase getProductoByIdUseCase
+            +findAll() List~Producto~
+            +findByProductoId(Integer) Producto
+            +findAllByTipoChequera(Integer, Integer, Integer) List~ProductoTipoChequera~
+        }
+
+        namespace usecases {
+            class GetAllProductosUseCaseImpl
+            class GetProductoByIdUseCaseImpl
+        }
+
+        class ProductoException
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class ProductoEntity {
+                +Integer productoId
+                +String nombre
+                +jsonify() String
+            }
+
+            class JpaProductoRepository {
+                <<JpaRepository>>
+                +findByProductoId(Integer) Optional~ProductoEntity~
+            }
+
+            class JpaProductoRepositoryAdapter {
+                -JpaProductoRepository repository
+                -ProductoMapper mapper
+                +findAll() List~Producto~
+                +findById(Integer) Optional~Producto~
+            }
+
+            class ProductoMapper {
+                +toDomainModel(ProductoEntity) Producto
+                +toEntity(Producto) ProductoEntity
+            }
+        }
+
+        namespace web {
+            class ProductoController {
+                -ProductoService service
+                -ProductoDtoMapper dtoMapper
+                +findAll() ResponseEntity~List~ProductoResponse~~
+                +findByProductoId(Integer) ResponseEntity~ProductoResponse~
+                +findAllByTipoChequera(Integer, Integer, Integer) ResponseEntity~List~ProductoTipoChequera~~
+            }
+
+            class ProductoRequest {
+                +Integer productoId
+                +String nombre
+            }
+
+            class ProductoResponse {
+                +Integer productoId
+                +String nombre
+            }
+
+            class ProductoDtoMapper {
+                +toDomain(ProductoRequest) Producto
+                +toResponse(Producto) ProductoResponse
+            }
+        }
+    }
+
+    ProductoService --> GetAllProductosUseCase : uses
+    ProductoService --> GetProductoByIdUseCase : uses
+
+    GetAllProductosUseCaseImpl ..|> GetAllProductosUseCase : implements
+    GetProductoByIdUseCaseImpl ..|> GetProductoByIdUseCase : implements
+
+    GetAllProductosUseCaseImpl --> ProductoRepository : uses
+    GetProductoByIdUseCaseImpl --> ProductoRepository : uses
+
+    JpaProductoRepositoryAdapter ..|> ProductoRepository : implements
+    JpaProductoRepositoryAdapter --> JpaProductoRepository : uses
+    JpaProductoRepositoryAdapter --> ProductoMapper : uses
+
+    ProductoMapper --> Producto : maps
+    ProductoMapper --> ProductoEntity : maps
+    JpaProductoRepository --> ProductoEntity : persists
+
+    ProductoController --> ProductoService : calls
+    ProductoController --> ProductoDtoMapper : uses
+    ProductoDtoMapper --> Producto : maps
+    ProductoDtoMapper --> ProductoResponse : maps

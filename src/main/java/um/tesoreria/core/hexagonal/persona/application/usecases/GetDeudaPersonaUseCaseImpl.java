@@ -4,13 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.client.tesoreria.mercadopago.PreferenceClient;
-import um.tesoreria.core.hexagonal.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
-import um.tesoreria.core.hexagonal.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.GetDeudaPersonaUseCase;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.model.dto.DeudaChequeraDto;
 import um.tesoreria.core.model.dto.DeudaPersonaDto;
 import um.tesoreria.core.model.dto.VencimientoDto;
@@ -42,9 +42,9 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
         var deudaCuotas = 0;
         var deudaTotal = BigDecimal.ZERO;
         List<DeudaChequeraDto> deudas = new ArrayList<>();
-        for (ChequeraSerieEntity chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
+        for (ChequeraSerie chequera : chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId,
                 null)) {
-            DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeuda(toDomain(chequera));
+            DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeuda(chequera);
             if (deuda.getCuotas() > 0) {
                 deudas.add(deuda);
                 deudaCuotas += deuda.getCuotas();
@@ -70,42 +70,42 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
         List<VencimientoDto> vencimientoDtos = new ArrayList<>();
 
         // 1. Fetch all series for the person
-        List<ChequeraSerieEntity> series = chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId, null);
+        List<ChequeraSerie> series = chequeraSerieService.findAllByPersonaIdAndDocumentoId(personaId, documentoId, null);
 
         // 2. Fetch all cuotas using business keys (Facultad, Tipo, Serie) to ensure we get them even if chequeraId is null
-        List<ChequeraCuotaEntity> allCuotas = new ArrayList<>();
-        Map<String, List<ChequeraSerieEntity>> seriesByGroup = series.stream()
+        List<ChequeraCuota> allCuotas = new ArrayList<>();
+        Map<String, List<ChequeraSerie>> seriesByGroup = series.stream()
                 .collect(Collectors.groupingBy(s -> s.getFacultadId() + "-" + s.getTipoChequeraId()));
 
-        for (Map.Entry<String, List<ChequeraSerieEntity>> entry : seriesByGroup.entrySet()) {
-            List<ChequeraSerieEntity> groupSeries = entry.getValue();
+        for (Map.Entry<String, List<ChequeraSerie>> entry : seriesByGroup.entrySet()) {
+            List<ChequeraSerie> groupSeries = entry.getValue();
             if (groupSeries.isEmpty()) continue;
             
             Integer facultadId = groupSeries.getFirst().getFacultadId();
             Integer tipoChequeraId = groupSeries.getFirst().getTipoChequeraId();
-            List<Long> serieIds = groupSeries.stream().map(ChequeraSerieEntity::getChequeraSerieId).collect(Collectors.toList());
+            List<Long> serieIds = groupSeries.stream().map(ChequeraSerie::getChequeraSerieId).collect(Collectors.toList());
 
             allCuotas.addAll(chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIds(
                     facultadId, tipoChequeraId, serieIds));
         }
 
         // 3. Batch "Self-Healing": Update chequeraId if null
-        List<ChequeraCuotaEntity> cuotasToUpdate = new ArrayList<>();
+        List<ChequeraCuota> cuotasToUpdate = new ArrayList<>();
         // Create a lookup map for series: key = "fac-tipo-serie"
-        Map<String, ChequeraSerieEntity> seriesMap = series.stream()
+        Map<String, ChequeraSerie> seriesMap = series.stream()
                 .collect(Collectors.toMap(
                         s -> s.getFacultadId() + "-" + s.getTipoChequeraId() + "-" + s.getChequeraSerieId(),
                         Function.identity(),
                         (existing, replacement) -> existing
                 ));
 
-        for (ChequeraCuotaEntity cuota : allCuotas) {
+        for (ChequeraCuota cuota : allCuotas) {
             String key = cuota.getFacultadId() + "-" + cuota.getTipoChequeraId() + "-" + cuota.getChequeraSerieId();
-            ChequeraSerieEntity serie = seriesMap.get(key);
+            ChequeraSerie serie = seriesMap.get(key);
             
             if (serie != null) {
                 // Ensure relationship is set in memory for processing
-                cuota.setChequeraSerie(serie);
+//                cuota.setChequeraSerie(serie);
                 
                 // If persistent ID is missing, fix it
                 if (cuota.getChequeraId() == null) {
@@ -121,13 +121,13 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
         }
 
         // 4. Group cuotas by chequeraId for processing
-        Map<Long, List<ChequeraCuotaEntity>> cuotasByChequeraId = allCuotas.stream()
+        Map<Long, List<ChequeraCuota>> cuotasByChequeraId = allCuotas.stream()
                 .filter(c -> c.getChequeraId() != null)
-                .collect(Collectors.groupingBy(ChequeraCuotaEntity::getChequeraId));
+                .collect(Collectors.groupingBy(ChequeraCuota::getChequeraId));
 
         // 5. Fetch MercadoPago contexts
         List<Long> allCuotaIds = allCuotas.stream()
-                .map(ChequeraCuotaEntity::getChequeraCuotaId)
+                .map(ChequeraCuota::getChequeraCuotaId)
                 .collect(Collectors.toList());
 
         Map<Long, MercadoPagoContext> contextsByCuotaId = mercadoPagoContextService.findAllByChequeraCuotaIds(allCuotaIds)
@@ -135,24 +135,24 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
                 .collect(Collectors.toMap(MercadoPagoContext::getChequeraCuotaId, Function.identity(), (a, b) -> a));
 
         // 6. Process debts
-        for (ChequeraSerieEntity chequera : series) {
-            DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeudaExtended(toDomain(chequera));
+        for (ChequeraSerie chequera : series) {
+            DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeudaExtended(chequera);
             if (deuda.getCuotas() > 0) {
                 deudas.add(deuda);
                 deudaCuotas += deuda.getCuotas();
                 deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
             }
 
-            List<ChequeraCuotaEntity> currentCuotas = cuotasByChequeraId.getOrDefault(chequera.getChequeraId(), List.of());
+            List<ChequeraCuota> currentCuotas = cuotasByChequeraId.getOrDefault(chequera.getChequeraId(), List.of());
 
-            List<ChequeraCuotaEntity> filteredCuotas = currentCuotas.stream()
+            List<ChequeraCuota> filteredCuotas = currentCuotas.stream()
                     .filter(c -> Objects.equals(c.getAlternativaId(), chequera.getAlternativaId()))
-                    .sorted(Comparator.comparing(ChequeraCuotaEntity::getVencimiento1, Comparator.nullsLast(Comparator.naturalOrder()))
-                            .thenComparing(ChequeraCuotaEntity::getProductoId, Comparator.nullsLast(Comparator.naturalOrder()))
-                            .thenComparing(ChequeraCuotaEntity::getCuotaId, Comparator.nullsLast(Comparator.naturalOrder())))
+                    .sorted(Comparator.comparing(ChequeraCuota::getVencimiento1, Comparator.nullsLast(Comparator.naturalOrder()))
+                            .thenComparing(ChequeraCuota::getProductoId, Comparator.nullsLast(Comparator.naturalOrder()))
+                            .thenComparing(ChequeraCuota::getCuotaId, Comparator.nullsLast(Comparator.naturalOrder())))
                     .toList();
 
-            for (ChequeraCuotaEntity chequeraCuota : filteredCuotas) {
+            for (ChequeraCuota chequeraCuota : filteredCuotas) {
                 if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0 && chequeraCuota.getCompensada() == 0
                         && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
 

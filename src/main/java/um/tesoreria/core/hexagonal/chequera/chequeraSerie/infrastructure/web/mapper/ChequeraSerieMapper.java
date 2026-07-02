@@ -1,6 +1,6 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.mapper;
 
-import um.tesoreria.core.hexagonal.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 
 public class ChequeraSerieMapper {

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,6 +25,7 @@ public interface JpaChequeraCuotaRepository extends JpaRepository<ChequeraCuotaE
 
 	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId);
 
+	@EntityGraph(attributePaths = {"producto", "chequeraSerie", "facultad", "tipoChequera"})
 	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Sort sort);
 

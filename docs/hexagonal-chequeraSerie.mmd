@@ -1,40 +1,204 @@
 ---
-title: Arquitectura Hexagonal - ChequeraSerie
+title: Arquitectura Hexagonal - Módulo ChequeraSerie (v3.30.0)
 ---
-flowchart TD
-    subgraph Dominio ["Dominio (Domain)"]
-        D["ChequeraSerie<br/>Reglas de Negocio<br/>Cálculo de Deuda"]
-    end
 
-    subgraph Aplicacion ["Aplicación (Application)"]
-        S["ChequeraSerieService<br/>(Servicio de Aplicación)"]
-        M["ChequeraSerieMapper<br/>(Mapper Dominio ↔ Entidad)"]
-    end
+classDiagram
+    direction TB
 
-    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        C["ChequeraSerieController<br/>(Controlador REST)"]
-        R["JpaChequeraSerieRepository<br/>(Repositorio JPA)"]
-        E["ChequeraSerieEntity<br/>(Entidad JPA)"]
-        DTO["DTOs<br/>Response/Request"]
-    end
+    namespace domain {
+        class ChequeraSerie {
+            +Long chequeraSerieId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieCtacteId
+            +Integer productoId
+            +BigDecimal personaId
+            +Integer documentoId
+            +String alternativaId
+            +Integer lectivoId
+            +Integer arancelTipoId
+            +Integer cursoId
+            +Byte asentado
+            +Integer geograficaId
+            +OffsetDateTime fecha
+            +Integer cuotasPagadas
+            +String observaciones
+            +Byte algoPagado
+            +Integer tipoImpresionId
+            +Byte flagPayperTic
+            +Integer usuarioId
+            +Byte enviado
+            +Byte retenida
+            +Long version
+            +Integer hpum
+            +BigDecimal becaPorcentaje
+            +String becaResolucion
+            +OffsetDateTime becaFecha
+            +Integer becaUserId
+            +getPersonaKey() String
+            +getFacultadKey() String
+            +jsonify() String
+        }
 
-    subgraph Externa ["Módulos Externos"]
-        BS["BajaService<br/>(Filtro de Bajas)"]
-    end
+        class ChequeraSerieRepository {
+            <<interface>>
+            +findAll() List~ChequeraSerie~
+            +findById(Long) Optional~ChequeraSerie~
+            +findAllByFacultad(Integer, Integer) List~ChequeraSerie~
+            +findAllByPersona(BigDecimal, Integer) List~ChequeraSerie~
+            +findAllByNumber(Long) List~ChequeraSerie~
+            +findByUnique(Integer, Integer, Long, String) Optional~ChequeraSerie~
+            +findByCbuOrVisa(Long) Optional~ChequeraSerie~
+            +findAltas(BigDecimal, Integer) List~ChequeraSerie~
+            +findIncompletas(BigDecimal, Integer) List~ChequeraSerie~
+            +findLast(BigDecimal, Integer) Optional~ChequeraSerie~
+            +save(ChequeraSerie) ChequeraSerie
+            +deleteById(Long)
+            +markSent(Long)
+            +setPayPerTic(Long, Byte)
+            +getResumenLectivo(Integer, Integer, Integer) List~Object[]~
+            +getSpecialQueries() List~ChequeraSerieQueryResult~
+        }
+    }
 
-    C --> S
-    S --> M
-    M --> R
-    R --> E
-    S --> D
-    D --> M
-    S -.->|"v3.21.1: filtra<br/>bajas"| BS
+    namespace application {
+        class ChequeraSerieService {
+            -CreateChequeraSerieUseCase createUseCase
+            -DeleteChequeraSerieUseCase deleteUseCase
+            -GetChequeraSerieAltasUseCase altasUseCase
+            -GetChequeraSerieByCbuOrVisaUseCase cbuOrVisaUseCase
+            -GetChequeraSerieByFacultadUseCase byFacultadUseCase
+            -GetChequeraSerieByIdUseCase byIdUseCase
+            -GetChequeraSerieByNumberUseCase byNumberUseCase
+            -GetChequeraSerieByPersonaUseCase byPersonaUseCase
+            -GetChequeraSerieByUniqueUseCase byUniqueUseCase
+            -GetChequeraSerieIncompletasUseCase incompletasUseCase
+            -GetChequeraSerieSpecialQueriesUseCase specialUseCase
+            -GetResumenLectivoUseCase resumenUseCase
+            -MarkSentUseCase markSentUseCase
+            -SetPayPerTicUseCase payPerTicUseCase
+            -UpdateChequeraSerieUseCase updateUseCase
+        }
 
-    style D fill:#e1f5fe
-    style S fill:#f3e5f5
-    style M fill:#f3e5f5
-    style C fill:#e8f5e8
-    style R fill:#e8f5e8
-    style E fill:#e8f5e8
-    style DTO fill:#fff3e0
-    style BS fill:#ffe0b2
+        namespace usecases {
+            class CreateChequeraSerieUseCaseImpl
+            class DeleteChequeraSerieUseCaseImpl
+            class GetChequeraSerieAltasUseCaseImpl
+            class GetChequeraSerieByCbuOrVisaUseCaseImpl
+            class GetChequeraSerieByFacultadUseCaseImpl
+            class GetChequeraSerieByIdUseCaseImpl
+            class GetChequeraSerieByNumberUseCaseImpl
+            class GetChequeraSerieByPersonaUseCaseImpl
+            class GetChequeraSerieByUniqueUseCaseImpl
+            class GetChequeraSerieIncompletasUseCaseImpl
+            class GetChequeraSerieSpecialQueriesUseCaseImpl
+            class GetResumenLectivoUseCaseImpl
+            class MarkSentUseCaseImpl
+            class SetPayPerTicUseCaseImpl
+            class UpdateChequeraSerieUseCaseImpl
+        }
+
+        class ChequeraSerieException
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class ChequeraSerieEntity {
+                +Long chequeraSerieId
+                +Integer facultadId
+                +Integer tipoChequeraId
+                +...
+                +jsonify() String
+            }
+
+            class JpaChequeraSerieRepository {
+                <<JpaRepository>>
+            }
+
+            class JpaChequeraSerieRepositoryAdapter {
+                -JpaChequeraSerieRepository repository
+                -ChequeraSerieMapper mapper
+                implements ChequeraSerieRepository
+            }
+
+            class ChequeraSerieMapper {
+                +toDomainModel(ChequeraSerieEntity) ChequeraSerie
+                +toEntity(ChequeraSerie) ChequeraSerieEntity
+            }
+        }
+
+        namespace web {
+            class ChequeraSerieController {
+                -ChequeraSerieService service
+                -ChequeraSerieDtoMapper dtoMapper
+            }
+
+            class ChequeraSerieRequest
+            class ChequeraSerieResponse
+            class ChequeraSerieDtoMapper {
+                +toDomain(ChequeraSerieRequest) ChequeraSerie
+                +toResponse(ChequeraSerie) ChequeraSerieResponse
+            }
+        }
+    }
+
+    ChequeraSerieService --> CreateChequeraSerieUseCaseImpl : uses
+    ChequeraSerieService --> DeleteChequeraSerieUseCaseImpl : uses
+    ChequeraSerieService --> GetChequeraSerieAltasUseCaseImpl : uses
+    ChequeraSerieService --> GetChequeraSerieByCbuOrVisaUseCaseImpl : uses
+    ChequeraSerieService --> GetChequeraSerieByFacultadUseCaseImpl : uses
+    ChequeraSerieService --> GetChequeraSerieByIdUseCaseImpl : uses
+    ChequeraSerieService --> GetChequeraSerieByNumberUseCaseImpl : uses
+    ChequeraSerieService --> GetChequeraSerieByPersonaUseCaseImpl : uses
+    ChequeraSerieService --> GetChequeraSerieByUniqueUseCaseImpl : uses
+    ChequeraSerieService --> GetChequeraSerieIncompletasUseCaseImpl : uses
+    ChequeraSerieService --> GetChequeraSerieSpecialQueriesUseCaseImpl : uses
+    ChequeraSerieService --> GetResumenLectivoUseCaseImpl : uses
+    ChequeraSerieService --> MarkSentUseCaseImpl : uses
+    ChequeraSerieService --> SetPayPerTicUseCaseImpl : uses
+    ChequeraSerieService --> UpdateChequeraSerieUseCaseImpl : uses
+
+    CreateChequeraSerieUseCaseImpl ..|> CreateChequeraSerieUseCase
+    DeleteChequeraSerieUseCaseImpl ..|> DeleteChequeraSerieUseCase
+    GetChequeraSerieAltasUseCaseImpl ..|> GetChequeraSerieAltasUseCase
+    GetChequeraSerieByCbuOrVisaUseCaseImpl ..|> GetChequeraSerieByCbuOrVisaUseCase
+    GetChequeraSerieByFacultadUseCaseImpl ..|> GetChequeraSerieByFacultadUseCase
+    GetChequeraSerieByIdUseCaseImpl ..|> GetChequeraSerieByIdUseCase
+    GetChequeraSerieByNumberUseCaseImpl ..|> GetChequeraSerieByNumberUseCase
+    GetChequeraSerieByPersonaUseCaseImpl ..|> GetChequeraSerieByPersonaUseCase
+    GetChequeraSerieByUniqueUseCaseImpl ..|> GetChequeraSerieByUniqueUseCase
+    GetChequeraSerieIncompletasUseCaseImpl ..|> GetChequeraSerieIncompletasUseCase
+    GetChequeraSerieSpecialQueriesUseCaseImpl ..|> GetChequeraSerieSpecialQueriesUseCase
+    GetResumenLectivoUseCaseImpl ..|> GetResumenLectivoUseCase
+    MarkSentUseCaseImpl ..|> MarkSentUseCase
+    SetPayPerTicUseCaseImpl ..|> SetPayPerTicUseCase
+    UpdateChequeraSerieUseCaseImpl ..|> UpdateChequeraSerieUseCase
+
+    CreateChequeraSerieUseCaseImpl --> ChequeraSerieRepository : uses
+    DeleteChequeraSerieUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieAltasUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieByCbuOrVisaUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieByFacultadUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieByIdUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieByNumberUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieByPersonaUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieByUniqueUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieIncompletasUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieSpecialQueriesUseCaseImpl --> ChequeraSerieRepository : uses
+    GetResumenLectivoUseCaseImpl --> ChequeraSerieRepository : uses
+    MarkSentUseCaseImpl --> ChequeraSerieRepository : uses
+    SetPayPerTicUseCaseImpl --> ChequeraSerieRepository : uses
+    UpdateChequeraSerieUseCaseImpl --> ChequeraSerieRepository : uses
+
+    JpaChequeraSerieRepositoryAdapter ..|> ChequeraSerieRepository : implements
+    JpaChequeraSerieRepositoryAdapter --> JpaChequeraSerieRepository : uses
+    JpaChequeraSerieRepositoryAdapter --> ChequeraSerieMapper : uses
+
+    ChequeraSerieMapper --> ChequeraSerie : maps
+    ChequeraSerieMapper --> ChequeraSerieEntity : maps
+    JpaChequeraSerieRepository --> ChequeraSerieEntity : persists
+
+    ChequeraSerieController --> ChequeraSerieService : calls
+    ChequeraSerieController --> ChequeraSerieDtoMapper : uses
+    ChequeraSerieDtoMapper --> ChequeraSerie : maps
+    ChequeraSerieDtoMapper --> ChequeraSerieResponse : maps

@@ -4,7 +4,45 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.29.0**
+**Versión actual (SemVer): 3.30.0**
+
+## Novedades 3.30.0 (verificado en código)
+- feat(producto): Nuevo módulo Producto con arquitectura hexagonal completa
+  - Modelo de dominio con campos `productoId`, `nombre`
+  - 2 puertos de entrada, casos de uso, DTOs, mapper, controlador REST, excepción
+  - `ProductoEntity.java` reemplaza `Producto.kt` (Kotlin legacy)
+- feat(tipoChequera): Nuevo módulo TipoChequera con arquitectura hexagonal completa
+  - Modelo de dominio con 11 campos, relaciones a `Geografica` y `ClaseChequera`
+  - 11 puertos de entrada, 11 casos de uso individuales, DTOs, mapper, controlador REST (9 endpoints), excepción
+  - `TipoChequeraEntity.java` reemplaza `TipoChequera.kt` (Kotlin legacy)
+- feat(lectivo): Nuevo módulo Lectivo con arquitectura hexagonal completa
+  - Modelo de dominio con campos `lectivoId`, `nombre`, `fechaInicio`, `fechaFinal`
+  - 8 puertos de entrada, 8 casos de uso individuales, DTOs, mapper, controlador REST (7 endpoints), excepción
+  - `LectivoEntity.java` reemplaza `Lectivo.kt` (Kotlin legacy)
+- feat(lectivoTotalImputacion): Nuevo módulo LectivoTotalImputacion con arquitectura hexagonal completa
+  - Modelo de dominio con campos `lectivoTotalImputacionId`, `facultadId`, `lectivoId`, `tipoChequeraId`, `productoId`, `cuenta`
+  - 4 puertos de entrada, 4 casos de uso, DTOs, mapper, controlador REST, excepción
+- feat(claseChequera): Nuevo módulo ClaseChequera con arquitectura hexagonal completa
+  - Modelo de dominio con campos `claseChequeraId`, `nombre`, `preuniversitario`, `grado`, `posgrado`, `curso`, `secundario`, `titulo`
+  - 4 puertos de entrada, casos de uso, DTOs, mapper, controlador REST, excepción
+  - `ClaseChequeraEntity.java` reemplaza `ClaseChequeraEntity.kt` (Kotlin legacy)
+- feat(chequeraCuota): Migración completa a casos de uso individuales (20+)
+  - Modelo de dominio enriquecido: nuevos campos `importe1Original`, `importe2/2Original`, `importe3/3Original`, `vencimiento2/3`, `codigoBarras`, `i2Of5`, `manual`, `tramoId`, `arancelTipoId`, relaciones a `Producto` y `ChequeraSerie`
+  - Nuevos DTOs (`ChequeraCuotaRequest`/`Response`), `ChequeraCuotaDtoMapper`, `ChequeraCuotaCalculoDeudaService`
+  - `ChequeraCuotaDeudaService` simplificado con `@RequiredArgsConstructor` y `.peek()`
+- feat(chequeraSerie): Migración completa a casos de uso individuales (15+)
+  - Modelo de dominio enriquecido: +20 nuevos campos, relaciones a `ArancelTipo`, `Domicilio`, `Facultad`, `Geografica`, `Lectivo`, `Persona`, `TipoChequera`
+  - Nuevos DTOs (`ChequeraSerieRequest`/`Response`), `ChequeraSerieDtoMapper`, `JpaChequeraSerieRepositoryAdapter`
+- feat(arancelTipo): Migración a 9 casos de uso individuales con repositorio y mapper propios
+- feat(arancelPorcentaje): Migración a 4 casos de uso individuales con repositorio y mapper propios
+- refactor(package): Reorganización masiva de módulos bajo `hexagonal/chequera/`
+  - `arancelTipo`, `arancelPorcentaje`, `chequeraCuota`, `chequeraSerie`, `producto`, `tipoChequera` movidos a `hexagonal/chequera/`
+  - Actualización de imports en +130 archivos del proyecto
+- refactor(cuenta): Reorganización de paquete a `hexagonal/contable/cuenta/`
+- refactor(exception): 9 excepciones movidas de `core/exception/` a sus respectivos módulos hexagonales
+- chore(docs): Nuevos diagramas Mermaid para Producto, TipoChequera, Lectivo; actualizados ChequeraSerie (de flowchart a classDiagram), ChequeraCuota (a classDiagram), ClaseChequera
+
+> Basado en análisis profundo de `git diff HEAD` (146 archivos, +4387/-1264 líneas, incluyendo migración masiva de 6 módulos a hexagonal + paquete contable) y `pom.xml` (versión 3.29.0 → 3.30.0).
 
 ## Novedades 3.29.0 (verificado en código)
 - feat(Tool): Actualizados mappings de propuesta a facultadId en `Tool.convert2Tesium()`

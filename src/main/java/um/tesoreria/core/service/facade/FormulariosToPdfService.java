@@ -29,7 +29,9 @@ import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
 
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
@@ -89,12 +91,12 @@ public class FormulariosToPdfService {
 
     public String generateChequeraPdf(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
                                       Integer alternativaId) {
-        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
-        List<ChequeraCuotaEntity> cuotas = chequeraCuotaService
+        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        List<ChequeraCuota> cuotas = chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId());
         boolean hayAlgoParaImprimir = false;
-        for (ChequeraCuotaEntity cuota : cuotas) {
+        for (ChequeraCuota cuota : cuotas) {
             if (cuota.getPagado() == 0 && cuota.getBaja() == 0 && cuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
                 hayAlgoParaImprimir = true;
             }
@@ -210,7 +212,7 @@ public class FormulariosToPdfService {
             document.add(paragraph);
             document.add(new Paragraph(" ", new Font(Font.HELVETICA, 8)));
 
-            for (ChequeraCuotaEntity cuota : chequeraCuotaService
+            for (ChequeraCuota cuota : chequeraCuotaService
                     .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                             serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId())) {
                 if (cuota.getPagado() == 0 && cuota.getBaja() == 0
@@ -309,8 +311,8 @@ public class FormulariosToPdfService {
     }
 
     public String generateCuotaPdf(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId) {
-        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
-        ChequeraCuotaEntity cuota = chequeraCuotaService
+        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraCuota cuota = chequeraCuotaService
                 .findByUnique(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId(), productoId, cuotaId);
         boolean hayAlgoParaImprimir = cuota.getPagado() == 0 && cuota.getBaja() == 0 && cuota.getImporte1().compareTo(BigDecimal.ZERO) != 0;

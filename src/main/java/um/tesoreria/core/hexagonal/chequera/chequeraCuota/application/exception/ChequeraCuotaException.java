@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.exception;
+package um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.exception;
 
 import java.text.MessageFormat;
 

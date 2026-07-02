@@ -2,6 +2,149 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.30.0] - 2026-07-01
+### Added
+- feat(producto): Nuevo módulo Producto con arquitectura hexagonal completa
+  - Modelo de dominio: `Producto` con campos `productoId`, `nombre` y método `jsonify()`
+  - Puertos de entrada (2): `GetAllProductosUseCase`, `GetProductoByIdUseCase`
+  - Puerto de salida: `ProductoRepository` con métodos CRUD
+  - Casos de uso: `GetAllProductosUseCaseImpl`, `GetProductoByIdUseCaseImpl`
+  - Servicio de aplicación: `ProductoService` con integración a `ProductoTipoChequeraRepository`
+  - Adaptador JPA: `JpaProductoRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `ProductoEntity` reemplazando `Producto.kt` (Kotlin legacy)
+  - Controlador REST: `ProductoController` con endpoints CRUD
+  - DTOs: `ProductoRequest`, `ProductoResponse`
+  - DTO Mapper: `ProductoDtoMapper`
+  - Excepción: `ProductoException`
+- feat(tipoChequera): Nuevo módulo TipoChequera con arquitectura hexagonal completa
+  - Modelo de dominio: `TipoChequera` con 11 campos, relaciones a `Geografica` y `ClaseChequera`, método `jsonify()`
+  - Puertos de entrada (11): CRUD completo + `GetAllTipoChequeraAsignable`, `GetAllTipoChequeraByClaseChequera`, `GetAllTipoChequeraByFacultadAndGeografica`, `MarkTipoChequera`, `UnmarkTipoChequera`
+  - Puerto de salida: `TipoChequeraRepository` con 11 métodos
+  - Casos de uso: 11 implementaciones individuales
+  - Servicio de aplicación: `TipoChequeraService` con integración a `TipoChequeraSearchService`
+  - Entidad JPA: `TipoChequeraEntity` reemplazando `TipoChequera.kt` (Kotlin legacy)
+  - Controlador REST: `TipoChequeraController` con 9 endpoints
+  - DTOs: `TipoChequeraRequest`, `TipoChequeraResponse`
+  - DTO Mapper: `TipoChequeraDtoMapper`
+  - Excepción: `TipoChequeraException`
+- feat(lectivo): Nuevo módulo Lectivo con arquitectura hexagonal completa
+  - Modelo de dominio: `Lectivo` con campos `lectivoId`, `nombre`, `fechaInicio`, `fechaFinal` y método `jsonify()`
+  - Puertos de entrada (8): CRUD + `GetAllLectivosReverse`, `GetAllLectivosByPersona`, `GetLectivoByFecha`, `GetLastLectivo`
+  - Puerto de salida: `LectivoRepository` con 8 métodos
+  - Casos de uso: 8 implementaciones individuales
+  - Servicio de aplicación: `LectivoService`
+  - Entidad JPA: `LectivoEntity` reemplazando `Lectivo.kt` (Kotlin legacy)
+  - Controlador REST: `LectivoController` con 7 endpoints
+  - DTOs: `LectivoRequest`, `LectivoResponse`
+  - DTO Mapper: `LectivoDtoMapper`
+  - Excepción: `LectivoException`
+- feat(lectivoTotalImputacion): Nuevo módulo LectivoTotalImputacion con arquitectura hexagonal completa
+  - Modelo de dominio: `LectivoTotalImputacion` con campos `lectivoTotalImputacionId`, `facultadId`, `lectivoId`, `tipoChequeraId`, `productoId`, `cuenta`
+  - Puertos de entrada (4): `AddLectivoTotalImputacionUseCase`, `FindAllByTipoUseCase`, `FindByProductoUseCase`, `UpdateLectivoTotalImputacionUseCase`
+  - Puerto de salida: `LectivoTotalImputacionRepository` con 5 métodos
+  - Casos de uso: 4 implementaciones individuales
+  - Entidad JPA: `LectivoTotalImputacionEntity` reemplazando `LectivoTotalImputacion.java` (legacy)
+  - Controlador REST: `LectivoTotalImputacionController` con endpoints GET/POST/PUT
+  - DTOs: `LectivoTotalImputacionRequest`, `LectivoTotalImputacionResponse`
+  - DTO Mapper: `LectivoTotalImputacionDtoMapper`
+  - Excepción: `LectivoTotalImputacionException`
+- feat(arancelTipo): Migración completa a casos de uso individuales con arquitectura hexagonal
+  - 8 nuevos casos de uso: `CreateArancelTipoUseCaseImpl`, `DeleteArancelTipoUseCaseImpl`, `GetAllArancelTiposUseCaseImpl`, `GetAllHabilitadosUseCaseImpl`, `GetArancelTipoByIdCompletoUseCaseImpl`, `GetArancelTipoByIdUseCaseImpl`, `GetLastArancelTipoUseCaseImpl`, `GetNewArancelTipoUseCaseImpl`, `UpdateArancelTipoUseCaseImpl`
+  - Nuevos puertos de entrada (9) correspondientes
+  - Nuevo puerto de salida: `ArancelTipoRepository` con métodos CRUD y búsquedas
+  - Nuevo repositorio JPA: `JpaArancelTipoRepositoryAdapter`
+  - Nuevos DTOs: `ArancelTipoRequest`, `ArancelTipoResponse`
+  - Nuevo mapper: `ArancelTipoDtoMapper`, `ArancelTipoMapper` (persistencia)
+- feat(arancelPorcentaje): Migración completa a casos de uso individuales con arquitectura hexagonal
+  - 4 nuevos casos de uso: `AddArancelPorcentajeUseCaseImpl`, `FindAllByArancelTipoIdUseCaseImpl`, `FindByUniqueUseCaseImpl`, `UpdateArancelPorcentajeUseCaseImpl`
+  - Nuevos puertos de entrada (4) correspondientes
+  - Nuevo puerto de salida: `ArancelPorcentajeRepository`
+  - Nuevo repositorio JPA: `JpaArancelPorcentajeRepositoryAdapter`
+  - Nuevos DTOs: `ArancelPorcentajeRequest`, `ArancelPorcentajeResponse`
+  - Nuevo mapper: `ArancelPorcentajeMapper`, `ArancelPorcentajeDtoMapper`
+- feat(claseChequera): Nuevo módulo ClaseChequera con arquitectura hexagonal completa
+  - Modelo de dominio: `ClaseChequera` con campos `claseChequeraId`, `nombre`, `preuniversitario`, `grado`, `posgrado`, `curso`, `secundario`, `titulo`, y método `jsonify()`
+  - Puertos de entrada (4): `GetAllClaseChequeraUseCase`, `GetAllClaseChequeraByCursoUseCase`, `GetAllClaseChequeraByPosgradoUseCase`, `GetAllClaseChequeraByTituloUseCase`
+  - Puerto de salida: `ClaseChequeraRepository` con métodos CRUD y búsquedas por tipo
+  - Casos de uso: Implementaciones completas en `application/usecases/`
+  - Servicio de aplicación: `ClaseChequeraService` con delegación a casos de uso
+  - Adaptador JPA: `JpaClaseChequeraRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `ClaseChequeraEntity` (Java) reemplazando `ClaseChequeraEntity.kt` (Kotlin)
+  - Repositorio JPA: `JpaClaseChequeraRepository`
+  - Controlador REST: `ClaseChequeraController` con endpoints GET
+  - DTOs: `ClaseChequeraRequest`, `ClaseChequeraResponse`
+  - DTO Mapper: `ClaseChequeraDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `ClaseChequeraException`
+- feat(chequeraCuota): Migración completa a casos de uso individuales con arquitectura hexagonal
+  - 20 nuevos casos de uso en `application/usecases/`: `CalculateTotalCuotasActivasUseCaseImpl`, `CalculateTotalCuotasPagadasUseCaseImpl`, `DeleteAllByChequeraUseCaseImpl`, `FindAllByChequeraAlternativaConImporteUseCaseImpl`, `FindAllByChequeraAlternativaUseCaseImpl`, `FindAllByChequeraIdsUseCaseImpl`, `FindAllByChequeraUseCaseImpl`, `FindAllByFacultadTipoChequeraSerieIdsUseCaseImpl`, `FindAllDebidasUseCaseImpl`, `FindAllInconsistenciasUseCaseImpl`, `FindAllPendientesBajaUseCaseImpl`, `FindAllPendientesUseCaseImpl`, `FindAllPeriodosLectivoUseCaseImpl`, `GetChequeraCuotaByIdUseCaseImpl`, `GetChequeraCuotaByUniqueUseCaseImpl`, `GetOneActivaImpagaPreviaUseCaseImpl`, `SaveAllChequeraCuotasUseCaseImpl`, `UpdateBarrasUseCaseImpl`, `UpdateChequeraCuotaUseCaseImpl`
+  - Nuevos puertos de entrada (20) correspondientes en `domain/ports/in/`
+  - Nuevos DTOs: `ChequeraCuotaRequest`, `ChequeraCuotaResponse`
+  - Nueva capa web: `ChequeraCuotaDtoMapper` para conversión DTO ↔ dominio
+  - Nuevo `ChequeraCuotaCalculoDeudaService` con lógica de cálculo de deuda separada
+  - Modelo de dominio enriquecido: nuevos campos `importe1Original`, `importe2`, `importe2Original`, `importe3`, `importe3Original`, `vencimiento2`, `vencimiento3`, `codigoBarras`, `i2Of5`, `manual`, `tramoId`, `arancelTipoId`, relaciones a `Producto` y `ChequeraSerie`, método `jsonify()`
+  - `ChequeraCuotaDeudaService` refactorizado y simplificado con `@RequiredArgsConstructor` y `.peek()`
+  - `ChequeraCuotaService` simplificado: lógica delegada a casos de uso individuales
+  - `ChequeraCuotaException` movido a `hexagonal/chequera/chequeraCuota/application/exception/`
+- feat(chequeraSerie): Migración completa a casos de uso individuales con arquitectura hexagonal
+  - 15 nuevos casos de uso en `application/usecases/`: `CreateChequeraSerieUseCaseImpl`, `DeleteChequeraSerieUseCaseImpl`, `GetChequeraSerieAltasUseCaseImpl`, `GetChequeraSerieByCbuOrVisaUseCaseImpl`, `GetChequeraSerieByFacultadUseCaseImpl`, `GetChequeraSerieByIdUseCaseImpl`, `GetChequeraSerieByNumberUseCaseImpl`, `GetChequeraSerieByPersonaUseCaseImpl`, `GetChequeraSerieByUniqueUseCaseImpl`, `GetChequeraSerieIncompletasUseCaseImpl`, `GetChequeraSerieSpecialQueriesUseCaseImpl`, `GetResumenLectivoUseCaseImpl`, `MarkSentUseCaseImpl`, `SetPayPerTicUseCaseImpl`, `UpdateChequeraSerieUseCaseImpl`
+  - Nuevos puertos de entrada (15) correspondientes en `domain/ports/in/`
+  - Nuevo puerto de salida: `ChequeraSerieRepository` con métodos completos CRUD y búsquedas
+  - NUEvos DTOs: `ChequeraSerieRequest`, `ChequeraSerieResponse`
+  - Nueva capa web: `ChequeraSerieDtoMapper` para conversión DTO ↔ dominio
+  - Nuevo adaptador JPA: `JpaChequeraSerieRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Modelo de dominio enriquecido: nuevos campos (`arancelTipoId`, `cursoId`, `asentado`, `geograficaId`, `fecha`, `cuotasPagadas`, `observaciones`, `algoPagado`, `tipoImpresionId`, `flagPayperTic`, `usuarioId`, `enviado`, `retenida`, `version`, `hpum`, `becaPorcentaje`, `becaResolucion`, `becaFecha`, `becaUserId`), relaciones a (`ArancelTipo`, `Domicilio`, `Facultad`, `Geografica`, `Lectivo`, `Persona`, `TipoChequera`), campos transient (`cuotasDeuda`, `importeDeuda`, `ultimoEnvio`), métodos `getPersonaKey()`, `getFacultadKey()`, `jsonify()`
+  - `ChequeraSerieException` movido a `hexagonal/chequera/chequeraSerie/application/exception/`
+  - `PreuniversitarioChequeraService` actualizado para usar nuevos casos de uso
+
+### Changed
+- refactor(package): Reorganización masiva de módulos bajo paquete `hexagonal/chequera/`
+  - `hexagonal/arancelTipo/` → `hexagonal/chequera/arancelTipo/`
+  - `hexagonal/arancelPorcentaje/` → `hexagonal/chequera/arancelPorcentaje/`
+  - `hexagonal/chequeraCuota/` → `hexagonal/chequera/chequeraCuota/`
+  - `hexagonal/chequeraSerie/` → `hexagonal/chequera/chequeraSerie/`
+  - `hexagonal/producto/` → `hexagonal/chequera/producto/`
+  - `hexagonal/tipoChequera/` → `hexagonal/chequera/tipoChequera/`
+  - Actualizadas todas las referencias de imports en todos los archivos del proyecto
+- refactor(chequeraCuota): `ChequeraCuotaService` simplificado, lógica delegada a 20+ casos de uso individuales
+- refactor(chequeraSerie): `ChequeraSerieService` simplificado, lógica delegada a 15+ casos de uso individuales
+- refactor(chequeraSerie): `ChequeraSerieMapper` movido a `hexagonal/chequera/chequeraSerie/infrastructure/persistence/mapper/`
+- refactor(lectivo): Migración completa del módulo Lectivo a arquitectura hexagonal con Java
+  - Eliminación de `Lectivo.kt` (Kotlin) del paquete `core/kotlin/model/`
+  - `LectivoService` y `LectivoController` movidos de `core/service|controller/` a `hexagonal/lectivo/`
+- refactor(lectivoTotalImputacion): Migración completa del módulo LectivoTotalImputacion a arquitectura hexagonal con Java
+  - Eliminación de `LectivoTotalImputacion.java` (legacy) del paquete `core/model/`
+  - Nuevo controlador REST, DTOs, mapper y excepción en `hexagonal/lectivoTotalImputacion/`
+- refactor(producto): Migración completa del módulo Producto a arquitectura hexagonal con Java
+  - Eliminación de `Producto.kt` (Kotlin) del paquete `core/kotlin/model/`
+  - `ProductoService` y `ProductoController` movidos a `hexagonal/chequera/producto/`
+- refactor(tipoChequera): Migración completa del módulo TipoChequera a arquitectura hexagonal con Java
+  - Eliminación de `TipoChequera.kt` (Kotlin) del paquete `core/kotlin/model/`
+  - `TipoChequeraService` y `TipoChequeraController` movidos a `hexagonal/chequera/tipoChequera/`
+- refactor(arancelTipo): Migración completa a casos de uso individuales con repositorio y mapper propios
+  - Nuevo `JpaArancelTipoRepositoryAdapter`, `ArancelTipoMapper`, `ArancelTipoDtoMapper`, DTOs Request/Response
+- refactor(arancelPorcentaje): Migración completa a casos de uso individuales con repositorio y mapper propios
+  - Nuevo `JpaArancelPorcentajeRepositoryAdapter`, `ArancelPorcentajeMapper`, `ArancelPorcentajeDtoMapper`, DTOs Request/Response
+- refactor(cuenta): Reorganización de paquete a `hexagonal/contable/cuenta/`
+  - Actualización de referencias cruzadas con módulo Contable
+- refactor(controller): `ChequeraController.java` actualizado con nuevas referencias de paquetes
+- refactor(facade): `BalanceService`, `ChequeraService`, `CompraService`, `ContabilidadService`, `CostoService`, `FormulariosToPdfService`, `MailChequeraService`, `MercadoPagoCoreService`, `PagarFileService`, `PayPerTicFileService`, `ProcessBajaService`, `SheetService`, `SincronizeService`, `SpoterService` actualizados para usar nuevas referencias hexagonales
+- refactor(exception): `ChequeraCuotaException`, `ChequeraSerieException`, `ArancelTipoException`, `ArancelPorcentajeException`, `AsientoException`, `ProductoException`, `TipoChequeraException`, `LectivoException`, `LectivoTotalImputacionException` movidos de `core/exception/` a sus módulos hexagonales
+- refactor(mapper): `ChequeraSerieMapper.java` actualizado con nuevos campos y mapeos
+- refactor(jsonify): Métodos `jsonify()` añadidos a modelos de dominio `ChequeraCuota`, `ChequeraSerie`, `ClaseChequera`, `Producto`, `TipoChequera`, `Lectivo`, y entidades JPA correspondientes para logging estructurado
+
+### Removed
+- Eliminación de `ChequeraCuotaDeudaService.java` legacy (`core/service/view/`)
+- Eliminación de módulos Kotlin legacy: `ClaseChequeraEntity.kt`, `ClaseChequera.kt`, `Lectivo.kt`, `Producto.kt`, `TipoChequera.kt`
+- Eliminación de repositorios legacy: `ClaseChequeraRepository.java`, `LectivoRepository.java`, `LectivoTotalImputacionRepository.java`, `ProductoRepository.java`, `TipoChequeraRepository.java`
+- Eliminación de servicios legacy: `ClaseChequeraService.java`, `LectivoService.java`, `LectivoTotalImputacionService.java`, `ProductoService.java`, `TipoChequeraService.java`, `ChequeraCuotaService.java`
+- Eliminación de controladores legacy: `ClaseChequeraController.java`, `LectivoController.java`, `LectivoTotalImputacionController.java`, `ProductoController.java`, `TipoChequeraController.java`, `ArancelPorcentajeController.java`
+- Eliminación de `LectivoTotalImputacion.java` (modelo legacy) del paquete `core/model/`
+
+### Added
+- feat(docs): Nuevos diagramas Mermaid para módulos Producto, TipoChequera, Lectivo, LectivoTotalImputación, ClaseChequera; actualizados ChequeraCuota (a classDiagram con 20+ casos de uso) y ChequeraSerie (de flowchart a classDiagram con 15+ casos de uso)
+
+> Basado en análisis profundo de `git diff HEAD` (146 archivos, +4387/-1264 líneas, incluyendo migración masiva de 6 módulos a hexagonal + paquete contable) y `pom.xml` (versión 3.29.0 → 3.30.0).
+
 ## [3.29.0] - 2026-06-26
 ### Added
 - feat(Tool): Nuevos mappings de propuesta a facultadId en `Tool.convert2Tesium()`

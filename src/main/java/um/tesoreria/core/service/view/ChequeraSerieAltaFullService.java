@@ -3,7 +3,8 @@ package um.tesoreria.core.service.view;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import um.tesoreria.core.exception.ChequeraCuotaException;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.exception.ChequeraCuotaException;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAltaFull;
 import um.tesoreria.core.kotlin.repository.view.ChequeraSerieAltaFullRepository;
@@ -30,7 +31,7 @@ public class ChequeraSerieAltaFullService {
         for (ChequeraSerieAltaFull chequeraSerieAltaFull : repository.findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(lectivoId, facultadId, geograficaId, tipoChequeraId)) {
             log.debug(Objects.requireNonNull(chequeraSerieAltaFull.getPersona()).getApellidoNombre());
             try {
-                ChequeraCuotaEntity chequeraCuota = chequeraCuotaService.findOneActivaImpagaPrevia(chequeraSerieAltaFull.getFacultadId(), chequeraSerieAltaFull.getTipoChequeraId(), chequeraSerieAltaFull.getChequeraSerieId(), chequeraSerieAltaFull.getAlternativaId(), fechaDesdePrimerVencimiento);
+                ChequeraCuota chequeraCuota = chequeraCuotaService.findOneActivaImpagaPrevia(chequeraSerieAltaFull.getFacultadId(), chequeraSerieAltaFull.getTipoChequeraId(), chequeraSerieAltaFull.getChequeraSerieId(), chequeraSerieAltaFull.getAlternativaId(), fechaDesdePrimerVencimiento);
                 if (chequeraCuota.getVencimiento1().isBefore(fechaDesdePrimerVencimiento)) {
                     log.debug("Agregada");
                     chequeras.add(chequeraSerieAltaFull);

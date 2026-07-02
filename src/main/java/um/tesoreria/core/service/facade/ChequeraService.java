@@ -22,8 +22,10 @@ import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.exception.DebitoException;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.service.ArancelTipoService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
@@ -102,7 +104,7 @@ public class ChequeraService {
                 chequeraSerieId);
 
         // Elimina chequera
-        ChequeraSerieEntity chequeraserie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraSerie chequeraserie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         chequeraSerieService.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId,
                 chequeraSerieId);
 
@@ -137,7 +139,7 @@ public class ChequeraService {
     @Transactional
     public void extendDebito(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         // Buscar la última cuota del debito
-        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         log.debug("Serie -> {}", serie);
         Debito lastDebito = null;
         try {
@@ -156,7 +158,7 @@ public class ChequeraService {
                         lastDebito.getDebitoTipoId())
                 .stream().collect(Collectors.toMap(Debito::cuotaKey, debito -> debito));
         List<Debito> newDebitos = new ArrayList<>();
-        for (ChequeraCuotaEntity cuota : chequeraCuotaService
+        for (ChequeraCuota cuota : chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId, tipoChequeraId,
                         chequeraSerieId, serie.getAlternativaId())) {
             if (!debitos.containsKey(cuota.cuotaKey())) {
@@ -176,7 +178,7 @@ public class ChequeraService {
 
     @Transactional
     public void track(Long chequeraId) {
-        ChequeraSerieEntity serie = chequeraSerieService.findByChequeraId(chequeraId);
+        ChequeraSerie serie = chequeraSerieService.findByChequeraId(chequeraId);
         ChequeraImpresionCabecera cabecera = new ChequeraImpresionCabecera(null, serie.getFacultadId(),
                 serie.getTipoChequeraId(), serie.getChequeraSerieId(), Tool.hourAbsoluteArgentina(),
                 serie.getPersonaId(), serie.getDocumentoId(), serie.getLectivoId(), serie.getGeograficaId(),
@@ -191,7 +193,7 @@ public class ChequeraService {
                         serie.getAlternativaId())
                 .stream().collect(Collectors.toMap(ChequeraAlternativa::getProductoId, alternativa -> alternativa));
         List<ChequeraImpresionDetalle> detalles = new ArrayList<ChequeraImpresionDetalle>();
-        for (ChequeraCuotaEntity cuota : chequeraCuotaService
+        for (ChequeraCuota cuota : chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId())) {
             ChequeraTotal total = totales.get(cuota.getProductoId());
@@ -208,16 +210,16 @@ public class ChequeraService {
 
     public PreuniversitarioData findLastPreData(Integer facultadId, BigDecimal personaId, Integer documentoId) {
         log.debug("\n\nStarting ChequeraService.findLastPreData()\n\n");
-        ChequeraSerieEntity chequeraSerie = chequeraSerieService
+        ChequeraSerie chequeraSerie = chequeraSerieService
                 .findLastPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadId(personaId, documentoId, facultadId);
         log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
 
         return new PreuniversitarioData(this.constructChequeraDataDTO(chequeraSerie));
     }
 
-    public ChequeraSerieDto constructChequeraDataDTO(ChequeraSerieEntity chequeraSerie) {
+    public ChequeraSerieDto constructChequeraDataDTO(ChequeraSerie chequeraSerie) {
         log.debug("\n\nConstructing ChequeraService.constructChequeraDataDTO\n\n");
-        List<ChequeraCuotaEntity> chequeraCuotas = chequeraCuotaService
+        List<ChequeraCuota> chequeraCuotas = chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdConImporte(
                         chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
                         chequeraSerie.getChequeraSerieId(), chequeraSerie.getAlternativaId());
@@ -299,20 +301,28 @@ public class ChequeraService {
     }
 
     public List<ChequeraCuotaPagosDto> findAllCuotaPagosByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
-        List<ChequeraCuotaEntity> cuotas = chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
+        log.debug("\n\nProcessing ChequeraService.findAllCuotaPagosByChequera\n\n");
+        List<ChequeraCuota> cuotas = chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
+        log.debug("\n\nChequeraService.findAllCuotaPagosByChequera.cuotas -> {}\n\n", Jsonifier.builder(cuotas).build());
         List<ChequeraPago> pagos = chequeraPagoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService);
+//        log.debug("pagos -> {}", Jsonifier.builder(pagos).build());
+
+        var result = cuotas.stream()
+                .map(cuota -> {
+                    ChequeraCuotaPagosDto dto = modelMapper.map(cuota, ChequeraCuotaPagosDto.class);
+                    dto.setProducto(cuota.getProducto());
+                    // Filtrar los pagos de esta cuota específica usando chequeraCuotaId
+                    List<ChequeraPago> pagosCuota = pagos.stream()
+                            .filter(pago -> Objects.equals(pago.getChequeraCuotaId(), cuota.getChequeraCuotaId()))
+                            .collect(Collectors.toList());
+                    dto.setChequeraPagos(modelMapper.map(pagosCuota, new TypeToken<List<ChequeraPagoDto>>() {}.getType()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+//        log.debug("Result -> {}", Jsonifier.builder(result).build());
         
-        return cuotas.stream()
-            .map(cuota -> {
-                ChequeraCuotaPagosDto dto = modelMapper.map(cuota, ChequeraCuotaPagosDto.class);
-                // Filtrar los pagos de esta cuota específica usando chequeraCuotaId
-                List<ChequeraPago> pagosCuota = pagos.stream()
-                    .filter(pago -> Objects.equals(pago.getChequeraCuotaId(), cuota.getChequeraCuotaId()))
-                    .collect(Collectors.toList());
-                dto.setChequeraPagos(modelMapper.map(pagosCuota, new TypeToken<List<ChequeraPagoDto>>() {}.getType()));
-                return dto;
-            })
-            .collect(Collectors.toList());
+        return result;
     }
 
     public ChequeraDetailDto constructStatusFromChequera(BigDecimal personaId, Integer facultadId) {

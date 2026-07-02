@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.server.ResponseStatusException;
-import um.tesoreria.core.exception.ChequeraSerieException;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.ChequeraSerieException;
 import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.kotlin.model.dto.PreuniversitarioData;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;

@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import um.tesoreria.core.hexagonal.baja.application.exception.BajaException;
 import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.mapper.ChequeraSerieMapper;
 import um.tesoreria.core.model.Debito;
 import um.tesoreria.core.hexagonal.baja.application.service.BajaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
@@ -37,16 +39,18 @@ public class ProcessBajaService {
     private final BajaService bajaService;
     private final ChequeraSerieService chequeraSerieService;
     private final JsonMapper jsonMapper;
+    private final ChequeraSerieMapper chequeraSerieMapper;
 
     public ProcessBajaService(ChequeraCuotaService chequeraCuotaService,
-                            DebitoService debitoService,
-                            BajaService bajaService,
-                            ChequeraSerieService chequeraSerieService) {
+                              DebitoService debitoService,
+                              BajaService bajaService,
+                              ChequeraSerieService chequeraSerieService, ChequeraSerieMapper chequeraSerieMapper) {
         this.chequeraCuotaService = chequeraCuotaService;
         this.debitoService = debitoService;
         this.bajaService = bajaService;
         this.chequeraSerieService = chequeraSerieService;
         this.jsonMapper = JsonMapper.builder().findAndAddModules().build();
+        this.chequeraSerieMapper = chequeraSerieMapper;
     }
 
     /**
@@ -63,7 +67,7 @@ public class ProcessBajaService {
         log.debug("Processing undoBaja for facultadId: {}, tipoChequeraId: {}, chequeraSerieId: {}", 
                   facultadId, tipoChequeraId, chequeraSerieId);
 
-        List<ChequeraCuotaEntity> cuotas = chequeraCuotaService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
+        List<ChequeraCuota> cuotas = chequeraCuotaService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
         cuotas.forEach(this::processCuotaUndo);
         
         return true;
@@ -102,14 +106,14 @@ public class ProcessBajaService {
         Assert.notNull(chequeraSerieId, "ChequeraSerieId cannot be null");
     }
 
-    private void processCuotaUndo(ChequeraCuotaEntity cuota) {
+    private void processCuotaUndo(ChequeraCuota cuota) {
         cuota.setBaja(BAJA_INACTIVE);
-        ChequeraCuotaEntity updatedCuota = chequeraCuotaService.update(cuota, cuota.getChequeraCuotaId());
+        ChequeraCuota updatedCuota = chequeraCuotaService.update(cuota, cuota.getChequeraCuotaId());
         logObject(updatedCuota, "Cuota");
         processDebitosUndo(updatedCuota);
     }
 
-    private void processDebitosUndo(ChequeraCuotaEntity cuota) {
+    private void processDebitosUndo(ChequeraCuota cuota) {
         List<Debito> debitos = debitoService.findAllAsociados(
                 cuota.getFacultadId(), cuota.getTipoChequeraId(), cuota.getChequeraSerieId(),
                 cuota.getProductoId(), cuota.getAlternativaId(), cuota.getCuotaId());
@@ -151,24 +155,24 @@ public class ProcessBajaService {
 
     private void ensureChequeraSerieIsSet(BajaEntity baja) {
         if (baja.getChequeraSerie() == null) {
-            baja.setChequeraSerie(chequeraSerieService.findByUnique(
-                    baja.getFacultadId(), baja.getTipoChequeraId(), baja.getChequeraSerieId()));
+            baja.setChequeraSerie(chequeraSerieMapper.toEntity(chequeraSerieService.findByUnique(
+                    baja.getFacultadId(), baja.getTipoChequeraId(), baja.getChequeraSerieId())));
         }
     }
 
     private void processPendingCuotas(BajaEntity baja, Periodo periodo) {
-        List<ChequeraCuotaEntity> pendingCuotas = chequeraCuotaService.findAllPendientesBaja(
+        List<ChequeraCuota> pendingCuotas = chequeraCuotaService.findAllPendientesBaja(
                 baja.getFacultadId(), baja.getTipoChequeraId(), baja.getChequeraSerieId(),
                 baja.getChequeraSerie().getAlternativaId());
 
         pendingCuotas.forEach(cuota -> processPendingCuota(cuota, periodo, baja));
     }
 
-    private void processPendingCuota(ChequeraCuotaEntity cuota, Periodo periodo, BajaEntity baja) {
+    private void processPendingCuota(ChequeraCuota cuota, Periodo periodo, BajaEntity baja) {
         int mes = normalizeMonth(cuota.getMes());
         if (shouldProcessCuota(periodo, cuota.getAnho(), mes)) {
             cuota.setBaja(BAJA_ACTIVE);
-            ChequeraCuotaEntity updatedCuota = chequeraCuotaService.update(cuota, cuota.getChequeraCuotaId());
+            ChequeraCuota updatedCuota = chequeraCuotaService.update(cuota, cuota.getChequeraCuotaId());
             logObject(updatedCuota, "Cuota");
             processDebitosBaja(updatedCuota, baja);
         }
@@ -182,7 +186,7 @@ public class ProcessBajaService {
         return periodo.getAnho() * 100 + periodo.getMes() <= cuotaAnho * 100 + cuotaMes;
     }
 
-    private void processDebitosBaja(ChequeraCuotaEntity cuota, BajaEntity baja) {
+    private void processDebitosBaja(ChequeraCuota cuota, BajaEntity baja) {
         List<Debito> debitos = debitoService.findAllAsociados(
                 cuota.getFacultadId(), cuota.getTipoChequeraId(), cuota.getChequeraSerieId(),
                 cuota.getProductoId(), cuota.getAlternativaId(), cuota.getCuotaId());

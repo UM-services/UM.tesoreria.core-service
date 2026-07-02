@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
-import um.tesoreria.core.service.view.ChequeraCuotaDeudaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaDeudaService;
 import um.tesoreria.core.util.Tool;
 import lombok.extern.slf4j.Slf4j;
 

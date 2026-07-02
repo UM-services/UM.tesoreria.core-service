@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-import um.tesoreria.core.exception.ChequeraSerieException;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.ChequeraSerieException;
 import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
 import um.tesoreria.core.extern.consumer.LegajoFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
@@ -48,7 +49,7 @@ public class FindInscriptosSinChequeraUseCaseImpl implements FindInscriptosSinCh
         for (InscripcionFacultad inscripto : inscriptos.values()) {
             boolean add = true;
             try {
-                ChequeraSerieEntity chequeraSerie;
+                ChequeraSerie chequeraSerie;
                 if (facultadId == 15) {
                     chequeraSerie = chequeraSerieService
                             .findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
