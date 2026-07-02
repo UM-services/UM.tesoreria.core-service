@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.kotlin.model.internal.ClickPagosEntity;
-import um.tesoreria.core.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

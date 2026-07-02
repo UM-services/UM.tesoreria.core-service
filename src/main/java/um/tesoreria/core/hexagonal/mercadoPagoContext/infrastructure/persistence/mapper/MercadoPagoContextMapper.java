@@ -2,7 +2,7 @@ package um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistenc
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.mapper.ChequeraCuotaMapper;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.mapper.ChequeraCuotaMapper;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistence.entity.MercadoPagoContextEntity;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.persistence.mapper.ReservaVacanteMapper;

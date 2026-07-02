@@ -1,7 +1,7 @@
 package um.tesoreria.core.kotlin.model.internal
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota
 import java.math.BigDecimal
 import java.time.LocalTime
 import java.time.OffsetDateTime
@@ -74,7 +74,7 @@ data class ClickPagosEntity(
     var cuotaId: Int = 0,
     var clave3: String = "",
     var descripcion: String = "",
-    var chequeraCuota: ChequeraCuotaEntity? = null,
+    var chequeraCuota: ChequeraCuota? = null,
     var processed: Boolean = false
 
 )

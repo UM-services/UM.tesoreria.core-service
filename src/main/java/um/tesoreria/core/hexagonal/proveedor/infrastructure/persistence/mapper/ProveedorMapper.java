@@ -1,7 +1,7 @@
 package um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.mapper;
 
 import org.springframework.stereotype.Component;
-import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.mapper.CuentaMapper;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.mapper.CuentaMapper;
 import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.proveedor.domain.model.ProveedorSearch;
 import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;

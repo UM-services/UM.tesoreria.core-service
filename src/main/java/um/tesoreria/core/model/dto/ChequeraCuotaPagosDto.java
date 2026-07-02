@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import um.tesoreria.core.kotlin.model.Producto;
+import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
 
 @Data
 @Builder

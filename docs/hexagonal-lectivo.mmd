@@ -1,0 +1,174 @@
+---
+title: Arquitectura Hexagonal - Módulo Lectivo (v3.30.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Lectivo {
+            +Integer lectivoId
+            +String nombre
+            +OffsetDateTime fechaInicio
+            +OffsetDateTime fechaFinal
+            +jsonify() String
+        }
+
+        class LectivoRepository {
+            <<interface>>
+            +findAll() List~Lectivo~
+            +findAllReverse() List~Lectivo~
+            +findAllByPersona(BigDecimal, Integer) List~Lectivo~
+            +findById(Integer) Optional~Lectivo~
+            +findByFecha(OffsetDateTime) Optional~Lectivo~
+            +findLast() Optional~Lectivo~
+            +create(Lectivo) Lectivo
+            +deleteById(Integer)
+        }
+    }
+
+    namespace application {
+        class LectivoService {
+            -CreateLectivoUseCase createLectivoUseCase
+            -GetAllLectivosUseCase getAllLectivosUseCase
+            -GetAllLectivosReverseUseCase getAllLectivosReverseUseCase
+            -GetAllLectivosByPersonaUseCase getAllLectivosByPersonaUseCase
+            -GetLectivoByIdUseCase getLectivoByIdUseCase
+            -GetLectivoByFechaUseCase getLectivoByFechaUseCase
+            -GetLastLectivoUseCase getLastLectivoUseCase
+            -DeleteLectivoUseCase deleteLectivoUseCase
+            +findAll() List~Lectivo~
+            +findAllReverse() List~Lectivo~
+            +findAllByPersona(BigDecimal, Integer) List~Lectivo~
+            +findByLectivoId(Integer) Lectivo
+            +findByFecha(OffsetDateTime) Lectivo
+            +findLast() Optional~Lectivo~
+            +createLectivo(Lectivo) Lectivo
+            +deleteByLectivoId(Integer)
+        }
+
+        namespace usecases {
+            class GetAllLectivosUseCaseImpl
+            class GetAllLectivosReverseUseCaseImpl
+            class GetAllLectivosByPersonaUseCaseImpl
+            class GetLectivoByIdUseCaseImpl
+            class GetLectivoByFechaUseCaseImpl
+            class GetLastLectivoUseCaseImpl
+            class CreateLectivoUseCaseImpl
+            class DeleteLectivoUseCaseImpl
+        }
+
+        class LectivoException
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class LectivoEntity {
+                +Integer lectivoId
+                +String nombre
+                +OffsetDateTime fechaInicio
+                +OffsetDateTime fechaFinal
+                +jsonify() String
+            }
+
+            class JpaLectivoRepository {
+                <<JpaRepository>>
+                +findAllByLectivoIdIn(List~Integer~, Sort) List~LectivoEntity~
+                +findByLectivoId(Integer) Optional~LectivoEntity~
+                +findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(OffsetDateTime, OffsetDateTime) Optional~LectivoEntity~
+                +findTopByOrderByLectivoIdDesc() Optional~LectivoEntity~
+            }
+
+            class JpaLectivoRepositoryAdapter {
+                -JpaLectivoRepository repository
+                -JpaChequeraSerieRepository chequeraSerieRepository
+                -LectivoMapper mapper
+                +findAll() List~Lectivo~
+                +findAllReverse() List~Lectivo~
+                +findAllByPersona(BigDecimal, Integer) List~Lectivo~
+                +findById(Integer) Optional~Lectivo~
+                +findByFecha(OffsetDateTime) Optional~Lectivo~
+                +findLast() Optional~Lectivo~
+                +create(Lectivo) Lectivo
+                +deleteById(Integer)
+            }
+
+            class LectivoMapper {
+                +toDomainModel(LectivoEntity) Lectivo
+                +toEntity(Lectivo) LectivoEntity
+            }
+        }
+
+        namespace web {
+            class LectivoController {
+                -LectivoService service
+                -LectivoDtoMapper dtoMapper
+                +findAll() ResponseEntity~List~LectivoResponse~~
+                +findAllReverse() ResponseEntity~List~LectivoResponse~~
+                +findAllByPersona(BigDecimal, Integer) ResponseEntity~List~LectivoResponse~~
+                +findByLectivoId(Integer) ResponseEntity~LectivoResponse~
+                +findLast() ResponseEntity~LectivoResponse~
+                +add(LectivoRequest) ResponseEntity~LectivoResponse~
+                +deleteByLectivoId(Integer) ResponseEntity~Void~
+            }
+
+            class LectivoRequest {
+                +Integer lectivoId
+                +String nombre
+                +OffsetDateTime fechaInicio
+                +OffsetDateTime fechaFinal
+            }
+
+            class LectivoResponse {
+                +Integer lectivoId
+                +String nombre
+                +OffsetDateTime fechaInicio
+                +OffsetDateTime fechaFinal
+            }
+
+            class LectivoDtoMapper {
+                +toDomain(LectivoRequest) Lectivo
+                +toResponse(Lectivo) LectivoResponse
+            }
+        }
+    }
+
+    LectivoService --> GetAllLectivosUseCase : uses
+    LectivoService --> GetAllLectivosReverseUseCase : uses
+    LectivoService --> GetAllLectivosByPersonaUseCase : uses
+    LectivoService --> GetLectivoByIdUseCase : uses
+    LectivoService --> GetLectivoByFechaUseCase : uses
+    LectivoService --> GetLastLectivoUseCase : uses
+    LectivoService --> CreateLectivoUseCase : uses
+    LectivoService --> DeleteLectivoUseCase : uses
+
+    GetAllLectivosUseCaseImpl ..|> GetAllLectivosUseCase : implements
+    GetAllLectivosReverseUseCaseImpl ..|> GetAllLectivosReverseUseCase : implements
+    GetAllLectivosByPersonaUseCaseImpl ..|> GetAllLectivosByPersonaUseCase : implements
+    GetLectivoByIdUseCaseImpl ..|> GetLectivoByIdUseCase : implements
+    GetLectivoByFechaUseCaseImpl ..|> GetLectivoByFechaUseCase : implements
+    GetLastLectivoUseCaseImpl ..|> GetLastLectivoUseCase : implements
+    CreateLectivoUseCaseImpl ..|> CreateLectivoUseCase : implements
+    DeleteLectivoUseCaseImpl ..|> DeleteLectivoUseCase : implements
+
+    GetAllLectivosUseCaseImpl --> LectivoRepository : uses
+    GetAllLectivosReverseUseCaseImpl --> LectivoRepository : uses
+    GetAllLectivosByPersonaUseCaseImpl --> LectivoRepository : uses
+    GetLectivoByIdUseCaseImpl --> LectivoRepository : uses
+    GetLectivoByFechaUseCaseImpl --> LectivoRepository : uses
+    GetLastLectivoUseCaseImpl --> LectivoRepository : uses
+    CreateLectivoUseCaseImpl --> LectivoRepository : uses
+    DeleteLectivoUseCaseImpl --> LectivoRepository : uses
+
+    JpaLectivoRepositoryAdapter ..|> LectivoRepository : implements
+    JpaLectivoRepositoryAdapter --> JpaLectivoRepository : uses
+    JpaLectivoRepositoryAdapter --> LectivoMapper : uses
+
+    LectivoMapper --> Lectivo : maps
+    LectivoMapper --> LectivoEntity : maps
+    JpaLectivoRepository --> LectivoEntity : persists
+
+    LectivoController --> LectivoService : calls
+    LectivoController --> LectivoDtoMapper : uses
+    LectivoDtoMapper --> Lectivo : maps
+    LectivoDtoMapper --> LectivoResponse : maps

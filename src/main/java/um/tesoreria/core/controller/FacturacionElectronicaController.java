@@ -5,7 +5,7 @@ import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.exception.FacturacionElectronicaException;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
 import um.tesoreria.core.model.FacturacionElectronica;
-import um.tesoreria.core.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.service.ChequeraPagoService;
 import um.tesoreria.core.service.FacturacionElectronicaService;
 import org.springframework.http.HttpStatus;

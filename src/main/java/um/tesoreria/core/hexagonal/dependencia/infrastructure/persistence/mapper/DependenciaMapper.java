@@ -2,7 +2,7 @@ package um.tesoreria.core.hexagonal.dependencia.infrastructure.persistence.mappe
 
 import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
-import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.mapper.CuentaMapper;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.mapper.CuentaMapper;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 import um.tesoreria.core.hexagonal.dependencia.domain.model.Dependencia;
 import um.tesoreria.core.hexagonal.dependencia.infrastructure.persistence.entity.DependenciaEntity;

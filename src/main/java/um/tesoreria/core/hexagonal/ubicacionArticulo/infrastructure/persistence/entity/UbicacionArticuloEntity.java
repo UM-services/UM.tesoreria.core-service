@@ -20,7 +20,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.*;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity;
 import um.tesoreria.core.model.Auditable;
-import um.tesoreria.core.hexagonal.cuenta.infrastructure.persistence.entity.CuentaEntity;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.hexagonal.ubicacion.infrastructure.persistence.entity.UbicacionEntity;
 
 /**

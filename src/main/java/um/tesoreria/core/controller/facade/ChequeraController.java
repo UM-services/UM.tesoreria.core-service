@@ -27,13 +27,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.server.ResponseStatusException;
-import um.tesoreria.core.exception.ChequeraSerieException;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.ChequeraSerieException;
 import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.kotlin.model.dto.PreuniversitarioData;
 import um.tesoreria.core.kotlin.model.dto.SpoterDataResponse;
 import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
 import um.tesoreria.core.model.dto.ChequeraDetailDto;
-import um.tesoreria.core.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.service.SpoterDataService;
 import um.tesoreria.core.service.facade.ChequeraService;
 import um.tesoreria.core.service.facade.FormulariosToPdfService;

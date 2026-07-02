@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.exception.ChequeraPagoException;
-import um.tesoreria.core.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.service.ChequeraPagoService;
 
 import java.time.OffsetDateTime;

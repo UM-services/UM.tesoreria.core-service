@@ -2,7 +2,7 @@ package um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import um.tesoreria.core.hexagonal.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
 import um.tesoreria.core.util.Jsonifier;
 

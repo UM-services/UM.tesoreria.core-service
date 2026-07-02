@@ -1,80 +1,311 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.25.0)
+title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.30.0)
 ---
-flowchart TD
-    subgraph Dominio ["Dominio (Domain)"]
-        CC[ChequeraCuota<br/>Entidad de Dominio]
-        CP[ChequeraPago<br/>Entidad de Dominio]
-        CT[ChequeraTotal<br/>Entidad de Dominio]
-        DD[DeudaData<br/>Agregado]
-        CDU[CalculateDeudaUseCase<br/>Puerto de Entrada]
-        CCR[ChequeraCuotaRepository<br/>Puerto de Salida]
-    end
 
-    subgraph ModuloExterno ["Módulo ChequeraSerie"]
-        CS[ChequeraSerie<br/>Domain Model]
-    end
+classDiagram
+    direction TB
 
-    subgraph Aplicacion ["Aplicación (Application)"]
-        CCS[ChequeraCuotaService<br/>Servicio de Aplicación]
-    end
+    namespace domain {
+        class ChequeraCuota {
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +Integer mes
+            +Integer anho
+            +Integer arancelTipoId
+            +OffsetDateTime vencimiento1
+            +BigDecimal importe1
+            +BigDecimal importe1Original
+            +OffsetDateTime vencimiento2
+            +BigDecimal importe2
+            +BigDecimal importe2Original
+            +OffsetDateTime vencimiento3
+            +BigDecimal importe3
+            +BigDecimal importe3Original
+            +String codigoBarras
+            +String i2Of5
+            +Byte pagado
+            +Byte baja
+            +Byte manual
+            +Byte compensada
+            +Integer tramoId
+            +cuotaKey() String
+            +jsonify() String
+        }
 
-    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        CCC[ChequeraCuotaController<br/>Adaptador Web]
-        PS[PersonaService<br/>Consumidor]
-        CSS[ChequeraSerieService<br/>Consumidor]
-        SS[SheetService<br/>Consumidor]
-        JPA[JpaChequeraCuotaRepositoryAdapter<br/>Adaptador JPA]
-        MAP[ChequeraCuotaMapper<br/>Mapeo Entidad-Dominio]
-        MSM[ChequeraSerieMapper<br/>Mapeo de Serie]
-    end
+        class Producto
+        class ChequeraSerie
 
-    subgraph Externo ["Externo (External)"]
-        JPAR[JpaRepository<br/>Spring Data]
-        FAC[FacultadService<br/>Servicio Externo]
-        TIP[TipoChequeraService<br/>Servicio Externo]
-        LEC[LectivoService<br/>Servicio Externo]
-    end
+        class ChequeraCuotaRepository {
+            <<interface>>
+            +findAllByChequera(Integer, Integer, Long) List~ChequeraCuota~
+            +findAllByChequeraIds(Integer, Integer, Long, Integer, Integer) List~ChequeraCuota~
+            +findAllByAlternativa(Integer, Integer, Long, Integer, Integer) List~ChequeraCuota~
+            +findAllByAlternativaConImporte(Integer, Integer, Long, Integer, Integer) List~ChequeraCuota~
+            +findAllDebidas(Integer, Integer, Long) List~ChequeraCuota~
+            +findAllInconsistencias() List~ChequeraCuota~
+            +findAllPendientes(Integer, Integer, Long) List~ChequeraCuota~
+            +findAllPendientesBaja(Integer) List~ChequeraCuota~
+            +findAllPeriodosLectivo(Integer, Integer, Long) List~Integer~
+            +findAllByFacultadTipoChequeraSerieIds(List~Integer~, Integer, Long) List~ChequeraCuota~
+            +findById(Long) Optional~ChequeraCuota~
+            +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraCuota~
+            +findOneActivaImpagaPrevia(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraCuota~
+            +saveAll(List~ChequeraCuota~) List~ChequeraCuota~
+            +update(ChequeraCuota) ChequeraCuota
+            +updateBarras(Integer, Integer, Long, Integer, Integer, String, String) void
+            +deleteAllByChequera(Integer, Integer, Long) void
+            +calculateTotalCuotasActivas(Integer, Integer, Long, Integer, Integer) BigDecimal
+            +calculateTotalCuotasPagadas(Integer, Integer, Long, Integer, Integer) BigDecimal
+        }
 
-    %% Flujo de Dependencias
-    CCC -->|usa| CDU
-    PS -->|usa| CDU
-    CSS -->|usa| CDU
-    SS -->|usa| CDU
-    
-    CCS -->|implementa| CDU
-    CCS -->|depende| CCR
-    CCS -->|usa| FAC
-    CCS -->|usa| TIP
-    CCS -->|usa| LEC
-    
-    CCR -->|implementa| JPA
-    JPA -->|usa| MAP
-    JPA -->|persiste| JPAR
-    
-    MAP -->|convierte| CC
-    MAP -->|convierte| CP
-    MAP -->|convierte| CT
-    MSM -->|convierte| CS
-    
-    %% Entidades
-    CC -->|compone| DD
-    CP -->|compone| DD
-    CT -->|compone| DD
-    CDU -.->|usa| CS
+        class CalculateDeudaUseCase { <<interface>> }
+        class CalculateTotalCuotasActivasUseCase { <<interface>> }
+        class CalculateTotalCuotasPagadasUseCase { <<interface>> }
+        class DeleteAllByChequeraUseCase { <<interface>> }
+        class FindAllByChequeraAlternativaConImporteUseCase { <<interface>> }
+        class FindAllByChequeraAlternativaUseCase { <<interface>> }
+        class FindAllByChequeraIdsUseCase { <<interface>> }
+        class FindAllByChequeraUseCase { <<interface>> }
+        class FindAllByFacultadTipoChequeraSerieIdsUseCase { <<interface>> }
+        class FindAllDebidasUseCase { <<interface>> }
+        class FindAllInconsistenciasUseCase { <<interface>> }
+        class FindAllPendientesBajaUseCase { <<interface>> }
+        class FindAllPendientesUseCase { <<interface>> }
+        class FindAllPeriodosLectivoUseCase { <<interface>> }
+        class GetChequeraCuotaByIdUseCase { <<interface>> }
+        class GetChequeraCuotaByUniqueUseCase { <<interface>> }
+        class GetOneActivaImpagaPreviaUseCase { <<interface>> }
+        class SaveAllChequeraCuotasUseCase { <<interface>> }
+        class UpdateBarrasUseCase { <<interface>> }
+        class UpdateChequeraCuotaUseCase { <<interface>> }
+    }
 
-    style CC fill:#e1f5fe
-    style CP fill:#e1f5fe
-    style CT fill:#e1f5fe
-    style CS fill:#b3e5fc
-    style DD fill:#e3f2fd
-    style CDU fill:#f3e5f5
-    style CCR fill:#f3e5f5
-    style CCS fill:#fff3e0
-    style CCC fill:#e8f5e8
-    style PS fill:#e8f5e8
-    style CSS fill:#e8f5e8
-    style SS fill:#e8f5e8
-    style JPA fill:#e8f5e8
-    style MAP fill:#fff8e1
-    style MSM fill:#fff8e1
+    domain_namespace_uses "domain" : Producto
+    domain_namespace_uses "domain" : ChequeraSerie
+
+    namespace application {
+        class ChequeraCuotaService {
+            -20+ use cases inyectados
+            +findAllByChequera() List~ChequeraCuota~
+            +findAllByChequeraIds() List~ChequeraCuota~
+            +findAllByAlternativa() List~ChequeraCuota~
+            +findAllByAlternativaConImporte() List~ChequeraCuota~
+            +findAllDebidas() List~ChequeraCuota~
+            +findAllInconsistencias() List~ChequeraCuota~
+            +findAllPendientes() List~ChequeraCuota~
+            +findAllPendientesBaja() List~ChequeraCuota~
+            +findAllPeriodosLectivo() List~Integer~
+            +findById(Long) ChequeraCuota
+            +findByUnique(...) ChequeraCuota
+            +findOneActivaImpagaPrevia(...) ChequeraCuota
+            +saveAll(List~ChequeraCuota~) List~ChequeraCuota~
+            +update(ChequeraCuota) ChequeraCuota
+            +updateBarras(...) void
+            +deleteAllByChequera(...) void
+            +calculateTotalCuotasActivas(...) BigDecimal
+            +calculateTotalCuotasPagadas(...) BigDecimal
+            +calculateDeuda(ChequeraSerie) DeudaChequeraDto
+        }
+
+        class ChequeraCuotaCalculoDeudaService {
+            +calculateTotalCuotasActivas() BigDecimal
+            +calculateTotalCuotasPagadas() BigDecimal
+        }
+
+        class ChequeraCuotaDeudaService {
+            +calculateDeuda(ChequeraSerie) DeudaChequeraDto
+        }
+
+        namespace usecases {
+            class CalculateDeudaUseCaseImpl
+            class CalculateTotalCuotasActivasUseCaseImpl
+            class CalculateTotalCuotasPagadasUseCaseImpl
+            class DeleteAllByChequeraUseCaseImpl
+            class FindAllByChequeraAlternativaConImporteUseCaseImpl
+            class FindAllByChequeraAlternativaUseCaseImpl
+            class FindAllByChequeraIdsUseCaseImpl
+            class FindAllByChequeraUseCaseImpl
+            class FindAllByFacultadTipoChequeraSerieIdsUseCaseImpl
+            class FindAllDebidasUseCaseImpl
+            class FindAllInconsistenciasUseCaseImpl
+            class FindAllPendientesBajaUseCaseImpl
+            class FindAllPendientesUseCaseImpl
+            class FindAllPeriodosLectivoUseCaseImpl
+            class GetChequeraCuotaByIdUseCaseImpl
+            class GetChequeraCuotaByUniqueUseCaseImpl
+            class GetOneActivaImpagaPreviaUseCaseImpl
+            class SaveAllChequeraCuotasUseCaseImpl
+            class UpdateBarrasUseCaseImpl
+            class UpdateChequeraCuotaUseCaseImpl
+        }
+
+        class ChequeraCuotaException
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class ChequeraCuotaEntity {
+                +@Table(name="chequera_cuota")
+                +Long chequeraCuotaId
+                +Integer facultadId
+                +Integer tipoChequeraId
+                +Long chequeraSerieId
+                +Integer productoId
+                +Integer alternativaId
+                +Integer cuotaId
+                +OffsetDateTime vencimiento1
+                +BigDecimal importe1
+            }
+
+            class JpaChequeraCuotaRepository {
+                <<JpaRepository>>
+                +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(...) List~ChequeraCuotaEntity~
+                +findByChequeraCuotaId(Long) Optional~ChequeraCuotaEntity~
+            }
+
+            class JpaChequeraCuotaRepositoryAdapter
+            class ChequeraCuotaMapper {
+                +toDomain(ChequeraCuotaEntity) ChequeraCuota
+                +toEntity(ChequeraCuota) ChequeraCuotaEntity
+            }
+        }
+
+        namespace web {
+            class ChequeraCuotaController {
+                -ChequeraCuotaService service
+                -ChequeraCuotaDeudaService deudaService
+                -ChequeraCuotaCalculoDeudaService calculoService
+                -ChequeraCuotaDtoMapper dtoMapper
+                +findAllByChequera(...) ResponseEntity
+                +findAllDebidas(...) ResponseEntity
+                +findAllInconsistencias() ResponseEntity
+                +findById(Long) ResponseEntity
+                +calculateDeuda(...) ResponseEntity
+                +update(...) ResponseEntity
+                +updateBarras(...) ResponseEntity
+            }
+
+            class ChequeraCuotaRequest {
+                +Integer facultadId
+                +Integer tipoChequeraId
+                +Long chequeraSerieId
+                +Integer productoId
+                +Integer alternativaId
+                +Integer cuotaId
+                +BigDecimal importe1
+                +OffsetDateTime vencimiento1
+            }
+
+            class ChequeraCuotaResponse {
+                +Integer facultadId
+                +Integer tipoChequeraId
+                +Long chequeraSerieId
+                +Integer productoId
+                +Integer alternativaId
+                +Integer cuotaId
+                +BigDecimal importe1
+                +OffsetDateTime vencimiento1
+                +String codigoBarras
+                +Producto producto
+                +ChequeraSerie chequeraSerie
+            }
+
+            class ChequeraCuotaDtoMapper {
+                +toDomain(ChequeraCuotaRequest) ChequeraCuota
+                +toResponse(ChequeraCuota) ChequeraCuotaResponse
+            }
+        }
+    }
+
+    namespace external {
+        class FacultadService
+        class TipoChequeraService
+        class LectivoService
+        class TipoChequeraService
+    }
+
+    ChequeraCuota --> Producto : references
+    ChequeraCuota --> ChequeraSerie : references
+
+    ChequeraCuotaService --> CalculateDeudaUseCase : uses
+    ChequeraCuotaService --> CalculateTotalCuotasActivasUseCase : uses
+    ChequeraCuotaService --> CalculateTotalCuotasPagadasUseCase : uses
+    ChequeraCuotaService --> DeleteAllByChequeraUseCase : uses
+    ChequeraCuotaService --> FindAllByChequeraAlternativaConImporteUseCase : uses
+    ChequeraCuotaService --> FindAllByChequeraAlternativaUseCase : uses
+    ChequeraCuotaService --> FindAllByChequeraIdsUseCase : uses
+    ChequeraCuotaService --> FindAllByChequeraUseCase : uses
+    ChequeraCuotaService --> FindAllByFacultadTipoChequeraSerieIdsUseCase : uses
+    ChequeraCuotaService --> FindAllDebidasUseCase : uses
+    ChequeraCuotaService --> FindAllInconsistenciasUseCase : uses
+    ChequeraCuotaService --> FindAllPendientesBajaUseCase : uses
+    ChequeraCuotaService --> FindAllPendientesUseCase : uses
+    ChequeraCuotaService --> FindAllPeriodosLectivoUseCase : uses
+    ChequeraCuotaService --> GetChequeraCuotaByIdUseCase : uses
+    ChequeraCuotaService --> GetChequeraCuotaByUniqueUseCase : uses
+    ChequeraCuotaService --> GetOneActivaImpagaPreviaUseCase : uses
+    ChequeraCuotaService --> SaveAllChequeraCuotasUseCase : uses
+    ChequeraCuotaService --> UpdateBarrasUseCase : uses
+    ChequeraCuotaService --> UpdateChequeraCuotaUseCase : uses
+
+    CalculateDeudaUseCaseImpl ..|> CalculateDeudaUseCase : implements
+    CalculateTotalCuotasActivasUseCaseImpl ..|> CalculateTotalCuotasActivasUseCase : implements
+    CalculateTotalCuotasPagadasUseCaseImpl ..|> CalculateTotalCuotasPagadasUseCase : implements
+    DeleteAllByChequeraUseCaseImpl ..|> DeleteAllByChequeraUseCase : implements
+    FindAllByChequeraAlternativaConImporteUseCaseImpl ..|> FindAllByChequeraAlternativaConImporteUseCase : implements
+    FindAllByChequeraAlternativaUseCaseImpl ..|> FindAllByChequeraAlternativaUseCase : implements
+    FindAllByChequeraIdsUseCaseImpl ..|> FindAllByChequeraIdsUseCase : implements
+    FindAllByChequeraUseCaseImpl ..|> FindAllByChequeraUseCase : implements
+    FindAllByFacultadTipoChequeraSerieIdsUseCaseImpl ..|> FindAllByFacultadTipoChequeraSerieIdsUseCase : implements
+    FindAllDebidasUseCaseImpl ..|> FindAllDebidasUseCase : implements
+    FindAllInconsistenciasUseCaseImpl ..|> FindAllInconsistenciasUseCase : implements
+    FindAllPendientesBajaUseCaseImpl ..|> FindAllPendientesBajaUseCase : implements
+    FindAllPendientesUseCaseImpl ..|> FindAllPendientesUseCase : implements
+    FindAllPeriodosLectivoUseCaseImpl ..|> FindAllPeriodosLectivoUseCase : implements
+    GetChequeraCuotaByIdUseCaseImpl ..|> GetChequeraCuotaByIdUseCase : implements
+    GetChequeraCuotaByUniqueUseCaseImpl ..|> GetChequeraCuotaByUniqueUseCase : implements
+    GetOneActivaImpagaPreviaUseCaseImpl ..|> GetOneActivaImpagaPreviaUseCase : implements
+    SaveAllChequeraCuotasUseCaseImpl ..|> SaveAllChequeraCuotasUseCase : implements
+    UpdateBarrasUseCaseImpl ..|> UpdateBarrasUseCase : implements
+    UpdateChequeraCuotaUseCaseImpl ..|> UpdateChequeraCuotaUseCase : implements
+
+    CalculateDeudaUseCaseImpl --> ChequeraCuotaRepository : uses
+    CalculateTotalCuotasActivasUseCaseImpl --> ChequeraCuotaRepository : uses
+    CalculateTotalCuotasPagadasUseCaseImpl --> ChequeraCuotaRepository : uses
+    DeleteAllByChequeraUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllByChequeraAlternativaConImporteUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllByChequeraAlternativaUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllByChequeraIdsUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllByChequeraUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllByFacultadTipoChequeraSerieIdsUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllDebidasUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllInconsistenciasUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllPendientesBajaUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllPendientesUseCaseImpl --> ChequeraCuotaRepository : uses
+    FindAllPeriodosLectivoUseCaseImpl --> ChequeraCuotaRepository : uses
+    GetChequeraCuotaByIdUseCaseImpl --> ChequeraCuotaRepository : uses
+    GetChequeraCuotaByUniqueUseCaseImpl --> ChequeraCuotaRepository : uses
+    GetOneActivaImpagaPreviaUseCaseImpl --> ChequeraCuotaRepository : uses
+    SaveAllChequeraCuotasUseCaseImpl --> ChequeraCuotaRepository : uses
+    UpdateBarrasUseCaseImpl --> ChequeraCuotaRepository : uses
+    UpdateChequeraCuotaUseCaseImpl --> ChequeraCuotaRepository : uses
+
+    JpaChequeraCuotaRepositoryAdapter ..|> ChequeraCuotaRepository : implements
+    JpaChequeraCuotaRepositoryAdapter --> JpaChequeraCuotaRepository : uses
+    JpaChequeraCuotaRepositoryAdapter --> ChequeraCuotaMapper : uses
+
+    ChequeraCuotaMapper --> ChequeraCuota : maps
+    ChequeraCuotaMapper --> ChequeraCuotaEntity : maps
+    JpaChequeraCuotaRepository --> ChequeraCuotaEntity : persists
+
+    ChequeraCuotaController --> ChequeraCuotaService : calls
+    ChequeraCuotaController --> ChequeraCuotaDeudaService : calls
+    ChequeraCuotaController --> ChequeraCuotaCalculoDeudaService : calls
+    ChequeraCuotaController --> ChequeraCuotaDtoMapper : uses
+    ChequeraCuotaDtoMapper --> ChequeraCuota : maps
+    ChequeraCuotaDtoMapper --> ChequeraCuotaRequest : maps
+    ChequeraCuotaDtoMapper --> ChequeraCuotaResponse : maps

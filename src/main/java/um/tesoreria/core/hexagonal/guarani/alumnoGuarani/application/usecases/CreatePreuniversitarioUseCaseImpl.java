@@ -3,7 +3,7 @@ package um.tesoreria.core.hexagonal.guarani.alumnoGuarani.application.usecases;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import um.tesoreria.core.hexagonal.chequeraSerie.application.service.PreuniversitarioChequeraService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.PreuniversitarioChequeraService;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.AlumnoGuarani;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.ports.in.CreatePreuniversitarioUseCase;
 import um.tesoreria.core.service.facade.MailChequeraService;

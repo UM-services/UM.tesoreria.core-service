@@ -29,24 +29,28 @@ import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
 
-import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
-import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.CarreraService;
-import um.tesoreria.core.service.ChequeraCuotaService;
-import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.LectivoAlternativaService;
-import um.tesoreria.core.service.LectivoService;
+import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.service.LegajoService;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
-import um.tesoreria.core.service.TipoChequeraService;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.CarreraException;
 import um.tesoreria.core.exception.FacultadException;
-import um.tesoreria.core.exception.LectivoException;
+import um.tesoreria.core.hexagonal.lectivo.application.exception.LectivoException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PersonaException;
 
@@ -87,12 +91,12 @@ public class FormulariosToPdfService {
 
     public String generateChequeraPdf(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
                                       Integer alternativaId) {
-        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
-        List<ChequeraCuotaEntity> cuotas = chequeraCuotaService
+        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        List<ChequeraCuota> cuotas = chequeraCuotaService
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId());
         boolean hayAlgoParaImprimir = false;
-        for (ChequeraCuotaEntity cuota : cuotas) {
+        for (ChequeraCuota cuota : cuotas) {
             if (cuota.getPagado() == 0 && cuota.getBaja() == 0 && cuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
                 hayAlgoParaImprimir = true;
             }
@@ -104,13 +108,13 @@ public class FormulariosToPdfService {
 
         Facultad facultad = facultadService.findByFacultadId(serie.getFacultadId());
         TipoChequera tipoChequera = tipoChequeraService.findByTipoChequeraId(serie.getTipoChequeraId());
-        Persona persona = null;
+        Persona persona;
         try {
             persona = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
         } catch (PersonaException e) {
             persona = new Persona();
         }
-        Lectivo lectivo = null;
+        Lectivo lectivo;
         try {
             lectivo = lectivoService.findByLectivoId(serie.getLectivoId());
         } catch (LectivoException e) {
@@ -208,7 +212,7 @@ public class FormulariosToPdfService {
             document.add(paragraph);
             document.add(new Paragraph(" ", new Font(Font.HELVETICA, 8)));
 
-            for (ChequeraCuotaEntity cuota : chequeraCuotaService
+            for (ChequeraCuota cuota : chequeraCuotaService
                     .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(serie.getFacultadId(),
                             serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId())) {
                 if (cuota.getPagado() == 0 && cuota.getBaja() == 0
@@ -307,8 +311,8 @@ public class FormulariosToPdfService {
     }
 
     public String generateCuotaPdf(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, Integer cuotaId) {
-        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
-        ChequeraCuotaEntity cuota = chequeraCuotaService
+        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraCuota cuota = chequeraCuotaService
                 .findByUnique(serie.getFacultadId(),
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId(), productoId, cuotaId);
         boolean hayAlgoParaImprimir = cuota.getPagado() == 0 && cuota.getBaja() == 0 && cuota.getImporte1().compareTo(BigDecimal.ZERO) != 0;
@@ -319,13 +323,13 @@ public class FormulariosToPdfService {
 
         Facultad facultad = facultadService.findByFacultadId(serie.getFacultadId());
         TipoChequera tipoChequera = tipoChequeraService.findByTipoChequeraId(serie.getTipoChequeraId());
-        Persona persona = null;
+        Persona persona;
         try {
             persona = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
         } catch (PersonaException e) {
             persona = new Persona();
         }
-        Lectivo lectivo = null;
+        Lectivo lectivo;
         try {
             lectivo = lectivoService.findByLectivoId(serie.getLectivoId());
         } catch (LectivoException e) {

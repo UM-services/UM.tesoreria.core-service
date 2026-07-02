@@ -3,7 +3,7 @@ package um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistenc
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
-import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.persistence.entity.ReservaVacanteEntity;
 import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.util.Jsonifier;

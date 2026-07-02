@@ -1,0 +1,178 @@
+---
+title: Arquitectura Hexagonal - Módulo LectivoTotalImputacion
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class LectivoTotalImputacion {
+            +Long lectivoTotalImputacionId
+            +Integer facultadId
+            +Integer lectivoId
+            +Integer tipoChequeraId
+            +Integer productoId
+            +BigDecimal cuenta
+        }
+
+        class LectivoTotalImputacionRepository {
+            <<interface>>
+            +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+            +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+            +add(LectivoTotalImputacion) LectivoTotalImputacion
+            +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
+            +findById(Long) Optional~LectivoTotalImputacion~
+        }
+    }
+
+    namespace application {
+        class LectivoTotalImputacionService {
+            -FindAllByTipoUseCase findAllByTipoUseCase
+            -FindByProductoUseCase findByProductoUseCase
+            -AddLectivoTotalImputacionUseCase addLectivoTotalImputacionUseCase
+            -UpdateLectivoTotalImputacionUseCase updateLectivoTotalImputacionUseCase
+            +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+            +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+            +add(LectivoTotalImputacion) LectivoTotalImputacion
+            +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
+        }
+
+        namespace usecases {
+            class FindAllByTipoUseCaseImpl {
+                -LectivoTotalImputacionRepository repository
+                +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+            }
+
+            class FindByProductoUseCaseImpl {
+                -LectivoTotalImputacionRepository repository
+                +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+            }
+
+            class AddLectivoTotalImputacionUseCaseImpl {
+                -LectivoTotalImputacionRepository repository
+                +add(LectivoTotalImputacion) LectivoTotalImputacion
+            }
+
+            class UpdateLectivoTotalImputacionUseCaseImpl {
+                -LectivoTotalImputacionRepository repository
+                +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
+            }
+        }
+
+        class FindAllByTipoUseCase {
+            <<interface>>
+            +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+        }
+
+        class FindByProductoUseCase {
+            <<interface>>
+            +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+        }
+
+        class AddLectivoTotalImputacionUseCase {
+            <<interface>>
+            +add(LectivoTotalImputacion) LectivoTotalImputacion
+        }
+
+        class UpdateLectivoTotalImputacionUseCase {
+            <<interface>>
+            +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
+        }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class LectivoTotalImputacionEntity {
+                +Long lectivoTotalImputacionId
+                +Integer facultadId
+                +Integer lectivoId
+                +Integer tipoChequeraId
+                +Integer productoId
+                +BigDecimal cuenta
+            }
+
+            class JpaLectivoTotalImputacionRepository {
+                <<JpaRepository>>
+                +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoTotalImputacionEntity~
+                +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoId(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacionEntity~
+                +findByLectivoTotalImputacionId(Long) Optional~LectivoTotalImputacionEntity~
+            }
+
+            class JpaLectivoTotalImputacionRepositoryAdapter {
+                -JpaLectivoTotalImputacionRepository jpaLectivoTotalImputacionRepository
+                -LectivoTotalImputacionMapper mapper
+                +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+                +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+                +add(LectivoTotalImputacion) LectivoTotalImputacion
+                +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
+                +findById(Long) Optional~LectivoTotalImputacion~
+            }
+
+            class LectivoTotalImputacionMapper {
+                +toDomain(LectivoTotalImputacionEntity) LectivoTotalImputacion
+                +toEntity(LectivoTotalImputacion) LectivoTotalImputacionEntity
+            }
+        }
+
+        namespace web {
+            class LectivoTotalImputacionController {
+                -LectivoTotalImputacionService service
+                -LectivoTotalImputacionDtoMapper mapper
+                +findAllByTipo(Integer, Integer, Integer) ResponseEntity~List~LectivoTotalImputacionResponse~~
+                +findByProducto(Integer, Integer, Integer, Integer) ResponseEntity~LectivoTotalImputacionResponse~
+                +add(LectivoTotalImputacionRequest) ResponseEntity~LectivoTotalImputacionResponse~
+                +update(LectivoTotalImputacionRequest, Long) ResponseEntity~LectivoTotalImputacionResponse~
+            }
+
+            class LectivoTotalImputacionRequest {
+                +Long lectivoTotalImputacionId
+                +Integer facultadId
+                +Integer lectivoId
+                +Integer tipoChequeraId
+                +Integer productoId
+                +BigDecimal cuenta
+            }
+
+            class LectivoTotalImputacionResponse {
+                +Long lectivoTotalImputacionId
+                +Integer facultadId
+                +Integer lectivoId
+                +Integer tipoChequeraId
+                +Integer productoId
+                +BigDecimal cuenta
+            }
+
+            class LectivoTotalImputacionDtoMapper {
+                +toDomain(LectivoTotalImputacionRequest) LectivoTotalImputacion
+                +toResponse(LectivoTotalImputacion) LectivoTotalImputacionResponse
+            }
+        }
+    }
+
+    LectivoTotalImputacionService --> FindAllByTipoUseCase : uses
+    LectivoTotalImputacionService --> FindByProductoUseCase : uses
+    LectivoTotalImputacionService --> AddLectivoTotalImputacionUseCase : uses
+    LectivoTotalImputacionService --> UpdateLectivoTotalImputacionUseCase : uses
+
+    FindAllByTipoUseCaseImpl ..|> FindAllByTipoUseCase : implements
+    FindByProductoUseCaseImpl ..|> FindByProductoUseCase : implements
+    AddLectivoTotalImputacionUseCaseImpl ..|> AddLectivoTotalImputacionUseCase : implements
+    UpdateLectivoTotalImputacionUseCaseImpl ..|> UpdateLectivoTotalImputacionUseCase : implements
+
+    FindAllByTipoUseCaseImpl --> LectivoTotalImputacionRepository : uses
+    FindByProductoUseCaseImpl --> LectivoTotalImputacionRepository : uses
+    AddLectivoTotalImputacionUseCaseImpl --> LectivoTotalImputacionRepository : uses
+    UpdateLectivoTotalImputacionUseCaseImpl --> LectivoTotalImputacionRepository : uses
+
+    JpaLectivoTotalImputacionRepositoryAdapter ..|> LectivoTotalImputacionRepository : implements
+    JpaLectivoTotalImputacionRepositoryAdapter --> JpaLectivoTotalImputacionRepository : uses
+    JpaLectivoTotalImputacionRepositoryAdapter --> LectivoTotalImputacionMapper : uses
+
+    LectivoTotalImputacionMapper --> LectivoTotalImputacion : maps
+    LectivoTotalImputacionMapper --> LectivoTotalImputacionEntity : maps
+    JpaLectivoTotalImputacionRepository --> LectivoTotalImputacionEntity : persists
+
+    LectivoTotalImputacionController --> LectivoTotalImputacionService : calls
+    LectivoTotalImputacionController --> LectivoTotalImputacionDtoMapper : uses
+    LectivoTotalImputacionDtoMapper --> LectivoTotalImputacion : maps
+    LectivoTotalImputacionDtoMapper --> LectivoTotalImputacionResponse : maps

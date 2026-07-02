@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.view.TipoChequeraSedeException;
 import um.tesoreria.core.model.view.TipoChequeraSede;
 import um.tesoreria.core.repository.view.TipoChequeraSedeRepository;
-import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 
 /**
  * @author daniel

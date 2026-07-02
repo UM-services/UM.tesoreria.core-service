@@ -3,7 +3,7 @@ package um.tesoreria.core.hexagonal.proveedor.domain.model;
 import java.math.BigDecimal;
 
 import lombok.*;
-import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 
 @Getter
 @Setter

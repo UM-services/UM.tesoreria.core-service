@@ -1,0 +1,176 @@
+---
+title: Arquitectura Hexagonal - Módulo ClaseChequera (v3.30.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class ClaseChequera {
+            +Integer claseChequeraId
+            +String nombre
+            +Byte preuniversitario
+            +Byte grado
+            +Byte posgrado
+            +Byte curso
+            +Byte secundario
+            +Byte titulo
+            +jsonify() String
+        }
+
+        class ClaseChequeraRepository {
+            <<interface>>
+            +findAll() List~ClaseChequera~
+            +findByPreuniversitario(Byte) List~ClaseChequera~
+            +findByCurso(Byte) List~ClaseChequera~
+            +findByPosgrado(Byte) List~ClaseChequera~
+            +findByTitulo(Byte) List~ClaseChequera~
+        }
+
+        class GetAllClaseChequeraUseCase {
+            <<interface>>
+            +getAll() List~ClaseChequera~
+        }
+
+        class GetAllClaseChequeraByCursoUseCase {
+            <<interface>>
+            +getAllByCurso() List~ClaseChequera~
+        }
+
+        class GetAllClaseChequeraByPosgradoUseCase {
+            <<interface>>
+            +getAllByPosgrado() List~ClaseChequera~
+        }
+
+        class GetAllClaseChequeraByTituloUseCase {
+            <<interface>>
+            +getAllByTitulo() List~ClaseChequera~
+        }
+    }
+
+    namespace application {
+        class ClaseChequeraService {
+            -GetAllClaseChequeraUseCase getAllClaseChequeraUseCase
+            -GetAllClaseChequeraByCursoUseCase getAllClaseChequeraByCursoUseCase
+            -GetAllClaseChequeraByPosgradoUseCase getAllClaseChequeraByPosgradoUseCase
+            -GetAllClaseChequeraByTituloUseCase getAllClaseChequeraByTituloUseCase
+            +findAll() List~ClaseChequera~
+            +findAllByCurso() List~ClaseChequera~
+            +findAllByPosgrado() List~ClaseChequera~
+            +findAllByTitulo() List~ClaseChequera~
+        }
+
+        namespace usecases {
+            class GetAllClaseChequeraUseCaseImpl
+            class GetAllClaseChequeraByCursoUseCaseImpl
+            class GetAllClaseChequeraByPosgradoUseCaseImpl
+            class GetAllClaseChequeraByTituloUseCaseImpl
+        }
+
+        class ClaseChequeraException
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class ClaseChequeraEntity {
+                +Integer claseChequeraId
+                +String nombre
+                +Byte preuniversitario
+                +Byte grado
+                +Byte posgrado
+                +Byte curso
+                +Byte secundario
+                +Byte titulo
+            }
+
+            class JpaClaseChequeraRepository {
+                <<JpaRepository>>
+                +findAllByOrderByNombre() List~ClaseChequeraEntity~
+                +findByPreuniversitario(Byte) List~ClaseChequeraEntity~
+                +findByCurso(Byte) List~ClaseChequeraEntity~
+                +findByPosgrado(Byte) List~ClaseChequeraEntity~
+                +findByTitulo(Byte) List~ClaseChequeraEntity~
+            }
+
+            class JpaClaseChequeraRepositoryAdapter {
+                -JpaClaseChequeraRepository repository
+                -ClaseChequeraMapper mapper
+                +findAll() List~ClaseChequera~
+                +findByPreuniversitario(Byte) List~ClaseChequera~
+                +findByCurso(Byte) List~ClaseChequera~
+                +findByPosgrado(Byte) List~ClaseChequera~
+                +findByTitulo(Byte) List~ClaseChequera~
+            }
+
+            class ClaseChequeraMapper {
+                +toDomain(ClaseChequeraEntity) ClaseChequera
+                +toEntity(ClaseChequera) ClaseChequeraEntity
+            }
+        }
+
+        namespace web {
+            class ClaseChequeraController {
+                -ClaseChequeraService service
+                -ClaseChequeraDtoMapper dtoMapper
+                +findAll() ResponseEntity~List~ClaseChequeraResponse~~
+                +findAllByCurso() ResponseEntity~List~ClaseChequeraResponse~~
+                +findAllByPosgrado() ResponseEntity~List~ClaseChequeraResponse~~
+                +findAllByTitulo() ResponseEntity~List~ClaseChequeraResponse~~
+            }
+
+            class ClaseChequeraRequest {
+                +Integer claseChequeraId
+                +String nombre
+                +Byte preuniversitario
+                +Byte grado
+                +Byte posgrado
+                +Byte curso
+                +Byte secundario
+                +Byte titulo
+            }
+
+            class ClaseChequeraResponse {
+                +Integer claseChequeraId
+                +String nombre
+                +Byte preuniversitario
+                +Byte grado
+                +Byte posgrado
+                +Byte curso
+                +Byte secundario
+                +Byte titulo
+            }
+
+            class ClaseChequeraDtoMapper {
+                +toDomain(ClaseChequeraRequest) ClaseChequera
+                +toResponse(ClaseChequera) ClaseChequeraResponse
+            }
+        }
+    }
+
+    ClaseChequeraService --> GetAllClaseChequeraUseCase : uses
+    ClaseChequeraService --> GetAllClaseChequeraByCursoUseCase : uses
+    ClaseChequeraService --> GetAllClaseChequeraByPosgradoUseCase : uses
+    ClaseChequeraService --> GetAllClaseChequeraByTituloUseCase : uses
+
+    GetAllClaseChequeraUseCaseImpl ..|> GetAllClaseChequeraUseCase : implements
+    GetAllClaseChequeraByCursoUseCaseImpl ..|> GetAllClaseChequeraByCursoUseCase : implements
+    GetAllClaseChequeraByPosgradoUseCaseImpl ..|> GetAllClaseChequeraByPosgradoUseCase : implements
+    GetAllClaseChequeraByTituloUseCaseImpl ..|> GetAllClaseChequeraByTituloUseCase : implements
+
+    GetAllClaseChequeraUseCaseImpl --> ClaseChequeraRepository : uses
+    GetAllClaseChequeraByCursoUseCaseImpl --> ClaseChequeraRepository : uses
+    GetAllClaseChequeraByPosgradoUseCaseImpl --> ClaseChequeraRepository : uses
+    GetAllClaseChequeraByTituloUseCaseImpl --> ClaseChequeraRepository : uses
+
+    JpaClaseChequeraRepositoryAdapter ..|> ClaseChequeraRepository : implements
+    JpaClaseChequeraRepositoryAdapter --> JpaClaseChequeraRepository : uses
+    JpaClaseChequeraRepositoryAdapter --> ClaseChequeraMapper : uses
+
+    ClaseChequeraMapper --> ClaseChequera : maps
+    ClaseChequeraMapper --> ClaseChequeraEntity : maps
+    JpaClaseChequeraRepository --> ClaseChequeraEntity : persists
+
+    ClaseChequeraController --> ClaseChequeraService : calls
+    ClaseChequeraController --> ClaseChequeraDtoMapper : uses
+    ClaseChequeraDtoMapper --> ClaseChequera : maps
+    ClaseChequeraDtoMapper --> ClaseChequeraResponse : maps

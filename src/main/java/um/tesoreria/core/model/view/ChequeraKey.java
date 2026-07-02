@@ -21,11 +21,12 @@ import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import um.tesoreria.core.hexagonal.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
+import um.tesoreria.core.hexagonal.chequera.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
+import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.entity.LectivoEntity;
 import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
-import um.tesoreria.core.kotlin.model.*;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -84,7 +85,7 @@ public class ChequeraKey extends Auditable implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "tipoChequeraId", insertable = false, updatable = false)
-	private TipoChequera tipoChequera;
+	private TipoChequeraEntity tipoChequera;
 
 	@OneToOne
 	@JoinColumns({
@@ -94,7 +95,7 @@ public class ChequeraKey extends Auditable implements Serializable {
 
 	@OneToOne
 	@JoinColumn(name = "lectivoId", insertable = false, updatable = false)
-	private Lectivo lectivo;
+	private LectivoEntity lectivo;
 
 	@OneToOne
 	@JoinColumn(name = "arancelTipoId", insertable = false, updatable = false)

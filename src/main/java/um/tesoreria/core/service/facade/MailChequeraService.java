@@ -24,16 +24,20 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import um.tesoreria.core.event.SendChequeraEvent;
 import um.tesoreria.core.exception.CarreraChequeraException;
-import um.tesoreria.core.hexagonal.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.SpoterDataException;
-import um.tesoreria.core.hexagonal.chequeraSerie.application.service.ChequeraSerieService;
-import um.tesoreria.core.hexagonal.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.AlumnoGuarani;
+import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
+import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.*;
@@ -179,7 +183,7 @@ public class MailChequeraService {
         }
 
         // Genera la chequera nueva con los datos encontrados
-        ChequeraSerieEntity chequeraSerie = spoterService.makeChequeraSpoter(spoterData, lectivoId, curso, carreraChequera);
+        ChequeraSerie chequeraSerie = spoterService.makeChequeraSpoter(spoterData, lectivoId, curso, carreraChequera);
         log.debug("ChequeraSerie={}", chequeraSerie.jsonify());
 
         // Enviar chequera
@@ -262,7 +266,7 @@ public class MailChequeraService {
             throws MessagingException {
         String data;
 
-        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
 
         Domicilio domicilio;
         try {
@@ -303,7 +307,7 @@ public class MailChequeraService {
     }
 
     public String notaDeudorChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
-        ChequeraSerieEntity serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
         Facultad facultad = facultadService.findByFacultadId(facultadId);
         Persona persona = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
 
@@ -327,7 +331,7 @@ public class MailChequeraService {
         data += "                   Detalle DEUDA Chequera: " + serie.getFacultadId() + "/" + serie.getTipoChequeraId()
                 + "/" + serie.getChequeraSerieId() + (char) 10;
         data += (char) 10;
-        for (ChequeraCuotaEntity cuota : chequeraCuotaService.findAllDebidas(facultadId, tipoChequeraId, chequeraSerieId,
+        for (ChequeraCuota cuota : chequeraCuotaService.findAllDebidas(facultadId, tipoChequeraId, chequeraSerieId,
                 serie.getAlternativaId())) {
             data += "         Período: " + String.format("%02d/%04d", cuota.getMes(), cuota.getAnho())
                     + "     Vencimiento: "

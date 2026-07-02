@@ -4,17 +4,17 @@
 package um.tesoreria.core.service.facade;
 
 import lombok.RequiredArgsConstructor;
-import um.tesoreria.core.hexagonal.asiento.application.exception.AsientoException;
+import um.tesoreria.core.hexagonal.contable.asiento.application.exception.AsientoException;
 import um.tesoreria.core.exception.EjercicioBloqueadoException;
 import um.tesoreria.core.exception.EjercicioException;
 import um.tesoreria.core.exception.facade.ContableException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import um.tesoreria.core.hexagonal.asiento.application.service.AsientoService;
-import um.tesoreria.core.hexagonal.asiento.infrastructure.persistence.entity.AsientoEntity;
-import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
-import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoService;
+import um.tesoreria.core.hexagonal.contable.asiento.infrastructure.persistence.entity.AsientoEntity;
+import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.service.*;

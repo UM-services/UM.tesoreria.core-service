@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import um.tesoreria.core.hexagonal.articulo.application.service.ArticuloService;
-import um.tesoreria.core.hexagonal.cuenta.application.service.CuentaService;
+import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.web.dto.ArticuloRequest;
 import um.tesoreria.core.hexagonal.articulo.infrastructure.web.dto.ArticuloSearchResponse;

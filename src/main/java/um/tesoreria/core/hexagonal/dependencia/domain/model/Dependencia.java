@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import um.tesoreria.core.hexagonal.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
 

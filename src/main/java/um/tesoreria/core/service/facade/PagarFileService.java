@@ -19,14 +19,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
-import um.tesoreria.core.service.ChequeraCuotaService;
-import um.tesoreria.core.service.view.ChequeraCuotaDeudaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaDeudaService;
 import um.tesoreria.core.util.Tool;
 import lombok.extern.slf4j.Slf4j;
 

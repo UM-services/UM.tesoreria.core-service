@@ -2,7 +2,7 @@ package um.tesoreria.core.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import um.tesoreria.core.kotlin.model.TipoChequera;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity;
 
 import java.util.UUID;
 
@@ -28,6 +28,6 @@ public class TipoChequeraMercadoPagoCreditCard extends Auditable {
 
     @OneToOne(optional = true)
     @JoinColumn(name = "tipoChequeraId", insertable = false, updatable = false)
-    private TipoChequera tipoChequera;
+    private TipoChequeraEntity tipoChequera;
 
 }
