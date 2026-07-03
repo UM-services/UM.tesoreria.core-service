@@ -34,23 +34,23 @@ public class LectivoTotalImputacionEntity extends Auditable {
     private BigDecimal numeroCuenta;
 
 	@OneToOne(optional = true)
-	@JoinColumn(columnDefinition = "facultadId", insertable = false, updatable = false)
+	@JoinColumn(name = "facultadId", insertable = false, updatable = false)
 	private FacultadEntity facultad;
 
 	@OneToOne(optional = true)
-	@JoinColumn(columnDefinition = "lectivoId", insertable = false, updatable = false)
+	@JoinColumn(name = "lectivoId", insertable = false, updatable = false)
 	private LectivoEntity lectivo;
 
 	@OneToOne(optional = true)
-	@JoinColumn(columnDefinition = "tipoChequeraId", insertable = false, updatable = false)
+	@JoinColumn(name = "tipoChequeraId", insertable = false, updatable = false)
 	private TipoChequeraEntity tipoChequera;
 
 	@OneToOne(optional = true)
-	@JoinColumn(columnDefinition = "productoId", insertable = false, updatable = false)
+	@JoinColumn(name = "productoId", insertable = false, updatable = false)
 	private ProductoEntity producto;
 
 	@OneToOne(optional = true)
-	@JoinColumn(columnDefinition = "numeroCuenta", insertable = false, updatable = false)
+	@JoinColumn(name = "cuenta", insertable = false, updatable = false)
 	private CuentaEntity cuenta;
 
 }

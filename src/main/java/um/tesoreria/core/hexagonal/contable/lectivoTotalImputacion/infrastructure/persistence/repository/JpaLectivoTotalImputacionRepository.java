@@ -21,6 +21,8 @@ public interface JpaLectivoTotalImputacionRepository extends JpaRepository<Lecti
 	List<LectivoTotalImputacionEntity> findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer facultadId,
 	                                                                                           Integer lectivoId, Integer tipoChequeraId);
 
+	List<LectivoTotalImputacionEntity> findAllByLectivoId(Integer lectivoId);
+
 	Optional<LectivoTotalImputacionEntity> findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoId(
 			Integer facultadId, Integer lectivoId, Integer tipoChequeraId, Integer productoId);
 

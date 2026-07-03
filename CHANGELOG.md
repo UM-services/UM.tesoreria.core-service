@@ -2,6 +2,35 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.31.0] - 2026-07-03
+### Added
+- feat(lectivoTotalImputacion): Nuevo caso de uso `FindAllByLectivoUseCase` y endpoint `GET /lectivo/{lectivoId}`
+  - Nuevo puerto de entrada: `FindAllByLectivoUseCase` con método `findAllByLectivo(Integer lectivoId)`
+  - Nueva implementación: `FindAllByLectivoUseCaseImpl`
+  - Nuevo método `findAllByLectivo(Integer)` en `LectivoTotalImputacionRepository`
+  - Nuevo endpoint: `GET /api/tesoreria/core/lectivototalimputacion/lectivo/{lectivoId}`
+  - Nueva ruta alternativa: `/api/tesoreria/core/lectivototalimputacion` como base path
+- feat(lectivoTotalImputacion): Enriquecimiento del modelo de dominio con asociaciones a `Facultad`, `Lectivo`, `TipoChequera`, `Producto` y `Cuenta`
+  - `LectivoTotalImputacion` domain model: nuevos campos `facultad`, `lectivo`, `tipoChequera`, `producto`, `cuenta`
+  - `LectivoTotalImputacionEntity`: corregida anotación `@JoinColumn` de `columnDefinition` a `name` (fix)
+  - `LectivoTotalImputacionResponse`: expone objetos completos de asociaciones en respuestas REST
+  - `LectivoTotalImputacionDtoMapper.toResponse()`: mapea nuevas asociaciones del dominio al DTO
+  - `LectivoTotalImputacionMapper`: ahora con `@RequiredArgsConstructor` e inyección de 5 mappers de dominio
+  - Refactorizado `toDomain()` para mapear asociaciones desde entidades JPA a modelos de dominio
+- feat(lectivoTotalImputacion): Refactorización de `ResponseEntity` API en controller
+  - Migración de `new ResponseEntity<>(..., HttpStatus.OK)` a `ResponseEntity.ok(...)`
+  - Migración de `new ResponseEntity<>(HttpStatus.NOT_FOUND)` a `ResponseEntity.notFound().build()`
+- feat(tests): Nuevos tests unitarios y de integración para el módulo LectivoTotalImputacion (8 tests)
+  - `LectivoTotalImputacionControllerTest`: controller REST con MockMvc
+  - `LectivoTotalImputacionServiceTest`: service con mocking de casos de uso
+  - `FindAllByLectivoUseCaseImplTest`, `AddLectivoTotalImputacionUseCaseImplTest`, `FindAllByTipoUseCaseImplTest`, `FindByProductoUseCaseImplTest`, `UpdateLectivoTotalImputacionUseCaseImplTest`: casos de uso individuales
+  - `JpaLectivoTotalImputacionRepositoryAdapterTest`, `JpaLectivoTotalImputacionRepositoryTest`: integración con BBDD H2
+  - `LectivoTotalImputacionMapperTest`, `LectivoTotalImputacionDtoMapperTest`: mappers
+- feat(deps): Nuevas dependencias de test `spring-boot-starter-data-jpa-test` y `spring-boot-starter-webmvc-test`
+- fix(test): Agregado `INIT=SET REFERENTIAL_INTEGRITY FALSE` en H2 test URL para evitar violaciones de FK
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados, +1071/-14 líneas) y `pom.xml` (versión 3.30.0 → 3.31.0).
+
 ## [3.30.0] - 2026-07-01
 ### Added
 - feat(producto): Nuevo módulo Producto con arquitectura hexagonal completa

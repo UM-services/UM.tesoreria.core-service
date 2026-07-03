@@ -29,6 +29,11 @@ public class LectivoTotalImputacionDtoMapper {
                 .tipoChequeraId(domain.getTipoChequeraId())
                 .productoId(domain.getProductoId())
                 .numeroCuenta(domain.getNumeroCuenta())
+                .facultad(domain.getFacultad())
+                .lectivo(domain.getLectivo())
+                .tipoChequera(domain.getTipoChequera())
+                .producto(domain.getProducto())
+                .cuenta(domain.getCuenta())
                 .build();
     }
 

@@ -26,6 +26,12 @@ public class JpaLectivoTotalImputacionRepositoryAdapter implements LectivoTotalI
     }
 
     @Override
+    public List<LectivoTotalImputacion> findAllByLectivo(Integer lectivoId) {
+        return jpaLectivoTotalImputacionRepository.findAllByLectivoId(lectivoId)
+                .stream().map(mapper::toDomain).collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<LectivoTotalImputacion> findByProducto(Integer facultadId, Integer lectivoId, Integer tipoChequeraId, Integer productoId) {
         return jpaLectivoTotalImputacionRepository
                 .findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoId(facultadId, lectivoId, tipoChequeraId, productoId)

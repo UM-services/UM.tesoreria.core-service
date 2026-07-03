@@ -1,7 +1,6 @@
 package um.tesoreria.core.hexagonal.contable.lectivoTotalImputacion.infrastructure.web.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import um.tesoreria.core.hexagonal.contable.lectivoTotalImputacion.application.service.LectivoTotalImputacionService;
@@ -13,12 +12,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/lectivototalimputacion")
+@RequestMapping({"/lectivototalimputacion", "/api/tesoreria/core/lectivototalimputacion"})
 @RequiredArgsConstructor
 public class LectivoTotalImputacionController {
 
     private final LectivoTotalImputacionService service;
     private final LectivoTotalImputacionDtoMapper mapper;
+
+    @GetMapping("/lectivo/{lectivoId}")
+    public ResponseEntity<List<LectivoTotalImputacionResponse>> findAllByLectivo(
+            @PathVariable Integer lectivoId) {
+        List<LectivoTotalImputacionResponse> responses = service.findAllByLectivo(lectivoId)
+                .stream().map(mapper::toResponse).collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
 
     @GetMapping("/tipo/{facultadId}/{lectivoId}/{tipochequeraId}")
     public ResponseEntity<List<LectivoTotalImputacionResponse>> findAllByTipo(
@@ -27,7 +34,7 @@ public class LectivoTotalImputacionController {
             @PathVariable Integer tipochequeraId) {
         List<LectivoTotalImputacionResponse> responses = service.findAllByTipo(facultadId, lectivoId, tipochequeraId)
                 .stream().map(mapper::toResponse).collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/producto/{facultadId}/{lectivoId}/{tipochequeraId}/{productoId}")
@@ -37,14 +44,14 @@ public class LectivoTotalImputacionController {
             @PathVariable Integer tipochequeraId,
             @PathVariable Integer productoId) {
         return service.findByProducto(facultadId, lectivoId, tipochequeraId, productoId)
-                .map(domain -> new ResponseEntity<>(mapper.toResponse(domain), HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .map(domain -> ResponseEntity.ok(mapper.toResponse(domain)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/")
     public ResponseEntity<LectivoTotalImputacionResponse> add(@RequestBody LectivoTotalImputacionRequest request) {
         LectivoTotalImputacionResponse response = mapper.toResponse(service.add(mapper.toDomain(request)));
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{lectivoTotalImputacionId}")
@@ -52,8 +59,8 @@ public class LectivoTotalImputacionController {
             @RequestBody LectivoTotalImputacionRequest request,
             @PathVariable Long lectivoTotalImputacionId) {
         return service.update(lectivoTotalImputacionId, mapper.toDomain(request))
-                .map(domain -> new ResponseEntity<>(mapper.toResponse(domain), HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .map(domain -> ResponseEntity.ok(mapper.toResponse(domain)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
 }
