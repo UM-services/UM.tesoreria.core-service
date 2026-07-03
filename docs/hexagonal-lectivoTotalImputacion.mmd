@@ -12,12 +12,48 @@ classDiagram
             +Integer lectivoId
             +Integer tipoChequeraId
             +Integer productoId
-            +BigDecimal cuenta
+            +BigDecimal numeroCuenta
+            +Facultad facultad
+            +Lectivo lectivo
+            +TipoChequera tipoChequera
+            +Producto producto
+            +Cuenta cuenta
+        }
+
+        class Facultad {
+            <<domain>>
+            +Integer facultadId
+            +String nombre
+        }
+
+        class Lectivo {
+            <<domain>>
+            +Integer lectivoId
+            +String nombre
+        }
+
+        class TipoChequera {
+            <<domain>>
+            +Integer tipoChequeraId
+            +String nombre
+        }
+
+        class Producto {
+            <<domain>>
+            +Integer productoId
+            +String nombre
+        }
+
+        class Cuenta {
+            <<domain>>
+            +String numeroCuenta
+            +String nombre
         }
 
         class LectivoTotalImputacionRepository {
             <<interface>>
             +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+            +findAllByLectivo(Integer) List~LectivoTotalImputacion~
             +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
             +add(LectivoTotalImputacion) LectivoTotalImputacion
             +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
@@ -28,10 +64,12 @@ classDiagram
     namespace application {
         class LectivoTotalImputacionService {
             -FindAllByTipoUseCase findAllByTipoUseCase
+            -FindAllByLectivoUseCase findAllByLectivoUseCase
             -FindByProductoUseCase findByProductoUseCase
             -AddLectivoTotalImputacionUseCase addLectivoTotalImputacionUseCase
             -UpdateLectivoTotalImputacionUseCase updateLectivoTotalImputacionUseCase
             +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+            +findAllByLectivo(Integer) List~LectivoTotalImputacion~
             +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
             +add(LectivoTotalImputacion) LectivoTotalImputacion
             +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
@@ -41,6 +79,11 @@ classDiagram
             class FindAllByTipoUseCaseImpl {
                 -LectivoTotalImputacionRepository repository
                 +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+            }
+
+            class FindAllByLectivoUseCaseImpl {
+                -LectivoTotalImputacionRepository repository
+                +findAllByLectivo(Integer) List~LectivoTotalImputacion~
             }
 
             class FindByProductoUseCaseImpl {
@@ -62,6 +105,11 @@ classDiagram
         class FindAllByTipoUseCase {
             <<interface>>
             +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+        }
+
+        class FindAllByLectivoUseCase {
+            <<interface>>
+            +findAllByLectivo(Integer) List~LectivoTotalImputacion~
         }
 
         class FindByProductoUseCase {
@@ -88,12 +136,18 @@ classDiagram
                 +Integer lectivoId
                 +Integer tipoChequeraId
                 +Integer productoId
-                +BigDecimal cuenta
+                +BigDecimal numeroCuenta
+                +FacultadEntity facultad
+                +LectivoEntity lectivo
+                +TipoChequeraEntity tipoChequera
+                +ProductoEntity producto
+                +CuentaEntity cuenta
             }
 
             class JpaLectivoTotalImputacionRepository {
                 <<JpaRepository>>
                 +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoTotalImputacionEntity~
+                +findAllByLectivoId(Integer) List~LectivoTotalImputacionEntity~
                 +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoId(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacionEntity~
                 +findByLectivoTotalImputacionId(Long) Optional~LectivoTotalImputacionEntity~
             }
@@ -102,6 +156,7 @@ classDiagram
                 -JpaLectivoTotalImputacionRepository jpaLectivoTotalImputacionRepository
                 -LectivoTotalImputacionMapper mapper
                 +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+                +findAllByLectivo(Integer) List~LectivoTotalImputacion~
                 +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
                 +add(LectivoTotalImputacion) LectivoTotalImputacion
                 +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
@@ -109,6 +164,11 @@ classDiagram
             }
 
             class LectivoTotalImputacionMapper {
+                -FacultadMapper facultadMapper
+                -LectivoMapper lectivoMapper
+                -TipoChequeraMapper tipoChequeraMapper
+                -ProductoMapper productoMapper
+                -CuentaMapper cuentaMapper
                 +toDomain(LectivoTotalImputacionEntity) LectivoTotalImputacion
                 +toEntity(LectivoTotalImputacion) LectivoTotalImputacionEntity
             }
@@ -118,6 +178,7 @@ classDiagram
             class LectivoTotalImputacionController {
                 -LectivoTotalImputacionService service
                 -LectivoTotalImputacionDtoMapper mapper
+                +findAllByLectivo(Integer) ResponseEntity~List~LectivoTotalImputacionResponse~~
                 +findAllByTipo(Integer, Integer, Integer) ResponseEntity~List~LectivoTotalImputacionResponse~~
                 +findByProducto(Integer, Integer, Integer, Integer) ResponseEntity~LectivoTotalImputacionResponse~
                 +add(LectivoTotalImputacionRequest) ResponseEntity~LectivoTotalImputacionResponse~
@@ -130,7 +191,7 @@ classDiagram
                 +Integer lectivoId
                 +Integer tipoChequeraId
                 +Integer productoId
-                +BigDecimal cuenta
+                +BigDecimal numeroCuenta
             }
 
             class LectivoTotalImputacionResponse {
@@ -139,7 +200,12 @@ classDiagram
                 +Integer lectivoId
                 +Integer tipoChequeraId
                 +Integer productoId
-                +BigDecimal cuenta
+                +BigDecimal numeroCuenta
+                +Facultad facultad
+                +Lectivo lectivo
+                +TipoChequera tipoChequera
+                +Producto producto
+                +Cuenta cuenta
             }
 
             class LectivoTotalImputacionDtoMapper {
@@ -149,17 +215,26 @@ classDiagram
         }
     }
 
+    LectivoTotalImputacion --> Facultad : has
+    LectivoTotalImputacion --> Lectivo : has
+    LectivoTotalImputacion --> TipoChequera : has
+    LectivoTotalImputacion --> Producto : has
+    LectivoTotalImputacion --> Cuenta : has
+
     LectivoTotalImputacionService --> FindAllByTipoUseCase : uses
+    LectivoTotalImputacionService --> FindAllByLectivoUseCase : uses
     LectivoTotalImputacionService --> FindByProductoUseCase : uses
     LectivoTotalImputacionService --> AddLectivoTotalImputacionUseCase : uses
     LectivoTotalImputacionService --> UpdateLectivoTotalImputacionUseCase : uses
 
     FindAllByTipoUseCaseImpl ..|> FindAllByTipoUseCase : implements
+    FindAllByLectivoUseCaseImpl ..|> FindAllByLectivoUseCase : implements
     FindByProductoUseCaseImpl ..|> FindByProductoUseCase : implements
     AddLectivoTotalImputacionUseCaseImpl ..|> AddLectivoTotalImputacionUseCase : implements
     UpdateLectivoTotalImputacionUseCaseImpl ..|> UpdateLectivoTotalImputacionUseCase : implements
 
     FindAllByTipoUseCaseImpl --> LectivoTotalImputacionRepository : uses
+    FindAllByLectivoUseCaseImpl --> LectivoTotalImputacionRepository : uses
     FindByProductoUseCaseImpl --> LectivoTotalImputacionRepository : uses
     AddLectivoTotalImputacionUseCaseImpl --> LectivoTotalImputacionRepository : uses
     UpdateLectivoTotalImputacionUseCaseImpl --> LectivoTotalImputacionRepository : uses
@@ -171,6 +246,12 @@ classDiagram
     LectivoTotalImputacionMapper --> LectivoTotalImputacion : maps
     LectivoTotalImputacionMapper --> LectivoTotalImputacionEntity : maps
     JpaLectivoTotalImputacionRepository --> LectivoTotalImputacionEntity : persists
+
+    LectivoTotalImputacionEntity --> FacultadEntity : references (via FacultadMapper)
+    LectivoTotalImputacionEntity --> LectivoEntity : references (via LectivoMapper)
+    LectivoTotalImputacionEntity --> TipoChequeraEntity : references (via TipoChequeraMapper)
+    LectivoTotalImputacionEntity --> ProductoEntity : references (via ProductoMapper)
+    LectivoTotalImputacionEntity --> CuentaEntity : references (via CuentaMapper)
 
     LectivoTotalImputacionController --> LectivoTotalImputacionService : calls
     LectivoTotalImputacionController --> LectivoTotalImputacionDtoMapper : uses

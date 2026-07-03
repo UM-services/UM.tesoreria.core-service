@@ -13,12 +13,17 @@ import java.util.Optional;
 public class LectivoTotalImputacionService {
 
     private final FindAllByTipoUseCase findAllByTipoUseCase;
+    private final FindAllByLectivoUseCase findAllByLectivoUseCase;
     private final FindByProductoUseCase findByProductoUseCase;
     private final AddLectivoTotalImputacionUseCase addLectivoTotalImputacionUseCase;
     private final UpdateLectivoTotalImputacionUseCase updateLectivoTotalImputacionUseCase;
 
     public List<LectivoTotalImputacion> findAllByTipo(Integer facultadId, Integer lectivoId, Integer tipoChequeraId) {
         return findAllByTipoUseCase.findAllByTipo(facultadId, lectivoId, tipoChequeraId);
+    }
+
+    public List<LectivoTotalImputacion> findAllByLectivo(Integer lectivoId) {
+        return findAllByLectivoUseCase.findAllByLectivo(lectivoId);
     }
 
     public Optional<LectivoTotalImputacion> findByProducto(Integer facultadId, Integer lectivoId, Integer tipoChequeraId, Integer productoId) {

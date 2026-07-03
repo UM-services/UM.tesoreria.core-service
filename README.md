@@ -4,7 +4,26 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.30.0**
+**Versión actual (SemVer): 3.31.0**
+
+## Novedades 3.31.0 (verificado en código)
+- feat(lectivoTotalImputacion): Nuevo caso de uso `FindAllByLectivoUseCase` y endpoint `GET /lectivo/{lectivoId}`
+  - Nuevo puerto de entrada: `FindAllByLectivoUseCase` con método `findAllByLectivo(Integer lectivoId)`
+  - Nueva implementación: `FindAllByLectivoUseCaseImpl`
+  - Nuevo método `findAllByLectivo(Integer)` en `LectivoTotalImputacionRepository` y adaptador JPA
+  - Nuevo endpoint: `GET /api/tesoreria/core/lectivototalimputacion/lectivo/{lectivoId}`
+  - Nueva ruta base alternativa: `/api/tesoreria/core/lectivototalimputacion`
+- feat(lectivoTotalImputacion): Enriquecimiento del modelo de dominio con asociaciones a `Facultad`, `Lectivo`, `TipoChequera`, `Producto` y `Cuenta`
+  - `LectivoTotalImputacion` domain model: nuevos campos `facultad`, `lectivo`, `tipoChequera`, `producto`, `cuenta`
+  - `LectivoTotalImputacionEntity`: corregido `@JoinColumn` de `columnDefinition` a `name` (fix JPA)
+  - `LectivoTotalImputacionResponse`: expone objetos completos de asociaciones en respuestas REST
+  - `LectivoTotalImputacionMapper`: inyecta 5 mappers de dominio para mapear asociaciones
+- feat(lectivoTotalImputacion): Refactorización de controller con `ResponseEntity.ok()` y `ResponseEntity.notFound().build()`
+- feat(tests): 8 nuevos tests unitarios y de integración para el módulo LectivoTotalImputacion (controller, service, use cases, mappers, repository)
+- feat(deps): Nuevas dependencias `spring-boot-starter-data-jpa-test` y `spring-boot-starter-webmvc-test`
+- fix(test): Agregado parámetro H2 `INIT=SET REFERENTIAL_INTEGRITY FALSE` en test application.yml
+
+> Basado en análisis profundo de `git diff HEAD` (25 archivos modificados, +1071/-14 líneas) y `pom.xml` (versión 3.30.0 → 3.31.0).
 
 ## Novedades 3.30.0 (verificado en código)
 - feat(producto): Nuevo módulo Producto con arquitectura hexagonal completa

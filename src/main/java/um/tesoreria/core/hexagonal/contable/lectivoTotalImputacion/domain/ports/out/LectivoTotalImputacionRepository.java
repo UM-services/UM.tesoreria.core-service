@@ -6,6 +6,7 @@ import java.util.Optional;
 
 public interface LectivoTotalImputacionRepository {
     List<LectivoTotalImputacion> findAllByTipo(Integer facultadId, Integer lectivoId, Integer tipoChequeraId);
+    List<LectivoTotalImputacion> findAllByLectivo(Integer lectivoId);
     Optional<LectivoTotalImputacion> findByProducto(Integer facultadId, Integer lectivoId, Integer tipoChequeraId, Integer productoId);
     LectivoTotalImputacion add(LectivoTotalImputacion lectivoTotalImputacion);
     Optional<LectivoTotalImputacion> update(Long id, LectivoTotalImputacion lectivoTotalImputacion);
