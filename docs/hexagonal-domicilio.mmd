@@ -33,10 +33,10 @@ classDiagram
             <<interface>>
             +create(Domicilio) Domicilio
             +findById(Long) Optional~Domicilio~
-            +findByUnique(Integer, Integer) Optional~Domicilio~
-            +findFirstByPersonaId(Integer) Optional~Domicilio~
+            +findByUnique(BigDecimal, Integer) Optional~Domicilio~
+            +findFirstByPersonaId(BigDecimal) Optional~Domicilio~
             +update(Long, Domicilio) Optional~Domicilio~
-            +deleteById(Long) void
+            +deleteById(Long) boolean
         }
     }
 
@@ -92,12 +92,24 @@ classDiagram
         namespace persistence {
             class DomicilioEntity {
                 +Long domicilioId
-                +Integer personaId
+                +BigDecimal personaId
                 +Integer documentoId
                 +OffsetDateTime fecha
                 +String calle
+                +String puerta
+                +String piso
+                +String dpto
+                +String telefono
+                +String movil
+                +String observaciones
+                +String codigoPostal
+                +Integer facultadId
+                +Integer provinciaId
+                +Integer localidadId
                 +String emailPersonal
                 +String emailInstitucional
+                +String laboral
+                +String emailPagador
             }
 
             class JpaDomicilioRepository {
@@ -112,15 +124,15 @@ classDiagram
                 -DomicilioMapper mapper
                 +create(Domicilio) Domicilio
                 +findById(Long) Optional~Domicilio~
-                +findByUnique(Integer, Integer) Optional~Domicilio~
-                +findFirstByPersonaId(Integer) Optional~Domicilio~
-                +update(Long, Domicilio) Optional~Domicilio~
-                +deleteById(Long) void
+            +findByUnique(BigDecimal, Integer) Optional~Domicilio~
+            +findFirstByPersonaId(BigDecimal) Optional~Domicilio~
+            +update(Long, Domicilio) Optional~Domicilio~
+            +deleteById(Long) boolean
             }
 
             class DomicilioMapper {
                 +toEntity(Domicilio) DomicilioEntity
-                +toDomain(DomicilioEntity) Domicilio
+                +toDomainModel(DomicilioEntity) Domicilio
             }
         }
 

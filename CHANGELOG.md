@@ -2,6 +2,15 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.32.2] - 2026-07-05
+### Fixed
+- fix(domicilio): Null-safety en campos email de `JpaDomicilioRepositoryAdapter` y `DomicilioMapper`
+  - `JpaDomicilioRepositoryAdapter.update()`: Asigna string vacío si `emailPersonal` o `emailInstitucional` es null al actualizar domicilio
+  - `DomicilioMapper.toEntity()`: Asigna string vacío si `emailPersonal` o `emailInstitucional` es null en el mapeo a entidad
+  - Previene `NullPointerException` en persistencia de domicilios cuando los campos email no están informados
+
+> Basado en análisis profundo de `git diff HEAD` (2 archivos modificados, +8/-8 líneas) y `pom.xml` (versión 3.32.1 → 3.32.2).
+
 ## [3.32.1] - 2026-07-05
 ### Fixed
 - fix(preuniversitario): Null-safety en creación de persona/domicilio y envío de chequera preuniversitaria

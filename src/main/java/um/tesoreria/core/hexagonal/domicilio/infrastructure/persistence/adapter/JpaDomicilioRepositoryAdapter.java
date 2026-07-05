@@ -61,8 +61,8 @@ public class JpaDomicilioRepositoryAdapter implements DomicilioRepository {
             entity.setFacultadId(domicilio.getFacultadId());
             entity.setProvinciaId(domicilio.getProvinciaId());
             entity.setLocalidadId(domicilio.getLocalidadId());
-            entity.setEmailPersonal(domicilio.getEmailPersonal());
-            entity.setEmailInstitucional(domicilio.getEmailInstitucional());
+            entity.setEmailPersonal(domicilio.getEmailPersonal() != null ? domicilio.getEmailPersonal() : "");
+            entity.setEmailInstitucional(domicilio.getEmailInstitucional() != null ? domicilio.getEmailInstitucional() : "");
             entity.setLaboral(domicilio.getLaboral());
             DomicilioEntity updated = jpaDomicilioRepository.save(entity);
             return domicilioMapper.toDomainModel(updated);

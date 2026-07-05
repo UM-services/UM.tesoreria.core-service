@@ -4,7 +4,7 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.32.1**
+**Versión actual (SemVer): 3.32.2**
 
 ## Novedades 3.32.0 (verificado en código)
 - feat(mercadopagoContext): Integración de pago MercadoPago con ReservaVacante en `ProcessPaymentEventUseCaseImpl`
@@ -17,6 +17,14 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 - feat(docs): Diagrama hexagonal-reservaVacante.mmd actualizado con UpdateReservaVacanteUseCase
 
 > Basado en análisis profundo de `git diff HEAD` (8 archivos modificados, +68/-15 líneas) y `pom.xml` (versión 3.31.0 → 3.32.0).
+
+## Novedades 3.32.2 (verificado en código)
+- fix(domicilio): Null-safety en campos email de `JpaDomicilioRepositoryAdapter` y `DomicilioMapper`
+  - `JpaDomicilioRepositoryAdapter.update()`: Asigna string vacío si `emailPersonal` o `emailInstitucional` es null al actualizar domicilio en BD
+  - `DomicilioMapper.toEntity()`: Asigna string vacío si `emailPersonal` o `emailInstitucional` es null en el mapeo dominio → entidad
+  - Previene `NullPointerException` en persistencia de domicilios cuando los campos email no están informados
+
+> Basado en análisis profundo de `git diff HEAD` (2 archivos modificados, +8/-8 líneas) y `pom.xml` (versión 3.32.1 → 3.32.2).
 
 ## Novedades 3.32.1 (verificado en código)
 - fix(preuniversitario): Null-safety en creación de persona/domicilio y envío de chequera preuniversitaria

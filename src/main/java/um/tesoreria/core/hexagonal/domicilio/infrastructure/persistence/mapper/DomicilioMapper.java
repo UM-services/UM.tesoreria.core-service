@@ -50,8 +50,8 @@ public class DomicilioMapper {
                 .facultadId(domain.getFacultadId())
                 .provinciaId(domain.getProvinciaId())
                 .localidadId(domain.getLocalidadId())
-                .emailPersonal(domain.getEmailPersonal())
-                .emailInstitucional(domain.getEmailInstitucional())
+                .emailPersonal(domain.getEmailPersonal() != null ? domain.getEmailPersonal() : "")
+                .emailInstitucional(domain.getEmailInstitucional() != null ? domain.getEmailInstitucional() : "")
                 .laboral(domain.getLaboral())
                 .build();
     }
