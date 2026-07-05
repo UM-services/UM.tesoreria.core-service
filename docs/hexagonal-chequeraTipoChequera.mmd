@@ -156,17 +156,17 @@ classDiagram
         }
     }
 
-    TipoChequeraService --> GetAllTipoChequeraUseCaseImpl : uses
-    TipoChequeraService --> GetAllTipoChequeraAsignableUseCaseImpl : uses
-    TipoChequeraService --> GetAllTipoChequeraByFacultadAndGeograficaUseCaseImpl : uses
-    TipoChequeraService --> GetAllTipoChequeraByClaseChequeraUseCaseImpl : uses
-    TipoChequeraService --> GetTipoChequeraByIdUseCaseImpl : uses
-    TipoChequeraService --> GetLastTipoChequeraUseCaseImpl : uses
-    TipoChequeraService --> CreateTipoChequeraUseCaseImpl : uses
-    TipoChequeraService --> UpdateTipoChequeraUseCaseImpl : uses
-    TipoChequeraService --> DeleteTipoChequeraUseCaseImpl : uses
-    TipoChequeraService --> MarkTipoChequeraUseCaseImpl : uses
-    TipoChequeraService --> UnmarkTipoChequeraUseCaseImpl : uses
+    TipoChequeraService --> GetAllTipoChequeraUseCase : uses
+    TipoChequeraService --> GetAllTipoChequeraAsignableUseCase : uses
+    TipoChequeraService --> GetAllTipoChequeraByFacultadAndGeograficaUseCase : uses
+    TipoChequeraService --> GetAllTipoChequeraByClaseChequeraUseCase : uses
+    TipoChequeraService --> GetTipoChequeraByIdUseCase : uses
+    TipoChequeraService --> GetLastTipoChequeraUseCase : uses
+    TipoChequeraService --> CreateTipoChequeraUseCase : uses
+    TipoChequeraService --> UpdateTipoChequeraUseCase : uses
+    TipoChequeraService --> DeleteTipoChequeraUseCase : uses
+    TipoChequeraService --> MarkTipoChequeraUseCase : uses
+    TipoChequeraService --> UnmarkTipoChequeraUseCase : uses
 
     GetAllTipoChequeraUseCaseImpl ..|> GetAllTipoChequeraUseCase : implements
     GetAllTipoChequeraAsignableUseCaseImpl ..|> GetAllTipoChequeraAsignableUseCase : implements

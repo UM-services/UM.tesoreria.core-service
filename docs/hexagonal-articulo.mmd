@@ -260,8 +260,6 @@ classDiagram
                 +toResponse(Articulo) ArticuloResponse
                 +toSearchResponse(ArticuloSearch) ArticuloSearchResponse
             }
-
-            ArticuloController --> CuentaService : calls
         }
     }
 
@@ -302,6 +300,7 @@ classDiagram
 
     ArticuloController --> ArticuloService : calls
     ArticuloController --> ArticuloDtoMapper : uses
+    ArticuloController --> CuentaService : calls
     ArticuloDtoMapper --> Articulo : maps
     ArticuloDtoMapper --> ArticuloResponse : maps
     ArticuloDtoMapper --> ArticuloSearchResponse : maps
