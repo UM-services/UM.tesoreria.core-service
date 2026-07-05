@@ -21,6 +21,10 @@ public class CreatePreuniversitarioUseCaseImpl implements CreatePreuniversitario
         log.debug("\n\nProcessing CreatePreuniversitarioUseCaseImpl.createPreuniversitario\n\n");
         log.debug("\n\nGeneración de chequera\n\n");
         var chequeraSerie = preuniversitarioChequeraService.create(alumnoGuarani);
+        if (chequeraSerie == null) {
+            log.info("\n\nChequera serie nula\n\n");
+            return alumnoGuarani;
+        }
         log.debug("\n\nEnvío de chequera\n\n");
         var result = mailChequeraService.sendChequera(chequeraSerie.getFacultadId(),
                 chequeraSerie.getTipoChequeraId(),

@@ -4,7 +4,7 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.32.0**
+**Versión actual (SemVer): 3.32.1**
 
 ## Novedades 3.32.0 (verificado en código)
 - feat(mercadopagoContext): Integración de pago MercadoPago con ReservaVacante en `ProcessPaymentEventUseCaseImpl`
@@ -17,6 +17,14 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 - feat(docs): Diagrama hexagonal-reservaVacante.mmd actualizado con UpdateReservaVacanteUseCase
 
 > Basado en análisis profundo de `git diff HEAD` (8 archivos modificados, +68/-15 líneas) y `pom.xml` (versión 3.31.0 → 3.32.0).
+
+## Novedades 3.32.1 (verificado en código)
+- fix(preuniversitario): Null-safety en creación de persona/domicilio y envío de chequera preuniversitaria
+  - `PreuniversitarioChequeraService.create()`: Maneja `PersonaException` y `DomicilioException` con retorno null controlado
+  - `CreatePreuniversitarioUseCaseImpl.createPreuniversitario()`: Valida null de `chequeraSerie` antes de enviar mail
+  - Evita `NullPointerException` y envío de chequeras incompletas cuando falla la creación de persona o domicilio desde Guarani
+
+> Basado en análisis profundo de `git diff HEAD` (2 archivos modificados, +17/-0 líneas) y `pom.xml` (versión 3.32.0 → 3.32.1).
 
 ## Novedades 3.31.0 (verificado en código)
 - feat(lectivoTotalImputacion): Nuevo caso de uso `FindAllByLectivoUseCase` y endpoint `GET /lectivo/{lectivoId}`

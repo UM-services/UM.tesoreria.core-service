@@ -84,7 +84,12 @@ public class PreuniversitarioChequeraService {
                     .primero((byte) 0)
                     .sexo(alumnoGuarani.getPersonaRel().getSexo())
                     .build();
-            persona = personaService.create(persona);
+            try {
+                persona = personaService.create(persona);
+            } catch (PersonaException ex) {
+                log.info(ex.getMessage());
+                return null;
+            }
         }
         log.debug("Persona -> {}", persona.jsonify());
 
@@ -108,7 +113,12 @@ public class PreuniversitarioChequeraService {
                     .movil("")
                     .observaciones("")
                     .build();
-            domicilio = domicilioService.create(domicilio);
+            try {
+                domicilio = domicilioService.create(domicilio);
+            } catch (DomicilioException ex) {
+                log.info(ex.getMessage());
+                return null;
+            }
         }
         log.debug("Domicilio -> {}", domicilio.jsonify());
 
