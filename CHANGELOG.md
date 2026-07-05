@@ -2,6 +2,21 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.32.0] - 2026-07-05
+### Added
+- feat(mercadopagoContext): Integración de pago MercadoPago con ReservaVacante en `ProcessPaymentEventUseCaseImpl`
+  - Nuevo flujo condicional: si `MercadoPagoContext.reservaVacanteId != null`, procesa el pago como reserva de vacante
+  - Al recibir evento `approved`, busca la `ReservaVacante` vía `ReservaVacanteService.findReservaVacante(UUID)` y actualiza su estado a `"pagado"`
+  - Nuevo campo `reservaVacanteId` (UUID) en `PaymentProcessedEvent` para identificar la reserva en el evento de pago
+  - Nueva dependencia `ReservaVacanteService` inyectada en `ProcessPaymentEventUseCaseImpl`
+- feat(reservaVacante): Nuevo `UpdateReservaVacanteUseCase` con implementación completa
+  - Nuevo puerto de entrada: `UpdateReservaVacanteUseCase` con método `update(ReservaVacante, UUID)`
+  - Nueva implementación: `UpdateReservaVacanteUseCaseImpl` con actualización de campos `estado`, `importe`, `vencimiento`
+  - Nuevo método `updateReservaVacante(ReservaVacante, UUID)` en `ReservaVacanteService`
+  - Nuevo método `update(ReservaVacante, UUID)` en `ReservaVacanteRepository` (interfaz y adaptador JPA)
+
+> Basado en análisis profundo de `git diff HEAD` (8 archivos modificados, +68/-15 líneas, incluyendo cambios en `ProcessPaymentEventUseCaseImpl`, `ReservaVacanteService`, `UpdateReservaVacanteUseCase` y adaptador JPA) y `pom.xml` (versión 3.31.0 → 3.32.0).
+
 ## [3.31.0] - 2026-07-03
 ### Added
 - feat(lectivoTotalImputacion): Nuevo caso de uso `FindAllByLectivoUseCase` y endpoint `GET /lectivo/{lectivoId}`

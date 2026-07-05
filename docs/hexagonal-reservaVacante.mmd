@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ReservaVacante (v3.27.0)
+title: Arquitectura Hexagonal - Módulo ReservaVacante (v3.32.0)
 ---
 
 classDiagram
@@ -25,6 +25,7 @@ classDiagram
             <<interface>>
             +create(ReservaVacante) ReservaVacante
             +findByReservaVacanteId(UUID) Optional~ReservaVacante~
+            +update(ReservaVacante, UUID) ReservaVacante
         }
     }
 
@@ -32,8 +33,10 @@ classDiagram
         class ReservaVacanteService {
             -CreateReservaVacanteUseCase createReservaVacanteUseCase
             -FindReservaVacanteUseCase findReservaVacanteUseCase
+            -UpdateReservaVacanteUseCase updateReservaVacanteUseCase
             +createReservaVacante(ReservaVacanteRequest) ReservaVacante
             +findReservaVacante(UUID) ReservaVacante
+            +updateReservaVacante(ReservaVacante, UUID) ReservaVacante
         }
 
         namespace usecases {
@@ -53,6 +56,10 @@ classDiagram
                 -CampanhaService campanhaService
                 +findByReservaVacanteId(UUID) ReservaVacante
             }
+            class UpdateReservaVacanteUseCaseImpl {
+                -ReservaVacanteRepository repository
+                +update(ReservaVacante, UUID) ReservaVacante
+            }
         }
 
         class CreateReservaVacanteUseCase {
@@ -62,6 +69,10 @@ classDiagram
         class FindReservaVacanteUseCase {
             <<interface>>
             +findByReservaVacanteId(UUID) ReservaVacante
+        }
+        class UpdateReservaVacanteUseCase {
+            <<interface>>
+            +update(ReservaVacante, UUID) ReservaVacante
         }
     }
 
@@ -88,6 +99,7 @@ classDiagram
                 -ReservaVacanteMapper mapper
                 +create(ReservaVacante) ReservaVacante
                 +findByReservaVacanteId(UUID) Optional~ReservaVacante~
+                +update(ReservaVacante, UUID) ReservaVacante
             }
 
             class ReservaVacanteMapper {
@@ -140,12 +152,15 @@ classDiagram
 
     ReservaVacanteService --> CreateReservaVacanteUseCase : uses
     ReservaVacanteService --> FindReservaVacanteUseCase : uses
+    ReservaVacanteService --> UpdateReservaVacanteUseCase : uses
 
     CreateReservaVacanteUseCaseImpl ..|> CreateReservaVacanteUseCase : implements
     FindReservaVacanteUseCaseImpl ..|> FindReservaVacanteUseCase : implements
+    UpdateReservaVacanteUseCaseImpl ..|> UpdateReservaVacanteUseCase : implements
 
     CreateReservaVacanteUseCaseImpl --> ReservaVacanteRepository : uses
     FindReservaVacanteUseCaseImpl --> ReservaVacanteRepository : uses
+    UpdateReservaVacanteUseCaseImpl --> ReservaVacanteRepository : uses
 
     JpaReservaVacanteRepositoryAdapter ..|> ReservaVacanteRepository : implements
     JpaReservaVacanteRepositoryAdapter --> JpaReservaVacanteRepository : uses

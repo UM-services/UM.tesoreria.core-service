@@ -8,6 +8,8 @@ import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoCo
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.in.FindByMercadoPagoContextIdUseCase;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.in.ProcessPaymentEventUseCase;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.in.UpdateMercadoPagoContextUseCase;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.application.service.ReservaVacanteService;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
 import um.tesoreria.core.service.facade.PagoService;
 
 import java.util.Objects;
@@ -19,14 +21,17 @@ public class ProcessPaymentEventUseCaseImpl implements ProcessPaymentEventUseCas
     private final FindByMercadoPagoContextIdUseCase findByMercadoPagoContextIdUseCase;
     private final UpdateMercadoPagoContextUseCase updateMercadoPagoContextUseCase;
     private final PagoService pagoService;
+    private final ReservaVacanteService reservaVacanteService;
 
     public ProcessPaymentEventUseCaseImpl(
             FindByMercadoPagoContextIdUseCase findByMercadoPagoContextIdUseCase,
             UpdateMercadoPagoContextUseCase updateMercadoPagoContextUseCase,
-            @Lazy PagoService pagoService) {
+            @Lazy PagoService pagoService,
+            ReservaVacanteService reservaVacanteService) {
         this.findByMercadoPagoContextIdUseCase = findByMercadoPagoContextIdUseCase;
         this.updateMercadoPagoContextUseCase = updateMercadoPagoContextUseCase;
         this.pagoService = pagoService;
+        this.reservaVacanteService = reservaVacanteService;
     }
 
     @Override
@@ -34,22 +39,48 @@ public class ProcessPaymentEventUseCaseImpl implements ProcessPaymentEventUseCas
         log.debug("\n\nProcessing payment event for contextId: {}\n\n", event.getMercadoPagoContextId());
         var context = findByMercadoPagoContextIdUseCase.findByMercadoPagoContextId(event.getMercadoPagoContextId());
 
-        if (!Objects.equals(context.getChequeraCuotaId(), event.getChequeraCuotaId())) {
-            log.error("Mismatch chequeraCuotaId for contextId: {}", event.getMercadoPagoContextId());
-            return;
-        }
+        if (context.getReservaVacanteId() != null) {
+            // Es un pago de reserva de vacante
+            if (!Objects.equals(context.getReservaVacanteId(), event.getReservaVacanteId())) {
+                log.error("Mismatch reservaVacanteId for contextId: {} (context: {}, event: {})", 
+                        event.getMercadoPagoContextId(), context.getReservaVacanteId(), event.getReservaVacanteId());
+                return;
+            }
 
-        context.setIdMercadoPago(event.getPaymentId());
-        context.setPayment(event.getPaymentJson());
-        context.setImportePagado(event.getTransactionAmount());
-        context.setFechaPago(event.getDateApproved());
-        context.setFechaAcreditacion(event.getDateApproved());
-        context.setStatus(event.getStatus());
+            context.setIdMercadoPago(event.getPaymentId());
+            context.setPayment(event.getPaymentJson());
+            context.setImportePagado(event.getTransactionAmount());
+            context.setFechaPago(event.getDateApproved());
+            context.setFechaAcreditacion(event.getDateApproved());
+            context.setStatus(event.getStatus());
 
-        context = updateMercadoPagoContextUseCase.update(context, context.getMercadoPagoContextId());
+            context = updateMercadoPagoContextUseCase.update(context, context.getMercadoPagoContextId());
 
-        if ("approved".equals(context.getStatus())) {
-            pagoService.registraPagoMP(context.getMercadoPagoContextId());
+            if ("approved".equals(context.getStatus())) {
+                ReservaVacante reservaVacante = reservaVacanteService.findReservaVacante(context.getReservaVacanteId());
+                reservaVacante.setEstado("pagado");
+                reservaVacanteService.updateReservaVacante(reservaVacante, context.getReservaVacanteId());
+                log.info("ReservaVacante {} marked as paid.", context.getReservaVacanteId());
+            }
+        } else {
+            // Es un pago de cuota
+            if (!Objects.equals(context.getChequeraCuotaId(), event.getChequeraCuotaId())) {
+                log.error("Mismatch chequeraCuotaId for contextId: {}", event.getMercadoPagoContextId());
+                return;
+            }
+
+            context.setIdMercadoPago(event.getPaymentId());
+            context.setPayment(event.getPaymentJson());
+            context.setImportePagado(event.getTransactionAmount());
+            context.setFechaPago(event.getDateApproved());
+            context.setFechaAcreditacion(event.getDateApproved());
+            context.setStatus(event.getStatus());
+
+            context = updateMercadoPagoContextUseCase.update(context, context.getMercadoPagoContextId());
+
+            if ("approved".equals(context.getStatus())) {
+                pagoService.registraPagoMP(context.getMercadoPagoContextId());
+            }
         }
     }
 }

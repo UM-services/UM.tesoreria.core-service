@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.31.0** (actualizada: 2026-07-03)
+**Versión actual del servicio: 3.32.0** (actualizada: 2026-07-05)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -29,7 +29,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-chequeraTipoChequera.mmd`: Arquitectura hexagonal del módulo TipoChequera (tipos de chequera con 11 casos de uso) - v3.30.0 (nuevo módulo).
 - `hexagonal-claseChequera.mmd`: Arquitectura hexagonal del módulo ClaseChequera (clasificación de chequeras) - v3.30.0 (nuevo módulo).
 - `hexagonal-lectivo.mmd`: Arquitectura hexagonal del módulo Lectivo (gestión de lectivos con 8 casos de uso) - v3.30.0 (nuevo módulo).
-- `hexagonal-reservaVacante.mmd`: Arquitectura hexagonal del módulo ReservaVacante (gestión de reservas de vacantes UM Hub) - v3.27.0.
+- `hexagonal-reservaVacante.mmd`: Arquitectura hexagonal del módulo ReservaVacante (gestión de reservas de vacantes UM Hub) - v3.32.0 (nuevo UpdateReservaVacanteUseCase con integración de pago MercadoPago).
 - `hexagonal-domicilio.mmd`: Arquitectura hexagonal del módulo Domicilio (gestión de domicilios) - v3.24.0.
 - `hexagonal-alumnoGuarani.mmd`: Arquitectura hexagonal del módulo AlumnoGuarani (integración con sistema Guarani) - v3.29.0 (simplificación de DTOs y extracción de PreuniversitarioChequeraService).
 - `hexagonal-arancelTipo.mmd`: Arquitectura hexagonal del módulo ArancelTipo (gestión de tipos de arancel) - v3.29.0 (migración desde Kotlin legacy).

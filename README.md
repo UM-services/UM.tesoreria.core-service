@@ -4,7 +4,19 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.31.0**
+**Versión actual (SemVer): 3.32.0**
+
+## Novedades 3.32.0 (verificado en código)
+- feat(mercadopagoContext): Integración de pago MercadoPago con ReservaVacante en `ProcessPaymentEventUseCaseImpl`
+  - Nuevo flujo condicional: si `MercadoPagoContext.reservaVacanteId != null`, procesa el pago como reserva de vacante en lugar de cuota
+  - Al recibir evento `approved`, actualiza el estado de `ReservaVacante` a `"pagado"` vía `ReservaVacanteService`
+  - Nuevo campo `reservaVacanteId` (UUID) en `PaymentProcessedEvent`
+- feat(reservaVacante): Nuevo `UpdateReservaVacanteUseCase` con implementación y adaptador JPA
+  - Nuevo método `updateReservaVacante(ReservaVacante, UUID)` en `ReservaVacanteService`
+  - Nuevo método `update(ReservaVacante, UUID)` en `ReservaVacanteRepository` y `JpaReservaVacanteRepositoryAdapter`
+- feat(docs): Diagrama hexagonal-reservaVacante.mmd actualizado con UpdateReservaVacanteUseCase
+
+> Basado en análisis profundo de `git diff HEAD` (8 archivos modificados, +68/-15 líneas) y `pom.xml` (versión 3.31.0 → 3.32.0).
 
 ## Novedades 3.31.0 (verificado en código)
 - feat(lectivoTotalImputacion): Nuevo caso de uso `FindAllByLectivoUseCase` y endpoint `GET /lectivo/{lectivoId}`

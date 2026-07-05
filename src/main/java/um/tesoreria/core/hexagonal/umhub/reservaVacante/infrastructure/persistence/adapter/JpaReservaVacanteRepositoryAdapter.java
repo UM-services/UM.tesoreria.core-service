@@ -33,4 +33,18 @@ public class JpaReservaVacanteRepositoryAdapter implements ReservaVacanteReposit
         return jpaReservaVacanteRepository.findByReservaVacanteId(reservaVacanteId)
                 .map(reservaVacanteMapper::toDomainModel);
     }
+
+    @Override
+    public ReservaVacante update(ReservaVacante reservaVacante, UUID reservaVacanteId) {
+        log.debug("Updating ReservaVacante -> {} with ID {}", reservaVacante.jsonify(), reservaVacanteId);
+        ReservaVacanteEntity entity = jpaReservaVacanteRepository.findByReservaVacanteId(reservaVacanteId)
+                .orElseThrow(() -> new RuntimeException("ReservaVacante not found for id: " + reservaVacanteId));
+        
+        entity.setEstado(reservaVacante.getEstado());
+        entity.setImporte(reservaVacante.getImporte());
+        entity.setVencimiento(reservaVacante.getVencimiento());
+        
+        ReservaVacanteEntity saved = jpaReservaVacanteRepository.save(entity);
+        return reservaVacanteMapper.toDomainModel(saved);
+    }
 }
