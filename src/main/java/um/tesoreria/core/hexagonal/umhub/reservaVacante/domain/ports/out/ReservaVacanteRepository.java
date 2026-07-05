@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface ReservaVacanteRepository {
     ReservaVacante create(ReservaVacante reservaVacante);
     Optional<ReservaVacante> findByReservaVacanteId(UUID reservaVacanteId);
+    ReservaVacante update(ReservaVacante reservaVacante, UUID reservaVacanteId);
 }
