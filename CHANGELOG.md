@@ -2,6 +2,16 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.32.1] - 2026-07-05
+### Fixed
+- fix(preuniversitario): Null-safety en creación de persona/domicilio y envío de chequera preuniversitaria
+  - `PreuniversitarioChequeraService.create()`: Envuelve `personaService.create(persona)` en try-catch con `PersonaException`, retornando null si falla
+  - `PreuniversitarioChequeraService.create()`: Envuelve `domicilioService.create(domicilio)` en try-catch con `DomicilioException`, retornando null si falla
+  - `CreatePreuniversitarioUseCaseImpl.createPreuniversitario()`: Agrega null-guard para `chequeraSerie`, retornando `alumnoGuarani` sin enviar mail si la chequera no se pudo crear
+  - Previene `NullPointerException` y envío de chequeras incompletas cuando la creación de persona o domicilio falla desde Guarani
+
+> Basado en análisis profundo de `git diff HEAD` (2 archivos modificados, +17/-0 líneas) y `pom.xml` (versión 3.32.0 → 3.32.1).
+
 ## [3.32.0] - 2026-07-05
 ### Added
 - feat(mercadopagoContext): Integración de pago MercadoPago con ReservaVacante en `ProcessPaymentEventUseCaseImpl`
