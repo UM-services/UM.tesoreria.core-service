@@ -3,10 +3,10 @@ package um.tesoreria.core.hexagonal.umhub.reservaVacante.application.usecases;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
-import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
+import um.tesoreria.core.hexagonal.domicilio.domain.ports.in.GetDomicilioByUniqueUseCase;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
+import um.tesoreria.core.hexagonal.persona.domain.ports.in.GetPersonaByUniqueIdUseCase;
 import um.tesoreria.core.hexagonal.umhub.campanha.application.service.CampanhaService;
 import um.tesoreria.core.hexagonal.umhub.campanha.domain.model.Campanha;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.application.exception.ReservaVacanteException;
@@ -22,8 +22,8 @@ import java.util.UUID;
 public class FindReservaVacanteUseCaseImpl implements FindReservaVacanteUseCase {
 
     private final ReservaVacanteRepository repository;
-    private final PersonaService personaService;
-    private final DomicilioService domicilioService;
+    private final GetPersonaByUniqueIdUseCase getPersonaByUniqueIdUseCase;
+    private final GetDomicilioByUniqueUseCase getDomicilioByUniqueUseCase;
 
     @Override
     public ReservaVacante findByReservaVacanteId(UUID reservaVacanteId) {
@@ -31,9 +31,9 @@ public class FindReservaVacanteUseCaseImpl implements FindReservaVacanteUseCase 
         ReservaVacante reservaVacante = repository.findByReservaVacanteId(reservaVacanteId)
                 .orElseThrow(() -> new ReservaVacanteException(reservaVacanteId));
         reservaVacante.setCampanha(reservaVacante.getCampanha());
-        Persona persona = personaService.findByUniqueId(reservaVacante.getPersonaUniqueId());
+        Persona persona = getPersonaByUniqueIdUseCase.findByUniqueId(reservaVacante.getPersonaUniqueId());
         reservaVacante.setPersona(persona);
-        Domicilio domicilio = domicilioService.findByUnique(persona.getPersonaId(), persona.getDocumentoId());
+        Domicilio domicilio = getDomicilioByUniqueUseCase.getDomicilioByUnique(persona.getPersonaId(), persona.getDocumentoId());
         reservaVacante.setDomicilio(domicilio);
         log.debug("ReservaVacante -> {}", reservaVacante.jsonify());
         return reservaVacante;

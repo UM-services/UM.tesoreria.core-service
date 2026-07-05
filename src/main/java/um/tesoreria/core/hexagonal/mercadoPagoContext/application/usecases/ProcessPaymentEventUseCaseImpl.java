@@ -8,7 +8,8 @@ import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoCo
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.in.FindByMercadoPagoContextIdUseCase;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.in.ProcessPaymentEventUseCase;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.in.UpdateMercadoPagoContextUseCase;
-import um.tesoreria.core.hexagonal.umhub.reservaVacante.application.service.ReservaVacanteService;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.FindReservaVacanteUseCase;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.UpdateReservaVacanteUseCase;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
 import um.tesoreria.core.service.facade.PagoService;
 
@@ -21,17 +22,20 @@ public class ProcessPaymentEventUseCaseImpl implements ProcessPaymentEventUseCas
     private final FindByMercadoPagoContextIdUseCase findByMercadoPagoContextIdUseCase;
     private final UpdateMercadoPagoContextUseCase updateMercadoPagoContextUseCase;
     private final PagoService pagoService;
-    private final ReservaVacanteService reservaVacanteService;
+    private final FindReservaVacanteUseCase findReservaVacanteUseCase;
+    private final UpdateReservaVacanteUseCase updateReservaVacanteUseCase;
 
     public ProcessPaymentEventUseCaseImpl(
             FindByMercadoPagoContextIdUseCase findByMercadoPagoContextIdUseCase,
             UpdateMercadoPagoContextUseCase updateMercadoPagoContextUseCase,
             @Lazy PagoService pagoService,
-            ReservaVacanteService reservaVacanteService) {
+            FindReservaVacanteUseCase findReservaVacanteUseCase,
+            UpdateReservaVacanteUseCase updateReservaVacanteUseCase) {
         this.findByMercadoPagoContextIdUseCase = findByMercadoPagoContextIdUseCase;
         this.updateMercadoPagoContextUseCase = updateMercadoPagoContextUseCase;
         this.pagoService = pagoService;
-        this.reservaVacanteService = reservaVacanteService;
+        this.findReservaVacanteUseCase = findReservaVacanteUseCase;
+        this.updateReservaVacanteUseCase = updateReservaVacanteUseCase;
     }
 
     @Override
@@ -57,9 +61,9 @@ public class ProcessPaymentEventUseCaseImpl implements ProcessPaymentEventUseCas
             context = updateMercadoPagoContextUseCase.update(context, context.getMercadoPagoContextId());
 
             if ("approved".equals(context.getStatus())) {
-                ReservaVacante reservaVacante = reservaVacanteService.findReservaVacante(context.getReservaVacanteId());
+                ReservaVacante reservaVacante = findReservaVacanteUseCase.findByReservaVacanteId(context.getReservaVacanteId());
                 reservaVacante.setEstado("pagado");
-                reservaVacanteService.updateReservaVacante(reservaVacante, context.getReservaVacanteId());
+                updateReservaVacanteUseCase.update(reservaVacante, context.getReservaVacanteId());
                 log.info("ReservaVacante {} marked as paid.", context.getReservaVacanteId());
             }
         } else {

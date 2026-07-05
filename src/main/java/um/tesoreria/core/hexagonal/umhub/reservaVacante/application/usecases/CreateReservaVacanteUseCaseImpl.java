@@ -9,8 +9,9 @@ import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioExce
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
-import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
+import um.tesoreria.core.hexagonal.persona.domain.ports.in.GetPersonaByUniqueUseCase;
+import um.tesoreria.core.hexagonal.persona.domain.ports.in.SavePersonaUseCase;
 import um.tesoreria.core.hexagonal.umhub.campanha.application.service.CampanhaService;
 import um.tesoreria.core.hexagonal.umhub.campanha.domain.model.Campanha;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.application.exception.ReservaVacanteException;
@@ -31,7 +32,8 @@ import java.time.ZoneOffset;
 public class CreateReservaVacanteUseCaseImpl implements CreateReservaVacanteUseCase {
 
     private final ReservaVacanteRepository repository;
-    private final PersonaService personaService;
+    private final GetPersonaByUniqueUseCase getPersonaByUniqueUseCase;
+    private final SavePersonaUseCase savePersonaUseCase;
     private final DomicilioService domicilioService;
     private final CampanhaService campanhaService;
     private final MercadoPagoCoreService mercadoPagoCoreService;
@@ -45,7 +47,7 @@ public class CreateReservaVacanteUseCaseImpl implements CreateReservaVacanteUseC
         Persona persona;
         var personaId = new BigDecimal(reservaVacanteRequest.getNumeroDocumento().replaceAll("\\D+", ""));
         try {
-            persona = personaService.findByUnique(personaId, reservaVacanteRequest.getTipoDocumento());
+            persona = getPersonaByUniqueUseCase.findByUnique(personaId, reservaVacanteRequest.getTipoDocumento());
         } catch (PersonaException e) {
             persona = Persona.builder()
                     .personaId(personaId)
@@ -58,7 +60,7 @@ public class CreateReservaVacanteUseCaseImpl implements CreateReservaVacanteUseC
                     .primero((byte) 0)
                     .sexo("")
                     .build();
-            persona = personaService.create(persona);
+            persona = savePersonaUseCase.create(persona);
         }
         log.debug("Persona -> {}", persona.jsonify());
         // Verificar domicilio

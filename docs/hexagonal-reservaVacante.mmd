@@ -42,7 +42,8 @@ classDiagram
         namespace usecases {
             class CreateReservaVacanteUseCaseImpl {
                 -ReservaVacanteRepository repository
-                -PersonaService personaService
+                -GetPersonaByUniqueUseCase getPersonaByUniqueUseCase
+                -SavePersonaUseCase savePersonaUseCase
                 -DomicilioService domicilioService
                 -CampanhaService campanhaService
                 -MercadoPagoCoreService mercadoPagoCoreService
@@ -53,7 +54,6 @@ classDiagram
                 -ReservaVacanteRepository repository
                 -PersonaService personaService
                 -DomicilioService domicilioService
-                -CampanhaService campanhaService
                 +findByReservaVacanteId(UUID) ReservaVacante
             }
             class UpdateReservaVacanteUseCaseImpl {
