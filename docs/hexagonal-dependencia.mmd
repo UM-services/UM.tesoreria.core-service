@@ -23,8 +23,8 @@ classDiagram
 
         class DependenciaRepository {
             <<interface>>
-            +findAll() List~Dependencia~
-            +findById(Integer) Optional~Dependencia~
+            +findAll() List<Dependencia>
+            +findById(Integer) Optional<Dependencia>
             +save(Dependencia) Dependencia
         }
     }
@@ -34,7 +34,7 @@ classDiagram
             -GetAllDependenciasUseCase getAllDependenciasUseCase
             -GetDependenciaByIdUseCase getDependenciaByIdUseCase
             -UpdateDependenciaUseCase updateDependenciaUseCase
-            +findAll() List~Dependencia~
+            +findAll() List<Dependencia>
             +findByDependenciaId(Integer) Dependencia
             +update(Integer, Dependencia) Dependencia
         }
@@ -42,12 +42,12 @@ classDiagram
         namespace usecases {
             class GetAllDependenciasUseCaseImpl {
                 -DependenciaRepository repository
-                +getAll() List~Dependencia~
+                +getAll() List<Dependencia>
             }
 
             class GetDependenciaByIdUseCaseImpl {
                 -DependenciaRepository repository
-                +getById(Integer) Optional~Dependencia~
+                +getById(Integer) Optional<Dependencia>
             }
 
             class UpdateDependenciaUseCaseImpl {
@@ -58,12 +58,12 @@ classDiagram
 
         class GetAllDependenciasUseCase {
             <<interface>>
-            +getAll() List~Dependencia~
+            +getAll() List<Dependencia>
         }
 
         class GetDependenciaByIdUseCase {
             <<interface>>
-            +getById(Integer) Optional~Dependencia~
+            +getById(Integer) Optional<Dependencia>
         }
 
         class UpdateDependenciaUseCase {
@@ -89,15 +89,15 @@ classDiagram
 
             class JpaDependenciaRepository {
                 <<JpaRepository>>
-                +findAllByOrderByNombre() List~DependenciaEntity~
-                +findByDependenciaId(Integer) Optional~DependenciaEntity~
+                +findAllByOrderByNombre() List<DependenciaEntity>
+                +findByDependenciaId(Integer) Optional<DependenciaEntity>
             }
 
             class JpaDependenciaRepositoryAdapter {
                 -JpaDependenciaRepository repository
                 -DependenciaMapper mapper
-                +findAll() List~Dependencia~
-                +findById(Integer) Optional~Dependencia~
+                +findAll() List<Dependencia>
+                +findById(Integer) Optional<Dependencia>
                 +save(Dependencia) Dependencia
             }
 
@@ -113,9 +113,9 @@ classDiagram
             class DependenciaController {
                 -DependenciaService service
                 -DependenciaDtoMapper mapper
-                +findAll() ResponseEntity~List~DependenciaResponse~~
-                +findByDependenciaId(Integer) ResponseEntity~DependenciaResponse~
-                +update(Integer, DependenciaRequest) ResponseEntity~DependenciaResponse~
+                +findAll() ResponseEntity<List<DependenciaResponse>>
+                +findByDependenciaId(Integer) ResponseEntity<DependenciaResponse>
+                +update(Integer, DependenciaRequest) ResponseEntity<DependenciaResponse>
             }
 
             class DependenciaRequest {

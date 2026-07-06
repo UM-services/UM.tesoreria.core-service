@@ -23,13 +23,13 @@ classDiagram
 
         class TipoChequeraRepository {
             <<interface>>
-            +findAll() List~TipoChequera~
-            +findAllAsignable(Integer, Integer, Integer, Integer) List~TipoChequera~
-            +findAllByFacultadIdAndGeograficaId(Integer, Integer) List~TipoChequera~
-            +findAllByClaseChequeraId(Integer) List~TipoChequera~
-            +findAllByClaseChequeraIds(List~Integer~) List~TipoChequera~
-            +findById(Integer) Optional~TipoChequera~
-            +findLast() Optional~TipoChequera~
+            +findAll() List<TipoChequera>
+            +findAllAsignable(Integer, Integer, Integer, Integer) List<TipoChequera>
+            +findAllByFacultadIdAndGeograficaId(Integer, Integer) List<TipoChequera>
+            +findAllByClaseChequeraId(Integer) List<TipoChequera>
+            +findAllByClaseChequeraIds(List<Integer>) List<TipoChequera>
+            +findById(Integer) Optional<TipoChequera>
+            +findLast() Optional<TipoChequera>
             +create(TipoChequera) TipoChequera
             +update(TipoChequera) TipoChequera
             +deleteById(Integer)
@@ -40,11 +40,11 @@ classDiagram
 
     namespace application {
         class TipoChequeraService {
-            +findAll() List~TipoChequera~
-            +findAllAsignable(Integer, Integer, Integer, Integer) List~TipoChequera~
-            +findAllByFacultadIdAndGeograficaId(Integer, Integer) List~TipoChequera~
-            +findAllByClaseChequera(Integer) List~TipoChequera~
-            +findAllByClaseChequeraIds(List~Integer~) List~TipoChequera~
+            +findAll() List<TipoChequera>
+            +findAllAsignable(Integer, Integer, Integer, Integer) List<TipoChequera>
+            +findAllByFacultadIdAndGeograficaId(Integer, Integer) List<TipoChequera>
+            +findAllByClaseChequera(Integer) List<TipoChequera>
+            +findAllByClaseChequeraIds(List<Integer>) List<TipoChequera>
             +findByTipoChequeraId(Integer) TipoChequera
             +findLast() TipoChequera
             +add(TipoChequera) TipoChequera
@@ -52,7 +52,7 @@ classDiagram
             +delete(Integer)
             +unmark()
             +mark(Integer, Byte) TipoChequera
-            +findAllByStrings(List~String~) List~TipoChequeraSearch~
+            +findAllByStrings(List<String>) List<TipoChequeraSearch>
         }
 
         namespace usecases {
@@ -90,11 +90,11 @@ classDiagram
 
             class JpaTipoChequeraRepository {
                 <<JpaRepository>>
-                +findAllByTipoChequeraIdInAndGeograficaId(List~Integer~, Integer) List~TipoChequeraEntity~
-                +findAllByClaseChequeraId(Integer) List~TipoChequeraEntity~
-                +findAllByClaseChequeraIdIn(List~Integer~) List~TipoChequeraEntity~
-                +findTopByOrderByTipoChequeraIdDesc() Optional~TipoChequeraEntity~
-                +findByTipoChequeraId(Integer) Optional~TipoChequeraEntity~
+                +findAllByTipoChequeraIdInAndGeograficaId(List<Integer>, Integer) List<TipoChequeraEntity>
+                +findAllByClaseChequeraId(Integer) List<TipoChequeraEntity>
+                +findAllByClaseChequeraIdIn(List<Integer>) List<TipoChequeraEntity>
+                +findTopByOrderByTipoChequeraIdDesc() Optional<TipoChequeraEntity>
+                +findByTipoChequeraId(Integer) Optional<TipoChequeraEntity>
             }
 
             class JpaTipoChequeraRepositoryAdapter {
@@ -113,14 +113,14 @@ classDiagram
             class TipoChequeraController {
                 -TipoChequeraService service
                 -TipoChequeraDtoMapper dtoMapper
-                +findAll() ResponseEntity~List~TipoChequeraResponse~~
-                +findByTipoChequeraId(Integer) ResponseEntity~TipoChequeraResponse~
-                +add(TipoChequeraRequest) ResponseEntity~TipoChequeraResponse~
-                +update(TipoChequeraRequest, Integer) ResponseEntity~TipoChequeraResponse~
-                +delete(Integer) ResponseEntity~Void~
-                +findAllAsignable(Integer, Integer, Integer, Integer) ResponseEntity~List~TipoChequeraResponse~~
-                +mark(Integer, Byte) ResponseEntity~Void~
-                +unmark() ResponseEntity~Void~
+                +findAll() ResponseEntity<List<TipoChequeraResponse>>
+                +findByTipoChequeraId(Integer) ResponseEntity<TipoChequeraResponse>
+                +add(TipoChequeraRequest) ResponseEntity<TipoChequeraResponse>
+                +update(TipoChequeraRequest, Integer) ResponseEntity<TipoChequeraResponse>
+                +delete(Integer) ResponseEntity<Void>
+                +findAllAsignable(Integer, Integer, Integer, Integer) ResponseEntity<List<TipoChequeraResponse>>
+                +mark(Integer, Byte) ResponseEntity<Void>
+                +unmark() ResponseEntity<Void>
             }
 
             class TipoChequeraRequest {

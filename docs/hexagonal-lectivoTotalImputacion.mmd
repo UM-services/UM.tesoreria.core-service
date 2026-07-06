@@ -52,12 +52,12 @@ classDiagram
 
         class LectivoTotalImputacionRepository {
             <<interface>>
-            +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
-            +findAllByLectivo(Integer) List~LectivoTotalImputacion~
-            +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+            +findAllByTipo(Integer, Integer, Integer) List<LectivoTotalImputacion>
+            +findAllByLectivo(Integer) List<LectivoTotalImputacion>
+            +findByProducto(Integer, Integer, Integer, Integer) Optional<LectivoTotalImputacion>
             +add(LectivoTotalImputacion) LectivoTotalImputacion
-            +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
-            +findById(Long) Optional~LectivoTotalImputacion~
+            +update(Long, LectivoTotalImputacion) Optional<LectivoTotalImputacion>
+            +findById(Long) Optional<LectivoTotalImputacion>
         }
     }
 
@@ -68,27 +68,27 @@ classDiagram
             -FindByProductoUseCase findByProductoUseCase
             -AddLectivoTotalImputacionUseCase addLectivoTotalImputacionUseCase
             -UpdateLectivoTotalImputacionUseCase updateLectivoTotalImputacionUseCase
-            +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
-            +findAllByLectivo(Integer) List~LectivoTotalImputacion~
-            +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+            +findAllByTipo(Integer, Integer, Integer) List<LectivoTotalImputacion>
+            +findAllByLectivo(Integer) List<LectivoTotalImputacion>
+            +findByProducto(Integer, Integer, Integer, Integer) Optional<LectivoTotalImputacion>
             +add(LectivoTotalImputacion) LectivoTotalImputacion
-            +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
+            +update(Long, LectivoTotalImputacion) Optional<LectivoTotalImputacion>
         }
 
         namespace usecases {
             class FindAllByTipoUseCaseImpl {
                 -LectivoTotalImputacionRepository repository
-                +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+                +findAllByTipo(Integer, Integer, Integer) List<LectivoTotalImputacion>
             }
 
             class FindAllByLectivoUseCaseImpl {
                 -LectivoTotalImputacionRepository repository
-                +findAllByLectivo(Integer) List~LectivoTotalImputacion~
+                +findAllByLectivo(Integer) List<LectivoTotalImputacion>
             }
 
             class FindByProductoUseCaseImpl {
                 -LectivoTotalImputacionRepository repository
-                +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+                +findByProducto(Integer, Integer, Integer, Integer) Optional<LectivoTotalImputacion>
             }
 
             class AddLectivoTotalImputacionUseCaseImpl {
@@ -98,23 +98,23 @@ classDiagram
 
             class UpdateLectivoTotalImputacionUseCaseImpl {
                 -LectivoTotalImputacionRepository repository
-                +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
+                +update(Long, LectivoTotalImputacion) Optional<LectivoTotalImputacion>
             }
         }
 
         class FindAllByTipoUseCase {
             <<interface>>
-            +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
+            +findAllByTipo(Integer, Integer, Integer) List<LectivoTotalImputacion>
         }
 
         class FindAllByLectivoUseCase {
             <<interface>>
-            +findAllByLectivo(Integer) List~LectivoTotalImputacion~
+            +findAllByLectivo(Integer) List<LectivoTotalImputacion>
         }
 
         class FindByProductoUseCase {
             <<interface>>
-            +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+            +findByProducto(Integer, Integer, Integer, Integer) Optional<LectivoTotalImputacion>
         }
 
         class AddLectivoTotalImputacionUseCase {
@@ -124,7 +124,7 @@ classDiagram
 
         class UpdateLectivoTotalImputacionUseCase {
             <<interface>>
-            +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
+            +update(Long, LectivoTotalImputacion) Optional<LectivoTotalImputacion>
         }
     }
 
@@ -146,21 +146,21 @@ classDiagram
 
             class JpaLectivoTotalImputacionRepository {
                 <<JpaRepository>>
-                +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoTotalImputacionEntity~
-                +findAllByLectivoId(Integer) List~LectivoTotalImputacionEntity~
-                +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoId(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacionEntity~
-                +findByLectivoTotalImputacionId(Long) Optional~LectivoTotalImputacionEntity~
+                +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List<LectivoTotalImputacionEntity>
+                +findAllByLectivoId(Integer) List<LectivoTotalImputacionEntity>
+                +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoId(Integer, Integer, Integer, Integer) Optional<LectivoTotalImputacionEntity>
+                +findByLectivoTotalImputacionId(Long) Optional<LectivoTotalImputacionEntity>
             }
 
             class JpaLectivoTotalImputacionRepositoryAdapter {
                 -JpaLectivoTotalImputacionRepository jpaLectivoTotalImputacionRepository
                 -LectivoTotalImputacionMapper mapper
-                +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
-                +findAllByLectivo(Integer) List~LectivoTotalImputacion~
-                +findByProducto(Integer, Integer, Integer, Integer) Optional~LectivoTotalImputacion~
+                +findAllByTipo(Integer, Integer, Integer) List<LectivoTotalImputacion>
+                +findAllByLectivo(Integer) List<LectivoTotalImputacion>
+                +findByProducto(Integer, Integer, Integer, Integer) Optional<LectivoTotalImputacion>
                 +add(LectivoTotalImputacion) LectivoTotalImputacion
-                +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
-                +findById(Long) Optional~LectivoTotalImputacion~
+                +update(Long, LectivoTotalImputacion) Optional<LectivoTotalImputacion>
+                +findById(Long) Optional<LectivoTotalImputacion>
             }
 
             class LectivoTotalImputacionMapper {
@@ -178,11 +178,11 @@ classDiagram
             class LectivoTotalImputacionController {
                 -LectivoTotalImputacionService service
                 -LectivoTotalImputacionDtoMapper mapper
-                +findAllByLectivo(Integer) ResponseEntity~List~LectivoTotalImputacionResponse~~
-                +findAllByTipo(Integer, Integer, Integer) ResponseEntity~List~LectivoTotalImputacionResponse~~
-                +findByProducto(Integer, Integer, Integer, Integer) ResponseEntity~LectivoTotalImputacionResponse~
-                +add(LectivoTotalImputacionRequest) ResponseEntity~LectivoTotalImputacionResponse~
-                +update(LectivoTotalImputacionRequest, Long) ResponseEntity~LectivoTotalImputacionResponse~
+                +findAllByLectivo(Integer) ResponseEntity<List<LectivoTotalImputacionResponse>>
+                +findAllByTipo(Integer, Integer, Integer) ResponseEntity<List<LectivoTotalImputacionResponse>>
+                +findByProducto(Integer, Integer, Integer, Integer) ResponseEntity<LectivoTotalImputacionResponse>
+                +add(LectivoTotalImputacionRequest) ResponseEntity<LectivoTotalImputacionResponse>
+                +update(LectivoTotalImputacionRequest, Long) ResponseEntity<LectivoTotalImputacionResponse>
             }
 
             class LectivoTotalImputacionRequest {

@@ -41,20 +41,20 @@ classDiagram
 
         class ChequeraCuotaRepository {
             <<interface>>
-            +findAllByChequera(Integer, Integer, Long) List~ChequeraCuota~
-            +findAllByChequeraIds(Integer, Integer, Long, Integer, Integer) List~ChequeraCuota~
-            +findAllByAlternativa(Integer, Integer, Long, Integer, Integer) List~ChequeraCuota~
-            +findAllByAlternativaConImporte(Integer, Integer, Long, Integer, Integer) List~ChequeraCuota~
-            +findAllDebidas(Integer, Integer, Long) List~ChequeraCuota~
-            +findAllInconsistencias() List~ChequeraCuota~
-            +findAllPendientes(Integer, Integer, Long) List~ChequeraCuota~
-            +findAllPendientesBaja(Integer) List~ChequeraCuota~
-            +findAllPeriodosLectivo(Integer, Integer, Long) List~Integer~
-            +findAllByFacultadTipoChequeraSerieIds(List~Integer~, Integer, Long) List~ChequeraCuota~
-            +findById(Long) Optional~ChequeraCuota~
-            +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraCuota~
-            +findOneActivaImpagaPrevia(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraCuota~
-            +saveAll(List~ChequeraCuota~) List~ChequeraCuota~
+            +findAllByChequera(Integer, Integer, Long) List<ChequeraCuota>
+            +findAllByChequeraIds(Integer, Integer, Long, Integer, Integer) List<ChequeraCuota>
+            +findAllByAlternativa(Integer, Integer, Long, Integer, Integer) List<ChequeraCuota>
+            +findAllByAlternativaConImporte(Integer, Integer, Long, Integer, Integer) List<ChequeraCuota>
+            +findAllDebidas(Integer, Integer, Long) List<ChequeraCuota>
+            +findAllInconsistencias() List<ChequeraCuota>
+            +findAllPendientes(Integer, Integer, Long) List<ChequeraCuota>
+            +findAllPendientesBaja(Integer) List<ChequeraCuota>
+            +findAllPeriodosLectivo(Integer, Integer, Long) List<Integer>
+            +findAllByFacultadTipoChequeraSerieIds(List<Integer>, Integer, Long) List<ChequeraCuota>
+            +findById(Long) Optional<ChequeraCuota>
+            +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) Optional<ChequeraCuota>
+            +findOneActivaImpagaPrevia(Integer, Integer, Long, Integer, Integer, Integer) Optional<ChequeraCuota>
+            +saveAll(List<ChequeraCuota>) List<ChequeraCuota>
             +update(ChequeraCuota) ChequeraCuota
             +updateBarras(Integer, Integer, Long, Integer, Integer, String, String) void
             +deleteAllByChequera(Integer, Integer, Long) void
@@ -87,19 +87,19 @@ classDiagram
     namespace application {
         class ChequeraCuotaService {
             -20+ use cases inyectados
-            +findAllByChequera() List~ChequeraCuota~
-            +findAllByChequeraIds() List~ChequeraCuota~
-            +findAllByAlternativa() List~ChequeraCuota~
-            +findAllByAlternativaConImporte() List~ChequeraCuota~
-            +findAllDebidas() List~ChequeraCuota~
-            +findAllInconsistencias() List~ChequeraCuota~
-            +findAllPendientes() List~ChequeraCuota~
-            +findAllPendientesBaja() List~ChequeraCuota~
-            +findAllPeriodosLectivo() List~Integer~
+            +findAllByChequera() List<ChequeraCuota>
+            +findAllByChequeraIds() List<ChequeraCuota>
+            +findAllByAlternativa() List<ChequeraCuota>
+            +findAllByAlternativaConImporte() List<ChequeraCuota>
+            +findAllDebidas() List<ChequeraCuota>
+            +findAllInconsistencias() List<ChequeraCuota>
+            +findAllPendientes() List<ChequeraCuota>
+            +findAllPendientesBaja() List<ChequeraCuota>
+            +findAllPeriodosLectivo() List<Integer>
             +findById(Long) ChequeraCuota
             +findByUnique(...) ChequeraCuota
             +findOneActivaImpagaPrevia(...) ChequeraCuota
-            +saveAll(List~ChequeraCuota~) List~ChequeraCuota~
+            +saveAll(List<ChequeraCuota>) List<ChequeraCuota>
             +update(ChequeraCuota) ChequeraCuota
             +updateBarras(...) void
             +deleteAllByChequera(...) void
@@ -160,8 +160,8 @@ classDiagram
 
             class JpaChequeraCuotaRepository {
                 <<JpaRepository>>
-                +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(...) List~ChequeraCuotaEntity~
-                +findByChequeraCuotaId(Long) Optional~ChequeraCuotaEntity~
+                +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(...) List<ChequeraCuotaEntity>
+                +findByChequeraCuotaId(Long) Optional<ChequeraCuotaEntity>
             }
 
             class JpaChequeraCuotaRepositoryAdapter

@@ -33,13 +33,13 @@ classDiagram
         class ContratoRepository {
             <<interface>>
             +create(Contrato) Contrato
-            +findById(Long) Optional~Contrato~
-            +findAllByFacultad(Integer, Integer) List~Contrato~
-            +findAllAjustable(OffsetDateTime) List~Contrato~
-            +findAllVigente(OffsetDateTime) List~Contrato~
-            +findAllByPersona(BigDecimal, Integer) List~Contrato~
-            +update(Long, Contrato) Optional~Contrato~
-            +saveAll(List~Contrato~) List~Contrato~
+            +findById(Long) Optional<Contrato>
+            +findAllByFacultad(Integer, Integer) List<Contrato>
+            +findAllAjustable(OffsetDateTime) List<Contrato>
+            +findAllVigente(OffsetDateTime) List<Contrato>
+            +findAllByPersona(BigDecimal, Integer) List<Contrato>
+            +update(Long, Contrato) Optional<Contrato>
+            +saveAll(List<Contrato>) List<Contrato>
             +deleteById(Long) boolean
         }
     }
@@ -56,13 +56,13 @@ classDiagram
             -SaveAllContratosUseCase saveAllContratosUseCase
             -UpdateContratoUseCase updateContratoUseCase
             +createContrato(Contrato) Contrato
-            +getContratosAjustables(OffsetDateTime) List~Contrato~
-            +getContratosByFacultad(Integer, Integer) List~Contrato~
-            +getContratosByPersona(BigDecimal, Integer) List~Contrato~
-            +getContratosVigentes(OffsetDateTime) List~Contrato~
-            +getContratoById(Long) Optional~Contrato~
-            +updateContrato(Long, Contrato) Optional~Contrato~
-            +saveAllContratos(List~Contrato~) List~Contrato~
+            +getContratosAjustables(OffsetDateTime) List<Contrato>
+            +getContratosByFacultad(Integer, Integer) List<Contrato>
+            +getContratosByPersona(BigDecimal, Integer) List<Contrato>
+            +getContratosVigentes(OffsetDateTime) List<Contrato>
+            +getContratoById(Long) Optional<Contrato>
+            +updateContrato(Long, Contrato) Optional<Contrato>
+            +saveAllContratos(List<Contrato>) List<Contrato>
             +deleteContrato(Long) boolean
         }
 
@@ -77,31 +77,31 @@ classDiagram
             }
             class GetAllContratosAjustablesUseCaseImpl {
                 -ContratoRepository repository
-                +getContratosAjustables(OffsetDateTime) List~Contrato~
+                +getContratosAjustables(OffsetDateTime) List<Contrato>
             }
             class GetAllContratosByFacultadUseCaseImpl {
                 -ContratoRepository repository
-                +getContratosByFacultad(Integer, Integer) List~Contrato~
+                +getContratosByFacultad(Integer, Integer) List<Contrato>
             }
             class GetAllContratosByPersonaUseCaseImpl {
                 -ContratoRepository repository
-                +getContratosByPersona(BigDecimal, Integer) List~Contrato~
+                +getContratosByPersona(BigDecimal, Integer) List<Contrato>
             }
             class GetAllContratosVigentesUseCaseImpl {
                 -ContratoRepository repository
-                +getContratosVigentes(OffsetDateTime) List~Contrato~
+                +getContratosVigentes(OffsetDateTime) List<Contrato>
             }
             class GetContratoByIdUseCaseImpl {
                 -ContratoRepository repository
-                +getContratoById(Long) Optional~Contrato~
+                +getContratoById(Long) Optional<Contrato>
             }
             class SaveAllContratosUseCaseImpl {
                 -ContratoRepository repository
-                +saveAllContratos(List~Contrato~) List~Contrato~
+                +saveAllContratos(List<Contrato>) List<Contrato>
             }
             class UpdateContratoUseCaseImpl {
                 -ContratoRepository repository
-                +updateContrato(Long, Contrato) Optional~Contrato~
+                +updateContrato(Long, Contrato) Optional<Contrato>
             }
         }
 
@@ -115,31 +115,31 @@ classDiagram
         }
         class GetAllContratosAjustablesUseCase {
             <<interface>>
-            +getContratosAjustables(OffsetDateTime) List~Contrato~
+            +getContratosAjustables(OffsetDateTime) List<Contrato>
         }
         class GetAllContratosByFacultadUseCase {
             <<interface>>
-            +getContratosByFacultad(Integer, Integer) List~Contrato~
+            +getContratosByFacultad(Integer, Integer) List<Contrato>
         }
         class GetAllContratosByPersonaUseCase {
             <<interface>>
-            +getContratosByPersona(BigDecimal, Integer) List~Contrato~
+            +getContratosByPersona(BigDecimal, Integer) List<Contrato>
         }
         class GetAllContratosVigentesUseCase {
             <<interface>>
-            +getContratosVigentes(OffsetDateTime) List~Contrato~
+            +getContratosVigentes(OffsetDateTime) List<Contrato>
         }
         class GetContratoByIdUseCase {
             <<interface>>
-            +getContratoById(Long) Optional~Contrato~
+            +getContratoById(Long) Optional<Contrato>
         }
         class SaveAllContratosUseCase {
             <<interface>>
-            +saveAllContratos(List~Contrato~) List~Contrato~
+            +saveAllContratos(List<Contrato>) List<Contrato>
         }
         class UpdateContratoUseCase {
             <<interface>>
-            +updateContrato(Long, Contrato) Optional~Contrato~
+            +updateContrato(Long, Contrato) Optional<Contrato>
         }
     }
 
@@ -171,11 +171,11 @@ classDiagram
 
             class JpaContratoRepository {
                 <<JpaRepository>>
-                +findAllByFacultadIdAndGeograficaId(Integer, Integer) List~ContratoEntity~
-                +findAllByAjusteAndHastaGreaterThanEqual(Byte, OffsetDateTime) List~ContratoEntity~
-                +findAllByHastaGreaterThanEqual(OffsetDateTime) List~ContratoEntity~
-                +findAllByPersonaIdAndDocumentoIdOrderByDesdeDesc(BigDecimal, Integer) List~ContratoEntity~
-                +findByContratoId(Long) Optional~ContratoEntity~
+                +findAllByFacultadIdAndGeograficaId(Integer, Integer) List<ContratoEntity>
+                +findAllByAjusteAndHastaGreaterThanEqual(Byte, OffsetDateTime) List<ContratoEntity>
+                +findAllByHastaGreaterThanEqual(OffsetDateTime) List<ContratoEntity>
+                +findAllByPersonaIdAndDocumentoIdOrderByDesdeDesc(BigDecimal, Integer) List<ContratoEntity>
+                +findByContratoId(Long) Optional<ContratoEntity>
                 +deleteByContratoId(Long) void
                 +existsByContratoId(Long) boolean
             }
@@ -184,13 +184,13 @@ classDiagram
                 -JpaContratoRepository repository
                 -ContratoMapper mapper
                 +create(Contrato) Contrato
-                +findById(Long) Optional~Contrato~
-                +findAllByFacultad(Integer, Integer) List~Contrato~
-                +findAllAjustable(OffsetDateTime) List~Contrato~
-                +findAllVigente(OffsetDateTime) List~Contrato~
-                +findAllByPersona(BigDecimal, Integer) List~Contrato~
-                +update(Long, Contrato) Optional~Contrato~
-                +saveAll(List~Contrato~) List~Contrato~
+                +findById(Long) Optional<Contrato>
+                +findAllByFacultad(Integer, Integer) List<Contrato>
+                +findAllAjustable(OffsetDateTime) List<Contrato>
+                +findAllVigente(OffsetDateTime) List<Contrato>
+                +findAllByPersona(BigDecimal, Integer) List<Contrato>
+                +update(Long, Contrato) Optional<Contrato>
+                +saveAll(List<Contrato>) List<Contrato>
                 +deleteById(Long) boolean
             }
 
@@ -204,12 +204,12 @@ classDiagram
             class ContratoController {
                 -ContratoService contratoService
                 -ContratoDtoMapper contratoDtoMapper
-                +findAllAjustable(OffsetDateTime) ResponseEntity~List~ContratoResponse~~
-                +findAllVigente(OffsetDateTime) ResponseEntity~List~ContratoResponse~~
-                +findAllByPersona(BigDecimal, Integer) ResponseEntity~List~ContratoResponse~~
-                +findByContratoId(Long) ResponseEntity~ContratoResponse~
-                +update(Long, ContratoRequest) ResponseEntity~ContratoResponse~
-                +saveAll(List~ContratoRequest~) ResponseEntity~List~ContratoResponse~~
+                +findAllAjustable(OffsetDateTime) ResponseEntity<List<ContratoResponse>>
+                +findAllVigente(OffsetDateTime) ResponseEntity<List<ContratoResponse>>
+                +findAllByPersona(BigDecimal, Integer) ResponseEntity<List<ContratoResponse>>
+                +findByContratoId(Long) ResponseEntity<ContratoResponse>
+                +update(Long, ContratoRequest) ResponseEntity<ContratoResponse>
+                +saveAll(List<ContratoRequest>) ResponseEntity<List<ContratoResponse>>
             }
 
             class ContratoRequest {

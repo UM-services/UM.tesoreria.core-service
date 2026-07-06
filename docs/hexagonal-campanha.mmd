@@ -17,9 +17,9 @@ classDiagram
         class CampanhaRepository {
             <<interface>>
             +create(Campanha) Campanha
-            +findById(UUID) Optional~Campanha~
-            +findAll() List~Campanha~
-            +update(UUID, Campanha) Optional~Campanha~
+            +findById(UUID) Optional<Campanha>
+            +findAll() List<Campanha>
+            +update(UUID, Campanha) Optional<Campanha>
             +deleteByCampanhaId(UUID) boolean
         }
     }
@@ -32,9 +32,9 @@ classDiagram
             -UpdateCampanhaUseCase updateCampanhaUseCase
             -DeleteCampanhaUseCase deleteCampanhaUseCase
             +createCampanha(Campanha) Campanha
-            +getCampanhaById(UUID) Optional~Campanha~
-            +getAllCampanhas() List~Campanha~
-            +updateCampanha(UUID, Campanha) Optional~Campanha~
+            +getCampanhaById(UUID) Optional<Campanha>
+            +getAllCampanhas() List<Campanha>
+            +updateCampanha(UUID, Campanha) Optional<Campanha>
             +deleteCampanha(UUID) boolean
         }
 
@@ -45,15 +45,15 @@ classDiagram
             }
             class GetCampanhaByIdUseCaseImpl {
                 -CampanhaRepository repository
-                +getCampanhaById(UUID) Optional~Campanha~
+                +getCampanhaById(UUID) Optional<Campanha>
             }
             class GetAllCampanhasUseCaseImpl {
                 -CampanhaRepository repository
-                +getAllCampanhas() List~Campanha~
+                +getAllCampanhas() List<Campanha>
             }
             class UpdateCampanhaUseCaseImpl {
                 -CampanhaRepository repository
-                +updateCampanha(UUID, Campanha) Optional~Campanha~
+                +updateCampanha(UUID, Campanha) Optional<Campanha>
             }
             class DeleteCampanhaUseCaseImpl {
                 -CampanhaRepository repository
@@ -67,15 +67,15 @@ classDiagram
         }
         class GetCampanhaByIdUseCase {
             <<interface>>
-            +getCampanhaById(UUID) Optional~Campanha~
+            +getCampanhaById(UUID) Optional<Campanha>
         }
         class GetAllCampanhasUseCase {
             <<interface>>
-            +getAllCampanhas() List~Campanha~
+            +getAllCampanhas() List<Campanha>
         }
         class UpdateCampanhaUseCase {
             <<interface>>
-            +updateCampanha(UUID, Campanha) Optional~Campanha~
+            +updateCampanha(UUID, Campanha) Optional<Campanha>
         }
         class DeleteCampanhaUseCase {
             <<interface>>
@@ -95,7 +95,7 @@ classDiagram
 
             class JpaCampanhaRepository {
                 <<JpaRepository>>
-                +findByCampanhaId(UUID) Optional~CampanhaEntity~
+                +findByCampanhaId(UUID) Optional<CampanhaEntity>
                 +existsByCampanhaId(UUID) boolean
                 +deleteByCampanhaId(UUID) void
             }
@@ -104,9 +104,9 @@ classDiagram
                 -JpaCampanhaRepository repository
                 -CampanhaMapper mapper
                 +create(Campanha) Campanha
-                +findById(UUID) Optional~Campanha~
-                +findAll() List~Campanha~
-                +update(UUID, Campanha) Optional~Campanha~
+                +findById(UUID) Optional<Campanha>
+                +findAll() List<Campanha>
+                +update(UUID, Campanha) Optional<Campanha>
                 +deleteByCampanhaId(UUID) boolean
             }
 
@@ -120,11 +120,11 @@ classDiagram
             class CampanhaController {
                 -CampanhaService campanhaService
                 -CampanhaDtoMapper campanhaDtoMapper
-                +findByCampanhaId(UUID) ResponseEntity~CampanhaResponse~
-                +add(CampanhaRequest) ResponseEntity~CampanhaResponse~
-                +getAll() ResponseEntity~List~CampanhaResponse~~
-                +update(UUID, CampanhaRequest) ResponseEntity~CampanhaResponse~
-                +delete(UUID) ResponseEntity~Void~
+                +findByCampanhaId(UUID) ResponseEntity<CampanhaResponse>
+                +add(CampanhaRequest) ResponseEntity<CampanhaResponse>
+                +getAll() ResponseEntity<List<CampanhaResponse>>
+                +update(UUID, CampanhaRequest) ResponseEntity<CampanhaResponse>
+                +delete(UUID) ResponseEntity<Void>
             }
 
             class CampanhaRequest {
