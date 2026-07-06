@@ -25,24 +25,24 @@ classDiagram
         class FacturaPendienteRepository {
             <<interface>>
             +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
-            +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+            +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List<FacturaPendiente>
         }
     }
 
     namespace application {
         class FacturaPendienteService {
             -GetFacturasPendientesUseCase getFacturasPendientesUseCase
-            +findAllFacturasPendientesBetweenDates(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+            +findAllFacturasPendientesBetweenDates(OffsetDateTime, OffsetDateTime) List<FacturaPendiente>
         }
 
         class GetFacturasPendientesUseCaseImpl {
             -FacturaPendienteRepository repository
-            +getFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+            +getFacturasPendientes(OffsetDateTime, OffsetDateTime) List<FacturaPendiente>
         }
 
         class GetFacturasPendientesUseCase {
             <<interface>>
-            +getFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+            +getFacturasPendientes(OffsetDateTime, OffsetDateTime) List<FacturaPendiente>
         }
     }
 
@@ -68,13 +68,13 @@ classDiagram
             class JpaFacturaPendienteRepository {
                 <<JpaRepository>>
                 +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
-                +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendienteEntity~
+                +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List<FacturaPendienteEntity>
             }
 
             class JpaFacturaPendienteRepositoryAdapter {
                 -JpaFacturaPendienteRepository repository
                 +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
-                +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
+                +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List<FacturaPendiente>
             }
         }
     }

@@ -34,7 +34,7 @@ classDiagram
             +String fechaNacimiento
             +String nacionalidad
             +DocumentoPrincipalGuarani documentoPrincipal
-            +List~ContactoGuarani~ contactos
+            +List<ContactoGuarani> contactos
         }
 
         class DocumentoPrincipalGuarani {
@@ -95,7 +95,7 @@ classDiagram
 
         class CheckAllPreuniversitarioWithoutChequeraUseCase {
             <<interface>>
-            +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+            +desmarcarEnviados(List<AlumnoDeteccionRequest>) List<AlumnoDeteccionRequest>
         }
     }
 
@@ -104,7 +104,7 @@ classDiagram
             -CreatePreuniversitarioUseCase createPreuniversitarioUseCase
             -CheckAllPreuniversitarioWithoutChequeraUseCase checkAllPreuniversitarioWithoutChequeraUseCase
             +createPreuniversitario(AlumnoGuarani) AlumnoGuarani
-            +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+            +desmarcarEnviados(List<AlumnoDeteccionRequest>) List<AlumnoDeteccionRequest>
         }
 
         namespace usecases {
@@ -117,7 +117,7 @@ classDiagram
             class CheckAllPreuniversitarioWithoutChequeraUseCaseImpl {
                 -ChequeraSerieService chequeraSerieService
                 -LectivoService lectivoService
-                +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+                +desmarcarEnviados(List<AlumnoDeteccionRequest>) List<AlumnoDeteccionRequest>
             }
         }
 
@@ -131,7 +131,7 @@ classDiagram
             class AlumnoGuaraniController {
                 -AlumnoGuaraniService alumnoGuaraniService
                 +createPreuniversitario(AlumnoGuaraniRequest) AlumnoGuarani
-                +desmarcarEnviadas(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+                +desmarcarEnviadas(List<AlumnoDeteccionRequest>) List<AlumnoDeteccionRequest>
             }
 
             namespace dto {

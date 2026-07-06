@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.33.0** (actualizada: 2026-07-06)
+**Versión actual del servicio: 3.33.1** (actualizada: 2026-07-06)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 

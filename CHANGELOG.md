@@ -2,6 +2,15 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.33.1] - 2026-07-06
+### Fixed
+- fix(docs): Corregida sintaxis de genéricos en 20 diagramas Mermaid de arquitectura hexagonal y secuencia
+  - Cambio de `~` (tilde) a `<>` (angle brackets) para tipos genéricos: `List~Documento~` → `List<Documento>`, `Optional~Facultad~` → `Optional<Facultad>`, `ResponseEntity~List~Foo~~` → `ResponseEntity<List<Foo>>`
+  - Afecta a todos los diagramas `hexagonal-*.mmd` y `sequence-consulta-articulos.mmd`
+  - Sincroniza la sintaxis con la especificación estándar Mermaid (v10+), mejorando la compatibilidad con parsers y herramientas de renderizado
+
+> Basado en `git diff HEAD` (20 archivos modificados, +431/-431 líneas, corrección únicamente sintáctica en diagramas de documentación). Sin cambios en código de aplicación.
+
 ## [3.33.0] - 2026-07-06
 ### Added
 - feat(documento): Nuevo módulo Documento con arquitectura hexagonal completa

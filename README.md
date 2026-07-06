@@ -4,7 +4,14 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.33.0**
+**Versión actual (SemVer): 3.33.1**
+
+## Novedades 3.33.1 (verificado en código)
+- fix(docs): Corregida sintaxis de genéricos Mermaid en 20 diagramas
+  - Cambio de `~` (tilde) a `<>` (angle brackets) en todos los diagramas `hexagonal-*.mmd` y `sequence-consulta-articulos.mmd`
+  - Sincroniza con sintaxis estándar Mermaid v10+, mejorando compatibilidad con parsers
+
+> Basado en `git diff HEAD` (20 archivos modificados, +431/-431 líneas, cambios puramente sintácticos en documentación).
 
 ## Novedades 3.33.0 (verificado en código)
 - feat(documento): Nuevo módulo Documento con arquitectura hexagonal completa
@@ -1031,21 +1038,30 @@ src/
 │   ├── java/
 │   │   └── um/tesoreria/core/
 │   │       ├── hexagonal/
-│   │       │   ├── arancelPorcentaje/        # Módulo ArancelPorcentaje (v3.29.0)
-│   │       │   ├── arancelTipo/              # Módulo ArancelTipo (v3.29.0)
+│   │       │   ├── articulo/                 # Módulo Artículo (v3.13.0)
 │   │       │   ├── asiento/                  # Módulo Asiento (v3.29.0)
 │   │       │   ├── auth/                     # Módulo Auth (v3.6.0)
 │   │       │   ├── baja/                     # Módulo Baja (v3.21.0)
-│   │       │   ├── chequeraCuota/            # Módulo ChequeraCuota (v3.2.0)
-│   │       │   ├── chequeraSerie/            # Módulo ChequeraSerie (v3.21.0)
+│   │       │   ├── chequera/                 # Módulos agrupados de chequera (v3.30.0)
+│   │       │   │   ├── arancelPorcentaje/    # Módulo ArancelPorcentaje (v3.29.0)
+│   │       │   │   ├── arancelTipo/          # Módulo ArancelTipo (v3.29.0)
+│   │       │   │   ├── chequeraCuota/        # Módulo ChequeraCuota (v3.2.0)
+│   │       │   │   ├── chequeraSerie/        # Módulo ChequeraSerie (v3.21.0)
+│   │       │   │   ├── claseChequera/        # Módulo ClaseChequera (v3.30.0)
+│   │       │   │   ├── producto/             # Módulo Producto (v3.30.0)
+│   │       │   │   └── tipoChequera/         # Módulo TipoChequera (v3.30.0)
+│   │       │   ├── contable/                 # Módulos contables (v3.30.0)
+│   │       │   │   └── cuenta/               # Módulo Cuenta (v3.8.0)
 │   │       │   ├── contrato/                 # Módulo Contrato (v3.19.0)
-│   │       │   ├── cuenta/                   # Módulo Cuenta (v3.8.0)
 │   │       │   ├── dependencia/              # Módulo Dependencia (v3.17.0)
+│   │       │   ├── documento/                # Módulo Documento (v3.33.0)
 │   │       │   ├── domicilio/                # Módulo Domicilio (v3.24.0)
 │   │       │   ├── facultad/                 # Módulo Facultad (v3.18.0)
 │   │       │   ├── facturaPendiente/         # Módulo FacturaPendiente (v3.15.0)
 │   │       │   ├── geografica/               # Módulo Geografica (v3.6.0)
 │   │       │   ├── guarani/alumnoGuarani/    # Módulo AlumnoGuarani (v3.29.0)
+│   │       │   ├── lectivo/                  # Módulo Lectivo (v3.30.0)
+│   │       │   ├── lectivoTotalImputacion/   # Módulo LectivoTotalImputacion (v3.31.0)
 │   │       │   ├── mercadoPagoContext/       # Módulo MercadoPagoContext (v3.24.0)
 │   │       │   ├── persona/                  # Módulo Persona (v3.24.0)
 │   │       │   ├── proveedor/                # Módulo Proveedor (v3.9.0)
@@ -1090,14 +1106,12 @@ Daniel Quinteros - daniel.quinterospinto@gmail.com
 
 Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](https://github.com/UM-services/um.tesoreria.core-service)
 
-# UM Tesorería Core Service
-
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.29.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-3.33.1-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

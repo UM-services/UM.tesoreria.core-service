@@ -32,10 +32,10 @@ classDiagram
         class DomicilioRepository {
             <<interface>>
             +create(Domicilio) Domicilio
-            +findById(Long) Optional~Domicilio~
-            +findByUnique(BigDecimal, Integer) Optional~Domicilio~
-            +findFirstByPersonaId(BigDecimal) Optional~Domicilio~
-            +update(Long, Domicilio) Optional~Domicilio~
+            +findById(Long) Optional<Domicilio>
+            +findByUnique(BigDecimal, Integer) Optional<Domicilio>
+            +findFirstByPersonaId(BigDecimal) Optional<Domicilio>
+            +update(Long, Domicilio) Optional<Domicilio>
             +deleteById(Long) boolean
         }
     }
@@ -51,15 +51,15 @@ classDiagram
             -DeleteDomicilioUseCase deleteDomicilioUseCase
             -GetAllDomiciliosByUnifiedsUseCase getAllDomiciliosByUnifiedsUseCase
             -GetDomicilioByPersonaIdUseCase getDomicilioByPersonaIdUseCase
-            +findByDomicilioId(Long) Optional~Domicilio~
+            +findByDomicilioId(Long) Optional<Domicilio>
             +findByUnique(Integer, Integer) Domicilio
             +findWithPagador(Integer, Integer, Integer) Domicilio
-            +findFirstByPersonaId(Integer) Optional~Domicilio~
+            +findFirstByPersonaId(Integer) Optional<Domicilio>
             +create(Domicilio) Domicilio
-            +update(Long, Domicilio) Optional~Domicilio~
+            +update(Long, Domicilio) Optional<Domicilio>
             +sincronize(Domicilio) Domicilio
             +capture(Integer, Integer) Domicilio
-            +findAllByUnifieds(String) List~Domicilio~
+            +findAllByUnifieds(String) List<Domicilio>
             +delete(Long) void
         }
 
@@ -114,19 +114,19 @@ classDiagram
 
             class JpaDomicilioRepository {
                 <<JpaRepository>>
-                +findByDomicilioId(Long) Optional~DomicilioEntity~
-                +findByPersonaIdAndDocumentoId(Integer, Integer) Optional~DomicilioEntity~
-                +findFirstByPersonaId(Integer) Optional~DomicilioEntity~
+                +findByDomicilioId(Long) Optional<DomicilioEntity>
+                +findByPersonaIdAndDocumentoId(Integer, Integer) Optional<DomicilioEntity>
+                +findFirstByPersonaId(Integer) Optional<DomicilioEntity>
             }
 
             class JpaDomicilioRepositoryAdapter {
                 -JpaDomicilioRepository repository
                 -DomicilioMapper mapper
                 +create(Domicilio) Domicilio
-                +findById(Long) Optional~Domicilio~
-            +findByUnique(BigDecimal, Integer) Optional~Domicilio~
-            +findFirstByPersonaId(BigDecimal) Optional~Domicilio~
-            +update(Long, Domicilio) Optional~Domicilio~
+                +findById(Long) Optional<Domicilio>
+            +findByUnique(BigDecimal, Integer) Optional<Domicilio>
+            +findFirstByPersonaId(BigDecimal) Optional<Domicilio>
+            +update(Long, Domicilio) Optional<Domicilio>
             +deleteById(Long) boolean
             }
 
@@ -140,15 +140,15 @@ classDiagram
             class DomicilioController {
                 -DomicilioService domicilioService
                 -DomicilioDtoMapper dtoMapper
-                +findById(Long) ResponseEntity~DomicilioResponse~
-                +findUnique(Integer, Integer) ResponseEntity~DomicilioResponse~
-                +findWithPagador(Integer, Integer, Integer) ResponseEntity~DomicilioResponse~
-                +create(DomicilioRequest) ResponseEntity~DomicilioResponse~
-                +update(Long, DomicilioRequest) ResponseEntity~DomicilioResponse~
-                +sincronize(DomicilioRequest) ResponseEntity~DomicilioResponse~
-                +capture(Integer, Integer) ResponseEntity~DomicilioResponse~
-                +findByUnifieds(String) ResponseEntity~List~DomicilioResponse~~
-                +delete(Long) ResponseEntity~Void~
+                +findById(Long) ResponseEntity<DomicilioResponse>
+                +findUnique(Integer, Integer) ResponseEntity<DomicilioResponse>
+                +findWithPagador(Integer, Integer, Integer) ResponseEntity<DomicilioResponse>
+                +create(DomicilioRequest) ResponseEntity<DomicilioResponse>
+                +update(Long, DomicilioRequest) ResponseEntity<DomicilioResponse>
+                +sincronize(DomicilioRequest) ResponseEntity<DomicilioResponse>
+                +capture(Integer, Integer) ResponseEntity<DomicilioResponse>
+                +findByUnifieds(String) ResponseEntity<List<DomicilioResponse>>
+                +delete(Long) ResponseEntity<Void>
             }
 
             class DomicilioRequest

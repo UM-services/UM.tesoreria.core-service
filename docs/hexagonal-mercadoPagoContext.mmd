@@ -32,16 +32,16 @@ classDiagram
 
         class MercadoPagoContextRepository {
             <<interface>>
-            +findByMercadoPagoContextId(Long) Optional~MercadoPagoContext~
-            +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContext~
-            +findByReservaVacanteIdAndActivo(UUID, Byte) Optional~MercadoPagoContext~
-            +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContext~
-            +findAllActiveChequeraCuota() List~Long~
-            +findAllActiveToChange(OffsetDateTime, OffsetDateTime) List~MercadoPagoContext~
-            +findAllByChequeraCuotaIds(List~Long~) List~MercadoPagoContext~
-            +findAllSinImputar() List~MercadoPagoContext~
+            +findByMercadoPagoContextId(Long) Optional<MercadoPagoContext>
+            +findByChequeraCuotaIdAndActivo(Long, Byte) Optional<MercadoPagoContext>
+            +findByReservaVacanteIdAndActivo(UUID, Byte) Optional<MercadoPagoContext>
+            +findAllByChequeraCuotaIdAndActivo(Long, Byte) List<MercadoPagoContext>
+            +findAllActiveChequeraCuota() List<Long>
+            +findAllActiveToChange(OffsetDateTime, OffsetDateTime) List<MercadoPagoContext>
+            +findAllByChequeraCuotaIds(List<Long>) List<MercadoPagoContext>
+            +findAllSinImputar() List<MercadoPagoContext>
             +save(MercadoPagoContext) MercadoPagoContext
-            +saveAll(List~MercadoPagoContext~) List~MercadoPagoContext~
+            +saveAll(List<MercadoPagoContext>) List<MercadoPagoContext>
         }
     }
 
@@ -59,16 +59,16 @@ classDiagram
             -SaveAllMercadoPagoContextsUseCase saveAllUseCase
             -UpdateMercadoPagoContextUseCase updateUseCase
             +add(MercadoPagoContext) MercadoPagoContext
-            +findById(Long) Optional~MercadoPagoContext~
-            +findActiveByChequeraCuotaId(Long) Optional~MercadoPagoContext~
+            +findById(Long) Optional<MercadoPagoContext>
+            +findActiveByChequeraCuotaId(Long) Optional<MercadoPagoContext>
             +findActiveByReservaVacanteId(UUID) MercadoPagoContext
-            +findAllActiveChequeraCuota() List~Long~
-            +findAllActiveToChange() List~MercadoPagoContext~
-            +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContext~
-            +findAllByChequeraCuotaIds(List~Long~) List~MercadoPagoContext~
-            +findAllSinImputar() List~MercadoPagoContext~
+            +findAllActiveChequeraCuota() List<Long>
+            +findAllActiveToChange() List<MercadoPagoContext>
+            +findAllByChequeraCuotaIdAndActivo(Long, Byte) List<MercadoPagoContext>
+            +findAllByChequeraCuotaIds(List<Long>) List<MercadoPagoContext>
+            +findAllSinImputar() List<MercadoPagoContext>
             +processPaymentEvent(Long, Long) void
-            +saveAll(List~MercadoPagoContext~) List~MercadoPagoContext~
+            +saveAll(List<MercadoPagoContext>) List<MercadoPagoContext>
             +update(MercadoPagoContext) MercadoPagoContext
         }
 
@@ -121,29 +121,29 @@ classDiagram
 
             class JpaMercadoPagoContextRepository {
                 <<JpaRepository>>
-                +findByMercadoPagoContextId(Long) Optional~MercadoPagoContextEntity~
-                +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContextEntity~
-                +findByReservaVacanteId(UUID) Optional~MercadoPagoContextEntity~
-                +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContextEntity~
-                +findAllByActivoAndFechaVencimientoBetween(OffsetDateTime, OffsetDateTime) List~MercadoPagoContextEntity~
-                +findAllByChequeraCuotaIdInAndActivo(List~Long~, Byte) List~MercadoPagoContextEntity~
-                +findAllByActivoOrderByMercadoPagoContextIdDesc() List~MercadoPagoContextEntity~
-                +findAllByStatusAndChequeraPagoIdIsNull(String) List~MercadoPagoContextEntity~
+                +findByMercadoPagoContextId(Long) Optional<MercadoPagoContextEntity>
+                +findByChequeraCuotaIdAndActivo(Long, Byte) Optional<MercadoPagoContextEntity>
+                +findByReservaVacanteId(UUID) Optional<MercadoPagoContextEntity>
+                +findAllByChequeraCuotaIdAndActivo(Long, Byte) List<MercadoPagoContextEntity>
+                +findAllByActivoAndFechaVencimientoBetween(OffsetDateTime, OffsetDateTime) List<MercadoPagoContextEntity>
+                +findAllByChequeraCuotaIdInAndActivo(List<Long>, Byte) List<MercadoPagoContextEntity>
+                +findAllByActivoOrderByMercadoPagoContextIdDesc() List<MercadoPagoContextEntity>
+                +findAllByStatusAndChequeraPagoIdIsNull(String) List<MercadoPagoContextEntity>
             }
 
             class JpaMercadoPagoContextRepositoryAdapter {
                 -JpaMercadoPagoContextRepository repository
                 -MercadoPagoContextMapper mapper
-                +findByMercadoPagoContextId(Long) Optional~MercadoPagoContext~
-                +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContext~
-                +findByReservaVacanteIdAndActivo(UUID, Byte) Optional~MercadoPagoContext~
-                +findAllByChequeraCuotaIdAndActivo(Long, Byte) List~MercadoPagoContext~
-                +findAllActiveChequeraCuota() List~Long~
-                +findAllActiveToChange(OffsetDateTime, OffsetDateTime) List~MercadoPagoContext~
-                +findAllByChequeraCuotaIds(List~Long~) List~MercadoPagoContext~
-                +findAllSinImputar() List~MercadoPagoContext~
+                +findByMercadoPagoContextId(Long) Optional<MercadoPagoContext>
+                +findByChequeraCuotaIdAndActivo(Long, Byte) Optional<MercadoPagoContext>
+                +findByReservaVacanteIdAndActivo(UUID, Byte) Optional<MercadoPagoContext>
+                +findAllByChequeraCuotaIdAndActivo(Long, Byte) List<MercadoPagoContext>
+                +findAllActiveChequeraCuota() List<Long>
+                +findAllActiveToChange(OffsetDateTime, OffsetDateTime) List<MercadoPagoContext>
+                +findAllByChequeraCuotaIds(List<Long>) List<MercadoPagoContext>
+                +findAllSinImputar() List<MercadoPagoContext>
                 +save(MercadoPagoContext) MercadoPagoContext
-                +saveAll(List~MercadoPagoContext~) List~MercadoPagoContext~
+                +saveAll(List<MercadoPagoContext>) List<MercadoPagoContext>
             }
 
             class MercadoPagoContextMapper {
@@ -158,11 +158,11 @@ classDiagram
             class MercadoPagoContextController {
                 -MercadoPagoContextService service
                 -MercadoPagoContextDtoMapper dtoMapper
-                +findByChequeraCuotaIdAndActivo(Long) ResponseEntity~MercadoPagoContextResponse~
-                +findById(Long) ResponseEntity~MercadoPagoContextResponse~
-                +findAllActiveChequeraCuota() ResponseEntity~List~Long~~
-                +findAllActiveToChange() ResponseEntity~List~MercadoPagoContextResponse~~
-                +findAllSinImputar() ResponseEntity~List~MercadoPagoContextResponse~~
+                +findByChequeraCuotaIdAndActivo(Long) ResponseEntity<MercadoPagoContextResponse>
+                +findById(Long) ResponseEntity<MercadoPagoContextResponse>
+                +findAllActiveChequeraCuota() ResponseEntity<List<Long>>
+                +findAllActiveToChange() ResponseEntity<List<MercadoPagoContextResponse>>
+                +findAllSinImputar() ResponseEntity<List<MercadoPagoContextResponse>>
             }
 
             class MercadoPagoContextRequest {
