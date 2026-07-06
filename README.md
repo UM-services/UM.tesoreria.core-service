@@ -4,7 +4,23 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.32.2**
+**Versión actual (SemVer): 3.33.0**
+
+## Novedades 3.33.0 (verificado en código)
+- feat(documento): Nuevo módulo Documento con arquitectura hexagonal completa
+  - Modelo de dominio: `Documento` con campos `documentoId`, `nombre`
+  - 2 puertos de entrada (`GetAllDocumentosUseCase`, `GetDocumentoByIdUseCase`), 2 casos de uso
+  - Servicio de aplicación: `DocumentoService` con métodos `findAll()`, `findByDocumentoId(Integer)`
+  - Adaptador JPA: `JpaDocumentoRepositoryAdapter` con `DocumentoMapper`, `DocumentoEntity` (Java reemplazando `Documento.kt`)
+  - Controlador REST: `DocumentoController` con endpoints `GET /documento/` y `GET /documento/{documentoId}`
+  - DTOs: `DocumentoRequest`, `DocumentoResponse`, `DocumentoDtoMapper`
+  - `DocumentoException` movida a `hexagonal/documento/application/exception/`
+- feat(preuniversitario): Integración de `DocumentoService` en `PreuniversitarioChequeraService.create()`
+  - Validación de `tipoDocumento` > 1 contra BD con fallback a documentoId=1
+  - Previene errores de integridad referencial al crear chequeras desde Guarani
+- feat(docs): Nuevo diagrama Mermaid `hexagonal-documento.mmd` para el módulo Documento
+
+> Basado en análisis profundo de `git diff HEAD` (21 archivos, +337/-120 líneas, incluyendo migración completa del módulo Documento a hexagonal + integración en PreuniversitarioChequeraService) y `pom.xml` (versión 3.32.2 → 3.33.0).
 
 ## Novedades 3.32.0 (verificado en código)
 - feat(mercadopagoContext): Integración de pago MercadoPago con ReservaVacante en `ProcessPaymentEventUseCaseImpl`

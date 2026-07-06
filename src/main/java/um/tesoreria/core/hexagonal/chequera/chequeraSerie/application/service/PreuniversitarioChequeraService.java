@@ -11,6 +11,9 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.Ch
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.documento.application.exception.DocumentoException;
+import um.tesoreria.core.hexagonal.documento.application.service.DocumentoService;
+import um.tesoreria.core.hexagonal.documento.domain.model.Documento;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
@@ -54,6 +57,7 @@ public class PreuniversitarioChequeraService {
     private final ChequeraAlternativaService chequeraAlternativaService;
     private final LectivoCuotaService lectivoCuotaService;
     private final ChequeraCuotaService chequeraCuotaService;
+    private final DocumentoService documentoService;
 
     @Transactional
     public ChequeraSerie create(AlumnoGuarani alumnoGuarani) {
@@ -67,7 +71,15 @@ public class PreuniversitarioChequeraService {
         }
 
         BigDecimal personaId = new BigDecimal(alumnoGuarani.getPersonaRel().getDocumentoPrincipalRel().getNroDocumento());
-        int documentoId = alumnoGuarani.getPersonaRel().getDocumentoPrincipalRel().getTipoDocumentoRel().getTipoDocumento() == 0 ? 1 : 0;
+        int documentoId = alumnoGuarani.getPersonaRel().getDocumentoPrincipalRel().getTipoDocumentoRel().getTipoDocumento() == 0 ? 1 : alumnoGuarani.getPersonaRel().getDocumentoPrincipalRel().getTipoDocumentoRel().getTipoDocumento();
+        // Verifica si el tipo de documento existe, suponemos que casi todos serán tipo 1
+        if (documentoId > 1) {
+            try {
+                documentoService.findByDocumentoId(documentoId);
+            } catch (DocumentoException e) {
+                documentoId = 1;
+            }
+        }
         Persona persona;
         try {
             persona = personaService.findByUnique(personaId, documentoId);

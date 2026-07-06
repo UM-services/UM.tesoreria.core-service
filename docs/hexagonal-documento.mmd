@@ -1,0 +1,101 @@
+---
+title: Arquitectura Hexagonal - Módulo Documento (v3.33.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Documento {
+            +Integer documentoId
+            +String nombre
+        }
+
+        class DocumentoRepository {
+            <<interface>>
+            +findAll() List~Documento~
+            +findById(Integer) Optional~Documento~
+        }
+    }
+
+    namespace application {
+        class DocumentoService {
+            -GetAllDocumentosUseCase getAllDocumentosUseCase
+            -GetDocumentoByIdUseCase getDocumentoByIdUseCase
+            +findAll() List~Documento~
+            +findByDocumentoId(Integer) Documento
+        }
+
+        namespace usecases {
+            class GetAllDocumentosUseCaseImpl
+            class GetDocumentoByIdUseCaseImpl
+        }
+
+        class GetAllDocumentosUseCase { <<interface>> }
+        class GetDocumentoByIdUseCase { <<interface>> }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class DocumentoEntity {
+                +Integer documentoId
+                +String nombre
+            }
+
+            class JpaDocumentoRepository {
+                <<JpaRepository>>
+                +findByDocumentoId(Integer) Optional~DocumentoEntity~
+            }
+
+            class JpaDocumentoRepositoryAdapter {
+                -JpaDocumentoRepository repository
+                -DocumentoMapper mapper
+                +findAll() List~Documento~
+                +findById(Integer) Optional~Documento~
+            }
+
+            class DocumentoMapper {
+                +toDomain(DocumentoEntity) Documento
+                +toEntity(Documento) DocumentoEntity
+            }
+        }
+
+        namespace web {
+            class DocumentoController {
+                -DocumentoService service
+                -DocumentoDtoMapper dtoMapper
+                +findAll() ResponseEntity~List~DocumentoResponse~~
+                +findByDocumentoId(Integer) ResponseEntity~DocumentoResponse~
+            }
+
+            class DocumentoRequest
+            class DocumentoResponse
+            class DocumentoDtoMapper {
+                +toDomain(DocumentoRequest) Documento
+                +toResponse(Documento) DocumentoResponse
+            }
+        }
+    }
+
+    DocumentoService --> GetAllDocumentosUseCase : uses
+    DocumentoService --> GetDocumentoByIdUseCase : uses
+
+    GetAllDocumentosUseCaseImpl ..|> GetAllDocumentosUseCase : implements
+    GetDocumentoByIdUseCaseImpl ..|> GetDocumentoByIdUseCase : implements
+
+    GetAllDocumentosUseCaseImpl --> DocumentoRepository : uses
+    GetDocumentoByIdUseCaseImpl --> DocumentoRepository : uses
+
+    JpaDocumentoRepositoryAdapter ..|> DocumentoRepository : implements
+    JpaDocumentoRepositoryAdapter --> JpaDocumentoRepository : uses
+    JpaDocumentoRepositoryAdapter --> DocumentoMapper : uses
+
+    DocumentoMapper --> Documento : maps
+    DocumentoMapper --> DocumentoEntity : maps
+    JpaDocumentoRepository --> DocumentoEntity : persists
+
+    DocumentoController --> DocumentoService : calls
+    DocumentoController --> DocumentoDtoMapper : uses
+    DocumentoDtoMapper --> Documento : maps
+    DocumentoDtoMapper --> DocumentoRequest : maps
+    DocumentoDtoMapper --> DocumentoResponse : maps
