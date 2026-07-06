@@ -247,11 +247,11 @@ classDiagram
     LectivoTotalImputacionMapper --> LectivoTotalImputacionEntity : maps
     JpaLectivoTotalImputacionRepository --> LectivoTotalImputacionEntity : persists
 
-    LectivoTotalImputacionEntity --> FacultadEntity : references (via FacultadMapper)
-    LectivoTotalImputacionEntity --> LectivoEntity : references (via LectivoMapper)
-    LectivoTotalImputacionEntity --> TipoChequeraEntity : references (via TipoChequeraMapper)
-    LectivoTotalImputacionEntity --> ProductoEntity : references (via ProductoMapper)
-    LectivoTotalImputacionEntity --> CuentaEntity : references (via CuentaMapper)
+    LectivoTotalImputacionEntity --> FacultadEntity : "references (via FacultadMapper)"
+    LectivoTotalImputacionEntity --> LectivoEntity : "references (via LectivoMapper)"
+    LectivoTotalImputacionEntity --> TipoChequeraEntity : "references (via TipoChequeraMapper)"
+    LectivoTotalImputacionEntity --> ProductoEntity : "references (via ProductoMapper)"
+    LectivoTotalImputacionEntity --> CuentaEntity : "references (via CuentaMapper)"
 
     LectivoTotalImputacionController --> LectivoTotalImputacionService : calls
     LectivoTotalImputacionController --> LectivoTotalImputacionDtoMapper : uses

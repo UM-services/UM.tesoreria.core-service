@@ -2,6 +2,36 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.33.0] - 2026-07-06
+### Added
+- feat(documento): Nuevo módulo Documento con arquitectura hexagonal completa
+  - Modelo de dominio: `Documento` con campos `documentoId`, `nombre`
+  - Puertos de entrada (2): `GetAllDocumentosUseCase`, `GetDocumentoByIdUseCase`
+  - Puerto de salida: `DocumentoRepository` con métodos `findAll()`, `findById(Integer)`
+  - Casos de uso: `GetAllDocumentosUseCaseImpl`, `GetDocumentoByIdUseCaseImpl`
+  - Servicio de aplicación: `DocumentoService` con métodos `findAll()`, `findByDocumentoId(Integer)`
+  - Adaptador JPA: `JpaDocumentoRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `DocumentoEntity` reemplazando `Documento.kt` (Kotlin legacy)
+  - Repositorio JPA: `JpaDocumentoRepository` con consulta `findByDocumentoId`
+  - Mapper: `DocumentoMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `DocumentoController` con endpoints `GET /documento/` y `GET /documento/{documentoId}`
+  - DTOs: `DocumentoRequest`, `DocumentoResponse`
+  - DTO Mapper: `DocumentoDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `DocumentoException` movida a `hexagonal/documento/application/exception/`
+- feat(preuniversitario): Integración de `DocumentoService` en `PreuniversitarioChequeraService.create()`
+  - Validación de `tipoDocumento` > 1 contra BD antes de asignar documentoId
+  - Fallback a documentoId=1 si el tipo de documento no existe en la base de datos
+  - Previene errores de integridad referencial al crear chequeras desde Guarani con tipos de documento no registrados
+- feat(docs): Nuevo diagrama Mermaid `hexagonal-documento.mmd` para el módulo Documento
+
+### Removed
+- Eliminación de `Documento.kt` (Kotlin legacy) del paquete `core/kotlin/model/`
+- Eliminación de `DocumentoRepository.java` (legacy) del paquete `core/repository/`
+- Eliminación de `DocumentoService.java` (legacy) del paquete `core/service/`
+- Eliminación de `DocumentoController.java` (legacy) del paquete `core/controller/`
+
+> Basado en análisis profundo de `git diff HEAD` (21 archivos, +337/-120 líneas, incluyendo migración completa del módulo Documento a hexagonal + integración en PreuniversitarioChequeraService) y `pom.xml` (versión 3.32.2 → 3.33.0).
+
 ## [3.32.2] - 2026-07-05
 ### Fixed
 - fix(domicilio): Null-safety en campos email de `JpaDomicilioRepositoryAdapter` y `DomicilioMapper`
