@@ -71,6 +71,8 @@ public class ChequeraCuotaDtoMapper {
                 .manual(domain.getManual())
                 .compensada(domain.getCompensada())
                 .tramoId(domain.getTramoId())
+                .facultad(domain.getFacultad())
+                .tipoChequera(domain.getTipoChequera())
                 .producto(domain.getProducto())
                 .chequeraSerie(domain.getChequeraSerie())
                 .build();

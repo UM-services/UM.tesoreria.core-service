@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Facultad (v3.18.0)
+title: Arquitectura Hexagonal - Módulo Facultad (v3.34.0)
 ---
 
 classDiagram
@@ -16,6 +16,7 @@ classDiagram
             +BigDecimal cuentacontable
             +String apiserver
             +Long apiport
+            +Integer guaraniResponsableAcademica
             +OffsetDateTime fechaAuditoria
             +String usuarioAuditoria
         }
@@ -86,6 +87,7 @@ classDiagram
                 +BigDecimal cuentacontable
                 +String apiserver
                 +Long apiport
+                +Integer guaraniResponsableAcademica
             }
 
             class JpaFacultadRepository {
@@ -129,6 +131,7 @@ classDiagram
                 +BigDecimal cuentacontable
                 +String apiserver
                 +Long apiport
+                +Integer guaraniResponsableAcademica
             }
 
             class FacultadDtoMapper {

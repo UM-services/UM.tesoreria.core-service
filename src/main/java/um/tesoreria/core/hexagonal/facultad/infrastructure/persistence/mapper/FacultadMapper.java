@@ -17,6 +17,7 @@ public class FacultadMapper {
                 .cuentacontable(entity.getCuentacontable())
                 .apiserver(entity.getApiserver())
                 .apiport(entity.getApiport())
+                .guaraniResponsableAcademica(entity.getGuaraniResponsableAcademica())
                 .build();
     }
 }

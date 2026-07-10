@@ -6,7 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -15,7 +18,7 @@ import java.time.OffsetDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChequeraCuota {
+public class ChequeraCuota implements Jsonifyable {
 
     private Long chequeraCuotaId;
     private Long chequeraId;
@@ -45,16 +48,14 @@ public class ChequeraCuota {
     private Byte compensada;
     private Integer tramoId;
 
+    private Facultad facultad;
+    private TipoChequera tipoChequera;
     private Producto producto;
     private ChequeraSerie chequeraSerie;
 
     public String cuotaKey() {
         return this.facultadId + "." + this.tipoChequeraId + "." + this.chequeraSerieId + "." + this.productoId + "."
                 + this.alternativaId + "." + this.cuotaId;
-    }
-
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
     }
 
 }

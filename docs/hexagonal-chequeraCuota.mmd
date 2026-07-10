@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.30.0)
+title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.34.0)
 ---
 
 classDiagram
@@ -38,6 +38,8 @@ classDiagram
 
         class Producto
         class ChequeraSerie
+        class Facultad
+        class TipoChequera
 
         class ChequeraCuotaRepository {
             <<interface>>
@@ -166,6 +168,10 @@ classDiagram
 
             class JpaChequeraCuotaRepositoryAdapter
             class ChequeraCuotaMapper {
+                -FacultadMapper facultadMapper
+                -TipoChequeraMapper tipoChequeraMapper
+                -ProductoMapper productoMapper
+                -ChequeraSerieMapper chequeraSerieMapper
                 +toDomain(ChequeraCuotaEntity) ChequeraCuota
                 +toEntity(ChequeraCuota) ChequeraCuotaEntity
             }
@@ -207,6 +213,8 @@ classDiagram
                 +BigDecimal importe1
                 +OffsetDateTime vencimiento1
                 +String codigoBarras
+                +Facultad facultad
+                +TipoChequera tipoChequera
                 +Producto producto
                 +ChequeraSerie chequeraSerie
             }
@@ -224,6 +232,8 @@ classDiagram
         class LectivoService
     }
 
+    ChequeraCuota --> Facultad : references
+    ChequeraCuota --> TipoChequera : references
     ChequeraCuota --> Producto : references
     ChequeraCuota --> ChequeraSerie : references
 
@@ -296,6 +306,8 @@ classDiagram
 
     ChequeraCuotaMapper --> ChequeraCuota : maps
     ChequeraCuotaMapper --> ChequeraCuotaEntity : maps
+    ChequeraCuotaMapper --> FacultadMapper : uses
+    ChequeraCuotaMapper --> TipoChequeraMapper : uses
     JpaChequeraCuotaRepository --> ChequeraCuotaEntity : persists
 
     ChequeraCuotaController --> ChequeraCuotaService : calls

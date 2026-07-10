@@ -21,6 +21,7 @@ public class Facultad {
     private BigDecimal cuentacontable;
     private String apiserver;
     private Long apiport;
+    private Integer guaraniResponsableAcademica;
     private OffsetDateTime fechaAuditoria;
     private String usuarioAuditoria;
 }

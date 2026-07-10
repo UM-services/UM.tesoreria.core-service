@@ -17,6 +17,7 @@ public class FacultadDtoMapper {
                 .cuentacontable(domain.getCuentacontable())
                 .apiserver(domain.getApiserver())
                 .apiport(domain.getApiport())
+                .guaraniResponsableAcademica(domain.getGuaraniResponsableAcademica())
                 .build();
     }
 }
