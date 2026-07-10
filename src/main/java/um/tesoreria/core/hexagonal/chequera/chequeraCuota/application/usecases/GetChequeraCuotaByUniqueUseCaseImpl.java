@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.usecases;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.GetChequeraCuotaByUniqueUseCase;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class GetChequeraCuotaByUniqueUseCaseImpl implements GetChequeraCuotaByUniqueUseCase {
 
     private final ChequeraCuotaRepository repository;
@@ -20,9 +22,11 @@ public class GetChequeraCuotaByUniqueUseCaseImpl implements GetChequeraCuotaByUn
 
     @Override
     public Optional<ChequeraCuota> getChequeraCuotaByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId) {
+        log.debug("\n\nProcessing GetChequeraCuotaByUniqueUseCaseImpl.getChequeraCuotaByUnique\n\n");
         Optional<ChequeraCuota> optionalCuota = repository.findByUnique(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
         if (optionalCuota.isPresent()) {
             ChequeraCuota chequeraCuota = optionalCuota.get();
+            log.debug("ChequeraCuota: {}", chequeraCuota.jsonify());
             if (chequeraCuota.getChequeraId() == null) {
                 ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
                 chequeraCuota.setChequeraId(chequeraSerie.getChequeraId());

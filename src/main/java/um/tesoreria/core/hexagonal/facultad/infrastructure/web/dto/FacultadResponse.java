@@ -18,4 +18,5 @@ public class FacultadResponse {
     private BigDecimal cuentacontable;
     private String apiserver;
     private Long apiport;
+    private Integer guaraniResponsableAcademica;
 }

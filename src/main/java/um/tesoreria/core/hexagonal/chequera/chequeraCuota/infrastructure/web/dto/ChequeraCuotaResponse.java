@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -44,6 +46,8 @@ public class ChequeraCuotaResponse {
     private Byte compensada;
     private Integer tramoId;
 
+    private Facultad facultad;
+    private TipoChequera tipoChequera;
     private Producto producto;
     private ChequeraSerie chequeraSerie;
 

@@ -4,7 +4,18 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.33.1**
+**Versión actual (SemVer): 3.34.0**
+
+## Novedades 3.34.0 (verificado en código)
+- feat(chequeraCuota): Enriquecimiento del modelo de dominio `ChequeraCuota` con asociaciones a `Facultad` y `TipoChequera`
+  - Nuevos campos `Facultad facultad` y `TipoChequera tipoChequera` en dominio, mapper, DTOs y respuesta REST
+  - `ChequeraCuotaMapper` inyecta `FacultadMapper` y `TipoChequeraMapper` para mapeo completo
+  - Actualización de constructores en `PreuniversitarioChequeraService` y `SpoterService`
+- feat(facultad): Nuevo campo `guaraniResponsableAcademica` (Integer) en Facultad (domain, entity, mapper, DTOs)
+- feat(util): Nueva interfaz `Jsonifyable` con método `jsonify()` por defecto — `ChequeraCuota` la implementa en lugar de definir `jsonify()` manualmente
+- refactor(chequeraCuota): Añadido `@Slf4j` y logging debug en `GetChequeraCuotaByUniqueUseCaseImpl`
+
+> Basado en análisis profundo de `git diff HEAD` (13 archivos staged, +39/-7 líneas) y `pom.xml` (versión 3.33.0 → 3.34.0).
 
 ## Novedades 3.33.1 (verificado en código)
 - fix(docs): Corregida sintaxis de genéricos Mermaid en 20 diagramas
@@ -29,18 +40,6 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 
 > Basado en análisis profundo de `git diff HEAD` (21 archivos, +337/-120 líneas, incluyendo migración completa del módulo Documento a hexagonal + integración en PreuniversitarioChequeraService) y `pom.xml` (versión 3.32.2 → 3.33.0).
 
-## Novedades 3.32.0 (verificado en código)
-- feat(mercadopagoContext): Integración de pago MercadoPago con ReservaVacante en `ProcessPaymentEventUseCaseImpl`
-  - Nuevo flujo condicional: si `MercadoPagoContext.reservaVacanteId != null`, procesa el pago como reserva de vacante en lugar de cuota
-  - Al recibir evento `approved`, actualiza el estado de `ReservaVacante` a `"pagado"` vía `ReservaVacanteService`
-  - Nuevo campo `reservaVacanteId` (UUID) en `PaymentProcessedEvent`
-- feat(reservaVacante): Nuevo `UpdateReservaVacanteUseCase` con implementación y adaptador JPA
-  - Nuevo método `updateReservaVacante(ReservaVacante, UUID)` en `ReservaVacanteService`
-  - Nuevo método `update(ReservaVacante, UUID)` en `ReservaVacanteRepository` y `JpaReservaVacanteRepositoryAdapter`
-- feat(docs): Diagrama hexagonal-reservaVacante.mmd actualizado con UpdateReservaVacanteUseCase
-
-> Basado en análisis profundo de `git diff HEAD` (8 archivos modificados, +68/-15 líneas) y `pom.xml` (versión 3.31.0 → 3.32.0).
-
 ## Novedades 3.32.2 (verificado en código)
 - fix(domicilio): Null-safety en campos email de `JpaDomicilioRepositoryAdapter` y `DomicilioMapper`
   - `JpaDomicilioRepositoryAdapter.update()`: Asigna string vacío si `emailPersonal` o `emailInstitucional` es null al actualizar domicilio en BD
@@ -56,6 +55,18 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
   - Evita `NullPointerException` y envío de chequeras incompletas cuando falla la creación de persona o domicilio desde Guarani
 
 > Basado en análisis profundo de `git diff HEAD` (2 archivos modificados, +17/-0 líneas) y `pom.xml` (versión 3.32.0 → 3.32.1).
+
+## Novedades 3.32.0 (verificado en código)
+- feat(mercadopagoContext): Integración de pago MercadoPago con ReservaVacante en `ProcessPaymentEventUseCaseImpl`
+  - Nuevo flujo condicional: si `MercadoPagoContext.reservaVacanteId != null`, procesa el pago como reserva de vacante en lugar de cuota
+  - Al recibir evento `approved`, actualiza el estado de `ReservaVacante` a `"pagado"` vía `ReservaVacanteService`
+  - Nuevo campo `reservaVacanteId` (UUID) en `PaymentProcessedEvent`
+- feat(reservaVacante): Nuevo `UpdateReservaVacanteUseCase` con implementación y adaptador JPA
+  - Nuevo método `updateReservaVacante(ReservaVacante, UUID)` en `ReservaVacanteService`
+  - Nuevo método `update(ReservaVacante, UUID)` en `ReservaVacanteRepository` y `JpaReservaVacanteRepositoryAdapter`
+- feat(docs): Diagrama hexagonal-reservaVacante.mmd actualizado con UpdateReservaVacanteUseCase
+
+> Basado en análisis profundo de `git diff HEAD` (8 archivos modificados, +68/-15 líneas) y `pom.xml` (versión 3.31.0 → 3.32.0).
 
 ## Novedades 3.31.0 (verificado en código)
 - feat(lectivoTotalImputacion): Nuevo caso de uso `FindAllByLectivoUseCase` y endpoint `GET /lectivo/{lectivoId}`

@@ -46,6 +46,8 @@ public class FacultadEntity extends Auditable {
     @Column(name = "api_server")
     private String apiserver = "";
 
+    private Integer guaraniResponsableAcademica;
+
     @Builder.Default
     @Column(name = "api_port")
     private Long apiport = 0L;

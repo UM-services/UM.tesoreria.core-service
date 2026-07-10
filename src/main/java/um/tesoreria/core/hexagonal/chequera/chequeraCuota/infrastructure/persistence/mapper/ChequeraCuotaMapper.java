@@ -10,6 +10,8 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persist
 import um.tesoreria.core.hexagonal.chequera.producto.infrastructure.persistence.mapper.ProductoMapper;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.mapper.ChequeraSerieMapper;
+import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.mapper.FacultadMapper;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.mapper.TipoChequeraMapper;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +19,8 @@ public class ChequeraCuotaMapper {
 
     private final ProductoMapper productoMapper;
     private final ChequeraSerieMapper chequeraSerieMapper;
+    private final FacultadMapper facultadMapper;
+    private final TipoChequeraMapper tipoChequeraMapper;
 
     public ChequeraCuota toDomain(ChequeraCuotaEntity entity) {
         if (entity == null) {
@@ -50,6 +54,8 @@ public class ChequeraCuotaMapper {
                 .manual(entity.getManual())
                 .compensada(entity.getCompensada())
                 .tramoId(entity.getTramoId())
+                .facultad(facultadMapper.toDomain(entity.getFacultad()))
+                .tipoChequera(tipoChequeraMapper.toDomainModel(entity.getTipoChequera()))
                 .producto(productoMapper.toDomainModel(entity.getProducto()))
                 .chequeraSerie(chequeraSerieMapper.toDomainModel(entity.getChequeraSerie()))
                 .build();

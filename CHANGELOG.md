@@ -2,6 +2,31 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.34.0] - 2026-07-10
+### Added
+- feat(chequeraCuota): Enriquecimiento del modelo de dominio `ChequeraCuota` con nuevas asociaciones a `Facultad` y `TipoChequera`
+  - Nuevos campos `Facultad facultad` y `TipoChequera tipoChequera` en `ChequeraCuota` domain model
+  - `ChequeraCuotaMapper.toDomain()`: mapeo de nuevas asociaciones desde `FacultadMapper` y `TipoChequeraMapper` inyectados
+  - `ChequeraCuotaResponse`: expone objetos `Facultad` y `TipoChequera` en respuestas REST
+  - `ChequeraCuotaDtoMapper.toResponse()`: mapeo de nuevas asociaciones del dominio al DTO
+  - Actualización de constructores en `PreuniversitarioChequeraService` y `SpoterService` con parámetros null para las nuevas asociaciones
+- feat(facultad): Nuevo campo `guaraniResponsableAcademica` (Integer) en el módulo Facultad
+  - `Facultad` domain model: nuevo campo `guaraniResponsableAcademica`
+  - `FacultadEntity`: persistencia del campo con mapeo JPA automático
+  - `FacultadMapper.toDomain()`: mapeo del nuevo campo
+  - `FacultadResponse`: expone el campo en respuestas REST
+  - `FacultadDtoMapper.toResponse()`: mapeo del nuevo campo al DTO
+- feat(util): Nueva interfaz `Jsonifyable` con método `jsonify()` por defecto
+  - Interfaz `Jsonifyable` en `core/util/` con implementación por defecto que delega a `Jsonifier.builder(this).build()`
+  - `ChequeraCuota` ahora implementa `Jsonifyable`, eliminando la implementación manual de `jsonify()`
+
+### Changed
+- refactor(chequeraCuota): `ChequeraCuota` implementa `Jsonifyable` en lugar de definir `jsonify()` manualmente
+  - Eliminación del método `jsonify()` en `ChequeraCuota.java` (ahora se hereda de la interfaz)
+  - `GetChequeraCuotaByUniqueUseCaseImpl`: añadido `@Slf4j` y logging debug con `jsonify()`
+
+> Basado en análisis profundo de `git diff HEAD` (13 archivos staged, +39/-7 líneas) y `pom.xml` (versión 3.33.0 → 3.34.0).
+
 ## [3.33.1] - 2026-07-06
 ### Fixed
 - fix(docs): Corregida sintaxis de genéricos en 20 diagramas Mermaid de arquitectura hexagonal y secuencia
