@@ -18,22 +18,24 @@ public class ProveedorMapper {
 
     public ProveedorEntity toEntity(Proveedor domain) {
         if (domain == null) return null;
-        return ProveedorEntity.builder()
+        ProveedorEntity.ProveedorEntityBuilder builder = ProveedorEntity.builder()
                 .proveedorId(domain.getProveedorId())
-                .cuit(domain.getCuit())
-                .nombreFantasia(domain.getNombreFantasia())
-                .razonSocial(domain.getRazonSocial())
-                .ordenCheque(domain.getOrdenCheque())
-                .domicilio(domain.getDomicilio())
-                .telefono(domain.getTelefono())
-                .fax(domain.getFax())
-                .celular(domain.getCelular())
-                .email(domain.getEmail())
-                .emailInterno(domain.getEmailInterno())
-                .numeroCuenta(domain.getNumeroCuenta())
-                .habilitado(domain.getHabilitado())
-                .cbu(domain.getCbu())
-                .build();
+                .numeroCuenta(domain.getNumeroCuenta());
+        
+        if (domain.getCuit() != null) builder.cuit(domain.getCuit());
+        if (domain.getNombreFantasia() != null) builder.nombreFantasia(domain.getNombreFantasia());
+        if (domain.getRazonSocial() != null) builder.razonSocial(domain.getRazonSocial());
+        if (domain.getOrdenCheque() != null) builder.ordenCheque(domain.getOrdenCheque());
+        if (domain.getDomicilio() != null) builder.domicilio(domain.getDomicilio());
+        if (domain.getTelefono() != null) builder.telefono(domain.getTelefono());
+        if (domain.getFax() != null) builder.fax(domain.getFax());
+        if (domain.getCelular() != null) builder.celular(domain.getCelular());
+        if (domain.getEmail() != null) builder.email(domain.getEmail());
+        if (domain.getEmailInterno() != null) builder.emailInterno(domain.getEmailInterno());
+        if (domain.getHabilitado() != null) builder.habilitado(domain.getHabilitado());
+        if (domain.getCbu() != null) builder.cbu(domain.getCbu());
+        
+        return builder.build();
     }
 
     public Proveedor toDomainModel(ProveedorEntity entity) {

@@ -40,16 +40,18 @@ public class TipoChequeraMapper {
 
     public TipoChequeraEntity toEntity(TipoChequera domain) {
         if (domain == null) return null;
-        return TipoChequeraEntity.builder()
+        TipoChequeraEntity.TipoChequeraEntityBuilder builder = TipoChequeraEntity.builder()
                 .tipoChequeraId(domain.getTipoChequeraId())
-                .nombre(domain.getNombre())
-                .prefijo(domain.getPrefijo())
-                .geograficaId(domain.getGeograficaId())
-                .claseChequeraId(domain.getClaseChequeraId())
-                .imprimir(domain.getImprimir())
-                .contado(domain.getContado())
-                .multiple(domain.getMultiple())
-                .emailCopia(domain.getEmailCopia())
-                .build();
+                .emailCopia(domain.getEmailCopia());
+        
+        if (domain.getNombre() != null) builder.nombre(domain.getNombre());
+        if (domain.getPrefijo() != null) builder.prefijo(domain.getPrefijo());
+        if (domain.getGeograficaId() != null) builder.geograficaId(domain.getGeograficaId());
+        if (domain.getClaseChequeraId() != null) builder.claseChequeraId(domain.getClaseChequeraId());
+        if (domain.getImprimir() != null) builder.imprimir(domain.getImprimir());
+        if (domain.getContado() != null) builder.contado(domain.getContado());
+        if (domain.getMultiple() != null) builder.multiple(domain.getMultiple());
+        
+        return builder.build();
     }
 }

@@ -25,7 +25,14 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
   - Eliminación del método `jsonify()` en `ChequeraCuota.java` (ahora se hereda de la interfaz)
   - `GetChequeraCuotaByUniqueUseCaseImpl`: añadido `@Slf4j` y logging debug con `jsonify()`
 
-> Basado en análisis profundo de `git diff HEAD` (13 archivos staged, +39/-7 líneas) y `pom.xml` (versión 3.33.0 → 3.34.0).
+### Fixed
+- fix(mappers): Null-safety en 16 mappers de persistencia hexagonal
+  - `toEntity()`: Cambio de `return Entity.builder()...build()` a builder intermedio con validación `!= null` antes de setear cada campo
+  - `updateEntity()`: Añadidas validaciones `!= null` antes de cada `setField()` en `ChequeraCuotaMapper`
+  - Afecta: `ArticuloMapper`, `ArancelPorcentajeMapper`, `ArancelTipoMapper`, `ChequeraCuotaMapper`, `ChequeraSerieMapper`, `ClaseChequeraMapper`, `ProductoMapper`, `TipoChequeraMapper`, `CuentaMapper`, `ContratoMapper`, `DependenciaMapper`, `DocumentoMapper`, `DomicilioMapper`, `LectivoMapper`, `MercadoPagoContextMapper`, `ProveedorMapper`
+  - Previene `NullPointerException` en persistencia cuando campos opcionales del dominio son nulos
+
+> Basado en análisis profundo de `git diff HEAD` (16 archivos staged, +200/-161 líneas) y `pom.xml` (versión 3.33.0 → 3.34.0).
 
 ## [3.33.1] - 2026-07-06
 ### Fixed

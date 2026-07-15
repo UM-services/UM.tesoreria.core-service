@@ -17,10 +17,14 @@ public class DocumentoMapper {
 
     public DocumentoEntity toEntity(Documento domain) {
         if (domain == null) return null;
-        return DocumentoEntity.builder()
-                .documentoId(domain.getDocumentoId())
-                .nombre(domain.getNombre())
-                .build();
+        DocumentoEntity.DocumentoEntityBuilder builder = DocumentoEntity.builder()
+                .documentoId(domain.getDocumentoId());
+        
+        if (domain.getNombre() != null) {
+            builder.nombre(domain.getNombre());
+        }
+        
+        return builder.build();
     }
 
 }

@@ -19,11 +19,13 @@ public class LectivoMapper {
 
     public LectivoEntity toEntity(Lectivo domain) {
         if (domain == null) return null;
-        return LectivoEntity.builder()
+        LectivoEntity.LectivoEntityBuilder builder = LectivoEntity.builder()
                 .lectivoId(domain.getLectivoId())
-                .nombre(domain.getNombre())
                 .fechaInicio(domain.getFechaInicio())
-                .fechaFinal(domain.getFechaFinal())
-                .build();
+                .fechaFinal(domain.getFechaFinal());
+        
+        if (domain.getNombre() != null) builder.nombre(domain.getNombre());
+        
+        return builder.build();
     }
 }

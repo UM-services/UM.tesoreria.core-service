@@ -11,7 +11,7 @@ public class ContratoMapper {
         if (contrato == null) {
             return null;
         }
-        return ContratoEntity.builder()
+        ContratoEntity.ContratoEntityBuilder builder = ContratoEntity.builder()
                 .contratoId(contrato.getContratoId())
                 .personaId(contrato.getPersonaId())
                 .documentoId(contrato.getDocumentoId())
@@ -22,18 +22,20 @@ public class ContratoMapper {
                 .geograficaId(contrato.getGeograficaId())
                 .cargoMateriaId(contrato.getCargoMateriaId())
                 .primerVencimiento(contrato.getPrimerVencimiento())
-                .cargo(contrato.getCargo())
-                .montoFijo(contrato.getMontoFijo())
-                .canonMensual(contrato.getCanonMensual())
-                .canonMensualSinAjuste(contrato.getCanonMensualSinAjuste())
-                .hasta(contrato.getHasta())
-                .canonMensualLetras(contrato.getCanonMensualLetras())
-                .canonTotal(contrato.getCanonTotal())
-                .canonTotalLetras(contrato.getCanonTotalLetras())
-                .meses(contrato.getMeses())
-                .mesesLetras(contrato.getMesesLetras())
-                .ajuste(contrato.getAjuste())
-                .build();
+                .hasta(contrato.getHasta());
+
+        if (contrato.getCargo() != null) builder.cargo(contrato.getCargo());
+        if (contrato.getMontoFijo() != null) builder.montoFijo(contrato.getMontoFijo());
+        if (contrato.getCanonMensual() != null) builder.canonMensual(contrato.getCanonMensual());
+        if (contrato.getCanonMensualSinAjuste() != null) builder.canonMensualSinAjuste(contrato.getCanonMensualSinAjuste());
+        if (contrato.getCanonMensualLetras() != null) builder.canonMensualLetras(contrato.getCanonMensualLetras());
+        if (contrato.getCanonTotal() != null) builder.canonTotal(contrato.getCanonTotal());
+        if (contrato.getCanonTotalLetras() != null) builder.canonTotalLetras(contrato.getCanonTotalLetras());
+        if (contrato.getMeses() != null) builder.meses(contrato.getMeses());
+        if (contrato.getMesesLetras() != null) builder.mesesLetras(contrato.getMesesLetras());
+        if (contrato.getAjuste() != null) builder.ajuste(contrato.getAjuste());
+
+        return builder.build();
     }
 
     public Contrato toDomainModel(ContratoEntity entity) {

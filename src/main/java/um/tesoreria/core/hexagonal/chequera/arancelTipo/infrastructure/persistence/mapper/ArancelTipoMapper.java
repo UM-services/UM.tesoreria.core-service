@@ -20,12 +20,14 @@ public class ArancelTipoMapper {
 
     public ArancelTipoEntity toEntity(ArancelTipo domain) {
         if (domain == null) return null;
-        return ArancelTipoEntity.builder()
+        ArancelTipoEntity.ArancelTipoEntityBuilder builder = ArancelTipoEntity.builder()
                 .arancelTipoId(domain.getArancelTipoId())
-                .descripcion(domain.getDescripcion())
-                .medioArancel(domain.getMedioArancel())
-                .arancelTipoIdCompleto(domain.getArancelTipoIdCompleto())
-                .habilitado(domain.getHabilitado())
-                .build();
+                .arancelTipoIdCompleto(domain.getArancelTipoIdCompleto());
+        
+        if (domain.getDescripcion() != null) builder.descripcion(domain.getDescripcion());
+        if (domain.getMedioArancel() != null) builder.medioArancel(domain.getMedioArancel());
+        if (domain.getHabilitado() != null) builder.habilitado(domain.getHabilitado());
+        
+        return builder.build();
     }
 }
