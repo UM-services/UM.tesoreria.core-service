@@ -70,7 +70,7 @@ public class ChequeraSerieMapper {
 
     public ChequeraSerieEntity toEntity(ChequeraSerie domain) {
         if (domain == null) return null;
-        return ChequeraSerieEntity.builder()
+        ChequeraSerieEntity.ChequeraSerieEntityBuilder builder = ChequeraSerieEntity.builder()
                 .chequeraId(domain.getChequeraId())
                 .facultadId(domain.getFacultadId())
                 .tipoChequeraId(domain.getTipoChequeraId())
@@ -88,19 +88,21 @@ public class ChequeraSerieMapper {
                 .alternativaId(domain.getAlternativaId())
                 .algoPagado(domain.getAlgoPagado())
                 .tipoImpresionId(domain.getTipoImpresionId())
-                .flagPayperTic(domain.getFlagPayperTic())
                 .usuarioId(domain.getUsuarioId())
-                .enviado(domain.getEnviado())
-                .retenida(domain.getRetenida())
                 .version(domain.getVersion())
-                .hpum(domain.getHpum())
-                .becaPorcentaje(domain.getBecaPorcentaje())
                 .becaResolucion(domain.getBecaResolucion())
                 .becaFecha(domain.getBecaFecha())
                 .becaUserId(domain.getBecaUserId())
-                .cuotasDeuda(domain.getCuotasDeuda())
-                .importeDeuda(domain.getImporteDeuda())
-                .ultimoEnvio(domain.getUltimoEnvio())
-                .build();
+                .ultimoEnvio(domain.getUltimoEnvio());
+
+        if (domain.getFlagPayperTic() != null) builder.flagPayperTic(domain.getFlagPayperTic());
+        if (domain.getEnviado() != null) builder.enviado(domain.getEnviado());
+        if (domain.getRetenida() != null) builder.retenida(domain.getRetenida());
+        if (domain.getHpum() != null) builder.hpum(domain.getHpum());
+        if (domain.getBecaPorcentaje() != null) builder.becaPorcentaje(domain.getBecaPorcentaje());
+        if (domain.getCuotasDeuda() != null) builder.cuotasDeuda(domain.getCuotasDeuda());
+        if (domain.getImporteDeuda() != null) builder.importeDeuda(domain.getImporteDeuda());
+
+        return builder.build();
     }
 }

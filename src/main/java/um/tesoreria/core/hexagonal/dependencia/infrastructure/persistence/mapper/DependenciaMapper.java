@@ -30,13 +30,15 @@ public class DependenciaMapper {
 
     public DependenciaEntity toEntity(Dependencia domain) {
         if (domain == null) return null;
-        DependenciaEntity entity = new DependenciaEntity();
-        entity.setDependenciaId(domain.getDependenciaId());
-        entity.setNombre(domain.getNombre());
-        entity.setAcronimo(domain.getAcronimo());
-        entity.setFacultadId(domain.getFacultadId());
-        entity.setGeograficaId(domain.getGeograficaId());
-        entity.setCuentaHonorariosPagar(domain.getCuentaHonorariosPagar());
-        return entity;
+        DependenciaEntity.DependenciaEntityBuilder builder = DependenciaEntity.builder()
+                .dependenciaId(domain.getDependenciaId())
+                .facultadId(domain.getFacultadId())
+                .geograficaId(domain.getGeograficaId())
+                .cuentaHonorariosPagar(domain.getCuentaHonorariosPagar());
+        
+        if (domain.getNombre() != null) builder.nombre(domain.getNombre());
+        if (domain.getAcronimo() != null) builder.acronimo(domain.getAcronimo());
+        
+        return builder.build();
     }
 }

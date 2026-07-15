@@ -65,7 +65,7 @@ public class ChequeraCuotaMapper {
         if (domain == null) {
             return null;
         }
-        return ChequeraCuotaEntity.builder()
+        ChequeraCuotaEntity.ChequeraCuotaEntityBuilder builder = ChequeraCuotaEntity.builder()
                 .chequeraCuotaId(domain.getChequeraCuotaId())
                 .chequeraId(domain.getChequeraId())
                 .facultadId(domain.getFacultadId())
@@ -74,26 +74,28 @@ public class ChequeraCuotaMapper {
                 .productoId(domain.getProductoId())
                 .alternativaId(domain.getAlternativaId())
                 .cuotaId(domain.getCuotaId())
-                .mes(domain.getMes())
-                .anho(domain.getAnho())
                 .arancelTipoId(domain.getArancelTipoId())
                 .vencimiento1(domain.getVencimiento1())
-                .importe1(domain.getImporte1())
-                .importe1Original(domain.getImporte1Original())
                 .vencimiento2(domain.getVencimiento2())
-                .importe2(domain.getImporte2())
-                .importe2Original(domain.getImporte2Original())
-                .vencimiento3(domain.getVencimiento3())
-                .importe3(domain.getImporte3())
-                .importe3Original(domain.getImporte3Original())
-                .codigoBarras(domain.getCodigoBarras())
-                .i2Of5(domain.getI2Of5())
-                .pagado(domain.getPagado())
-                .baja(domain.getBaja())
-                .manual(domain.getManual())
-                .compensada(domain.getCompensada())
-                .tramoId(domain.getTramoId())
-                .build();
+                .vencimiento3(domain.getVencimiento3());
+
+        if (domain.getMes() != null) builder.mes(domain.getMes());
+        if (domain.getAnho() != null) builder.anho(domain.getAnho());
+        if (domain.getImporte1() != null) builder.importe1(domain.getImporte1());
+        if (domain.getImporte1Original() != null) builder.importe1Original(domain.getImporte1Original());
+        if (domain.getImporte2() != null) builder.importe2(domain.getImporte2());
+        if (domain.getImporte2Original() != null) builder.importe2Original(domain.getImporte2Original());
+        if (domain.getImporte3() != null) builder.importe3(domain.getImporte3());
+        if (domain.getImporte3Original() != null) builder.importe3Original(domain.getImporte3Original());
+        if (domain.getCodigoBarras() != null) builder.codigoBarras(domain.getCodigoBarras());
+        if (domain.getI2Of5() != null) builder.i2Of5(domain.getI2Of5());
+        if (domain.getPagado() != null) builder.pagado(domain.getPagado());
+        if (domain.getBaja() != null) builder.baja(domain.getBaja());
+        if (domain.getManual() != null) builder.manual(domain.getManual());
+        if (domain.getCompensada() != null) builder.compensada(domain.getCompensada());
+        if (domain.getTramoId() != null) builder.tramoId(domain.getTramoId());
+
+        return builder.build();
     }
 
     public void updateEntity(ChequeraCuota domain, ChequeraCuotaEntity entity) {
@@ -107,25 +109,26 @@ public class ChequeraCuotaMapper {
         entity.setProductoId(domain.getProductoId());
         entity.setAlternativaId(domain.getAlternativaId());
         entity.setCuotaId(domain.getCuotaId());
-        entity.setMes(domain.getMes());
-        entity.setAnho(domain.getAnho());
+        
+        if (domain.getMes() != null) entity.setMes(domain.getMes());
+        if (domain.getAnho() != null) entity.setAnho(domain.getAnho());
         entity.setArancelTipoId(domain.getArancelTipoId());
         entity.setVencimiento1(domain.getVencimiento1());
-        entity.setImporte1(domain.getImporte1());
-        entity.setImporte1Original(domain.getImporte1Original());
+        if (domain.getImporte1() != null) entity.setImporte1(domain.getImporte1());
+        if (domain.getImporte1Original() != null) entity.setImporte1Original(domain.getImporte1Original());
         entity.setVencimiento2(domain.getVencimiento2());
-        entity.setImporte2(domain.getImporte2());
-        entity.setImporte2Original(domain.getImporte2Original());
+        if (domain.getImporte2() != null) entity.setImporte2(domain.getImporte2());
+        if (domain.getImporte2Original() != null) entity.setImporte2Original(domain.getImporte2Original());
         entity.setVencimiento3(domain.getVencimiento3());
-        entity.setImporte3(domain.getImporte3());
-        entity.setImporte3Original(domain.getImporte3Original());
-        entity.setCodigoBarras(domain.getCodigoBarras());
-        entity.setI2Of5(domain.getI2Of5());
-        entity.setPagado(domain.getPagado());
-        entity.setBaja(domain.getBaja());
-        entity.setManual(domain.getManual());
-        entity.setCompensada(domain.getCompensada());
-        entity.setTramoId(domain.getTramoId());
+        if (domain.getImporte3() != null) entity.setImporte3(domain.getImporte3());
+        if (domain.getImporte3Original() != null) entity.setImporte3Original(domain.getImporte3Original());
+        if (domain.getCodigoBarras() != null) entity.setCodigoBarras(domain.getCodigoBarras());
+        if (domain.getI2Of5() != null) entity.setI2Of5(domain.getI2Of5());
+        if (domain.getPagado() != null) entity.setPagado(domain.getPagado());
+        if (domain.getBaja() != null) entity.setBaja(domain.getBaja());
+        if (domain.getManual() != null) entity.setManual(domain.getManual());
+        if (domain.getCompensada() != null) entity.setCompensada(domain.getCompensada());
+        if (domain.getTramoId() != null) entity.setTramoId(domain.getTramoId());
     }
 
     public ChequeraPago toDomain(um.tesoreria.core.kotlin.model.ChequeraPago entity) {

@@ -16,26 +16,28 @@ public class MercadoPagoContextMapper {
 
     public MercadoPagoContextEntity toEntity(MercadoPagoContext domain) {
         if (domain == null) return null;
-        return MercadoPagoContextEntity.builder()
+        MercadoPagoContextEntity.MercadoPagoContextEntityBuilder builder = MercadoPagoContextEntity.builder()
                 .mercadoPagoContextId(domain.getMercadoPagoContextId())
                 .chequeraCuotaId(domain.getChequeraCuotaId())
                 .reservaVacanteId(domain.getReservaVacanteId())
                 .initPoint(domain.getInitPoint())
                 .fechaVencimiento(domain.getFechaVencimiento())
-                .importe(domain.getImporte())
-                .changed(domain.getChanged())
                 .lastVencimientoUpdated(domain.getLastVencimientoUpdated())
                 .preferenceId(domain.getPreferenceId())
                 .preference(domain.getPreference())
-                .activo(domain.getActivo())
                 .chequeraPagoId(domain.getChequeraPagoId())
                 .idMercadoPago(domain.getIdMercadoPago())
                 .status(domain.getStatus())
                 .fechaPago(domain.getFechaPago())
                 .fechaAcreditacion(domain.getFechaAcreditacion())
-                .importePagado(domain.getImportePagado())
-                .payment(domain.getPayment())
-                .build();
+                .payment(domain.getPayment());
+
+        if (domain.getImporte() != null) builder.importe(domain.getImporte());
+        if (domain.getChanged() != null) builder.changed(domain.getChanged());
+        if (domain.getActivo() != null) builder.activo(domain.getActivo());
+        if (domain.getImportePagado() != null) builder.importePagado(domain.getImportePagado());
+
+        return builder.build();
     }
 
     public MercadoPagoContext toDomainModel(MercadoPagoContextEntity entity) {

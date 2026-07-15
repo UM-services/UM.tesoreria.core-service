@@ -36,19 +36,21 @@ public class ArticuloMapper {
 
     public ArticuloEntity toEntity(Articulo domain) {
         if (domain == null) return null;
-        return ArticuloEntity.builder()
+        ArticuloEntity.ArticuloEntityBuilder builder = ArticuloEntity.builder()
                 .articuloId(domain.getArticuloId())
-                .nombre(domain.getNombre())
-                .descripcion(domain.getDescripcion())
-                .unidad(domain.getUnidad())
-                .precio(domain.getPrecio())
-                .inventariable(domain.getInventariable())
-                .stockMinimo(domain.getStockMinimo())
-                .numeroCuenta(domain.getNumeroCuenta())
-                .tipo(domain.getTipo())
-                .directo(domain.getDirecto())
-                .habilitado(domain.getHabilitado())
-                .build();
+                .numeroCuenta(domain.getNumeroCuenta());
+        
+        if (domain.getNombre() != null) builder.nombre(domain.getNombre());
+        if (domain.getDescripcion() != null) builder.descripcion(domain.getDescripcion());
+        if (domain.getUnidad() != null) builder.unidad(domain.getUnidad());
+        if (domain.getPrecio() != null) builder.precio(domain.getPrecio());
+        if (domain.getInventariable() != null) builder.inventariable(domain.getInventariable());
+        if (domain.getStockMinimo() != null) builder.stockMinimo(domain.getStockMinimo());
+        if (domain.getTipo() != null) builder.tipo(domain.getTipo());
+        if (domain.getDirecto() != null) builder.directo(domain.getDirecto());
+        if (domain.getHabilitado() != null) builder.habilitado(domain.getHabilitado());
+        
+        return builder.build();
     }
 
     public ArticuloSearch toSearchDomain(ArticuloKey entity) {

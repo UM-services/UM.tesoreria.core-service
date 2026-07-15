@@ -14,8 +14,9 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 - feat(facultad): Nuevo campo `guaraniResponsableAcademica` (Integer) en Facultad (domain, entity, mapper, DTOs)
 - feat(util): Nueva interfaz `Jsonifyable` con método `jsonify()` por defecto — `ChequeraCuota` la implementa en lugar de definir `jsonify()` manualmente
 - refactor(chequeraCuota): Añadido `@Slf4j` y logging debug en `GetChequeraCuotaByUniqueUseCaseImpl`
+- fix(mappers): Null-safety en 16 mappers de persistencia hexagonal — previene `NullPointerException` en campos opcionales
 
-> Basado en análisis profundo de `git diff HEAD` (13 archivos staged, +39/-7 líneas) y `pom.xml` (versión 3.33.0 → 3.34.0).
+> Basado en análisis profundo de `git diff HEAD` (16 archivos staged, +200/-161 líneas) y `pom.xml` (versión 3.33.0 → 3.34.0).
 
 ## Novedades 3.33.1 (verificado en código)
 - fix(docs): Corregida sintaxis de genéricos Mermaid en 20 diagramas

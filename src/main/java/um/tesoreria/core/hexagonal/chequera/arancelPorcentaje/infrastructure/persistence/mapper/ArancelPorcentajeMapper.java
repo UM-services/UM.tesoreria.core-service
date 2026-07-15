@@ -19,11 +19,15 @@ public class ArancelPorcentajeMapper {
 
     public ArancelPorcentajeEntity toEntity(ArancelPorcentaje domain) {
         if (domain == null) return null;
-        return ArancelPorcentajeEntity.builder()
+        ArancelPorcentajeEntity.ArancelPorcentajeEntityBuilder builder = ArancelPorcentajeEntity.builder()
                 .arancelporcentajeId(domain.getArancelporcentajeId())
                 .aranceltipoId(domain.getAranceltipoId())
-                .productoId(domain.getProductoId())
-                .porcentaje(domain.getPorcentaje())
-                .build();
+                .productoId(domain.getProductoId());
+        
+        if (domain.getPorcentaje() != null) {
+            builder.porcentaje(domain.getPorcentaje());
+        }
+        
+        return builder.build();
     }
 }

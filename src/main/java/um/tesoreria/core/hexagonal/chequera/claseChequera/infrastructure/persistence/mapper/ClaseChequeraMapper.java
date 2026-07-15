@@ -23,16 +23,18 @@ public class ClaseChequeraMapper {
 
     public ClaseChequeraEntity toEntity(ClaseChequera domain) {
         if (domain == null) return null;
-        return ClaseChequeraEntity.builder()
+        ClaseChequeraEntity.ClaseChequeraEntityBuilder builder = ClaseChequeraEntity.builder()
                 .claseChequeraId(domain.getClaseChequeraId())
-                .nombre(domain.getNombre())
-                .preuniversitario(domain.getPreuniversitario())
-                .grado(domain.getGrado())
-                .posgrado(domain.getPosgrado())
-                .curso(domain.getCurso())
-                .secundario(domain.getSecundario())
-                .titulo(domain.getTitulo())
-                .build();
+                .nombre(domain.getNombre());
+        
+        if (domain.getPreuniversitario() != null) builder.preuniversitario(domain.getPreuniversitario());
+        if (domain.getGrado() != null) builder.grado(domain.getGrado());
+        if (domain.getPosgrado() != null) builder.posgrado(domain.getPosgrado());
+        if (domain.getCurso() != null) builder.curso(domain.getCurso());
+        if (domain.getSecundario() != null) builder.secundario(domain.getSecundario());
+        if (domain.getTitulo() != null) builder.titulo(domain.getTitulo());
+        
+        return builder.build();
     }
 
 }

@@ -17,9 +17,13 @@ public class ProductoMapper {
 
     public ProductoEntity toEntity(Producto domain) {
         if (domain == null) return null;
-        return ProductoEntity.builder()
-                .productoId(domain.getProductoId())
-                .nombre(domain.getNombre())
-                .build();
+        ProductoEntity.ProductoEntityBuilder builder = ProductoEntity.builder()
+                .productoId(domain.getProductoId());
+        
+        if (domain.getNombre() != null) {
+            builder.nombre(domain.getNombre());
+        }
+        
+        return builder.build();
     }
 }

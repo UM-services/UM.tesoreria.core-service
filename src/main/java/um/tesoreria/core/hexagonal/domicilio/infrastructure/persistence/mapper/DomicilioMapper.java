@@ -34,25 +34,27 @@ public class DomicilioMapper {
 
     public DomicilioEntity toEntity(Domicilio domain) {
         if (domain == null) return null;
-        return DomicilioEntity.builder()
+        DomicilioEntity.DomicilioEntityBuilder builder = DomicilioEntity.builder()
                 .domicilioId(domain.getDomicilioId())
                 .personaId(domain.getPersonaId())
                 .documentoId(domain.getDocumentoId())
-                .fecha(domain.getFecha())
-                .calle(domain.getCalle())
-                .puerta(domain.getPuerta())
-                .piso(domain.getPiso())
-                .dpto(domain.getDpto())
-                .telefono(domain.getTelefono())
-                .movil(domain.getMovil())
-                .observaciones(domain.getObservaciones())
-                .codigoPostal(domain.getCodigoPostal())
                 .facultadId(domain.getFacultadId())
                 .provinciaId(domain.getProvinciaId())
-                .localidadId(domain.getLocalidadId())
-                .emailPersonal(domain.getEmailPersonal() != null ? domain.getEmailPersonal() : "")
-                .emailInstitucional(domain.getEmailInstitucional() != null ? domain.getEmailInstitucional() : "")
-                .laboral(domain.getLaboral())
-                .build();
+                .localidadId(domain.getLocalidadId());
+        
+        if (domain.getFecha() != null) builder.fecha(domain.getFecha());
+        if (domain.getCalle() != null) builder.calle(domain.getCalle());
+        if (domain.getPuerta() != null) builder.puerta(domain.getPuerta());
+        if (domain.getPiso() != null) builder.piso(domain.getPiso());
+        if (domain.getDpto() != null) builder.dpto(domain.getDpto());
+        if (domain.getTelefono() != null) builder.telefono(domain.getTelefono());
+        if (domain.getMovil() != null) builder.movil(domain.getMovil());
+        if (domain.getObservaciones() != null) builder.observaciones(domain.getObservaciones());
+        if (domain.getCodigoPostal() != null) builder.codigoPostal(domain.getCodigoPostal());
+        if (domain.getEmailPersonal() != null) builder.emailPersonal(domain.getEmailPersonal());
+        if (domain.getEmailInstitucional() != null) builder.emailInstitucional(domain.getEmailInstitucional());
+        if (domain.getLaboral() != null) builder.laboral(domain.getLaboral());
+        
+        return builder.build();
     }
 }

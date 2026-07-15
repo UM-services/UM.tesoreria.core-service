@@ -10,20 +10,22 @@ public class CuentaMapper {
 
     public CuentaEntity toEntity(Cuenta domain) {
         if (domain == null) return null;
-        return CuentaEntity.builder()
+        CuentaEntity.CuentaEntityBuilder builder = CuentaEntity.builder()
                 .numeroCuenta(domain.getNumeroCuenta())
-                .nombre(domain.getNombre())
-                .integradora(domain.getIntegradora())
-                .grado(domain.getGrado())
                 .grado1(domain.getGrado1())
                 .grado2(domain.getGrado2())
                 .grado3(domain.getGrado3())
                 .grado4(domain.getGrado4())
                 .geograficaId(domain.getGeograficaId())
                 .fechaBloqueo(domain.getFechaBloqueo())
-                .visible(domain.getVisible())
-                .cuentaContableId(domain.getCuentaContableId())
-                .build();
+                .cuentaContableId(domain.getCuentaContableId());
+        
+        if (domain.getNombre() != null) builder.nombre(domain.getNombre());
+        if (domain.getIntegradora() != null) builder.integradora(domain.getIntegradora());
+        if (domain.getGrado() != null) builder.grado(domain.getGrado());
+        if (domain.getVisible() != null) builder.visible(domain.getVisible());
+        
+        return builder.build();
     }
 
     public Cuenta toDomain(CuentaEntity entity) {
