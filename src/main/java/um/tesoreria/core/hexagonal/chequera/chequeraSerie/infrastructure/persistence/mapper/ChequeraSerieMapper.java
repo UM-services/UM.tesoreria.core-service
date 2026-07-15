@@ -100,7 +100,7 @@ public class ChequeraSerieMapper {
         if (domain.getRetenida() != null) builder.retenida(domain.getRetenida());
         if (domain.getHpum() != null) builder.hpum(domain.getHpum());
         if (domain.getBecaPorcentaje() != null) builder.becaPorcentaje(domain.getBecaPorcentaje());
-        if (domain.getCuotasDeuda() != null) builder.cuotasDeuda(domain.getCuotasDeuda());
+        builder.cuotasDeuda(domain.getCuotasDeuda());
         if (domain.getImporteDeuda() != null) builder.importeDeuda(domain.getImporteDeuda());
 
         return builder.build();
