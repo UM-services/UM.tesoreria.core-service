@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.34.0** (actualizada: 2026-07-10)
+**Versión actual del servicio: 3.35.0** (actualizada: 2026-07-16)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -36,6 +36,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-arancelPorcentaje.mmd`: Arquitectura hexagonal del módulo ArancelPorcentaje (porcentajes por producto) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-asiento.mmd`: Arquitectura hexagonal del módulo Asiento (asientos contables) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento (gestión de tipos de documento) - v3.33.0 (nuevo módulo con migración desde Kotlin legacy).
+- `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario (gestión de usuarios) - v3.35.0 (migración desde Kotlin legacy).
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona (gestión de personas) - v3.24.0.
 
 - `deployment.mmd`: Diagrama de despliegue del microservicio.

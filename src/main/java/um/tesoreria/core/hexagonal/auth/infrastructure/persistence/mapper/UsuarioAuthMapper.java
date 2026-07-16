@@ -2,14 +2,14 @@ package um.tesoreria.core.hexagonal.auth.infrastructure.persistence.mapper;
 
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.auth.domain.model.UsuarioAuth;
-import um.tesoreria.core.kotlin.model.Usuario;
+import um.tesoreria.core.hexagonal.usuario.infrastructure.persistence.entity.UsuarioEntity;
 
 @Component
 public class UsuarioAuthMapper {
 
-    public Usuario toEntity(UsuarioAuth domain) {
+    public UsuarioEntity toEntity(UsuarioAuth domain) {
         if (domain == null) return null;
-        Usuario entity = new Usuario();
+        UsuarioEntity entity = new UsuarioEntity();
         entity.setUserId(domain.getUserId());
         entity.setLogin(domain.getLogin());
         entity.setPassword(domain.getPassword());
@@ -25,7 +25,7 @@ public class UsuarioAuthMapper {
         return entity;
     }
 
-    public UsuarioAuth toDomainModel(Usuario entity) {
+    public UsuarioAuth toDomainModel(UsuarioEntity entity) {
         if (entity == null) return null;
         return new UsuarioAuth(
             entity.getUserId(),
