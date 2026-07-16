@@ -109,6 +109,7 @@ const diagrams = [
   { id: 'hexagonal-claseChequera', file: 'hexagonal-claseChequera.mmd', title: '🔷 Arquitectura Hexagonal - ClaseChequera' },
   { id: 'hexagonal-lectivo', file: 'hexagonal-lectivo.mmd', title: '🔷 Arquitectura Hexagonal - Lectivo' },
   { id: 'hexagonal-documento', file: 'hexagonal-documento.mmd', title: '🔷 Arquitectura Hexagonal - Documento' },
+  { id: 'hexagonal-usuario', file: 'hexagonal-usuario.mmd', title: '🔷 Arquitectura Hexagonal - Usuario' },
   { id: 'dependencies-diagram', file: 'dependencies.mmd', title: '📦 Diagrama de Dependencias' },
   { id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },
   { id: 'deployment-diagram', file: 'deployment.mmd', title: '🚀 Diagrama de Despliegue' },

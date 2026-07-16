@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.auth.domain.model.UsuarioAuth;
 import um.tesoreria.core.hexagonal.auth.domain.ports.out.UsuarioAuthRepository;
 import um.tesoreria.core.hexagonal.auth.infrastructure.persistence.mapper.UsuarioAuthMapper;
-import um.tesoreria.core.kotlin.model.Usuario;
-import um.tesoreria.core.repository.UsuarioRepository;
+import um.tesoreria.core.hexagonal.usuario.infrastructure.persistence.entity.UsuarioEntity;
+import um.tesoreria.core.hexagonal.usuario.infrastructure.persistence.repository.JpaUsuarioRepository;
 
 import java.util.Optional;
 
@@ -14,7 +14,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JpaUsuarioAuthRepositoryAdapter implements UsuarioAuthRepository {
 
-    private final UsuarioRepository usuarioRepository;
+    private final JpaUsuarioRepository usuarioRepository;
     private final UsuarioAuthMapper usuarioAuthMapper;
 
     @Override
@@ -29,8 +29,8 @@ public class JpaUsuarioAuthRepositoryAdapter implements UsuarioAuthRepository {
 
     @Override
     public UsuarioAuth save(UsuarioAuth usuario) {
-        Usuario entity = usuarioAuthMapper.toEntity(usuario);
-        Usuario savedEntity = usuarioRepository.save(entity);
+        UsuarioEntity entity = usuarioAuthMapper.toEntity(usuario);
+        UsuarioEntity savedEntity = usuarioRepository.save(entity);
         return usuarioAuthMapper.toDomainModel(savedEntity);
     }
 }

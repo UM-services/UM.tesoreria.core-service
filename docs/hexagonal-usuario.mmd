@@ -1,0 +1,194 @@
+---
+title: Arquitectura Hexagonal - Módulo Usuario (v3.35.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Usuario {
+            +Long userId
+            +String login
+            +String password
+            +String nombre
+            +Integer geograficaId
+            +Byte imprimeChequera
+            +Byte numeroOpManual
+            +Byte habilitaOpEliminacion
+            +Byte eliminaChequera
+            +Byte modificaChequera
+            +OffsetDateTime lastLog
+            +String googleMail
+            +Byte activo
+        }
+
+        class UsuarioRepository {
+            <<interface>>
+            +findByLogin(String) Optional<Usuario>
+            +findByPassword(String) Optional<Usuario>
+            +findByUserId(Long) Optional<Usuario>
+            +findByGoogleMailAndActivo(String, Byte) Optional<Usuario>
+            +save(Usuario) Usuario
+            +updateLastLog(Long, OffsetDateTime) void
+        }
+    }
+
+    namespace application {
+        class UsuarioService {
+            -FindUsuarioByLoginUseCase findUsuarioByLoginUseCase
+            -FindUsuarioByPasswordUseCase findUsuarioByPasswordUseCase
+            -CreateUsuarioUseCase createUsuarioUseCase
+            -UpdateUsuarioUseCase updateUsuarioUseCase
+            -UpdateLastLogUseCase updateLastLogUseCase
+            -FindUsuarioByGoogleMailUseCase findUsuarioByGoogleMailUseCase
+            +findByLogin(String) Usuario
+            +findByPassword(String) Usuario
+            +add(Usuario) Usuario
+            +update(Usuario, Long) Usuario
+            +updateLastLog(Long) Usuario
+            +findByGoogleMail(String) Usuario
+        }
+
+        namespace usecases {
+            class CreateUsuarioUseCaseImpl
+            class FindUsuarioByGoogleMailUseCaseImpl
+            class FindUsuarioByLoginUseCaseImpl
+            class FindUsuarioByPasswordUseCaseImpl
+            class UpdateLastLogUseCaseImpl
+            class UpdateUsuarioUseCaseImpl
+        }
+
+        class CreateUsuarioUseCase { <<interface>> }
+        class FindUsuarioByGoogleMailUseCase { <<interface>> }
+        class FindUsuarioByLoginUseCase { <<interface>> }
+        class FindUsuarioByPasswordUseCase { <<interface>> }
+        class UpdateLastLogUseCase { <<interface>> }
+        class UpdateUsuarioUseCase { <<interface>> }
+    }
+
+    namespace infrastructure {
+        namespace persistence {
+            class UsuarioEntity {
+                +Long userId
+                +String login
+                +String password
+                +String nombre
+                +Integer geograficaId
+                +Byte imprimeChequera
+                +Byte numeroOpManual
+                +Byte habilitaOpEliminacion
+                +Byte eliminaChequera
+                +Byte modificaChequera
+                +OffsetDateTime lastLog
+                +String googleMail
+                +Byte activo
+            }
+
+            class JpaUsuarioRepository {
+                <<JpaRepository>>
+                +findByLogin(String) Optional<UsuarioEntity>
+                +findByPassword(String) Optional<UsuarioEntity>
+                +findByUserId(Long) Optional<UsuarioEntity>
+                +findByGoogleMailAndActivo(String, Byte) Optional<UsuarioEntity>
+                +updateLastLog(Long, OffsetDateTime) void
+            }
+
+            class JpaUsuarioRepositoryAdapter {
+                -JpaUsuarioRepository jpaUsuarioRepository
+                -UsuarioMapper usuarioMapper
+                +findByLogin(String) Optional<Usuario>
+                +findByPassword(String) Optional<Usuario>
+                +findByUserId(Long) Optional<Usuario>
+                +findByGoogleMailAndActivo(String, Byte) Optional<Usuario>
+                +save(Usuario) Usuario
+                +updateLastLog(Long, OffsetDateTime) void
+            }
+
+            class UsuarioMapper {
+                +toDomain(UsuarioEntity) Usuario
+                +toEntity(Usuario) UsuarioEntity
+            }
+        }
+
+        namespace web {
+            class UsuarioController {
+                -UsuarioService service
+                -UsuarioDtoMapper dtoMapper
+                +findByLogin(String) ResponseEntity<UsuarioResponse>
+                +add(UsuarioRequest) ResponseEntity<UsuarioResponse>
+                +update(UsuarioRequest, Long) ResponseEntity<UsuarioResponse>
+                +findByPassword(UsuarioRequest) ResponseEntity<UsuarioResponse>
+                +updateLastLog(Long) ResponseEntity<UsuarioResponse>
+                +findByGoogleMail(String) ResponseEntity<UsuarioResponse>
+            }
+
+            class UsuarioRequest {
+                +String login
+                +String password
+                +String nombre
+                +Integer geograficaId
+                +Byte imprimeChequera
+                +Byte numeroOpManual
+                +Byte habilitaOpEliminacion
+                +Byte eliminaChequera
+                +Byte modificaChequera
+                +String googleMail
+                +Byte activo
+            }
+
+            class UsuarioResponse {
+                +Long userId
+                +String login
+                +String nombre
+                +Integer geograficaId
+                +Byte imprimeChequera
+                +Byte numeroOpManual
+                +Byte habilitaOpEliminacion
+                +Byte eliminaChequera
+                +Byte modificaChequera
+                +OffsetDateTime lastLog
+                +String googleMail
+                +Byte activo
+            }
+
+            class UsuarioDtoMapper {
+                +toDomain(UsuarioRequest) Usuario
+                +toResponse(Usuario) UsuarioResponse
+            }
+        }
+    }
+
+    UsuarioService --> CreateUsuarioUseCase : uses
+    UsuarioService --> FindUsuarioByGoogleMailUseCase : uses
+    UsuarioService --> FindUsuarioByLoginUseCase : uses
+    UsuarioService --> FindUsuarioByPasswordUseCase : uses
+    UsuarioService --> UpdateLastLogUseCase : uses
+    UsuarioService --> UpdateUsuarioUseCase : uses
+
+    CreateUsuarioUseCaseImpl ..|> CreateUsuarioUseCase : implements
+    FindUsuarioByGoogleMailUseCaseImpl ..|> FindUsuarioByGoogleMailUseCase : implements
+    FindUsuarioByLoginUseCaseImpl ..|> FindUsuarioByLoginUseCase : implements
+    FindUsuarioByPasswordUseCaseImpl ..|> FindUsuarioByPasswordUseCase : implements
+    UpdateLastLogUseCaseImpl ..|> UpdateLastLogUseCase : implements
+    UpdateUsuarioUseCaseImpl ..|> UpdateUsuarioUseCase : implements
+
+    CreateUsuarioUseCaseImpl --> UsuarioRepository : uses
+    FindUsuarioByGoogleMailUseCaseImpl --> UsuarioRepository : uses
+    FindUsuarioByLoginUseCaseImpl --> UsuarioRepository : uses
+    FindUsuarioByPasswordUseCaseImpl --> UsuarioRepository : uses
+    UpdateLastLogUseCaseImpl --> UsuarioRepository : uses
+    UpdateUsuarioUseCaseImpl --> UsuarioRepository : uses
+
+    JpaUsuarioRepositoryAdapter ..|> UsuarioRepository : implements
+    JpaUsuarioRepositoryAdapter --> JpaUsuarioRepository : uses
+    JpaUsuarioRepositoryAdapter --> UsuarioMapper : uses
+
+    UsuarioMapper --> Usuario : maps
+    UsuarioMapper --> UsuarioEntity : maps
+    JpaUsuarioRepository --> UsuarioEntity : persists
+
+    UsuarioController --> UsuarioService : calls
+    UsuarioController --> UsuarioDtoMapper : uses
+    UsuarioDtoMapper --> Usuario : maps
+    UsuarioDtoMapper --> UsuarioRequest : maps
+    UsuarioDtoMapper --> UsuarioResponse : maps

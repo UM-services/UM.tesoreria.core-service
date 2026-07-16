@@ -4,7 +4,33 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.34.0**
+**Versión actual (SemVer): 3.35.0**
+
+## Novedades 3.35.0 (verificado en código)
+- refactor(usuario): Migración completa del módulo Usuario a arquitectura hexagonal
+  - Modelo de dominio: `Usuario` con campos `userId`, `login`, `password`, `nombre`, `geograficaId`, `imprimeChequera`, `numeroOpManual`, `habilitaOpEliminacion`, `eliminaChequera`, `modificaChequera`, `lastLog`, `googleMail`, `activo`
+  - Puertos de entrada (6): `CreateUsuarioUseCase`, `FindUsuarioByGoogleMailUseCase`, `FindUsuarioByLoginUseCase`, `FindUsuarioByPasswordUseCase`, `UpdateLastLogUseCase`, `UpdateUsuarioUseCase`
+  - Puerto de salida: `UsuarioRepository` con métodos CRUD y búsquedas
+  - Casos de uso: Implementaciones completas en `application/usecases/`
+  - Servicio de aplicación: `UsuarioService` con delegación a casos de uso
+  - Adaptador JPA: `JpaUsuarioRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `UsuarioEntity` reemplazando `Usuario.kt` (Kotlin legacy)
+  - Repositorio JPA: `JpaUsuarioRepository` con consultas específicas
+  - Mapper: `UsuarioMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `UsuarioController` con endpoints CRUD
+  - DTOs: `UsuarioRequest`, `UsuarioResponse`
+  - DTO Mapper: `UsuarioDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `UsuarioException` movida a `hexagonal/usuario/application/exception/`
+- refactor(usuario): Eliminación de `Usuario.kt` (Kotlin legacy) del paquete `core/kotlin/model/`
+- refactor(usuario): Eliminación de `UsuarioRepository.java` (legacy) del paquete `core/repository/`
+- refactor(usuario): Eliminación de `UsuarioService.java` (legacy) del paquete `core/service/`
+- refactor(usuario): Eliminación de `UsuarioController.java` (legacy) del paquete `core/controller/`
+- refactor(auth): Actualización de `UsuarioAuthMapper` para usar `UsuarioEntity` en lugar de `Usuario` legacy
+- refactor(auth): Actualización de `JpaUsuarioAuthRepositoryAdapter` para usar `JpaUsuarioRepository` en lugar de `UsuarioRepository` legacy
+- refactor(model): Actualización de `UsuarioChequeraFacultad` para usar `UsuarioEntity` en lugar de `Usuario` legacy
+- feat(docs): Nuevo diagrama Mermaid `hexagonal-usuario.mmd` para el módulo Usuario
+
+> Basado en análisis profundo de `git diff HEAD` (30 archivos staged, +1000/-200 líneas, incluyendo migración completa del módulo Usuario a hexagonal) y `pom.xml` (versión 3.34.0 → 3.35.0).
 
 ## Novedades 3.34.0 (verificado en código)
 - feat(chequeraCuota): Enriquecimiento del modelo de dominio `ChequeraCuota` con asociaciones a `Facultad` y `TipoChequera`

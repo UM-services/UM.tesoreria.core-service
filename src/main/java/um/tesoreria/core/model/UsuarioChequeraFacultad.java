@@ -14,7 +14,7 @@ import jakarta.persistence.UniqueConstraint;
 
 import lombok.*;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
-import um.tesoreria.core.kotlin.model.Usuario;
+import um.tesoreria.core.hexagonal.usuario.infrastructure.persistence.entity.UsuarioEntity;
 
 /**
  * @author daniel
@@ -43,7 +43,7 @@ public class UsuarioChequeraFacultad extends Auditable {
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "userId", insertable = false, updatable = false)
-	private Usuario usuario;
+	private UsuarioEntity usuario;
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "facultadId", insertable = false, updatable = false)
