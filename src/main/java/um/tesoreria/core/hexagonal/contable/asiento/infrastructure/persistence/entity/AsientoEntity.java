@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import um.tesoreria.core.kotlin.model.Track;
+import um.tesoreria.core.hexagonal.track.infrastructure.persistence.entity.TrackEntity;
 import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.util.Jsonifier;
 
@@ -58,7 +58,7 @@ public class AsientoEntity extends Auditable {
 
     @OneToOne(optional = true)
     @JoinColumn(name = "trackId", insertable = false, updatable = false)
-    private Track track;
+    private TrackEntity track;
 
     public String jsonify() {
         return Jsonifier.builder(this).build();

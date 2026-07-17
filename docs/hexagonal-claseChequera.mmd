@@ -20,31 +20,31 @@ classDiagram
 
         class ClaseChequeraRepository {
             <<interface>>
-            +findAll() List<ClaseChequera>
-            +findByPreuniversitario(Byte) List<ClaseChequera>
-            +findByCurso(Byte) List<ClaseChequera>
-            +findByPosgrado(Byte) List<ClaseChequera>
-            +findByTitulo(Byte) List<ClaseChequera>
+            +findAll() List~ClaseChequera~
+            +findByPreuniversitario(Byte) List~ClaseChequera~
+            +findByCurso(Byte) List~ClaseChequera~
+            +findByPosgrado(Byte) List~ClaseChequera~
+            +findByTitulo(Byte) List~ClaseChequera~
         }
 
         class GetAllClaseChequeraUseCase {
             <<interface>>
-            +getAll() List<ClaseChequera>
+            +getAll() List~ClaseChequera~
         }
 
         class GetAllClaseChequeraByCursoUseCase {
             <<interface>>
-            +getAllByCurso() List<ClaseChequera>
+            +getAllByCurso() List~ClaseChequera~
         }
 
         class GetAllClaseChequeraByPosgradoUseCase {
             <<interface>>
-            +getAllByPosgrado() List<ClaseChequera>
+            +getAllByPosgrado() List~ClaseChequera~
         }
 
         class GetAllClaseChequeraByTituloUseCase {
             <<interface>>
-            +getAllByTitulo() List<ClaseChequera>
+            +getAllByTitulo() List~ClaseChequera~
         }
     }
 
@@ -54,10 +54,10 @@ classDiagram
             -GetAllClaseChequeraByCursoUseCase getAllClaseChequeraByCursoUseCase
             -GetAllClaseChequeraByPosgradoUseCase getAllClaseChequeraByPosgradoUseCase
             -GetAllClaseChequeraByTituloUseCase getAllClaseChequeraByTituloUseCase
-            +findAll() List<ClaseChequera>
-            +findAllByCurso() List<ClaseChequera>
-            +findAllByPosgrado() List<ClaseChequera>
-            +findAllByTitulo() List<ClaseChequera>
+            +findAll() List~ClaseChequera~
+            +findAllByCurso() List~ClaseChequera~
+            +findAllByPosgrado() List~ClaseChequera~
+            +findAllByTitulo() List~ClaseChequera~
         }
 
         namespace usecases {
@@ -85,21 +85,21 @@ classDiagram
 
             class JpaClaseChequeraRepository {
                 <<JpaRepository>>
-                +findAllByOrderByNombre() List<ClaseChequeraEntity>
-                +findByPreuniversitario(Byte) List<ClaseChequeraEntity>
-                +findByCurso(Byte) List<ClaseChequeraEntity>
-                +findByPosgrado(Byte) List<ClaseChequeraEntity>
-                +findByTitulo(Byte) List<ClaseChequeraEntity>
+                +findAllByOrderByNombre() List~ClaseChequeraEntity~
+                +findByPreuniversitario(Byte) List~ClaseChequeraEntity~
+                +findByCurso(Byte) List~ClaseChequeraEntity~
+                +findByPosgrado(Byte) List~ClaseChequeraEntity~
+                +findByTitulo(Byte) List~ClaseChequeraEntity~
             }
 
             class JpaClaseChequeraRepositoryAdapter {
                 -JpaClaseChequeraRepository repository
                 -ClaseChequeraMapper mapper
-                +findAll() List<ClaseChequera>
-                +findByPreuniversitario(Byte) List<ClaseChequera>
-                +findByCurso(Byte) List<ClaseChequera>
-                +findByPosgrado(Byte) List<ClaseChequera>
-                +findByTitulo(Byte) List<ClaseChequera>
+                +findAll() List~ClaseChequera~
+                +findByPreuniversitario(Byte) List~ClaseChequera~
+                +findByCurso(Byte) List~ClaseChequera~
+                +findByPosgrado(Byte) List~ClaseChequera~
+                +findByTitulo(Byte) List~ClaseChequera~
             }
 
             class ClaseChequeraMapper {
@@ -112,10 +112,10 @@ classDiagram
             class ClaseChequeraController {
                 -ClaseChequeraService service
                 -ClaseChequeraDtoMapper dtoMapper
-                +findAll() ResponseEntity<List<ClaseChequeraResponse>>
-                +findAllByCurso() ResponseEntity<List<ClaseChequeraResponse>>
-                +findAllByPosgrado() ResponseEntity<List<ClaseChequeraResponse>>
-                +findAllByTitulo() ResponseEntity<List<ClaseChequeraResponse>>
+                +findAll() ResponseEntity~List~ClaseChequeraResponse~~
+                +findAllByCurso() ResponseEntity~List~ClaseChequeraResponse~~
+                +findAllByPosgrado() ResponseEntity~List~ClaseChequeraResponse~~
+                +findAllByTitulo() ResponseEntity~List~ClaseChequeraResponse~~
             }
 
             class ClaseChequeraRequest {

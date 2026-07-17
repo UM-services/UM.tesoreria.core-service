@@ -1,0 +1,63 @@
+---
+title: Arquitectura Hexagonal - Track (v3.36.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        T[Track<br/>Modelo de Dominio<br/>implements Jsonifyable]
+        TR[TrackRepository<br/>Puerto de Salida]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc[TrackService<br/>Servicio de Aplicación]
+        UC1[CreateTrackUseCase]
+        UC2[GetAllTracksUseCase]
+        UC3[GetTrackByIdUseCase]
+        UC4[DeleteTrackUseCase]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        TC[TrackController<br/>Adaptador Web]
+        JPA[JpaTrackRepositoryAdapter<br/>Adaptador JPA]
+        TM[TrackMapper<br/>Mapeador Dominio]
+        DM[TrackDtoMapper<br/>Mapeador DTO]
+        Req[TrackRequest<br/>DTO Entrada]
+        Resp[TrackResponse<br/>DTO Salida]
+        ENT[TrackEntity<br/>Entidad JPA]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+    end
+
+    %% Flujo de Dependencias
+    TC -->|usa| Svc
+    TC -->|recibe| Req
+    TC -->|envía| Resp
+    TC -->|usa| DM
+
+    Svc -->|depende| TR
+    Svc -->|ejecuta| UC1
+    Svc -->|ejecuta| UC2
+    Svc -->|ejecuta| UC3
+    Svc -->|ejecuta| UC4
+
+    JPA -->|implementa| TR
+    JPA -->|persiste| JPAR
+    JPA -->|gestiona| ENT
+    JPA -->|usa| TM
+
+    TM -->|convierte| T
+    TM -->|convierte| ENT
+
+    DM -->|convierte| Req
+    DM -->|convierte| Resp
+    DM -->|convierte| T
+
+    style T fill:#e1f5fe
+    style TR fill:#f3e5f5
+    style Svc fill:#fff3e0
+    style TC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style TM fill:#e8f5e8
+    style DM fill:#e8f5e8
+    style ENT fill:#e8f5e8

@@ -9,6 +9,7 @@ import java.time.OffsetDateTime
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
+import um.tesoreria.core.hexagonal.track.infrastructure.persistence.entity.TrackEntity
 import um.tesoreria.core.hexagonal.ubicacion.infrastructure.persistence.entity.UbicacionEntity
 import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.util.Jsonifier
@@ -55,7 +56,7 @@ data class Entrega (
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "trackId", insertable = false, updatable = false)
-	var track: Track? = null
+	var track: TrackEntity? = null
 
 ) : Auditable() {
     fun jsonify(): String {
@@ -78,7 +79,7 @@ data class Entrega (
 		private var tipo: String = ""
 		private var trackId: Long? = null
 		private var ubicacion: UbicacionEntity? = null
-		private var track: Track? = null
+		private var track: TrackEntity? = null
 
 		fun entregaId(entregaId: Long?) = apply { this.entregaId = entregaId }
 		fun fecha(fecha: OffsetDateTime?) = apply { this.fecha = fecha }
@@ -91,7 +92,7 @@ data class Entrega (
 		fun tipo(tipo: String) = apply { this.tipo = tipo }
 		fun trackId(trackId: Long?) = apply { this.trackId = trackId }
 		fun ubicacion(ubicacion: UbicacionEntity?) = apply { this.ubicacion = ubicacion }
-		fun track(track: Track?) = apply { this.track = track }
+		fun track(track: TrackEntity?) = apply { this.track = track }
 
 		fun build() = Entrega(
 			entregaId,

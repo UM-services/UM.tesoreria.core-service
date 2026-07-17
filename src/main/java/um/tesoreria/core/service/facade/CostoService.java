@@ -9,8 +9,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.*;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
 import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoService;
 import um.tesoreria.core.hexagonal.contable.asiento.infrastructure.persistence.entity.AsientoEntity;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.exception.CuentaMovimientoException;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
+import um.tesoreria.core.hexagonal.track.application.service.TrackService;
+import um.tesoreria.core.hexagonal.track.domain.model.Track;
+import um.tesoreria.core.hexagonal.track.infrastructure.persistence.entity.TrackEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.model.dto.AsignacionCostoDto;
@@ -42,7 +51,7 @@ public class CostoService {
         log.debug("Processing CostoService.addAsignacion");
         log.debug("AsignacionCostoDto -> {}", asignacionCostoDto.jsonify());
         try {
-            Track track = trackService.add(new Track.Builder()
+            Track track = trackService.createTrack(Track.builder()
                     .descripcion("Asignación Costo")
                     .build());
             log.debug("Track -> {}", track.jsonify());
@@ -81,7 +90,7 @@ public class CostoService {
 
             String concepto = MessageFormat.format("{0} - {1}-{2} - Asignación de Costos", asignacionCostoDto.getComprobante().getDescripcion(), String.format("%04d", asignacionCostoDto.getProveedorMovimiento().getPrefijo()), String.format("%08d", asignacionCostoDto.getProveedorMovimiento().getNumeroComprobante()));
             item += 1;
-            CuentaMovimiento cuentaMovimiento = new CuentaMovimiento.Builder()
+            CuentaMovimiento cuentaMovimiento = CuentaMovimiento.builder()
                     .fechaContable(entrega.getFechaContable())
                     .ordenContable(entrega.getOrdenContable())
                     .item(item)
@@ -94,10 +103,10 @@ public class CostoService {
                     .proveedorMovimientoId(asignacionCostoDto.getProveedorMovimiento().getProveedorMovimientoId())
                     .trackId(track.getTrackId())
                     .build();
-            cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
+            cuentaMovimiento = cuentaMovimientoService.createCuentaMovimiento(cuentaMovimiento);
             log.debug("CuentaMovimiento -> {}", cuentaMovimiento.jsonify());
             item += 1;
-            cuentaMovimiento = new CuentaMovimiento.Builder()
+            cuentaMovimiento = CuentaMovimiento.builder()
                     .fechaContable(entrega.getFechaContable())
                     .ordenContable(entrega.getOrdenContable())
                     .item(item)
@@ -110,7 +119,7 @@ public class CostoService {
                     .proveedorMovimientoId(asignacionCostoDto.getProveedorMovimiento().getProveedorMovimientoId())
                     .trackId(track.getTrackId())
                     .build();
-            cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
+            cuentaMovimiento = cuentaMovimientoService.createCuentaMovimiento(cuentaMovimiento);
             log.debug("CuentaMovimiento -> {}", cuentaMovimiento.jsonify());
 
             entrega = entregaService.add(entrega);

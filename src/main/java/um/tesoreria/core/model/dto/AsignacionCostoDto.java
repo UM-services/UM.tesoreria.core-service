@@ -7,14 +7,14 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity;
-import um.tesoreria.core.kotlin.model.Comprobante;
+import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.entity.ArticuloEntity;
+import um.tesoreria.core.hexagonal.comprobante.infrastructure.persistence.entity.ComprobanteEntity;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.entity.UbicacionArticuloEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.kotlin.model.ProveedorArticulo;
-import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
 import um.tesoreria.core.util.Jsonifier;
 
 /**
@@ -29,10 +29,10 @@ public class AsignacionCostoDto implements Serializable {
 	@Serial
     private static final long serialVersionUID = -1663996814534996127L;
 
-	private ProveedorMovimiento proveedorMovimiento;
+	private ProveedorMovimientoEntity proveedorMovimiento;
 	private ProveedorArticulo proveedorArticulo;
 	private ArticuloEntity articulo;
-	private Comprobante comprobante;
+	private ComprobanteEntity comprobante;
 	private UbicacionArticuloEntity ubicacionArticulo;
 
 	private BigDecimal importe;

@@ -18,15 +18,15 @@ import org.hibernate.annotations.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
+import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.model.Auditable;
-import um.tesoreria.core.kotlin.model.Comprobante;
+import um.tesoreria.core.hexagonal.comprobante.infrastructure.persistence.entity.ComprobanteEntity;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import um.tesoreria.core.kotlin.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
 
 /**
  * @author daniel
@@ -75,14 +75,14 @@ public class CuentaMovimientoAsiento extends Auditable implements Serializable {
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "comprobanteId", insertable = false, updatable = false)
-	private Comprobante comprobante;
+	private ComprobanteEntity comprobante;
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "proveedorMovimientoId", insertable = false, updatable = false)
-	private ProveedorMovimiento proveedorMovimiento;
+	private ProveedorMovimientoEntity proveedorMovimiento;
 
 	@OneToOne(optional = true)
 	@JoinColumn(name = "proveedorMovimientoIdOrdenPago", insertable = false, updatable = false)
-	private ProveedorMovimiento ordenPago;
+	private ProveedorMovimientoEntity ordenPago;
 
 }

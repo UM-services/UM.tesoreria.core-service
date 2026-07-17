@@ -14,18 +14,18 @@ classDiagram
 
         class ProductoRepository {
             <<interface>>
-            +findAll() List<Producto>
-            +findById(Integer) Optional<Producto>
+            +findAll() List~Producto~
+            +findById(Integer) Optional~Producto~
         }
 
         class GetAllProductosUseCase {
             <<interface>>
-            +getAllProductos() List<Producto>
+            +getAllProductos() List~Producto~
         }
 
         class GetProductoByIdUseCase {
             <<interface>>
-            +getProductoById(Integer) Optional<Producto>
+            +getProductoById(Integer) Optional~Producto~
         }
     }
 
@@ -33,9 +33,9 @@ classDiagram
         class ProductoService {
             -GetAllProductosUseCase getAllProductosUseCase
             -GetProductoByIdUseCase getProductoByIdUseCase
-            +findAll() List<Producto>
+            +findAll() List~Producto~
             +findByProductoId(Integer) Producto
-            +findAllByTipoChequera(Integer, Integer, Integer) List<ProductoTipoChequera>
+            +findAllByTipoChequera(Integer, Integer, Integer) List~ProductoTipoChequera~
         }
 
         namespace usecases {
@@ -56,14 +56,14 @@ classDiagram
 
             class JpaProductoRepository {
                 <<JpaRepository>>
-                +findByProductoId(Integer) Optional<ProductoEntity>
+                +findByProductoId(Integer) Optional~ProductoEntity~
             }
 
             class JpaProductoRepositoryAdapter {
                 -JpaProductoRepository repository
                 -ProductoMapper mapper
-                +findAll() List<Producto>
-                +findById(Integer) Optional<Producto>
+                +findAll() List~Producto~
+                +findById(Integer) Optional~Producto~
             }
 
             class ProductoMapper {
@@ -76,9 +76,9 @@ classDiagram
             class ProductoController {
                 -ProductoService service
                 -ProductoDtoMapper dtoMapper
-                +findAll() ResponseEntity<List<ProductoResponse>>
-                +findByProductoId(Integer) ResponseEntity<ProductoResponse>
-                +findAllByTipoChequera(Integer, Integer, Integer) ResponseEntity<List<ProductoTipoChequera>>
+                +findAll() ResponseEntity~List~ProductoResponse~~
+                +findByProductoId(Integer) ResponseEntity~ProductoResponse~
+                +findAllByTipoChequera(Integer, Integer, Integer) ResponseEntity~List~ProductoTipoChequera~~
             }
 
             class ProductoRequest {

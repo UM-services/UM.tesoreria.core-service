@@ -13,8 +13,8 @@ classDiagram
 
         class DocumentoRepository {
             <<interface>>
-            +findAll() List<Documento>
-            +findById(Integer) Optional<Documento>
+            +findAll() List~Documento~
+            +findById(Integer) Optional~Documento~
         }
     }
 
@@ -22,7 +22,7 @@ classDiagram
         class DocumentoService {
             -GetAllDocumentosUseCase getAllDocumentosUseCase
             -GetDocumentoByIdUseCase getDocumentoByIdUseCase
-            +findAll() List<Documento>
+            +findAll() List~Documento~
             +findByDocumentoId(Integer) Documento
         }
 
@@ -44,14 +44,14 @@ classDiagram
 
             class JpaDocumentoRepository {
                 <<JpaRepository>>
-                +findByDocumentoId(Integer) Optional<DocumentoEntity>
+                +findByDocumentoId(Integer) Optional~DocumentoEntity~
             }
 
             class JpaDocumentoRepositoryAdapter {
                 -JpaDocumentoRepository repository
                 -DocumentoMapper mapper
-                +findAll() List<Documento>
-                +findById(Integer) Optional<Documento>
+                +findAll() List~Documento~
+                +findById(Integer) Optional~Documento~
             }
 
             class DocumentoMapper {
@@ -64,8 +64,8 @@ classDiagram
             class DocumentoController {
                 -DocumentoService service
                 -DocumentoDtoMapper dtoMapper
-                +findAll() ResponseEntity<List<DocumentoResponse>>
-                +findByDocumentoId(Integer) ResponseEntity<DocumentoResponse>
+                +findAll() ResponseEntity~List~DocumentoResponse~~
+                +findByDocumentoId(Integer) ResponseEntity~DocumentoResponse~
             }
 
             class DocumentoRequest

@@ -4,7 +4,32 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.35.0**
+**Versión actual (SemVer): 3.36.0**
+
+## Novedades 3.36.0 (verificado en código)
+- feat(compras/proveedorMovimiento): Nuevo módulo ProveedorMovimiento con arquitectura hexagonal completa (13 casos de uso)
+  - Modelo de dominio: `ProveedorMovimiento` con campos para gestión de movimientos de proveedores
+  - 13 puertos de entrada: CRUD + búsquedas por orden de pago, proveedor, comprobante, rango de fechas, eliminables, asignables, disponibles, ajuste de costos
+  - Puerto de salida: `ProveedorMovimientoRepository` con consultas complejas
+  - Controlador REST: `ProveedorMovimientoController` con 6 endpoints bajo `/proveedorMovimiento/`
+- feat(compras/comprobante): Nuevo módulo Comprobante con arquitectura hexagonal completa (6 casos de uso)
+  - Modelo de dominio: `Comprobante` con campos para tipos de comprobantes (AFIP, punto de venta, letra)
+  - 6 puertos de entrada: Consultas por ID, tipo de transacción, orden de pago, y combinaciones
+  - Controlador REST: `ComprobanteController` con rutas `/comprobante` y `/api/tesoreria/core/comprobante`
+- feat(contable/cuentaMovimiento): Nuevo módulo CuentaMovimiento con arquitectura hexagonal completa (11 casos de uso)
+  - Modelo de dominio: `CuentaMovimiento` con campos para asientos contables, implementa `Jsonifyable`
+  - 11 puertos de entrada: CRUD + búsquedas por cuenta, asiento, rango de fechas, apertura; eliminación por ID, lista y asiento
+  - Controlador REST: `CuentaMovimientoController` con rutas `/cuentaMovimiento` y `/api/tesoreria/core/cuentaMovimiento`
+- feat(track): Nuevo módulo Track con arquitectura hexagonal completa (4 casos de uso)
+  - Modelo de dominio: `Track` con campos `trackId`, `descripcion`, implementa `Jsonifyable`
+  - 4 puertos de entrada: Create, GetAll, GetById, Delete
+  - Controlador REST: `TrackController` con rutas `/track` y `/api/tesoreria/core/track`, endpoints CRUD completos
+- refactor(compras): Reorganización de módulos Articulo, Proveedor y FacturaPendiente bajo `hexagonal/compras/`
+- refactor(chequera): Reorganización del módulo Baja bajo `hexagonal/chequera/baja/`
+- refactor(legacy): Eliminación de controllers, servicios, repositorios y modelos Kotlin legacy
+- feat(docs): Nuevos diagramas Mermaid para módulos ProveedorMovimiento, Comprobante, CuentaMovimiento y Track; actualizados diagramas de baja, articulo, proveedor y facturaPendiente
+
+> Basado en análisis profundo de `git diff HEAD` (200+ archivos staged, incluyendo reestructuración masiva + 4 nuevos módulos hexagonales) y `pom.xml` (versión 3.35.0 → 3.36.0).
 
 ## Novedades 3.35.0 (verificado en código)
 - refactor(usuario): Migración completa del módulo Usuario a arquitectura hexagonal

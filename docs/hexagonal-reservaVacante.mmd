@@ -24,7 +24,7 @@ classDiagram
         class ReservaVacanteRepository {
             <<interface>>
             +create(ReservaVacante) ReservaVacante
-            +findByReservaVacanteId(UUID) Optional<ReservaVacante>
+            +findByReservaVacanteId(UUID) Optional~ReservaVacante~
             +update(ReservaVacante, UUID) ReservaVacante
         }
     }
@@ -91,14 +91,14 @@ classDiagram
 
             class JpaReservaVacanteRepository {
                 <<JpaRepository>>
-                +findByReservaVacanteId(UUID) Optional<ReservaVacanteEntity>
+                +findByReservaVacanteId(UUID) Optional~ReservaVacanteEntity~
             }
 
             class JpaReservaVacanteRepositoryAdapter {
                 -JpaReservaVacanteRepository repository
                 -ReservaVacanteMapper mapper
                 +create(ReservaVacante) ReservaVacante
-                +findByReservaVacanteId(UUID) Optional<ReservaVacante>
+                +findByReservaVacanteId(UUID) Optional~ReservaVacante~
                 +update(ReservaVacante, UUID) ReservaVacante
             }
 
@@ -112,8 +112,8 @@ classDiagram
             class ReservaVacanteController {
                 -ReservaVacanteService reservaVacanteService
                 -ReservaVacanteDtoMapper reservaVacanteDtoMapper
-                +add(ReservaVacanteRequest) ResponseEntity<ReservaVacanteResponse>
-                +get(UUID) ResponseEntity<ReservaVacanteResponse>
+                +add(ReservaVacanteRequest) ResponseEntity~ReservaVacanteResponse~
+                +get(UUID) ResponseEntity~ReservaVacanteResponse~
             }
 
             class ReservaVacanteRequest {

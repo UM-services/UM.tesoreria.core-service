@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
-import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity
+import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.entity.ArticuloEntity
 import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal

@@ -1,0 +1,85 @@
+---
+title: Arquitectura Hexagonal - CuentaMovimiento (v3.36.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        CM[CuentaMovimiento<br/>Modelo de Dominio<br/>implements Jsonifyable]
+        CR[CuentaMovimientoRepository<br/>Puerto de Salida]
+        CU[Cuenta<br/>Modelo de Dominio]
+        P[Proveedor<br/>Modelo de Dominio]
+        CO[Comprobante<br/>Modelo de Dominio]
+        PM[ProveedorMovimiento<br/>Modelo de Dominio]
+        T[Track<br/>Modelo de Dominio]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc[CuentaMovimientoService<br/>Servicio de Aplicación]
+        UC1[CreateCuentaMovimientoUseCase]
+        UC2[UpdateCuentaMovimientoUseCase]
+        UC3[FindByCuentaMovimientoIdUseCase]
+        UC4[FindAllByNumeroCuentaUseCase]
+        UC5[FindAllByAsientoUseCase]
+        UC6[FindAllByNumeroCuentaAndFechaContableBetweenAndAperturaUseCase]
+        UC7[FindLastByFechaUseCase]
+        UC8[DeleteByCuentaMovimientoIdUseCase]
+        UC9[DeleteAllByCuentaMovimientoIdInUseCase]
+        UC10[DeleteAsientoUseCase]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        CC[CuentaMovimientoController<br/>Adaptador Web]
+        JPA[JpaCuentaMovimientoRepositoryAdapter<br/>Adaptador JPA]
+        CMM[CuentaMovimientoMapper<br/>Mapeador Dominio]
+        DM[CuentaMovimientoDtoMapper<br/>Mapeador DTO]
+        Req[CuentaMovimientoRequest<br/>DTO Entrada]
+        Resp[CuentaMovimientoResponse<br/>DTO Salida]
+        ENT[CuentaMovimientoEntity<br/>Entidad JPA]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+    end
+
+    %% Flujo de Dependencias
+    CC -->|usa| Svc
+    CC -->|recibe| Req
+    CC -->|envía| Resp
+    CC -->|usa| DM
+
+    Svc -->|depende| CR
+    Svc -->|ejecuta| UC1
+    Svc -->|ejecuta| UC2
+    Svc -->|ejecuta| UC3
+    Svc -->|ejecuta| UC4
+    Svc -->|ejecuta| UC5
+    Svc -->|ejecuta| UC6
+    Svc -->|ejecuta| UC7
+    Svc -->|ejecuta| UC8
+    Svc -->|ejecuta| UC9
+    Svc -->|ejecuta| UC10
+
+    JPA -->|implementa| CR
+    JPA -->|persiste| JPAR
+    JPA -->|gestiona| ENT
+    JPA -->|usa| CMM
+
+    CMM -->|convierte| CM
+    CMM -->|convierte| ENT
+
+    DM -->|convierte| Req
+    DM -->|convierte| Resp
+    DM -->|convierte| CM
+
+    style CM fill:#e1f5fe
+    style CU fill:#e1f5fe
+    style P fill:#e1f5fe
+    style CO fill:#e1f5fe
+    style PM fill:#e1f5fe
+    style T fill:#e1f5fe
+    style CR fill:#f3e5f5
+    style Svc fill:#fff3e0
+    style CC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style CMM fill:#e8f5e8
+    style DM fill:#e8f5e8
+    style ENT fill:#e8f5e8

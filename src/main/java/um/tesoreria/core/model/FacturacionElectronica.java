@@ -12,7 +12,7 @@ import java.time.OffsetDateTime;
 
 import lombok.*;
 import um.tesoreria.core.kotlin.model.ChequeraPago;
-import um.tesoreria.core.kotlin.model.Comprobante;
+import um.tesoreria.core.hexagonal.comprobante.infrastructure.persistence.entity.ComprobanteEntity;
 import um.tesoreria.core.util.Jsonifier;
 
 @Getter
@@ -53,7 +53,7 @@ public class FacturacionElectronica extends Auditable {
 
     @OneToOne(optional = true)
     @JoinColumn(name = "comprobanteId", insertable = false, updatable = false)
-    private Comprobante comprobante;
+    private ComprobanteEntity comprobante;
 
     public String jsonify() {
         return Jsonifier.builder(this).build();

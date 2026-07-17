@@ -2,6 +2,105 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.36.0] - 2026-07-17
+### Added
+- feat(compras/proveedorMovimiento): Nuevo módulo ProveedorMovimiento con arquitectura hexagonal completa bajo `hexagonal/compras/proveedorMovimiento/`
+  - Modelo de dominio: `ProveedorMovimiento` con campos `proveedorMovimientoId`, `proveedorId`, `nombreBeneficiario`, `comprobanteId`, `fechaComprobante`, `fechaVencimiento`, `prefijo`, `numeroComprobante`, `netoSinDescuento`, `descuento`, `neto`, `importe`, `cancelado`, `fechaContable`, `ordenContable`, `concepto`, `fechaAnulacion`, `conCargo`, `solicitaFactura`, `geograficaId`
+  - Asociaciones de dominio: `Comprobante`, `Proveedor`, `Geografica`, `List<ProveedorArticulo>`, `List<ProveedorPago>`
+  - Puertos de entrada (13): `CreateProveedorMovimientoUseCase`, `UpdateProveedorMovimientoUseCase`, `DeleteProveedorMovimientoUseCase`, `GetProveedorMovimientoByIdUseCase`, `GetProveedorMovimientoByOrdenPagoUseCase`, `GetLastProveedorMovimientoByOrdenPagoUseCase`, `GetProveedorMovimientosByIdsUseCase`, `GetProveedorMovimientosByProveedorUseCase`, `GetProveedorMovimientosByComprobanteAndFechaRangeUseCase`, `GetProveedorMovimientosEliminablesUseCase`, `GetProveedorMovimientosAsignablesUseCase`, `GetProveedorMovimientosDisponiblesUseCase`, `GetProveedorMovimientoIdsForCostAdjustmentUseCase`
+  - Puerto de salida: `ProveedorMovimientoRepository` con métodos CRUD y búsquedas complejas
+  - Servicio de aplicación: `ProveedorMovimientoService` con delegación a 13 casos de uso
+  - Adaptador JPA: `JpaProveedorMovimientoRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `ProveedorMovimientoEntity` con anotaciones Lombok
+  - Repositorio JPA: `JpaProveedorMovimientoRepository` con consultas especializadas
+  - Mapper: `ProveedorMovimientoMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `ProveedorMovimientoController` con endpoints `GET /proveedorMovimiento/eliminables/{ejercicioId}`, `GET /proveedorMovimiento/asignables/{proveedorId}/{desde}/{hasta}/{geograficaId}/{todos}`, `GET /proveedorMovimiento/{proveedorMovimientoId}`, `GET /proveedorMovimiento/ordenPago/{prefijo}/{numeroComprobante}`, `GET /proveedorMovimiento/lastOrdenPago/{prefijo}`, `POST /proveedorMovimiento/`
+  - DTOs: `ProveedorMovimientoRequest`, `ProveedorMovimientoResponse`
+  - DTO Mapper: `ProveedorMovimientoDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `ProveedorMovimientoException` movida de `core/exception/` a `hexagonal/compras/proveedorMovimiento/application/exception/`
+- feat(compras/comprobante): Nuevo módulo Comprobante con arquitectura hexagonal completa bajo `hexagonal/comprobante/`
+  - Modelo de dominio: `Comprobante` con campos `comprobanteId`, `descripcion`, `tipoTransaccionId`, `ordenPago`, `aplicaPendiente`, `cuentaCorriente`, `debita`, `diasVigencia`, `facturacionElectronica`, `comprobanteAfipId`, `puntoVenta`, `letraComprobante`
+  - Puertos de entrada (6): `GetAllComprobantesUseCase`, `GetAllComprobantesByOrdenPagoUseCase`, `GetAllComprobantesByTipoTransaccionIdUseCase`, `GetAllComprobantesByOrdenPagoAndTipoTransaccionIdUseCase`, `GetComprobanteByTipoTransaccionIdUseCase`, `GetComprobanteByIdUseCase`
+  - Puerto de salida: `ComprobanteRepository` con métodos de consulta
+  - Servicio de aplicación: `ComprobanteService` con delegación a 6 casos de uso
+  - Adaptador JPA: `JpaComprobanteRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `ComprobanteEntity` con anotaciones Lombok
+  - Repositorio JPA: `JpaComprobanteRepository` con consultas por ID y tipo
+  - Mapper: `ComprobanteMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `ComprobanteController` con rutas `/comprobante` y `/api/tesoreria/core/comprobante`
+  - DTOs: `ComprobanteResponse`
+  - DTO Mapper: `ComprobanteDtoMapper` para conversión dominio → DTO
+  - Excepción: `ComprobanteException` movida de `core/exception/` a `hexagonal/comprobante/application/exception/`
+- feat(contable/cuentaMovimiento): Nuevo módulo CuentaMovimiento con arquitectura hexagonal completa bajo `hexagonal/contable/cuentaMovimiento/`
+  - Modelo de dominio: `CuentaMovimiento` con campos `cuentaMovimientoId`, `fechaContable`, `ordenContable`, `item`, `numeroCuenta`, `debita`, `comprobanteId`, `concepto`, `importe`, `proveedorId`, `numeroAnulado`, `version`, `proveedorMovimientoId`, `proveedorMovimientoIdOrdenPago`, `apertura`, `trackId`, e implementa `Jsonifyable`
+  - Asociaciones de dominio: `Cuenta`, `Proveedor`, `Comprobante`, `ProveedorMovimiento` (movimiento y orden de pago), `Track`
+  - Puertos de entrada (11): `CreateCuentaMovimientoUseCase`, `UpdateCuentaMovimientoUseCase`, `FindByCuentaMovimientoIdUseCase`, `FindAllByNumeroCuentaUseCase`, `FindAllByAsientoUseCase`, `FindAllByNumeroCuentaAndFechaContableBetweenAndAperturaUseCase`, `FindLastByFechaUseCase`, `DeleteByCuentaMovimientoIdUseCase`, `DeleteAllByCuentaMovimientoIdInUseCase`, `DeleteAsientoUseCase`
+  - Puerto de salida: `CuentaMovimientoRepository` con métodos CRUD, búsquedas y eliminación por asiento
+  - Servicio de aplicación: `CuentaMovimientoService` con delegación a 10 casos de uso y métodos transaccionales
+  - Adaptador JPA: `JpaCuentaMovimientoRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `CuentaMovimientoEntity` con anotaciones Lombok
+  - Repositorio JPA: `JpaCuentaMovimientoRepository` con consultas por cuenta, asiento y rango de fechas
+  - Mapper: `CuentaMovimientoMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `CuentaMovimientoController` con rutas `/cuentaMovimiento` y `/api/tesoreria/core/cuentaMovimiento`
+  - DTOs: `CuentaMovimientoRequest`, `CuentaMovimientoResponse`
+  - DTO Mapper: `CuentaMovimientoDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `CuentaMovimientoException` movida de `core/exception/` a `hexagonal/contable/cuentaMovimiento/application/exception/`
+- feat(track): Nuevo módulo Track con arquitectura hexagonal completa bajo `hexagonal/track/`
+  - Modelo de dominio: `Track` con campos `trackId`, `descripcion`, implementa `Jsonifyable`
+  - Puertos de entrada (4): `CreateTrackUseCase`, `GetAllTracksUseCase`, `GetTrackByIdUseCase`, `DeleteTrackUseCase`
+  - Puerto de salida: `TrackRepository` con métodos CRUD
+  - Servicio de aplicación: `TrackService` con delegación a 4 casos de uso
+  - Adaptador JPA: `JpaTrackRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `TrackEntity` con anotaciones Lombok
+  - Repositorio JPA: `JpaTrackRepository` con consultas por ID
+  - Mapper: `TrackMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `TrackController` con rutas `/track` y `/api/tesoreria/core/track`, endpoints `GET /`, `GET /{trackId}`, `POST /`, `DELETE /{trackId}`
+  - DTOs: `TrackRequest`, `TrackResponse`
+  - DTO Mapper: `TrackDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `TrackException`
+- feat(docs): Nuevos diagramas Mermaid para módulos ProveedorMovimiento, Comprobante, CuentaMovimiento y Track
+
+### Changed
+- refactor(compras): Reorganización de módulos Articulo, Proveedor y FacturaPendiente bajo `hexagonal/compras/`
+  - `hexagonal/articulo/` → `hexagonal/compras/articulo/` (paquete completo migrado)
+  - `hexagonal/proveedor/` → `hexagonal/compras/proveedor/` (paquete completo migrado)
+  - `hexagonal/facturaPendiente/` → `hexagonal/compras/facturaPendiente/` (paquete completo migrado)
+  - Eliminación de interfaces de puertos legacy en `hexagonal/articulo/domain/ports/in/` y `hexagonal/proveedor/domain/ports/in/`
+  - Creación de nuevos puertos de entrada en ubicaciones correctas bajo `compras/`
+  - Nuevos repositorios: `ArticuloKeyRepositoryCustom`, `JpaProveedorSearchRepositoryCustom`
+  - Actualización de imports en servicios facade: `SheetService`, `CompraService`, `ProveedorSearchService`, `ProcessBajaService`
+- refactor(chequera): Reorganización del módulo Baja bajo `hexagonal/chequera/baja/`
+  - `hexagonal/baja/` → `hexagonal/chequera/baja/` (paquete completo migrado)
+  - Actualización de imports en `ProcessBajaService`, `SheetService`
+- refactor(compras/proveedor): `ProveedorException` movida de `core/exception/` a `hexagonal/compras/proveedor/application/exception/`
+- refactor(legacy): Eliminación de controllers legacy `ComprobanteController.java`, `CuentaMovimientoController.java`, `ProveedorMovimientoController.java` del paquete `core/controller/`
+- refactor(legacy): Eliminación de servicios legacy `ComprobanteService.java`, `CuentaMovimientoService.java`, `ProveedorMovimientoService.java`, `TrackService.java` del paquete `core/service/`
+- refactor(legacy): Eliminación de repositorios legacy `ComprobanteRepository.java`, `CuentaMovimientoRepository.java`, `ProveedorMovimientoRepository.java`, `TrackRepository.java` del paquete `core/repository/`
+- refactor(kotlin): Eliminación de modelos Kotlin legacy `Comprobante.kt`, `CuentaMovimiento.kt`, `ProveedorMovimiento.kt`, `Track.kt` del paquete `core/kotlin/model/`
+- refactor(model): Actualización de modelos Kotlin `Entrega.kt`, `EntregaDetalle.kt`, `ProveedorArticulo.kt`, `ProveedorArticuloTrack.kt`, `ProveedorPago.kt`, `ProveedorValor.kt` para usar nuevos paquetes hexagonales
+- refactor(facade): Actualización de imports en servicios facade: `AsientoInflacionService`, `BalanceService`, `CompraService`, `ContabilidadService`, `CostoService`, `NotificacionService`, `ProcessBajaService`, `SheetService`
+- refactor(model): Actualización de `FacturacionElectronica.java`, `AsignacionCostoDto.java`, `CostoParameterDto.java`, `CuentaMovimientoAsiento.java` para nuevos paquetes
+- refactor(docs): Actualización de diagramas Mermaid existentes (baja, articulo, proveedor, facturaPendiente) con versiones y referencias de paquetes actualizadas
+
+### Removed
+- Eliminación de `ComprobanteController.java` (legacy) del paquete `core/controller/`
+- Eliminación de `CuentaMovimientoController.java` (legacy) del paquete `core/controller/`
+- Eliminación de `ProveedorMovimientoController.java` (legacy) del paquete `core/controller/`
+- Eliminación de `Comprobante.kt` (Kotlin legacy) del paquete `core/kotlin/model/`
+- Eliminación de `CuentaMovimiento.kt` (Kotlin legacy) del paquete `core/kotlin/model/`
+- Eliminación de `ProveedorMovimiento.kt` (Kotlin legacy) del paquete `core/kotlin/model/`
+- Eliminación de `Track.kt` (Kotlin legacy) del paquete `core/kotlin/model/`
+- Eliminación de `ComprobanteService.java` (legacy) del paquete `core/service/`
+- Eliminación de `CuentaMovimientoService.java` (legacy) del paquete `core/service/`
+- Eliminación de `ProveedorMovimientoService.java` (legacy) del paquete `core/service/`
+- Eliminación de `TrackService.java` (legacy) del paquete `core/service/`
+- Eliminación de `ComprobanteRepository.java` (legacy) del paquete `core/repository/`
+- Eliminación de `CuentaMovimientoRepository.java` (legacy) del paquete `core/repository/`
+- Eliminación de `ProveedorMovimientoRepository.java` (legacy) del paquete `core/repository/`
+- Eliminación de `TrackRepository.java` (legacy) del paquete `core/repository/`
+
+> Basado en análisis profundo de `git diff HEAD` (200+ archivos staged, incluyendo reestructuración masiva de módulos + 4 nuevos módulos hexagonales + eliminación de legacy Kotlin/Java) y `pom.xml` (versión 3.35.0 → 3.36.0).
+
 ## [3.35.0] - 2026-07-16
 ### Changed
 - refactor(usuario): Migración completa del módulo Usuario a arquitectura hexagonal

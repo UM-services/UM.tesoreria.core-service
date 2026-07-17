@@ -24,10 +24,10 @@ classDiagram
 
         class UsuarioRepository {
             <<interface>>
-            +findByLogin(String) Optional<Usuario>
-            +findByPassword(String) Optional<Usuario>
-            +findByUserId(Long) Optional<Usuario>
-            +findByGoogleMailAndActivo(String, Byte) Optional<Usuario>
+            +findByLogin(String) Optional~Usuario~
+            +findByPassword(String) Optional~Usuario~
+            +findByUserId(Long) Optional~Usuario~
+            +findByGoogleMailAndActivo(String, Byte) Optional~Usuario~
             +save(Usuario) Usuario
             +updateLastLog(Long, OffsetDateTime) void
         }
@@ -86,20 +86,20 @@ classDiagram
 
             class JpaUsuarioRepository {
                 <<JpaRepository>>
-                +findByLogin(String) Optional<UsuarioEntity>
-                +findByPassword(String) Optional<UsuarioEntity>
-                +findByUserId(Long) Optional<UsuarioEntity>
-                +findByGoogleMailAndActivo(String, Byte) Optional<UsuarioEntity>
+                +findByLogin(String) Optional~UsuarioEntity~
+                +findByPassword(String) Optional~UsuarioEntity~
+                +findByUserId(Long) Optional~UsuarioEntity~
+                +findByGoogleMailAndActivo(String, Byte) Optional~UsuarioEntity~
                 +updateLastLog(Long, OffsetDateTime) void
             }
 
             class JpaUsuarioRepositoryAdapter {
                 -JpaUsuarioRepository jpaUsuarioRepository
                 -UsuarioMapper usuarioMapper
-                +findByLogin(String) Optional<Usuario>
-                +findByPassword(String) Optional<Usuario>
-                +findByUserId(Long) Optional<Usuario>
-                +findByGoogleMailAndActivo(String, Byte) Optional<Usuario>
+                +findByLogin(String) Optional~Usuario~
+                +findByPassword(String) Optional~Usuario~
+                +findByUserId(Long) Optional~Usuario~
+                +findByGoogleMailAndActivo(String, Byte) Optional~Usuario~
                 +save(Usuario) Usuario
                 +updateLastLog(Long, OffsetDateTime) void
             }
@@ -114,12 +114,12 @@ classDiagram
             class UsuarioController {
                 -UsuarioService service
                 -UsuarioDtoMapper dtoMapper
-                +findByLogin(String) ResponseEntity<UsuarioResponse>
-                +add(UsuarioRequest) ResponseEntity<UsuarioResponse>
-                +update(UsuarioRequest, Long) ResponseEntity<UsuarioResponse>
-                +findByPassword(UsuarioRequest) ResponseEntity<UsuarioResponse>
-                +updateLastLog(Long) ResponseEntity<UsuarioResponse>
-                +findByGoogleMail(String) ResponseEntity<UsuarioResponse>
+                +findByLogin(String) ResponseEntity~UsuarioResponse~
+                +add(UsuarioRequest) ResponseEntity~UsuarioResponse~
+                +update(UsuarioRequest, Long) ResponseEntity~UsuarioResponse~
+                +findByPassword(UsuarioRequest) ResponseEntity~UsuarioResponse~
+                +updateLastLog(Long) ResponseEntity~UsuarioResponse~
+                +findByGoogleMail(String) ResponseEntity~UsuarioResponse~
             }
 
             class UsuarioRequest {

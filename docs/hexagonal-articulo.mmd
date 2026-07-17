@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Artículo (v3.16.0)
+title: Arquitectura Hexagonal - Módulo Artículo (v3.36.0)
 ---
 
 classDiagram
@@ -41,11 +41,11 @@ classDiagram
         class ArticuloRepository {
             <<interface>>
             +create(Articulo) Articulo
-            +findById(Long) Optional<Articulo>
-            +findAll() List<Articulo>
-            +update(Long, Articulo) Optional<Articulo>
+            +findById(Long) Optional~Articulo~
+            +findAll() List~Articulo~
+            +update(Long, Articulo) Optional~Articulo~
             +deleteById(Long) boolean
-            +findLast() Optional<Articulo>
+            +findLast() Optional~Articulo~
         }
     }
 
@@ -60,13 +60,13 @@ classDiagram
             -GetPaginatedArticulosUseCase getPaginatedArticulosUseCase
             -SearchArticulosUseCase searchArticulosUseCase
             +createArticulo(Articulo) Articulo
-            +getArticuloById(Long) Optional<Articulo>
-            +getAllArticulos() List<Articulo>
-            +updateArticulo(Long, Articulo) Optional<Articulo>
+            +getArticuloById(Long) Optional~Articulo~
+            +getAllArticulos() List~Articulo~
+            +updateArticulo(Long, Articulo) Optional~Articulo~
             +deleteArticulo(Long) boolean
             +getNewArticulo() Articulo
-            +getPaginated(int, int) PaginatedResponse<Articulo>
-            +searchArticulos(String) List<ArticuloSearch>
+            +getPaginated(int, int) PaginatedResponse~Articulo~
+            +searchArticulos(String) List~ArticuloSearch~
         }
 
         namespace usecases {
@@ -77,17 +77,17 @@ classDiagram
 
             class GetArticuloByIdUseCaseImpl {
                 -ArticuloRepository repository
-                +getArticuloById(Long) Optional<Articulo>
+                +getArticuloById(Long) Optional~Articulo~
             }
 
             class GetAllArticulosUseCaseImpl {
                 -ArticuloRepository repository
-                +getAllArticulos() List<Articulo>
+                +getAllArticulos() List~Articulo~
             }
 
             class UpdateArticuloUseCaseImpl {
                 -ArticuloRepository repository
-                +updateArticulo(Long, Articulo) Optional<Articulo>
+                +updateArticulo(Long, Articulo) Optional~Articulo~
             }
 
             class DeleteArticuloUseCaseImpl {
@@ -102,12 +102,12 @@ classDiagram
 
         class GetPaginatedArticulosUseCaseImpl {
             -ArticuloRepository repository
-            +getPaginated(int, int) PaginatedResponse<Articulo>
+            +getPaginated(int, int) PaginatedResponse~Articulo~
         }
 
         class SearchArticulosUseCaseImpl {
             -ArticuloRepository repository
-            +searchArticulos(String) List<ArticuloSearch>
+            +searchArticulos(String) List~ArticuloSearch~
         }
         }
 
@@ -118,17 +118,17 @@ classDiagram
 
         class GetArticuloByIdUseCase {
             <<interface>>
-            +getArticuloById(Long) Optional<Articulo>
+            +getArticuloById(Long) Optional~Articulo~
         }
 
         class GetAllArticulosUseCase {
             <<interface>>
-            +getAllArticulos() List<Articulo>
+            +getAllArticulos() List~Articulo~
         }
 
         class UpdateArticuloUseCase {
             <<interface>>
-            +updateArticulo(Long, Articulo) Optional<Articulo>
+            +updateArticulo(Long, Articulo) Optional~Articulo~
         }
 
         class DeleteArticuloUseCase {
@@ -143,12 +143,12 @@ classDiagram
 
         class GetPaginatedArticulosUseCase {
             <<interface>>
-            +getPaginated(int, int) PaginatedResponse<Articulo>
+            +getPaginated(int, int) PaginatedResponse~Articulo~
         }
 
         class SearchArticulosUseCase {
             <<interface>>
-            +searchArticulos(String) List<ArticuloSearch>
+            +searchArticulos(String) List~ArticuloSearch~
         }
     }
 
@@ -171,18 +171,18 @@ classDiagram
 
             class JpaArticuloRepository {
                 <<JpaRepository>>
-                +findTopByOrderByArticuloIdDesc() Optional<ArticuloEntity>
+                +findTopByOrderByArticuloIdDesc() Optional~ArticuloEntity~
             }
 
             class JpaArticuloRepositoryAdapter {
                 -JpaArticuloRepository jpaArticuloRepository
                 -ArticuloMapper articuloMapper
                 +create(Articulo) Articulo
-                +findById(Long) Optional<Articulo>
-                +findAll() List<Articulo>
-                +update(Long, Articulo) Optional<Articulo>
+                +findById(Long) Optional~Articulo~
+                +findAll() List~Articulo~
+                +update(Long, Articulo) Optional~Articulo~
                 +deleteById(Long) boolean
-                +findLast() Optional<Articulo>
+                +findLast() Optional~Articulo~
             }
 
             class ArticuloMapper {
@@ -198,14 +198,14 @@ classDiagram
                 -ArticuloService articuloService
                 -ArticuloDtoMapper articuloDtoMapper
                 -CuentaService cuentaService
-                +createArticulo(ArticuloRequest) ResponseEntity<ArticuloResponse>
-                +getArticuloById(Long) ResponseEntity<ArticuloResponse>
-                +getAllArticulos() ResponseEntity<List<ArticuloResponse>>
-                +updateArticulo(Long, ArticuloRequest) ResponseEntity<ArticuloResponse>
-                +deleteArticulo(Long) ResponseEntity<Void>
-                +getNewArticulo() ResponseEntity<ArticuloResponse>
-                +getPaginatedArticulos(int, int) ResponseEntity<PaginatedResponse<ArticuloResponse>>
-                +searchArticulos(List<String>) ResponseEntity<List<ArticuloSearchResponse>>
+                +createArticulo(ArticuloRequest) ResponseEntity~ArticuloResponse~
+                +getArticuloById(Long) ResponseEntity~ArticuloResponse~
+                +getAllArticulos() ResponseEntity~List~ArticuloResponse~~
+                +updateArticulo(Long, ArticuloRequest) ResponseEntity~ArticuloResponse~
+                +deleteArticulo(Long) ResponseEntity~Void~
+                +getNewArticulo() ResponseEntity~ArticuloResponse~
+                +getPaginatedArticulos(int, int) ResponseEntity~PaginatedResponse~ArticuloResponse~~
+                +searchArticulos(List~String~) ResponseEntity~List~ArticuloSearchResponse~~
             }
 
             class ArticuloRequest {

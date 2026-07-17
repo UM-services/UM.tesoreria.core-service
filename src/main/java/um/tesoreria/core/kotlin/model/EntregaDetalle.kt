@@ -9,7 +9,9 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Column
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
-import um.tesoreria.core.hexagonal.articulo.infrastructure.persistence.entity.ArticuloEntity
+import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.entity.ArticuloEntity
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity
+import um.tesoreria.core.hexagonal.track.infrastructure.persistence.entity.TrackEntity
 import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
@@ -59,7 +61,7 @@ data class EntregaDetalle @JvmOverloads constructor(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "ned_fad_mvp_id", insertable = false, updatable = false)
-    var proveedorMovimiento: ProveedorMovimiento? = null,
+    var proveedorMovimiento: ProveedorMovimientoEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "ned_fad_mvp_id", referencedColumnName = "fad_mvp_id", insertable = false, updatable = false)
@@ -68,7 +70,7 @@ data class EntregaDetalle @JvmOverloads constructor(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "trackId", insertable = false, updatable = false)
-    var track: Track? = null
+    var track: TrackEntity? = null
 
 ) : Auditable() {
     fun jsonify(): String {
@@ -91,9 +93,9 @@ data class EntregaDetalle @JvmOverloads constructor(
         private var proveedorArticuloId: Long? = null
         private var entrega: Entrega? = null
         private var articulo: ArticuloEntity? = null
-        private var proveedorMovimiento: ProveedorMovimiento? = null
+        private var proveedorMovimiento: ProveedorMovimientoEntity? = null
         private var proveedorArticulo: ProveedorArticulo? = null
-        private var track: Track? = null
+        private var track: TrackEntity? = null
 
         fun entregaDetalleId(entregaDetalleId: Long?) = apply { this.entregaDetalleId = entregaDetalleId }
         fun entregaId(id: Long?) = apply { this.entregaId = id }
@@ -106,9 +108,9 @@ data class EntregaDetalle @JvmOverloads constructor(
         fun proveedorArticuloId(id: Long?) = apply { this.proveedorArticuloId = id }
         fun entrega(entrega: Entrega?) = apply { this.entrega = entrega }
         fun articulo(articulo: ArticuloEntity?) = apply { this.articulo = articulo }
-        fun proveedorMovimiento(proveedorMovimiento: ProveedorMovimiento?) = apply { this.proveedorMovimiento = proveedorMovimiento }
+        fun proveedorMovimiento(proveedorMovimiento: ProveedorMovimientoEntity?) = apply { this.proveedorMovimiento = proveedorMovimiento }
         fun proveedorArticulo(proveedorArticulo: ProveedorArticulo?) = apply { this.proveedorArticulo = proveedorArticulo }
-        fun track(track: Track?) = apply { this.track = track }
+        fun track(track: TrackEntity?) = apply { this.track = track }
 
         fun build() = EntregaDetalle(
             entregaDetalleId,

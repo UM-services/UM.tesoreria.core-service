@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorSearchEntity;
-import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.repository.JpaProveedorSearchRepository;
+import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.entity.ProveedorSearchEntity;
+import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.repository.JpaProveedorSearchRepository;
 
 /**
  * @author daniel

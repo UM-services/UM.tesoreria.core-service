@@ -9,16 +9,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CoeficienteInflacionException;
-import um.tesoreria.core.kotlin.model.CuentaMovimiento;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.entity.CuentaMovimientoEntity;
 import um.tesoreria.core.kotlin.model.Ejercicio;
 import um.tesoreria.core.model.CoeficienteInflacion;
 import um.tesoreria.core.model.view.CuentaMensual;
 import um.tesoreria.core.service.CoeficienteInflacionService;
-import um.tesoreria.core.service.CuentaMovimientoService;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
 import um.tesoreria.core.service.EjercicioService;
 import um.tesoreria.core.service.view.CuentaMensualService;
 import um.tesoreria.core.util.Periodo;
@@ -28,19 +30,13 @@ import um.tesoreria.core.util.Periodo;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class AsientoInflacionService {
 
-	@Autowired
-	private EjercicioService ejercicioService;
-
-	@Autowired
-	private CuentaMensualService cuentaMensualService;
-
-	@Autowired
-	private CoeficienteInflacionService coeficienteInflacionService;
-
-	@Autowired
-	private CuentaMovimientoService cuentaMovimientoService;
+	private final EjercicioService ejercicioService;
+	private final CuentaMensualService cuentaMensualService;
+	private final CoeficienteInflacionService coeficienteInflacionService;
+	private final CuentaMovimientoService cuentaMovimientoService;
 
 	public void generateAsientoInflacionResultado(Integer ejercicioId) {
 		Ejercicio ejercicio = ejercicioService.findByEjercicioId(ejercicioId);
@@ -150,7 +146,7 @@ public class AsientoInflacionService {
 			cuentaMovimiento.setImporte(cuentaMovimiento.getImporte().abs());
 
 			if (cuentaMovimiento.getImporte().compareTo(BigDecimal.ZERO) != 0)
-				cuentaMovimientoService.add(cuentaMovimiento);
+				cuentaMovimientoService.createCuentaMovimiento(cuentaMovimiento);
 		});
 
 		movimientosIngresos.forEach((cuenta, cuentaMovimiento) -> {
@@ -161,7 +157,7 @@ public class AsientoInflacionService {
 			cuentaMovimiento.setImporte(cuentaMovimiento.getImporte().abs());
 
 			if (cuentaMovimiento.getImporte().compareTo(BigDecimal.ZERO) != 0)
-				cuentaMovimientoService.add(cuentaMovimiento);
+				cuentaMovimientoService.createCuentaMovimiento(cuentaMovimiento);
 		});
 	}
 
@@ -249,7 +245,7 @@ public class AsientoInflacionService {
 			cuentaMovimiento.setImporte(cuentaMovimiento.getImporte().abs());
 
 			if (cuentaMovimiento.getImporte().compareTo(BigDecimal.ZERO) != 0)
-				cuentaMovimientoService.add(cuentaMovimiento);
+				cuentaMovimientoService.createCuentaMovimiento(cuentaMovimiento);
 		});
 	}
 }

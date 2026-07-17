@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity
 import um.tesoreria.core.model.Auditable
 import java.math.BigDecimal
 import java.time.OffsetDateTime
@@ -34,6 +35,6 @@ data class ProveedorPago(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "opc_orp_id", insertable = false, updatable = false)
-    var ordenPago: ProveedorMovimiento? = null,
+    var ordenPago: ProveedorMovimientoEntity? = null,
 
-) : Auditable()
+    ) : Auditable()

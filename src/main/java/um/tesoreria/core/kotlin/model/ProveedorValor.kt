@@ -1,6 +1,7 @@
 package um.tesoreria.core.kotlin.model
 
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity
 import um.tesoreria.core.model.Auditable
 
 
@@ -31,6 +32,6 @@ data class ProveedorValor(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "opv_orp_id", referencedColumnName = "mvp_id", insertable = false, updatable = false)
-    var proveedorMovimiento: ProveedorMovimiento? = null,
+    var proveedorMovimiento: ProveedorMovimientoEntity? = null,
 
     ) : Auditable()

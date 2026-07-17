@@ -18,22 +18,24 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
+import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
-import um.tesoreria.core.exception.ProveedorMovimientoException;
-import um.tesoreria.core.exception.ProveedorException;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
+import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorException;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.proveedor.application.service.ProveedorService;
-import um.tesoreria.core.hexagonal.proveedor.domain.model.Proveedor;
-import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity;
+import um.tesoreria.core.hexagonal.compras.proveedor.application.service.ProveedorService;
+import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.PersonaSuspendido;
-import um.tesoreria.core.service.ComprobanteService;
+import um.tesoreria.core.hexagonal.comprobante.application.service.ComprobanteService;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.PersonaSuspendidoService;
 import um.tesoreria.core.service.ProveedorComprobanteService;
-import um.tesoreria.core.service.ProveedorMovimientoService;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
 import um.tesoreria.core.service.ProveedorValorService;
 import um.tesoreria.core.service.ValorMovimientoService;
 import um.tesoreria.core.service.ValorService;
@@ -133,7 +135,7 @@ public class NotificacionService {
 	public String notifyPagoProveedor(Long proveedorMovimientoId) throws MessagingException {
 		String data = "";
 
-		ProveedorMovimiento proveedorMovimiento = null;
+		ProveedorMovimiento proveedorMovimiento;
 		try {
 			proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
 		} catch (ProveedorMovimientoException e) {
@@ -163,7 +165,7 @@ public class NotificacionService {
 
 		// Datos de valores
 		List<ProveedorValor> proveedorValors = proveedorValorService.findAllByProveedorMovimientoId(proveedorMovimientoId);
-		List<Long> valorMovimientoIds = proveedorValors.stream().map(valor -> valor.getValorMovimientoId())
+		List<Long> valorMovimientoIds = proveedorValors.stream().map(ProveedorValor::getValorMovimientoId)
 				.collect(Collectors.toList());
 		Map<Long, ValorMovimiento> valorMovimientos = valorMovimientoService
 				.findAllByValorMovimientoIdIn(valorMovimientoIds).stream()
