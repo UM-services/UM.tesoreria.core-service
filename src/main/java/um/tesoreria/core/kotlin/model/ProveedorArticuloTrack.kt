@@ -7,6 +7,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity
+import um.tesoreria.core.hexagonal.track.infrastructure.persistence.entity.TrackEntity
 import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.util.Jsonifier
 import java.math.BigDecimal
@@ -26,11 +28,11 @@ data class ProveedorArticuloTrack(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "trackId", insertable = false, updatable = false)
-    var track: Track? = null,
+    var track: TrackEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "proveedorMovimientoId", insertable = false, updatable = false)
-    var proveedorMovimiento: ProveedorMovimiento? = null,
+    var proveedorMovimiento: ProveedorMovimientoEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "proveedorArticuloId", insertable = false, updatable = false)
@@ -51,8 +53,8 @@ data class ProveedorArticuloTrack(
         private var proveedorArticuloId: Long? = null
         private var trackId: Long? = null
         private var importe: BigDecimal = BigDecimal.ZERO
-        private var track: Track? = null
-        private var proveedorMovimiento: ProveedorMovimiento? = null
+        private var track: TrackEntity? = null
+        private var proveedorMovimiento: ProveedorMovimientoEntity? = null
         private var proveedorArticulo: ProveedorArticulo? = null
 
         fun proveedorArticuloTrackId(proveedorArticuloTrackId: Long?) = apply { this.proveedorArticuloTrackId = proveedorArticuloTrackId }
@@ -60,8 +62,8 @@ data class ProveedorArticuloTrack(
         fun proveedorArticuloId(id: Long?) = apply { this.proveedorArticuloId = id }
         fun trackId(id: Long?) = apply { this.trackId = id }
         fun importe(importe: BigDecimal) = apply { this.importe = importe }
-        fun track(track: Track?) = apply { this.track = track }
-        fun proveedorMovimiento(proveedorMovimiento: ProveedorMovimiento?) = apply { this.proveedorMovimiento = proveedorMovimiento }
+        fun track(track: TrackEntity?) = apply { this.track = track }
+        fun proveedorMovimiento(proveedorMovimiento: ProveedorMovimientoEntity?) = apply { this.proveedorMovimiento = proveedorMovimiento }
         fun proveedorArticulo(proveedorArticulo: ProveedorArticulo?) = apply { this.proveedorArticulo = proveedorArticulo }
 
         fun build() = ProveedorArticuloTrack(

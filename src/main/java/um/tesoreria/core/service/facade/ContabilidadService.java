@@ -4,6 +4,11 @@
 package um.tesoreria.core.service.facade;
 
 import lombok.RequiredArgsConstructor;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
+import um.tesoreria.core.hexagonal.comprobante.application.service.ComprobanteService;
+import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
 import um.tesoreria.core.hexagonal.contable.asiento.application.exception.AsientoException;
 import um.tesoreria.core.exception.EjercicioBloqueadoException;
 import um.tesoreria.core.exception.EjercicioException;
@@ -15,6 +20,8 @@ import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoS
 import um.tesoreria.core.hexagonal.contable.asiento.infrastructure.persistence.entity.AsientoEntity;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.service.*;
@@ -217,7 +224,7 @@ public class ContabilidadService {
             cuentaMovimiento.setFechaContable(asientoInternalContra.getFechaContable());
             cuentaMovimiento.setOrdenContable(asientoInternalContra.getOrdenContable());
             cuentaMovimiento.setDebita((byte) (1 - cuentaMovimiento.getDebita()));
-            cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
+            cuentaMovimiento = cuentaMovimientoService.createCuentaMovimiento(cuentaMovimiento);
         }
     }
 
@@ -249,7 +256,7 @@ public class ContabilidadService {
             cuentaMovimiento.setOrdenContable(ordenContable);
             cuentaMovimiento.setItem(++item);
             cuentaMovimiento.setProveedorMovimientoId(proveedorMovimientoId);
-            cuentaMovimiento = cuentaMovimientoService.add(cuentaMovimiento);
+            cuentaMovimiento = cuentaMovimientoService.createCuentaMovimiento(cuentaMovimiento);
         }
         deleteAsientoDesde(fechaContable, ordenContable, item + 1);
 
@@ -294,7 +301,7 @@ public class ContabilidadService {
                         log.debug("Actualizando el asiento");
                         cuentaMovimiento.setFechaContable(targetDate);
                         cuentaMovimiento.setOrdenContable(targetNumber);
-                        cuentaMovimiento = cuentaMovimientoService.update(cuentaMovimiento, cuentaMovimiento.getCuentaMovimientoId());
+                        cuentaMovimiento = cuentaMovimientoService.updateCuentaMovimiento(cuentaMovimiento, cuentaMovimiento.getCuentaMovimientoId());
                         log.debug("CuentaMovimiento -> {}", cuentaMovimiento.jsonify());
                     }
                     // Actualizando relación con el asiento

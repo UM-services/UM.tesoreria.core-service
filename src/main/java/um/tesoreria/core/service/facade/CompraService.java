@@ -4,14 +4,19 @@ import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.exception.BancoMovimientoException;
 import um.tesoreria.core.exception.ProveedorValorException;
 import um.tesoreria.core.exception.facade.ContableException;
+import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
+import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
+import um.tesoreria.core.hexagonal.comprobante.infrastructure.persistence.entity.ComprobanteEntity;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
-import um.tesoreria.core.hexagonal.proveedor.infrastructure.persistence.entity.ProveedorEntity;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.entity.ProveedorEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.service.*;
 import um.tesoreria.core.util.Tool;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -56,7 +61,6 @@ public class CompraService {
 
         // Update cancellation amounts for all related movements
         proveedorPagos.forEach(proveedorPago -> {
-            logProveedorPago(proveedorPago);
             ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(
                 proveedorPago.getProveedorMovimientoIdFactura()
             );
@@ -67,8 +71,7 @@ public class CompraService {
                     .setScale(2, RoundingMode.HALF_UP)
             );
             
-            proveedorMovimientoService.update(proveedorMovimiento, proveedorMovimiento.getProveedorMovimientoId());
-            logProveedorMovimiento(proveedorMovimiento);
+            proveedorMovimientoService.updateProveedorMovimiento(proveedorMovimiento, proveedorMovimiento.getProveedorMovimientoId());
         });
 
         // Bulk delete all provider payments
@@ -78,7 +81,6 @@ public class CompraService {
         // Process valor-related deletions
         var proveedorValores = proveedorValorService.findAllByProveedorMovimientoId(proveedorMovimientoId);
         var valorMovimientos = proveedorValores.stream()
-            .peek(this::logProveedorValor)
             .map(pv -> valorMovimientoService.findByValorMovimientoId(pv.getValorMovimientoId()))
             .peek(vm -> {
                 if (vm.getFechaContable() != null) {
@@ -132,7 +134,6 @@ public class CompraService {
         var proveedorArticulos = proveedorArticuloService
             .findAllByProveedorMovimientoId(proveedorMovimientoId, false)
             .stream()
-            .peek(this::logProveedorArticulo)
             .toList();
 
         var proveedorArticuloIds = proveedorArticulos.stream()
@@ -167,53 +168,7 @@ public class CompraService {
 
         // Eliminamos el comprobante
         log.debug("Eliminando comprobante {}", proveedorMovimientoId);
-        proveedorMovimientoService.deleteByProveedorMovimientoId(proveedorMovimientoId);
-    }
-
-    private void logProveedorArticuloTrack(ProveedorArticuloTrack paTrack) {
-        log.debug("Processing logProveedorArticuloTrack");
-        try {
-            log.debug("ProveedorArticuloTrack -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(paTrack));
-        } catch (JsonProcessingException e) {
-            log.debug("ProveedorArticuloTrack JSON error -> {}", e.getMessage());
-        }
-    }
-
-    private void logProveedorArticulo(ProveedorArticulo proveedorArticulo) {
-        log.debug("Processing logProveedorArticulo");
-        try {
-            log.debug("ProveedorArticulo -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorArticulo));
-        } catch (JsonProcessingException e) {
-            log.debug("ProveedorArticulo JSON error -> {}", e.getMessage());
-        }
-
-    }
-
-    private void logProveedorValor(ProveedorValor proveedorValor) {
-        log.debug("Processing logProveedorValor");
-        try {
-            log.debug("ProveedorValor -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorValor));
-        } catch (JsonProcessingException e) {
-            log.debug("ProveedorValor JSON error -> {}", e.getMessage());
-        }
-    }
-
-    private void logProveedorMovimiento(ProveedorMovimiento proveedorMovimiento) {
-        log.debug("Processing logProveedorMovimiento");
-        try {
-            log.debug("ProveedorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
-        } catch (JsonProcessingException e) {
-            log.debug("ProveedorMovimiento JSON error -> {}", e.getMessage());
-        }
-    }
-
-    private void logProveedorPago(ProveedorPago proveedorPago) {
-        log.debug("Processing logProveedorPago");
-        try {
-            log.debug("ProveedorPago -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorPago));
-        } catch (JsonProcessingException e) {
-            log.debug("ProveedorPago JSON error -> {}", e.getMessage());
-        }
+        proveedorMovimientoService.deleteProveedorMovimiento(proveedorMovimientoId);
     }
 
     @Transactional
@@ -233,11 +188,6 @@ public class CompraService {
             valorMovimiento.setFechaContable(null);
             valorMovimiento.setOrdenContable(null);
             valorMovimiento = valorMovimientoService.update(valorMovimiento, valorMovimiento.getValorMovimientoId());
-            try {
-                log.debug("... ValorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valorMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("... sin ValorMovimiento -> {}", e.getMessage());
-            }
 
             if (fechaContable != null) {
                 contabilidadService.deleteAsiento(fechaContable, ordenContable);
@@ -250,11 +200,6 @@ public class CompraService {
                 bancoMovimiento.setFechaContable(null);
                 bancoMovimiento.setOrdenContable(0);
                 bancoMovimiento = bancoMovimientoService.update(bancoMovimiento, bancoMovimiento.getBancoMovimientoId());
-                try {
-                    log.debug("... BancoMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(bancoMovimiento));
-                } catch (JsonProcessingException e) {
-                    log.debug("... sin BancoMovimiento -> {}", e.getMessage());
-                }
             } catch (BancoMovimientoException e) {
                 log.debug("... sin BancoMovimiento -> {}", e.getMessage());
             }
@@ -273,11 +218,6 @@ public class CompraService {
                 BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimiento.getValorMovimientoId());
                 bancoMovimiento.setAnulado((byte) 1);
                 bancoMovimiento = bancoMovimientoService.update(bancoMovimiento, bancoMovimiento.getBancoMovimientoId());
-                try {
-                    log.debug("... BancoMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(bancoMovimiento));
-                } catch (JsonProcessingException e) {
-                    log.debug("... sin BancoMovimiento -> {}", e.getMessage());
-                }
             } catch (BancoMovimientoException e) {
                 log.debug("... sin BancoMovimiento -> {}", e.getMessage());
             }
@@ -288,31 +228,16 @@ public class CompraService {
     public void deleteValor(Long valorMovimientoId) {
         log.debug("Iniciando");
         ValorMovimiento valorMovimiento = valorMovimientoService.findByValorMovimientoId(valorMovimientoId);
-        try {
-            log.debug("ValorMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valorMovimiento));
-        } catch (JsonProcessingException e) {
-            log.debug("Sin Valor Movimiento");
-        }
         OffsetDateTime fechaContable = valorMovimiento.getFechaContable();
         Integer ordenContable = valorMovimiento.getOrdenContable();
 
         for (ProveedorValor proveedorValor : proveedorValorService.findAllByValorMovimientoId(valorMovimientoId)) {
-            try {
-                log.debug("ProveedorValor={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorValor));
-            } catch (JsonProcessingException e) {
-                log.debug("Sin Proveedor Valor");
-            }
             proveedorValorService.deleteByProveedorValorId(proveedorValor.getProveedorValorId());
             log.debug("Eliminado Proveedor Valor");
         }
 
         try {
             BancoMovimiento bancoMovimiento = bancoMovimientoService.findByValorMovimientoId(valorMovimientoId);
-            try {
-                log.debug("BancoMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(bancoMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("Sin Banco Movimiento");
-            }
             bancoMovimientoService.deleteByBancoMovimientoId(bancoMovimiento.getBancoMovimientoId());
             log.debug("BancoMovimiento eliminado");
         } catch (BancoMovimientoException e) {
@@ -334,15 +259,9 @@ public class CompraService {
         ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
 
         proveedorMovimiento.setFechaAnulacion(Tool.dateAbsoluteArgentina());
-        proveedorMovimiento = proveedorMovimientoService.update(proveedorMovimiento, proveedorMovimientoId);
-        logProveedorMovimiento(proveedorMovimiento);
+        proveedorMovimiento = proveedorMovimientoService.updateProveedorMovimiento(proveedorMovimiento, proveedorMovimientoId);
 
         for (ValorMovimiento valorMovimiento : valorMovimientoService.findAllByOrdenPago(proveedorMovimientoId)) {
-            try {
-                log.debug("anulating ValorMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valorMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("Sin ValorMovimiento");
-            }
             anulateValor(valorMovimiento.getValorMovimientoId(), Tool.dateAbsoluteArgentina());
         }
     }
@@ -356,21 +275,11 @@ public class CompraService {
         } catch (ProveedorValorException e) {
             proveedorValor = new ProveedorValor();
         }
-        try {
-            log.debug("ProveedorValor={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorValor));
-        } catch (JsonProcessingException e) {
-            log.debug("ProveedorValor=JsonException");
-        }
         Integer orden = proveedorValor.getOrden();
         ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService.findByProveedorMovimientoId(proveedorMovimientoId);
-        try {
-            log.debug("ProveedorMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimiento));
-        } catch (JsonProcessingException e) {
-            log.debug("ProveedorMovimiento=JsonException");
-        }
         Comprobante comprobante = proveedorMovimiento.getComprobante();
         String datoProveedor = "";
-        ProveedorEntity proveedor = proveedorMovimiento.getProveedor();
+        Proveedor proveedor = proveedorMovimiento.getProveedor();
         Integer proveedorId = null;
         if (proveedor != null) {
             datoProveedor = proveedor.getRazonSocial() + " (" + proveedor.getCuit() + ")";
@@ -379,20 +288,10 @@ public class CompraService {
         String concepto = "Pago " + new DecimalFormat("0000").format(proveedorMovimiento.getPrefijo()) + "-" + new DecimalFormat("00000000").format(proveedorMovimiento.getNumeroComprobante()) + " - " + datoProveedor;
 
         for (ValorMovimiento valorMovimiento : valorMovimientos) {
-            try {
-                log.debug("ValorMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valorMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("ValorMovimiento=JsonException");
-            }
             // Inicializa asiento
             List<CuentaMovimiento> cuentaMovimientos = new ArrayList<CuentaMovimiento>();
             // Buscar asiento
             AsientoInternal asientoInternal = contabilidadService.nextAsiento(valorMovimiento.getFechaEmision(), null);
-            try {
-                log.debug("AsientoInternal={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(asientoInternal));
-            } catch (JsonProcessingException e) {
-                log.debug("AsientoInternal=JsonException");
-            }
             OffsetDateTime fechaContable = asientoInternal.getFechaContable();
             Integer ordenContable = asientoInternal.getOrdenContable();
             // Imputacion Contable
@@ -402,18 +301,8 @@ public class CompraService {
             }
             CuentaMovimiento cuentaMovimiento = new CuentaMovimiento(null, fechaContable, ordenContable, 0, numeroCuenta, (byte) (comprobante.getDebita() == 1 ? 1 : 0), comprobante.getComprobanteId(), concepto, valorMovimiento.getImporte().abs(), proveedorId, 0, 0, null, null, (byte) 0, null, null, null, null, null, null, null);
             cuentaMovimientos.add(cuentaMovimiento);
-            try {
-                log.debug("CuentaMovimientos={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimientos));
-            } catch (JsonProcessingException e) {
-                log.debug("CuentaMovimientos=JsonException");
-            }
 
             Valor valor = valorService.findByValorId(valorMovimiento.getValorId());
-            try {
-                log.debug("Valor={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valor));
-            } catch (JsonProcessingException e) {
-                log.debug("Valor=JsonException");
-            }
             CuentaEntity cuenta = null;
             if (valorMovimiento.getBancariaIdOrigen() == null) {
                 cuenta = valor.getCuenta();
@@ -421,18 +310,8 @@ public class CompraService {
                 Bancaria bancaria = bancariaService.findByBancariaId(valorMovimiento.getBancariaIdOrigen());
                 cuenta = bancaria.getCuenta();
             }
-            try {
-                log.debug("Cuenta={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valor));
-            } catch (JsonProcessingException e) {
-                log.debug("Cuenta=JsonException");
-            }
             cuentaMovimiento = new CuentaMovimiento(null, fechaContable, ordenContable, 0, cuenta.getNumeroCuenta(), (byte) (comprobante.getDebita() == 1 ? 0 : 1), comprobante.getComprobanteId(), concepto, valorMovimiento.getImporte().abs(), proveedorId, 0, 0, null, null, (byte) 0, null, null, null, null, null, null, null);
             cuentaMovimientos.add(cuentaMovimiento);
-            try {
-                log.debug("CuentaMovimientos={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimientos));
-            } catch (JsonProcessingException e) {
-                log.debug("CuentaMovimientos=JsonException");
-            }
 
             // Guarda asiento por asiento
             contabilidadService.saveAsiento(fechaContable, ordenContable, proveedorMovimientoId, concepto, cuentaMovimientos);
@@ -441,20 +320,10 @@ public class CompraService {
             valorMovimiento.setFechaContable(fechaContable);
             valorMovimiento.setOrdenContable(ordenContable);
             valorMovimiento = valorMovimientoService.add(valorMovimiento);
-            try {
-                log.debug("ValorMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(valorMovimiento));
-            } catch (JsonProcessingException e) {
-                log.debug("ValorMovimiento=JsonException");
-            }
 
             // Graba proveedorValor
             proveedorValor = new ProveedorValor(null, proveedorMovimientoId, ++orden, valorMovimiento.getValorMovimientoId(), null, null);
             proveedorValor = proveedorValorService.add(proveedorValor);
-            try {
-                log.debug("ProveedorValor={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorValor));
-            } catch (JsonProcessingException e) {
-                log.debug("ProveedorValor=JsonException");
-            }
 
             // Graba libroBanco
             if (valorMovimiento.getBancariaIdOrigen() != null) {
@@ -462,11 +331,6 @@ public class CompraService {
                 valor = valorService.findByValorId(valorMovimiento.getValorId());
 
                 BancoMovimiento bancoMovimiento = bancoMovimientoService.generateNextId(valorMovimiento.getBancariaIdOrigen(), valorMovimiento.getFechaEmision());
-                try {
-                    log.debug("BancoMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(bancoMovimiento));
-                } catch (JsonProcessingException e) {
-                    log.debug("BancoMovimiento=JsonException");
-                }
                 bancoMovimiento.setTipo(valor.getCategoria());
                 if (bancoMovimiento.getTipo().equals("Transferencia")) {
                     bancoMovimiento.setTipo("TransferenciaS");
@@ -479,11 +343,6 @@ public class CompraService {
                 bancoMovimiento.setOrdenContable(ordenContable);
                 bancoMovimiento.setValorMovimientoId(valorMovimiento.getValorMovimientoId());
                 bancoMovimiento = bancoMovimientoService.add(bancoMovimiento);
-                try {
-                    log.debug("BancoMovimiento={}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(bancoMovimiento));
-                } catch (JsonProcessingException e) {
-                    log.debug("BancoMovimiento=JsonException");
-                }
             }
         }
     }

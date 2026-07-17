@@ -1,0 +1,87 @@
+---
+title: Arquitectura Hexagonal - ProveedorMovimiento (v3.36.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        PM[ProveedorMovimiento<br/>Modelo de Dominio]
+        PR[ProveedorMovimientoRepository<br/>Puerto de Salida]
+        C[Comprobante<br/>Modelo de Dominio]
+        P[Proveedor<br/>Modelo de Dominio]
+        G[Geografica<br/>Modelo de Dominio]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc[ProveedorMovimientoService<br/>Servicio de Aplicación]
+        UC1[CreateProveedorMovimientoUseCase]
+        UC2[UpdateProveedorMovimientoUseCase]
+        UC3[DeleteProveedorMovimientoUseCase]
+        UC4[GetProveedorMovimientoByIdUseCase]
+        UC5[GetProveedorMovimientoByOrdenPagoUseCase]
+        UC6[GetLastProveedorMovimientoByOrdenPagoUseCase]
+        UC7[GetProveedorMovimientosByIdsUseCase]
+        UC8[GetProveedorMovimientosByProveedorUseCase]
+        UC9[GetProveedorMovimientosByComprobanteAndFechaRangeUseCase]
+        UC10[GetProveedorMovimientosEliminablesUseCase]
+        UC11[GetProveedorMovimientosAsignablesUseCase]
+        UC12[GetProveedorMovimientosDisponiblesUseCase]
+        UC13[GetProveedorMovimientoIdsForCostAdjustmentUseCase]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        PC[ProveedorMovimientoController<br/>Adaptador Web]
+        JPA[JpaProveedorMovimientoRepositoryAdapter<br/>Adaptador JPA]
+        PMMapper[ProveedorMovimientoMapper<br/>Mapeador Dominio]
+        DM[ProveedorMovimientoDtoMapper<br/>Mapeador DTO]
+        Req[ProveedorMovimientoRequest<br/>DTO Entrada]
+        Resp[ProveedorMovimientoResponse<br/>DTO Salida]
+        ENT[ProveedorMovimientoEntity<br/>Entidad JPA]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+    end
+
+    %% Flujo de Dependencias
+    PC -->|usa| Svc
+    PC -->|recibe| Req
+    PC -->|envía| Resp
+    PC -->|usa| DM
+
+    Svc -->|depende| PR
+    Svc -->|ejecuta| UC1
+    Svc -->|ejecuta| UC2
+    Svc -->|ejecuta| UC3
+    Svc -->|ejecuta| UC4
+    Svc -->|ejecuta| UC5
+    Svc -->|ejecuta| UC6
+    Svc -->|ejecuta| UC7
+    Svc -->|ejecuta| UC8
+    Svc -->|ejecuta| UC9
+    Svc -->|ejecuta| UC10
+    Svc -->|ejecuta| UC11
+    Svc -->|ejecuta| UC12
+    Svc -->|ejecuta| UC13
+
+    JPA -->|implementa| PR
+    JPA -->|persiste| JPAR
+    JPA -->|gestiona| ENT
+    JPA -->|usa| PMMapper
+
+    PMMapper -->|convierte| PM
+    PMMapper -->|convierte| ENT
+
+    DM -->|convierte| Req
+    DM -->|convierte| Resp
+    DM -->|convierte| PM
+
+    style PM fill:#e1f5fe
+    style C fill:#e1f5fe
+    style P fill:#e1f5fe
+    style G fill:#e1f5fe
+    style PR fill:#f3e5f5
+    style Svc fill:#fff3e0
+    style PC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style PMMapper fill:#e8f5e8
+    style DM fill:#e8f5e8
+    style ENT fill:#e8f5e8

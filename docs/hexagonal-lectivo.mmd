@@ -16,12 +16,12 @@ classDiagram
 
         class LectivoRepository {
             <<interface>>
-            +findAll() List<Lectivo>
-            +findAllReverse() List<Lectivo>
-            +findAllByPersona(BigDecimal, Integer) List<Lectivo>
-            +findById(Integer) Optional<Lectivo>
-            +findByFecha(OffsetDateTime) Optional<Lectivo>
-            +findLast() Optional<Lectivo>
+            +findAll() List~Lectivo~
+            +findAllReverse() List~Lectivo~
+            +findAllByPersona(BigDecimal, Integer) List~Lectivo~
+            +findById(Integer) Optional~Lectivo~
+            +findByFecha(OffsetDateTime) Optional~Lectivo~
+            +findLast() Optional~Lectivo~
             +create(Lectivo) Lectivo
             +deleteById(Integer)
         }
@@ -37,12 +37,12 @@ classDiagram
             -GetLectivoByFechaUseCase getLectivoByFechaUseCase
             -GetLastLectivoUseCase getLastLectivoUseCase
             -DeleteLectivoUseCase deleteLectivoUseCase
-            +findAll() List<Lectivo>
-            +findAllReverse() List<Lectivo>
-            +findAllByPersona(BigDecimal, Integer) List<Lectivo>
+            +findAll() List~Lectivo~
+            +findAllReverse() List~Lectivo~
+            +findAllByPersona(BigDecimal, Integer) List~Lectivo~
             +findByLectivoId(Integer) Lectivo
             +findByFecha(OffsetDateTime) Lectivo
-            +findLast() Optional<Lectivo>
+            +findLast() Optional~Lectivo~
             +createLectivo(Lectivo) Lectivo
             +deleteByLectivoId(Integer)
         }
@@ -73,22 +73,22 @@ classDiagram
 
             class JpaLectivoRepository {
                 <<JpaRepository>>
-                +findAllByLectivoIdIn(List<Integer>, Sort) List<LectivoEntity>
-                +findByLectivoId(Integer) Optional<LectivoEntity>
-                +findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(OffsetDateTime, OffsetDateTime) Optional<LectivoEntity>
-                +findTopByOrderByLectivoIdDesc() Optional<LectivoEntity>
+                +findAllByLectivoIdIn(List~Integer~, Sort) List~LectivoEntity~
+                +findByLectivoId(Integer) Optional~LectivoEntity~
+                +findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(OffsetDateTime, OffsetDateTime) Optional~LectivoEntity~
+                +findTopByOrderByLectivoIdDesc() Optional~LectivoEntity~
             }
 
             class JpaLectivoRepositoryAdapter {
                 -JpaLectivoRepository repository
                 -JpaChequeraSerieRepository chequeraSerieRepository
                 -LectivoMapper mapper
-                +findAll() List<Lectivo>
-                +findAllReverse() List<Lectivo>
-                +findAllByPersona(BigDecimal, Integer) List<Lectivo>
-                +findById(Integer) Optional<Lectivo>
-                +findByFecha(OffsetDateTime) Optional<Lectivo>
-                +findLast() Optional<Lectivo>
+                +findAll() List~Lectivo~
+                +findAllReverse() List~Lectivo~
+                +findAllByPersona(BigDecimal, Integer) List~Lectivo~
+                +findById(Integer) Optional~Lectivo~
+                +findByFecha(OffsetDateTime) Optional~Lectivo~
+                +findLast() Optional~Lectivo~
                 +create(Lectivo) Lectivo
                 +deleteById(Integer)
             }
@@ -103,13 +103,13 @@ classDiagram
             class LectivoController {
                 -LectivoService service
                 -LectivoDtoMapper dtoMapper
-                +findAll() ResponseEntity<List<LectivoResponse>>
-                +findAllReverse() ResponseEntity<List<LectivoResponse>>
-                +findAllByPersona(BigDecimal, Integer) ResponseEntity<List<LectivoResponse>>
-                +findByLectivoId(Integer) ResponseEntity<LectivoResponse>
-                +findLast() ResponseEntity<LectivoResponse>
-                +add(LectivoRequest) ResponseEntity<LectivoResponse>
-                +deleteByLectivoId(Integer) ResponseEntity<Void>
+                +findAll() ResponseEntity~List~LectivoResponse~~
+                +findAllReverse() ResponseEntity~List~LectivoResponse~~
+                +findAllByPersona(BigDecimal, Integer) ResponseEntity~List~LectivoResponse~~
+                +findByLectivoId(Integer) ResponseEntity~LectivoResponse~
+                +findLast() ResponseEntity~LectivoResponse~
+                +add(LectivoRequest) ResponseEntity~LectivoResponse~
+                +deleteByLectivoId(Integer) ResponseEntity~Void~
             }
 
             class LectivoRequest {

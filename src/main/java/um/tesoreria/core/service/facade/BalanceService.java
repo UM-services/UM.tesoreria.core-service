@@ -16,8 +16,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -29,12 +27,19 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import um.tesoreria.core.exception.ProveedorMovimientoException;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
 import um.tesoreria.core.exception.ProveedorValorException;
 import um.tesoreria.core.exception.ValorMovimientoException;
 import um.tesoreria.core.exception.ValorException;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
+import um.tesoreria.core.hexagonal.comprobante.application.service.ComprobanteService;
+import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -236,11 +241,6 @@ public class BalanceService {
 
 		for (CuentaMovimiento cuentaMovimiento : cuentaMovimientoService
 				.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, (byte) 0)) {
-            try {
-                log.debug("CuentaMovimiento -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(cuentaMovimiento));
-            } catch (JsonProcessingException e) {
-                log.error(e.getMessage());
-            }
             row = sheet.createRow(++fila);
 			this.setCellString(row, columnaFecha,
 					format.format(Objects.requireNonNull(cuentaMovimiento.getFechaContable()).withOffsetSameInstant(ZoneOffset.UTC)), style_normal);
@@ -257,18 +257,8 @@ public class BalanceService {
 
 			// busqueda de la OP
 			ProveedorPago proveedorPago = proveedorPagoService.findAllByFactura(cuentaMovimiento.getProveedorMovimientoId()).stream().findFirst().orElse(null);
-            try {
-                log.debug("proveedorPago -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorPago));
-            } catch (JsonProcessingException e) {
-                log.debug("Sin proveedorPago");
-            }
 			if (proveedorPago != null) {
-				ProveedorMovimiento proveedorMovimientoOP = proveedorPago.getOrdenPago();
-                try {
-                    log.debug("proveedorMovimientoOP -> {}", JsonMapper.builder().findAndAddModules().build().writerWithDefaultPrettyPrinter().writeValueAsString(proveedorMovimientoOP));
-                } catch (JsonProcessingException e) {
-                    log.debug("Sin proveedorMovimientoOP");
-                }
+				ProveedorMovimientoEntity proveedorMovimientoOP = proveedorPago.getOrdenPago();
                 assert proveedorMovimientoOP != null;
                 String ordenPago = Objects.requireNonNull(proveedorMovimientoOP.getComprobante()).getDescripcion() + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
 				this.setCellString(row, columnaOrdenPago, ordenPago, style_normal);

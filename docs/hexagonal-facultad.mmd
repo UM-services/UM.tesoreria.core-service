@@ -23,9 +23,9 @@ classDiagram
 
         class FacultadRepository {
             <<interface>>
-            +findAll() List<Facultad>
-            +findAllIn(List<Integer>) List<Facultad>
-            +findById(Integer) Optional<Facultad>
+            +findAll() List~Facultad~
+            +findAllIn(List~Integer~) List~Facultad~
+            +findById(Integer) Optional~Facultad~
         }
     }
 
@@ -34,44 +34,44 @@ classDiagram
             -GetAllFacultadesUseCase getAllFacultadesUseCase
             -GetFacultadesFiltradasUseCase getFacultadesFiltradasUseCase
             -GetFacultadByIdUseCase getFacultadByIdUseCase
-            +findAll() List<Facultad>
-            +findFacultades() List<Facultad>
+            +findAll() List~Facultad~
+            +findFacultades() List~Facultad~
             +findByFacultadId(Integer) Facultad
-            +findAllByLectivoId(Integer) List<FacultadLectivo>
-            +findAllByPersona(BigDecimal, Integer, Integer) List<FacultadPersona>
-            +findAllByDisenho(Integer, Integer) List<FacultadLectivoSede>
+            +findAllByLectivoId(Integer) List~FacultadLectivo~
+            +findAllByPersona(BigDecimal, Integer, Integer) List~FacultadPersona~
+            +findAllByDisenho(Integer, Integer) List~FacultadLectivoSede~
         }
 
         namespace usecases {
             class GetAllFacultadesUseCaseImpl {
                 -FacultadRepository repository
-                +getAll() List<Facultad>
+                +getAll() List~Facultad~
             }
 
             class GetFacultadByIdUseCaseImpl {
                 -FacultadRepository repository
-                +getById(Integer) Optional<Facultad>
+                +getById(Integer) Optional~Facultad~
             }
 
             class GetFacultadesFiltradasUseCaseImpl {
                 -FacultadRepository repository
-                +getFacultadesFiltradas() List<Facultad>
+                +getFacultadesFiltradas() List~Facultad~
             }
         }
 
         class GetAllFacultadesUseCase {
             <<interface>>
-            +getAll() List<Facultad>
+            +getAll() List~Facultad~
         }
 
         class GetFacultadByIdUseCase {
             <<interface>>
-            +getById(Integer) Optional<Facultad>
+            +getById(Integer) Optional~Facultad~
         }
 
         class GetFacultadesFiltradasUseCase {
             <<interface>>
-            +getFacultadesFiltradas() List<Facultad>
+            +getFacultadesFiltradas() List~Facultad~
         }
     }
 
@@ -92,16 +92,16 @@ classDiagram
 
             class JpaFacultadRepository {
                 <<JpaRepository>>
-                +findAllByFacultadIdIn(List<Integer>) List<FacultadEntity>
-                +findByFacultadId(Integer) Optional<FacultadEntity>
+                +findAllByFacultadIdIn(List~Integer~) List~FacultadEntity~
+                +findByFacultadId(Integer) Optional~FacultadEntity~
             }
 
             class JpaFacultadRepositoryAdapter {
                 -JpaFacultadRepository repository
                 -FacultadMapper mapper
-                +findAll() List<Facultad>
-                +findAllIn(List<Integer>) List<Facultad>
-                +findById(Integer) Optional<Facultad>
+                +findAll() List~Facultad~
+                +findAllIn(List~Integer~) List~Facultad~
+                +findById(Integer) Optional~Facultad~
             }
 
             class FacultadMapper {
@@ -113,12 +113,12 @@ classDiagram
             class FacultadController {
                 -FacultadService service
                 -FacultadDtoMapper mapper
-                +findAll() ResponseEntity<List<FacultadResponse>>
-                +findFacultades() ResponseEntity<List<FacultadResponse>>
-                +findByFacultadId(Integer) ResponseEntity<FacultadResponse>
-                +findAllByLectivoId(Integer) ResponseEntity<List<FacultadLectivo>>
-                +findAllByPersona(BigDecimal, Integer, Integer) ResponseEntity<List<FacultadPersona>>
-                +findAllByDisenho(Integer, Integer) ResponseEntity<List<FacultadLectivoSede>>
+                +findAll() ResponseEntity~List~FacultadResponse~~
+                +findFacultades() ResponseEntity~List~FacultadResponse~~
+                +findByFacultadId(Integer) ResponseEntity~FacultadResponse~
+                +findAllByLectivoId(Integer) ResponseEntity~List~FacultadLectivo~~
+                +findAllByPersona(BigDecimal, Integer, Integer) ResponseEntity~List~FacultadPersona~~
+                +findAllByDisenho(Integer, Integer) ResponseEntity~List~FacultadLectivoSede~~
             }
 
             class FacultadResponse {

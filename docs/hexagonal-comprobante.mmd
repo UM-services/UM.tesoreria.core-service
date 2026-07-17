@@ -1,0 +1,64 @@
+---
+title: Arquitectura Hexagonal - Comprobante (v3.36.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        C[Comprobante<br/>Modelo de Dominio]
+        CR[ComprobanteRepository<br/>Puerto de Salida]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc[ComprobanteService<br/>Servicio de Aplicación]
+        UC1[GetAllComprobantesUseCase]
+        UC2[GetAllComprobantesByOrdenPagoUseCase]
+        UC3[GetAllComprobantesByTipoTransaccionIdUseCase]
+        UC4[GetAllComprobantesByOrdenPagoAndTipoTransaccionIdUseCase]
+        UC5[GetComprobanteByTipoTransaccionIdUseCase]
+        UC6[GetComprobanteByIdUseCase]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        CC[ComprobanteController<br/>Adaptador Web]
+        JPA[JpaComprobanteRepositoryAdapter<br/>Adaptador JPA]
+        CM[ComprobanteMapper<br/>Mapeador Dominio]
+        DM[ComprobanteDtoMapper<br/>Mapeador DTO]
+        Resp[ComprobanteResponse<br/>DTO Salida]
+        ENT[ComprobanteEntity<br/>Entidad JPA]
+    end
+
+    subgraph Externo ["Externo (External)"]
+        JPAR[JpaRepository<br/>Spring Data]
+    end
+
+    %% Flujo de Dependencias
+    CC -->|usa| Svc
+    CC -->|envía| Resp
+    CC -->|usa| DM
+
+    Svc -->|depende| CR
+    Svc -->|ejecuta| UC1
+    Svc -->|ejecuta| UC2
+    Svc -->|ejecuta| UC3
+    Svc -->|ejecuta| UC4
+    Svc -->|ejecuta| UC5
+    Svc -->|ejecuta| UC6
+
+    JPA -->|implementa| CR
+    JPA -->|persiste| JPAR
+    JPA -->|gestiona| ENT
+    JPA -->|usa| CM
+
+    CM -->|convierte| C
+    CM -->|convierte| ENT
+
+    DM -->|convierte| Resp
+    DM -->|convierte| C
+
+    style C fill:#e1f5fe
+    style CR fill:#f3e5f5
+    style Svc fill:#fff3e0
+    style CC fill:#e8f5e8
+    style JPA fill:#e8f5e8
+    style CM fill:#e8f5e8
+    style DM fill:#e8f5e8
+    style ENT fill:#e8f5e8

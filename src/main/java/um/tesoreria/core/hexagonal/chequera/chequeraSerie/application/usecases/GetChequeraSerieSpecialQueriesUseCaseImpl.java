@@ -8,8 +8,8 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.GetChe
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.out.ChequeraSerieRepository;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
-import um.tesoreria.core.hexagonal.baja.application.service.BajaService;
-import um.tesoreria.core.hexagonal.baja.infrastructure.persistence.entity.BajaEntity;
+import um.tesoreria.core.hexagonal.chequera.baja.application.service.BajaService;
+import um.tesoreria.core.hexagonal.chequera.baja.infrastructure.persistence.entity.BajaEntity;
 
 import java.math.BigDecimal;
 import java.util.List;

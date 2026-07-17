@@ -42,22 +42,22 @@ classDiagram
 
         class ChequeraSerieRepository {
             <<interface>>
-            +findAll() List<ChequeraSerie>
-            +findById(Long) Optional<ChequeraSerie>
-            +findAllByFacultad(Integer, Integer) List<ChequeraSerie>
-            +findAllByPersona(BigDecimal, Integer) List<ChequeraSerie>
-            +findAllByNumber(Long) List<ChequeraSerie>
-            +findByUnique(Integer, Integer, Long, String) Optional<ChequeraSerie>
-            +findByCbuOrVisa(Long) Optional<ChequeraSerie>
-            +findAltas(BigDecimal, Integer) List<ChequeraSerie>
-            +findIncompletas(BigDecimal, Integer) List<ChequeraSerie>
-            +findLast(BigDecimal, Integer) Optional<ChequeraSerie>
+            +findAll() List~ChequeraSerie~
+            +findById(Long) Optional~ChequeraSerie~
+            +findAllByFacultad(Integer, Integer) List~ChequeraSerie~
+            +findAllByPersona(BigDecimal, Integer) List~ChequeraSerie~
+            +findAllByNumber(Long) List~ChequeraSerie~
+            +findByUnique(Integer, Integer, Long, String) Optional~ChequeraSerie~
+            +findByCbuOrVisa(Long) Optional~ChequeraSerie~
+            +findAltas(BigDecimal, Integer) List~ChequeraSerie~
+            +findIncompletas(BigDecimal, Integer) List~ChequeraSerie~
+            +findLast(BigDecimal, Integer) Optional~ChequeraSerie~
             +save(ChequeraSerie) ChequeraSerie
             +deleteById(Long)
             +markSent(Long)
             +setPayPerTic(Long, Byte)
-            +getResumenLectivo(Integer, Integer, Integer) List<Object[]>
-            +getSpecialQueries() List<ChequeraSerieQueryResult>
+            +getResumenLectivo(Integer, Integer, Integer) List~Object[]~
+            +getSpecialQueries() List~ChequeraSerieQueryResult~
         }
     }
 

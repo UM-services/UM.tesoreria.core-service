@@ -11,12 +11,12 @@
     </parent>
     <groupId>ar.edu</groupId>
     <artifactId>um.tesoreria.core-service</artifactId>
-    <version>3.35.0</version>
+    <version>3.36.0</version>
     <name>UM.tesoreria.core-service</name>
     <description>Tesoreria API REST</description>
     <properties>
         <java.version>25</java.version>
-        <kotlin.version>2.4.0</kotlin.version>
+        <kotlin.version>2.4.10</kotlin.version>
         <spring-cloud.version>2025.1.2</spring-cloud.version>
         <sonar.organization>um-services</sonar.organization>
         <sonar.projectKey>UM-services_UM.tesoreria.core-service</sonar.projectKey>
@@ -199,11 +199,11 @@
                 <version>${kotlin.version}</version>
                 <configuration>
                     <args>
-                        <arg>-Xannotation-default-target=param-property</arg>
                     </args>
                     <compilerPlugins>
                         <plugin>spring</plugin>
                         <plugin>jpa</plugin>
+                        <plugin>lombok</plugin>
                     </compilerPlugins>
                 </configuration>
                 <executions>
@@ -213,6 +213,7 @@
                         <goals>
                             <goal>compile</goal>
                         </goals>
+                        <configuration/>
                     </execution>
                     <execution>
                         <id>test-compile</id>
@@ -231,6 +232,11 @@
                     <dependency>
                         <groupId>org.jetbrains.kotlin</groupId>
                         <artifactId>kotlin-maven-noarg</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-lombok</artifactId>
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
