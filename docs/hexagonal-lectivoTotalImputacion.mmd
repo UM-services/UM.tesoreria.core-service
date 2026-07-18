@@ -75,7 +75,8 @@ classDiagram
             +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class FindAllByTipoUseCaseImpl {
                 -LectivoTotalImputacionRepository repository
                 +findAllByTipo(Integer, Integer, Integer) List~LectivoTotalImputacion~
@@ -100,7 +101,8 @@ classDiagram
                 -LectivoTotalImputacionRepository repository
                 +update(Long, LectivoTotalImputacion) Optional~LectivoTotalImputacion~
             }
-        }
+    }
+    namespace application {
 
         class FindAllByTipoUseCase {
             <<interface>>
@@ -129,7 +131,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class LectivoTotalImputacionEntity {
                 +Long lectivoTotalImputacionId
                 +Integer facultadId
@@ -172,9 +175,11 @@ classDiagram
                 +toDomain(LectivoTotalImputacionEntity) LectivoTotalImputacion
                 +toEntity(LectivoTotalImputacion) LectivoTotalImputacionEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class LectivoTotalImputacionController {
                 -LectivoTotalImputacionService service
                 -LectivoTotalImputacionDtoMapper mapper
@@ -212,7 +217,8 @@ classDiagram
                 +toDomain(LectivoTotalImputacionRequest) LectivoTotalImputacion
                 +toResponse(LectivoTotalImputacion) LectivoTotalImputacionResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     LectivoTotalImputacion --> Facultad : has

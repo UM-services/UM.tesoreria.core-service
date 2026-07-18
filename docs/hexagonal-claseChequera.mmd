@@ -60,18 +60,21 @@ classDiagram
             +findAllByTitulo() List~ClaseChequera~
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class GetAllClaseChequeraUseCaseImpl
             class GetAllClaseChequeraByCursoUseCaseImpl
             class GetAllClaseChequeraByPosgradoUseCaseImpl
             class GetAllClaseChequeraByTituloUseCaseImpl
-        }
+    }
+    namespace application {
 
         class ClaseChequeraException
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class ClaseChequeraEntity {
                 +Integer claseChequeraId
                 +String nombre
@@ -106,9 +109,11 @@ classDiagram
                 +toDomain(ClaseChequeraEntity) ClaseChequera
                 +toEntity(ClaseChequera) ClaseChequeraEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class ClaseChequeraController {
                 -ClaseChequeraService service
                 -ClaseChequeraDtoMapper dtoMapper
@@ -144,7 +149,8 @@ classDiagram
                 +toDomain(ClaseChequeraRequest) ClaseChequera
                 +toResponse(ClaseChequera) ClaseChequeraResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     ClaseChequeraService --> GetAllClaseChequeraUseCase : uses

@@ -38,16 +38,19 @@ classDiagram
             +findAllByTipoChequera(Integer, Integer, Integer) List~ProductoTipoChequera~
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class GetAllProductosUseCaseImpl
             class GetProductoByIdUseCaseImpl
-        }
+    }
+    namespace application {
 
         class ProductoException
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class ProductoEntity {
                 +Integer productoId
                 +String nombre
@@ -70,9 +73,11 @@ classDiagram
                 +toDomainModel(ProductoEntity) Producto
                 +toEntity(Producto) ProductoEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class ProductoController {
                 -ProductoService service
                 -ProductoDtoMapper dtoMapper
@@ -95,7 +100,8 @@ classDiagram
                 +toDomain(ProductoRequest) Producto
                 +toResponse(Producto) ProductoResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     ProductoService --> GetAllProductosUseCase : uses

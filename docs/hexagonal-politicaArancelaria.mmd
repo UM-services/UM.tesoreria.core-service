@@ -1,0 +1,48 @@
+---
+title: Arquitectura Hexagonal - Módulo PoliticaArancelaria (v3.37.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace application {
+        class PoliticaArancelariaService {
+            -RecalculateCuotaByUniqueIndexUseCase findPoliticaArancelariaUseCase
+            +recalculateCuotaByUniqueIndex(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
+        }
+
+    }
+    namespace application_usecases {
+            class RecalculateCuotaByUniqueIndexUseCaseImpl {
+                -ChequeraCuotaService chequeraCuotaService
+                +recalculateCuota(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
+            }
+    }
+    namespace application {
+
+        class RecalculateCuotaByUniqueIndexUseCase { <<interface>> }
+    }
+
+    namespace infrastructure_web {
+            class PoliticaArancelariaController {
+                -PoliticaArancelariaService service
+                +recalculateCuotaByUnique(Integer, Integer, Long, Integer, Integer, Integer) ResponseEntity
+            }
+    }
+
+    PoliticaArancelariaService --> RecalculateCuotaByUniqueIndexUseCase : uses
+
+    RecalculateCuotaByUniqueIndexUseCaseImpl ..|> RecalculateCuotaByUniqueIndexUseCase : implements
+
+    RecalculateCuotaByUniqueIndexUseCaseImpl --> ChequeraCuotaService : uses
+
+    PoliticaArancelariaController --> PoliticaArancelariaService : calls
+
+    class ChequeraCuotaService {
+        <<external>>
+        +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
+    }
+
+    class ChequeraCuota {
+        <<external>>
+    }

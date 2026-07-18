@@ -3,6 +3,7 @@ package um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.adapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
 import um.tesoreria.core.hexagonal.lectivo.domain.ports.out.LectivoRepository;
 import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.entity.LectivoEntity;
@@ -42,7 +43,7 @@ public class JpaLectivoRepositoryAdapter implements LectivoRepository {
     public List<Lectivo> findAllByPersona(BigDecimal personaId, Integer documentoId) {
         return jpaLectivoRepository.findAllByLectivoIdIn(
                 chequeraSerieRepository.findAllByPersonaIdAndDocumentoId(personaId, documentoId, null).stream()
-                        .map(chequera -> chequera.getLectivoId())
+                        .map(ChequeraSerieEntity::getLectivoId)
                         .collect(Collectors.toList()),
                 Sort.by("lectivoId").descending()).stream()
                 .map(lectivoMapper::toDomainModel)

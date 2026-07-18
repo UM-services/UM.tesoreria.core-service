@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import lombok.*;
-import um.tesoreria.core.kotlin.model.ChequeraPago;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.entity.ChequeraPagoEntity;
 import um.tesoreria.core.hexagonal.comprobante.infrastructure.persistence.entity.ComprobanteEntity;
 import um.tesoreria.core.util.Jsonifier;
 
@@ -49,7 +49,7 @@ public class FacturacionElectronica extends Auditable {
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chequeraPagoId", insertable = false, updatable = false)
-    private ChequeraPago chequeraPago;
+    private ChequeraPagoEntity chequeraPago;
 
     @OneToOne(optional = true)
     @JoinColumn(name = "comprobanteId", insertable = false, updatable = false)

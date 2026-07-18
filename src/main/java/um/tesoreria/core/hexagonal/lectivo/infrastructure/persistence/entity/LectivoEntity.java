@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.time.OffsetDateTime;
 
@@ -15,7 +16,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LectivoEntity extends Auditable {
+public class LectivoEntity extends Auditable implements Jsonifyable {
 
     @Id
     @Column(name = "lec_id")
@@ -32,9 +33,5 @@ public class LectivoEntity extends Auditable {
     @Column(name = "lec_fin")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime fechaFinal;
-
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
-    }
 
 }

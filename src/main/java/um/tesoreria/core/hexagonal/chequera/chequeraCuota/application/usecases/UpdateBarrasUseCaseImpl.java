@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.FindAllByChequeraUseCase;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.FindAllCuotasByChequeraUseCase;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.SaveAllChequeraCuotasUseCase;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.UpdateBarrasUseCase;
 import um.tesoreria.core.util.Tool;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UpdateBarrasUseCaseImpl implements UpdateBarrasUseCase {
 
-    private final FindAllByChequeraUseCase findAllByChequeraUseCase;
+    private final FindAllCuotasByChequeraUseCase findAllByChequeraUseCase;
     private final SaveAllChequeraCuotasUseCase saveAllChequeraCuotasUseCase;
 
     @Override

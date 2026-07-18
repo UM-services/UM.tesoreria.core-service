@@ -47,7 +47,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class FacturaPendienteEntity {
                 <<Immutable>>
                 +Long proveedorMovimientoId
@@ -76,7 +77,8 @@ classDiagram
                 +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
                 +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     FacturaPendienteService --> GetFacturasPendientesUseCase : uses

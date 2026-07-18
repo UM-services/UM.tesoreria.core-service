@@ -1,13 +1,9 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.usecases;
 
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.FindAllInconsistenciasUseCase;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.mapper.ChequeraCuotaMapper;
-import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaDeudaService;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.out.ChequeraCuotaRepository;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -20,24 +16,17 @@ import java.util.stream.Stream;
 @Component
 public class FindAllInconsistenciasUseCaseImpl implements FindAllInconsistenciasUseCase {
 
-    private final ChequeraCuotaDeudaService chequeraCuotaDeudaService;
-    private final ChequeraCuotaMapper mapper;
-    private final ChequeraCuotaService chequeraCuotaService;
+    private final ChequeraCuotaRepository repository;
 
-    public FindAllInconsistenciasUseCaseImpl(ChequeraCuotaDeudaService chequeraCuotaDeudaService, ChequeraCuotaMapper mapper, @Lazy ChequeraCuotaService chequeraCuotaService) {
-        this.chequeraCuotaDeudaService = chequeraCuotaDeudaService;
-        this.mapper = mapper;
-        this.chequeraCuotaService = chequeraCuotaService;
+    public FindAllInconsistenciasUseCaseImpl(ChequeraCuotaRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public List<ChequeraCuota> findAllInconsistencias(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced) {
         final BigDecimal MULTIPLICADOR = new BigDecimal(49);
 
-        return chequeraCuotaDeudaService.findAllByRango(desde, hasta, reduced, null, chequeraCuotaService).stream()
-                .map(ChequeraCuotaDeuda::getChequeraCuota)
-                .filter(Objects::nonNull)
-                .map(mapper::toDomain)
+        return repository.findAllByVencimiento1Between(desde, hasta).stream()
                 .filter(cuota -> {
                     boolean vencimientosInvalidos = Objects.requireNonNull(cuota.getVencimiento1())
                             .isAfter(cuota.getVencimiento2()) ||

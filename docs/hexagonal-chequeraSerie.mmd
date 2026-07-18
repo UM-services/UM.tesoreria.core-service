@@ -80,7 +80,8 @@ classDiagram
             -UpdateChequeraSerieUseCase updateUseCase
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class CreateChequeraSerieUseCaseImpl
             class DeleteChequeraSerieUseCaseImpl
             class GetChequeraSerieAltasUseCaseImpl
@@ -96,13 +97,15 @@ classDiagram
             class MarkSentUseCaseImpl
             class SetPayPerTicUseCaseImpl
             class UpdateChequeraSerieUseCaseImpl
-        }
+    }
+    namespace application {
 
         class ChequeraSerieException
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class ChequeraSerieEntity {
                 +Long chequeraSerieId
                 +Integer facultadId
@@ -125,9 +128,11 @@ classDiagram
                 +toDomainModel(ChequeraSerieEntity) ChequeraSerie
                 +toEntity(ChequeraSerie) ChequeraSerieEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class ChequeraSerieController {
                 -ChequeraSerieService service
                 -ChequeraSerieDtoMapper dtoMapper
@@ -139,7 +144,8 @@ classDiagram
                 +toDomain(ChequeraSerieRequest) ChequeraSerie
                 +toResponse(ChequeraSerie) ChequeraSerieResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     ChequeraSerieService --> CreateChequeraSerieUseCase : uses

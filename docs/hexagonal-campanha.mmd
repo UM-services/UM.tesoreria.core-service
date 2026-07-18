@@ -38,7 +38,8 @@ classDiagram
             +deleteCampanha(UUID) boolean
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class CreateCampanhaUseCaseImpl {
                 -CampanhaRepository repository
                 +createCampanha(Campanha) Campanha
@@ -59,7 +60,8 @@ classDiagram
                 -CampanhaRepository repository
                 +deleteCampanha(UUID) boolean
             }
-        }
+    }
+    namespace application {
 
         class CreateCampanhaUseCase {
             <<interface>>
@@ -84,7 +86,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class CampanhaEntity {
                 +UUID campanhaId
                 +String nombre
@@ -114,9 +117,11 @@ classDiagram
                 +toEntity(Campanha) CampanhaEntity
                 +toDomainModel(CampanhaEntity) Campanha
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class CampanhaController {
                 -CampanhaService campanhaService
                 -CampanhaDtoMapper campanhaDtoMapper
@@ -146,7 +151,8 @@ classDiagram
                 +toDomain(CampanhaRequest) Campanha
                 +toResponse(Campanha) CampanhaResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     CampanhaService --> CreateCampanhaUseCase : uses

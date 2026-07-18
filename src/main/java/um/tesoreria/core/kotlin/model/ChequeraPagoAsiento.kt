@@ -2,6 +2,7 @@ package um.tesoreria.core.kotlin.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.*
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.entity.ChequeraPagoEntity
 import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.model.ChequeraPagoReemplazo
 import java.math.BigDecimal
@@ -62,7 +63,7 @@ data class ChequeraPagoAsiento(
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chequeraPagoId", referencedColumnName = "clave", updatable = false, insertable = false)
-    var chequeraPago: ChequeraPago? = null,
+    var chequeraPago: ChequeraPagoEntity? = null,
 
     @OneToOne(optional = true)
     @JoinColumn(name = "chequeraPagoReemplazoId", referencedColumnName = "clave", updatable = false, insertable = false)
