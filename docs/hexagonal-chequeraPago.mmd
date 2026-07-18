@@ -1,0 +1,318 @@
+---
+title: Arquitectura Hexagonal - Módulo ChequeraPago (v3.37.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class ChequeraPago {
+            +Long chequeraPagoId
+            +Long chequeraCuotaId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +Integer orden
+            +Integer mes
+            +Integer anho
+            +OffsetDateTime fecha
+            +OffsetDateTime acreditacion
+            +BigDecimal importe
+            +String path
+            +String archivo
+            +String observaciones
+            +Long archivoBancoId
+            +Long archivoBancoIdAcreditacion
+            +Integer verificador
+            +Integer tipoPagoId
+            +String idMercadoPago
+            +getCuotaKey() String
+        }
+
+        class ChequeraPagoRepository {
+            <<interface>>
+            +findAllByTipoPagoAndAcreditacion(Integer, OffsetDateTime) List~ChequeraPago~
+            +findAllByTipoPagoAndFechaBetween(Integer, OffsetDateTime, OffsetDateTime) List~ChequeraPago~
+            +findAllByChequera(Integer, Integer, Long) List~ChequeraPago~
+            +findAllByCuota(Integer, Integer, Long, Integer, Integer, Integer) List~ChequeraPago~
+            +findPendientesFactura(OffsetDateTime, OffsetDateTime, Integer) List~ChequeraPago~
+            +findAllByFacultadAndTipoChequeraAndLectivo(Integer, Integer, Integer) List~ChequeraPago~
+            +findByChequeraPagoId(Long) Optional~ChequeraPago~
+            +findByIdMercadoPago(String) Optional~ChequeraPago~
+            +findTopByCompositeKeyOrderByOrdenDesc(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraPago~
+            +deleteAllByChequera(Integer, Integer, Long)
+            +save(ChequeraPago) ChequeraPago
+            +saveAll(List~ChequeraPago~) List~ChequeraPago~
+        }
+    }
+
+    namespace application {
+        class ChequeraPagoService {
+            -CreateChequeraPagoUseCase createChequeraPagoUseCase
+            -DeletePagosByChequeraUseCase deletePagosByChequeraUseCase
+            -FindPagosByTipoPagoAndFechaAcreditacionUseCase findPagosByTipoPagoAndFechaAcreditacionUseCase
+            -FindPagosByTipoPagoAndFechaPagoUseCase findPagosByTipoPagoAndFechaPagoUseCase
+            -FindPagosByChequeraUseCase findPagosByChequeraUseCase
+            -FindPagosByCuotaUseCase findPagosByCuotaUseCase
+            -FindPagosPendientesFacturaUseCase findPagosPendientesFacturaUseCase
+            -FindPagosByFacultadAndTipoChequeraAndLectivoUseCase findPagosByFacultadAndTipoChequeraAndLectivoUseCase
+            -GetChequeraPagoByIdUseCase getChequeraPagoByIdUseCase
+            -GetChequeraPagoByIdMercadoPagoUseCase getChequeraPagoByIdMercadoPagoUseCase
+            -IsPagadoUseCase isPagadoUseCase
+            -GetNextOrdenUseCase getNextOrdenUseCase
+            +create(ChequeraPago) ChequeraPago
+            +deleteByChequera(Integer, Integer, Long)
+            +findAllByTipoPagoIdAndFechaAcreditacion(Integer, OffsetDateTime) List~ChequeraPago~
+            +findAllByTipoPagoIdAndFechaPago(Integer, OffsetDateTime) List~ChequeraPago~
+            +findAllByChequera(Integer, Integer, Long) List~ChequeraPago~
+            +findAllByCuota(Integer, Integer, Long, Integer, Integer, Integer) List~ChequeraPago~
+            +pendientesFactura(OffsetDateTime) List~ChequeraPago~
+            +findAllByFacultadIdAndTipoChequeraIdAndLectivoId(Integer, Integer, Integer) List~ChequeraPago~
+            +findByChequeraPagoId(Long) ChequeraPago
+            +findByIdMercadoPago(String) ChequeraPago
+            +isPagado(Integer, Integer, Long, Integer, Integer, Integer) boolean
+            +nextOrden(Integer, Integer, Long, Integer, Integer, Integer) Integer
+        }
+
+    }
+    namespace application_usecases {
+            class CreateChequeraPagoUseCaseImpl
+            class DeletePagosByChequeraUseCaseImpl
+            class FindPagosByChequeraUseCaseImpl
+            class FindPagosByCuotaUseCaseImpl
+            class FindPagosByFacultadAndTipoChequeraAndLectivoUseCaseImpl
+            class FindPagosByTipoPagoAndFechaAcreditacionUseCaseImpl
+            class FindPagosByTipoPagoAndFechaPagoUseCaseImpl
+            class FindPagosPendientesFacturaUseCaseImpl {
+                -FacturacionElectronicaService facturacionElectronicaService
+            }
+            class GetChequeraPagoByIdMercadoPagoUseCaseImpl
+            class GetChequeraPagoByIdUseCaseImpl
+            class GetNextOrdenUseCaseImpl
+            class IsPagadoUseCaseImpl
+    }
+    namespace application {
+
+        class ChequeraPagoException
+
+        class CreateChequeraPagoUseCase { <<interface>> }
+        class DeletePagosByChequeraUseCase { <<interface>> }
+        class FindPagosByChequeraUseCase { <<interface>> }
+        class FindPagosByCuotaUseCase { <<interface>> }
+        class FindPagosByFacultadAndTipoChequeraAndLectivoUseCase { <<interface>> }
+        class FindPagosByTipoPagoAndFechaAcreditacionUseCase { <<interface>> }
+        class FindPagosByTipoPagoAndFechaPagoUseCase { <<interface>> }
+        class FindPagosPendientesFacturaUseCase { <<interface>> }
+        class GetChequeraPagoByIdMercadoPagoUseCase { <<interface>> }
+        class GetChequeraPagoByIdUseCase { <<interface>> }
+        class GetNextOrdenUseCase { <<interface>> }
+        class IsPagadoUseCase { <<interface>> }
+    }
+
+    namespace infrastructure {
+    }
+    namespace infrastructure_persistence {
+            class ChequeraPagoEntity {
+                +@Table(name="chequera_pago")
+                +Long chequeraPagoId
+                +Long chequeraCuotaId
+                +Integer facultadId
+                +Integer tipoChequeraId
+                +Long chequeraSerieId
+                +Integer productoId
+                +Integer alternativaId
+                +Integer cuotaId
+                +Integer orden
+                +Integer mes
+                +Integer anho
+                +OffsetDateTime fecha
+                +OffsetDateTime acreditacion
+                +BigDecimal importe
+                +String path
+                +String archivo
+                +String observaciones
+                +Long archivoBancoId
+                +Long archivoBancoIdAcreditacion
+                +Integer verificador
+                +Integer tipoPagoId
+                +String idMercadoPago
+            }
+
+            class JpaChequeraPagoRepository {
+                <<JpaRepository>>
+                +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long) List~ChequeraPagoEntity~
+                +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Long, Integer, Integer, Integer) List~ChequeraPagoEntity~
+                +findAllByFechaBetweenAndTipoPagoIdGreaterThan(OffsetDateTime, OffsetDateTime, Integer) List~ChequeraPagoEntity~
+                +findAllByTipoPagoIdAndAcreditacion(Integer, OffsetDateTime) List~ChequeraPagoEntity~
+                +findAllByTipoPagoIdAndFechaBetween(Integer, OffsetDateTime, OffsetDateTime) List~ChequeraPagoEntity~
+                +findAllByFacultadIdAndTipoChequeraIdAndChequeraCuotaChequeraSerieLectivoId(Integer, Integer, Integer) List~ChequeraPagoEntity~
+                +findByChequeraPagoId(Long) Optional~ChequeraPagoEntity~
+                +findByIdMercadoPago(String) Optional~ChequeraPagoEntity~
+                +findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdOrderByOrdenDesc(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraPagoEntity~
+                +deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long)
+            }
+
+            class JpaChequeraPagoRepositoryAdapter {
+                -JpaChequeraPagoRepository repository
+                -ChequeraPagoMapper mapper
+                -ChequeraCuotaService chequeraCuotaService
+                -fillChequeraCuotaId(ChequeraPagoEntity)
+                -isValidChequeraPago(ChequeraPagoEntity) boolean
+                +findAllByTipoPagoAndAcreditacion(Integer, OffsetDateTime) List~ChequeraPago~
+                +findAllByTipoPagoAndFechaBetween(Integer, OffsetDateTime, OffsetDateTime) List~ChequeraPago~
+                +findAllByChequera(Integer, Integer, Long) List~ChequeraPago~
+                +findAllByCuota(Integer, Integer, Long, Integer, Integer, Integer) List~ChequeraPago~
+                +findPendientesFactura(OffsetDateTime, OffsetDateTime, Integer) List~ChequeraPago~
+                +findAllByFacultadAndTipoChequeraAndLectivo(Integer, Integer, Integer) List~ChequeraPago~
+                +findByChequeraPagoId(Long) Optional~ChequeraPago~
+                +findByIdMercadoPago(String) Optional~ChequeraPago~
+                +findTopByCompositeKeyOrderByOrdenDesc(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraPago~
+                +deleteAllByChequera(Integer, Integer, Long)
+                +save(ChequeraPago) ChequeraPago
+                +saveAll(List~ChequeraPago~) List~ChequeraPago~
+            }
+
+            class ChequeraPagoMapper {
+                +toDomain(ChequeraPagoEntity) ChequeraPago
+                +toEntity(ChequeraPago) ChequeraPagoEntity
+            }
+    }
+    namespace infrastructure {
+
+    }
+    namespace infrastructure_web {
+            class ChequeraPagoController {
+                -ChequeraPagoService service
+                -ChequeraPagoDtoMapper dtoMapper
+                +pendientesFactura(OffsetDateTime) ResponseEntity~List~ChequeraPagoResponse~~
+                +findAllByChequera(Integer, Integer, Long) ResponseEntity~List~ChequeraPagoResponse~~
+                +findAllByTipoPagoIdAndFechaAcreditacion(Integer, OffsetDateTime) ResponseEntity~List~ChequeraPagoResponse~~
+                +findAllByTipoPagoIdAndFechaPago(Integer, OffsetDateTime) ResponseEntity~List~ChequeraPagoResponse~~
+                +findAllByFacultadIdAndTipoChequeraIdAndLectivoId(Integer, Integer, Integer) ResponseEntity~List~ChequeraPagoResponse~~
+                +findByChequeraPagoId(Long) ResponseEntity~ChequeraPagoResponse~
+                +add(ChequeraPagoRequest) ResponseEntity~ChequeraPagoResponse~
+                +findByIdMercadoPago(String) ResponseEntity~ChequeraPagoResponse~
+            }
+
+            class ChequeraPagoRequest {
+                +@NotNull Integer facultadId
+                +@NotNull Integer tipoChequeraId
+                +@NotNull Long chequeraSerieId
+                +@NotNull Integer productoId
+                +@NotNull Integer alternativaId
+                +@NotNull Integer cuotaId
+                +Integer orden
+                +Integer mes
+                +Integer anho
+                +OffsetDateTime fecha
+                +OffsetDateTime acreditacion
+                +BigDecimal importe
+                +String path
+                +String archivo
+                +String observaciones
+                +Long archivoBancoId
+                +Long archivoBancoIdAcreditacion
+                +Integer verificador
+                +Integer tipoPagoId
+                +String idMercadoPago
+            }
+            class ChequeraPagoResponse {
+                +Long chequeraPagoId
+                +Long chequeraCuotaId
+                +Integer facultadId
+                +Integer tipoChequeraId
+                +Long chequeraSerieId
+                +Integer productoId
+                +Integer alternativaId
+                +Integer cuotaId
+                +Integer orden
+                +Integer mes
+                +Integer anho
+                +OffsetDateTime fecha
+                +OffsetDateTime acreditacion
+                +BigDecimal importe
+                +String path
+                +String archivo
+                +String observaciones
+                +Long archivoBancoId
+                +Long archivoBancoIdAcreditacion
+                +Integer verificador
+                +Integer tipoPagoId
+                +String idMercadoPago
+            }
+            class ChequeraPagoDtoMapper {
+                +toDomain(ChequeraPagoRequest) ChequeraPago
+                +toResponse(ChequeraPago) ChequeraPagoResponse
+            }
+    }
+    namespace infrastructure {
+    }
+
+    ChequeraPagoService --> CreateChequeraPagoUseCase : uses
+    ChequeraPagoService --> DeletePagosByChequeraUseCase : uses
+    ChequeraPagoService --> FindPagosByChequeraUseCase : uses
+    ChequeraPagoService --> FindPagosByCuotaUseCase : uses
+    ChequeraPagoService --> FindPagosByFacultadAndTipoChequeraAndLectivoUseCase : uses
+    ChequeraPagoService --> FindPagosByTipoPagoAndFechaAcreditacionUseCase : uses
+    ChequeraPagoService --> FindPagosByTipoPagoAndFechaPagoUseCase : uses
+    ChequeraPagoService --> FindPagosPendientesFacturaUseCase : uses
+    ChequeraPagoService --> GetChequeraPagoByIdUseCase : uses
+    ChequeraPagoService --> GetChequeraPagoByIdMercadoPagoUseCase : uses
+    ChequeraPagoService --> IsPagadoUseCase : uses
+    ChequeraPagoService --> GetNextOrdenUseCase : uses
+
+    CreateChequeraPagoUseCaseImpl ..|> CreateChequeraPagoUseCase : implements
+    DeletePagosByChequeraUseCaseImpl ..|> DeletePagosByChequeraUseCase : implements
+    FindPagosByChequeraUseCaseImpl ..|> FindPagosByChequeraUseCase : implements
+    FindPagosByCuotaUseCaseImpl ..|> FindPagosByCuotaUseCase : implements
+    FindPagosByFacultadAndTipoChequeraAndLectivoUseCaseImpl ..|> FindPagosByFacultadAndTipoChequeraAndLectivoUseCase : implements
+    FindPagosByTipoPagoAndFechaAcreditacionUseCaseImpl ..|> FindPagosByTipoPagoAndFechaAcreditacionUseCase : implements
+    FindPagosByTipoPagoAndFechaPagoUseCaseImpl ..|> FindPagosByTipoPagoAndFechaPagoUseCase : implements
+    FindPagosPendientesFacturaUseCaseImpl ..|> FindPagosPendientesFacturaUseCase : implements
+    GetChequeraPagoByIdMercadoPagoUseCaseImpl ..|> GetChequeraPagoByIdMercadoPagoUseCase : implements
+    GetChequeraPagoByIdUseCaseImpl ..|> GetChequeraPagoByIdUseCase : implements
+    GetNextOrdenUseCaseImpl ..|> GetNextOrdenUseCase : implements
+    IsPagadoUseCaseImpl ..|> IsPagadoUseCase : implements
+
+    CreateChequeraPagoUseCaseImpl --> ChequeraPagoRepository : uses
+    DeletePagosByChequeraUseCaseImpl --> ChequeraPagoRepository : uses
+    FindPagosByChequeraUseCaseImpl --> ChequeraPagoRepository : uses
+    FindPagosByCuotaUseCaseImpl --> ChequeraPagoRepository : uses
+    FindPagosByFacultadAndTipoChequeraAndLectivoUseCaseImpl --> ChequeraPagoRepository : uses
+    FindPagosByTipoPagoAndFechaAcreditacionUseCaseImpl --> ChequeraPagoRepository : uses
+    FindPagosByTipoPagoAndFechaPagoUseCaseImpl --> ChequeraPagoRepository : uses
+    FindPagosPendientesFacturaUseCaseImpl --> ChequeraPagoRepository : uses
+    GetChequeraPagoByIdMercadoPagoUseCaseImpl --> ChequeraPagoRepository : uses
+    GetChequeraPagoByIdUseCaseImpl --> ChequeraPagoRepository : uses
+    GetNextOrdenUseCaseImpl --> ChequeraPagoRepository : uses
+    IsPagadoUseCaseImpl --> ChequeraPagoRepository : uses
+
+    FindPagosPendientesFacturaUseCaseImpl --> FacturacionElectronicaService : uses
+
+    JpaChequeraPagoRepositoryAdapter ..|> ChequeraPagoRepository : implements
+    JpaChequeraPagoRepositoryAdapter --> JpaChequeraPagoRepository : uses
+    JpaChequeraPagoRepositoryAdapter --> ChequeraPagoMapper : uses
+    JpaChequeraPagoRepositoryAdapter --> ChequeraCuotaService : uses
+
+    ChequeraPagoMapper --> ChequeraPago : maps
+    ChequeraPagoMapper --> ChequeraPagoEntity : maps
+    JpaChequeraPagoRepository --> ChequeraPagoEntity : persists
+
+    ChequeraPagoController --> ChequeraPagoService : calls
+    ChequeraPagoController --> ChequeraPagoDtoMapper : uses
+    ChequeraPagoDtoMapper --> ChequeraPago : maps
+    ChequeraPagoDtoMapper --> ChequeraPagoRequest : maps
+    ChequeraPagoDtoMapper --> ChequeraPagoResponse : maps
+
+    class ChequeraCuotaService {
+        <<external>>
+        +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
+    }
+
+    class FacturacionElectronicaService {
+        <<external>>
+        +findAllByChequeraPagoIds(List~Long~) List~FacturacionElectronica~
+    }

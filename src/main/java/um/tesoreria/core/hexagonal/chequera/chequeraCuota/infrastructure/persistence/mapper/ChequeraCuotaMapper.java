@@ -3,12 +3,8 @@ package um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persis
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
-import java.math.BigDecimal;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraPago;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.chequera.producto.infrastructure.persistence.mapper.ProductoMapper;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.mapper.ChequeraSerieMapper;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.mapper.FacultadMapper;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.mapper.TipoChequeraMapper;
@@ -129,36 +125,6 @@ public class ChequeraCuotaMapper {
         if (domain.getManual() != null) entity.setManual(domain.getManual());
         if (domain.getCompensada() != null) entity.setCompensada(domain.getCompensada());
         if (domain.getTramoId() != null) entity.setTramoId(domain.getTramoId());
-    }
-
-    public ChequeraPago toDomain(um.tesoreria.core.kotlin.model.ChequeraPago entity) {
-        if (entity == null) {
-            return null;
-        }
-        return ChequeraPago.builder()
-                .chequeraPagoId(entity.getChequeraPagoId())
-                .facultadId(entity.getFacultadId())
-                .tipoChequeraId(entity.getTipoChequeraId())
-                .chequeraSerieId(entity.getChequeraSerieId())
-                .productoId(entity.getProductoId())
-                .alternativaId(entity.getAlternativaId())
-                .cuotaId(entity.getCuotaId())
-                .importe(entity.getImporte())
-                .build();
-    }
-
-    public ChequeraTotal toDomain(um.tesoreria.core.model.ChequeraTotal entity) {
-        if (entity == null) {
-            return null;
-        }
-        return ChequeraTotal.builder()
-                .chequeraTotalId(entity.getChequeraTotalId())
-                .facultadId(entity.getFacultadId())
-                .tipoChequeraId(entity.getTipoChequeraId())
-                .chequeraSerieId(entity.getChequeraSerieId())
-                .productoId(entity.getProductoId())
-                .total(entity.getTotal())
-                .build();
     }
 
 }

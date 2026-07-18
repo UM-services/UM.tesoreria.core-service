@@ -63,7 +63,8 @@ classDiagram
             +delete(Long) void
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class CreateDomicilioUseCaseImpl
             class GetDomicilioByIdUseCaseImpl
             class GetDomicilioByUniqueUseCaseImpl
@@ -73,7 +74,8 @@ classDiagram
             class DeleteDomicilioUseCaseImpl
             class GetAllDomiciliosByUnifiedsUseCaseImpl
             class GetDomicilioByPersonaIdUseCaseImpl
-        }
+    }
+    namespace application {
 
         class CreateDomicilioUseCase { <<interface>> }
         class GetDomicilioByIdUseCase { <<interface>> }
@@ -89,7 +91,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class DomicilioEntity {
                 +Long domicilioId
                 +BigDecimal personaId
@@ -134,9 +137,11 @@ classDiagram
                 +toEntity(Domicilio) DomicilioEntity
                 +toDomainModel(DomicilioEntity) Domicilio
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class DomicilioController {
                 -DomicilioService domicilioService
                 -DomicilioDtoMapper dtoMapper
@@ -157,7 +162,8 @@ classDiagram
                 +toDomain(DomicilioRequest) Domicilio
                 +toResponse(Domicilio) DomicilioResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     DomicilioService --> CreateDomicilioUseCase : uses

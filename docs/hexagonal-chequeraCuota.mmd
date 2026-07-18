@@ -119,7 +119,8 @@ classDiagram
             +calculateDeuda(ChequeraSerie) DeudaChequeraDto
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class CalculateDeudaUseCaseImpl
             class CalculateTotalCuotasActivasUseCaseImpl
             class CalculateTotalCuotasPagadasUseCaseImpl
@@ -140,13 +141,15 @@ classDiagram
             class SaveAllChequeraCuotasUseCaseImpl
             class UpdateBarrasUseCaseImpl
             class UpdateChequeraCuotaUseCaseImpl
-        }
+    }
+    namespace application {
 
         class ChequeraCuotaException
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class ChequeraCuotaEntity {
                 +@Table(name="chequera_cuota")
                 +Long chequeraCuotaId
@@ -175,9 +178,11 @@ classDiagram
                 +toDomain(ChequeraCuotaEntity) ChequeraCuota
                 +toEntity(ChequeraCuota) ChequeraCuotaEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class ChequeraCuotaController {
                 -ChequeraCuotaService service
                 -ChequeraCuotaDeudaService deudaService
@@ -223,7 +228,8 @@ classDiagram
                 +toDomain(ChequeraCuotaRequest) ChequeraCuota
                 +toResponse(ChequeraCuota) ChequeraCuotaResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     namespace external {

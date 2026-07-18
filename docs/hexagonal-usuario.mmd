@@ -49,14 +49,16 @@ classDiagram
             +findByGoogleMail(String) Usuario
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class CreateUsuarioUseCaseImpl
             class FindUsuarioByGoogleMailUseCaseImpl
             class FindUsuarioByLoginUseCaseImpl
             class FindUsuarioByPasswordUseCaseImpl
             class UpdateLastLogUseCaseImpl
             class UpdateUsuarioUseCaseImpl
-        }
+    }
+    namespace application {
 
         class CreateUsuarioUseCase { <<interface>> }
         class FindUsuarioByGoogleMailUseCase { <<interface>> }
@@ -67,7 +69,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class UsuarioEntity {
                 +Long userId
                 +String login
@@ -108,9 +111,11 @@ classDiagram
                 +toDomain(UsuarioEntity) Usuario
                 +toEntity(Usuario) UsuarioEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class UsuarioController {
                 -UsuarioService service
                 -UsuarioDtoMapper dtoMapper
@@ -155,7 +160,8 @@ classDiagram
                 +toDomain(UsuarioRequest) Usuario
                 +toResponse(Usuario) UsuarioResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     UsuarioService --> CreateUsuarioUseCase : uses

@@ -39,7 +39,8 @@ classDiagram
             +update(Integer, Dependencia) Dependencia
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class GetAllDependenciasUseCaseImpl {
                 -DependenciaRepository repository
                 +getAll() List~Dependencia~
@@ -54,7 +55,8 @@ classDiagram
                 -DependenciaRepository repository
                 +update(Integer, Dependencia) Dependencia
             }
-        }
+    }
+    namespace application {
 
         class GetAllDependenciasUseCase {
             <<interface>>
@@ -73,7 +75,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class DependenciaEntity {
                 +Integer dependenciaId
                 +String nombre
@@ -107,9 +110,11 @@ classDiagram
                 +toDomain(DependenciaEntity) Dependencia
                 +toEntity(Dependencia) DependenciaEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class DependenciaController {
                 -DependenciaService service
                 -DependenciaDtoMapper mapper
@@ -145,7 +150,8 @@ classDiagram
                 +toDomain(DependenciaRequest) Dependencia
                 +toResponse(Dependencia) DependenciaResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     DependenciaService --> GetAllDependenciasUseCase : uses

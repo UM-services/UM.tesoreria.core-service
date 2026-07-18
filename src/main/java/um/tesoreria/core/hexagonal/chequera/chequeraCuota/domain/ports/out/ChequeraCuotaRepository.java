@@ -1,12 +1,9 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.out;
 
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraPago;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.DeudaData;
 import um.tesoreria.core.model.internal.CuotaPeriodoDto;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -50,5 +47,7 @@ public interface ChequeraCuotaRepository {
     List<ChequeraCuota> findAllByChequeraIds(List<Long> chequeraIds);
 
     List<ChequeraCuota> findAllByFacultadTipoChequeraSerieIds(Integer facultadId, Integer tipoChequeraId, List<Long> chequeraSerieIds);
+
+    List<ChequeraCuota> findAllByVencimiento1Between(OffsetDateTime desde, OffsetDateTime hasta);
 
 }

@@ -3,10 +3,14 @@ package um.tesoreria.core.service.facade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import um.tesoreria.core.exception.ChequeraPagoException;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.exception.ChequeraPagoException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.service.ChequeraPagoService;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.domain.model.ChequeraPago;
+import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
+import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
-import um.tesoreria.core.kotlin.model.ChequeraPago;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.entity.ChequeraPagoEntity;
 import um.tesoreria.core.kotlin.model.ChequeraPagoAsiento;
 import um.tesoreria.core.model.ChequeraPagoReemplazo;
 import um.tesoreria.core.model.dto.ItemAsientoDto;
@@ -37,7 +41,7 @@ public class PagoService {
     private final ChequeraPagoAsientoService chequeraPagoAsientoService;
 
     public List<PagoDto> getPagos(Integer tipoPagoId, OffsetDateTime fecha) {
-        List<ChequeraPago> pagos = (tipoPagoId != TIPO_MERCADO_PAGO) 
+        List<ChequeraPago> pagos = (tipoPagoId != TIPO_MERCADO_PAGO)
             ? chequeraPagoService.findAllByTipoPagoIdAndFechaAcreditacion(tipoPagoId, fecha)
             : chequeraPagoService.findAllByTipoPagoIdAndFechaPago(tipoPagoId, fecha);
 
@@ -164,7 +168,7 @@ public class PagoService {
 
         var fechaAcreditacion = LocalDate.now().isAfter(LocalDate.of(2025, 9, 1).minusDays(1)) ? mercadoPagoContext.getFechaPago() : mercadoPagoContext.getFechaAcreditacion();
 
-        var chequeraPago = new ChequeraPago.Builder()
+        var chequeraPago = ChequeraPago.builder()
                 .chequeraCuotaId(chequeraCuota.getChequeraCuotaId())
                 .facultadId(chequeraCuota.getFacultadId())
                 .tipoChequeraId(chequeraCuota.getTipoChequeraId())
@@ -182,7 +186,7 @@ public class PagoService {
                 .idMercadoPago(mercadoPagoContext.getIdMercadoPago())
                 .archivo("MercadoPago")
                 .build();
-        chequeraPago = chequeraPagoService.add(chequeraPago, chequeraCuotaService);
+        chequeraPago = chequeraPagoService.create(chequeraPago);
 
         mercadoPagoContext.setChequeraPagoId(chequeraPago.getChequeraPagoId());
         mercadoPagoContextService.update(mercadoPagoContext, mercadoPagoContextId);
@@ -195,7 +199,7 @@ public class PagoService {
     public void marcarPago(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, ChequeraCuotaService chequeraCuotaService) {
         log.debug("Processing marcarPago");
 
-        boolean pagado = chequeraPagoService.isPagado(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, chequeraCuotaService);
+        boolean pagado = chequeraPagoService.isPagado(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
 
         var chequeraCuota = chequeraCuotaService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
         chequeraCuota.setPagado((byte) (pagado ? 1 : 0));

@@ -4,7 +4,34 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.36.0**
+**Versión actual (SemVer): 3.37.0**
+
+## Novedades 3.37.0 (verificado en código)
+- feat(chequeraPago): Nuevo módulo ChequeraPago con arquitectura hexagonal completa (12 casos de uso)
+  - Modelo de dominio: `ChequeraPago` con 22 campos y método `getCuotaKey()`
+  - 12 puertos de entrada: CRUD + búsquedas por chequera, cuota, tipo pago/fecha, pendientes factura, ID MercadoPago, orden, pagado
+  - Puerto de salida: `ChequeraPagoRepository` con consultas complejas
+  - Controlador REST: `ChequeraPagoController` con 8 endpoints bajo `/chequeraPago/`
+  - Migración desde `ChequeraPago.kt` (Kotlin legacy) a dominio hexagonal Java puro
+- feat(chequeraTotal): Nuevo módulo ChequeraTotal con arquitectura hexagonal completa (5 casos de uso)
+  - Modelo de dominio: `ChequeraTotal` con campos `chequeraTotalId`, `facultadId`, `tipoChequeraId`, `chequeraSerieId`, `productoId`, `total`, `pagado`
+  - 5 puertos de entrada: Create, Delete, FindAllByChequera, FindByUnique, Update
+  - Puerto de salida: `ChequeraTotalRepository` con 6 métodos de CRUD
+  - Controlador REST: `ChequeraTotalController` con 1 endpoint de lectura bajo `/chequeratotal/`
+  - Migración desde `ChequeraTotal.java` (legacy) a dominio hexagonal
+- feat(politicaArancelaria): Nuevo módulo PoliticaArancelaria bajo `/api/tesoreria/core/politicaArancelaria`
+  - Puerto de entrada: `RecalculateCuotaByUniqueIndexUseCase` que delega a `ChequeraCuotaService.findByUnique()`
+  - Controlador REST: `PoliticaArancelariaController` con endpoint `GET /recalculate/cuota/...`
+  - Dependencia cross-module con `chequeraCuota`
+- refactor(lectivo): `Lectivo` y `LectivoEntity` implementan `Jsonifyable` en lugar de definir `jsonify()` manualmente
+- refactor(lectivo): DTOs migrados de `@Data` a `@Getter`/`@Setter`
+- refactor(facade): `ChequeraService`, `PagoService` y `SpoterService` actualizados para usar servicios hexagonales `ChequeraPagoService` y `ChequeraTotalService`
+- refactor(chequeraCuota): Eliminación de `ChequeraPago` duplicado, `ChequeraCuotaMapper` legacy, renombrado de caso de uso
+- refactor(facturacionElectronica): `FacturacionElectronica.chequeraPago` cambiado a tipo `ChequeraPagoEntity` (hexagonal)
+- refactor(docs): Namespace restructuring en 20 diagramas Mermaid existentes
+- feat(docs): Nuevos diagramas Mermaid `hexagonal-chequeraPago.mmd`, `hexagonal-chequeraTotal.mmd`, `hexagonal-politicaArancelaria.mmd`
+
+> Basado en análisis profundo de `git diff HEAD` (104 archivos staged, +1927/-859 líneas, incluyendo migración de ChequeraPago y ChequeraTotal a hexagonal + nuevo módulo PoliticaArancelaria) y `pom.xml` (versión 3.36.0 → 3.37.0).
 
 ## Novedades 3.36.0 (verificado en código)
 - feat(compras/proveedorMovimiento): Nuevo módulo ProveedorMovimiento con arquitectura hexagonal completa (13 casos de uso)
@@ -742,7 +769,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 
 ## Novedades 3.2.0 (verificado en código)
 - feat: Implementación completa del módulo ChequeraCuota con Arquitectura Hexagonal
-  - Nuevos modelos de dominio: `ChequeraCuota`, `ChequeraPago`, `ChequeraTotal`, `DeudaData`, `ChequeraSerie`
+  - Nuevos modelos de dominio: `ChequeraCuota`, `ChequeraPagoEntity`, `ChequeraTotalEntity`, `DeudaData`, `ChequeraSerie`
   - Puertos definidos: `CalculateDeudaUseCase`, `ChequeraCuotaRepository`
   - Servicio de aplicación: `ChequeraCuotaService` con cálculo de deudas y extensión
   - Adaptador JPA: `JpaChequeraCuotaRepositoryAdapter` con mappers

@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChequeraCuotaService {
 
-    private final FindAllByChequeraUseCase findAllByChequeraUseCase;
+    private final FindAllCuotasByChequeraUseCase findAllByChequeraUseCase;
     private final FindAllByChequeraAlternativaUseCase findAllByChequeraAlternativaUseCase;
     private final FindAllByChequeraAlternativaConImporteUseCase findAllByChequeraAlternativaConImporteUseCase;
     private final FindAllDebidasUseCase findAllDebidasUseCase;

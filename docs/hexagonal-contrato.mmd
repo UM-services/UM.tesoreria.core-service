@@ -66,7 +66,8 @@ classDiagram
             +deleteContrato(Long) boolean
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class CreateContratoUseCaseImpl {
                 -ContratoRepository repository
                 +createContrato(Contrato) Contrato
@@ -103,7 +104,8 @@ classDiagram
                 -ContratoRepository repository
                 +updateContrato(Long, Contrato) Optional~Contrato~
             }
-        }
+    }
+    namespace application {
 
         class CreateContratoUseCase {
             <<interface>>
@@ -144,7 +146,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class ContratoEntity {
                 +Long contratoId
                 +BigDecimal personaId
@@ -198,9 +201,11 @@ classDiagram
                 +toEntity(Contrato) ContratoEntity
                 +toDomainModel(ContratoEntity) Contrato
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class ContratoController {
                 -ContratoService contratoService
                 -ContratoDtoMapper contratoDtoMapper
@@ -263,7 +268,8 @@ classDiagram
                 +toDomain(ContratoRequest) Contrato
                 +toResponse(Contrato) ContratoResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     ContratoService --> CreateContratoUseCase : uses

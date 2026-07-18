@@ -3,7 +3,7 @@ package um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persis
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.DeudaData;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.out.ChequeraCuotaRepository;
@@ -11,8 +11,10 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persist
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.mapper.ChequeraCuotaMapper;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.repository.JpaChequeraCuotaRepository;
 import um.tesoreria.core.model.internal.CuotaPeriodoDto;
-import um.tesoreria.core.repository.ChequeraPagoRepository;
-import um.tesoreria.core.repository.ChequeraTotalRepository;
+import um.tesoreria.core.repository.view.ChequeraCuotaDeudaRepository;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.mapper.ChequeraPagoMapper;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.repository.JpaChequeraPagoRepository;
+import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.ports.out.ChequeraTotalRepository;
 import um.tesoreria.core.util.Jsonifier;
 import um.tesoreria.core.util.Tool;
 
@@ -21,15 +23,17 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 @Slf4j
 public class JpaChequeraCuotaRepositoryAdapter implements ChequeraCuotaRepository {
 
     private final JpaChequeraCuotaRepository jpaChequeraCuotaRepository;
-    private final ChequeraPagoRepository chequeraPagoRepository;
+    private final JpaChequeraPagoRepository chequeraPagoRepository;
     private final ChequeraTotalRepository chequeraTotalRepository;
     private final ChequeraCuotaMapper mapper;
+    private final ChequeraCuotaDeudaRepository chequeraCuotaDeudaRepository;
+    private final ChequeraPagoMapper chequeraPagoMapper;
 
     @Override
     public DeudaData findDeudaData(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
@@ -44,14 +48,11 @@ public class JpaChequeraCuotaRepositoryAdapter implements ChequeraCuotaRepositor
         var pagos = chequeraPagoRepository
                 .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
                 .stream()
-                .map(mapper::toDomain)
+                .map(chequeraPagoMapper::toDomain)
                 .toList();
 
         var totals = chequeraTotalRepository
-                .findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId)
-                .stream()
-                .map(mapper::toDomain)
-                .toList();
+                .findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
 
         return DeudaData.builder()
                 .cuotas(cuotas)
@@ -188,5 +189,14 @@ public class JpaChequeraCuotaRepositoryAdapter implements ChequeraCuotaRepositor
     public List<ChequeraCuota> findAllByFacultadTipoChequeraSerieIds(Integer facultadId, Integer tipoChequeraId, List<Long> chequeraSerieIds) {
         return jpaChequeraCuotaRepository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdIn(facultadId, tipoChequeraId, chequeraSerieIds)
                 .stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    public List<ChequeraCuota> findAllByVencimiento1Between(OffsetDateTime desde, OffsetDateTime hasta) {
+        return chequeraCuotaDeudaRepository.findAllByVencimiento1Between(desde, hasta, null)
+                .stream()
+                .filter(cuotaDeuda -> cuotaDeuda.getChequeraCuota() != null)
+                .map(cuotaDeuda -> mapper.toDomain(cuotaDeuda.getChequeraCuota()))
+                .toList();
     }
 }

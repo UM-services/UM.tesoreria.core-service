@@ -26,17 +26,20 @@ classDiagram
             +findByDocumentoId(Integer) Documento
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class GetAllDocumentosUseCaseImpl
             class GetDocumentoByIdUseCaseImpl
-        }
+    }
+    namespace application {
 
         class GetAllDocumentosUseCase { <<interface>> }
         class GetDocumentoByIdUseCase { <<interface>> }
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class DocumentoEntity {
                 +Integer documentoId
                 +String nombre
@@ -58,9 +61,11 @@ classDiagram
                 +toDomain(DocumentoEntity) Documento
                 +toEntity(Documento) DocumentoEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class DocumentoController {
                 -DocumentoService service
                 -DocumentoDtoMapper dtoMapper
@@ -74,7 +79,8 @@ classDiagram
                 +toDomain(DocumentoRequest) Documento
                 +toResponse(Documento) DocumentoResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     DocumentoService --> GetAllDocumentosUseCase : uses

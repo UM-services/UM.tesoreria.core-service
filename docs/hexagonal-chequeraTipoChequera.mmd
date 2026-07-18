@@ -55,7 +55,8 @@ classDiagram
             +findAllByStrings(List~String~) List~TipoChequeraSearch~
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class GetAllTipoChequeraUseCaseImpl
             class GetAllTipoChequeraAsignableUseCaseImpl
             class GetAllTipoChequeraByFacultadAndGeograficaUseCaseImpl
@@ -67,13 +68,15 @@ classDiagram
             class DeleteTipoChequeraUseCaseImpl
             class MarkTipoChequeraUseCaseImpl
             class UnmarkTipoChequeraUseCaseImpl
-        }
+    }
+    namespace application {
 
         class TipoChequeraException
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class TipoChequeraEntity {
                 +Integer tipoChequeraId
                 +String nombre
@@ -107,9 +110,11 @@ classDiagram
                 +toDomainModel(TipoChequeraEntity) TipoChequera
                 +toEntity(TipoChequera) TipoChequeraEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class TipoChequeraController {
                 -TipoChequeraService service
                 -TipoChequeraDtoMapper dtoMapper
@@ -153,7 +158,8 @@ classDiagram
                 +toDomain(TipoChequeraRequest) TipoChequera
                 +toResponse(TipoChequera) TipoChequeraResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     TipoChequeraService --> GetAllTipoChequeraUseCase : uses

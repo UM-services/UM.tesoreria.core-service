@@ -2,6 +2,87 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.37.0] - 2026-07-17
+### Added
+- feat(chequeraPago): Nuevo módulo ChequeraPago con arquitectura hexagonal completa bajo `hexagonal/chequera/chequeraPago/`
+  - Modelo de dominio: `ChequeraPago` con campos `chequeraPagoId`, `chequeraCuotaId`, `facultadId`, `tipoChequeraId`, `chequeraSerieId`, `productoId`, `alternativaId`, `cuotaId`, `orden`, `mes`, `anho`, `fecha`, `acreditacion`, `importe`, `path`, `archivo`, `observaciones`, `archivoBancoId`, `archivoBancoIdAcreditacion`, `verificador`, `tipoPagoId`, `idMercadoPago`, y método `getCuotaKey()`
+  - Puertos de entrada (12): `CreateChequeraPagoUseCase`, `DeletePagosByChequeraUseCase`, `FindPagosByChequeraUseCase`, `FindPagosByCuotaUseCase`, `FindPagosByFacultadAndTipoChequeraAndLectivoUseCase`, `FindPagosByTipoPagoAndFechaAcreditacionUseCase`, `FindPagosByTipoPagoAndFechaPagoUseCase`, `FindPagosPendientesFacturaUseCase`, `GetChequeraPagoByIdMercadoPagoUseCase`, `GetChequeraPagoByIdUseCase`, `GetNextOrdenUseCase`, `IsPagadoUseCase`
+  - Puerto de salida: `ChequeraPagoRepository` con 12 métodos de consulta, CRUD y eliminación
+  - Servicio de aplicación: `ChequeraPagoService` con delegación a 12 casos de uso
+  - Adaptador JPA: `JpaChequeraPagoRepositoryAdapter` con mapeo dominio ↔ entidad y lógica de auto-relleno de `chequeraCuotaId`
+  - Entidad JPA: `ChequeraPagoEntity` con restricción única `(chp_fac_id, chp_tch_id, chp_chs_id, chp_pro_id, chp_alt_id, chp_cuo_id, chp_orden)` y relaciones `@OneToOne` a `TipoPago`, `ProductoEntity`, `ChequeraCuotaEntity`
+  - Repositorio JPA: `JpaChequeraPagoRepository` con 9 consultas Spring Data derivadas
+  - Mapper: `ChequeraPagoMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `ChequeraPagoController` con rutas `/chequeraPago` y `/api/tesoreria/core/chequeraPago`, 8 endpoints: `GET /pendientesFactura/{fechaPago}`, `GET /chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}`, `GET /fecha/acreditacion/{tipoPagoId}/{fechaAcreditacion}`, `GET /fecha/pago/{tipoPagoId}/{fechaPago}`, `GET /pagos/facultad/{facultadId}/tipoChequera/{tipoChequeraId}/lectivo/{lectivoId}`, `GET /{chequeraPagoId}`, `POST /`, `GET /search/id/mercado/pago/{idMercadoPago}`
+  - DTOs: `ChequeraPagoRequest` (6 campos `@NotNull`), `ChequeraPagoResponse`
+  - DTO Mapper: `ChequeraPagoDtoMapper` para conversión DTO ↔ dominio
+  - Excepción: `ChequeraPagoException` movida de `core/exception/` a `hexagonal/chequera/chequeraPago/application/exception/`
+- feat(chequeraTotal): Nuevo módulo ChequeraTotal con arquitectura hexagonal completa bajo `hexagonal/chequera/chequeraTotal/`
+  - Modelo de dominio: `ChequeraTotal` con campos `chequeraTotalId`, `facultadId`, `tipoChequeraId`, `chequeraSerieId`, `productoId`, `total`, `pagado`
+  - Puertos de entrada (5): `CreateChequeraTotalUseCase`, `DeleteChequeraTotalUseCase`, `FindAllTotalByChequeraUseCase`, `FindByUniqueChequeraTotalUseCase`, `UpdateChequeraTotalUseCase`
+  - Puerto de salida: `ChequeraTotalRepository` con 6 métodos de CRUD
+  - Servicio de aplicación: `ChequeraTotalService` con delegación a 5 casos de uso
+  - Adaptador JPA: `JpaChequeraTotalRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `ChequeraTotalEntity` con restricción única `(cht_fac_id, cht_tch_id, cht_chs_id, cht_pro_id)`
+  - Repositorio JPA: `JpaChequeraTotalRepository` con 4 consultas Spring Data derivadas
+  - Mapper: `ChequeraTotalMapper` para conversión entidad ↔ dominio
+  - Controlador REST: `ChequeraTotalController` con ruta `/chequeratotal`, 1 endpoint: `GET /chequera/{facultadId}/{tipochequeraId}/{chequeraserieId}`
+  - DTO: `ChequeraTotalResponse`
+  - DTO Mapper: `ChequeraTotalDtoMapper` para conversión dominio → DTO
+  - Excepción: `ChequeraTotalException` movida de `core/exception/` a `hexagonal/chequera/chequeraTotal/application/exception/`
+- feat(politicaArancelaria): Nuevo módulo PoliticaArancelaria bajo `hexagonal/chequera/politicaArancelaria/`
+  - Puerto de entrada: `RecalculateCuotaByUniqueIndexUseCase` con método `recalculateCuota()` que retorna `ChequeraCuota`
+  - Servicio de aplicación: `PoliticaArancelariaService` con delegación al caso de uso
+  - Caso de uso: `RecalculateCuotaByUniqueIndexUseCaseImpl` que delega a `ChequeraCuotaService.findByUnique()`
+  - Controlador REST: `PoliticaArancelariaController` con ruta `/api/tesoreria/core/politicaArancelaria`, endpoint `GET /recalculate/cuota/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{productoId}/{alternativaId}/{cuotaId}`
+  - Dependencia cross-module: `ChequeraCuotaService` del módulo `chequeraCuota`
+- feat(docs): Nuevos diagramas Mermaid `hexagonal-chequeraPago.mmd`, `hexagonal-chequeraTotal.mmd`, `hexagonal-politicaArancelaria.mmd`
+
+### Changed
+- refactor(chequeraPago): Migración de `ChequeraPago.kt` (Kotlin legacy, 187 líneas) a `ChequeraPago.java` (dominio hexagonal)
+  - Modelo de dominio puro: eliminación de anotaciones JPA y relaciones de persistencia del modelo de dominio
+  - Builder pattern migrado de `ChequeraPago.Builder()` (manual) a Lombok `@Builder`
+  - Método `getCuotaKey()` preservado como lógica de dominio
+- refactor(chequeraTotal): Migración de `ChequeraTotal.java` (legacy `core/model/`) a `ChequeraTotal.java` (dominio hexagonal)
+  - Modelo de dominio puro: eliminación de anotaciones JPA del modelo de dominio
+  - Nuevo `@Data` + `@Builder` con Lombok para constructores
+- refactor(lectivo): `Lectivo` y `LectivoEntity` implementan `Jsonifyable` en lugar de definir `jsonify()` manualmente
+  - Eliminación de métodos `jsonify()` en `Lectivo.java` y `LectivoEntity.java`
+  - Importación de `um.tesoreria.core.util.Jsonifyable`
+- refactor(lectivo): `LectivoRequest` y `LectivoResponse` migrados de `@Data` a `@Getter`/`@Setter` para consistencia
+- refactor(lectivo): Refactorizado method reference en `JpaLectivoRepositoryAdapter.findAllByPersona()` de lambda a `ChequeraSerieEntity::getLectivoId`
+- refactor(facade): `ChequeraService` actualizado para usar nuevos servicios hexagonales `ChequeraPagoService` y `ChequeraTotalService`
+  - Cambio de `chequeraPagoService.deleteAllByFacultadIdAndTipochequeraIdAndChequeraserieId()` a `chequeraPagoService.deleteByChequera()`
+  - Cambio de `chequeraPagoService.findAllByChequera(..., chequeraCuotaService)` a `chequeraPagoService.findAllByChequera(...)` (sin dependencia explícita de ChequeraCuotaService)
+- refactor(facade): `PagoService` actualizado para usar nuevos servicios hexagonales
+  - Cambio de `ChequeraPago.Builder()` a `ChequeraPago.builder()` (Lombok)
+  - Cambio de `chequeraPagoService.add(pago, chequeraCuotaService)` a `chequeraPagoService.create(pago)`
+  - Cambio de `chequeraPagoService.isPagado(..., chequeraCuotaService)` a `chequeraPagoService.isPagado(...)`
+- refactor(facade): `SpoterService` actualizado para usar `ChequeraTotal.builder()` en lugar de constructor manual `new ChequeraTotal(null, ...)`
+- refactor(chequeraCuota): Eliminación de modelo `ChequeraPago` duplicado del paquete `chequeraCuota/domain/model/`
+- refactor(chequeraCuota): Eliminación de `ChequeraCuotaMapper` legacy del paquete `chequeraCuota/infrastructure/persistence/mapper/`
+- refactor(chequeraCuota): Renombrado de `FindAllByChequeraAlternativaUseCaseImpl` a `FindAllCuotasByChequeraUseCaseImpl`
+- refactor(chequeraCuota): `ChequeraCuota` eliminado de imports innecesarios en múltiples casos de uso
+- refactor(chequeraCuota): `ChequeraCuotaResponse` y `ChequeraCuotaRequest` migrados de `@Data` a `@Getter`/`@Setter`
+- refactor(chequeraCuota): `ChequeraCuotaRepository` actualizado con firma `FindAllCuotasByChequeraUseCase`
+- refactor(facturacionElectronica): `FacturacionElectronica.chequeraPago` cambiado de tipo `ChequeraPago` (Kotlin legacy) a `ChequeraPagoEntity` (hexagonal)
+- refactor(chequeraPagoAsiento): `ChequeraPagoAsiento.chequeraPago` cambiado de tipo `ChequeraPago` (Kotlin legacy) a `ChequeraPagoEntity` (hexagonal)
+- refactor(docs): Namespace restructuring en 20 diagramas Mermaid existentes (flattened nested namespaces para mejor compatibilidad con parsers Mermaid v10+)
+
+### Removed
+- Eliminación de `ChequeraPago.kt` (Kotlin legacy, 187 líneas) del paquete `core/kotlin/model/`
+- Eliminación de `ChequeraPagoRepository.java` (legacy) del paquete `core/repository/`
+- Eliminación de `ChequeraPagoService.java` (legacy, 188 líneas) del paquete `core/service/`
+- Eliminación de `ChequeraPagoController.java` (legacy) del paquete `core/controller/`
+- Eliminación de `ChequeraPagoException.java` (legacy) del paquete `core/exception/`
+- Eliminación de `ChequeraTotalRepository.java` (legacy) del paquete `core/repository/`
+- Eliminación de `ChequeraTotalService.java` (legacy, 66 líneas) del paquete `core/service/`
+- Eliminación de `ChequeraTotalController.java` (legacy) del paquete `core/controller/`
+- Eliminación de `ChequeraTotalException.java` (legacy) del paquete `core/exception/`
+- Eliminación de `ChequeraCuotaMapper.java` legacy del paquete `chequeraCuota/infrastructure/persistence/mapper/`
+
+> Basado en análisis profundo de `git diff HEAD` (104 archivos staged, +1927/-859 líneas, incluyendo migración de ChequeraPago y ChequeraTotal a arquitectura hexagonal + nuevo módulo PoliticaArancelaria + refactoring de Lectivo) y `pom.xml` (versión 3.36.0 → 3.37.0).
+
 ## [3.36.0] - 2026-07-17
 ### Added
 - feat(compras/proveedorMovimiento): Nuevo módulo ProveedorMovimiento con arquitectura hexagonal completa bajo `hexagonal/compras/proveedorMovimiento/`
@@ -338,7 +419,7 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
   - DTO Mapper: `ClaseChequeraDtoMapper` para conversión DTO ↔ dominio
   - Excepción: `ClaseChequeraException`
 - feat(chequeraCuota): Migración completa a casos de uso individuales con arquitectura hexagonal
-  - 20 nuevos casos de uso en `application/usecases/`: `CalculateTotalCuotasActivasUseCaseImpl`, `CalculateTotalCuotasPagadasUseCaseImpl`, `DeleteAllByChequeraUseCaseImpl`, `FindAllByChequeraAlternativaConImporteUseCaseImpl`, `FindAllByChequeraAlternativaUseCaseImpl`, `FindAllByChequeraIdsUseCaseImpl`, `FindAllByChequeraUseCaseImpl`, `FindAllByFacultadTipoChequeraSerieIdsUseCaseImpl`, `FindAllDebidasUseCaseImpl`, `FindAllInconsistenciasUseCaseImpl`, `FindAllPendientesBajaUseCaseImpl`, `FindAllPendientesUseCaseImpl`, `FindAllPeriodosLectivoUseCaseImpl`, `GetChequeraCuotaByIdUseCaseImpl`, `GetChequeraCuotaByUniqueUseCaseImpl`, `GetOneActivaImpagaPreviaUseCaseImpl`, `SaveAllChequeraCuotasUseCaseImpl`, `UpdateBarrasUseCaseImpl`, `UpdateChequeraCuotaUseCaseImpl`
+  - 20 nuevos casos de uso en `application/usecases/`: `CalculateTotalCuotasActivasUseCaseImpl`, `CalculateTotalCuotasPagadasUseCaseImpl`, `DeleteAllByChequeraUseCaseImpl`, `FindAllByChequeraAlternativaConImporteUseCaseImpl`, `FindAllByChequeraAlternativaUseCaseImpl`, `FindAllByChequeraIdsUseCaseImpl`, `FindAllCuotasByChequeraUseCaseImpl`, `FindAllByFacultadTipoChequeraSerieIdsUseCaseImpl`, `FindAllDebidasUseCaseImpl`, `FindAllInconsistenciasUseCaseImpl`, `FindAllPendientesBajaUseCaseImpl`, `FindAllPendientesUseCaseImpl`, `FindAllPeriodosLectivoUseCaseImpl`, `GetChequeraCuotaByIdUseCaseImpl`, `GetChequeraCuotaByUniqueUseCaseImpl`, `GetOneActivaImpagaPreviaUseCaseImpl`, `SaveAllChequeraCuotasUseCaseImpl`, `UpdateBarrasUseCaseImpl`, `UpdateChequeraCuotaUseCaseImpl`
   - Nuevos puertos de entrada (20) correspondientes en `domain/ports/in/`
   - Nuevos DTOs: `ChequeraCuotaRequest`, `ChequeraCuotaResponse`
   - Nueva capa web: `ChequeraCuotaDtoMapper` para conversión DTO ↔ dominio
@@ -573,7 +654,7 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 - refactor(chequeraCuota): Replace all legacy Kotlin imports (`ChequeraCuotaEntity.kt`) with new Java entity imports across ~30 files
   - `ChequeraCuotaService`, `ChequeraPagoService`, `ChequeraSerieAltaFullService`, `ChequeraCuotaDeudaService`
   - `ChequeraService`, `FormulariosToPdfService`, `MailChequeraService`, `MercadoPagoCoreService`, `ProcessBajaService`, `SpoterService`
-  - `ChequeraCuotaRepository`, `UMPreferenceMPDto`, `ClickPagosEntity`, `ChequeraCuotaDeuda.kt`, `ChequeraPago.kt`
+  - `ChequeraCuotaRepository`, `UMPreferenceMPDto`, `ClickPagosEntity`, `ChequeraCuotaDeuda.kt`, `ChequeraPagoEntity.kt`
 - refactor(chequeraCuota): `ChequeraCuotaService.update()` migrated from `.Builder()` pattern to Lombok `.builder()` pattern
 
 > Basado en análisis profundo de `git diff HEAD` (30+ archivos modificados/renombrados, +410/-230 líneas), `pom.xml` (versión 3.24.0 → 3.25.0) y cambios locales staged no commiteados.

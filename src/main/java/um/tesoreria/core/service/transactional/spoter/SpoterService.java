@@ -8,18 +8,18 @@ import um.tesoreria.core.exception.ChequeraSerieControlException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
+import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.ChequeraSerieControl;
-import um.tesoreria.core.model.ChequeraTotal;
 import um.tesoreria.core.model.LectivoCuota;
 import um.tesoreria.core.model.LectivoTotal;
 import um.tesoreria.core.service.*;
@@ -146,9 +146,14 @@ public class SpoterService {
         List<ChequeraTotal> chequeraTotals = new ArrayList<>();
         for (LectivoTotal lectivoTotal : lectivoTotalService.findAllByTipo(chequeraSerie.getFacultadId(),
                 chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId())) {
-            chequeraTotals.add(new ChequeraTotal(null, chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
-                    chequeraSerie.getChequeraSerieId(), lectivoTotal.getProductoId(), lectivoTotal.getTotal(),
-                    BigDecimal.ZERO));
+            chequeraTotals.add(ChequeraTotal.builder()
+                    .facultadId(chequeraSerie.getFacultadId())
+                    .tipoChequeraId(chequeraSerie.getTipoChequeraId())
+                    .chequeraSerieId(chequeraSerie.getChequeraSerieId())
+                    .productoId(lectivoTotal.getProductoId())
+                    .total(lectivoTotal.getTotal())
+                    .pagado(BigDecimal.ZERO)
+                    .build());
         }
         chequeraTotals = chequeraTotalService.saveAll(chequeraTotals);
         log.debug("ChequeraTotals -> {}", Jsonifier.builder(chequeraTotals).build());

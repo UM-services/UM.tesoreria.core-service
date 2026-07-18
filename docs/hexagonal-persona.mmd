@@ -60,7 +60,8 @@ classDiagram
             +update(Persona) Persona
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class GetPersonaByUniqueUseCaseImpl
             class GetPersonaByIdUseCaseImpl
             class GetPersonaByUniqueIdUseCaseImpl
@@ -74,7 +75,8 @@ classDiagram
             class FindByStringsUseCaseImpl
             class GetDeudaPersonaUseCaseImpl
             class GetInscripcionFullUseCaseImpl
-        }
+    }
+    namespace application {
 
         class GetPersonaByUniqueUseCase { <<interface>> }
         class GetPersonaByIdUseCase { <<interface>> }
@@ -92,7 +94,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class PersonaEntity {
                 +Long uniqueId
                 +Integer personaId
@@ -123,9 +126,11 @@ classDiagram
                 +toEntity(Persona) PersonaEntity
                 +toDomain(PersonaEntity) Persona
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class PersonaController {
                 -PersonaService personaService
                 -PersonaDtoMapper dtoMapper
@@ -149,7 +154,8 @@ classDiagram
                 +toDomain(PersonaRequest) Persona
                 +toResponse(Persona) PersonaResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     PersonaService --> GetPersonaByUniqueUseCase : uses

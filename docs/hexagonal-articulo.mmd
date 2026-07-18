@@ -69,7 +69,8 @@ classDiagram
             +searchArticulos(String) List~ArticuloSearch~
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class CreateArticuloUseCaseImpl {
                 -ArticuloRepository repository
                 +createArticulo(Articulo) Articulo
@@ -109,7 +110,8 @@ classDiagram
             -ArticuloRepository repository
             +searchArticulos(String) List~ArticuloSearch~
         }
-        }
+    }
+    namespace application {
 
         class CreateArticuloUseCase {
             <<interface>>
@@ -153,7 +155,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class ArticuloEntity {
                 +Long articuloId
                 +String nombre
@@ -191,9 +194,11 @@ classDiagram
                 +toEntity(Articulo) ArticuloEntity
                 +toSearchDomain(ArticuloKey) ArticuloSearch
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class ArticuloController {
                 -ArticuloService articuloService
                 -ArticuloDtoMapper articuloDtoMapper
@@ -260,7 +265,8 @@ classDiagram
                 +toResponse(Articulo) ArticuloResponse
                 +toSearchResponse(ArticuloSearch) ArticuloSearchResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     ArticuloService --> CreateArticuloUseCase : uses

@@ -47,7 +47,8 @@ classDiagram
             +deleteByLectivoId(Integer)
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class GetAllLectivosUseCaseImpl
             class GetAllLectivosReverseUseCaseImpl
             class GetAllLectivosByPersonaUseCaseImpl
@@ -56,13 +57,15 @@ classDiagram
             class GetLastLectivoUseCaseImpl
             class CreateLectivoUseCaseImpl
             class DeleteLectivoUseCaseImpl
-        }
+    }
+    namespace application {
 
         class LectivoException
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class LectivoEntity {
                 +Integer lectivoId
                 +String nombre
@@ -97,9 +100,11 @@ classDiagram
                 +toDomainModel(LectivoEntity) Lectivo
                 +toEntity(Lectivo) LectivoEntity
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class LectivoController {
                 -LectivoService service
                 -LectivoDtoMapper dtoMapper
@@ -130,7 +135,8 @@ classDiagram
                 +toDomain(LectivoRequest) Lectivo
                 +toResponse(Lectivo) LectivoResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     LectivoService --> GetAllLectivosUseCase : uses

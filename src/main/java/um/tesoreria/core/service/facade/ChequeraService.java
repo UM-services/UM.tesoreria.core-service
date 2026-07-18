@@ -23,10 +23,13 @@ import um.tesoreria.core.exception.DebitoException;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.service.ArancelTipoService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.service.ChequeraPagoService;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.domain.model.ChequeraPago;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.entity.ChequeraPagoEntity;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
+import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
+import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
@@ -39,7 +42,6 @@ import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.Tip
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.*;
 import um.tesoreria.core.model.ChequeraSerieControl;
-import um.tesoreria.core.model.ChequeraTotal;
 import um.tesoreria.core.model.Debito;
 import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
 import um.tesoreria.core.model.dto.ChequeraDetailDto;
@@ -88,8 +90,7 @@ public class ChequeraService {
                 chequeraSerieId);
 
         // Elimina los pagos asociados
-        chequeraPagoService.deleteAllByFacultadIdAndTipochequeraIdAndChequeraserieId(facultadId, tipoChequeraId,
-                chequeraSerieId);
+        chequeraPagoService.deleteByChequera(facultadId, tipoChequeraId, chequeraSerieId);
 
         // Elimina las cuotas asociadas
         chequeraCuotaService.deleteAllByFacultadIdAndTipochequeraIdAndChequeraserieId(facultadId, tipoChequeraId,
@@ -227,7 +228,7 @@ public class ChequeraService {
         
         List<ChequeraPago> chequeraPagos = chequeraPagoService.findAllByChequera(
                 chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
-                chequeraSerie.getChequeraSerieId(), chequeraCuotaService);
+                chequeraSerie.getChequeraSerieId());
         log.debug("ChequeraPagos -> {}",  Jsonifier.builder(chequeraPagos).build());
         
         FacultadDto facultadDTO = modelMapper.map(facultadService.findByFacultadId(chequeraSerie.getFacultadId()), FacultadDto.class);
@@ -304,7 +305,7 @@ public class ChequeraService {
         log.debug("\n\nProcessing ChequeraService.findAllCuotaPagosByChequera\n\n");
         List<ChequeraCuota> cuotas = chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
         log.debug("\n\nChequeraService.findAllCuotaPagosByChequera.cuotas -> {}\n\n", Jsonifier.builder(cuotas).build());
-        List<ChequeraPago> pagos = chequeraPagoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService);
+        List<ChequeraPago> pagos = chequeraPagoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
 //        log.debug("pagos -> {}", Jsonifier.builder(pagos).build());
 
         var result = cuotas.stream()
@@ -320,7 +321,7 @@ public class ChequeraService {
                 })
                 .collect(Collectors.toList());
 
-//        log.debug("Result -> {}", Jsonifier.builder(result).build());
+        log.debug("Result -> {}", Jsonifier.builder(result).build());
         
         return result;
     }

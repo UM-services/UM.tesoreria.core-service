@@ -1,9 +1,7 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
 import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
@@ -14,7 +12,8 @@ import um.tesoreria.core.util.Jsonifyable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,13 +30,20 @@ public class ChequeraCuota implements Jsonifyable {
     private Integer mes;
     private Integer anho;
     private Integer arancelTipoId;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime vencimiento1;
+
     private BigDecimal importe1;
     private BigDecimal importe1Original;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime vencimiento2;
+
     private BigDecimal importe2;
     private BigDecimal importe2Original;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime vencimiento3;
+
     private BigDecimal importe3;
     private BigDecimal importe3Original;
     private String codigoBarras;

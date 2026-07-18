@@ -3,10 +3,11 @@ package um.tesoreria.core.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.exception.FacturacionElectronicaException;
-import um.tesoreria.core.kotlin.model.ChequeraPago;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.domain.model.ChequeraPago;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.entity.ChequeraPagoEntity;
 import um.tesoreria.core.model.FacturacionElectronica;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
-import um.tesoreria.core.service.ChequeraPagoService;
+import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.service.ChequeraPagoService;
 import um.tesoreria.core.service.FacturacionElectronicaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +24,10 @@ public class FacturacionElectronicaController {
 
     private final FacturacionElectronicaService service;
     private final ChequeraPagoService chequeraPagoService;
-    private final ChequeraCuotaService chequeraCuotaService;
 
     @GetMapping("/chequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<List<FacturacionElectronica>> findAllByChequera(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
-        List<Long> chequeraPagoIds = chequeraPagoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, chequeraCuotaService).stream().map(ChequeraPago::getChequeraPagoId).collect(Collectors.toList());
+        List<Long> chequeraPagoIds = chequeraPagoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId).stream().map(ChequeraPago::getChequeraPagoId).collect(Collectors.toList());
         return ResponseEntity.ok(service.findAllByChequeraPagoIds(chequeraPagoIds));
     }
 

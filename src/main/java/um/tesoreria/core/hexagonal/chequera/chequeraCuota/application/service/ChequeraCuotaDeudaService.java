@@ -11,9 +11,7 @@ import java.util.List;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.mapper.ChequeraSerieMapper;
 import um.tesoreria.core.hexagonal.chequera.claseChequera.domain.model.ClaseChequera;
-import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persistence.entity.ClaseChequeraEntity;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.kotlin.model.*;
@@ -39,14 +37,12 @@ public class ChequeraCuotaDeudaService {
     private final TipoChequeraService tipoChequeraService;
     private final ChequeraSerieService chequeraSerieService;
     private final FacultadGrupoService facultadGrupoService;
-    private final ChequeraSerieMapper chequeraSerieMapper;
 
     public List<ChequeraCuotaDeuda> findAllByRango(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced, Pageable pageable, ChequeraCuotaService chequeraCuotaService) {
         return repository.findAllByVencimiento1Between(Tool.firstTime(desde), Tool.lastTime(hasta), pageable).stream().peek(cuotaDeuda -> {
             if (cuotaDeuda.getChequeraId() == null) {
                 ChequeraCuota chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(cuotaDeuda.getChequeraCuotaId());
                 cuotaDeuda.setChequeraId(chequeraCuota.getChequeraId());
-                cuotaDeuda.setChequeraSerie(chequeraSerieMapper.toEntity(chequeraCuota.getChequeraSerie()));
             }
             if (reduced) {
                 cuotaDeuda.setChequeraSerie(null);
@@ -63,7 +59,6 @@ public class ChequeraCuotaDeudaService {
             if (cuotaDeuda.getChequeraId() == null) {
                 ChequeraCuota chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(cuotaDeuda.getChequeraCuotaId());
                 cuotaDeuda.setChequeraId(chequeraCuota.getChequeraId());
-                cuotaDeuda.setChequeraSerie(chequeraSerieMapper.toEntity(chequeraCuota.getChequeraSerie()));
             }
             if (reduced) {
                 cuotaDeuda.setChequeraSerie(null);
@@ -78,7 +73,6 @@ public class ChequeraCuotaDeudaService {
             if (cuotaDeuda.getChequeraId() == null) {
                 ChequeraCuota chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(cuotaDeuda.getChequeraCuotaId());
                 cuotaDeuda.setChequeraId(chequeraCuota.getChequeraId());
-                cuotaDeuda.setChequeraSerie(chequeraSerieMapper.toEntity(chequeraCuota.getChequeraSerie()));
             }
             if (reduced) {
                 cuotaDeuda.setChequeraSerie(null);
@@ -105,7 +99,6 @@ public class ChequeraCuotaDeudaService {
             if (cuotaDeuda.getChequeraId() == null) {
                 ChequeraCuota chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(cuotaDeuda.getChequeraCuotaId());
                 cuotaDeuda.setChequeraId(chequeraCuota.getChequeraId());
-                cuotaDeuda.setChequeraSerie(chequeraSerieMapper.toEntity(chequeraCuota.getChequeraSerie()));
             }
         }).toList();
     }

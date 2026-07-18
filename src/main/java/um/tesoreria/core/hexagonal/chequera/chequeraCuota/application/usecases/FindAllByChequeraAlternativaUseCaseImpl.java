@@ -8,7 +8,6 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.FindAl
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.out.ChequeraCuotaRepository;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 
 import jakarta.transaction.Transactional;
 import um.tesoreria.core.util.Jsonifier;

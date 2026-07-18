@@ -20,11 +20,8 @@ import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.entity.Lec
 public interface JpaLectivoRepository extends JpaRepository<LectivoEntity, Integer> {
 
     List<LectivoEntity> findAllByLectivoIdIn(List<Integer> ids, Sort sort);
-
     Optional<LectivoEntity> findByLectivoId(Integer lectivoId);
-
     Optional<LectivoEntity> findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(OffsetDateTime now, OffsetDateTime now2);
-
     Optional<LectivoEntity> findTopByOrderByLectivoIdDesc();
 
 }

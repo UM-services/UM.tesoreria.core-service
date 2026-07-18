@@ -107,7 +107,8 @@ classDiagram
             +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class CreatePreuniversitarioUseCaseImpl {
                 -PreuniversitarioChequeraService preuniversitarioChequeraService
                 -MailChequeraService mailChequeraService
@@ -119,7 +120,8 @@ classDiagram
                 -LectivoService lectivoService
                 +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
             }
-        }
+    }
+    namespace application {
 
         class PreuniversitarioChequeraService {
             +create(AlumnoGuarani) ChequeraSerieEntity
@@ -127,14 +129,16 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace web {
+    }
+    namespace infrastructure_web {
             class AlumnoGuaraniController {
                 -AlumnoGuaraniService alumnoGuaraniService
                 +createPreuniversitario(AlumnoGuaraniRequest) AlumnoGuarani
                 +desmarcarEnviadas(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
             }
 
-            namespace dto {
+    }
+    namespace infrastructure_web_dto {
                 class AlumnoGuaraniRequest
                 class AlumnoDeteccionRequest {
                     +Integer ubicacion
@@ -148,12 +152,14 @@ classDiagram
                     +Integer geograficaId
                     +Integer tipoChequeraId
                 }
-            }
+    }
+    namespace infrastructure_web {
 
             class AlumnoGuaraniDtoMapper {
                 +toDomain(AlumnoGuaraniRequest) AlumnoGuarani
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     AlumnoGuarani --> PersonaGuarani

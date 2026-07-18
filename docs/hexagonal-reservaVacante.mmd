@@ -39,7 +39,8 @@ classDiagram
             +updateReservaVacante(ReservaVacante, UUID) ReservaVacante
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class CreateReservaVacanteUseCaseImpl {
                 -ReservaVacanteRepository repository
                 -GetPersonaByUniqueUseCase getPersonaByUniqueUseCase
@@ -60,7 +61,8 @@ classDiagram
                 -ReservaVacanteRepository repository
                 +update(ReservaVacante, UUID) ReservaVacante
             }
-        }
+    }
+    namespace application {
 
         class CreateReservaVacanteUseCase {
             <<interface>>
@@ -77,7 +79,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class ReservaVacanteEntity {
                 +UUID reservaVacanteId
                 +Long personaUniqueId
@@ -106,9 +109,11 @@ classDiagram
                 +toEntity(ReservaVacante) ReservaVacanteEntity
                 +toDomainModel(ReservaVacanteEntity) ReservaVacante
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class ReservaVacanteController {
                 -ReservaVacanteService reservaVacanteService
                 -ReservaVacanteDtoMapper reservaVacanteDtoMapper
@@ -147,7 +152,8 @@ classDiagram
                 +toDomain(ReservaVacanteRequest) ReservaVacante
                 +toResponse(ReservaVacante) ReservaVacanteResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     ReservaVacanteService --> CreateReservaVacanteUseCase : uses

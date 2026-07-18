@@ -2,8 +2,9 @@ package um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.web.dt
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
@@ -12,7 +13,8 @@ import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoCheque
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

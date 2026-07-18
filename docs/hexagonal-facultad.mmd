@@ -42,7 +42,8 @@ classDiagram
             +findAllByDisenho(Integer, Integer) List~FacultadLectivoSede~
         }
 
-        namespace usecases {
+    }
+    namespace application_usecases {
             class GetAllFacultadesUseCaseImpl {
                 -FacultadRepository repository
                 +getAll() List~Facultad~
@@ -57,7 +58,8 @@ classDiagram
                 -FacultadRepository repository
                 +getFacultadesFiltradas() List~Facultad~
             }
-        }
+    }
+    namespace application {
 
         class GetAllFacultadesUseCase {
             <<interface>>
@@ -76,7 +78,8 @@ classDiagram
     }
 
     namespace infrastructure {
-        namespace persistence {
+    }
+    namespace infrastructure_persistence {
             class FacultadEntity {
                 +Integer facultadId
                 +String nombre
@@ -107,9 +110,11 @@ classDiagram
             class FacultadMapper {
                 +toDomain(FacultadEntity) Facultad
             }
-        }
+    }
+    namespace infrastructure {
 
-        namespace web {
+    }
+    namespace infrastructure_web {
             class FacultadController {
                 -FacultadService service
                 -FacultadDtoMapper mapper
@@ -137,7 +142,8 @@ classDiagram
             class FacultadDtoMapper {
                 +toResponse(Facultad) FacultadResponse
             }
-        }
+    }
+    namespace infrastructure {
     }
 
     FacultadService --> GetAllFacultadesUseCase : uses

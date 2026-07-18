@@ -1,0 +1,156 @@
+---
+title: Arquitectura Hexagonal - Módulo ChequeraTotal (v3.37.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class ChequeraTotal {
+            +Long chequeraTotalId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +BigDecimal total
+            +BigDecimal pagado
+        }
+
+        class ChequeraTotalRepository {
+            <<interface>>
+            +findAllByChequera(Integer, Integer, Long) List~ChequeraTotal~
+            +findByUnique(Integer, Integer, Long, Integer) Optional~ChequeraTotal~
+            +findByChequeraTotalId(Long) Optional~ChequeraTotal~
+            +saveAll(List~ChequeraTotal~) List~ChequeraTotal~
+            +save(ChequeraTotal) ChequeraTotal
+            +deleteAllByChequera(Integer, Integer, Long)
+        }
+    }
+
+    namespace application {
+        class ChequeraTotalService {
+            -FindAllTotalByChequeraUseCase findAllByChequeraUseCase
+            -FindByUniqueChequeraTotalUseCase findByUniqueChequeraTotalUseCase
+            -CreateChequeraTotalUseCase createChequeraTotalUseCase
+            -DeleteChequeraTotalUseCase deleteChequeraTotalUseCase
+            -UpdateChequeraTotalUseCase updateChequeraTotalUseCase
+            +findAllByChequera(Integer, Integer, Long) List~ChequeraTotal~
+            +findByUnique(Integer, Integer, Long, Integer) ChequeraTotal
+            +saveAll(List~ChequeraTotal~) List~ChequeraTotal~
+            +deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long)
+            +update(ChequeraTotal, Long) ChequeraTotal
+        }
+
+    }
+    namespace application_usecases {
+            class CreateChequeraTotalUseCaseImpl
+            class DeleteChequeraTotalUseCaseImpl
+            class FindAllTotalByChequeraUseCaseImpl
+            class FindByUniqueChequeraTotalUseCaseImpl
+            class UpdateChequeraTotalUseCaseImpl
+    }
+    namespace application {
+
+        class ChequeraTotalException
+
+        class CreateChequeraTotalUseCase { <<interface>> }
+        class DeleteChequeraTotalUseCase { <<interface>> }
+        class FindAllTotalByChequeraUseCase { <<interface>> }
+        class FindByUniqueChequeraTotalUseCase { <<interface>> }
+        class UpdateChequeraTotalUseCase { <<interface>> }
+    }
+
+    namespace infrastructure {
+    }
+    namespace infrastructure_persistence {
+            class ChequeraTotalEntity {
+                +@Table(name="chequera_total")
+                +Long chequeraTotalId
+                +Integer facultadId
+                +Integer tipoChequeraId
+                +Long chequeraSerieId
+                +Integer productoId
+                +BigDecimal total
+                +BigDecimal pagado
+            }
+
+            class JpaChequeraTotalRepository {
+                <<JpaRepository>>
+                +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long) List~ChequeraTotalEntity~
+                +findByChequeraTotalId(Long) Optional~ChequeraTotalEntity~
+                +findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoId(Integer, Integer, Long, Integer) Optional~ChequeraTotalEntity~
+                +deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long)
+            }
+
+            class JpaChequeraTotalRepositoryAdapter {
+                -JpaChequeraTotalRepository repository
+                -ChequeraTotalMapper mapper
+                +findAllByChequera(Integer, Integer, Long) List~ChequeraTotal~
+                +findByUnique(Integer, Integer, Long, Integer) Optional~ChequeraTotal~
+                +findByChequeraTotalId(Long) Optional~ChequeraTotal~
+                +saveAll(List~ChequeraTotal~) List~ChequeraTotal~
+                +save(ChequeraTotal) ChequeraTotal
+                +deleteAllByChequera(Integer, Integer, Long)
+            }
+
+            class ChequeraTotalMapper {
+                +toDomain(ChequeraTotalEntity) ChequeraTotal
+                +toEntity(ChequeraTotal) ChequeraTotalEntity
+            }
+    }
+    namespace infrastructure {
+
+    }
+    namespace infrastructure_web {
+            class ChequeraTotalController {
+                -ChequeraTotalService service
+                -ChequeraTotalDtoMapper dtoMapper
+                +findAllByChequera(Integer, Integer, Long) ResponseEntity~List~ChequeraTotalResponse~~
+            }
+
+            class ChequeraTotalResponse {
+                +Long chequeraTotalId
+                +Integer facultadId
+                +Integer tipoChequeraId
+                +Long chequeraSerieId
+                +Integer productoId
+                +BigDecimal total
+                +BigDecimal pagado
+            }
+            class ChequeraTotalDtoMapper {
+                +toResponse(ChequeraTotal) ChequeraTotalResponse
+            }
+    }
+    namespace infrastructure {
+    }
+
+    ChequeraTotalService --> CreateChequeraTotalUseCase : uses
+    ChequeraTotalService --> DeleteChequeraTotalUseCase : uses
+    ChequeraTotalService --> FindAllTotalByChequeraUseCase : uses
+    ChequeraTotalService --> FindByUniqueChequeraTotalUseCase : uses
+    ChequeraTotalService --> UpdateChequeraTotalUseCase : uses
+
+    CreateChequeraTotalUseCaseImpl ..|> CreateChequeraTotalUseCase : implements
+    DeleteChequeraTotalUseCaseImpl ..|> DeleteChequeraTotalUseCase : implements
+    FindAllTotalByChequeraUseCaseImpl ..|> FindAllTotalByChequeraUseCase : implements
+    FindByUniqueChequeraTotalUseCaseImpl ..|> FindByUniqueChequeraTotalUseCase : implements
+    UpdateChequeraTotalUseCaseImpl ..|> UpdateChequeraTotalUseCase : implements
+
+    CreateChequeraTotalUseCaseImpl --> ChequeraTotalRepository : uses
+    DeleteChequeraTotalUseCaseImpl --> ChequeraTotalRepository : uses
+    FindAllTotalByChequeraUseCaseImpl --> ChequeraTotalRepository : uses
+    FindByUniqueChequeraTotalUseCaseImpl --> ChequeraTotalRepository : uses
+    UpdateChequeraTotalUseCaseImpl --> ChequeraTotalRepository : uses
+
+    JpaChequeraTotalRepositoryAdapter ..|> ChequeraTotalRepository : implements
+    JpaChequeraTotalRepositoryAdapter --> JpaChequeraTotalRepository : uses
+    JpaChequeraTotalRepositoryAdapter --> ChequeraTotalMapper : uses
+
+    ChequeraTotalMapper --> ChequeraTotal : maps
+    ChequeraTotalMapper --> ChequeraTotalEntity : maps
+    JpaChequeraTotalRepository --> ChequeraTotalEntity : persists
+
+    ChequeraTotalController --> ChequeraTotalService : calls
+    ChequeraTotalController --> ChequeraTotalDtoMapper : uses
+    ChequeraTotalDtoMapper --> ChequeraTotal : maps
+    ChequeraTotalDtoMapper --> ChequeraTotalResponse : maps
