@@ -128,8 +128,6 @@ classDiagram
         }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_web {
             class AlumnoGuaraniController {
                 -AlumnoGuaraniService alumnoGuaraniService
@@ -158,8 +156,6 @@ classDiagram
             class AlumnoGuaraniDtoMapper {
                 +toDomain(AlumnoGuaraniRequest) AlumnoGuarani
             }
-    }
-    namespace infrastructure {
     }
 
     AlumnoGuarani --> PersonaGuarani

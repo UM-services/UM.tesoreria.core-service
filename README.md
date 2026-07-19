@@ -4,7 +4,24 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.37.0**
+**Versión actual (SemVer): 3.38.0**
+
+## Novedades 3.38.0 (verificado en código)
+- feat(chequeraCuota): Nuevo caso de uso `GetCuotaActualUseCase` para obtener la cuota vigente por fecha
+  - Filtra cuotas por `vencimiento1` o `vencimiento2` anterior a `fechaActual`
+  - Resuelve `chequeraId` si es null, delegando a `ChequeraSerieService.findByUnique()`
+  - Nuevo endpoint: `GET /chequeraCuota/cuotaActual/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{productoId}/{alternativaId}`
+- feat(politicaArancelaria): Nuevo parámetro `plazo` (días) en endpoint de recálculo de cuota
+  - Endpoint: `GET .../politicaArancelaria/recalculate/cuota/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{productoId}/{alternativaId}/{cuotaId}/plazo/{dias}`
+  - Nuevo DTO `PoliticaArancelariaResponse` con 28 campos + `PoliticaArancelariaDtoMapper`
+  - `RecalculateCuotaByUniqueIndexUseCaseImpl`: compara importe3 con cuota de referencia, actualiza vencimiento3 con plazo días
+- feat(mercadoPago): Nuevos endpoints batch para contextos MercadoPago
+  - `GET /mercadoPagoCore/makeContextsChequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}`: crea contextos MP para cuotas pendientes
+  - `PUT /mercadoPagoCore/updateContexts`: actualiza lista de contextos MP en batch
+- feat(chequeraCuota): Enriquecimiento del `@EntityGraph` con 9 asociaciones anidadas adicionales (evita LazyInitializationException)
+- fix(docs): Eliminación de namespaces vacíos en 20 diagramas Mermaid + sanitizador en `script.js`
+
+> Basado en análisis profundo de `git diff HEAD` (39 archivos staged, +284/-160 líneas) y `pom.xml` (versión 3.37.0 → 3.38.0).
 
 ## Novedades 3.37.0 (verificado en código)
 - feat(chequeraPago): Nuevo módulo ChequeraPago con arquitectura hexagonal completa (12 casos de uso)

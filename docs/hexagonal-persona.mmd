@@ -93,8 +93,6 @@ classDiagram
         class GetInscripcionFullUseCase { <<interface>> }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class PersonaEntity {
                 +Long uniqueId
@@ -127,9 +125,6 @@ classDiagram
                 +toDomain(PersonaEntity) Persona
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class PersonaController {
                 -PersonaService personaService
@@ -154,8 +149,6 @@ classDiagram
                 +toDomain(PersonaRequest) Persona
                 +toResponse(Persona) PersonaResponse
             }
-    }
-    namespace infrastructure {
     }
 
     PersonaService --> GetPersonaByUniqueUseCase : uses

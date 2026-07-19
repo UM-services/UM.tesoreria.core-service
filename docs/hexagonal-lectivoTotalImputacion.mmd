@@ -130,8 +130,6 @@ classDiagram
         }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class LectivoTotalImputacionEntity {
                 +Long lectivoTotalImputacionId
@@ -176,9 +174,6 @@ classDiagram
                 +toEntity(LectivoTotalImputacion) LectivoTotalImputacionEntity
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class LectivoTotalImputacionController {
                 -LectivoTotalImputacionService service
@@ -217,8 +212,6 @@ classDiagram
                 +toDomain(LectivoTotalImputacionRequest) LectivoTotalImputacion
                 +toResponse(LectivoTotalImputacion) LectivoTotalImputacionResponse
             }
-    }
-    namespace infrastructure {
     }
 
     LectivoTotalImputacion --> Facultad : has

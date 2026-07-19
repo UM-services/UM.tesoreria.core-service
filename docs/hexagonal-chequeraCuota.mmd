@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.34.0)
+title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.38.0)
 ---
 
 classDiagram
@@ -80,6 +80,7 @@ classDiagram
         class FindAllPeriodosLectivoUseCase { <<interface>> }
         class GetChequeraCuotaByIdUseCase { <<interface>> }
         class GetChequeraCuotaByUniqueUseCase { <<interface>> }
+        class GetCuotaActualUseCase { <<interface>> }
         class GetOneActivaImpagaPreviaUseCase { <<interface>> }
         class SaveAllChequeraCuotasUseCase { <<interface>> }
         class UpdateBarrasUseCase { <<interface>> }
@@ -100,6 +101,7 @@ classDiagram
             +findAllPeriodosLectivo() List~Integer~
             +findById(Long) ChequeraCuota
             +findByUnique(...) ChequeraCuota
+            +getCuotaActual(Integer, Integer, Long, Integer, Integer, OffsetDateTime) ChequeraCuota
             +findOneActivaImpagaPrevia(...) ChequeraCuota
             +saveAll(List~ChequeraCuota~) List~ChequeraCuota~
             +update(ChequeraCuota) ChequeraCuota
@@ -137,6 +139,7 @@ classDiagram
             class FindAllPeriodosLectivoUseCaseImpl
             class GetChequeraCuotaByIdUseCaseImpl
             class GetChequeraCuotaByUniqueUseCaseImpl
+            class GetCuotaActualUseCaseImpl
             class GetOneActivaImpagaPreviaUseCaseImpl
             class SaveAllChequeraCuotasUseCaseImpl
             class UpdateBarrasUseCaseImpl
@@ -147,8 +150,6 @@ classDiagram
         class ChequeraCuotaException
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class ChequeraCuotaEntity {
                 +@Table(name="chequera_cuota")
@@ -179,9 +180,6 @@ classDiagram
                 +toEntity(ChequeraCuota) ChequeraCuotaEntity
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class ChequeraCuotaController {
                 -ChequeraCuotaService service
@@ -195,6 +193,7 @@ classDiagram
                 +calculateDeuda(...) ResponseEntity
                 +update(...) ResponseEntity
                 +updateBarras(...) ResponseEntity
+                +getCuotaActual(Integer, Integer, Long, Integer, Integer) ResponseEntity
             }
 
             class ChequeraCuotaRequest {
@@ -229,8 +228,6 @@ classDiagram
                 +toResponse(ChequeraCuota) ChequeraCuotaResponse
             }
     }
-    namespace infrastructure {
-    }
 
     namespace external {
         class FacultadService
@@ -259,6 +256,7 @@ classDiagram
     ChequeraCuotaService --> FindAllPeriodosLectivoUseCase : uses
     ChequeraCuotaService --> GetChequeraCuotaByIdUseCase : uses
     ChequeraCuotaService --> GetChequeraCuotaByUniqueUseCase : uses
+    ChequeraCuotaService --> GetCuotaActualUseCase : uses
     ChequeraCuotaService --> GetOneActivaImpagaPreviaUseCase : uses
     ChequeraCuotaService --> SaveAllChequeraCuotasUseCase : uses
     ChequeraCuotaService --> UpdateBarrasUseCase : uses
@@ -280,6 +278,7 @@ classDiagram
     FindAllPeriodosLectivoUseCaseImpl ..|> FindAllPeriodosLectivoUseCase : implements
     GetChequeraCuotaByIdUseCaseImpl ..|> GetChequeraCuotaByIdUseCase : implements
     GetChequeraCuotaByUniqueUseCaseImpl ..|> GetChequeraCuotaByUniqueUseCase : implements
+    GetCuotaActualUseCaseImpl ..|> GetCuotaActualUseCase : implements
     GetOneActivaImpagaPreviaUseCaseImpl ..|> GetOneActivaImpagaPreviaUseCase : implements
     SaveAllChequeraCuotasUseCaseImpl ..|> SaveAllChequeraCuotasUseCase : implements
     UpdateBarrasUseCaseImpl ..|> UpdateBarrasUseCase : implements
@@ -301,6 +300,7 @@ classDiagram
     FindAllPeriodosLectivoUseCaseImpl --> ChequeraCuotaRepository : uses
     GetChequeraCuotaByIdUseCaseImpl --> ChequeraCuotaRepository : uses
     GetChequeraCuotaByUniqueUseCaseImpl --> ChequeraCuotaRepository : uses
+    GetCuotaActualUseCaseImpl --> ChequeraCuotaRepository : uses
     GetOneActivaImpagaPreviaUseCaseImpl --> ChequeraCuotaRepository : uses
     SaveAllChequeraCuotasUseCaseImpl --> ChequeraCuotaRepository : uses
     UpdateBarrasUseCaseImpl --> ChequeraCuotaRepository : uses

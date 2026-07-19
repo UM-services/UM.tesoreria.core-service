@@ -77,8 +77,6 @@ classDiagram
         }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class FacultadEntity {
                 +Integer facultadId
@@ -111,9 +109,6 @@ classDiagram
                 +toDomain(FacultadEntity) Facultad
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class FacultadController {
                 -FacultadService service
@@ -142,8 +137,6 @@ classDiagram
             class FacultadDtoMapper {
                 +toResponse(Facultad) FacultadResponse
             }
-    }
-    namespace infrastructure {
     }
 
     FacultadService --> GetAllFacultadesUseCase : uses

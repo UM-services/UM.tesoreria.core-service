@@ -112,8 +112,6 @@ classDiagram
         class IsPagadoUseCase { <<interface>> }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class ChequeraPagoEntity {
                 +@Table(name="chequera_pago")
@@ -180,9 +178,6 @@ classDiagram
                 +toEntity(ChequeraPago) ChequeraPagoEntity
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class ChequeraPagoController {
                 -ChequeraPagoService service
@@ -247,8 +242,6 @@ classDiagram
                 +toDomain(ChequeraPagoRequest) ChequeraPago
                 +toResponse(ChequeraPago) ChequeraPagoResponse
             }
-    }
-    namespace infrastructure {
     }
 
     ChequeraPagoService --> CreateChequeraPagoUseCase : uses

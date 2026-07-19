@@ -103,8 +103,6 @@ classDiagram
         class ChequeraSerieException
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class ChequeraSerieEntity {
                 +Long chequeraSerieId
@@ -129,9 +127,6 @@ classDiagram
                 +toEntity(ChequeraSerie) ChequeraSerieEntity
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class ChequeraSerieController {
                 -ChequeraSerieService service
@@ -144,8 +139,6 @@ classDiagram
                 +toDomain(ChequeraSerieRequest) ChequeraSerie
                 +toResponse(ChequeraSerie) ChequeraSerieResponse
             }
-    }
-    namespace infrastructure {
     }
 
     ChequeraSerieService --> CreateChequeraSerieUseCase : uses

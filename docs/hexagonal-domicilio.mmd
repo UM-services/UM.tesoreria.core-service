@@ -90,8 +90,6 @@ classDiagram
         class DomicilioException
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class DomicilioEntity {
                 +Long domicilioId
@@ -138,9 +136,6 @@ classDiagram
                 +toDomainModel(DomicilioEntity) Domicilio
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class DomicilioController {
                 -DomicilioService domicilioService
@@ -162,8 +157,6 @@ classDiagram
                 +toDomain(DomicilioRequest) Domicilio
                 +toResponse(Domicilio) DomicilioResponse
             }
-    }
-    namespace infrastructure {
     }
 
     DomicilioService --> CreateDomicilioUseCase : uses

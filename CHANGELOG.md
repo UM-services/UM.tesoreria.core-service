@@ -2,6 +2,39 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.38.0] - 2026-07-19
+### Added
+- feat(chequeraCuota): Nuevo caso de uso `GetCuotaActualUseCase` para obtener la cuota vigente por fecha
+  - Nuevo puerto de entrada: `GetCuotaActualUseCase` con método `getCuotaActual(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, OffsetDateTime fechaActual)`
+  - Nueva implementación: `GetCuotaActualUseCaseImpl` que filtra cuotas por vencimiento (`vencimiento1` o `vencimiento2` anterior a `fechaActual`) y resuelve `chequeraId` si es null
+  - Dependencia cruzada con `ChequeraSerieService` para resolver `chequeraId` faltante
+  - Nuevo endpoint en `ChequeraCuotaController`: `GET /chequeraCuota/cuotaActual/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{productoId}/{alternativaId}`
+  - Nuevo método `getCuotaActual()` en `ChequeraCuotaService` con delegación al caso de uso y `ChequeraCuotaException` en caso de no encontrar cuota
+  - Nuevo constructor `ChequeraCuotaException(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId)` para errores de búsqueda por 5 claves
+- feat(politicaArancelaria): Nuevo parámetro `plazo` (días) en endpoint de recálculo de cuota
+  - Endpoint actualizado: `GET /api/tesoreria/core/politicaArancelaria/recalculate/cuota/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{productoId}/{alternativaId}/{cuotaId}/plazo/{dias}`
+  - Nuevo DTO `PoliticaArancelariaResponse` con 28 campos (chequeraCuota completa + importes originales)
+  - Nuevo `PoliticaArancelariaDtoMapper` para conversión dominio `ChequeraCuota` → DTO
+  - `RecalculateCuotaByUniqueIndexUseCaseImpl` refactorizado: compara `importe3` con cuota de referencia (`getCuotaActual`), actualiza `importe3` y `vencimiento3` con `plazo` días
+  - `RecalculateCuotaByUniqueIndexUseCase` interface actualizada con parámetro `Integer plazo`
+- feat(mercadoPago): Nuevos endpoints batch para gestión de contextos MercadoPago
+  - `GET /mercadoPagoCore/makeContextsChequera/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}`: crea contextos MP para todas las cuotas pendientes de una chequera
+  - `PUT /mercadoPagoCore/updateContexts`: actualiza una lista de contextos MP en batch
+  - `MercadoPagoCoreService.makeContextsChequera()`: itera cuotas pendientes, valida disponibilidad, crea/actualiza contextos y retorna `List<UMPreferenceMPDto>`
+  - `MercadoPagoCoreService.updateContexts()`: delega a `mercadoPagoContextService.saveAll()`
+- feat(chequeraCuota): Enriquecimiento del `@EntityGraph` en `findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId`
+  - Agregadas asociaciones anidadas: `tipoChequera.geografica`, `tipoChequera.claseChequera`, `chequeraSerie.facultad`, `chequeraSerie.tipoChequera`, `chequeraSerie.persona`, `chequeraSerie.domicilio`, `chequeraSerie.lectivo`, `chequeraSerie.arancelTipo`, `chequeraSerie.geografica`
+  - Mejora rendimiento: evita `LazyInitializationException` en consultas que usan `findAllByChequeraAlternativa`
+
+### Fixed
+- fix(docs): Eliminación de namespaces vacíos en 20 diagramas Mermaid
+  - Removidos bloques `namespace infrastructure { }` vacíos que causaban `Syntax Error` en Mermaid v10+
+  - Afecta diagramas: alumnoGuarani, articulo, campanha, chequeraCuota, chequeraPago, chequeraProducto, chequeraSerie, chequeraTipoChequera, chequeraTotal, claseChequera, contrato, dependencia, documento, domicilio, facturaPendiente, facultad, lectivo, lectivoTotalImputacion, mercadoPagoContext, persona, reservaVacante, usuario
+- fix(docs): Agregado sanitizador en `script.js` para eliminar namespaces vacíos al vuelo antes de renderizar
+- fix(chequeraCuota): Comentado log verbose de `findAllByChequeraAlternativa` en `JpaChequeraCuotaRepositoryAdapter` (reducir ruido en logs de producción)
+
+> Basado en análisis profundo de `git diff HEAD` (39 archivos staged, +284/-160 líneas, incluyendo nuevos use cases, endpoints batch MercadoPago, parámetro plazo en politicaArancelaria y limpieza de diagramas) y `pom.xml` (versión 3.37.0 → 3.38.0).
+
 ## [3.37.0] - 2026-07-17
 ### Added
 - feat(chequeraPago): Nuevo módulo ChequeraPago con arquitectura hexagonal completa bajo `hexagonal/chequera/chequeraPago/`

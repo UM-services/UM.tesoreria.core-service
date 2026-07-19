@@ -154,8 +154,6 @@ classDiagram
         }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class ArticuloEntity {
                 +Long articuloId
@@ -194,9 +192,6 @@ classDiagram
                 +toEntity(Articulo) ArticuloEntity
                 +toSearchDomain(ArticuloKey) ArticuloSearch
             }
-    }
-    namespace infrastructure {
-
     }
     namespace infrastructure_web {
             class ArticuloController {
@@ -265,8 +260,6 @@ classDiagram
                 +toResponse(Articulo) ArticuloResponse
                 +toSearchResponse(ArticuloSearch) ArticuloSearchResponse
             }
-    }
-    namespace infrastructure {
     }
 
     ArticuloService --> CreateArticuloUseCase : uses

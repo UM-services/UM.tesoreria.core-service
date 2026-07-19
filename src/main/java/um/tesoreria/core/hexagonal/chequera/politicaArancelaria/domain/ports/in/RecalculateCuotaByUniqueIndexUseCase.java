@@ -4,5 +4,5 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraC
 
 public interface RecalculateCuotaByUniqueIndexUseCase {
     ChequeraCuota recalculateCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-                       Integer productoId, Integer alternativaId, Integer cuotaId);
+                       Integer productoId, Integer alternativaId, Integer cuotaId, Integer plazo);
 }

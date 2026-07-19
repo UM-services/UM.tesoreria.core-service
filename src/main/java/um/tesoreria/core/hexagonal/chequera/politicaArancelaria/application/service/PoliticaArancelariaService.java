@@ -12,8 +12,8 @@ public class PoliticaArancelariaService {
     private final RecalculateCuotaByUniqueIndexUseCase findPoliticaArancelariaUseCase;
 
     public ChequeraCuota recalculateCuotaByUniqueIndex(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-                              Integer productoId, Integer alternativaId, Integer cuotaId) {
+                              Integer productoId, Integer alternativaId, Integer cuotaId, Integer plazo) {
         return findPoliticaArancelariaUseCase.recalculateCuota(facultadId, tipoChequeraId, chequeraSerieId,
-                productoId, alternativaId, cuotaId);
+                productoId, alternativaId, cuotaId, plazo);
     }
 }

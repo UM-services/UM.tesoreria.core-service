@@ -34,6 +34,7 @@ public class ChequeraCuotaService {
     private final FindAllPeriodosLectivoUseCase findAllPeriodosLectivoUseCase;
     private final FindAllByChequeraIdsUseCase findAllByChequeraIdsUseCase;
     private final FindAllByFacultadTipoChequeraSerieIdsUseCase findAllByFacultadTipoChequeraSerieIdsUseCase;
+    private final GetCuotaActualUseCase getCuotaActualUseCase;
 
     public List<ChequeraCuota> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         return findAllByChequeraUseCase.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
@@ -123,6 +124,12 @@ public class ChequeraCuotaService {
 
     public List<ChequeraCuota> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIds(Integer facultadId, Integer tipoChequeraId, List<Long> chequeraSerieIds) {
         return findAllByFacultadTipoChequeraSerieIdsUseCase.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIds(facultadId, tipoChequeraId, chequeraSerieIds);
+    }
+
+    public ChequeraCuota getCuotaActual(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
+                                         Integer productoId, Integer alternativaId, OffsetDateTime fechaActual) {
+        return getCuotaActualUseCase.getCuotaActual(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, fechaActual)
+                .orElseThrow(() -> new ChequeraCuotaException(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId));
     }
 
 }

@@ -135,4 +135,18 @@ public class ChequeraCuotaController {
         return ResponseEntity.ok(service.findAllPeriodosLectivo(lectivoId));
     }
 
+    @GetMapping("/cuotaActual/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{productoId}/{alternativaId}")
+    public ResponseEntity<ChequeraCuotaResponse> getCuotaActual(@PathVariable Integer facultadId,
+                                                                 @PathVariable Integer tipoChequeraId,
+                                                                 @PathVariable Long chequeraSerieId,
+                                                                 @PathVariable Integer productoId,
+                                                                 @PathVariable Integer alternativaId) {
+        try {
+            var domain = service.getCuotaActual(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, OffsetDateTime.now());
+            return ResponseEntity.ok(chequeraCuotaDtoMapper.toResponse(domain));
+        } catch (ChequeraCuotaException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
 }

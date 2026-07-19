@@ -74,8 +74,6 @@ classDiagram
         class TipoChequeraException
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class TipoChequeraEntity {
                 +Integer tipoChequeraId
@@ -110,9 +108,6 @@ classDiagram
                 +toDomainModel(TipoChequeraEntity) TipoChequera
                 +toEntity(TipoChequera) TipoChequeraEntity
             }
-    }
-    namespace infrastructure {
-
     }
     namespace infrastructure_web {
             class TipoChequeraController {
@@ -158,8 +153,6 @@ classDiagram
                 +toDomain(TipoChequeraRequest) TipoChequera
                 +toResponse(TipoChequera) TipoChequeraResponse
             }
-    }
-    namespace infrastructure {
     }
 
     TipoChequeraService --> GetAllTipoChequeraUseCase : uses

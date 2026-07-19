@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.37.0** (actualizada: 2026-07-17)
+**Versión actual del servicio: 3.38.0** (actualizada: 2026-07-19)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -12,7 +12,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-cuentaMovimiento.mmd`: Arquitectura hexagonal del módulo CuentaMovimiento (asientos contables) - v3.36.0 (nuevo módulo, 11 casos de uso).
 - `hexagonal-proveedorMovimiento.mmd`: Arquitectura hexagonal del módulo ProveedorMovimiento (movimientos de proveedores) - v3.36.0 (nuevo módulo, 13 casos de uso).
 - `hexagonal-track.mmd`: Arquitectura hexagonal del módulo Track (seguimiento) - v3.36.0 (nuevo módulo, 4 casos de uso).
-- `hexagonal-chequeraCuota.mmd`: Arquitectura hexagonal del módulo ChequeraCuota (20+ casos de uso individuales) - v3.30.0 (refactorización masiva a casos de uso).
+- `hexagonal-chequeraCuota.mmd`: Arquitectura hexagonal del módulo ChequeraCuota (21 casos de uso individuales) - v3.38.0 (nuevo caso de uso GetCuotaActualUseCase + endpoint cuotaActual).
 - `hexagonal-mercadoPagoContext.mmd`: Arquitectura hexagonal del módulo MercadoPagoContext (contexto de pagos MP) - v3.26.0.
 - `hexagonal-auth.mmd`: Arquitectura hexagonal del módulo Auth (autenticación de usuarios).
 - `hexagonal-geografica.mmd`: Arquitectura hexagonal del módulo Geografica (entidades geográficas).
@@ -44,7 +44,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona (gestión de personas) - v3.24.0.
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.37.0 (nuevo módulo, migración desde Kotlin legacy).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).
-- `hexagonal-politicaArancelaria.mmd`: Arquitectura hexagonal del módulo PoliticaArancelaria (recálculo de cuotas por política arancelaria) - v3.37.0 (nuevo módulo).
+- `hexagonal-politicaArancelaria.mmd`: Arquitectura hexagonal del módulo PoliticaArancelaria (recálculo de cuotas por política arancelaria) - v3.38.0 (parámetro plazo, DTO PoliticaArancelariaResponse + PoliticaArancelariaDtoMapper).
 
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 
@@ -64,6 +64,11 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `sequence-movimientos-cuenta.mmd`: Movimientos de cuenta.
 - `sequence-pago-chequera.mmd`: Pago de chequera.
 - `sequence-reemplazo-chequera.mmd`: Reemplazo de chequera.
+
+## Reglas para la creación de Diagramas Mermaid
+- **No incluir namespaces vacíos**: En diagramas de clase (`classDiagram`), nunca incluir bloques vacíos como `namespace infrastructure { }`. Mermaid v10 arroja `Syntax Error` si un namespace no contiene al menos una clase.
+- **Formato de genéricos**: Utilizar tildes `~` para tipos genéricos (ej. `List~String~` en lugar de `<String>`).
+- **Validación automática**: `docs/script.js` sanitiza bloques `namespace` vacíos al vuelo antes de renderizar, pero los archivos `.mmd` deben guardarse limpios.
 
 ## Notas sobre el pipeline
 - El pipeline de documentación debe validar la sintaxis Mermaid antes de publicar.

@@ -78,8 +78,6 @@ classDiagram
         }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class ReservaVacanteEntity {
                 +UUID reservaVacanteId
@@ -109,9 +107,6 @@ classDiagram
                 +toEntity(ReservaVacante) ReservaVacanteEntity
                 +toDomainModel(ReservaVacanteEntity) ReservaVacante
             }
-    }
-    namespace infrastructure {
-
     }
     namespace infrastructure_web {
             class ReservaVacanteController {
@@ -152,8 +147,6 @@ classDiagram
                 +toDomain(ReservaVacanteRequest) ReservaVacante
                 +toResponse(ReservaVacante) ReservaVacanteResponse
             }
-    }
-    namespace infrastructure {
     }
 
     ReservaVacanteService --> CreateReservaVacanteUseCase : uses
