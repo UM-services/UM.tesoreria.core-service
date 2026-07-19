@@ -48,8 +48,6 @@ classDiagram
         class ProductoException
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class ProductoEntity {
                 +Integer productoId
@@ -74,9 +72,6 @@ classDiagram
                 +toEntity(Producto) ProductoEntity
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class ProductoController {
                 -ProductoService service
@@ -100,8 +95,6 @@ classDiagram
                 +toDomain(ProductoRequest) Producto
                 +toResponse(Producto) ProductoResponse
             }
-    }
-    namespace infrastructure {
     }
 
     ProductoService --> GetAllProductosUseCase : uses

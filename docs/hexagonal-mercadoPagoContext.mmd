@@ -105,8 +105,6 @@ classDiagram
         class MercadoPagoContextException
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class MercadoPagoContextEntity {
                 +Long mercadoPagoContextId
@@ -156,9 +154,6 @@ classDiagram
                 +toDomain(MercadoPagoContextEntity) MercadoPagoContext
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class MercadoPagoContextController {
                 -MercadoPagoContextService service
@@ -194,8 +189,6 @@ classDiagram
                 +toDomain(MercadoPagoContextRequest) MercadoPagoContext
                 +toResponse(MercadoPagoContext) MercadoPagoContextResponse
             }
-    }
-    namespace infrastructure {
     }
 
     MercadoPagoContextService --> AddMercadoPagoContextUseCase : uses

@@ -85,8 +85,6 @@ classDiagram
         }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class CampanhaEntity {
                 +UUID campanhaId
@@ -118,9 +116,6 @@ classDiagram
                 +toDomainModel(CampanhaEntity) Campanha
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class CampanhaController {
                 -CampanhaService campanhaService
@@ -151,8 +146,6 @@ classDiagram
                 +toDomain(CampanhaRequest) Campanha
                 +toResponse(Campanha) CampanhaResponse
             }
-    }
-    namespace infrastructure {
     }
 
     CampanhaService --> CreateCampanhaUseCase : uses

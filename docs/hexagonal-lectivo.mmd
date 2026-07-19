@@ -63,8 +63,6 @@ classDiagram
         class LectivoException
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class LectivoEntity {
                 +Integer lectivoId
@@ -101,9 +99,6 @@ classDiagram
                 +toEntity(Lectivo) LectivoEntity
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class LectivoController {
                 -LectivoService service
@@ -135,8 +130,6 @@ classDiagram
                 +toDomain(LectivoRequest) Lectivo
                 +toResponse(Lectivo) LectivoResponse
             }
-    }
-    namespace infrastructure {
     }
 
     LectivoService --> GetAllLectivosUseCase : uses

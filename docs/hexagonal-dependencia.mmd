@@ -74,8 +74,6 @@ classDiagram
         }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class DependenciaEntity {
                 +Integer dependenciaId
@@ -110,9 +108,6 @@ classDiagram
                 +toDomain(DependenciaEntity) Dependencia
                 +toEntity(Dependencia) DependenciaEntity
             }
-    }
-    namespace infrastructure {
-
     }
     namespace infrastructure_web {
             class DependenciaController {
@@ -150,8 +145,6 @@ classDiagram
                 +toDomain(DependenciaRequest) Dependencia
                 +toResponse(Dependencia) DependenciaResponse
             }
-    }
-    namespace infrastructure {
     }
 
     DependenciaService --> GetAllDependenciasUseCase : uses

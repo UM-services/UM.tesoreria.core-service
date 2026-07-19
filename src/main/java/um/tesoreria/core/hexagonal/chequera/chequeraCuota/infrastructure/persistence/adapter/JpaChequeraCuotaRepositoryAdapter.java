@@ -84,7 +84,7 @@ public class JpaChequeraCuotaRepositoryAdapter implements ChequeraCuotaRepositor
                 facultadId, tipoChequeraId, chequeraSerieId, alternativaId, Sort.by("vencimiento1").ascending()
                         .and(Sort.by("productoId").ascending().and(Sort.by("cuotaId").ascending()))
         );
-        log.debug("\n\nJpaChequeraCuotaRepositoryAdapter.findAllByChequeraAlternativa.cuotas -> {}\n\n", Jsonifier.builder(cuotas).build());
+//        log.debug("\n\nJpaChequeraCuotaRepositoryAdapter.findAllByChequeraAlternativa.cuotas -> {}\n\n", Jsonifier.builder(cuotas).build());
         return cuotas.stream().map(mapper::toDomain).toList();
     }
 

@@ -25,7 +25,14 @@ public interface JpaChequeraCuotaRepository extends JpaRepository<ChequeraCuotaE
 
 	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId);
 
-	@EntityGraph(attributePaths = {"producto", "chequeraSerie", "facultad", "tipoChequera"})
+	@EntityGraph(attributePaths = {
+		"producto", "facultad",
+		"tipoChequera", "tipoChequera.geografica", "tipoChequera.claseChequera",
+		"chequeraSerie", "chequeraSerie.facultad", "chequeraSerie.tipoChequera",
+		"chequeraSerie.tipoChequera.geografica", "chequeraSerie.tipoChequera.claseChequera",
+		"chequeraSerie.persona", "chequeraSerie.domicilio",
+		"chequeraSerie.lectivo", "chequeraSerie.arancelTipo", "chequeraSerie.geografica"
+	})
 	List<ChequeraCuotaEntity> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Sort sort);
 

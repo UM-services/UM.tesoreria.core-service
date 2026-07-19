@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo PoliticaArancelaria (v3.37.0)
+title: Arquitectura Hexagonal - Módulo PoliticaArancelaria (v3.38.0)
 ---
 
 classDiagram
@@ -8,14 +8,14 @@ classDiagram
     namespace application {
         class PoliticaArancelariaService {
             -RecalculateCuotaByUniqueIndexUseCase findPoliticaArancelariaUseCase
-            +recalculateCuotaByUniqueIndex(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
+            +recalculateCuotaByUniqueIndex(Integer, Integer, Long, Integer, Integer, Integer, Integer) ChequeraCuota
         }
 
     }
     namespace application_usecases {
             class RecalculateCuotaByUniqueIndexUseCaseImpl {
                 -ChequeraCuotaService chequeraCuotaService
-                +recalculateCuota(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
+                +recalculateCuota(Integer, Integer, Long, Integer, Integer, Integer, Integer) ChequeraCuota
             }
     }
     namespace application {
@@ -26,7 +26,42 @@ classDiagram
     namespace infrastructure_web {
             class PoliticaArancelariaController {
                 -PoliticaArancelariaService service
-                +recalculateCuotaByUnique(Integer, Integer, Long, Integer, Integer, Integer) ResponseEntity
+                -PoliticaArancelariaDtoMapper politicaArancelariaDtoMapper
+                +recalculateCuotaByUnique(Integer, Integer, Long, Integer, Integer, Integer, Integer) ResponseEntity
+            }
+
+            class PoliticaArancelariaResponse {
+                +Long chequeraCuotaId
+                +Long chequeraId
+                +Integer facultadId
+                +Integer tipoChequeraId
+                +Long chequeraSerieId
+                +Integer productoId
+                +Integer alternativaId
+                +Integer cuotaId
+                +Integer mes
+                +Integer anho
+                +Integer arancelTipoId
+                +OffsetDateTime vencimiento1
+                +BigDecimal importe1
+                +BigDecimal importe1Original
+                +OffsetDateTime vencimiento2
+                +BigDecimal importe2
+                +BigDecimal importe2Original
+                +OffsetDateTime vencimiento3
+                +BigDecimal importe3
+                +BigDecimal importe3Original
+                +String codigoBarras
+                +String i2Of5
+                +Byte pagado
+                +Byte baja
+                +Byte manual
+                +Byte compensada
+                +Integer tramoId
+            }
+
+            class PoliticaArancelariaDtoMapper {
+                +toResponse(ChequeraCuota) PoliticaArancelariaResponse
             }
     }
 
@@ -37,10 +72,13 @@ classDiagram
     RecalculateCuotaByUniqueIndexUseCaseImpl --> ChequeraCuotaService : uses
 
     PoliticaArancelariaController --> PoliticaArancelariaService : calls
+    PoliticaArancelariaController --> PoliticaArancelariaDtoMapper : uses
+    PoliticaArancelariaDtoMapper --> PoliticaArancelariaResponse : maps
 
     class ChequeraCuotaService {
         <<external>>
         +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
+        +getCuotaActual(Integer, Integer, Long, Integer, Integer, OffsetDateTime) ChequeraCuota
     }
 
     class ChequeraCuota {

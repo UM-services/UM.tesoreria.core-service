@@ -60,8 +60,6 @@ classDiagram
         class UpdateChequeraTotalUseCase { <<interface>> }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class ChequeraTotalEntity {
                 +@Table(name="chequera_total")
@@ -98,9 +96,6 @@ classDiagram
                 +toEntity(ChequeraTotal) ChequeraTotalEntity
             }
     }
-    namespace infrastructure {
-
-    }
     namespace infrastructure_web {
             class ChequeraTotalController {
                 -ChequeraTotalService service
@@ -120,8 +115,6 @@ classDiagram
             class ChequeraTotalDtoMapper {
                 +toResponse(ChequeraTotal) ChequeraTotalResponse
             }
-    }
-    namespace infrastructure {
     }
 
     ChequeraTotalService --> CreateChequeraTotalUseCase : uses

@@ -68,8 +68,6 @@ classDiagram
         class UpdateUsuarioUseCase { <<interface>> }
     }
 
-    namespace infrastructure {
-    }
     namespace infrastructure_persistence {
             class UsuarioEntity {
                 +Long userId
@@ -111,9 +109,6 @@ classDiagram
                 +toDomain(UsuarioEntity) Usuario
                 +toEntity(Usuario) UsuarioEntity
             }
-    }
-    namespace infrastructure {
-
     }
     namespace infrastructure_web {
             class UsuarioController {
@@ -160,8 +155,6 @@ classDiagram
                 +toDomain(UsuarioRequest) Usuario
                 +toResponse(Usuario) UsuarioResponse
             }
-    }
-    namespace infrastructure {
     }
 
     UsuarioService --> CreateUsuarioUseCase : uses

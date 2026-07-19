@@ -139,6 +139,7 @@ diagrams.forEach(diag => {
     })
     .then(data => {
       let content = data.startsWith('---') ? data.substring(data.indexOf('---', 3) + 3).trim() : data;
+      content = content.replace(/[ \t]*namespace\s+[\w_-]+\s*\{\s*\}[ \t]*\r?\n?/g, '');
       const valid = /^(flowchart|sequenceDiagram|erDiagram|classDiagram|stateDiagram|gantt|pie|journey|requirementDiagram|gitGraph|mindmap|timeline|quadrantChart)/.test(content);
       
       const container = document.getElementById(diag.id);
