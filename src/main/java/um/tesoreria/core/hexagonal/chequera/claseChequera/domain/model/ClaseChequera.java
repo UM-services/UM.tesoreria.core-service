@@ -2,13 +2,14 @@ package um.tesoreria.core.hexagonal.chequera.claseChequera.domain.model;
 
 import lombok.*;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClaseChequera {
+public class ClaseChequera implements Jsonifyable {
 
     private Integer claseChequeraId;
     private String nombre;
@@ -19,9 +20,5 @@ public class ClaseChequera {
     private Byte secundario;
     private Byte titulo;
     private Byte tramite;
-
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
-    }
 
 }
