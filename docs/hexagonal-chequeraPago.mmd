@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraPago (v3.37.0)
+title: Arquitectura Hexagonal - Módulo ChequeraPago (v3.40.0)
 ---
 
 classDiagram
@@ -29,6 +29,9 @@ classDiagram
             +Integer verificador
             +Integer tipoPagoId
             +String idMercadoPago
+            +TipoPago tipoPago
+            +Producto producto
+            +ChequeraCuota chequeraCuota
             +getCuotaKey() String
         }
 
@@ -174,6 +177,8 @@ classDiagram
             }
 
             class ChequeraPagoMapper {
+                -ProductoMapper productoMapper
+                -ChequeraCuotaMapper chequeraCuotaMapper
                 +toDomain(ChequeraPagoEntity) ChequeraPago
                 +toEntity(ChequeraPago) ChequeraPagoEntity
             }
@@ -237,6 +242,9 @@ classDiagram
                 +Integer verificador
                 +Integer tipoPagoId
                 +String idMercadoPago
+                +TipoPago tipoPago
+                +Producto producto
+                +ChequeraCuota chequeraCuota
             }
             class ChequeraPagoDtoMapper {
                 +toDomain(ChequeraPagoRequest) ChequeraPago
@@ -292,6 +300,8 @@ classDiagram
 
     ChequeraPagoMapper --> ChequeraPago : maps
     ChequeraPagoMapper --> ChequeraPagoEntity : maps
+    ChequeraPagoMapper --> ProductoMapper : uses
+    ChequeraPagoMapper --> ChequeraCuotaMapper : uses
     JpaChequeraPagoRepository --> ChequeraPagoEntity : persists
 
     ChequeraPagoController --> ChequeraPagoService : calls
@@ -308,4 +318,31 @@ classDiagram
     class FacturacionElectronicaService {
         <<external>>
         +findAllByChequeraPagoIds(List~Long~) List~FacturacionElectronica~
+    }
+
+    class TipoPago {
+        <<external>>
+        +Integer tipoPagoId
+        +String descripcion
+    }
+
+    class Producto {
+        <<external>>
+        +Integer productoId
+        +String nombre
+    }
+
+    class ChequeraCuota {
+        <<external>>
+        +Long chequeraCuotaId
+    }
+
+    class ProductoMapper {
+        <<external>>
+        +toDomainModel(ProductoEntity) Producto
+    }
+
+    class ChequeraCuotaMapper {
+        <<external>>
+        +toDomain(ChequeraCuotaEntity) ChequeraCuota
     }

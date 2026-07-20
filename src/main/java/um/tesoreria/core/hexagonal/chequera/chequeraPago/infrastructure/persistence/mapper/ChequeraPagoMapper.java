@@ -1,11 +1,18 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.mapper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.mapper.ChequeraCuotaMapper;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.domain.model.ChequeraPago;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.entity.ChequeraPagoEntity;
+import um.tesoreria.core.hexagonal.chequera.producto.infrastructure.persistence.mapper.ProductoMapper;
 
 @Component
+@RequiredArgsConstructor
 public class ChequeraPagoMapper {
+
+    private final ProductoMapper productoMapper;
+    private final ChequeraCuotaMapper chequeraCuotaMapper;
 
     public ChequeraPago toDomain(ChequeraPagoEntity entity) {
         if (entity == null) return null;
@@ -32,6 +39,9 @@ public class ChequeraPagoMapper {
         if (entity.getArchivo() != null) builder.archivo(entity.getArchivo());
         if (entity.getObservaciones() != null) builder.observaciones(entity.getObservaciones());
         if (entity.getVerificador() != null) builder.verificador(entity.getVerificador());
+        builder.tipoPago(entity.getTipoPago())
+                .producto(productoMapper.toDomainModel(entity.getProducto()))
+                .chequeraCuota(chequeraCuotaMapper.toDomain(entity.getChequeraCuota()));
         return builder.build();
     }
 

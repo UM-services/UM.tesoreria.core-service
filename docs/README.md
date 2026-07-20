@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.39.0** (actualizada: 2026-07-20)
+**Versión actual del servicio: 3.40.0** (actualizada: 2026-07-20)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -42,7 +42,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento (gestión de tipos de documento) - v3.33.0 (nuevo módulo con migración desde Kotlin legacy).
 - `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario (gestión de usuarios) - v3.35.0 (migración desde Kotlin legacy).
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona (gestión de personas) - v3.24.0.
-- `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.37.0 (nuevo módulo, migración desde Kotlin legacy).
+- `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).
 - `hexagonal-politicaArancelaria.mmd`: Arquitectura hexagonal del módulo PoliticaArancelaria (recálculo de cuotas por política arancelaria) - v3.38.0 (parámetro plazo, DTO PoliticaArancelariaResponse + PoliticaArancelariaDtoMapper).
 

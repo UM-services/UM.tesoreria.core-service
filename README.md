@@ -4,7 +4,16 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.39.0**
+**Versión actual (SemVer): 3.40.0**
+
+## Novedades 3.40.0 (verificado en código)
+- feat(chequeraPago): Enriquecimiento del modelo de dominio `ChequeraPago` con asociaciones a `TipoPago`, `Producto` y `ChequeraCuota`
+  - Nuevos campos `TipoPago tipoPago`, `Producto producto`, `ChequeraCuota chequeraCuota` en el modelo de dominio `ChequeraPago`
+  - `ChequeraPagoMapper`: inyecta `ProductoMapper` y `ChequeraCuotaMapper` para mapeo completo desde entidad JPA
+  - `ChequeraPagoResponse`: expone los 3 objetos asociados en respuestas REST
+  - `ChequeraPagoDtoMapper`: mapea las asociaciones del dominio al DTO
+
+> Basado en análisis profundo de `git diff HEAD` (4 archivos staged, +21/-0 líneas) y `pom.xml` (versión 3.38.0 → 3.40.0).
 
 ## Novedades 3.39.0 (verificado en código)
 - feat(claseChequera): Nuevo campo `tramite` (Byte) en el modelo de dominio `ClaseChequera`
