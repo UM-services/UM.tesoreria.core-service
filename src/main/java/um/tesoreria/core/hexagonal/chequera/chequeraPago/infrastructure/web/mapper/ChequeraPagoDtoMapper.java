@@ -59,6 +59,9 @@ public class ChequeraPagoDtoMapper {
         if (domain.getArchivo() != null) builder.archivo(domain.getArchivo());
         if (domain.getObservaciones() != null) builder.observaciones(domain.getObservaciones());
         if (domain.getVerificador() != null) builder.verificador(domain.getVerificador());
+        builder.tipoPago(domain.getTipoPago())
+                .producto(domain.getProducto())
+                .chequeraCuota(domain.getChequeraCuota());
         return builder.build();
     }
 

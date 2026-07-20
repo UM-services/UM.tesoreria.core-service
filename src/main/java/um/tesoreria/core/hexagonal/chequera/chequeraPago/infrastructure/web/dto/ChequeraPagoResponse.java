@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
+import um.tesoreria.core.kotlin.model.TipoPago;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -56,5 +59,9 @@ public class ChequeraPagoResponse {
     private Integer verificador = 0;
     private Integer tipoPagoId;
     private String idMercadoPago;
+
+    private TipoPago tipoPago;
+    private Producto producto;
+    private ChequeraCuota chequeraCuota;
 
 }

@@ -2,6 +2,17 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.40.0] - 2026-07-20
+### Added
+- feat(chequeraPago): Enriquecimiento del modelo de dominio `ChequeraPago` con asociaciones a `TipoPago`, `Producto` y `ChequeraCuota`
+  - Nuevos campos `TipoPago tipoPago`, `Producto producto`, `ChequeraCuota chequeraCuota` en el modelo de dominio `ChequeraPago`
+  - `ChequeraPagoMapper`: inyecta `ProductoMapper` y `ChequeraCuotaMapper` para mapeo completo desde entidad JPA
+  - `ChequeraPagoMapper.toDomain()`: mapea `tipoPago`, `producto` y `chequeraCuota` desde la entidad
+  - `ChequeraPagoResponse`: expone los 3 objetos asociados en respuestas REST
+  - `ChequeraPagoDtoMapper.toResponse()`: mapea las asociaciones del dominio al DTO
+
+> Basado en análisis profundo de `git diff HEAD` (4 archivos staged, +21/-0 líneas, incluyendo enriquecimiento del modelo ChequeraPago con 3 asociaciones) y `pom.xml` (versión 3.38.0 → 3.40.0).
+
 ## [3.39.0] - 2026-07-20
 ### Added
 - feat(claseChequera): Nuevo campo `tramite` (Byte) en el modelo de dominio `ClaseChequera`
