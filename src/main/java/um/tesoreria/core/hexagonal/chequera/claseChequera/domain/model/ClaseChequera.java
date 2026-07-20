@@ -18,6 +18,7 @@ public class ClaseChequera {
     private Byte curso;
     private Byte secundario;
     private Byte titulo;
+    private Byte tramite;
 
     public String jsonify() {
         return Jsonifier.builder(this).build();

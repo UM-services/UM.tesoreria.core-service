@@ -13,5 +13,6 @@ public class ClaseChequeraRequest {
     private Byte curso;
     private Byte secundario;
     private Byte titulo;
+    private Byte tramite;
 
 }

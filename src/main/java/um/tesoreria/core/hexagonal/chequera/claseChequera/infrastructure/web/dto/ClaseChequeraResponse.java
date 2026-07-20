@@ -19,5 +19,6 @@ public class ClaseChequeraResponse {
     private Byte curso;
     private Byte secundario;
     private Byte titulo;
+    private Byte tramite;
 
 }

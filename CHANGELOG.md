@@ -2,6 +2,31 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.39.0] - 2026-07-20
+### Added
+- feat(claseChequera): Nuevo campo `tramite` (Byte) en el modelo de dominio `ClaseChequera`
+  - `ClaseChequera.tramite`: campo para identificar chequeras de tipo trámite
+  - `ClaseChequeraEntity.tramite`: persistencia con valor por defecto `0`
+  - `ClaseChequeraRequest`/`ClaseChequeraResponse`: expone el campo en API REST
+  - `ClaseChequeraMapper`: mapeo bidireccional del campo `tramite`
+  - `ClaseChequeraDtoMapper`: mapeo del campo `tramite` en DTOs
+- feat(claseChequera): Nuevo caso de uso `GetAllClaseChequeraByTramiteUseCase`
+  - Nuevo puerto de entrada: `GetAllClaseChequeraByTramiteUseCase` con método `getAllClaseChequeraByTramite()`
+  - Nuevo caso de uso: `GetAllClaseChequeraByTramiteUseCaseImpl` que filtra por `tramite = (byte) 1`
+  - Nuevo método `findAllByTramite(Byte)` en `ClaseChequeraRepository`, `JpaClaseChequeraRepository` y `JpaClaseChequeraRepositoryAdapter`
+  - Nuevo método `findAllByTramite()` en `ClaseChequeraService` con delegación al caso de uso
+  - Nuevo endpoint: `GET /claseChequera/tramite` retorna todas las chequeras de tipo trámite
+
+### Changed
+- refactor(claseChequeraEntity): `ClaseChequeraEntity` implementa `Jsonifyable` en lugar de definir `jsonify()` manualmente
+  - Eliminación del método `jsonify()` en `ClaseChequeraEntity` (ahora se hereda de la interfaz `Jsonifyable`)
+  - Importación de `um.tesoreria.core.util.Jsonifyable`
+
+### Fixed
+- fix(docs): Registrado diagrama `hexagonal-politicaArancelaria.mmd` en pipeline `script.js` (faltaba en la lista de diagramas)
+
+> Basado en análisis profundo de `git diff HEAD` (13 archivos staged, +66/-5 líneas, incluyendo nuevo campo tramite, caso de uso y endpoint en módulo ClaseChequera) y `pom.xml` (versión 3.38.0 → 3.39.0).
+
 ## [3.38.0] - 2026-07-19
 ### Added
 - feat(chequeraCuota): Nuevo caso de uso `GetCuotaActualUseCase` para obtener la cuota vigente por fecha

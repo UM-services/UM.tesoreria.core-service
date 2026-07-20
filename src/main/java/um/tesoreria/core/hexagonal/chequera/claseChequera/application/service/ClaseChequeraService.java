@@ -16,6 +16,7 @@ public class ClaseChequeraService {
     private final GetAllClaseChequeraByPosgradoUseCase getAllClaseChequeraByPosgradoUseCase;
     private final GetAllClaseChequeraByCursoUseCase getAllClaseChequeraByCursoUseCase;
     private final GetAllClaseChequeraByTituloUseCase getAllClaseChequeraByTituloUseCase;
+    private final GetAllClaseChequeraByTramiteUseCase getAllClaseChequeraByTramiteUseCase;
 
     public List<ClaseChequera> findAll() {
         return getAllClaseChequeraUseCase.getAllClaseChequera();
@@ -31,6 +32,10 @@ public class ClaseChequeraService {
 
     public List<ClaseChequera> findAllByTitulo() {
         return getAllClaseChequeraByTituloUseCase.getAllClaseChequeraByTitulo();
+    }
+
+    public List<ClaseChequera> findAllByTramite() {
+        return getAllClaseChequeraByTramiteUseCase.getAllClaseChequeraByTramite();
     }
 
 }

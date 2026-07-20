@@ -18,6 +18,7 @@ public class ClaseChequeraMapper {
                 .curso(entity.getCurso())
                 .secundario(entity.getSecundario())
                 .titulo(entity.getTitulo())
+                .tramite(entity.getTramite())
                 .build();
     }
 
@@ -33,6 +34,7 @@ public class ClaseChequeraMapper {
         if (domain.getCurso() != null) builder.curso(domain.getCurso());
         if (domain.getSecundario() != null) builder.secundario(domain.getSecundario());
         if (domain.getTitulo() != null) builder.titulo(domain.getTitulo());
+        if (domain.getTramite() != null) builder.tramite(domain.getTramite());
         
         return builder.build();
     }

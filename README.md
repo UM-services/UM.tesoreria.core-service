@@ -4,7 +4,25 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.38.0**
+**Versión actual (SemVer): 3.39.0**
+
+## Novedades 3.39.0 (verificado en código)
+- feat(claseChequera): Nuevo campo `tramite` (Byte) en el modelo de dominio `ClaseChequera`
+  - `ClaseChequera.tramite`: campo para identificar chequeras de tipo trámite
+  - `ClaseChequeraEntity.tramite`: persistencia con valor por defecto `0`
+  - `ClaseChequeraRequest`/`ClaseChequeraResponse`: expone el campo en API REST
+  - `ClaseChequeraMapper`: mapeo bidireccional del campo `tramite`
+  - `ClaseChequeraDtoMapper`: mapeo del campo `tramite` en DTOs
+- feat(claseChequera): Nuevo caso de uso `GetAllClaseChequeraByTramiteUseCase`
+  - Nuevo puerto de entrada: `GetAllClaseChequeraByTramiteUseCase` con método `getAllClaseChequeraByTramite()`
+  - Nuevo caso de uso: `GetAllClaseChequeraByTramiteUseCaseImpl` que filtra por `tramite = (byte) 1`
+  - Nuevo método `findAllByTramite(Byte)` en `ClaseChequeraRepository`, `JpaClaseChequeraRepository` y `JpaClaseChequeraRepositoryAdapter`
+  - Nuevo método `findAllByTramite()` en `ClaseChequeraService` con delegación al caso de uso
+  - Nuevo endpoint: `GET /claseChequera/tramite` retorna todas las chequeras de tipo trámite
+- refactor(claseChequeraEntity): `ClaseChequeraEntity` implementa `Jsonifyable` en lugar de definir `jsonify()` manualmente
+- fix(docs): Registrado diagrama `hexagonal-politicaArancelaria.mmd` en pipeline `script.js`
+
+> Basado en análisis profundo de `git diff HEAD` (13 archivos staged, +66/-5 líneas) y `pom.xml` (versión 3.38.0 → 3.39.0).
 
 ## Novedades 3.38.0 (verificado en código)
 - feat(chequeraCuota): Nuevo caso de uso `GetCuotaActualUseCase` para obtener la cuota vigente por fecha

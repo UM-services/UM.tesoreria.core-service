@@ -14,4 +14,6 @@ public interface ClaseChequeraRepository {
 
     List<ClaseChequera> findAllByTitulo(Byte titulo);
 
+    List<ClaseChequera> findAllByTramite(Byte tramite);
+
 }

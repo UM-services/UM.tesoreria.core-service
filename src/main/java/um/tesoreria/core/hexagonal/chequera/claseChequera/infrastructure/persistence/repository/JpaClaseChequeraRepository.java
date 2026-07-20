@@ -21,4 +21,6 @@ public interface JpaClaseChequeraRepository extends JpaRepository<ClaseChequeraE
 
     List<ClaseChequeraEntity> findAllByTitulo(Byte titulo);
 
+    List<ClaseChequeraEntity> findAllByTramite(Byte tramite);
+
 }
