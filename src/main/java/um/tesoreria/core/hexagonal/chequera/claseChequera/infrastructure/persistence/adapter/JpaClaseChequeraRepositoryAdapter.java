@@ -45,4 +45,11 @@ public class JpaClaseChequeraRepositoryAdapter implements ClaseChequeraRepositor
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<ClaseChequera> findAllByTramite(Byte tramite) {
+        return jpaClaseChequeraRepository.findAllByTramite(tramite).stream()
+                .map(claseChequeraMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
 }

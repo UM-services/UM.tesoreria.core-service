@@ -19,6 +19,7 @@ public class ClaseChequeraDtoMapper {
                 .curso(request.getCurso())
                 .secundario(request.getSecundario())
                 .titulo(request.getTitulo())
+                .tramite(request.getTramite())
                 .build();
     }
 
@@ -33,6 +34,7 @@ public class ClaseChequeraDtoMapper {
                 .curso(domain.getCurso())
                 .secundario(domain.getSecundario())
                 .titulo(domain.getTitulo())
+                .tramite(domain.getTramite())
                 .build();
     }
 

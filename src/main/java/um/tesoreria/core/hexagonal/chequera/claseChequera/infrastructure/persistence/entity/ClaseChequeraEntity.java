@@ -3,7 +3,7 @@ package um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persis
 import jakarta.persistence.*;
 import lombok.*;
 import um.tesoreria.core.model.Auditable;
-import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 @Entity
 @Table(name = "clase_chequera")
@@ -12,7 +12,7 @@ import um.tesoreria.core.util.Jsonifier;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClaseChequeraEntity extends Auditable {
+public class ClaseChequeraEntity extends Auditable implements Jsonifyable {
 
     @Id
     @Column(name = "cch_id")
@@ -39,8 +39,7 @@ public class ClaseChequeraEntity extends Auditable {
     @Builder.Default
     private Byte titulo = 0;
 
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
-    }
+    @Builder.Default
+    private Byte tramite = 0;
 
 }

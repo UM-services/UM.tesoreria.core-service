@@ -53,4 +53,12 @@ public class ClaseChequeraController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/tramite")
+    public ResponseEntity<List<ClaseChequeraResponse>> findAllByTramite() {
+        List<ClaseChequeraResponse> responses = claseChequeraService.findAllByTramite().stream()
+                .map(claseChequeraDtoMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
 }
