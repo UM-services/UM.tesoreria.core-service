@@ -2,6 +2,44 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.41.0] - 2026-07-21
+### Added
+- feat(lectivoCuota): Nuevo módulo LectivoCuota con arquitectura hexagonal completa bajo `hexagonal/chequera/lectivoCuota/`
+  - Modelo de dominio: `LectivoCuota` con campos `lectivoCuotaId`, `facultadId`, `lectivoId`, `tipoChequeraId`, `productoId`, `alternativaId`, `cuotaId`, `mes`, `anho`, `vencimiento1`, `importe1`, `vencimiento2`, `importe2`, `vencimiento3`, `importe3`, `tramoId`
+  - Puertos de entrada (3): `FindLectivoCuotaByUniqueKeyUseCase`, `GetLectivoCuotasByFacultadLectivoTipoUseCase`, `GetLectivoCuotasByTipoUseCase`
+  - Puerto de salida: `LectivoCuotaRepository` con métodos de consulta por facultad/lectivo/tipo y por unique key
+  - Casos de uso: `FindLectivoCuotaByUniqueKeyUseCaseImpl`, `GetLectivoCuotasByFacultadLectivoTipoUseCaseImpl`, `GetLectivoCuotasByTipoUseCaseImpl`
+  - Servicio de aplicación: `LectivoCuotaService` con delegación a 3 casos de uso
+  - Adaptador JPA: `JpaLectivoCuotaRepositoryAdapter` con mapeo dominio ↔ entidad
+  - Entidad JPA: `LectivoCuotaEntity` (migrada desde `LectivoCuota.java` legacy) con `@Table(name = "lectivo_cuota")` y `@Builder`
+  - Repositorio JPA: `JpaLectivoCuotaRepository` con 3 consultas Spring Data derivadas
+  - Mapper: `LectivoCuotaMapper` para conversión entidad ↔ dominio con null-safety
+  - Excepción: `LectivoCuotaException` con constructores para 0, 1, 3 y 6 parámetros
+- feat(politicaArancelaria): Fallback a `LectivoCuota` en `RecalculateCuotaByUniqueIndexUseCaseImpl` cuando no encuentra `ChequeraCuota`
+  - Nuevo flujo: si `chequeraCuotaService.findByUnique()` lanza `ChequeraCuotaException`, busca la cuota actual desde `LectivoCuotaService` usando el lectivo vigente
+  - Nuevo método `buildChequeraCuotaFromLectivo()`: construye `ChequeraCuota` a partir de `LectivoCuota` con importes y vencimientos
+  - Extracción de métodos privados: `findCuotaEnRevision()`, `resolveCuotaReferencia()`, `resolveImporteReferencia()`, `findCuotaEnRevisionFromLectivo()`
+
+### Changed
+- refactor(lectivoCuota): Migración de `LectivoCuota.java` (legacy `core/model/`) a `LectivoCuotaEntity.java` (hexagonal)
+  - Modelo de dominio puro: `LectivoCuota` en `hexagonal/chequera/lectivoCuota/domain/model/` con Lombok `@Builder`
+  - Eliminación de `serialVersionUID` y migración de `@Data` a `@Getter`/`@Setter`
+  - `@Table(name = "lectivo_cuota")` añadido para mapeo explícito de tabla
+- refactor(lectivoCuota): Eliminación de `LectivoCuotaRepository.java` (legacy `core/repository/`)
+- refactor(lectivoCuota): Eliminación de `LectivoCuotaService.java` (legacy `core/service/`) con `@Autowired`
+- refactor(preuniversitarioChequera): Actualizado import de `LectivoCuota` de `core.model` a `hexagonal.chequera.lectivoCuota.domain.model`
+- refactor(spoter): Actualizado import de `LectivoCuota` de `core.model` a `hexagonal.chequera.lectivoCuota.domain.model`
+- refactor(plantillaArancel): Cambio de `LectivoCuotaRepository` a `JpaLectivoCuotaRepository` y de `LectivoCuota` a `LectivoCuotaEntity`
+- fix(chequeraCuotaException): Corregido mensaje de error con 7 parámetros a 6 (parámetro sobrante eliminado)
+- fix(chequeraCuotaException): Eliminado `serialVersionUID` obsoleto
+
+### Removed
+- Eliminación de `LectivoCuota.java` (legacy) del paquete `core/model/`
+- Eliminación de `LectivoCuotaRepository.java` (legacy) del paquete `core/repository/`
+- Eliminación de `LectivoCuotaService.java` (legacy, 30 líneas) del paquete `core/service/`
+
+> Basado en análisis profundo de `git diff HEAD` (21 archivos modificados, +383/-90 líneas, incluyendo nuevo módulo hexagonal LectivoCuota + refactorización de PoliticaArancelaria con fallback) y `pom.xml` (versión 3.40.0 → 3.41.0).
+
 ## [3.40.0] - 2026-07-20
 ### Added
 - feat(chequeraPago): Enriquecimiento del modelo de dominio `ChequeraPago` con asociaciones a `TipoPago`, `Producto` y `ChequeraCuota`
