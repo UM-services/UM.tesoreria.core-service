@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.hexagonal.chequera.arancelPorcentaje.infrastructure.persistence.entity.ArancelPorcentajeEntity;
-import um.tesoreria.core.model.LectivoCuota;
+import um.tesoreria.core.hexagonal.chequera.lectivoCuota.infrastructure.persistence.entity.LectivoCuotaEntity;
 import um.tesoreria.core.model.dto.PlantillaArancelDto;
 import um.tesoreria.core.hexagonal.chequera.arancelPorcentaje.infrastructure.persistence.repository.JpaArancelPorcentajeRepository;
-import um.tesoreria.core.repository.LectivoCuotaRepository;
+import um.tesoreria.core.hexagonal.chequera.lectivoCuota.infrastructure.persistence.repository.JpaLectivoCuotaRepository;
 
 /**
  * @author daniel
@@ -24,7 +24,7 @@ import um.tesoreria.core.repository.LectivoCuotaRepository;
 public class PlantillaArancelService {
 
 	@Autowired
-	private LectivoCuotaRepository lectivoCuotaRepository;
+	private JpaLectivoCuotaRepository lectivoCuotaRepository;
 
 	@Autowired
 	private JpaArancelPorcentajeRepository arancelPorcentajeRepository;
@@ -32,7 +32,7 @@ public class PlantillaArancelService {
 	public List<PlantillaArancelDto> findAllByPlantilla(Integer facultadId, Integer lectivoId, Integer tipoChequeraId,
                                                         Integer arancelTipoId) {
 		List<PlantillaArancelDto> cuotas = new ArrayList<PlantillaArancelDto>();
-		for (LectivoCuota modelo : lectivoCuotaRepository.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId,
+		for (LectivoCuotaEntity modelo : lectivoCuotaRepository.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId,
 				lectivoId, tipoChequeraId)) {
 			ArancelPorcentajeEntity porcentaje = arancelPorcentajeRepository
 					.findByAranceltipoIdAndProductoId(arancelTipoId, modelo.getProductoId())

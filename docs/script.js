@@ -107,6 +107,7 @@ const diagrams = [
   { id: 'hexagonal-chequeraProducto', file: 'hexagonal-chequeraProducto.mmd', title: '🔷 Arquitectura Hexagonal - Producto' },
   { id: 'hexagonal-chequeraTipoChequera', file: 'hexagonal-chequeraTipoChequera.mmd', title: '🔷 Arquitectura Hexagonal - TipoChequera' },
   { id: 'hexagonal-politicaArancelaria', file: 'hexagonal-politicaArancelaria.mmd', title: '🔷 Arquitectura Hexagonal - PoliticaArancelaria' },
+  { id: 'hexagonal-lectivoCuota', file: 'hexagonal-lectivoCuota.mmd', title: '🔷 Arquitectura Hexagonal - LectivoCuota' },
   { id: 'hexagonal-claseChequera', file: 'hexagonal-claseChequera.mmd', title: '🔷 Arquitectura Hexagonal - ClaseChequera' },
   { id: 'hexagonal-lectivo', file: 'hexagonal-lectivo.mmd', title: '🔷 Arquitectura Hexagonal - Lectivo' },
   { id: 'hexagonal-documento', file: 'hexagonal-documento.mmd', title: '🔷 Arquitectura Hexagonal - Documento' },

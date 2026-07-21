@@ -1,0 +1,147 @@
+---
+title: Arquitectura Hexagonal - Módulo LectivoCuota (v3.41.0)
+---
+classDiagram
+    direction TB
+
+    namespace domain {
+        class LectivoCuota {
+            +Long lectivoCuotaId
+            +Integer facultadId
+            +Integer lectivoId
+            +Integer tipoChequeraId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +Integer mes
+            +Integer anho
+            +OffsetDateTime vencimiento1
+            +BigDecimal importe1
+            +OffsetDateTime vencimiento2
+            +BigDecimal importe2
+            +OffsetDateTime vencimiento3
+            +BigDecimal importe3
+            +Integer tramoId
+        }
+    }
+
+    namespace domain_ports_in {
+        class FindLectivoCuotaByUniqueKeyUseCase {
+            <<interface>>
+            +findByUniqueKey(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuota~
+        }
+
+        class GetLectivoCuotasByFacultadLectivoTipoUseCase {
+            <<interface>>
+            +getLectivoCuotasByFacultadLectivoTipo(Integer, Integer, Integer) List~LectivoCuota~
+        }
+
+        class GetLectivoCuotasByTipoUseCase {
+            <<interface>>
+            +getLectivoCuotasByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
+        }
+    }
+
+    namespace domain_ports_out {
+        class LectivoCuotaRepository {
+            <<interface>>
+            +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoCuota~
+            +findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer, Integer, Integer, Integer) List~LectivoCuota~
+            +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuota~
+        }
+    }
+
+    namespace application {
+        class LectivoCuotaService {
+            -GetLectivoCuotasByTipoUseCase getLectivoCuotasByTipoUseCase
+            -GetLectivoCuotasByFacultadLectivoTipoUseCase getLectivoCuotasByFacultadLectivoTipoUseCase
+            -FindLectivoCuotaByUniqueKeyUseCase findLectivoCuotaByUniqueKeyUseCase
+            +findAllByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
+            +findAllByFacultadLectivoTipo(Integer, Integer, Integer) List~LectivoCuota~
+            +findByUniqueKey(Integer, Integer, Integer, Integer, Integer, Integer) LectivoCuota
+        }
+
+        class LectivoCuotaException {
+            +LectivoCuotaException()
+            +LectivoCuotaException(Long)
+            +LectivoCuotaException(Integer, Integer, Integer)
+            +LectivoCuotaException(Integer, Integer, Integer, Integer, Integer, Integer)
+        }
+    }
+
+    namespace application_usecases {
+        class FindLectivoCuotaByUniqueKeyUseCaseImpl {
+            -LectivoCuotaRepository lectivoCuotaRepository
+            +findByUniqueKey(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuota~
+        }
+
+        class GetLectivoCuotasByFacultadLectivoTipoUseCaseImpl {
+            -LectivoCuotaRepository lectivoCuotaRepository
+            +getLectivoCuotasByFacultadLectivoTipo(Integer, Integer, Integer) List~LectivoCuota~
+        }
+
+        class GetLectivoCuotasByTipoUseCaseImpl {
+            -LectivoCuotaRepository lectivoCuotaRepository
+            +getLectivoCuotasByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
+        }
+    }
+
+    namespace infrastructure_persistence {
+        class JpaLectivoCuotaRepositoryAdapter {
+            -JpaLectivoCuotaRepository jpaLectivoCuotaRepository
+            -LectivoCuotaMapper lectivoCuotaMapper
+            +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoCuota~
+            +findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer, Integer, Integer, Integer) List~LectivoCuota~
+            +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuota~
+        }
+
+        class LectivoCuotaEntity {
+            +Long lectivoCuotaId
+            +Integer facultadId
+            +Integer lectivoId
+            +Integer tipoChequeraId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +Integer mes
+            +Integer anho
+            +OffsetDateTime vencimiento1
+            +BigDecimal importe1
+            +OffsetDateTime vencimiento2
+            +BigDecimal importe2
+            +OffsetDateTime vencimiento3
+            +BigDecimal importe3
+            +Integer tramoId
+        }
+
+        class LectivoCuotaMapper {
+            +toDomain(LectivoCuotaEntity) LectivoCuota
+            +toEntity(LectivoCuota) LectivoCuotaEntity
+        }
+
+        class JpaLectivoCuotaRepository {
+            <<interface>>
+            +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoCuotaEntity~
+            +findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer, Integer, Integer, Integer) List~LectivoCuotaEntity~
+            +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuotaEntity~
+        }
+    }
+
+    LectivoCuotaService --> FindLectivoCuotaByUniqueKeyUseCase : uses
+    LectivoCuotaService --> GetLectivoCuotasByFacultadLectivoTipoUseCase : uses
+    LectivoCuotaService --> GetLectivoCuotasByTipoUseCase : uses
+    LectivoCuotaService ..> LectivoCuotaException : throws
+
+    FindLectivoCuotaByUniqueKeyUseCaseImpl ..|> FindLectivoCuotaByUniqueKeyUseCase : implements
+    GetLectivoCuotasByFacultadLectivoTipoUseCaseImpl ..|> GetLectivoCuotasByFacultadLectivoTipoUseCase : implements
+    GetLectivoCuotasByTipoUseCaseImpl ..|> GetLectivoCuotasByTipoUseCase : implements
+
+    FindLectivoCuotaByUniqueKeyUseCaseImpl --> LectivoCuotaRepository : uses
+    GetLectivoCuotasByFacultadLectivoTipoUseCaseImpl --> LectivoCuotaRepository : uses
+    GetLectivoCuotasByTipoUseCaseImpl --> LectivoCuotaRepository : uses
+
+    JpaLectivoCuotaRepositoryAdapter ..|> LectivoCuotaRepository : implements
+    JpaLectivoCuotaRepositoryAdapter --> JpaLectivoCuotaRepository : uses
+    JpaLectivoCuotaRepositoryAdapter --> LectivoCuotaMapper : uses
+    LectivoCuotaMapper --> LectivoCuotaEntity : maps
+    LectivoCuotaMapper --> LectivoCuota : maps

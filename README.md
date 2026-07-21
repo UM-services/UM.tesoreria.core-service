@@ -4,7 +4,22 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.40.0**
+**Versión actual (SemVer): 3.41.0**
+
+## Novedades 3.41.0 (verificado en código)
+- feat(lectivoCuota): Nuevo módulo LectivoCuota con arquitectura hexagonal completa (3 casos de uso)
+  - Modelo de dominio: `LectivoCuota` con campos de cuotas lectivas (facultad, lectivo, tipo, producto, alternativa, cuota, importes, vencimientos, tramo)
+  - 3 puertos de entrada: `FindLectivoCuotaByUniqueKeyUseCase`, `GetLectivoCuotasByFacultadLectivoTipoUseCase`, `GetLectivoCuotasByTipoUseCase`
+  - Puerto de salida: `LectivoCuotaRepository` con consultas por facultad/lectivo/tipo y unique key
+  - Servicio de aplicación: `LectivoCuotaService` con delegación a casos de uso
+  - Adaptador JPA: `JpaLectivoCuotaRepositoryAdapter` con mapper y entidad migrada desde `core/model/`
+- feat(politicaArancelaria): Fallback a `LectivoCuota` cuando `ChequeraCuota` no existe
+  - `RecalculateCuotaByUniqueIndexUseCaseImpl`: si no encuentra cuota en chequera, busca en lectivo actual y construye cuota virtual
+- refactor: Eliminación de archivos legacy `LectivoCuota.java`, `LectivoCuotaRepository.java`, `LectivoCuotaService.java`
+- refactor: Actualización de imports en `PreuniversitarioChequeraService`, `SpoterService`, `PlantillaArancelService`
+- fix: Corregido mensaje de `ChequeraCuotaException` (parámetro sobrante)
+
+> Basado en análisis profundo de `git diff HEAD` (21 archivos modificados, +383/-90 líneas) y `pom.xml` (versión 3.40.0 → 3.41.0).
 
 ## Novedades 3.40.0 (verificado en código)
 - feat(chequeraPago): Enriquecimiento del modelo de dominio `ChequeraPago` con asociaciones a `TipoPago`, `Producto` y `ChequeraCuota`
