@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.model;
+package um.tesoreria.core.hexagonal.chequera.lectivoCuota.infrastructure.persistence.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -17,27 +17,23 @@ import jakarta.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import um.tesoreria.core.model.Auditable;
 
 /**
  * @author daniel
  *
  */
-@Data
+@Getter
+@Setter
 @Entity
-@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "lec_fac_id", "lec_lec_id", "lec_tch_id", "lec_pro_id",
+@Table(name = "lectivo_cuota", uniqueConstraints = { @UniqueConstraint(columnNames = { "lec_fac_id", "lec_lec_id", "lec_tch_id", "lec_pro_id",
 		"lec_alt_id", "lec_cuo_id" }) })
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class LectivoCuota extends Auditable implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4065131077451107247L;
+@Builder
+public class LectivoCuotaEntity extends Auditable implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

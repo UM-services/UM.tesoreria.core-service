@@ -12,6 +12,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraC
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
+import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
 import um.tesoreria.core.hexagonal.documento.application.exception.DocumentoException;
 import um.tesoreria.core.hexagonal.documento.application.service.DocumentoService;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
@@ -26,7 +27,7 @@ import um.tesoreria.core.kotlin.model.ChequeraAlternativa;
 import um.tesoreria.core.kotlin.model.LectivoAlternativa;
 import um.tesoreria.core.kotlin.model.Legajo;
 import um.tesoreria.core.model.ChequeraSerieControl;
-import um.tesoreria.core.model.LectivoCuota;
+import um.tesoreria.core.hexagonal.chequera.lectivoCuota.domain.model.LectivoCuota;
 import um.tesoreria.core.model.LectivoTotal;
 import um.tesoreria.core.service.*;
 import um.tesoreria.core.util.Jsonifier;
