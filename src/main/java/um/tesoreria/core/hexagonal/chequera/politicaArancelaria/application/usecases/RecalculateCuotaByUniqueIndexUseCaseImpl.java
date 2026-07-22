@@ -26,60 +26,67 @@ public class RecalculateCuotaByUniqueIndexUseCaseImpl implements RecalculateCuot
 
     @Override
     public ChequeraCuota recalculateCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, Integer plazo) {
-        var cuotaEnRevision = findCuotaEnRevision(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
-        // Si todavía no pasa la segunda fecha de mora no hay nada que hacer
-        if (cuotaEnRevision.getVencimiento3().isAfter(OffsetDateTime.now())) {
+        log.debug("\n\nProcessing RecalculateCuotaByUniqueIndexUseCaseImpl.recalculateCuota\n\n");
+        var ahora = OffsetDateTime.now();
+        var cuotaEnRevision = findCuotaEnRevision(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, ahora);
+        if (cuotaEnRevision.getVencimiento3().isAfter(ahora)) {
             return cuotaEnRevision;
         }
-        var cuotaReferencia = resolveCuotaReferencia(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaEnRevision);
+        var cuotaReferencia = resolveCuotaReferencia(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, ahora);
         var importeReferencia = resolveImporteReferencia(cuotaEnRevision, cuotaReferencia);
-        var fechaReferencia = Tool.firstTime(OffsetDateTime.now()).plusDays(plazo);
+        var fechaReferencia = Tool.firstTime(ahora).plusDays(plazo);
         cuotaEnRevision.setImporte3(importeReferencia);
         cuotaEnRevision.setVencimiento3(fechaReferencia);
         log.debug("Cuota nueva: {}", cuotaEnRevision.jsonify());
         return cuotaEnRevision;
     }
 
-    private ChequeraCuota findCuotaEnRevision(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId) {
+    private ChequeraCuota findCuotaEnRevision(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, OffsetDateTime ahora) {
+        log.debug("\n\nProcessing RecalculateCuotaByUniqueIndexUseCaseImpl.findCuotaEnRevision\n\n");
         try {
             var cuotaEnRevision = chequeraCuotaService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
             log.debug("Cuota en revision: {}", cuotaEnRevision.jsonify());
             return cuotaEnRevision;
         } catch (ChequeraCuotaException e) {
             log.error(e.getMessage());
-            return findCuotaEnRevisionFromLectivo(facultadId, tipoChequeraId, productoId, alternativaId, cuotaId);
+            return findCuotaEnRevisionFromLectivo(facultadId, tipoChequeraId, productoId, alternativaId, cuotaId, ahora);
         }
     }
 
-    private ChequeraCuota findCuotaEnRevisionFromLectivo(Integer facultadId, Integer tipoChequeraId, Integer productoId, Integer alternativaId, Integer cuotaId) {
-        var lectivo = lectivoService.findByFecha(OffsetDateTime.now());
-        var lectivoCuota = lectivoCuotaService.findByUniqueKey(facultadId, lectivo.getLectivoId(), tipoChequeraId, productoId, alternativaId, cuotaId);
+    private ChequeraCuota findCuotaEnRevisionFromLectivo(Integer facultadId, Integer tipoChequeraId, Integer productoId, Integer alternativaId, Integer cuotaId, OffsetDateTime ahora) {
+        log.debug("\n\nProcessing RecalculateCuotaByUniqueIndexUseCaseImpl.findCuotaEnRevisionFromLectivo\n\n");
+        var lectivo = lectivoService.findByFecha(ahora);
+        var lectivoCuota = lectivoCuotaService.findCuotaByFecha(facultadId, lectivo.getLectivoId(), tipoChequeraId, productoId, alternativaId, ahora);
         log.debug("LectivoCuota: {}", lectivoCuota.jsonify());
         return buildChequeraCuotaFromLectivo(facultadId, tipoChequeraId, productoId, alternativaId, cuotaId, lectivoCuota);
     }
 
-    private ChequeraCuota resolveCuotaReferencia(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, ChequeraCuota cuotaEnRevision) {
+    private ChequeraCuota resolveCuotaReferencia(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, OffsetDateTime ahora) {
+        log.debug("\n\nProcessing RecalculateCuotaByUniqueIndexUseCaseImpl.resolveCuotaReferencia\n\n");
         try {
-            var cuotaReferencia = chequeraCuotaService.getCuotaActual(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, OffsetDateTime.now());
+            var cuotaReferencia = chequeraCuotaService.getCuotaActual(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, ahora);
             log.debug("Cuota referencia: {}", cuotaReferencia.jsonify());
             return cuotaReferencia;
         } catch (ChequeraCuotaException e) {
-            return ChequeraCuota.builder()
-                    .importe1(cuotaEnRevision.getImporte3())
-                    .build();
+            var lectivo = lectivoService.findByFecha(ahora);
+            var lectivoCuota = lectivoCuotaService.findCuotaByFecha(facultadId, lectivo.getLectivoId(), tipoChequeraId, productoId, alternativaId, ahora);
+            log.debug("LectivoCuota: {}", lectivoCuota.jsonify());
+            return buildChequeraCuotaFromLectivo(facultadId, tipoChequeraId, productoId, alternativaId, cuotaId, lectivoCuota);
         }
     }
 
     private BigDecimal resolveImporteReferencia(ChequeraCuota cuotaEnRevision, ChequeraCuota cuotaReferencia) {
-        var importeReferencia = cuotaReferencia.getImporte1();
-        if (cuotaEnRevision.getImporte3().compareTo(importeReferencia) > 0) {
-            importeReferencia = cuotaReferencia.getImporte3();
+        log.debug("\n\nProcessing RecalculateCuotaByUniqueIndexUseCaseImpl.resolveImporteReferencia\n\n");
+        var importeBase = cuotaReferencia.getImporte3();
+        if (cuotaEnRevision.getImporte3().compareTo(importeBase) > 0) {
+            return cuotaReferencia.getImporte3();
         }
-        return importeReferencia;
+        return importeBase;
     }
 
     private ChequeraCuota buildChequeraCuotaFromLectivo(Integer facultadId, Integer tipoChequeraId, Integer productoId, Integer alternativaId, Integer cuotaId, LectivoCuota lectivoCuota) {
-        return ChequeraCuota.builder()
+        log.debug("\n\nProcessing RecalculateCuotaByUniqueIndexUseCaseImpl.buildChequeraCuotaFromLectivo\n\n");
+        var cuotaGenerada = ChequeraCuota.builder()
                 .facultadId(facultadId)
                 .tipoChequeraId(tipoChequeraId)
                 .productoId(productoId)
@@ -95,6 +102,8 @@ public class RecalculateCuotaByUniqueIndexUseCaseImpl implements RecalculateCuot
                 .importe3Original(lectivoCuota.getImporte3())
                 .vencimiento3(lectivoCuota.getVencimiento3())
                 .build();
+        log.debug("CuotaGenerada: {}", cuotaGenerada.jsonify());
+        return cuotaGenerada;
     }
 
 }

@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo LectivoCuota (v3.41.0)
+title: Arquitectura Hexagonal - Módulo LectivoCuota (v3.42.0)
 ---
 classDiagram
     direction TB
@@ -40,6 +40,11 @@ classDiagram
             <<interface>>
             +getLectivoCuotasByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
         }
+
+        class FindLectivoCuotaByFechaUseCase {
+            <<interface>>
+            +findCuotaByFecha(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) Optional~LectivoCuota~
+        }
     }
 
     namespace domain_ports_out {
@@ -48,6 +53,7 @@ classDiagram
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoCuota~
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer, Integer, Integer, Integer) List~LectivoCuota~
             +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuota~
+            +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaId(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) List~LectivoCuota~
         }
     }
 
@@ -56,9 +62,11 @@ classDiagram
             -GetLectivoCuotasByTipoUseCase getLectivoCuotasByTipoUseCase
             -GetLectivoCuotasByFacultadLectivoTipoUseCase getLectivoCuotasByFacultadLectivoTipoUseCase
             -FindLectivoCuotaByUniqueKeyUseCase findLectivoCuotaByUniqueKeyUseCase
+            -FindLectivoCuotaByFechaUseCase findLectivoCuotaByFechaUseCase
             +findAllByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
             +findAllByFacultadLectivoTipo(Integer, Integer, Integer) List~LectivoCuota~
             +findByUniqueKey(Integer, Integer, Integer, Integer, Integer, Integer) LectivoCuota
+            +findCuotaByFecha(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) LectivoCuota
         }
 
         class LectivoCuotaException {
@@ -66,6 +74,7 @@ classDiagram
             +LectivoCuotaException(Long)
             +LectivoCuotaException(Integer, Integer, Integer)
             +LectivoCuotaException(Integer, Integer, Integer, Integer, Integer, Integer)
+            +LectivoCuotaException(Integer, Integer, Integer, Integer, Integer, String)
         }
     }
 
@@ -84,6 +93,11 @@ classDiagram
             -LectivoCuotaRepository lectivoCuotaRepository
             +getLectivoCuotasByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
         }
+
+        class FindLectivoCuotaByFechaUseCaseImpl {
+            -LectivoCuotaRepository lectivoCuotaRepository
+            +findCuotaByFecha(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) Optional~LectivoCuota~
+        }
     }
 
     namespace infrastructure_persistence {
@@ -93,6 +107,7 @@ classDiagram
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoCuota~
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer, Integer, Integer, Integer) List~LectivoCuota~
             +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuota~
+            +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaId(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) List~LectivoCuota~
         }
 
         class LectivoCuotaEntity {
@@ -124,21 +139,25 @@ classDiagram
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoCuotaEntity~
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer, Integer, Integer, Integer) List~LectivoCuotaEntity~
             +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuotaEntity~
+            +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaIdAndVencimiento2GreaterThanEqualAndImporte2GreaterThan(Integer, Integer, Integer, Integer, Integer, OffsetDateTime, BigDecimal) List~LectivoCuotaEntity~
         }
     }
 
     LectivoCuotaService --> FindLectivoCuotaByUniqueKeyUseCase : uses
     LectivoCuotaService --> GetLectivoCuotasByFacultadLectivoTipoUseCase : uses
     LectivoCuotaService --> GetLectivoCuotasByTipoUseCase : uses
+    LectivoCuotaService --> FindLectivoCuotaByFechaUseCase : uses
     LectivoCuotaService ..> LectivoCuotaException : throws
 
     FindLectivoCuotaByUniqueKeyUseCaseImpl ..|> FindLectivoCuotaByUniqueKeyUseCase : implements
     GetLectivoCuotasByFacultadLectivoTipoUseCaseImpl ..|> GetLectivoCuotasByFacultadLectivoTipoUseCase : implements
     GetLectivoCuotasByTipoUseCaseImpl ..|> GetLectivoCuotasByTipoUseCase : implements
+    FindLectivoCuotaByFechaUseCaseImpl ..|> FindLectivoCuotaByFechaUseCase : implements
 
     FindLectivoCuotaByUniqueKeyUseCaseImpl --> LectivoCuotaRepository : uses
     GetLectivoCuotasByFacultadLectivoTipoUseCaseImpl --> LectivoCuotaRepository : uses
     GetLectivoCuotasByTipoUseCaseImpl --> LectivoCuotaRepository : uses
+    FindLectivoCuotaByFechaUseCaseImpl --> LectivoCuotaRepository : uses
 
     JpaLectivoCuotaRepositoryAdapter ..|> LectivoCuotaRepository : implements
     JpaLectivoCuotaRepositoryAdapter --> JpaLectivoCuotaRepository : uses

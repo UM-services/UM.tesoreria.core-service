@@ -2,6 +2,29 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.42.0] - 2026-07-22
+### Added
+- feat(lectivoCuota): Nuevo caso de uso `FindLectivoCuotaByFechaUseCase` para buscar cuotas por fecha de vencimiento
+  - Nuevo puerto de entrada: `FindLectivoCuotaByFechaUseCase` con método `findCuotaByFecha(facultadId, lectivoId, tipoChequeraId, productoId, alternativaId, fecha)`
+  - Nuevo caso de uso: `FindLectivoCuotaByFechaUseCaseImpl` que filtra cuotas por `vencimiento2 >= fecha` y `importe2 > 0`
+  - Nuevo método `findCuotaByFecha(...)` en `LectivoCuotaService` con delegación al caso de uso
+- feat(lectivoCuota): Enriquecimiento del modelo de dominio `LectivoCuota` con formato ISO 8601
+  - Añadida anotación `@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXX")` a campos `vencimiento1`, `vencimiento2`, `vencimiento3`
+- feat(lectivoCuota): Nuevo método `findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaId` en `LectivoCuotaRepository`
+  - Implementación en `JpaLectivoCuotaRepositoryAdapter` con consulta derivada `Vencimiento2GreaterThanEqualAndImporte2GreaterThan`
+- feat(politicaArancelaria): Refactorización de `RecalculateCuotaByUniqueIndexUseCaseImpl`
+  - `resolveCuotaReferencia`: ahora busca fallback en `LectivoCuotaService.findCuotaByFecha()` cuando falla `ChequeraCuotaService.getCuotaActual()`
+  - `findCuotaEnRevisionFromLectivo`: usa `findCuotaByFecha()` en lugar de `findByUniqueKey()` para mayor precisión temporal
+  - Resolución de `ahora` (OffsetDateTime.now()) una sola vez y pasada por parámetro
+
+### Fixed
+- fix(lectivoCuota): Nuevo constructor de `LectivoCuotaException` para 6 parámetros + fecha
+
+### Changed
+- refactor(docs): Actualizados diagramas Mermaid `hexagonal-lectivoCuota.mmd` y `hexagonal-politicaArancelaria.mmd` con nuevo use case y dependencias
+
+> Basado en análisis profundo de `git diff HEAD` (11 archivos modificados, +113/-30 líneas) y `pom.xml` (versión 3.41.0 → 3.42.0).
+
 ## [3.41.0] - 2026-07-21
 ### Added
 - feat(lectivoCuota): Nuevo módulo LectivoCuota con arquitectura hexagonal completa bajo `hexagonal/chequera/lectivoCuota/`
