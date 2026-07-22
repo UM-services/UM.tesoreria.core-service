@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.exception.ChequeraCuotaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.exception.LectivoCuotaException;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.domain.model.LectivoCuota;
 import um.tesoreria.core.hexagonal.chequera.politicaArancelaria.domain.ports.in.RecalculateCuotaByUniqueIndexUseCase;
@@ -69,8 +70,18 @@ public class RecalculateCuotaByUniqueIndexUseCaseImpl implements RecalculateCuot
             return cuotaReferencia;
         } catch (ChequeraCuotaException e) {
             var lectivo = lectivoService.findByFecha(ahora);
-            var lectivoCuota = lectivoCuotaService.findCuotaByFecha(facultadId, lectivo.getLectivoId(), tipoChequeraId, productoId, alternativaId, ahora);
-            log.debug("LectivoCuota: {}", lectivoCuota.jsonify());
+            LectivoCuota lectivoCuota;
+            try {
+                lectivoCuota = lectivoCuotaService.findCuotaByFecha(facultadId, lectivo.getLectivoId(), tipoChequeraId, productoId, alternativaId, ahora);
+                log.debug("LectivoCuota: {}", lectivoCuota.jsonify());
+            } catch (LectivoCuotaException ex) {
+                log.error("No hay LectivoCuota de referencia");
+                lectivoCuota = LectivoCuota.builder()
+                        .importe1(BigDecimal.ZERO)
+                        .importe2(BigDecimal.ZERO)
+                        .importe3(BigDecimal.ZERO)
+                        .build();
+            }
             return buildChequeraCuotaFromLectivo(facultadId, tipoChequeraId, productoId, alternativaId, cuotaId, lectivoCuota);
         }
     }
@@ -79,7 +90,7 @@ public class RecalculateCuotaByUniqueIndexUseCaseImpl implements RecalculateCuot
         log.debug("\n\nProcessing RecalculateCuotaByUniqueIndexUseCaseImpl.resolveImporteReferencia\n\n");
         var importeBase = cuotaReferencia.getImporte3();
         if (cuotaEnRevision.getImporte3().compareTo(importeBase) > 0) {
-            return cuotaReferencia.getImporte3();
+            return cuotaEnRevision.getImporte3();
         }
         return importeBase;
     }
