@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.40.0** (actualizada: 2026-07-20)
+**Versión actual del servicio: 3.42.1** (actualizada: 2026-07-22)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -44,7 +44,8 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona (gestión de personas) - v3.24.0.
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).
-- `hexagonal-politicaArancelaria.mmd`: Arquitectura hexagonal del módulo PoliticaArancelaria (recálculo de cuotas por política arancelaria) - v3.38.0 (parámetro plazo, DTO PoliticaArancelariaResponse + PoliticaArancelariaDtoMapper).
+- `hexagonal-politicaArancelaria.mmd`: Arquitectura hexagonal del módulo PoliticaArancelaria (recálculo de cuotas por política arancelaria) - v3.42.0 (refactorización de RecalculateCuotaByUniqueIndexUseCaseImpl, fallback a LectivoCuota con importes cero).
+- `hexagonal-lectivoCuota.mmd`: Arquitectura hexagonal del módulo LectivoCuota (cuotas lectivas por facultad/lectivo/tipo) - v3.42.0 (nuevo caso de uso FindLectivoCuotaByFechaUseCase, formato ISO 8601).
 
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 
