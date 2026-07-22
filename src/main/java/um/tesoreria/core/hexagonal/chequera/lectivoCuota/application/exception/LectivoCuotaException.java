@@ -17,4 +17,8 @@ public class LectivoCuotaException extends RuntimeException {
     public LectivoCuotaException(Integer facultadId, Integer lectivoId, Integer tipoChequeraId, Integer productoId, Integer alternativaId, Integer cuotaId) {
         super("Cannot find LectivoCuota for facultad: " + facultadId + ", lectivo: " + lectivoId + ", tipoChequera: " + tipoChequeraId + ", producto: " + productoId + ", alternativa: " + alternativaId + ", cuota: " + cuotaId);
     }
+
+    public LectivoCuotaException(Integer facultadId, Integer lectivoId, Integer tipoChequeraId, Integer productoId, Integer alternativaId, String fecha) {
+        super("Cannot find LectivoCuota for facultad: " + facultadId + ", lectivo: " + lectivoId + ", tipoChequera: " + tipoChequeraId + ", producto: " + productoId + ", alternativa: " + alternativaId + ", fecha: " + fecha);
+    }
 }

@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo PoliticaArancelaria (v3.41.0)
+title: Arquitectura Hexagonal - Módulo PoliticaArancelaria (v3.42.0)
 ---
 
 classDiagram
@@ -18,9 +18,9 @@ classDiagram
                 -LectivoCuotaService lectivoCuotaService
                 -LectivoService lectivoService
                 +recalculateCuota(Integer, Integer, Long, Integer, Integer, Integer, Integer) ChequeraCuota
-                -findCuotaEnRevision(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
-                -findCuotaEnRevisionFromLectivo(Integer, Integer, Integer, Integer, Integer) ChequeraCuota
-                -resolveCuotaReferencia(Integer, Integer, Long, Integer, Integer, ChequeraCuota) ChequeraCuota
+                -findCuotaEnRevision(Integer, Integer, Long, Integer, Integer, Integer, OffsetDateTime) ChequeraCuota
+                -findCuotaEnRevisionFromLectivo(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) ChequeraCuota
+                -resolveCuotaReferencia(Integer, Integer, Long, Integer, Integer, Integer, OffsetDateTime) ChequeraCuota
                 -resolveImporteReferencia(ChequeraCuota, ChequeraCuota) BigDecimal
                 -buildChequeraCuotaFromLectivo(Integer, Integer, Integer, Integer, Integer, LectivoCuota) ChequeraCuota
             }
@@ -96,7 +96,7 @@ classDiagram
 
     class LectivoCuotaService {
         <<external>>
-        +findByUniqueKey(Integer, Integer, Integer, Integer, Integer, Integer) LectivoCuota
+        +findCuotaByFecha(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) LectivoCuota
         +findAllByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
         +findAllByFacultadLectivoTipo(Integer, Integer, Integer) List~LectivoCuota~
     }
