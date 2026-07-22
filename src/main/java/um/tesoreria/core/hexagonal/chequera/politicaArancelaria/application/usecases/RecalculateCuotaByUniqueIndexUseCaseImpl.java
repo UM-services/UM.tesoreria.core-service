@@ -33,8 +33,11 @@ public class RecalculateCuotaByUniqueIndexUseCaseImpl implements RecalculateCuot
         if (cuotaEnRevision.getVencimiento3().isAfter(ahora)) {
             return cuotaEnRevision;
         }
+        log.debug("Recalculate - Cuota En Revisión -> {}", cuotaEnRevision.jsonify());
         var cuotaReferencia = resolveCuotaReferencia(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, ahora);
+        log.debug("Recalculate - Cuota Referencia -> {}", cuotaReferencia.jsonify());
         var importeReferencia = resolveImporteReferencia(cuotaEnRevision, cuotaReferencia);
+        log.debug("\n\nImporte Referencia -> {}\n\n", importeReferencia);
         var fechaReferencia = Tool.firstTime(ahora).plusDays(plazo);
         cuotaEnRevision.setImporte3(importeReferencia);
         cuotaEnRevision.setVencimiento3(fechaReferencia);
