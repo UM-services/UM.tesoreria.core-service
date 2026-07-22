@@ -2,6 +2,21 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.42.1] - 2026-07-22
+### Fixed
+- fix(politicaArancelaria): Corregida lógica de `resolveImporteReferencia` en `RecalculateCuotaByUniqueIndexUseCaseImpl`
+  - Antes retornaba `cuotaReferencia.getImporte3()` siempre que la cuota en revisión fuera mayor al importe base
+  - Ahora retorna `cuotaEnRevision.getImporte3()` para preservar importes customizados por el usuario
+- fix(politicaArancelaria): Nuevo try-catch `LectivoCuotaException` en `resolveCuotaReferencia`
+  - Cuando `LectivoCuotaService.findCuotaByFecha()` no encuentra cuota de referencia, crea un `LectivoCuota` con importes en cero
+  - Previene `LectivoCuotaException` no controlada al no existir cuota lectiva para la fecha
+
+### Changed
+- chore(politicaArancelaria): Añadidos 3 statements de debug logging en `RecalculateCuotaByUniqueIndexUseCaseImpl`
+  - `log.debug` para cuota en revisión, cuota referencia e importe referencia
+
+> Basado en análisis profundo de `git diff HEAD` (1 archivo staged, +13/-3 líneas) y `pom.xml` (versión 3.42.0, cambios de nivel patch sobre v3.42.0).
+
 ## [3.42.0] - 2026-07-22
 ### Added
 - feat(lectivoCuota): Nuevo caso de uso `FindLectivoCuotaByFechaUseCase` para buscar cuotas por fecha de vencimiento
