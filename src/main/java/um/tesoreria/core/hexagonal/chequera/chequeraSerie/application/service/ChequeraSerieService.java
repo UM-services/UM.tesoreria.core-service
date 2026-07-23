@@ -99,6 +99,10 @@ public class ChequeraSerieService {
         return getChequeraSerieByFacultadUseCase.getAllByFacultad(personaId, documentoId, facultadId);
     }
 
+    public List<ChequeraSerie> findAllByFacultadIdAndPersonaIdAndDocumentoId(Integer facultadId, BigDecimal personaId, Integer documentoId) {
+        return getChequeraSerieByFacultadUseCase.getAllByFacultad(personaId, documentoId, facultadId);
+    }
+
     public List<ChequeraSerie> findAllByFacultadExtended(BigDecimal personaId, Integer documentoId,
                                                                Integer facultadId) {
         return getChequeraSerieByFacultadUseCase.getAllByFacultadExtended(personaId, documentoId, facultadId);

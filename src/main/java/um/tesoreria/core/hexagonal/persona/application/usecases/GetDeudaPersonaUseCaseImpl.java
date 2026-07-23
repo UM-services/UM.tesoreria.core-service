@@ -16,6 +16,7 @@ import um.tesoreria.core.model.dto.DeudaPersonaDto;
 import um.tesoreria.core.model.dto.VencimientoDto;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
+import um.tesoreria.core.service.facade.MercadoPagoCoreService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -35,7 +36,7 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
     private final ChequeraCuotaService chequeraCuotaService;
     private final MercadoPagoContextService mercadoPagoContextService;
     private final PreferenceClient preferenceClient;
-    private final um.tesoreria.core.service.facade.MercadoPagoCoreService mercadoPagoCoreService;
+    private final MercadoPagoCoreService mercadoPagoCoreService;
 
     @Override
     public DeudaPersonaDto deudaByPersona(BigDecimal personaId, Integer documentoId) {

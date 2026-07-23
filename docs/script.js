@@ -112,6 +112,8 @@ const diagrams = [
   { id: 'hexagonal-lectivo', file: 'hexagonal-lectivo.mmd', title: '🔷 Arquitectura Hexagonal - Lectivo' },
   { id: 'hexagonal-documento', file: 'hexagonal-documento.mmd', title: '🔷 Arquitectura Hexagonal - Documento' },
   { id: 'hexagonal-usuario', file: 'hexagonal-usuario.mmd', title: '🔷 Arquitectura Hexagonal - Usuario' },
+  { id: 'hexagonal-setup', file: 'hexagonal-setup.mmd', title: '🔷 Arquitectura Hexagonal - Setup' },
+  { id: 'hexagonal-deudaExamen', file: 'hexagonal-deudaExamen.mmd', title: '🔷 Arquitectura Hexagonal - DeudaExamen' },
   { id: 'hexagonal-chequeraPago', file: 'hexagonal-chequeraPago.mmd', title: '🔷 Arquitectura Hexagonal - ChequeraPago' },
   { id: 'hexagonal-chequeraTotal', file: 'hexagonal-chequeraTotal.mmd', title: '🔷 Arquitectura Hexagonal - ChequeraTotal' },
   { id: 'hexagonal-comprobante', file: 'hexagonal-comprobante.mmd', title: '🔷 Arquitectura Hexagonal - Comprobante' },

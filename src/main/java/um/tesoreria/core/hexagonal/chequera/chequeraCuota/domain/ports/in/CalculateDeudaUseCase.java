@@ -6,7 +6,6 @@ import um.tesoreria.core.model.dto.DeudaChequeraDto;
 public interface CalculateDeudaUseCase {
 
     DeudaChequeraDto calculateDeuda(ChequeraSerie chequeraSerie);
-
     DeudaChequeraDto calculateDeudaExtended(ChequeraSerie chequeraSerie);
 
 }

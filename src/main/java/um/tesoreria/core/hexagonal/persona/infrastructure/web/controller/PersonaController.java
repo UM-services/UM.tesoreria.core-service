@@ -1,10 +1,12 @@
 package um.tesoreria.core.hexagonal.persona.infrastructure.web.controller;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.exception.PersonaException;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaExamenResponse;
 import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaRequest;
 import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaResponse;
 import um.tesoreria.core.hexagonal.persona.infrastructure.web.mapper.PersonaDtoMapper;
@@ -117,6 +120,11 @@ public class PersonaController {
 	public ResponseEntity<DeudaPersonaDto> deudaByPersonaExtended(@PathVariable BigDecimal personaId,
                                                                   @PathVariable Integer documentoId) {
 		return ResponseEntity.ok(service.deudaByPersonaExtended(personaId, documentoId));
+	}
+
+	@GetMapping("/deudaExamen/facultad/{facultadId}/persona/{personaId}/{documentoId}/fecha/{fechaExamen}")
+	public ResponseEntity<DeudaExamenResponse> getDeudaExamenByFacultadAndPersona(@PathVariable Integer facultadId, @PathVariable BigDecimal personaId, @PathVariable Integer documentoId, @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fechaExamen) {
+		return ResponseEntity.ok(dtoMapper.toDeudaExamenResponse(service.getDeudaExamenByFacultadAndPersona(facultadId, personaId, documentoId, fechaExamen)));
 	}
 
 	@PostMapping("/")

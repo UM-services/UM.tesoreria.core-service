@@ -1,7 +1,9 @@
 package um.tesoreria.core.hexagonal.persona.infrastructure.web.mapper;
 
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.persona.domain.model.DeudaExamen;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaExamenResponse;
 import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaRequest;
 import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaResponse;
 
@@ -39,6 +41,15 @@ public class PersonaDtoMapper {
                 .cbu(domain.getCbu())
                 .password(domain.getPassword())
                 .hpum(domain.getHpum())
+                .build();
+    }
+
+    public DeudaExamenResponse toDeudaExamenResponse(DeudaExamen domain) {
+        if (domain == null) return null;
+        return DeudaExamenResponse.builder()
+                .autorizadoRendir(domain.getAutorizadoRendir())
+                .matriculaPagada(domain.getMatriculaPagada())
+                .cuotasAdeudadas(domain.getCuotasAdeudadas())
                 .build();
     }
 }
