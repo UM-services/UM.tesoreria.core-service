@@ -36,9 +36,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${{ github.repository }}/milestones" > docs/milestones.json
-          curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${{ github.repository }}/issues?state=all&per_page=100" > docs/issues.json
-          curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${{ github.repository }}/pulls?state=all&per_page=100" > docs/prs.json
+          fetch_all_pages() {
+            local url="$1"
+            local output="$2"
+            local auth="$3"
+            echo "[]" > "$output"
+            while [ -n "$url" ] && [ "$url" != "null" ]; do
+              response=$(curl -s -D /tmp/headers.txt -H "Authorization: token $auth" "$url")
+              tmp=$(mktemp)
+              jq -s '.[0] + .[1]' "$output" <(echo "$response") > "$tmp" && mv "$tmp" "$output"
+              url=$(grep -i '^link:' /tmp/headers.txt | grep -oP '<[^>]+>; rel="next"' | grep -oP '<\K[^>]+')
+            done
+          }
+
+          fetch_all_pages "https://api.github.com/repos/${{ github.repository }}/milestones?state=all&per_page=100" "docs/milestones.json" "$GITHUB_TOKEN"
+          fetch_all_pages "https://api.github.com/repos/${{ github.repository }}/issues?state=all&per_page=100" "docs/issues.json" "$GITHUB_TOKEN"
+          fetch_all_pages "https://api.github.com/repos/${{ github.repository }}/pulls?state=all&per_page=100" "docs/prs.json" "$GITHUB_TOKEN"
+
+          echo "Fetched $(jq length docs/issues.json) issues, $(jq length docs/prs.json) PRs, $(jq length docs/milestones.json) milestones"
 
       - name: Generate Wiki Content
         env:

@@ -33,11 +33,15 @@ public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
                     .autorizadoRendir(false)
                     .matriculaPagada(false)
                     .cuotasAdeudadas(1000)
+                    .importeAdeudado(new BigDecimal("100000000"))
+                    .habilitadoTesoreria(false)
                     .build();
         }
         var setup = setupService.findLastOrFail();
         var cuotasAdeudadas = 0;
         var matriculaPagada = true;
+        var habilitadoTesoreria = false;
+        var importeAdeudado = BigDecimal.ZERO;
         for (var chequera : chequeras) {
             var cuotasNoPagadas = chequeraCuotaService.findAllDebidasByProducto(chequera.getFacultadId(), chequera.getTipoChequeraId(), chequera.getChequeraSerieId(), chequera.getAlternativaId(), PRODUCTO_ARANCEL, fechaExamen);
             cuotasAdeudadas += cuotasNoPagadas.size();
@@ -45,6 +49,15 @@ public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
             if (!matriculasNoPagadas.isEmpty()) {
                 matriculaPagada = false;
             }
+            // Acumular cuotas usando Streams
+            importeAdeudado = cuotasNoPagadas.stream()
+                    .map(c -> c.getImporte1() != null ? c.getImporte1() : BigDecimal.ZERO)
+                    .reduce(importeAdeudado, BigDecimal::add);
+
+            // Acumular matrículas usando Streams
+            importeAdeudado = matriculasNoPagadas.stream()
+                    .map(m -> m.getImporte1() != null ? m.getImporte1() : BigDecimal.ZERO)
+                    .reduce(importeAdeudado, BigDecimal::add);
         }
         var autorizadoRendir = false;
         if (matriculaPagada) {
@@ -56,6 +69,8 @@ public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
                 .autorizadoRendir(autorizadoRendir)
                 .matriculaPagada(matriculaPagada)
                 .cuotasAdeudadas(cuotasAdeudadas)
+                .importeAdeudado(importeAdeudado)
+                .habilitadoTesoreria(habilitadoTesoreria)
                 .build();
     }
 }
