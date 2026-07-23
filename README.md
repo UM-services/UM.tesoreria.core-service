@@ -4,7 +4,18 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.43.0**
+**Versión actual (SemVer): 3.44.0**
+
+## Novedades 3.44.0 (verificado en código)
+- feat(persona/deudaExamen): Enriquecimiento del modelo de dominio `DeudaExamen` con nuevos campos `importeAdeudado` y `habilitadoTesoreria`
+  - `DeudaExamen.importeAdeudado` (BigDecimal): acumula el total adeudado sumando `importe1` de cuotas no pagadas y matriculas pendientes
+  - `DeudaExamen.habilitadoTesoreria` (Boolean): indica si la persona esta habilitada en tesoreria para rendir examen
+  - `GetDeudaExamenUseCaseImpl`: nueva logica de acumulacion con Streams (`BigDecimal::add`) para cuotas y matriculas
+  - `DeudaExamenResponse`: nuevos campos `importe_adeudado` y `habilitado_tesoreria` con `@JsonProperty`
+  - `PersonaDtoMapper.toDeudaExamenResponse()`: mapeo de nuevos campos del dominio al DTO
+- refactor(docs): Actualizados diagramas Mermaid `hexagonal-persona.mmd` y `hexagonal-deudaExamen.mmd` con nuevos campos y version v3.44.0
+
+> Basado en análisis profundo de `git diff HEAD` (4 archivos modificados, +29 líneas) y `pom.xml` (versión 3.43.0 → 3.44.0).
 
 ## Novedades 3.43.0 (verificado en código)
 - feat(setup): Nuevo modulo Setup con arquitectura hexagonal completa bajo `hexagonal/setup/`

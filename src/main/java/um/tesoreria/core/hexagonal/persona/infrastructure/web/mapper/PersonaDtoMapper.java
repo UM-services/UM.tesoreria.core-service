@@ -50,6 +50,8 @@ public class PersonaDtoMapper {
                 .autorizadoRendir(domain.getAutorizadoRendir())
                 .matriculaPagada(domain.getMatriculaPagada())
                 .cuotasAdeudadas(domain.getCuotasAdeudadas())
+                .importeAdeudado(domain.getImporteAdeudado())
+                .habilitadoTesoreria(domain.getHabilitadoTesoreria())
                 .build();
     }
 }

@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - DeudaExamen (v3.43.0)
+title: Arquitectura Hexagonal - DeudaExamen (v3.44.0)
 ---
 
 classDiagram
@@ -10,6 +10,8 @@ classDiagram
             +Boolean autorizadoRendir
             +Boolean matriculaPagada
             +Integer cuotasAdeudadas
+            +BigDecimal importeAdeudado
+            +Boolean habilitadoTesoreria
         }
 
         class GetDeudaExamenUseCase {
@@ -39,6 +41,8 @@ classDiagram
             +Boolean autorizadoRendir
             +Boolean matriculaPagada
             +Integer cuotasAdeudadas
+            +BigDecimal importeAdeudado
+            +Boolean habilitadoTesoreria
         }
 
         class PersonaDtoMapper {

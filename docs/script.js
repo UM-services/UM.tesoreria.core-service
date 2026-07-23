@@ -77,59 +77,59 @@ Promise.all([
 
 // --- Diagramas Mermaid ---
 const diagrams = [
-  { id: 'architecture', file: 'architecture.mmd', title: '🏛️ Arquitectura General del Servicio' },
-  { id: 'hexagonal-architecture', file: 'hexagonal-architecture.mmd', title: '🔷 Arquitectura Hexagonal - Caso de Uso Curso Cargo Contratado' },
-  { id: 'hexagonal-articulo', file: 'hexagonal-articulo.mmd', title: '🔷 Arquitectura Hexagonal - Artículo' },
-  { id: 'hexagonal-chequeraCuota', file: 'hexagonal-chequeraCuota.mmd', title: '🔷 Arquitectura Hexagonal - Chequera Cuota' },
-  { id: 'hexagonal-auth', file: 'hexagonal-auth.mmd', title: '🔷 Arquitectura Hexagonal - Auth (Autenticación)' },
-  { id: 'hexagonal-geografica', file: 'hexagonal-geografica.mmd', title: '🔷 Arquitectura Hexagonal - Geografica' },
-  { id: 'hexagonal-proveedor', file: 'hexagonal-proveedor.mmd', title: '🔷 Arquitectura Hexagonal - Proveedor' },
-  { id: 'hexagonal-cuenta', file: 'hexagonal-cuenta.mmd', title: '🔷 Arquitectura Hexagonal - Cuenta' },
-  { id: 'hexagonal-ubicacion', file: 'hexagonal-ubicacion.mmd', title: '🔷 Arquitectura Hexagonal - Ubicacion' },
-  { id: 'hexagonal-ubicacionArticulo', file: 'hexagonal-ubicacionArticulo.mmd', title: '🔷 Arquitectura Hexagonal - UbicacionArticulo' },
-  { id: 'hexagonal-mercadopago', file: 'hexagonal-mercadopago-context-history.mmd', title: '🔷 Arquitectura Hexagonal - MercadoPago Context History' },
-  { id: 'hexagonal-dependencia', file: 'hexagonal-dependencia.mmd', title: '🔷 Arquitectura Hexagonal - Dependencia' },
-  { id: 'hexagonal-facturaPendiente', file: 'hexagonal-facturaPendiente.mmd', title: '🔷 Arquitectura Hexagonal - Factura Pendiente' },
-  { id: 'hexagonal-facultad', file: 'hexagonal-facultad.mmd', title: '🔷 Arquitectura Hexagonal - Facultad' },
-  { id: 'hexagonal-contrato', file: 'hexagonal-contrato.mmd', title: '🔷 Arquitectura Hexagonal - Contrato' },
-  { id: 'hexagonal-chequeraSerie', file: 'hexagonal-chequeraSerie.mmd', title: '🔷 Arquitectura Hexagonal - ChequeraSerie' },
-  { id: 'hexagonal-baja', file: 'hexagonal-baja.mmd', title: '🔷 Arquitectura Hexagonal - Baja' },
-  { id: 'hexagonal-campanha', file: 'hexagonal-campanha.mmd', title: '🔷 Arquitectura Hexagonal - Campanha (UM Hub)' },
-  { id: 'hexagonal-reservaVacante', file: 'hexagonal-reservaVacante.mmd', title: '🔷 Arquitectura Hexagonal - ReservaVacante (UM Hub)' },
-  { id: 'hexagonal-domicilio', file: 'hexagonal-domicilio.mmd', title: '🔷 Arquitectura Hexagonal - Domicilio' },
-  { id: 'hexagonal-alumnoGuarani', file: 'hexagonal-alumnoGuarani.mmd', title: '🔷 Arquitectura Hexagonal - AlumnoGuarani (Guarani)' },
-  { id: 'hexagonal-persona', file: 'hexagonal-persona.mmd', title: '🔷 Arquitectura Hexagonal - Persona' },
-  { id: 'hexagonal-mercadoPagoContext', file: 'hexagonal-mercadoPagoContext.mmd', title: '🔷 Arquitectura Hexagonal - MercadoPagoContext' },
-  { id: 'hexagonal-lectivoTotalImputacion', file: 'hexagonal-lectivoTotalImputacion.mmd', title: '🔷 Arquitectura Hexagonal - LectivoTotalImputacion' },
-  { id: 'hexagonal-arancelTipo', file: 'hexagonal-arancelTipo.mmd', title: '🔷 Arquitectura Hexagonal - ArancelTipo' },
-  { id: 'hexagonal-arancelPorcentaje', file: 'hexagonal-arancelPorcentaje.mmd', title: '🔷 Arquitectura Hexagonal - ArancelPorcentaje' },
-  { id: 'hexagonal-asiento', file: 'hexagonal-asiento.mmd', title: '🔷 Arquitectura Hexagonal - Asiento' },
-  { id: 'hexagonal-chequeraProducto', file: 'hexagonal-chequeraProducto.mmd', title: '🔷 Arquitectura Hexagonal - Producto' },
-  { id: 'hexagonal-chequeraTipoChequera', file: 'hexagonal-chequeraTipoChequera.mmd', title: '🔷 Arquitectura Hexagonal - TipoChequera' },
-  { id: 'hexagonal-politicaArancelaria', file: 'hexagonal-politicaArancelaria.mmd', title: '🔷 Arquitectura Hexagonal - PoliticaArancelaria' },
-  { id: 'hexagonal-lectivoCuota', file: 'hexagonal-lectivoCuota.mmd', title: '🔷 Arquitectura Hexagonal - LectivoCuota' },
-  { id: 'hexagonal-claseChequera', file: 'hexagonal-claseChequera.mmd', title: '🔷 Arquitectura Hexagonal - ClaseChequera' },
-  { id: 'hexagonal-lectivo', file: 'hexagonal-lectivo.mmd', title: '🔷 Arquitectura Hexagonal - Lectivo' },
-  { id: 'hexagonal-documento', file: 'hexagonal-documento.mmd', title: '🔷 Arquitectura Hexagonal - Documento' },
-  { id: 'hexagonal-usuario', file: 'hexagonal-usuario.mmd', title: '🔷 Arquitectura Hexagonal - Usuario' },
-  { id: 'hexagonal-setup', file: 'hexagonal-setup.mmd', title: '🔷 Arquitectura Hexagonal - Setup' },
-  { id: 'hexagonal-deudaExamen', file: 'hexagonal-deudaExamen.mmd', title: '🔷 Arquitectura Hexagonal - DeudaExamen' },
-  { id: 'hexagonal-chequeraPago', file: 'hexagonal-chequeraPago.mmd', title: '🔷 Arquitectura Hexagonal - ChequeraPago' },
-  { id: 'hexagonal-chequeraTotal', file: 'hexagonal-chequeraTotal.mmd', title: '🔷 Arquitectura Hexagonal - ChequeraTotal' },
-  { id: 'hexagonal-comprobante', file: 'hexagonal-comprobante.mmd', title: '🔷 Arquitectura Hexagonal - Comprobante' },
-  { id: 'hexagonal-cuentaMovimiento', file: 'hexagonal-cuentaMovimiento.mmd', title: '🔷 Arquitectura Hexagonal - CuentaMovimiento' },
-  { id: 'hexagonal-proveedorMovimiento', file: 'hexagonal-proveedorMovimiento.mmd', title: '🔷 Arquitectura Hexagonal - ProveedorMovimiento' },
-  { id: 'hexagonal-track', file: 'hexagonal-track.mmd', title: '🔷 Arquitectura Hexagonal - Track' },
-  { id: 'dependencies-diagram', file: 'dependencies.mmd', title: '📦 Diagrama de Dependencias' },
-  { id: 'erd-diagram', file: 'entities.mmd', title: '🗃️ Diagrama de Entidad-Relación (Simplificado)' },
-  { id: 'deployment-diagram', file: 'deployment.mmd', title: '🚀 Diagrama de Despliegue' },
+  { id: 'architecture', file: 'architecture.mmd', title: 'Arquitectura General del Servicio' },
+  { id: 'hexagonal-architecture', file: 'hexagonal-architecture.mmd', title: 'Arquitectura Hexagonal - Caso de Uso Curso Cargo Contratado' },
+  { id: 'hexagonal-articulo', file: 'hexagonal-articulo.mmd', title: 'Arquitectura Hexagonal - Articulo' },
+  { id: 'hexagonal-chequeraCuota', file: 'hexagonal-chequeraCuota.mmd', title: 'Arquitectura Hexagonal - Chequera Cuota' },
+  { id: 'hexagonal-auth', file: 'hexagonal-auth.mmd', title: 'Arquitectura Hexagonal - Auth (Autenticacion)' },
+  { id: 'hexagonal-geografica', file: 'hexagonal-geografica.mmd', title: 'Arquitectura Hexagonal - Geografica' },
+  { id: 'hexagonal-proveedor', file: 'hexagonal-proveedor.mmd', title: 'Arquitectura Hexagonal - Proveedor' },
+  { id: 'hexagonal-cuenta', file: 'hexagonal-cuenta.mmd', title: 'Arquitectura Hexagonal - Cuenta' },
+  { id: 'hexagonal-ubicacion', file: 'hexagonal-ubicacion.mmd', title: 'Arquitectura Hexagonal - Ubicacion' },
+  { id: 'hexagonal-ubicacionArticulo', file: 'hexagonal-ubicacionArticulo.mmd', title: 'Arquitectura Hexagonal - UbicacionArticulo' },
+  { id: 'hexagonal-mercadopago', file: 'hexagonal-mercadopago-context-history.mmd', title: 'Arquitectura Hexagonal - MercadoPago Context History' },
+  { id: 'hexagonal-dependencia', file: 'hexagonal-dependencia.mmd', title: 'Arquitectura Hexagonal - Dependencia' },
+  { id: 'hexagonal-facturaPendiente', file: 'hexagonal-facturaPendiente.mmd', title: 'Arquitectura Hexagonal - Factura Pendiente' },
+  { id: 'hexagonal-facultad', file: 'hexagonal-facultad.mmd', title: 'Arquitectura Hexagonal - Facultad' },
+  { id: 'hexagonal-contrato', file: 'hexagonal-contrato.mmd', title: 'Arquitectura Hexagonal - Contrato' },
+  { id: 'hexagonal-chequeraSerie', file: 'hexagonal-chequeraSerie.mmd', title: 'Arquitectura Hexagonal - ChequeraSerie' },
+  { id: 'hexagonal-baja', file: 'hexagonal-baja.mmd', title: 'Arquitectura Hexagonal - Baja' },
+  { id: 'hexagonal-campanha', file: 'hexagonal-campanha.mmd', title: 'Arquitectura Hexagonal - Campanha (UM Hub)' },
+  { id: 'hexagonal-reservaVacante', file: 'hexagonal-reservaVacante.mmd', title: 'Arquitectura Hexagonal - ReservaVacante (UM Hub)' },
+  { id: 'hexagonal-domicilio', file: 'hexagonal-domicilio.mmd', title: 'Arquitectura Hexagonal - Domicilio' },
+  { id: 'hexagonal-alumnoGuarani', file: 'hexagonal-alumnoGuarani.mmd', title: 'Arquitectura Hexagonal - AlumnoGuarani (Guarani)' },
+  { id: 'hexagonal-persona', file: 'hexagonal-persona.mmd', title: 'Arquitectura Hexagonal - Persona' },
+  { id: 'hexagonal-mercadoPagoContext', file: 'hexagonal-mercadoPagoContext.mmd', title: 'Arquitectura Hexagonal - MercadoPagoContext' },
+  { id: 'hexagonal-lectivoTotalImputacion', file: 'hexagonal-lectivoTotalImputacion.mmd', title: 'Arquitectura Hexagonal - LectivoTotalImputacion' },
+  { id: 'hexagonal-arancelTipo', file: 'hexagonal-arancelTipo.mmd', title: 'Arquitectura Hexagonal - ArancelTipo' },
+  { id: 'hexagonal-arancelPorcentaje', file: 'hexagonal-arancelPorcentaje.mmd', title: 'Arquitectura Hexagonal - ArancelPorcentaje' },
+  { id: 'hexagonal-asiento', file: 'hexagonal-asiento.mmd', title: 'Arquitectura Hexagonal - Asiento' },
+  { id: 'hexagonal-chequeraProducto', file: 'hexagonal-chequeraProducto.mmd', title: 'Arquitectura Hexagonal - Producto' },
+  { id: 'hexagonal-chequeraTipoChequera', file: 'hexagonal-chequeraTipoChequera.mmd', title: 'Arquitectura Hexagonal - TipoChequera' },
+  { id: 'hexagonal-politicaArancelaria', file: 'hexagonal-politicaArancelaria.mmd', title: 'Arquitectura Hexagonal - PoliticaArancelaria' },
+  { id: 'hexagonal-lectivoCuota', file: 'hexagonal-lectivoCuota.mmd', title: 'Arquitectura Hexagonal - LectivoCuota' },
+  { id: 'hexagonal-claseChequera', file: 'hexagonal-claseChequera.mmd', title: 'Arquitectura Hexagonal - ClaseChequera' },
+  { id: 'hexagonal-lectivo', file: 'hexagonal-lectivo.mmd', title: 'Arquitectura Hexagonal - Lectivo' },
+  { id: 'hexagonal-documento', file: 'hexagonal-documento.mmd', title: 'Arquitectura Hexagonal - Documento' },
+  { id: 'hexagonal-usuario', file: 'hexagonal-usuario.mmd', title: 'Arquitectura Hexagonal - Usuario' },
+  { id: 'hexagonal-setup', file: 'hexagonal-setup.mmd', title: 'Arquitectura Hexagonal - Setup' },
+  { id: 'hexagonal-deudaExamen', file: 'hexagonal-deudaExamen.mmd', title: 'Arquitectura Hexagonal - DeudaExamen' },
+  { id: 'hexagonal-chequeraPago', file: 'hexagonal-chequeraPago.mmd', title: 'Arquitectura Hexagonal - ChequeraPago' },
+  { id: 'hexagonal-chequeraTotal', file: 'hexagonal-chequeraTotal.mmd', title: 'Arquitectura Hexagonal - ChequeraTotal' },
+  { id: 'hexagonal-comprobante', file: 'hexagonal-comprobante.mmd', title: 'Arquitectura Hexagonal - Comprobante' },
+  { id: 'hexagonal-cuentaMovimiento', file: 'hexagonal-cuentaMovimiento.mmd', title: 'Arquitectura Hexagonal - CuentaMovimiento' },
+  { id: 'hexagonal-proveedorMovimiento', file: 'hexagonal-proveedorMovimiento.mmd', title: 'Arquitectura Hexagonal - ProveedorMovimiento' },
+  { id: 'hexagonal-track', file: 'hexagonal-track.mmd', title: 'Arquitectura Hexagonal - Track' },
+  { id: 'dependencies-diagram', file: 'dependencies.mmd', title: 'Diagrama de Dependencias' },
+  { id: 'erd-diagram', file: 'entities.mmd', title: 'Diagrama de Entidad-Relacion (Simplificado)' },
+  { id: 'deployment-diagram', file: 'deployment.mmd', title: 'Diagrama de Despliegue' },
   { id: 'sequence-diagrams', file: 'sequence-alta-usuario.mmd', title: 'Alta de Usuario' },
   { id: 'sequence-diagrams', file: 'sequence-baja-usuario.mmd', title: 'Baja de Usuario' },
   { id: 'sequence-diagrams', file: 'sequence-chequera-serie-sede.mmd', title: 'Chequera Serie Sede' },
   { id: 'sequence-diagrams', file: 'sequence-comprobante.mmd', title: 'Comprobante' },
-  { id: 'sequence-diagrams', file: 'sequence-consulta-articulos.mmd', title: 'Consulta de Artículos' },
+  { id: 'sequence-diagrams', file: 'sequence-consulta-articulos.mmd', title: 'Consulta de Articulos' },
   { id: 'sequence-diagrams', file: 'sequence-example.mmd', title: 'Ejemplo de Secuencia' },
-  { id: 'sequence-diagrams', file: 'sequence-liquidacion-sueldos.mmd', title: 'Liquidación de Sueldos' },
+  { id: 'sequence-diagrams', file: 'sequence-liquidacion-sueldos.mmd', title: 'Liquidacion de Sueldos' },
   { id: 'sequence-diagrams', file: 'sequence-mercadopago-to-change.mmd', title: 'MercadoPago to Change' },
   { id: 'sequence-diagrams', file: 'sequence-movimientos-cuenta.mmd', title: 'Movimientos de Cuenta' },
   { id: 'sequence-diagrams', file: 'sequence-pago-chequera.mmd', title: 'Pago de Chequera' },
@@ -137,21 +137,19 @@ const diagrams = [
 ];
 
 const sequenceDiagramsContainer = document.getElementById('sequence-diagrams');
-sequenceDiagramsContainer.innerHTML = '<h2>🔄 Diagramas de Secuencia</h2>';
+sequenceDiagramsContainer.innerHTML = '<h2>Diagramas de Secuencia</h2>';
 
-diagrams.forEach(diag => {
-  fetch(diag.file)
+const diagramPromises = diagrams.map(diag => {
+  return fetch(diag.file)
     .then(response => {
-      if (!response.ok) {
-        throw new Error(`Network response was not ok for ${diag.file}`);
-      }
+      if (!response.ok) throw new Error(`Network response was not ok for ${diag.file}`);
       return response.text();
     })
     .then(data => {
       let content = data.startsWith('---') ? data.substring(data.indexOf('---', 3) + 3).trim() : data;
       content = content.replace(/[ \t]*namespace\s+[\w_-]+\s*\{\s*\}[ \t]*\r?\n?/g, '');
       const valid = /^(flowchart|sequenceDiagram|erDiagram|classDiagram|stateDiagram|gantt|pie|journey|requirementDiagram|gitGraph|mindmap|timeline|quadrantChart)/.test(content);
-      
+
       const container = document.getElementById(diag.id);
       const diagramElement = document.createElement('div');
       diagramElement.className = 'section';
@@ -159,7 +157,7 @@ diagrams.forEach(diag => {
       if (valid) {
         diagramElement.innerHTML = `<h3>${diag.title}</h3><div class="mermaid">${content}</div>`;
       } else {
-        diagramElement.innerHTML = `<div class="warn">⚠️ El archivo <b>${diag.file}</b> no contiene un diagrama Mermaid válido.</div>`;
+        diagramElement.innerHTML = `<div class="warn">El archivo <b>${diag.file}</b> no contiene un diagrama Mermaid valido.</div>`;
       }
 
       if (diag.id === 'sequence-diagrams') {
@@ -173,8 +171,8 @@ diagrams.forEach(diag => {
       const container = document.getElementById(diag.id);
       const errorElement = document.createElement('div');
       errorElement.className = 'warn';
-      errorElement.innerHTML = `⚠️ El archivo <b>${diag.file}</b> no se encuentra o no pudo cargarse.`;
-      
+      errorElement.innerHTML = `El archivo <b>${diag.file}</b> no se encuentra o no pudo cargarse.`;
+
       if (diag.id === 'sequence-diagrams') {
         const diagramElement = document.createElement('div');
         diagramElement.className = 'section';
@@ -187,7 +185,12 @@ diagrams.forEach(diag => {
     });
 });
 
-// Render all Mermaid diagrams at once after a short delay
-setTimeout(() => {
-    mermaid.init(undefined, document.querySelectorAll('.mermaid'));
-}, 500);
+Promise.all(diagramPromises).then(() => {
+  const targets = document.querySelectorAll('.mermaid');
+  if (targets.length > 0 && typeof mermaid !== 'undefined') {
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    mermaid.run({ nodes: targets }).catch(err => {
+      console.error('Mermaid rendering error:', err);
+    });
+  }
+});

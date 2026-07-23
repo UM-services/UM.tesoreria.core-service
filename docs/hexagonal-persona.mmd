@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Modulo Persona (v3.43.0)
+title: Arquitectura Hexagonal - Modulo Persona (v3.44.0)
 ---
 
 classDiagram
@@ -154,6 +154,8 @@ classDiagram
                 +Boolean autorizadoRendir
                 +Boolean matriculaPagada
                 +Integer cuotasAdeudadas
+                +BigDecimal importeAdeudado
+                +Boolean habilitadoTesoreria
             }
             class PersonaDtoMapper {
                 +toDomain(PersonaRequest) Persona
