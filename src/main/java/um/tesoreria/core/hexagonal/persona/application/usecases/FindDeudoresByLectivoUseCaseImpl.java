@@ -11,6 +11,7 @@ import um.tesoreria.core.model.view.PersonaKey;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.service.view.PersonaKeyService;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class FindDeudoresByLectivoUseCaseImpl implements FindDeudoresByLectivoUs
         for (ChequeraSerie serie : chequeraSerieService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId,
                 facultadId, geograficaId)) {
             if (cuotas <= chequeraCuotaService.findAllDebidas(facultadId, serie.getTipoChequeraId(),
-                    serie.getChequeraSerieId(), serie.getAlternativaId()).size()) {
+                    serie.getChequeraSerieId(), serie.getAlternativaId(), OffsetDateTime.now()).size()) {
                 unifieds.add(serie.getPersonaKey());
             }
         }

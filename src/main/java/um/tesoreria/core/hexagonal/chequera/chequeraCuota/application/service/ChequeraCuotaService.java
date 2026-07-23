@@ -19,6 +19,7 @@ public class ChequeraCuotaService {
     private final FindAllByChequeraAlternativaUseCase findAllByChequeraAlternativaUseCase;
     private final FindAllByChequeraAlternativaConImporteUseCase findAllByChequeraAlternativaConImporteUseCase;
     private final FindAllDebidasUseCase findAllDebidasUseCase;
+    private final FindAllDebidasByProductoUseCase findAllDebidasByProductoUseCase;
     private final FindAllInconsistenciasUseCase findAllInconsistenciasUseCase;
     private final FindAllPendientesUseCase findAllPendientesUseCase;
     private final FindAllPendientesBajaUseCase findAllPendientesBajaUseCase;
@@ -50,8 +51,12 @@ public class ChequeraCuotaService {
         return findAllByChequeraAlternativaConImporteUseCase.findAllByChequeraAlternativaConImporte(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
     }
 
-    public List<ChequeraCuota> findAllDebidas(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
-        return findAllDebidasUseCase.findAllDebidas(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
+    public List<ChequeraCuota> findAllDebidas(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, OffsetDateTime referencia) {
+        return findAllDebidasUseCase.findAllDebidas(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, referencia);
+    }
+
+    public List<ChequeraCuota> findAllDebidasByProducto(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, OffsetDateTime referencia) {
+        return findAllDebidasByProductoUseCase.findAllDebidasByProducto(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, productoId, referencia);
     }
 
     public List<ChequeraCuota> findAllInconsistencias(OffsetDateTime desde, OffsetDateTime hasta, Boolean reduced) {

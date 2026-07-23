@@ -1,0 +1,53 @@
+---
+title: Arquitectura Hexagonal - DeudaExamen (v3.43.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class DeudaExamen {
+            +Boolean autorizadoRendir
+            +Boolean matriculaPagada
+            +Integer cuotasAdeudadas
+        }
+
+        class GetDeudaExamenUseCase {
+            <<interface>>
+            +getDeudaExamenByFacultadAndPersona(Integer, BigDecimal, Integer, OffsetDateTime) DeudaExamen
+        }
+    }
+
+    namespace application {
+        class GetDeudaExamenUseCaseImpl {
+            -ChequeraSerieService chequeraSerieService
+            -SetupService setupService
+            -ChequeraCuotaService chequeraCuotaService
+            -LectivoService lectivoService
+            +getDeudaExamenByFacultadAndPersona(Integer, BigDecimal, Integer, OffsetDateTime) DeudaExamen
+        }
+    }
+
+    namespace infrastructure_web {
+        class PersonaController {
+            -PersonaService personaService
+            -PersonaDtoMapper dtoMapper
+            +getDeudaExamenByFacultadAndPersona(Integer, BigDecimal, Integer, OffsetDateTime) ResponseEntity~DeudaExamenResponse~
+        }
+
+        class DeudaExamenResponse {
+            +Boolean autorizadoRendir
+            +Boolean matriculaPagada
+            +Integer cuotasAdeudadas
+        }
+
+        class PersonaDtoMapper {
+            +toDeudaExamenResponse(DeudaExamen) DeudaExamenResponse
+        }
+    }
+
+    GetDeudaExamenUseCaseImpl ..|> GetDeudaExamenUseCase : implements
+
+    PersonaController --> PersonaDtoMapper : uses
+    PersonaDtoMapper --> DeudaExamen : maps
+    PersonaDtoMapper --> DeudaExamenResponse : maps

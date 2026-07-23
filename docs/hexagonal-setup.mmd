@@ -1,0 +1,101 @@
+---
+title: Arquitectura Hexagonal - Modulo Setup (v3.43.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class Setup {
+            +Integer setupId
+            +Integer cuotasPermitidas
+            +BigDecimal cuentaHonorariosPagar
+        }
+
+        class SetupRepository {
+            <<interface>>
+            +findLast() Optional~Setup~
+        }
+    }
+
+    namespace application {
+        class SetupService {
+            -GetLastSetupUseCase getLastSetupUseCase
+            +findLast() Optional~Setup~
+            +findLastOrFail() Setup
+        }
+
+        class GetLastSetupUseCase {
+            <<interface>>
+            +getLastSetup() Optional~Setup~
+        }
+
+        class GetLastSetupUseCaseImpl {
+            -SetupRepository repository
+            +getLastSetup() Optional~Setup~
+        }
+
+        class SetupException {
+            +SetupException()
+            +SetupException(Integer)
+        }
+    }
+
+    namespace infrastructure_persistence {
+        class SetupEntity {
+            +Integer setupId
+            +Integer cuotasPermitidas
+            +BigDecimal cuentaHonorariosPagar
+        }
+
+        class JpaSetupRepository {
+            <<JpaRepository>>
+            +findTopByOrderBySetupIdDesc() Optional~SetupEntity~
+        }
+
+        class JpaSetupRepositoryAdapter {
+            -JpaSetupRepository jpaSetupRepository
+            -SetupMapper setupMapper
+            +findLast() Optional~Setup~
+        }
+
+        class SetupMapper {
+            +toDomain(SetupEntity) Setup
+            +toEntity(Setup) SetupEntity
+        }
+    }
+
+    namespace infrastructure_web {
+        class SetupController {
+            -SetupService setupService
+            -SetupDtoMapper setupDtoMapper
+            +findLast() ResponseEntity~SetupResponse~
+        }
+
+        class SetupResponse {
+            +Integer setupId
+            +Integer cuotasPermitidas
+            +BigDecimal cuentaHonorariosPagar
+        }
+
+        class SetupDtoMapper {
+            +toResponse(Setup) SetupResponse
+        }
+    }
+
+    SetupService --> GetLastSetupUseCase : uses
+    GetLastSetupUseCaseImpl ..|> GetLastSetupUseCase : implements
+    GetLastSetupUseCaseImpl --> SetupRepository : uses
+
+    JpaSetupRepositoryAdapter ..|> SetupRepository : implements
+    JpaSetupRepositoryAdapter --> JpaSetupRepository : uses
+    JpaSetupRepositoryAdapter --> SetupMapper : uses
+
+    SetupMapper --> Setup : maps
+    SetupMapper --> SetupEntity : maps
+    JpaSetupRepository --> SetupEntity : persists
+
+    SetupController --> SetupService : calls
+    SetupController --> SetupDtoMapper : uses
+    SetupDtoMapper --> Setup : maps
+    SetupDtoMapper --> SetupResponse : maps

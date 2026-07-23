@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Persona (v3.24.0)
+title: Arquitectura Hexagonal - Modulo Persona (v3.43.0)
 ---
 
 classDiagram
@@ -46,6 +46,7 @@ classDiagram
             -FindByStringsUseCase findByStringsUseCase
             -GetDeudaPersonaUseCase getDeudaPersonaUseCase
             -GetInscripcionFullUseCase getInscripcionFullUseCase
+            -GetDeudaExamenUseCase getDeudaExamenUseCase
             +findByUnique(BigDecimal, Integer) Persona
             +findTopByPersonaId(BigDecimal) Optional~Persona~
             +findByUniqueId(Long) Optional~Persona~
@@ -56,6 +57,7 @@ classDiagram
             +findByStrings(String, String, Integer) List~Persona~
             +getDeudaPersona(...) DeudaPersonaDto
             +getInscripcionFull(...) InscripcionFullDto
+            +getDeudaExamenByFacultadAndPersona(...) DeudaExamen
             +create(Persona) Persona
             +update(Persona) Persona
         }
@@ -75,6 +77,7 @@ classDiagram
             class FindByStringsUseCaseImpl
             class GetDeudaPersonaUseCaseImpl
             class GetInscripcionFullUseCaseImpl
+            class GetDeudaExamenUseCaseImpl
     }
     namespace application {
 
@@ -91,6 +94,7 @@ classDiagram
         class FindByStringsUseCase { <<interface>> }
         class GetDeudaPersonaUseCase { <<interface>> }
         class GetInscripcionFullUseCase { <<interface>> }
+        class GetDeudaExamenUseCase { <<interface>> }
     }
 
     namespace infrastructure_persistence {
@@ -139,15 +143,22 @@ classDiagram
                 +findByStrings(...) ResponseEntity~List~PersonaResponse~~
                 +getDeudaPersona(...) ResponseEntity~DeudaPersonaDto~
                 +getInscripcionFull(...) ResponseEntity~InscripcionFullDto~
+                +getDeudaExamenByFacultadAndPersona(...) ResponseEntity~DeudaExamenResponse~
                 +create(PersonaRequest) ResponseEntity~PersonaResponse~
                 +update(PersonaRequest) ResponseEntity~PersonaResponse~
             }
 
             class PersonaRequest
             class PersonaResponse
+            class DeudaExamenResponse {
+                +Boolean autorizadoRendir
+                +Boolean matriculaPagada
+                +Integer cuotasAdeudadas
+            }
             class PersonaDtoMapper {
                 +toDomain(PersonaRequest) Persona
                 +toResponse(Persona) PersonaResponse
+                +toDeudaExamenResponse(DeudaExamen) DeudaExamenResponse
             }
     }
 
@@ -162,6 +173,7 @@ classDiagram
     PersonaService --> FindByStringsUseCase : uses
     PersonaService --> GetDeudaPersonaUseCase : uses
     PersonaService --> GetInscripcionFullUseCase : uses
+    PersonaService --> GetDeudaExamenUseCase : uses
 
     GetPersonaByUniqueUseCaseImpl ..|> GetPersonaByUniqueUseCase : implements
     GetPersonaByIdUseCaseImpl ..|> GetPersonaByIdUseCase : implements
@@ -174,6 +186,7 @@ classDiagram
     FindByStringsUseCaseImpl ..|> FindByStringsUseCase : implements
     GetDeudaPersonaUseCaseImpl ..|> GetDeudaPersonaUseCase : implements
     GetInscripcionFullUseCaseImpl ..|> GetInscripcionFullUseCase : implements
+    GetDeudaExamenUseCaseImpl ..|> GetDeudaExamenUseCase : implements
 
     GetPersonaByUniqueUseCaseImpl --> PersonaRepository : uses
     GetPersonaByIdUseCaseImpl --> PersonaRepository : uses
@@ -193,3 +206,4 @@ classDiagram
     PersonaDtoMapper --> Persona : maps
     PersonaDtoMapper --> PersonaRequest : maps
     PersonaDtoMapper --> PersonaResponse : maps
+    PersonaDtoMapper --> DeudaExamenResponse : maps

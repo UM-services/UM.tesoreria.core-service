@@ -4,7 +4,36 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.42.1**
+**Versión actual (SemVer): 3.43.0**
+
+## Novedades 3.43.0 (verificado en código)
+- feat(setup): Nuevo modulo Setup con arquitectura hexagonal completa bajo `hexagonal/setup/`
+  - Modelo de dominio: `Setup` con campos `setupId`, `cuotasPermitidas`, `cuentaHonorariosPagar`
+  - Puerto de entrada: `GetLastSetupUseCase` con metodo `getLastSetup()`
+  - Puerto de salida: `SetupRepository` con metodo `findLast()`
+  - Caso de uso: `GetLastSetupUseCaseImpl` con implementacion completa
+  - Servicio de aplicacion: `SetupService` con metodos `findLast()` y `findLastOrFail()`
+  - Controlador REST: `SetupController` con endpoint `GET /setup/last`
+  - Excepcion: `SetupException` con constructores por defecto y con `setupId`
+- feat(deudaExamen): Nuevo modulo DeudaExamen bajo `hexagonal/persona/`
+  - Modelo de dominio: `DeudaExamen` con campos `autorizadoRendir`, `matriculaPagada`, `cuotasAdeudadas`
+  - Puerto de entrada: `GetDeudaExamenUseCase` con metodo `getDeudaExamenByFacultadAndPersona(...)`
+  - Caso de uso: `GetDeudaExamenUseCaseImpl` que valida matricula y cuotas adeudadas contra configuracion de Setup
+  - DTOs: `DeudaExamenResponse` con campos del modelo de dominio
+  - Nuevo endpoint: `GET /persona/deudaExamen/facultad/{facultadId}/persona/{personaId}/{documentoId}/fecha/{fechaExamen}`
+- feat(chequeraCuota): Nuevo caso de uso `FindAllDebidasByProductoUseCase` para filtrar cuotas deudas por producto
+  - Nuevo puerto de entrada: `FindAllDebidasByProductoUseCase` con metodo `findAllDebidasByProducto(...)`
+  - Nuevo metodo `findAllDebidasByProducto()` en `ChequeraCuotaService`
+- refactor(chequeraCuota): Nuevo parametro `OffsetDateTime referencia` en `FindAllDebidasUseCase.findAllDebidas()`
+  - Cambio de usar `OffsetDateTime.now()` internamente a recibir la fecha de referencia como parametro
+- refactor(chequeraSerie): Nuevo metodo `findAllByFacultadIdAndPersonaIdAndDocumentoId()` en `ChequeraSerieService`
+- refactor(mailChequera): Refactorizacion de `MailChequeraService.buildDeudaChequeraTexto()` - cambio de concatenacion a `StringBuilder`
+- refactor(persona): Refactorizacion de `FindDeudoresByLectivoUseCaseImpl` - actualizado para usar `OffsetDateTime.now()`
+- refactor(docs): Nuevos diagramas Mermaid `hexagonal-setup.mmd` y `hexagonal-deudaExamen.mmd` registrados en pipeline
+- refactor(docs): Actualizado diagrama `hexagonal-persona.mmd` con nuevo endpoint DeudaExamen (v3.43.0)
+- Eliminacion de archivos legacy: `Setup.kt`, `SetupRepository.java`, `SetupService.java`, `SetupController.java`
+
+> Basado en analisis profundo de `git diff HEAD` (40 archivos modificados, +493/-187 lineas) y `pom.xml` (version 3.42.0 -> 3.43.0).
 
 ## Novedades 3.42.1 (verificado en código)
 - fix(politicaArancelaria): Corregida lógica de `resolveImporteReferencia` en `RecalculateCuotaByUniqueIndexUseCaseImpl`
@@ -748,7 +777,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
   - Nueva estructura en `hexagonal/cuenta/` con capas domain, application, infrastructure
   - Actualización de servicios externos (`BalanceService`, `CompraService`, `ContabilidadService`) para usar nueva estructura
 - refactor(model): Migración de modelos Kotlin a Java en paquete `core/kotlin/model/`
-  - `Articulo.kt`, `Bancaria.kt`, `BancoMovimiento.kt`, `CuentaMovimiento.kt`, `Dependencia.kt`, `Setup.kt`, `Valor.kt`
+  - `Articulo.kt`, `Bancaria.kt`, `BancoMovimiento.kt`, `CuentaMovimiento.kt`, `Dependencia.kt`, `SetupEntity.kt`, `Valor.kt`
   - Actualización de `UbicacionArticulo.java` y `CuentaMovimientoAsiento.java`
 
 > Basado en análisis profundo de `git diff HEAD` (19 archivos modificados, +161/-146 líneas).

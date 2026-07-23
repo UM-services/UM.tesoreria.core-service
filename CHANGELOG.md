@@ -2,6 +2,61 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.43.0] - 2026-07-23
+### Added
+- feat(setup): Nuevo modulo Setup con arquitectura hexagonal completa bajo `hexagonal/setup/`
+  - Modelo de dominio: `Setup` con campos `setupId`, `cuotasPermitidas`, `cuentaHonorariosPagar`
+  - Puerto de entrada: `GetLastSetupUseCase` con metodo `getLastSetup() Optional~Setup~`
+  - Puerto de salida: `SetupRepository` con metodo `findLast() Optional~Setup~`
+  - Caso de uso: `GetLastSetupUseCaseImpl` con implementacion completa
+  - Servicio de aplicacion: `SetupService` con metodos `findLast()` y `findLastOrFail()`
+  - Adaptador JPA: `JpaSetupRepositoryAdapter` con mapeo dominio <-> entidad
+  - Entidad JPA: `SetupEntity` con anotaciones Lombok y `@Table(name = "setup")`
+  - Repositorio JPA: `JpaSetupRepository` con `findTopByOrderBySetupIdDesc()`
+  - Mapper: `SetupMapper` para conversion entidad <-> dominio
+  - Controlador REST: `SetupController` con endpoint `GET /setup/last`
+  - DTOs: `SetupResponse` con campos del modelo de dominio
+  - DTO Mapper: `SetupDtoMapper` para conversion dominio -> DTO
+  - Excepcion: `SetupException` con constructores por defecto y con `setupId`
+- feat(deudaExamen): Nuevo modulo DeudaExamen bajo `hexagonal/persona/`
+  - Modelo de dominio: `DeudaExamen` con campos `autorizadoRendir`, `matriculaPagada`, `cuotasAdeudadas`
+  - Puerto de entrada: `GetDeudaExamenUseCase` con metodo `getDeudaExamenByFacultadAndPersona(Integer, BigDecimal, Integer, OffsetDateTime)`
+  - Caso de uso: `GetDeudaExamenUseCaseImpl` que valida matricula y cuotas adeudadas contra configuracion de Setup
+  - DTOs: `DeudaExamenResponse` con campos del modelo de dominio
+  - DTO Mapper: `PersonaDtoMapper.toDeudaExamenResponse()` para conversion dominio -> DTO
+  - Nuevo endpoint en `PersonaController`: `GET /persona/deudaExamen/facultad/{facultadId}/persona/{personaId}/{documentoId}/fecha/{fechaExamen}`
+- feat(chequeraCuota): Nuevo caso de uso `FindAllDebidasByProductoUseCase` para filtrar cuotas deudas por producto
+  - Nuevo puerto de entrada: `FindAllDebidasByProductoUseCase` con metodo `findAllDebidasByProducto(Integer, Integer, Long, Integer, Integer, OffsetDateTime)`
+  - Nuevo caso de uso: `FindAllDebidasByProductoUseCaseImpl` que filtra cuotas por facultad, tipo chequera, serie, alternativa, producto y fecha de referencia
+  - Nuevo metodo `findAllDebidasByProducto()` en `ChequeraCuotaService`
+  - Nueva consulta Spring Data en `JpaChequeraCuotaRepository`: `findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndProductoIdAndBajaAndPagadoAndVencimiento1LessThanEqualAndImporte1GreaterThan`
+
+### Changed
+- refactor(chequeraCuota): Nuevo parametro `OffsetDateTime referencia` en `FindAllDebidasUseCase.findAllDebidas()`
+  - Cambio de usar `OffsetDateTime.now()` internamente a recibir la fecha de referencia como parametro
+  - `FindAllDebidasUseCaseImpl` actualizado para usar el parametro `referencia` en lugar de `OffsetDateTime.now()`
+  - `ChequeraCuotaService.findAllDebidas()` actualizado con nuevo parametro
+- refactor(chequeraSerie): Nuevo metodo `findAllByFacultadIdAndPersonaIdAndDocumentoId()` en `ChequeraSerieService`
+  - Wrapper sobre `getChequeraSerieByFacultadUseCase.getAllByFacultad()` para consistencia de API
+- refactor(mailChequera): Refactorizacion de `MailChequeraService.buildDeudaChequeraTexto()` 
+  - Cambio de concatenacion de strings a `StringBuilder` para mejor rendimiento
+  - Actualizado para usar `findAllDebidas()` con parametro `OffsetDateTime.now()`
+- refactor(persona): Refactorizacion de `FindDeudoresByLectivoUseCaseImpl`
+  - Actualizado para usar `findAllDebidas()` con parametro `OffsetDateTime.now()`
+- refactor(persona): Simplificado import de `MercadoPagoCoreService` en `GetDeudaPersonaUseCaseImpl`
+- refactor(docs): Actualizados diagramas Mermaid `hexagonal-persona.mmd` (v3.43.0) con nuevo endpoint DeudaExamen
+- feat(docs): Nuevos diagramas Mermaid `hexagonal-setup.mmd` y `hexagonal-deudaExamen.mmd`
+- feat(docs): Registrados diagramas `hexagonal-setup.mmd` y `hexagonal-deudaExamen.mmd` en pipeline `script.js`
+
+### Removed
+- Eliminacion de `Setup.kt` (Kotlin legacy) del paquete `core/kotlin/model/`
+- Eliminacion de `SetupRepository.java` (legacy) del paquete `core/repository/`
+- Eliminacion de `SetupService.java` (legacy) del paquete `core/service/`
+- Eliminacion de `SetupController.java` (legacy) del paquete `core/controller/`
+- Eliminacion de `SetupException.java` (legacy) del paquete `core/exception/`
+
+> Basado en analisis profundo de `git diff HEAD` (40 archivos modificados, +493/-187 lineas, incluyendo nuevo modulo Setup hexagonal, modulo DeudaExamen, caso de uso FindAllDebidasByProducto y refactorizaciones) y `pom.xml` (version 3.42.0 -> 3.43.0).
+
 ## [3.42.1] - 2026-07-22
 ### Fixed
 - fix(politicaArancelaria): Corregida lógica de `resolveImporteReferencia` en `RecalculateCuotaByUniqueIndexUseCaseImpl`
@@ -1294,7 +1349,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
   - Eliminación de `CuentaController.java` del paquete `core/controller/`
   - Creación de estructura hexagonal en `hexagonal/cuenta/` con capas domain, application, infrastructure
   - Actualización de `BalanceService`, `CompraService`, `ContabilidadService` para usar nueva estructura
-  - Migración de modelos Kotlin a Java: `Articulo.kt`, `Bancaria.kt`, `BancoMovimiento.kt`, `CuentaMovimiento.kt`, `Dependencia.kt`, `Setup.kt`, `Valor.kt`
+  - Migración de modelos Kotlin a Java: `Articulo.kt`, `Bancaria.kt`, `BancoMovimiento.kt`, `CuentaMovimiento.kt`, `Dependencia.kt`, `SetupEntity.kt`, `Valor.kt`
   - Actualización de `UbicacionArticulo.java` y `CuentaMovimientoAsiento.java` para usar nuevas entidades
   - `CuentaEntity` con relación `@OneToOne` a `GeograficaEntity`
   - Uso de `Auditable` como clase base para auditoría

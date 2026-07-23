@@ -311,55 +311,47 @@ public class MailChequeraService {
         Facultad facultad = facultadService.findByFacultadId(facultadId);
         Persona persona = personaService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
 
-        String data = "" + (char) 10;
-        data += "UNIVERSIDAD DE MENDOZA" + (char) 10;
-        data += "Rectorado - Arístides Villanueva 794 (5500) Mendoza" + (char) 10;
-        data += (char) 10;
-        data += persona.getApellido() + ", " + persona.getNombre() + " (" + persona.getPersonaId() + ")" + (char) 10;
-        data += facultad.getNombre() + (char) 10;
-        data += (char) 10;
-        data += "De nuestra mayor consideración:" + (char) 10;
-        data += "         Tenemos el agrado de dirigirnos a Ud. a efectos de llevar a su conocimiento que" + (char) 10;
-        data += "al " + DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(OffsetDateTime.now())
-                + " figuran en nuestros registros pendientes de cancelación las" + (char) 10;
-        data += "siguientes cuotas. Por tal motivo le rogamos tenga a bien regularizar su situación arancelaria,"
-                + (char) 10;
-        data += "para lo cual podrá dirigir un e-mail a tesoreria@um.edu.ar a efectos de generar la chequera"
-                + (char) 10;
-        data += "de pago correspondiente." + (char) 10;
-        data += (char) 10;
-        data += "                   Detalle DEUDA Chequera: " + serie.getFacultadId() + "/" + serie.getTipoChequeraId()
-                + "/" + serie.getChequeraSerieId() + (char) 10;
-        data += (char) 10;
+        StringBuilder data = new StringBuilder("" + (char) 10);
+        data.append("UNIVERSIDAD DE MENDOZA" + (char) 10);
+        data.append("Rectorado - Arístides Villanueva 794 (5500) Mendoza" + (char) 10);
+        data.append((char) 10);
+        data.append(persona.getApellido()).append(", ").append(persona.getNombre()).append(" (").append(persona.getPersonaId()).append(")").append((char) 10);
+        data.append(facultad.getNombre()).append((char) 10);
+        data.append((char) 10);
+        data.append("De nuestra mayor consideración:" + (char) 10);
+        data.append("         Tenemos el agrado de dirigirnos a Ud. a efectos de llevar a su conocimiento que" + (char) 10);
+        data.append("al ").append(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(OffsetDateTime.now())).append(" figuran en nuestros registros pendientes de cancelación las").append((char) 10);
+        data.append("siguientes cuotas. Por tal motivo le rogamos tenga a bien regularizar su situación arancelaria," + (char) 10);
+        data.append("para lo cual podrá dirigir un e-mail a tesoreria@um.edu.ar a efectos de generar la chequera" + (char) 10);
+        data.append("de pago correspondiente." + (char) 10);
+        data.append((char) 10);
+        data.append("                   Detalle DEUDA Chequera: ").append(serie.getFacultadId()).append("/").append(serie.getTipoChequeraId()).append("/").append(serie.getChequeraSerieId()).append((char) 10);
+        data.append((char) 10);
         for (ChequeraCuota cuota : chequeraCuotaService.findAllDebidas(facultadId, tipoChequeraId, chequeraSerieId,
-                serie.getAlternativaId())) {
-            data += "         Período: " + String.format("%02d/%04d", cuota.getMes(), cuota.getAnho())
-                    + "     Vencimiento: "
-                    + DateTimeFormatter.ofPattern("dd/MM/yyyy")
-                            .format(Objects.requireNonNull(cuota.getVencimiento1())
-                                    .withOffsetSameInstant(ZoneOffset.UTC))
-                    + "     Importe: " + cuota.getImporte1().setScale(2, RoundingMode.HALF_UP) + (char) 10;
+                serie.getAlternativaId(), OffsetDateTime.now())) {
+            data.append("         Período: ").append(String.format("%02d/%04d", cuota.getMes(), cuota.getAnho())).append("     Vencimiento: ").append(DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                    .format(Objects.requireNonNull(cuota.getVencimiento1())
+                            .withOffsetSameInstant(ZoneOffset.UTC))).append("     Importe: ").append(cuota.getImporte1().setScale(2, RoundingMode.HALF_UP)).append((char) 10);
 
         }
-        data += (char) 10;
-        data += "         Del mismo modo deseamos recordarle que, a fin de poder acceder a las próximas" + (char) 10;
-        data += "Mesas de Exámenes, deberá encontrarse al día con sus pagos." + (char) 10;
-        data += (char) 10;
-        data += "         Por último le recordamos que, si ha decidido no continuar sus estudios durante" + (char) 10;
-        data += "el presente Ciclo Lectivo, debe comunicar esta decisión lo antes posible a la Secretaría" + (char) 10;
-        data += "de su Facultad, de modo de no continuar generando deuda." + (char) 10;
-        data += (char) 10;
-        data += "         Si al recibir la presente, su deuda estuviese cancelada, le pedimos disculpas y" + (char) 10;
-        data += "le solicitamos remitir un e-mail a tesoreria@um.edu.ar a fin de tomar nota de los pagos" + (char) 10;
-        data += "realizados." + (char) 10;
-        data += (char) 10;
-        data += "         Le saludamos cordialmente." + (char) 10;
-        data += (char) 10;
-        data += (char) 10;
-        data += "Por favor no responda este mail, fue generado automáticamente. Su respuesta no será leída."
-                + (char) 10;
+        data.append((char) 10);
+        data.append("         Del mismo modo deseamos recordarle que, a fin de poder acceder a las próximas" + (char) 10);
+        data.append("Mesas de Exámenes, deberá encontrarse al día con sus pagos." + (char) 10);
+        data.append((char) 10);
+        data.append("         Por último le recordamos que, si ha decidido no continuar sus estudios durante" + (char) 10);
+        data.append("el presente Ciclo Lectivo, debe comunicar esta decisión lo antes posible a la Secretaría" + (char) 10);
+        data.append("de su Facultad, de modo de no continuar generando deuda." + (char) 10);
+        data.append((char) 10);
+        data.append("         Si al recibir la presente, su deuda estuviese cancelada, le pedimos disculpas y" + (char) 10);
+        data.append("le solicitamos remitir un e-mail a tesoreria@um.edu.ar a fin de tomar nota de los pagos" + (char) 10);
+        data.append("realizados." + (char) 10);
+        data.append((char) 10);
+        data.append("         Le saludamos cordialmente." + (char) 10);
+        data.append((char) 10);
+        data.append((char) 10);
+        data.append("Por favor no responda este mail, fue generado automáticamente. Su respuesta no será leída." + (char) 10);
 
-        return data;
+        return data.toString();
     }
 
 }

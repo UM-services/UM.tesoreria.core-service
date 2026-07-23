@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
+import um.tesoreria.core.hexagonal.persona.domain.model.DeudaExamen;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.*;
 import um.tesoreria.core.model.dto.DeudaPersonaDto;
 import um.tesoreria.core.model.view.PersonaKey;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +33,7 @@ public class PersonaService {
     private final FindByStringsUseCase findByStringsUseCase;
     private final GetDeudaPersonaUseCase getDeudaPersonaUseCase;
     private final GetInscripcionFullUseCase getInscripcionFullUseCase;
+    private final GetDeudaExamenUseCase getDeudaExamenUseCase;
 
     public Persona findByUnique(BigDecimal personaId, Integer documentoId) {
         return getPersonaByUniqueUseCase.findByUnique(personaId, documentoId);
@@ -92,4 +95,9 @@ public class PersonaService {
     public InscripcionFullDto findInscripcionFull(Integer facultadId, BigDecimal personaId, Integer documentoId, Integer lectivoId) {
         return getInscripcionFullUseCase.findInscripcionFull(facultadId, personaId, documentoId, lectivoId);
     }
+
+    public DeudaExamen getDeudaExamenByFacultadAndPersona(Integer facultadId, BigDecimal personaId, Integer documentoId, OffsetDateTime fechaExamen) {
+        return getDeudaExamenUseCase.getDeudaExamenByFacultadAndPersona(facultadId, personaId, documentoId, fechaExamen);
+    }
+
 }

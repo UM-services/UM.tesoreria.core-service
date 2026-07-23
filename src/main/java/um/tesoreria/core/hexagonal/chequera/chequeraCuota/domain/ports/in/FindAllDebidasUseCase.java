@@ -1,8 +1,10 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in;
 
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
+
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface FindAllDebidasUseCase {
-    List<ChequeraCuota> findAllDebidas(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId);
+    List<ChequeraCuota> findAllDebidas(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, OffsetDateTime referencia);
 }

@@ -119,6 +119,13 @@ public class JpaChequeraCuotaRepositoryAdapter implements ChequeraCuotaRepositor
     }
 
     @Override
+    public List<ChequeraCuota> findAllDebidasByProducto(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, OffsetDateTime referencia) {
+        return jpaChequeraCuotaRepository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndProductoIdAndBajaAndPagadoAndVencimiento1LessThanEqualAndImporte1GreaterThan(
+                facultadId, tipoChequeraId, chequeraSerieId, alternativaId, productoId, (byte) 0, (byte) 0, referencia, BigDecimal.ZERO
+        ).stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
     public List<ChequeraCuota> findAllPendientes(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
         return jpaChequeraCuotaRepository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndPagadoAndBajaAndCompensadaAndImporte1GreaterThan(
                 facultadId, tipoChequeraId, chequeraSerieId, alternativaId, (byte) 0, (byte) 0, (byte) 0, BigDecimal.ZERO
