@@ -2,6 +2,37 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.45.0] - 2026-07-29
+### Added
+- feat(guarani/guaraniBeneficio): Nuevo modulo GuaraniBeneficio con arquitectura hexagonal completa bajo `hexagonal/guarani/guaraniBeneficio/`
+  - Modelo de dominio: `GuaraniBeneficio` con campos `guaraniBeneficioId`, `requisito`, `porcentajeBeneficio` (BigDecimal default ZERO)
+  - Puertos de entrada (3): `CreateGuaraniBeneficioUseCase`, `GetGuaraniBeneficioByRequisitoUseCase`, `UpdateGuaraniBeneficioByRequisitoUseCase`
+  - Puerto de salida: `GuaraniBeneficioRepository` con metodos `findByRequisito(Integer)` y `save(GuaraniBeneficio)`
+  - Casos de uso: `CreateGuaraniBeneficioUseCaseImpl`, `GetGuaraniBeneficioByRequisitoUseCaseImpl`, `UpdateGuaraniBeneficioByRequisitoUseCaseImpl`
+  - Servicio de aplicacion: `GuaraniBeneficioService` con delegacion a los 3 casos de uso
+  - Adaptador JPA: `JpaGuaraniBeneficioRepositoryAdapter` con mapeo dominio <-> entidad
+  - Entidad JPA: `GuaraniBeneficioEntity` con `@Table(name = "guarani_beneficio")` y Lombok
+  - Repositorio JPA: `JpaGuaraniBeneficioRepository` con consulta `findByRequisito(Integer)`
+  - Mapper: `GuaraniBeneficioMapper` para conversion entidad <-> dominio
+  - Controlador REST: `GuaraniBeneficioController` con 3 endpoints:
+    - `GET /api/tesoreria/core/guaraniBeneficio/requisito/{requisito}`
+    - `POST /api/tesoreria/core/guaraniBeneficio/`
+    - `PUT /api/tesoreria/core/guaraniBeneficio/requisito/{requisito}`
+  - DTOs: `GuaraniBeneficioRequest`, `GuaraniBeneficioResponse`
+  - DTO Mapper: `GuaraniBeneficioDtoMapper` para conversion DTO <-> dominio
+  - Excepcion: `GuaraniBeneficioException` con constructores por defecto y con `requisito`
+- feat(persona/deudaExamen): Parche temporal en `GetDeudaExamenUseCaseImpl` forzando `matriculaPagada = true`
+  - Cambio en `GetDeudaExamenUseCaseImpl` linea 68-69: asignacion forzada de `matriculaPagada = true`
+
+### Changed
+- fix(ci): Mejorado manejo de respuestas no-array en pipeline de generacion de documentacion (`generate-docs.yml`)
+  - Validacion `jq -e 'type == "array"'` antes de concatenar paginacion de API
+  - Log de warning y break en caso de error de autenticacion/rate-limit
+  - Previene corrupcion del archivo JSON cuando la API retorna error en lugar de array
+- feat(docs): Nuevo diagrama Mermaid `hexagonal-guaraniBeneficio.mmd` registrado en pipeline `script.js` e `index.html`
+
+> Basado en analisis profundo de `git diff HEAD` (20 archivos modificados, +377/-1 lineas, incluyendo nuevo modulo GuaraniBeneficio, parche en DeudaExamen y mejora CI) y `pom.xml` (version 3.44.0 -> 3.45.0).
+
 ## [3.44.0] - 2026-07-23
 ### Added
 - feat(persona/deudaExamen): Enriquecimiento del modelo de dominio `DeudaExamen` con nuevos campos `importeAdeudado` y `habilitadoTesoreria`

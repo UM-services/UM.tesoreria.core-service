@@ -44,7 +44,14 @@ jobs:
             while [ -n "$url" ] && [ "$url" != "null" ]; do
               response=$(curl -s -D /tmp/headers.txt -H "Authorization: token $auth" "$url")
               tmp=$(mktemp)
-              jq -s '.[0] + .[1]' "$output" <(echo "$response") > "$tmp" && mv "$tmp" "$output"
+              if echo "$response" | jq -e 'type == "array"' > /dev/null 2>&1; then
+                jq -s '.[0] + .[1]' "$output" <(echo "$response") > "$tmp" && mv "$tmp" "$output"
+              else
+                echo "Warning: API returned non-array response (possibly rate limit or auth error)"
+                echo "$response" | jq . > /tmp/api_error.json 2>/dev/null || echo "$response" > /tmp/api_error.json
+                cat /tmp/api_error.json
+                break
+              fi
               url=$(grep -i '^link:' /tmp/headers.txt | grep -oP '<[^>]+>; rel="next"' | grep -oP '<\K[^>]+')
             done
           }

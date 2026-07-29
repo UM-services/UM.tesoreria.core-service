@@ -4,7 +4,25 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.44.0**
+**Versión actual (SemVer): 3.45.0**
+
+## Novedades 3.45.0 (verificado en código)
+- feat(guarani/guaraniBeneficio): Nuevo modulo GuaraniBeneficio con arquitectura hexagonal completa bajo `hexagonal/guarani/guaraniBeneficio/`
+  - Modelo de dominio: `GuaraniBeneficio` con campos `guaraniBeneficioId`, `requisito`, `porcentajeBeneficio`
+  - 3 puertos de entrada: `CreateGuaraniBeneficioUseCase`, `GetGuaraniBeneficioByRequisitoUseCase`, `UpdateGuaraniBeneficioByRequisitoUseCase`
+  - Puerto de salida: `GuaraniBeneficioRepository` con `findByRequisito(Integer)` y `save(GuaraniBeneficio)`
+  - Servicio de aplicacion: `GuaraniBeneficioService` con delegacion a casos de uso
+  - Adaptador JPA: `JpaGuaraniBeneficioRepositoryAdapter` con mapper y entidad
+  - Entidad JPA: `GuaraniBeneficioEntity` con `@Table(name = "guarani_beneficio")`
+  - Repositorio JPA: `JpaGuaraniBeneficioRepository`
+  - Controlador REST: `GuaraniBeneficioController` con 3 endpoints (`GET /requisito/{id}`, `POST /`, `PUT /requisito/{id}`)
+  - DTOs: `GuaraniBeneficioRequest`, `GuaraniBeneficioResponse`, `GuaraniBeneficioDtoMapper`
+  - Excepcion: `GuaraniBeneficioException`
+- feat(persona/deudaExamen): Parche temporal forzando `matriculaPagada = true` en `GetDeudaExamenUseCaseImpl`
+- fix(ci): Mejorado manejo de respuestas no-array en pipeline de generacion de docs (`generate-docs.yml`)
+- feat(docs): Nuevo diagrama Mermaid `hexagonal-guaraniBeneficio.mmd` registrado en pipeline
+
+> Basado en analisis profundo de `git diff HEAD` (20 archivos modificados, +377/-1 lineas, incluyendo nuevo modulo GuaraniBeneficio, parche en DeudaExamen y mejora CI) y `pom.xml` (version 3.44.0 -> 3.45.0).
 
 ## Novedades 3.44.0 (verificado en código)
 - feat(persona/deudaExamen): Enriquecimiento del modelo de dominio `DeudaExamen` con nuevos campos `importeAdeudado` y `habilitadoTesoreria`

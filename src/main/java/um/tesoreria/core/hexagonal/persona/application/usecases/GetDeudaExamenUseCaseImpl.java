@@ -65,6 +65,10 @@ public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
                 autorizadoRendir = true;
             }
         }
+
+        // parche temporal
+        matriculaPagada = true;
+        //
         return DeudaExamen.builder()
                 .autorizadoRendir(autorizadoRendir)
                 .matriculaPagada(matriculaPagada)
