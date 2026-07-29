@@ -1,0 +1,7 @@
+package um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.ports.in;
+
+import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.model.GuaraniBeneficio;
+
+public interface CreateGuaraniBeneficioUseCase {
+    GuaraniBeneficio create(GuaraniBeneficio guaraniBeneficio);
+}

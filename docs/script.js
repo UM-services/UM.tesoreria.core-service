@@ -120,6 +120,7 @@ const diagrams = [
   { id: 'hexagonal-cuentaMovimiento', file: 'hexagonal-cuentaMovimiento.mmd', title: 'Arquitectura Hexagonal - CuentaMovimiento' },
   { id: 'hexagonal-proveedorMovimiento', file: 'hexagonal-proveedorMovimiento.mmd', title: 'Arquitectura Hexagonal - ProveedorMovimiento' },
   { id: 'hexagonal-track', file: 'hexagonal-track.mmd', title: 'Arquitectura Hexagonal - Track' },
+  { id: 'hexagonal-guaraniBeneficio', file: 'hexagonal-guaraniBeneficio.mmd', title: 'Arquitectura Hexagonal - GuaraniBeneficio' },
   { id: 'dependencies-diagram', file: 'dependencies.mmd', title: 'Diagrama de Dependencias' },
   { id: 'erd-diagram', file: 'entities.mmd', title: 'Diagrama de Entidad-Relacion (Simplificado)' },
   { id: 'deployment-diagram', file: 'deployment.mmd', title: 'Diagrama de Despliegue' },

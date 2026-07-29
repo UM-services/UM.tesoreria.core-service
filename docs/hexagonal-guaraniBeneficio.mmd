@@ -1,0 +1,138 @@
+---
+title: Arquitectura Hexagonal - Módulo GuaraniBeneficio (v3.45.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class GuaraniBeneficio {
+            +Integer guaraniBeneficioId
+            +Integer requisito
+            +BigDecimal porcentajeBeneficio
+        }
+
+        class CreateGuaraniBeneficioUseCase {
+            <<interface>>
+            +create(GuaraniBeneficio) GuaraniBeneficio
+        }
+
+        class GetGuaraniBeneficioByRequisitoUseCase {
+            <<interface>>
+            +getGuaraniBeneficioByRequisito(Integer) Optional~GuaraniBeneficio~
+        }
+
+        class UpdateGuaraniBeneficioByRequisitoUseCase {
+            <<interface>>
+            +updateByRequisito(Integer, GuaraniBeneficio) GuaraniBeneficio
+        }
+    }
+
+    namespace application {
+        class GuaraniBeneficioService {
+            -GetGuaraniBeneficioByRequisitoUseCase getGuaraniBeneficioByRequisitoUseCase
+            -CreateGuaraniBeneficioUseCase createGuaraniBeneficioUseCase
+            -UpdateGuaraniBeneficioByRequisitoUseCase updateGuaraniBeneficioByRequisitoUseCase
+            +findByRequisito(Integer) GuaraniBeneficio
+            +create(GuaraniBeneficio) GuaraniBeneficio
+            +updateByRequisito(Integer, GuaraniBeneficio) GuaraniBeneficio
+        }
+
+        class CreateGuaraniBeneficioUseCaseImpl {
+            -GuaraniBeneficioRepository repository
+            +create(GuaraniBeneficio) GuaraniBeneficio
+        }
+
+        class GetGuaraniBeneficioByRequisitoUseCaseImpl {
+            -GuaraniBeneficioRepository repository
+            +getGuaraniBeneficioByRequisito(Integer) Optional~GuaraniBeneficio~
+        }
+
+        class UpdateGuaraniBeneficioByRequisitoUseCaseImpl {
+            -GuaraniBeneficioRepository repository
+            +updateByRequisito(Integer, GuaraniBeneficio) GuaraniBeneficio
+        }
+    }
+
+    namespace domain_ports_out {
+        class GuaraniBeneficioRepository {
+            <<interface>>
+            +findByRequisito(Integer) Optional~GuaraniBeneficio~
+            +save(GuaraniBeneficio) GuaraniBeneficio
+        }
+    }
+
+    namespace infrastructure_persistence {
+        class GuaraniBeneficioEntity {
+            +Integer guaraniBeneficioId
+            +Integer requisito
+            +BigDecimal porcentajeBeneficio
+        }
+
+        class JpaGuaraniBeneficioRepository {
+            <<interface>>
+            +findByRequisito(Integer) Optional~GuaraniBeneficioEntity~
+        }
+
+        class JpaGuaraniBeneficioRepositoryAdapter {
+            -JpaGuaraniBeneficioRepository repository
+            -GuaraniBeneficioMapper mapper
+            +findByRequisito(Integer) Optional~GuaraniBeneficio~
+            +save(GuaraniBeneficio) GuaraniBeneficio
+        }
+
+        class GuaraniBeneficioMapper {
+            +toDomainModel(GuaraniBeneficioEntity) GuaraniBeneficio
+            +toEntity(GuaraniBeneficio) GuaraniBeneficioEntity
+        }
+    }
+
+    namespace infrastructure_web {
+        class GuaraniBeneficioController {
+            -GuaraniBeneficioService guaraniBeneficioService
+            -GuaraniBeneficioDtoMapper guaraniBeneficioDtoMapper
+            +findByRequisito(Integer) ResponseEntity~GuaraniBeneficioResponse~
+            +add(GuaraniBeneficioRequest) ResponseEntity~GuaraniBeneficioResponse~
+            +updateByRequisito(Integer, GuaraniBeneficioRequest) ResponseEntity~GuaraniBeneficioResponse~
+        }
+
+        class GuaraniBeneficioRequest {
+            +Integer requisito
+            +BigDecimal porcentajeBeneficio
+        }
+
+        class GuaraniBeneficioResponse {
+            +Integer guaraniBeneficioId
+            +Integer requisito
+            +BigDecimal porcentajeBeneficio
+        }
+
+        class GuaraniBeneficioDtoMapper {
+            +toDomain(GuaraniBeneficioRequest) GuaraniBeneficio
+            +toResponse(GuaraniBeneficio) GuaraniBeneficioResponse
+        }
+    }
+
+    CreateGuaraniBeneficioUseCaseImpl ..|> CreateGuaraniBeneficioUseCase
+    GetGuaraniBeneficioByRequisitoUseCaseImpl ..|> GetGuaraniBeneficioByRequisitoUseCase
+    UpdateGuaraniBeneficioByRequisitoUseCaseImpl ..|> UpdateGuaraniBeneficioByRequisitoUseCase
+
+    JpaGuaraniBeneficioRepositoryAdapter ..|> GuaraniBeneficioRepository
+
+    GuaraniBeneficioService --> CreateGuaraniBeneficioUseCase
+    GuaraniBeneficioService --> GetGuaraniBeneficioByRequisitoUseCase
+    GuaraniBeneficioService --> UpdateGuaraniBeneficioByRequisitoUseCase
+
+    CreateGuaraniBeneficioUseCaseImpl --> GuaraniBeneficioRepository
+    GetGuaraniBeneficioByRequisitoUseCaseImpl --> GuaraniBeneficioRepository
+    UpdateGuaraniBeneficioByRequisitoUseCaseImpl --> GuaraniBeneficioRepository
+
+    JpaGuaraniBeneficioRepositoryAdapter --> JpaGuaraniBeneficioRepository
+    JpaGuaraniBeneficioRepositoryAdapter --> GuaraniBeneficioMapper
+    GuaraniBeneficioMapper ..> GuaraniBeneficioEntity : maps from
+    GuaraniBeneficioMapper ..> GuaraniBeneficio : maps to
+
+    GuaraniBeneficioController --> GuaraniBeneficioService
+    GuaraniBeneficioDtoMapper ..> GuaraniBeneficioRequest : maps from
+    GuaraniBeneficioDtoMapper ..> GuaraniBeneficio : maps to
+    GuaraniBeneficioDtoMapper ..> GuaraniBeneficioResponse : maps to
