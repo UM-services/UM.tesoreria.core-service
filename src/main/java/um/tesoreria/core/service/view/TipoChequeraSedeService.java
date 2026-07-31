@@ -3,11 +3,11 @@
  */
 package um.tesoreria.core.service.view;
 
+import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.view.TipoChequeraSedeException;
@@ -20,13 +20,12 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.Ch
  *
  */
 @Service
+@RequiredArgsConstructor
 public class TipoChequeraSedeService {
 
-	@Autowired
-	private TipoChequeraSedeRepository repository;
+	private final TipoChequeraSedeRepository repository;
 
-	@Autowired
-	private ChequeraSerieService chequeraSerieService;
+	private final ChequeraSerieService chequeraSerieService;
 
 	public List<TipoChequeraSede> findAll() {
 		return repository.findAll();

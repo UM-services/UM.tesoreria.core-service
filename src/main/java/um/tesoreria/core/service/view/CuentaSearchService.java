@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.service.view;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.CuentaSearch;
@@ -16,10 +16,10 @@ import um.tesoreria.core.repository.view.CuentaSearchRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class CuentaSearchService {
 
-	@Autowired
-	private CuentaSearchRepository repository;
+	private final CuentaSearchRepository repository;
 
 	public List<CuentaSearch> findAllByStrings(List<String> conditions, Boolean visible) {
 		return repository.findAllByStrings(conditions, visible);

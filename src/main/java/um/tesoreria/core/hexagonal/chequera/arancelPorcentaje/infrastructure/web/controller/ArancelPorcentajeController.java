@@ -46,7 +46,7 @@ public class ArancelPorcentajeController {
     public ResponseEntity<ArancelPorcentajeResponse> add(@RequestBody ArancelPorcentajeRequest request) {
         ArancelPorcentaje domain = dtoMapper.toDomain(request);
         ArancelPorcentaje created = service.add(domain);
-        return new ResponseEntity<>(dtoMapper.toResponse(created), HttpStatus.OK);
+        return ResponseEntity.ok(dtoMapper.toResponse(created));
     }
 
     @PutMapping("/{arancelporcentajeId}")
@@ -54,6 +54,6 @@ public class ArancelPorcentajeController {
                                                              @PathVariable Long arancelporcentajeId) {
         ArancelPorcentaje domain = dtoMapper.toDomain(request);
         ArancelPorcentaje updated = service.update(domain, arancelporcentajeId);
-        return new ResponseEntity<>(dtoMapper.toResponse(updated), HttpStatus.OK);
+        return ResponseEntity.ok(dtoMapper.toResponse(updated));
     }
 }

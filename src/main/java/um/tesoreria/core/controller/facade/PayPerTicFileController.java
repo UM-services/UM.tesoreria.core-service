@@ -3,10 +3,10 @@
  */
 package um.tesoreria.core.controller.facade;
 
+import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 import java.time.OffsetDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -30,14 +30,11 @@ import static um.tesoreria.core.util.Tool.generateFile;
  */
 @RestController
 @RequestMapping("/payperticfile")
+@RequiredArgsConstructor
 public class PayPerTicFileController {
 
 	private final PayPerTicFileService service;
 
-	@Autowired
-	public PayPerTicFileController(PayPerTicFileService service) {
-		this.service = service;
-	}
 
 	@GetMapping("/generate/{filename_return}/{desde}/{hasta}")
 	public ResponseEntity<Resource> generate(@PathVariable String filename_return,

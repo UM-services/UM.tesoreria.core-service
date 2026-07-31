@@ -3,10 +3,10 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +19,10 @@ import um.tesoreria.core.repository.PeriodoSuspendidoRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class PersonaSuspendidoService {
 
-	@Autowired
-	private PeriodoSuspendidoRepository repository;
+	private final PeriodoSuspendidoRepository repository;
 
 	public List<PersonaSuspendido> findAllBySede(Integer facultadId, Integer geograficaId) {
 		return repository.findAllByFacultadIdAndGeograficaId(facultadId, geograficaId);

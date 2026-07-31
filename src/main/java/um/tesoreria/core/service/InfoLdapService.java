@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.InfoLdapException;
@@ -17,10 +17,10 @@ import um.tesoreria.core.repository.InfoLdapRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class InfoLdapService {
 
-	@Autowired
-	private InfoLdapRepository repository;
+	private final InfoLdapRepository repository;
 
 	public InfoLdap findByPersonaId(BigDecimal personaId) {
 		return repository.findByPersonaId(personaId).orElseThrow(() -> new InfoLdapException(personaId));

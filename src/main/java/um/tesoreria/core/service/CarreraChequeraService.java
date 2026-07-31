@@ -3,12 +3,12 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CarreraChequeraException;
@@ -21,10 +21,10 @@ import um.tesoreria.core.repository.CarreraChequeraRepository;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CarreraChequeraService {
 
-	@Autowired
-	private CarreraChequeraRepository repository;
+	private final CarreraChequeraRepository repository;
 
 	public List<CarreraChequera> findAllByFacultadIdAndLectivoIdAndGeograficaIdAndClaseChequeraIdAndCurso(Integer facultadId,
 																										  Integer lectivoId, Integer geograficaId, Integer claseChequeraId, Integer curso) {

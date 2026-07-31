@@ -3,10 +3,10 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -28,23 +28,21 @@ import um.tesoreria.core.service.PersonaSuspendidoService;
  */
 @RestController
 @RequestMapping("/personaSuspendido")
+@RequiredArgsConstructor
 public class PersonaSuspendidoController {
 
-	@Autowired
-	private PersonaSuspendidoService service;
+	private final PersonaSuspendidoService service;
 
 	@GetMapping("/sede/{facultadId}/{geograficaId}")
 	public ResponseEntity<List<PersonaSuspendido>> findAllBySede(@PathVariable Integer facultadId,
 			@PathVariable Integer geograficaId) {
-		return new ResponseEntity<List<PersonaSuspendido>>(service.findAllBySede(facultadId, geograficaId),
-				HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllBySede(facultadId, geograficaId));
 	}
 
 	@GetMapping("/{personaSuspendidoId}")
 	public ResponseEntity<PersonaSuspendido> findByPersonaSuspendidoId(@PathVariable Long personaSuspendidoId) {
 		try {
-			return new ResponseEntity<PersonaSuspendido>(service.findByPersonaSuspendidoId(personaSuspendidoId),
-					HttpStatus.OK);
+			return ResponseEntity.ok(service.findByPersonaSuspendidoId(personaSuspendidoId));
 		} catch (PersonaSuspendidoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -54,7 +52,7 @@ public class PersonaSuspendidoController {
 	public ResponseEntity<PersonaSuspendido> findByUnique(@PathVariable BigDecimal personaId,
 			@PathVariable Integer documentoId) {
 		try {
-			return new ResponseEntity<PersonaSuspendido>(service.findByUnique(personaId, documentoId), HttpStatus.OK);
+			return ResponseEntity.ok(service.findByUnique(personaId, documentoId));
 		} catch (PersonaSuspendidoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -62,7 +60,7 @@ public class PersonaSuspendidoController {
 
 	@PostMapping("/")
 	public ResponseEntity<PersonaSuspendido> add(@RequestBody PersonaSuspendido personaSuspendido) {
-		return new ResponseEntity<PersonaSuspendido>(service.add(personaSuspendido), HttpStatus.OK);
+		return ResponseEntity.ok(service.add(personaSuspendido));
 	}
 
 	@DeleteMapping("/{personaSuspendidoId}")

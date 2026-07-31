@@ -38,10 +38,9 @@ public class CarreraChequeraController {
 	public ResponseEntity<List<CarreraChequera>> findAllByCurso(@PathVariable Integer facultadId,
 																@PathVariable Integer lectivoId, @PathVariable Integer geograficaId, @PathVariable Integer claseChequeraId,
 																@PathVariable Integer curso) {
-		return new ResponseEntity<>(
+		return ResponseEntity.ok(
 				service.findAllByFacultadIdAndLectivoIdAndGeograficaIdAndClaseChequeraIdAndCurso(facultadId, lectivoId,
-						geograficaId, claseChequeraId, curso),
-				HttpStatus.OK);
+						geograficaId, claseChequeraId, curso));
 	}
 
 	@GetMapping("/unique/{facultadId}/{lectivoId}/{planId}/{carreraId}/{claseChequeraId}/{curso}/{geograficaId}")
@@ -49,8 +48,8 @@ public class CarreraChequeraController {
 			@PathVariable Integer lectivoId, @PathVariable Integer planId, @PathVariable Integer carreraId,
 			@PathVariable Integer claseChequeraId, @PathVariable Integer curso, @PathVariable Integer geograficaId) {
 		try {
-			return new ResponseEntity<>(service.findByUnique(facultadId, lectivoId, planId, carreraId,
-					claseChequeraId, curso, geograficaId), HttpStatus.OK);
+			return ResponseEntity.ok(service.findByUnique(facultadId, lectivoId, planId, carreraId,
+					claseChequeraId, curso, geograficaId));
 		} catch (CarreraChequeraException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -58,13 +57,13 @@ public class CarreraChequeraController {
 
 	@PostMapping("/")
 	public ResponseEntity<CarreraChequera> add(@RequestBody CarreraChequera carrerachequera) {
-		return new ResponseEntity<>(service.add(carrerachequera), HttpStatus.OK);
+		return ResponseEntity.ok(service.add(carrerachequera));
 	}
 
 	@PutMapping("/{carrerachequeraId}")
 	public ResponseEntity<CarreraChequera> update(@RequestBody CarreraChequera carrerachequera,
 			@PathVariable Long carrerachequeraId) {
-		return new ResponseEntity<>(service.update(carrerachequera, carrerachequeraId), HttpStatus.OK);
+		return ResponseEntity.ok(service.update(carrerachequera, carrerachequeraId));
 	}
 
 }

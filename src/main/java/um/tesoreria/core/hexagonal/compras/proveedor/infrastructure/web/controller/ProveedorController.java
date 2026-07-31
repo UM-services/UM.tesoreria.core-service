@@ -40,7 +40,7 @@ public class ProveedorController {
                 .collect(Collectors.toList());
         PaginatedResponse<ProveedorResponse> paginatedResponse = new PaginatedResponse<>(
                 responses, result.getTotalElements(), result.getTotalPages(), result.getCurrentPage(), result.getPageSize());
-        return new ResponseEntity<>(paginatedResponse, HttpStatus.OK);
+        return ResponseEntity.ok(paginatedResponse);
     }
 
     @GetMapping("/")
@@ -48,7 +48,7 @@ public class ProveedorController {
         List<ProveedorResponse> responses = proveedorService.getAll().stream()
                 .map(proveedorDtoMapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/search")
@@ -56,27 +56,27 @@ public class ProveedorController {
         List<ProveedorSearchResponse> responses = proveedorService.search(conditions).stream()
                 .map(proveedorDtoMapper::toSearchResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{proveedorId}")
     public ResponseEntity<ProveedorResponse> findByProveedorId(@PathVariable Integer proveedorId) {
         return proveedorService.getByProveedorId(proveedorId)
-                .map(proveedor -> new ResponseEntity<>(proveedorDtoMapper.toResponse(proveedor), HttpStatus.OK))
+                .map(proveedor -> ResponseEntity.ok(proveedorDtoMapper.toResponse(proveedor)))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor no encontrado"));
     }
 
     @GetMapping("/cuit/{cuit}")
     public ResponseEntity<ProveedorResponse> findByCuit(@PathVariable String cuit) {
         return proveedorService.getByCuit(cuit)
-                .map(proveedor -> new ResponseEntity<>(proveedorDtoMapper.toResponse(proveedor), HttpStatus.OK))
+                .map(proveedor -> ResponseEntity.ok(proveedorDtoMapper.toResponse(proveedor)))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Proveedor no encontrado con CUIT " + cuit));
     }
 
     @GetMapping("/last")
     public ResponseEntity<ProveedorResponse> findLast() {
         return proveedorService.getLast()
-                .map(proveedor -> new ResponseEntity<>(proveedorDtoMapper.toResponse(proveedor), HttpStatus.OK))
+                .map(proveedor -> ResponseEntity.ok(proveedorDtoMapper.toResponse(proveedor)))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay proveedores"));
     }
 
@@ -84,14 +84,14 @@ public class ProveedorController {
     public ResponseEntity<ProveedorResponse> add(@RequestBody ProveedorRequest proveedorRequest) {
         Proveedor proveedor = proveedorDtoMapper.toDomain(proveedorRequest);
         Proveedor createdProveedor = proveedorService.create(proveedor);
-        return new ResponseEntity<>(proveedorDtoMapper.toResponse(createdProveedor), HttpStatus.OK);
+        return ResponseEntity.ok(proveedorDtoMapper.toResponse(createdProveedor));
     }
 
     @PutMapping("/{proveedorId}")
     public ResponseEntity<ProveedorResponse> update(@RequestBody ProveedorRequest proveedorRequest, @PathVariable Integer proveedorId) {
         Proveedor proveedor = proveedorDtoMapper.toDomain(proveedorRequest);
         return proveedorService.update(proveedorId, proveedor)
-                .map(updated -> new ResponseEntity<>(proveedorDtoMapper.toResponse(updated), HttpStatus.OK))
+                .map(updated -> ResponseEntity.ok(proveedorDtoMapper.toResponse(updated)))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se pudo actualizar"));
     }
 

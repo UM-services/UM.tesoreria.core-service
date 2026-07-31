@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,47 +26,46 @@ import um.tesoreria.core.service.ContratoPeriodoService;
  */
 @RestController
 @RequestMapping("/contratoperiodo")
+@RequiredArgsConstructor
 public class ContratoPeriodoController {
 
-	@Autowired
-	private ContratoPeriodoService service;
+	private final ContratoPeriodoService service;
 
 	@GetMapping("/contrato/{contratoId}")
 	public ResponseEntity<List<ContratoPeriodo>> findAllByContrato(@PathVariable Long contratoId) {
-		return new ResponseEntity<List<ContratoPeriodo>>(service.findAllByContrato(contratoId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByContrato(contratoId));
 	}
 
 	@GetMapping("/contratofactura/{contratofacturaId}")
 	public ResponseEntity<List<ContratoPeriodo>> findAllByContratoFactura(@PathVariable Long contratofacturaId) {
-		return new ResponseEntity<List<ContratoPeriodo>>(service.findAllByContratoFactura(contratofacturaId),
-				HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByContratoFactura(contratofacturaId));
 	}
 
 	@GetMapping("/pendiente/{contratoId}")
 	public ResponseEntity<List<ContratoPeriodo>> findAllPendienteByContrato(@PathVariable Long contratoId) {
-		return new ResponseEntity<List<ContratoPeriodo>>(service.findAllPendienteByContrato(contratoId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllPendienteByContrato(contratoId));
 	}
 
 	@GetMapping("/periodo/{contratoId}/{anho}/{mes}")
 	public ResponseEntity<ContratoPeriodo> findByPeriodo(@PathVariable Long contratoId, @PathVariable Integer anho,
 			@PathVariable Integer mes) {
-		return new ResponseEntity<ContratoPeriodo>(service.findByPeriodo(contratoId, anho, mes), HttpStatus.OK);
+		return ResponseEntity.ok(service.findByPeriodo(contratoId, anho, mes));
 	}
 
 	@GetMapping("/{contratoPeriodoId}")
 	public ResponseEntity<ContratoPeriodo> findByContratoPeriodoId(@PathVariable Long contratoPeriodoId) {
-		return new ResponseEntity<ContratoPeriodo>(service.findByContratoPeriodoId(contratoPeriodoId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findByContratoPeriodoId(contratoPeriodoId));
 	}
 
 	@PostMapping("/")
 	public ResponseEntity<ContratoPeriodo> add(@RequestBody ContratoPeriodo contratoperiodo) {
-		return new ResponseEntity<ContratoPeriodo>(service.add(contratoperiodo), HttpStatus.OK);
+		return ResponseEntity.ok(service.add(contratoperiodo));
 	}
 
 	@PutMapping("/{contratoperiodoId}")
 	public ResponseEntity<ContratoPeriodo> update(@RequestBody ContratoPeriodo contratoperiodo,
 			@PathVariable Long contratoperiodoId) {
-		return new ResponseEntity<ContratoPeriodo>(service.update(contratoperiodo, contratoperiodoId), HttpStatus.OK);
+		return ResponseEntity.ok(service.update(contratoperiodo, contratoperiodoId));
 	}
 
 	@DeleteMapping("/{contratoPeriodoId}")

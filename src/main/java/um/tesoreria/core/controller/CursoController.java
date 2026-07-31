@@ -33,13 +33,13 @@ public class CursoController {
 
     @GetMapping("/")
     public ResponseEntity<List<Curso>> findAll() {
-        return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/{cursoId}")
     public ResponseEntity<Curso> findByCursoId(@PathVariable Integer cursoId) {
         try {
-            return new ResponseEntity<>(service.findByCursoId(cursoId), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByCursoId(cursoId));
         } catch (CursoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -48,7 +48,7 @@ public class CursoController {
     @GetMapping("/top/{claseChequeraId}")
     public ResponseEntity<Curso> findTopByClaseChequeraId(@PathVariable Integer claseChequeraId) {
         try {
-            return new ResponseEntity<>(service.findTopByClaseChequera(claseChequeraId), HttpStatus.OK);
+            return ResponseEntity.ok(service.findTopByClaseChequera(claseChequeraId));
         } catch (CursoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }

@@ -3,9 +3,8 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.kotlin.model.Build;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,19 +19,19 @@ import um.tesoreria.core.service.BuildService;
  */
 @RestController
 @RequestMapping("/build")
+@RequiredArgsConstructor
 public class BuildController {
 
-	@Autowired
-	private BuildService service;
+	private final BuildService service;
 
 	@GetMapping("/last")
 	public ResponseEntity<Build> findLast() {
-		return new ResponseEntity<>(service.findLast(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findLast());
 	}
 
 	@PostMapping("/")
 	public ResponseEntity<Build> add() {
-		return new ResponseEntity<>(service.add(new Build()), HttpStatus.OK);
+		return ResponseEntity.ok(service.add(new Build()));
 	}
 
 }

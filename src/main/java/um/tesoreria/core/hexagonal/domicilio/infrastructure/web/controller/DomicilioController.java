@@ -33,7 +33,7 @@ public class DomicilioController {
     @GetMapping("/{domicilioId}")
     public ResponseEntity<DomicilioResponse> findById(@PathVariable Long domicilioId) {
         return domicilioService.findById(domicilioId)
-                .map(domain -> new ResponseEntity<>(domicilioDtoMapper.toResponse(domain), HttpStatus.OK))
+                .map(domain -> ResponseEntity.ok(domicilioDtoMapper.toResponse(domain)))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -53,12 +53,12 @@ public class DomicilioController {
                                                               @PathVariable Integer documentoId,
                                                               @PathVariable Integer lectivoId) {
         var domain = domicilioService.findWithPagador(facultadId, personaId, documentoId, lectivoId);
-        return new ResponseEntity<>(domicilioDtoMapper.toResponse(domain), HttpStatus.OK);
+        return ResponseEntity.ok(domicilioDtoMapper.toResponse(domain));
     }
 
     @PostMapping("/unifieds")
     public ResponseEntity<List<DomicilioKey>> findAllByUnifieds(@RequestBody List<String> unifieds) {
-        return new ResponseEntity<>(domicilioService.findAllByUnifieds(unifieds), HttpStatus.OK);
+        return ResponseEntity.ok(domicilioService.findAllByUnifieds(unifieds));
     }
 
     @PutMapping("/{domicilioId}")
@@ -66,7 +66,7 @@ public class DomicilioController {
                                                      @RequestBody DomicilioRequest request) {
         var domicilio = domicilioDtoMapper.toDomain(request);
         return domicilioService.update(domicilioId, domicilio)
-                .map(domain -> new ResponseEntity<>(domicilioDtoMapper.toResponse(domain), HttpStatus.OK))
+                .map(domain -> ResponseEntity.ok(domicilioDtoMapper.toResponse(domain)))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -74,11 +74,11 @@ public class DomicilioController {
     public ResponseEntity<DomicilioResponse> sincronize(@RequestBody DomicilioRequest request) {
         var domicilio = domicilioDtoMapper.toDomain(request);
         var result = domicilioService.sincronize(domicilio);
-        return new ResponseEntity<>(domicilioDtoMapper.toResponse(result), HttpStatus.OK);
+        return ResponseEntity.ok(domicilioDtoMapper.toResponse(result));
     }
 
     @GetMapping("/capture/{personaId}/{documentoId}")
     public ResponseEntity<Integer> capture(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
-        return new ResponseEntity<>(domicilioService.capture(personaId, documentoId), HttpStatus.OK);
+        return ResponseEntity.ok(domicilioService.capture(personaId, documentoId));
     }
 }

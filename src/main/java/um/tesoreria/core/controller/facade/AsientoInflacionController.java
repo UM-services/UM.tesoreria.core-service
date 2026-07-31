@@ -3,7 +3,7 @@
  */
 package um.tesoreria.core.controller.facade;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,10 +19,10 @@ import um.tesoreria.core.service.facade.AsientoInflacionService;
  */
 @RestController
 @RequestMapping("/asientoinflacion")
+@RequiredArgsConstructor
 public class AsientoInflacionController {
 
-	@Autowired
-	private AsientoInflacionService service;
+	private final AsientoInflacionService service;
 
 	@GetMapping("/resultado/{ejercicioId}")
 	public ResponseEntity<Void> generateAsientoInflacionResultado(@PathVariable Integer ejercicioId) {

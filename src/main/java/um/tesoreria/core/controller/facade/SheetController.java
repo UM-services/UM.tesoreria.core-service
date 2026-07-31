@@ -3,11 +3,11 @@
  */
 package um.tesoreria.core.controller.facade;
 
+import lombok.RequiredArgsConstructor;
 import java.io.FileNotFoundException;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +27,11 @@ import static um.tesoreria.core.util.Tool.generateFile;
  */
 @RestController
 @RequestMapping({"/sheet", "/api/tesoreria/core/sheet"})
+@RequiredArgsConstructor
 public class SheetController {
 
     private final SheetService service;
 
-    @Autowired
-    public SheetController(SheetService service) {
-        this.service = service;
-    }
 
     @GetMapping("/generateingresos/{anho}/{mes}")
     public ResponseEntity<Resource> generateIngresos(@PathVariable Integer anho, @PathVariable Integer mes)

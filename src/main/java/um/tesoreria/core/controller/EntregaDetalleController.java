@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,29 +26,27 @@ import um.tesoreria.core.service.EntregaDetalleService;
  */
 @RestController
 @RequestMapping("/entregaDetalle")
+@RequiredArgsConstructor
 public class EntregaDetalleController {
 
-	@Autowired
-	private EntregaDetalleService service;
+	private final EntregaDetalleService service;
 
 	@GetMapping("/proveedorMovimiento/{proveedorMovimientoId}")
 	public ResponseEntity<List<EntregaDetalle>> findAllByProveedorMovimientoId(
 			@PathVariable Long proveedorMovimientoId) {
-		return new ResponseEntity<List<EntregaDetalle>>(service.findAllByProveedorMovimientoId(proveedorMovimientoId),
-				HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByProveedorMovimientoId(proveedorMovimientoId));
 	}
 
 	@PostMapping("/proveedorMovimiento")
 	public ResponseEntity<List<EntregaDetalle>> findAllByProveedorMovimientoIds(
 			@RequestBody List<Long> proveedorMovimientoIds) {
-		return new ResponseEntity<List<EntregaDetalle>>(service.findAllByProveedorMovimientoIds(proveedorMovimientoIds),
-				HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByProveedorMovimientoIds(proveedorMovimientoIds));
 	}
 
 	@GetMapping("/{entregaDetalleId}")
 	public ResponseEntity<EntregaDetalle> findByEntregaDetalleId(@PathVariable Long entregaDetalleId) {
 		try {
-			return new ResponseEntity<EntregaDetalle>(service.findByEntregaDetalleId(entregaDetalleId), HttpStatus.OK);
+			return ResponseEntity.ok(service.findByEntregaDetalleId(entregaDetalleId));
 		} catch (EntregaDetalleException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}

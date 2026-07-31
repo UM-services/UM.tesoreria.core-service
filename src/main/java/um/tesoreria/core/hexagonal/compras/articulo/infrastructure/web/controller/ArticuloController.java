@@ -43,7 +43,7 @@ public class ArticuloController {
                         cuentaService.findByNumeroCuenta(dto.getNumeroCuenta())
                                 .ifPresent(dto::setCuenta);
                     }
-                    return new ResponseEntity<>(dto, HttpStatus.OK);
+                    return ResponseEntity.ok(dto);
                 })
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -60,7 +60,7 @@ public class ArticuloController {
                     return dto;
                 })
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/")
@@ -68,7 +68,7 @@ public class ArticuloController {
         List<ArticuloResponse> responses = articuloService.getAllArticulos().stream()
                 .map(articuloDtoMapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/tipo/{tipo}/page")
@@ -98,14 +98,14 @@ public class ArticuloController {
                 domainPage.getPageSize()
         );
         
-        return new ResponseEntity<>(paginatedResponse, HttpStatus.OK);
+        return ResponseEntity.ok(paginatedResponse);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ArticuloResponse> updateArticulo(@PathVariable Long id, @RequestBody ArticuloRequest articuloRequest) {
         Articulo articulo = articuloDtoMapper.toDomain(articuloRequest);
         return articuloService.updateArticulo(id, articulo)
-                .map(updatedArticulo -> new ResponseEntity<>(articuloDtoMapper.toResponse(updatedArticulo), HttpStatus.OK))
+                .map(updatedArticulo -> ResponseEntity.ok(articuloDtoMapper.toResponse(updatedArticulo)))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -121,6 +121,6 @@ public class ArticuloController {
 
     @GetMapping("/new")
     public ResponseEntity<ArticuloResponse> getNewArticulo() {
-        return new ResponseEntity<>(articuloDtoMapper.toResponse(articuloService.getNewArticulo()), HttpStatus.OK);
+        return ResponseEntity.ok(articuloDtoMapper.toResponse(articuloService.getNewArticulo()));
     }
 }

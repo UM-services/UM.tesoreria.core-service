@@ -1,0 +1,88 @@
+---
+title: Arquitectura Hexagonal - Módulo TesoreriaEstado (v3.46.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class TesoreriaEstadoFacultad {
+            +Long tesoreriaEstadoId
+            +Integer facultadId
+            +BigDecimal personaId
+            +Integer documentoId
+            +BigDecimal deuda
+            +Byte manual
+            +Byte importado
+            +String observaciones
+            +OffsetDateTime fechaTope
+            +String uuid
+        }
+
+        class FindTesoreriaEstadoByUniqueUseCase {
+            <<interface>>
+            +findByUnique(Integer, BigDecimal, Integer) Optional~TesoreriaEstadoFacultad~
+        }
+    }
+
+    namespace application {
+        class FindTesoreriaEstadoByUniqueUseCaseImpl {
+            -TesoreriaEstadoRepository tesoreriaEstadoRepository
+            +findByUnique(Integer, BigDecimal, Integer) Optional~TesoreriaEstadoFacultad~
+        }
+
+        class TesoreriaEstadoFacultadService {
+            -FindTesoreriaEstadoByUniqueUseCase findTesoreriaEstadoByUniqueUseCase
+            +findByUnique(Integer, BigDecimal, Integer) TesoreriaEstadoFacultad
+        }
+
+        class TesoreriaEstadoException {
+            +TesoreriaEstadoException()
+            +TesoreriaEstadoException(Integer, BigDecimal, Integer)
+            +TesoreriaEstadoException(String)
+        }
+    }
+
+    namespace domain_ports_out {
+        class TesoreriaEstadoRepository {
+            <<interface>>
+            +findByUnique(Integer, BigDecimal, Integer) Optional~TesoreriaEstadoFacultad~
+        }
+    }
+
+    namespace infrastructure_web {
+        class TesoreriaEstadoFacultadConsumer {
+            -RestClient restClient
+            -FacultadUrlResolver urlResolver
+            -TesoreriaEstadoFacultadMapper mapper
+            +findByUnique(Integer, BigDecimal, Integer) Optional~TesoreriaEstadoFacultad~
+        }
+
+        class TesoreriaEstadoFacultadResponse {
+            +Long tesoreriaEstadoId
+            +Integer facultadId
+            +BigDecimal personaId
+            +Integer documentoId
+            +BigDecimal deuda
+            +Byte manual
+            +Byte importado
+            +String observaciones
+            +OffsetDateTime fechaTope
+            +String uuid
+        }
+
+        class TesoreriaEstadoFacultadMapper {
+            +toDomain(TesoreriaEstadoFacultadResponse) TesoreriaEstadoFacultad
+        }
+    }
+
+    FindTesoreriaEstadoByUniqueUseCaseImpl ..|> FindTesoreriaEstadoByUniqueUseCase
+    TesoreriaEstadoFacultadConsumer ..|> TesoreriaEstadoRepository
+
+    TesoreriaEstadoFacultadService --> FindTesoreriaEstadoByUniqueUseCase
+    FindTesoreriaEstadoByUniqueUseCaseImpl --> TesoreriaEstadoRepository
+
+    TesoreriaEstadoFacultadConsumer --> RestClient
+    TesoreriaEstadoFacultadConsumer --> FacultadUrlResolver
+    TesoreriaEstadoFacultadMapper ..> TesoreriaEstadoFacultadResponse : maps from
+    TesoreriaEstadoFacultadMapper ..> TesoreriaEstadoFacultad : maps to

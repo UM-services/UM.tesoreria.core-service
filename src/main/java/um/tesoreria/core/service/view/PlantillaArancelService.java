@@ -3,11 +3,11 @@
  */
 package um.tesoreria.core.service.view;
 
+import lombok.RequiredArgsConstructor;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.hexagonal.chequera.arancelPorcentaje.infrastructure.persistence.entity.ArancelPorcentajeEntity;
@@ -21,13 +21,12 @@ import um.tesoreria.core.hexagonal.chequera.lectivoCuota.infrastructure.persiste
  *
  */
 @Service
+@RequiredArgsConstructor
 public class PlantillaArancelService {
 
-	@Autowired
-	private JpaLectivoCuotaRepository lectivoCuotaRepository;
+	private final JpaLectivoCuotaRepository lectivoCuotaRepository;
 
-	@Autowired
-	private JpaArancelPorcentajeRepository arancelPorcentajeRepository;
+	private final JpaArancelPorcentajeRepository arancelPorcentajeRepository;
 
 	public List<PlantillaArancelDto> findAllByPlantilla(Integer facultadId, Integer lectivoId, Integer tipoChequeraId,
                                                         Integer arancelTipoId) {

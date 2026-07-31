@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.MateriaException;
@@ -17,10 +17,10 @@ import um.tesoreria.core.repository.MateriaRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class MateriaService {
 
-	@Autowired
-	private MateriaRepository repository;
+	private final MateriaRepository repository;
 
 	public List<Materia> findAll() {
 		return repository.findAll();

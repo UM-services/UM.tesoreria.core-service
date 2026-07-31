@@ -45,7 +45,7 @@ public class TrackController {
     public ResponseEntity<TrackResponse> add(@RequestBody TrackRequest trackRequest) {
         Track track = trackDtoMapper.toDomain(trackRequest);
         Track createdTrack = trackService.createTrack(track);
-        return new ResponseEntity<>(trackDtoMapper.toResponse(createdTrack), HttpStatus.OK);
+        return ResponseEntity.ok(trackDtoMapper.toResponse(createdTrack));
     }
 
     @DeleteMapping("/{trackId}")

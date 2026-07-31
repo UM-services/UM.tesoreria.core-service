@@ -57,7 +57,7 @@ public class EjercicioController {
 	@GetMapping("/fecha/{fecha}")
 	public ResponseEntity<Ejercicio> findByFecha(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime fecha) {
 		try {
-			return new ResponseEntity<>(service.findByFecha(fecha), HttpStatus.OK);
+			return ResponseEntity.ok(service.findByFecha(fecha));
 		} catch (EjercicioException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}

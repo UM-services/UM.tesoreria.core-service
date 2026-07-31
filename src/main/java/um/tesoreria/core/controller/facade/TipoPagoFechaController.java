@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +34,7 @@ public class TipoPagoFechaController {
 	@GetMapping("/fecha/{fecha}")
 	public ResponseEntity<List<TipoPagoFechaDto>> findAllByFecha(
 			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime fecha) {
-		return new ResponseEntity<>(service.findAllByFecha(fecha), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByFecha(fecha));
 	}
 
 }

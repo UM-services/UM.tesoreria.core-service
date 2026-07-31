@@ -3,7 +3,7 @@
  */
 package um.tesoreria.core.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraEliminadaException;
@@ -15,10 +15,10 @@ import um.tesoreria.core.repository.ChequeraEliminadaRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class ChequeraEliminadaService {
 
-	@Autowired
-	private ChequeraEliminadaRepository repository;
+	private final ChequeraEliminadaRepository repository;
 
 	public ChequeraEliminada findByUnique(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
 		return repository

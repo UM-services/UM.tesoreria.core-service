@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.PlanException;
@@ -17,10 +17,10 @@ import um.tesoreria.core.repository.PlanRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class PlanService {
 
-	@Autowired
-	private PlanRepository repository;
+	private final PlanRepository repository;
 
 	public List<Plan> findAll() {
 		return repository.findAll();

@@ -27,7 +27,7 @@ public class LectivoAlternativaController {
             @PathVariable Integer lectivoId,
             @PathVariable Integer tipoChequeraId,
             @PathVariable Integer alternativaId) {
-        return new ResponseEntity<>(service.findAllByTipo(facultadId, lectivoId, tipoChequeraId, alternativaId), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByTipo(facultadId, lectivoId, tipoChequeraId, alternativaId));
     }
 
     @GetMapping("/unique/{facultadId}/{lectivoId}/{tipoChequeraId}/{productoId}/{alternativaId}")
@@ -38,7 +38,7 @@ public class LectivoAlternativaController {
             @PathVariable Integer productoId,
             @PathVariable Integer alternativaId) {
         try {
-            return new ResponseEntity<>(service.findByFacultadIdAndLectivoIdAndTipochequeraIdAndProductoIdAndAlternativaId( facultadId, lectivoId, tipoChequeraId, productoId, alternativaId), HttpStatus.OK);
+            return ResponseEntity.ok(service.findByFacultadIdAndLectivoIdAndTipochequeraIdAndProductoIdAndAlternativaId( facultadId, lectivoId, tipoChequeraId, productoId, alternativaId));
         } catch (LectivoAlternativaException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }

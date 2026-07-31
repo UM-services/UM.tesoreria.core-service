@@ -11,9 +11,6 @@ import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.model.kotlin.LegajoFacultad;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
-import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
-import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.FindInscriptosSinChequeraUseCase;
 import um.tesoreria.core.model.view.PersonaKey;
 import um.tesoreria.core.service.view.PersonaKeyService;
@@ -30,7 +27,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FindInscriptosSinChequeraUseCaseImpl implements FindInscriptosSinChequeraUseCase {
 
-    private final FacultadService facultadService;
     private final InscripcionFacultadConsumer inscripcionFacultadConsumer;
     private final ChequeraSerieService chequeraSerieService;
     private final LegajoFacultadConsumer legajoFacultadConsumer;
@@ -38,10 +34,8 @@ public class FindInscriptosSinChequeraUseCaseImpl implements FindInscriptosSinCh
 
     @Override
     public List<PersonaKey> findAllInscriptosSinChequera(Integer facultadId, Integer lectivoId, Integer geograficaId, Integer curso) {
-        Facultad facultad = facultadService.findByFacultadId(facultadId);
         Map<String, InscripcionFacultad> inscriptos = inscripcionFacultadConsumer
-                .findAllByCursoSinProvisoria(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
-                        geograficaId, curso)
+                .findAllByCursoSinProvisoria(facultadId, lectivoId, geograficaId, curso)
                 .stream().collect(Collectors.toMap(InscripcionFacultad::getPersonaKey, Function.identity(),
                         (inscripto, replacement) -> inscripto));
         // Elimina los que ya tengan chequera
@@ -68,8 +62,7 @@ public class FindInscriptosSinChequeraUseCaseImpl implements FindInscriptosSinCh
             // Verifica los alumnos de intercambio
             if (add) {
                 try {
-                    LegajoFacultad legajo = legajoFacultadConsumer.findByPersona(facultad.getApiserver(),
-                            facultad.getApiport(), inscripto.getPersonaId(), inscripto.getDocumentoId(), facultadId);
+                    LegajoFacultad legajo = legajoFacultadConsumer.findByPersona(facultadId, inscripto.getPersonaId(), inscripto.getDocumentoId());
                     if (legajo.getIntercambio() == 1) {
                         add = false;
                     }

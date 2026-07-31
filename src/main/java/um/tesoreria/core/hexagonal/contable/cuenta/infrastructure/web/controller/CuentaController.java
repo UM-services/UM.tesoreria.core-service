@@ -84,7 +84,7 @@ public class CuentaController {
 
     @GetMapping("/recalculagrados")
     public ResponseEntity<String> recalculaGrados() {
-        return new ResponseEntity<>(service.recalculaGrados(), HttpStatus.OK);
+        return ResponseEntity.ok(service.recalculaGrados());
     }
 
 }

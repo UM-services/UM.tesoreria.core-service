@@ -3,13 +3,13 @@
  */
 package um.tesoreria.core.controller.facade;
 
+import lombok.RequiredArgsConstructor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -30,14 +30,11 @@ import um.tesoreria.core.service.facade.BalanceService;
  */
 @RestController
 @RequestMapping("/balance")
+@RequiredArgsConstructor
 public class BalanceController {
 
 	private final BalanceService service;
 
-	@Autowired
-	public BalanceController(BalanceService service) {
-		this.service = service;
-	}
 
 	@GetMapping("/sumasysaldos/{desde}/{hasta}")
 	public ResponseEntity<Resource> makeSumasSaldos2(

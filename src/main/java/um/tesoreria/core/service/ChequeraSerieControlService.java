@@ -3,7 +3,7 @@
  */
 package um.tesoreria.core.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraSerieControlException;
@@ -15,10 +15,10 @@ import um.tesoreria.core.repository.ChequeraSerieControlRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class ChequeraSerieControlService {
 
-	@Autowired
-	private ChequeraSerieControlRepository repository;
+	private final ChequeraSerieControlRepository repository;
 
 	public ChequeraSerieControl findLastByTipoChequera(Integer facultadId, Integer tipoChequeraId) {
 		return repository.findTopByFacultadIdAndTipoChequeraIdOrderByChequeraSerieIdDesc(facultadId, tipoChequeraId)

@@ -3,8 +3,7 @@
  */
 package um.tesoreria.core.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,15 +19,15 @@ import um.tesoreria.core.service.FacultadPagoCuentaService;
  */
 @RestController
 @RequestMapping("/facultadpagocuenta")
+@RequiredArgsConstructor
 public class FacultadPagoCuentaController {
 
-	@Autowired
-	private FacultadPagoCuentaService service;
+	private final FacultadPagoCuentaService service;
 
 	@GetMapping("/unique/{facultadId}/{tipoPagoId}")
 	public ResponseEntity<FacultadPagoCuenta> findByUnique(@PathVariable Integer facultadId,
 			@PathVariable Integer tipoPagoId) {
-		return new ResponseEntity<FacultadPagoCuenta>(service.findByUnique(facultadId, tipoPagoId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findByUnique(facultadId, tipoPagoId));
 	}
 
 }

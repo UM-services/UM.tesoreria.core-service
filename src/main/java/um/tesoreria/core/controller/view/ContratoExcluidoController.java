@@ -3,10 +3,9 @@
  */
 package um.tesoreria.core.controller.view;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,13 +20,13 @@ import um.tesoreria.core.service.view.ContratoExcluidoService;
  */
 @RestController
 @RequestMapping("/contratoexcluido")
+@RequiredArgsConstructor
 public class ContratoExcluidoController {
 
-	@Autowired
-	private ContratoExcluidoService service;
+	private final ContratoExcluidoService service;
 
 	@GetMapping("/")
 	public ResponseEntity<List<ContratoExcluido>> findAll() {
-		return new ResponseEntity<List<ContratoExcluido>>(service.findAll(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAll());
 	}
 }

@@ -5,8 +5,6 @@ package um.tesoreria.core.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,17 +30,17 @@ public class PlanController {
 
 	@GetMapping("/")
 	public ResponseEntity<List<Plan>> findAll() {
-		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAll());
 	}
 
 	@GetMapping("/facultad/{facultadId}")
 	public ResponseEntity<List<Plan>> findAllByFacultad(@PathVariable Integer facultadId) {
-		return new ResponseEntity<>(service.findAllByFacultadId(facultadId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByFacultadId(facultadId));
 	}
 
 	@GetMapping("/unique/{facultadId}/{planId}")
 	public ResponseEntity<Plan> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer planId) {
-		return new ResponseEntity<>(service.findByFacultadIdAndPlanId(facultadId, planId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findByFacultadIdAndPlanId(facultadId, planId));
 	}
 
 }

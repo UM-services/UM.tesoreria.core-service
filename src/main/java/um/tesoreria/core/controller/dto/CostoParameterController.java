@@ -3,8 +3,7 @@
  */
 package um.tesoreria.core.controller.dto;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,14 +18,14 @@ import um.tesoreria.core.service.dto.CostoParameterService;
  */
 @RestController
 @RequestMapping("/costoParameter")
+@RequiredArgsConstructor
 public class CostoParameterController {
 
-	@Autowired
-	private CostoParameterService service;
+	private final CostoParameterService service;
 
 	@GetMapping("/")
 	public ResponseEntity<CostoParameterDto> findParameters() {
-		return new ResponseEntity<CostoParameterDto>(service.findParameters(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findParameters());
 	}
 
 }

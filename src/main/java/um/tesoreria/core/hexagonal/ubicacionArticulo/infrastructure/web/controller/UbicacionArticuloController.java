@@ -25,14 +25,14 @@ public class UbicacionArticuloController {
         List<UbicacionArticuloResponse> responses = service.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{ubicacionId}/{articuloId}")
     public ResponseEntity<UbicacionArticuloResponse> findByUbicacionAndArticulo(
             @PathVariable Integer ubicacionId, @PathVariable Long articuloId) {
         return service.getByUbicacionAndArticulo(ubicacionId, articuloId)
-                .map(ua -> new ResponseEntity<>(mapper.toResponse(ua), HttpStatus.OK))
+                .map(ua -> ResponseEntity.ok(mapper.toResponse(ua)))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -41,13 +41,13 @@ public class UbicacionArticuloController {
         List<UbicacionArticuloResponse> responses = service.findAllByArticuloId(articuloId).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/")
     public ResponseEntity<UbicacionArticuloResponse> save(@RequestBody UbicacionArticuloRequest request) {
         UbicacionArticulo domain = mapper.toDomain(request);
         UbicacionArticulo saved = service.save(domain);
-        return new ResponseEntity<>(mapper.toResponse(saved), HttpStatus.OK);
+        return ResponseEntity.ok(mapper.toResponse(saved));
     }
 }

@@ -3,7 +3,7 @@
  */
 package um.tesoreria.core.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.PostalException;
@@ -15,9 +15,9 @@ import um.tesoreria.core.repository.PostalRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class PostalService {
-	@Autowired
-	private PostalRepository repository;
+	private final PostalRepository repository;
 
 	public Postal findByCodigopostal(Integer codigopostal) {
 		return repository.findByCodigopostal(codigopostal).orElseThrow(() -> new PostalException(codigopostal));

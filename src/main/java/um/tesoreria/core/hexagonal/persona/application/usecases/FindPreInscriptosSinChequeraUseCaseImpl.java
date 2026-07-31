@@ -8,8 +8,6 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.
 import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.PreInscripcionFacultad;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
-import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
-import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.FindPreInscriptosSinChequeraUseCase;
 import um.tesoreria.core.model.view.PersonaKey;
 import um.tesoreria.core.service.view.PersonaKeyService;
@@ -26,7 +24,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FindPreInscriptosSinChequeraUseCaseImpl implements FindPreInscriptosSinChequeraUseCase {
 
-    private final FacultadService facultadService;
     private final PreInscripcionFacultadConsumer preInscripcionFacultadConsumer;
     private final ChequeraSerieService chequeraSerieService;
     private final PersonaKeyService personaKeyService;
@@ -34,10 +31,8 @@ public class FindPreInscriptosSinChequeraUseCaseImpl implements FindPreInscripto
     @Override
     public List<PersonaKey> findAllPreInscriptosSinChequera(Integer facultadId, Integer lectivoId,
             Integer geograficaId) {
-        Facultad facultad = facultadService.findByFacultadId(facultadId);
         Map<String, PreInscripcionFacultad> preinscriptos = preInscripcionFacultadConsumer
-                .findAllByPreInscriptos(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId,
-                        geograficaId)
+                .findAllByPreInscriptos(facultadId, lectivoId, geograficaId)
                 .stream().collect(Collectors.toMap(PreInscripcionFacultad::getPersonaKey, Function.identity(),
                         (preinscripto, replacement) -> preinscripto));
         // Elimina los que ya tengan chequera

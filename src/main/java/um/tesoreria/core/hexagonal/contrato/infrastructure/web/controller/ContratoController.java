@@ -31,7 +31,7 @@ public class ContratoController {
         List<ContratoResponse> responses = contratoService.getContratosAjustables(referencia).stream()
                 .map(contratoDtoMapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/vigente/{referencia}")
@@ -40,7 +40,7 @@ public class ContratoController {
         List<ContratoResponse> responses = contratoService.getContratosVigentes(referencia).stream()
                 .map(contratoDtoMapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/persona/{personaId}/{documentoId}")
@@ -49,13 +49,13 @@ public class ContratoController {
         List<ContratoResponse> responses = contratoService.getContratosByPersona(personaId, documentoId).stream()
                 .map(contratoDtoMapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{contratoId}")
     public ResponseEntity<ContratoResponse> findByContratoId(@PathVariable Long contratoId) {
         return contratoService.getContratoById(contratoId)
-                .map(contrato -> new ResponseEntity<>(contratoDtoMapper.toResponse(contrato), HttpStatus.OK))
+                .map(contrato -> ResponseEntity.ok(contratoDtoMapper.toResponse(contrato)))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -63,7 +63,7 @@ public class ContratoController {
     public ResponseEntity<ContratoResponse> update(@PathVariable Long contratoId, @RequestBody ContratoRequest request) {
         Contrato domain = contratoDtoMapper.toDomain(request);
         return contratoService.updateContrato(contratoId, domain)
-                .map(updatedContrato -> new ResponseEntity<>(contratoDtoMapper.toResponse(updatedContrato), HttpStatus.OK))
+                .map(updatedContrato -> ResponseEntity.ok(contratoDtoMapper.toResponse(updatedContrato)))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -77,6 +77,6 @@ public class ContratoController {
                 .map(contratoDtoMapper::toResponse)
                 .collect(Collectors.toList());
         
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 }

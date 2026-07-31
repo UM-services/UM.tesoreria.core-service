@@ -3,7 +3,7 @@
  */
 package um.tesoreria.core.controller.view;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,15 +22,15 @@ import um.tesoreria.core.service.view.OrdenPagoEntregadoService;
  */
 @RestController
 @RequestMapping("/ordenPagoEntregado")
+@RequiredArgsConstructor
 public class OrdenPagoEntregadoController {
 	
-	@Autowired
-	private OrdenPagoEntregadoService service;
+	private final OrdenPagoEntregadoService service;
 
 	@GetMapping("/{ordenPagoId}")
 	public ResponseEntity<OrdenPagoEntregado> findByOrdenPagoId(@PathVariable Long ordenPagoId) {
 		try {
-			return new ResponseEntity<OrdenPagoEntregado>(service.findByOrdenPagoId(ordenPagoId), HttpStatus.OK);
+			return ResponseEntity.ok(service.findByOrdenPagoId(ordenPagoId));
 		} catch (OrdenPagoEntregadoException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}

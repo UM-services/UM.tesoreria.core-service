@@ -1,6 +1,5 @@
 package um.tesoreria.core.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,10 +24,9 @@ public class ChequeraCuotaReemplazoController {
     public ResponseEntity<List<ChequeraCuotaReemplazo>> findAllByChequera(@PathVariable Integer facultadId,
                                                                           @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId,
                                                                           @PathVariable Integer alternativaId) {
-        return new ResponseEntity<>(
+        return ResponseEntity.ok(
                 service.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(facultadId,
-                        tipoChequeraId, chequeraSerieId, alternativaId),
-                HttpStatus.OK);
+                        tipoChequeraId, chequeraSerieId, alternativaId));
     }
 
 }
