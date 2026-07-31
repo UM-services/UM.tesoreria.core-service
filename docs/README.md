@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.42.1** (actualizada: 2026-07-22)
+**Versión actual del servicio: 3.46.0** (actualizada: 2026-07-31)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -46,6 +46,10 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).
 - `hexagonal-politicaArancelaria.mmd`: Arquitectura hexagonal del módulo PoliticaArancelaria (recálculo de cuotas por política arancelaria) - v3.42.0 (refactorización de RecalculateCuotaByUniqueIndexUseCaseImpl, fallback a LectivoCuota con importes cero).
 - `hexagonal-lectivoCuota.mmd`: Arquitectura hexagonal del módulo LectivoCuota (cuotas lectivas por facultad/lectivo/tipo) - v3.42.0 (nuevo caso de uso FindLectivoCuotaByFechaUseCase, formato ISO 8601).
+- `hexagonal-setup.mmd`: Arquitectura hexagonal del módulo Setup (configuración de tesorería) - v3.43.0 (nuevo módulo).
+- `hexagonal-deudaExamen.mmd`: Arquitectura hexagonal del módulo DeudaExamen (validación de habilitación para rendir exámenes) - v3.46.0 (integración con TesoreriaEstadoFacultadService para habilitación manual).
+- `hexagonal-guaraniBeneficio.mmd`: Arquitectura hexagonal del módulo GuaraniBeneficio (beneficios de estudiantes Guarani) - v3.45.0 (nuevo módulo).
+- `hexagonal-tesoreriaEstado.mmd`: Arquitectura hexagonal del módulo TesoreriaEstado (consulta de estado de tesorería del estudiante en el servicio de facultad) - v3.46.0 (nuevo módulo, consumer REST).
 
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 

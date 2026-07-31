@@ -2,6 +2,38 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.46.0] - 2026-07-31
+### Added
+- feat(extern/tesoreriaEstado): Nuevo módulo TesoreriaEstadoFacultad con arquitectura hexagonal completa bajo `hexagonal/extern/facultad/tesoreriaEstado/`
+  - Modelo de dominio: `TesoreriaEstadoFacultad` con campos `tesoreriaEstadoId`, `facultadId`, `personaId`, `documentoId`, `deuda`, `manual`, `importado`, `observaciones`, `fechaTope`, `uuid` (defaults con `@Builder.Default`)
+  - Puerto de entrada: `FindTesoreriaEstadoByUniqueUseCase` con metodo `findByUnique(Integer, BigDecimal, Integer) Optional~TesoreriaEstadoFacultad~`
+  - Puerto de salida: `TesoreriaEstadoRepository` con metodo `findByUnique(Integer, BigDecimal, Integer)` (implementado por consumer REST)
+  - Caso de uso: `FindTesoreriaEstadoByUniqueUseCaseImpl` con delegacion al repositorio
+  - Servicio de aplicacion: `TesoreriaEstadoFacultadService` con delegacion al caso de uso y `TesoreriaEstadoException` si no existe
+  - Consumer REST: `TesoreriaEstadoFacultadConsumer` que consulta `GET /tesoreriaEstado/unique/{facultadId}/{personaId}/{documentoId}` en el servicio de facultad (404 → `Optional.empty()`)
+  - DTO: `TesoreriaEstadoFacultadResponse`, Mapper: `TesoreriaEstadoFacultadMapper` con null-safety en campos default
+  - Tests: `FindTesoreriaEstadoByUniqueUseCaseImplTest`, `TesoreriaEstadoFacultadConsumerTest`, `TesoreriaEstadoFacultadMapperTest`
+- feat(config): Nueva configuracion `RestClientConfig` con bean `RestClient` compartido (`JdkClientHttpRequestFactory` con read timeout de 15 segundos)
+- feat(extern/resolver): Nuevo `FacultadUrlResolver` que resuelve la URL base (`http://apiserver:apiport`) a partir de `facultadId` consultando `GetFacultadByIdUseCase`
+- feat(persona/deudaExamen): Integracion con `TesoreriaEstadoFacultadService` en `GetDeudaExamenUseCaseImpl`
+  - Reemplaza el parche temporal `matriculaPagada = true` por analisis de habilitacion manual
+  - Si `manual == 1` y `fechaTope` posterior a `fechaExamen - 1 dia`, autoriza rendir y marca `habilitadoTesoreria = true`
+  - Fallback a `TesoreriaEstadoFacultad` por defecto (`tesoreriaEstadoId = 0`) cuando no existe registro en el servicio de facultad
+- feat(docs): Nuevo diagrama Mermaid `hexagonal-tesoreriaEstado.mmd` registrado en pipeline `script.js` e `index.html`
+- feat(docs): Actualizado diagrama `hexagonal-deudaExamen.mmd` con dependencia `TesoreriaEstadoFacultadService` (v3.46.0)
+
+### Changed
+- refactor(extern): 19 consumers `*FacultadConsumer` migrados a nueva firma `(Integer facultadId, ...)`
+  - Eliminado parametro `(String server, Long port)`; la URL base ahora se resuelve via `FacultadUrlResolver`
+  - `RestClient` inyectado por constructor (antes `RestClient.create()` estatico) y URI templates con placeholders
+  - Afecta: AlumnoExamen, Baja, Carrera, Domicilio, InscripcionDetalle, Inscripcion, Legajo, Localidad, Persona, Plan, PreInscripcion, PreTurno, Provincia y consumers de vistas (InscriptoCurso, LegajoKey, PersonaKey, PreunivCarrera, PreunivMatricResumen, PreunivResumen)
+- refactor(controller): Migracion de ~80 controladores de inyeccion `@Autowired` a constructor con `@RequiredArgsConstructor` y `ResponseEntity.ok()` en lugar de `new ResponseEntity<>(..., HttpStatus.OK)`
+- refactor(service): Migracion de ~70 servicios a inyeccion por constructor con `@RequiredArgsConstructor`
+- refactor(domicilio): `CaptureDomicilioUseCaseImpl` y `GetDomicilioWithPagadorUseCaseImpl` actualizados a la nueva firma de consumers; null-safety en `facultad.getApiserver()`
+- refactor(facade): `SincronizeService` simplificado (eliminada resolucion manual de facultad antes de llamar a consumers)
+
+> Basado en analisis profundo de `git diff --cached HEAD` (168 archivos modificados, +1280/-806 lineas, incluyendo nuevo modulo TesoreriaEstado, RestClientConfig, FacultadUrlResolver, refactor de 19 consumers y migracion a constructor injection) y `pom.xml` (version 3.44.0 → 3.46.0; la release 3.45.0 no actualizo la version del pom.xml).
+
 ## [3.45.0] - 2026-07-29
 ### Added
 - feat(guarani/guaraniBeneficio): Nuevo modulo GuaraniBeneficio con arquitectura hexagonal completa bajo `hexagonal/guarani/guaraniBeneficio/`

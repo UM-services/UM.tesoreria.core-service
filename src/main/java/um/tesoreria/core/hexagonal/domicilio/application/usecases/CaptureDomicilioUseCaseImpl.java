@@ -37,14 +37,14 @@ public class CaptureDomicilioUseCaseImpl implements CaptureDomicilioUseCase {
     @Override
     public Integer capture(BigDecimal personaId, Integer documentoId) {
         for (Facultad facultad : facultadService.findFacultades()) {
-            if (facultad.getApiserver().isEmpty()) {
+            if (facultad.getApiserver() == null || facultad.getApiserver().isEmpty()) {
                 continue;
             }
 
             Domicilio domicilio = null;
             try {
                 var entity = domicilioFacultadConsumer.findByUnique(
-                        facultad.getApiserver(), facultad.getApiport(),
+                        facultad.getFacultadId(),
                         personaId, documentoId);
                 domicilio = Domicilio.builder()
                         .domicilioId(null)
@@ -87,7 +87,7 @@ public class CaptureDomicilioUseCaseImpl implements CaptureDomicilioUseCase {
                 }
 
                 domicilio.setFacultadId(facultad.getFacultadId());
-                sincronizeProvinciaAndLocalidad(domicilio, facultad);
+                sincronizeProvinciaAndLocalidad(domicilio);
 
                 repository.create(domicilio);
                 return facultad.getFacultadId();
@@ -96,7 +96,7 @@ public class CaptureDomicilioUseCaseImpl implements CaptureDomicilioUseCase {
         return 0;
     }
 
-    private void sincronizeProvinciaAndLocalidad(Domicilio domicilio, Facultad facultad) {
+    private void sincronizeProvinciaAndLocalidad(Domicilio domicilio) {
         if (domicilio.getProvinciaId() == null) {
             return;
         }
@@ -104,7 +104,6 @@ public class CaptureDomicilioUseCaseImpl implements CaptureDomicilioUseCase {
             provinciaService.findByUnique(domicilio.getFacultadId(), domicilio.getProvinciaId());
         } catch (ProvinciaException e) {
             Provincia provincia = provinciaFacultadConsumer.findByUnique(
-                    facultad.getApiserver(), facultad.getApiport(),
                     domicilio.getFacultadId(), domicilio.getProvinciaId());
             provincia.setUniqueId(null);
             provinciaService.add(provincia);
@@ -114,7 +113,6 @@ public class CaptureDomicilioUseCaseImpl implements CaptureDomicilioUseCase {
                     domicilio.getProvinciaId(), domicilio.getLocalidadId());
         } catch (LocalidadException e) {
             Localidad localidad = localidadFacultadConsumer.findByUnique(
-                    facultad.getApiserver(), facultad.getApiport(),
                     domicilio.getFacultadId(), domicilio.getProvinciaId(),
                     domicilio.getLocalidadId());
             localidad.setUniqueId(null);

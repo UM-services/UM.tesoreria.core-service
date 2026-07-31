@@ -3,10 +3,9 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,14 +20,14 @@ import um.tesoreria.core.service.CargoMateriaService;
  */
 @RestController
 @RequestMapping("/cargomateria")
+@RequiredArgsConstructor
 public class CargoMateriaController {
 
-	@Autowired
-	private CargoMateriaService service;
+	private final CargoMateriaService service;
 
 	@GetMapping("/")
 	public ResponseEntity<List<CargoMateria>> findAll() {
-		return new ResponseEntity<List<CargoMateria>>(service.findAll(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAll());
 	}
 
 }

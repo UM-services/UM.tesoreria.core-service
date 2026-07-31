@@ -4,7 +4,24 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.45.0**
+**Versión actual (SemVer): 3.46.0**
+
+## Novedades 3.46.0 (verificado en código)
+- feat(extern/tesoreriaEstado): Nuevo modulo TesoreriaEstadoFacultad con arquitectura hexagonal completa bajo `hexagonal/extern/facultad/tesoreriaEstado/`
+  - Modelo de dominio: `TesoreriaEstadoFacultad` con campos `tesoreriaEstadoId`, `facultadId`, `personaId`, `documentoId`, `deuda`, `manual`, `importado`, `observaciones`, `fechaTope`, `uuid`
+  - Puerto de entrada: `FindTesoreriaEstadoByUniqueUseCase`, Puerto de salida: `TesoreriaEstadoRepository`
+  - Caso de uso: `FindTesoreriaEstadoByUniqueUseCaseImpl`, Servicio: `TesoreriaEstadoFacultadService`, Excepcion: `TesoreriaEstadoException`
+  - Consumer REST: `TesoreriaEstadoFacultadConsumer` (consulta `GET /tesoreriaEstado/unique/{facultadId}/{personaId}/{documentoId}` en el servicio de facultad)
+  - DTO: `TesoreriaEstadoFacultadResponse`, Mapper: `TesoreriaEstadoFacultadMapper`
+  - Tests: `FindTesoreriaEstadoByUniqueUseCaseImplTest`, `TesoreriaEstadoFacultadConsumerTest`, `TesoreriaEstadoFacultadMapperTest`
+- feat(config): Nueva configuracion `RestClientConfig` con bean `RestClient` compartido (read timeout de 15 segundos)
+- feat(extern/resolver): Nuevo `FacultadUrlResolver` que resuelve la URL base (`http://apiserver:apiport`) desde `facultadId`
+- feat(persona/deudaExamen): `GetDeudaExamenUseCaseImpl` integrado con `TesoreriaEstadoFacultadService` — reemplaza el parche temporal `matriculaPagada = true` por habilitacion manual real (si `manual == 1` y `fechaTope` valido, autoriza rendir)
+- refactor(extern): 19 consumers `*FacultadConsumer` migrados a firma `(Integer facultadId, ...)` con `RestClient` inyectado y `FacultadUrlResolver`
+- refactor(core): ~80 controladores y ~70 servicios migrados de `@Autowired` a constructor injection con `@RequiredArgsConstructor` y `ResponseEntity.ok()`
+- feat(docs): Nuevo diagrama Mermaid `hexagonal-tesoreriaEstado.mmd`; actualizado `hexagonal-deudaExamen.mmd` (v3.46.0)
+
+> Basado en analisis profundo de `git diff --cached HEAD` (168 archivos modificados, +1280/-806 lineas, incluyendo nuevo modulo TesoreriaEstado, RestClientConfig, FacultadUrlResolver, refactor de 19 consumers y migracion a constructor injection) y `pom.xml` (version 3.44.0 → 3.46.0).
 
 ## Novedades 3.45.0 (verificado en código)
 - feat(guarani/guaraniBeneficio): Nuevo modulo GuaraniBeneficio con arquitectura hexagonal completa bajo `hexagonal/guarani/guaraniBeneficio/`

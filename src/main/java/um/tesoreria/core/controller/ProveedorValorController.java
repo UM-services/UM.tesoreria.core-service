@@ -3,9 +3,8 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.kotlin.model.ProveedorValor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,24 +21,24 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/proveedorValor")
+@RequiredArgsConstructor
 public class ProveedorValorController {
 
-	@Autowired
-	private ProveedorValorService service;
+	private final ProveedorValorService service;
 
 	@GetMapping("/proveedorMovimiento/{proveedorMovimientoId}")
 	public ResponseEntity<List<ProveedorValor>> findAllByProveedorMovimientoId(@PathVariable Long proveedorMovimientoId) {
-		return new ResponseEntity<List<ProveedorValor>>(service.findAllByProveedorMovimientoId(proveedorMovimientoId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByProveedorMovimientoId(proveedorMovimientoId));
 	}
 
 	@GetMapping("/{proveedorValorId}")
 	public ResponseEntity<ProveedorValor> findByProveedorValorId(@PathVariable Long proveedorValorId) {
-		return new ResponseEntity<ProveedorValor>(service.findByProveedorValorId(proveedorValorId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findByProveedorValorId(proveedorValorId));
 	}
 
 	@GetMapping("/valorMovimiento/{valorMovimientoId}")
 	public ResponseEntity<ProveedorValor> findByValorMovimientoId(@PathVariable Long valorMovimientoId) {
-		return new ResponseEntity<ProveedorValor>(service.findByValorMovimientoId(valorMovimientoId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findByValorMovimientoId(valorMovimientoId));
 	}
 
 }

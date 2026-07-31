@@ -7,7 +7,6 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import java.util.stream.Collectors;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,20 +32,20 @@ public class DependenciaController {
         List<DependenciaResponse> responses = service.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{dependenciaId}")
     public ResponseEntity<DependenciaResponse> findByDependenciaId(@PathVariable Integer dependenciaId) {
         Dependencia domain = service.findByDependenciaId(dependenciaId);
-        return new ResponseEntity<>(mapper.toResponse(domain), HttpStatus.OK);
+        return ResponseEntity.ok(mapper.toResponse(domain));
     }
 
     @PutMapping("/{dependenciaId}")
     public ResponseEntity<DependenciaResponse> update(@PathVariable Integer dependenciaId, @RequestBody DependenciaRequest request) {
         Dependencia domain = mapper.toDomain(request);
         Dependencia updated = service.update(dependenciaId, domain);
-        return new ResponseEntity<>(mapper.toResponse(updated), HttpStatus.OK);
+        return ResponseEntity.ok(mapper.toResponse(updated));
     }
 
 }

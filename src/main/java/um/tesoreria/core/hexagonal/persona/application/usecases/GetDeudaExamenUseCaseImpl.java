@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.extern.facultad.tesoreriaEstado.application.exception.TesoreriaEstadoException;
+import um.tesoreria.core.hexagonal.extern.facultad.tesoreriaEstado.application.service.TesoreriaEstadoFacultadService;
+import um.tesoreria.core.hexagonal.extern.facultad.tesoreriaEstado.domain.model.TesoreriaEstadoFacultad;
 import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.hexagonal.persona.domain.model.DeudaExamen;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.GetDeudaExamenUseCase;
@@ -23,10 +26,20 @@ public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
     private final SetupService setupService;
     private final ChequeraCuotaService chequeraCuotaService;
     private final LectivoService lectivoService;
+    private final TesoreriaEstadoFacultadService tesoreriaEstadoFacultadService;
 
     @Override
     public DeudaExamen getDeudaExamenByFacultadAndPersona(Integer facultadId, BigDecimal personaId, Integer documentoId, OffsetDateTime fechaExamen) {
         var lectivo = lectivoService.findByFecha(OffsetDateTime.now());
+        TesoreriaEstadoFacultad tesoreriaEstado;
+        try {
+            tesoreriaEstado = tesoreriaEstadoFacultadService.findByUnique(facultadId, personaId, documentoId);
+        } catch (TesoreriaEstadoException e) {
+            tesoreriaEstado = TesoreriaEstadoFacultad.builder()
+                    .tesoreriaEstadoId(0L)
+                    .fechaTope(OffsetDateTime.now().plusHours(-7))
+                    .build();
+        }
         var chequeras = chequeraSerieService.findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId(personaId, documentoId, facultadId, lectivo.getLectivoId());
         if (chequeras.isEmpty()) {
             return DeudaExamen.builder()
@@ -66,9 +79,17 @@ public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
             }
         }
 
-        // parche temporal
-        matriculaPagada = true;
-        //
+        // Análisis de habilitación manual
+        if (tesoreriaEstado.getTesoreriaEstadoId() > 0) {
+            if (tesoreriaEstado.getFechaTope().isAfter(fechaExamen.plusDays(-1))) {
+                if (tesoreriaEstado.getManual() == 1) {
+                    autorizadoRendir = true;
+                    matriculaPagada = true;
+                    habilitadoTesoreria = true;
+                }
+            }
+        }
+
         return DeudaExamen.builder()
                 .autorizadoRendir(autorizadoRendir)
                 .matriculaPagada(matriculaPagada)

@@ -29,7 +29,7 @@ public class CompraController {
         try {
             service.deleteComprobante(proveedorMovimientoId);
             log.debug("Anulated Comprobante -> {}", proveedorMovimientoId);
-            return new ResponseEntity<>(true, HttpStatus.OK);
+            return ResponseEntity.ok(true);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
@@ -39,7 +39,7 @@ public class CompraController {
     public ResponseEntity<Boolean> anulateValor(@PathVariable Long valorMovimientoId, @PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime fechaContableAnulacion) {
         try {
             service.anulateValor(valorMovimientoId, fechaContableAnulacion);
-            return new ResponseEntity<>(true, HttpStatus.OK);
+            return ResponseEntity.ok(true);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
@@ -49,7 +49,7 @@ public class CompraController {
     public ResponseEntity<Boolean> deleteValor(@PathVariable Long valorMovimientoId) {
         try {
             service.deleteValor(valorMovimientoId);
-            return new ResponseEntity<>(true, HttpStatus.OK);
+            return ResponseEntity.ok(true);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
@@ -59,7 +59,7 @@ public class CompraController {
     public ResponseEntity<Boolean> addValores(@RequestBody List<ValorMovimiento> valorMovimientos, @PathVariable Long proveedorMovimientoId) {
         try {
             service.addValores(proveedorMovimientoId, valorMovimientos);
-            return new ResponseEntity<>(true, HttpStatus.OK);
+            return ResponseEntity.ok(true);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);
         }
@@ -70,7 +70,7 @@ public class CompraController {
         try {
             service.anulateOPago(proveedorMovimientoId);
             log.debug("Anulated OrdenPago -> {}", proveedorMovimientoId);
-            return new ResponseEntity<>(true, HttpStatus.OK);
+            return ResponseEntity.ok(true);
         } catch (Exception e) {
             log.debug("ERROR Anulating OrdenPago -> {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE);

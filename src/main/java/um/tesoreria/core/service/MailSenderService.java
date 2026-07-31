@@ -3,12 +3,12 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import java.util.LinkedList;
 import java.util.List;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.MailSenderException;
@@ -22,10 +22,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MailSenderService {
 
-	@Autowired
-	private MailSenderRepository repository;
+	private final MailSenderRepository repository;
 
 	public List<MailSender> findAllByEnabledAndMailSenderIdGreaterThan(Byte enabled, Long mailSenderId) {
 		return repository.findAllByEnabledAndMailSenderIdGreaterThanOrderByMailSenderId(enabled, mailSenderId);

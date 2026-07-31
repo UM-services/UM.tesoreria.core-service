@@ -3,7 +3,6 @@
  */
 package um.tesoreria.core.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +28,6 @@ public class ChequeraPagoReemplazoController {
 
 	@GetMapping("/{chequeraPagoReemplazoId}")
 	public ResponseEntity<ChequeraPagoReemplazo> findByChequeraPagoReemplazoId(@PathVariable Long chequeraPagoReemplazoId) {
-		return new ResponseEntity<>(service.findByChequeraPagoReemplazoId(chequeraPagoReemplazoId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findByChequeraPagoReemplazoId(chequeraPagoReemplazoId));
 	}
 }

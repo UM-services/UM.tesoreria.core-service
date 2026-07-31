@@ -1,7 +1,7 @@
 package um.tesoreria.core.service.view;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.exception.ChequeraCuotaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
@@ -17,14 +17,11 @@ import java.util.Objects;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ChequeraSerieAltaFullService {
 
     private final ChequeraSerieAltaFullRepository repository;
 
-    @Autowired
-    public ChequeraSerieAltaFullService(ChequeraSerieAltaFullRepository repository) {
-        this.repository = repository;
-    }
 
     public List<ChequeraSerieAltaFull> findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(Integer lectivoId, Integer facultadId, Integer geograficaId, Integer tipoChequeraId, OffsetDateTime fechaDesdePrimerVencimiento, ChequeraCuotaService chequeraCuotaService) {
         List<ChequeraSerieAltaFull> chequeras = new ArrayList<>();

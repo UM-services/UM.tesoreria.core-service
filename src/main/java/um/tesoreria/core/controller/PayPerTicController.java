@@ -3,13 +3,12 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,19 +26,19 @@ import um.tesoreria.core.service.PayPerTicService;
  */
 @RestController
 @RequestMapping("/paypertic")
+@RequiredArgsConstructor
 public class PayPerTicController {
-	@Autowired
-	private PayPerTicService service;
+	private final PayPerTicService service;
 
 	@GetMapping("/periodo/{desde}/{hasta}")
 	public ResponseEntity<List<PayPerTic>> findAllByPeriodo(
 			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime desde,
 			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) {
-		return new ResponseEntity<List<PayPerTic>>(service.findAllByPeriodo(desde, hasta), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByPeriodo(desde, hasta));
 	}
 	
 	@PutMapping("/{payperticId}")
 	public ResponseEntity<PayPerTic> update(@RequestBody PayPerTic paypertic, @PathVariable String payperticId) {
-		return new ResponseEntity<PayPerTic>(service.update(paypertic, payperticId), HttpStatus.OK);
+		return ResponseEntity.ok(service.update(paypertic, payperticId));
 	}
 }

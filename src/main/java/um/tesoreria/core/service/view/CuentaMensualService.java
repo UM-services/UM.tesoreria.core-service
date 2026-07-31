@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.service.view;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.CuentaMensual;
@@ -16,9 +16,9 @@ import um.tesoreria.core.repository.view.CuentaMensualRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class CuentaMensualService {
-	@Autowired
-	private CuentaMensualRepository repository;
+	private final CuentaMensualRepository repository;
 	
 	public List<CuentaMensual> findIngresosByMes(Integer anho, Integer mes) {
 		return repository.findIngresosByMes(anho, mes);

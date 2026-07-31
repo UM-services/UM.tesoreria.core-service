@@ -1,33 +1,36 @@
-/**
- * 
- */
 package um.tesoreria.core.extern.consumer.view;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-
 import um.tesoreria.core.extern.model.view.PreunivCarreraFacultad;
+import um.tesoreria.core.extern.resolver.FacultadUrlResolver;
 
 @Service
+@RequiredArgsConstructor
 public class PreunivCarreraFacultadConsumer {
 
-	private final RestClient restClient = RestClient.create();
+	private final RestClient restClient;
+	private final FacultadUrlResolver urlResolver;
 
-	public List<PreunivCarreraFacultad> findAllByCarrera(String server, Long port, Integer facultadId,
+	public List<PreunivCarreraFacultad> findAllByCarrera(Integer facultadId,
 			Integer lectivoId, Integer geograficaId, Integer turnoId, Integer planId, Integer carreraId) {
-		String url = "http://" + server + ":" + port + "/preunivcarrera/carrera/" + facultadId + "/" + lectivoId + "/"
-				+ geograficaId + "/" + turnoId + "/" + planId + "/" + carreraId;
-		return Arrays.asList(Objects.requireNonNull(restClient.get().uri(url).retrieve().toEntity(PreunivCarreraFacultad[].class).getBody()));
+		String baseUrl = urlResolver.getBaseUrl(facultadId);
+		return restClient.get()
+				.uri(baseUrl + "/preunivcarrera/carrera/{facultadId}/{lectivoId}/{geograficaId}/{turnoId}/{planId}/{carreraId}",
+						facultadId, lectivoId, geograficaId, turnoId, planId, carreraId)
+				.retrieve()
+				.body(new ParameterizedTypeReference<List<PreunivCarreraFacultad>>() {});
 	}
 
-	public List<PreunivCarreraFacultad> findAllByLectivo(String server, Long port, Integer facultadId,
-			Integer lectivoId) {
-		String url = "http://" + server + ":" + port + "/preunivcarrera/lectivo/" + facultadId + "/" + lectivoId;
-		return Arrays.asList(Objects.requireNonNull(restClient.get().uri(url).retrieve().toEntity(PreunivCarreraFacultad[].class).getBody()));
+	public List<PreunivCarreraFacultad> findAllByLectivo(Integer facultadId, Integer lectivoId) {
+		String baseUrl = urlResolver.getBaseUrl(facultadId);
+		return restClient.get()
+				.uri(baseUrl + "/preunivcarrera/lectivo/{facultadId}/{lectivoId}", facultadId, lectivoId)
+				.retrieve()
+				.body(new ParameterizedTypeReference<List<PreunivCarreraFacultad>>() {});
 	}
 
 }

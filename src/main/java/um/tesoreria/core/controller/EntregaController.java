@@ -36,21 +36,21 @@ public class EntregaController {
 	@GetMapping("/detalle/{proveedorMovimientoId}")
 	public ResponseEntity<List<Entrega>> findAllDetalleByProveedorMovimientoId(@PathVariable Long proveedorMovimientoId)
 			throws JsonProcessingException {
-		return new ResponseEntity<List<Entrega>>(
-				service.findAllDetalleByProveedorMovimientoId(proveedorMovimientoId, true), HttpStatus.OK);
+		return ResponseEntity.ok(
+				service.findAllDetalleByProveedorMovimientoId(proveedorMovimientoId, true));
 	}
 
 	@PostMapping("/detalle")
 	public ResponseEntity<List<Entrega>> findAllDetalleByProveedorMovimientosIds(
 			@RequestBody List<Long> proveedorMovimientoIds) throws JsonProcessingException {
-		return new ResponseEntity<List<Entrega>>(
-				service.findAllDetalleByProveedorMovimientoIds(proveedorMovimientoIds, true), HttpStatus.OK);
+		return ResponseEntity.ok(
+				service.findAllDetalleByProveedorMovimientoIds(proveedorMovimientoIds, true));
 	}
 
 	@GetMapping("/{entregaId}")
 	public ResponseEntity<Entrega> findByEntregaId(@PathVariable Long entregaId) {
 		try {
-			return new ResponseEntity<Entrega>(service.findByEntregaId(entregaId), HttpStatus.OK);
+			return ResponseEntity.ok(service.findByEntregaId(entregaId));
 		} catch (EntregaException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}

@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.exception.CarreraException;
 import um.tesoreria.core.kotlin.model.Carrera;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,18 +33,18 @@ public class CarreraController {
 
 	@GetMapping("/")
 	public ResponseEntity<List<Carrera>> findAll() {
-		return new ResponseEntity<>(service.findAll(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAll());
 	}
 
 	@GetMapping("/facultad/{facultadId}")
 	public ResponseEntity<List<Carrera>> findAllByFacultadId(@PathVariable Integer facultadId) {
-		return new ResponseEntity<>(service.findAllByFacultadId(facultadId), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByFacultadId(facultadId));
 	}
 
 	@GetMapping("/{uniqueId}")
 	public ResponseEntity<Carrera> findByUniqueId(@PathVariable Long uniqueId) {
 		try {
-			return new ResponseEntity<>(service.findByUniqueId(uniqueId), HttpStatus.OK);
+			return ResponseEntity.ok(service.findByUniqueId(uniqueId));
 		} catch (CarreraException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}
@@ -55,8 +54,7 @@ public class CarreraController {
 	public ResponseEntity<Carrera> findByFacultadIdAndPlanIdAndCarreraId(@PathVariable Integer facultadId,
 			@PathVariable Integer planId, @PathVariable Integer carreraId) {
 		try {
-			return new ResponseEntity<>(service.findByFacultadIdAndPlanIdAndCarreraId(facultadId, planId, carreraId),
-					HttpStatus.OK);
+			return ResponseEntity.ok(service.findByFacultadIdAndPlanIdAndCarreraId(facultadId, planId, carreraId));
 		} catch (CarreraException e) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
 		}

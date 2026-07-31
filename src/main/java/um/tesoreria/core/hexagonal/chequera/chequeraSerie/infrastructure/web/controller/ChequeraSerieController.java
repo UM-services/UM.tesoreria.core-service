@@ -78,7 +78,7 @@ public class ChequeraSerieController {
         List<ChequeraSerieResponse> responses = service.findAllByPersonaExtended(personaId, documentoId).stream()
                 .map(chequeraSerieDtoMapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/facultad/{personaId}/{documentoId}/{facultadId}")

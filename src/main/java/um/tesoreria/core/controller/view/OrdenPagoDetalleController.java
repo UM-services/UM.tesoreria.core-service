@@ -1,7 +1,6 @@
 package um.tesoreria.core.controller.view;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,14 +13,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/ordenPagoDetalle")
+@RequiredArgsConstructor
 public class OrdenPagoDetalleController {
 
-    @Autowired
-    private OrdenPagoDetalleService service;
+    private final OrdenPagoDetalleService service;
 
     @PostMapping("/search")
     public ResponseEntity<List<OrdenPagoDetalle>> findByStrings(@RequestBody List<String> conditions) {
-        return new ResponseEntity<>(service.findAllByStrings(conditions), HttpStatus.OK);
+        return ResponseEntity.ok(service.findAllByStrings(conditions));
     }
 
 }

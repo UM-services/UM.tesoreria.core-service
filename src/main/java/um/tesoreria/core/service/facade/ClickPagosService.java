@@ -1,9 +1,9 @@
 package um.tesoreria.core.service.facade;
 
+import lombok.RequiredArgsConstructor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.kotlin.model.internal.ClickPagosEntity;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
@@ -17,10 +17,10 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ClickPagosService {
 
-    @Autowired
-    private ChequeraCuotaService chequeraCuotaService;
+    private final ChequeraCuotaService chequeraCuotaService;
 
     public ClickPagosEntity processLine(String line, Boolean verify) {
         log.debug("line={}", line);

@@ -34,7 +34,7 @@ public class GuaraniBeneficioController {
     public ResponseEntity<GuaraniBeneficioResponse> add(@RequestBody GuaraniBeneficioRequest request) {
         GuaraniBeneficio domain = guaraniBeneficioDtoMapper.toDomain(request);
         GuaraniBeneficio created = guaraniBeneficioService.create(domain);
-        return new ResponseEntity<>(guaraniBeneficioDtoMapper.toResponse(created), HttpStatus.OK);
+        return ResponseEntity.ok(guaraniBeneficioDtoMapper.toResponse(created));
     }
 
     @PutMapping("/requisito/{requisito}")
@@ -43,6 +43,6 @@ public class GuaraniBeneficioController {
             @RequestBody GuaraniBeneficioRequest request) {
         GuaraniBeneficio domain = guaraniBeneficioDtoMapper.toDomain(request);
         GuaraniBeneficio updated = guaraniBeneficioService.updateByRequisito(requisito, domain);
-        return new ResponseEntity<>(guaraniBeneficioDtoMapper.toResponse(updated), HttpStatus.OK);
+        return ResponseEntity.ok(guaraniBeneficioDtoMapper.toResponse(updated));
     }
 }

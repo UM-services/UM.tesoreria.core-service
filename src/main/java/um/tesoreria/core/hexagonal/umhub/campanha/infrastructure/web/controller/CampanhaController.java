@@ -25,7 +25,7 @@ public class CampanhaController {
     @GetMapping("/{campanhaId}")
     public ResponseEntity<CampanhaResponse> findByCampanhaId(@PathVariable UUID campanhaId) {
         return campanhaService.getCampanhaById(campanhaId)
-                .map(domain -> new ResponseEntity<>(campanhaDtoMapper.toResponse(domain), HttpStatus.OK))
+                .map(domain -> ResponseEntity.ok(campanhaDtoMapper.toResponse(domain)))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -41,14 +41,14 @@ public class CampanhaController {
         List<CampanhaResponse> responses = campanhaService.getAllCampanhas().stream()
                 .map(campanhaDtoMapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @PutMapping("/{campanhaId}")
     public ResponseEntity<CampanhaResponse> update(@PathVariable UUID campanhaId, @RequestBody CampanhaRequest request) {
         Campanha domain = campanhaDtoMapper.toDomain(request);
         return campanhaService.updateCampanha(campanhaId, domain)
-                .map(updated -> new ResponseEntity<>(campanhaDtoMapper.toResponse(updated), HttpStatus.OK))
+                .map(updated -> ResponseEntity.ok(campanhaDtoMapper.toResponse(updated)))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 

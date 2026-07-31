@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CarreraException;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
-import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.exception.InfoLdapException;
 import um.tesoreria.core.exception.LegajoException;
@@ -27,10 +26,8 @@ import um.tesoreria.core.extern.consumer.PersonaFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PlanFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.*;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.entity.DomicilioEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.InfoLdap;
 import um.tesoreria.core.service.CarreraService;
@@ -98,32 +95,23 @@ public class SincronizeService {
 
 	@Transactional
 	public void sincronizeCarreraAlumno(Integer facultadId, BigDecimal personaId, Integer documentoId) {
-		Facultad facultad = null;
-		try {
-			facultad = facultadService.findByFacultadId(facultadId);
-		} catch (FacultadException e) {
-			return;
-		}
 		LegajoFacultad legajoFacultad = null;
 		try {
-			legajoFacultad = legajoFacultadConsumer.findByPersona(facultad.getApiserver(), facultad.getApiport(),
-					personaId, documentoId, facultadId);
+			legajoFacultad = legajoFacultadConsumer.findByPersona(facultadId, personaId, documentoId);
 		} catch (Exception e) {
 			log.debug("Sin LEGAJO");
 			return;
 		}
 		PlanFacultad planFacultad = null;
 		try {
-			planFacultad = planFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
-					legajoFacultad.getFacultadId(), legajoFacultad.getPlanId());
+			planFacultad = planFacultadConsumer.findByUnique(legajoFacultad.getFacultadId(), legajoFacultad.getPlanId());
 		} catch (Exception e) {
 			log.debug("Sin PLAN");
 			return;
 		}
 		CarreraFacultad carreraFacultad = null;
 		try {
-			carreraFacultad = carreraFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(),
-					legajoFacultad.getFacultadId(), legajoFacultad.getPlanId(), legajoFacultad.getCarreraId());
+			carreraFacultad = carreraFacultadConsumer.findByUnique(legajoFacultad.getFacultadId(), legajoFacultad.getPlanId(), legajoFacultad.getCarreraId());
 		} catch (Exception e) {
 			log.debug("Sin CARRERA");
 			return;
@@ -177,16 +165,8 @@ public class SincronizeService {
 
 	@Transactional
 	public void sincronizeCarrera(Integer facultadId) {
-		Facultad facultad = null;
-		try {
-			facultad = facultadService.findByFacultadId(facultadId);
-		} catch (FacultadException e) {
-			return;
-		}
-		List<PlanFacultad> planesFacultad = planFacultadConsumer.findAll(facultad.getApiserver(),
-				facultad.getApiport());
-		List<CarreraFacultad> carrerasFacultad = carreraFacultadConsumer.findAll(facultad.getApiserver(),
-				facultad.getApiport());
+		List<PlanFacultad> planesFacultad = planFacultadConsumer.findAll(facultadId);
+		List<CarreraFacultad> carrerasFacultad = carreraFacultadConsumer.findAll(facultadId);
 		Map<String, Plan> planes = planService.findAll().stream()
 				.collect(Collectors.toMap(Plan::getPlanKey, plan -> plan));
 		Map<String, Carrera> carreras = carreraService.findAll().stream()

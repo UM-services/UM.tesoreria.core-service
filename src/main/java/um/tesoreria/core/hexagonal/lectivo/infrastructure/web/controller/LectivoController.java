@@ -62,7 +62,7 @@ public class LectivoController {
     @GetMapping("/last")
     public ResponseEntity<LectivoResponse> findLast() {
         return lectivoService.findLast()
-                .map(domain -> new ResponseEntity<>(lectivoDtoMapper.toResponse(domain), HttpStatus.OK))
+                .map(domain -> ResponseEntity.ok(lectivoDtoMapper.toResponse(domain)))
                 .orElse(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
@@ -70,7 +70,7 @@ public class LectivoController {
     public ResponseEntity<LectivoResponse> add(@RequestBody LectivoRequest lectivoRequest) {
         Lectivo lectivo = lectivoDtoMapper.toDomain(lectivoRequest);
         Lectivo createdLectivo = lectivoService.createLectivo(lectivo);
-        return new ResponseEntity<>(lectivoDtoMapper.toResponse(createdLectivo), HttpStatus.OK);
+        return ResponseEntity.ok(lectivoDtoMapper.toResponse(createdLectivo));
     }
 
     @DeleteMapping("/{lectivoId}")

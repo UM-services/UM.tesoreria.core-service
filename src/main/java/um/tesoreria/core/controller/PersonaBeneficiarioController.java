@@ -3,7 +3,7 @@
  */
 package um.tesoreria.core.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,15 +26,15 @@ import um.tesoreria.core.service.PersonaBeneficiarioService;
  */
 @RestController
 @RequestMapping("/personaBeneficiario")
+@RequiredArgsConstructor
 public class PersonaBeneficiarioController {
 
-	@Autowired
-	private PersonaBeneficiarioService service;
+	private final PersonaBeneficiarioService service;
 
 	@GetMapping("/{personaUniqueId}")
 	public ResponseEntity<PersonaBeneficiario> findByPersonaUniqueId(@PathVariable Long personaUniqueId) {
 		try {
-			return new ResponseEntity<PersonaBeneficiario>(service.findByPersonaUniqueId(personaUniqueId), HttpStatus.OK);
+			return ResponseEntity.ok(service.findByPersonaUniqueId(personaUniqueId));
 		} catch (PersonaBeneficiarioException e) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
@@ -42,14 +42,13 @@ public class PersonaBeneficiarioController {
 
 	@PostMapping("/")
 	public ResponseEntity<PersonaBeneficiario> add(@RequestBody PersonaBeneficiario personaBeneficiario) {
-		return new ResponseEntity<PersonaBeneficiario>(service.add(personaBeneficiario), HttpStatus.OK);
+		return ResponseEntity.ok(service.add(personaBeneficiario));
 	}
 
 	@PutMapping("/{personaBeneficiarioId}")
 	public ResponseEntity<PersonaBeneficiario> update(@RequestBody PersonaBeneficiario personaBeneficiario,
 			@PathVariable Long personaBeneficiarioId) {
-		return new ResponseEntity<PersonaBeneficiario>(service.update(personaBeneficiario, personaBeneficiarioId),
-				HttpStatus.OK);
+		return ResponseEntity.ok(service.update(personaBeneficiario, personaBeneficiarioId));
 	}
 
 	@DeleteMapping("/{personaUniqueId}")

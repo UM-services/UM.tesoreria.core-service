@@ -1,6 +1,5 @@
 package um.tesoreria.core.controller.facade;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +19,6 @@ public class ContabilidadController {
 
     @GetMapping("/ajusteAsientoCosto/{proveedorMovimientoIdFactura}")
     public ResponseEntity<Boolean> ajusteAsientoCosto(@PathVariable Long proveedorMovimientoIdFactura) {
-        return new ResponseEntity<>(service.ajusteAsientoCosto(proveedorMovimientoIdFactura), HttpStatus.OK);
+        return ResponseEntity.ok(service.ajusteAsientoCosto(proveedorMovimientoIdFactura));
     }
 }

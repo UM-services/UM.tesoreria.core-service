@@ -3,11 +3,11 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.EntregaDetalle;
@@ -19,10 +19,10 @@ import um.tesoreria.core.repository.EntregaDetalleRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class EntregaDetalleService {
 
-	@Autowired
-	private EntregaDetalleRepository repository;
+	private final EntregaDetalleRepository repository;
 
 	public List<EntregaDetalle> findAllByProveedorMovimientoId(Long proveedorMovimientoId) {
 		return repository.findAllByProveedorMovimientoIdOrderByOrden(proveedorMovimientoId);

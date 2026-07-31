@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.PersonaBeneficiarioException;
@@ -17,10 +17,10 @@ import um.tesoreria.core.repository.PersonaBeneficiarioRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class PersonaBeneficiarioService {
 
-	@Autowired
-	private PersonaBeneficiarioRepository repository;
+	private final PersonaBeneficiarioRepository repository;
 
 	public PersonaBeneficiario findByPersonaUniqueId(Long personaUniqueId) {
 		return repository.findByPersonaUniqueId(personaUniqueId)

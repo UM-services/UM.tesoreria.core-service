@@ -288,7 +288,7 @@ public class SheetService {
             Map<Long, BajaEntity> bajas = bajaService.findAllByChequeraIdIn(chequeraList.stream().map(ChequeraSerie::getChequeraId).collect(Collectors.toList())).stream().collect(Collectors.toMap(BajaEntity::getChequeraId, Function.identity(), (baja, replacement) -> baja));
             List<String> keys = new ArrayList<>(chequeras.keySet());
             Map<String, LegajoKey> legajos = legajoKeyService.findAllByFacultadIdAndUnifiedIn(facultadId, keys).stream().collect(Collectors.toMap(LegajoKey::getUnified, Function.identity(), (legajo, replacement) -> legajo));
-            Map<String, LegajoKeyFacultad> legajosFacultad = legajoKeyFacultadConsumer.findAllByFacultadAndKeys(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), keys).stream().collect(Collectors.toMap(LegajoKeyFacultad::getPersonakey, Function.identity(), (legajo, replacement) -> legajo));
+            Map<String, LegajoKeyFacultad> legajosFacultad = legajoKeyFacultadConsumer.findAllByFacultadAndKeys(facultad.getFacultadId(), keys).stream().collect(Collectors.toMap(LegajoKeyFacultad::getPersonakey, Function.identity(), (legajo, replacement) -> legajo));
             Map<String, DomicilioKey> domicilios = domicilioKeyService.findAllByUnifiedIn(keys).stream().collect(Collectors.toMap(DomicilioKey::getUnified, domicilio -> domicilio));
 
             for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()))) {
@@ -345,7 +345,7 @@ public class SheetService {
                     // Baja Facultad
                     BajaFacultad bajaFacultad = null;
                     try {
-                        bajaFacultad = bajaFacultadConsumer.findByUnique(facultad.getApiserver(), facultad.getApiport(), facultadId, persona.getPersonaId(), persona.getDocumentoId(), lectivoId);
+                        bajaFacultad = bajaFacultadConsumer.findByUnique(facultadId, persona.getPersonaId(), persona.getDocumentoId(), lectivoId);
                     } catch (BajaFacultadException e) {
                         log.debug("Error buscando facultad en otro servicio");
                     }
@@ -531,9 +531,9 @@ public class SheetService {
         Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
 
         // Matriculados
-        Map<String, PreunivMatricResumenFacultad> matriculas = preunivMatricResumenFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId).stream().collect(Collectors.toMap(PreunivMatricResumenFacultad::getKey, matricula -> matricula));
+        Map<String, PreunivMatricResumenFacultad> matriculas = preunivMatricResumenFacultadConsumer.findAllByLectivo(facultad.getFacultadId(), lectivoId).stream().collect(Collectors.toMap(PreunivMatricResumenFacultad::getKey, matricula -> matricula));
         // Turnos
-        Map<String, PreTurnoFacultad> turnos = preTurnoFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId).stream().collect(Collectors.toMap(PreTurnoFacultad::getKey, turno -> turno));
+        Map<String, PreTurnoFacultad> turnos = preTurnoFacultadConsumer.findAllByLectivo(facultad.getFacultadId(), lectivoId).stream().collect(Collectors.toMap(PreTurnoFacultad::getKey, turno -> turno));
         // Sincronizar carreras
         sincronizeService.sincronizeCarrera(facultad.getFacultadId());
 
@@ -542,9 +542,9 @@ public class SheetService {
 
         Map<String, ChequeraPreuniv> chequerasPre = chequeraPreunivService.findAllByFacultadIdAndLectivoId(facultadId, lectivoId - 1).stream().collect(Collectors.toMap(ChequeraPreuniv::getPersonaKey, Function.identity(), (existing, chequera) -> chequera));
 
-        for (PreunivResumenFacultad resumen : preunivResumenFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId)) {
+        for (PreunivResumenFacultad resumen : preunivResumenFacultadConsumer.findAllByLectivo(facultad.getFacultadId(), lectivoId)) {
             // Recupera lista de alumnos inscriptos en el turno
-            List<PreunivCarreraFacultad> preInscriptosCarrera = preunivCarreraFacultadConsumer.findAllByCarrera(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId, resumen.getGeograficaId(), resumen.getTurnoId(), resumen.getPlanId(), resumen.getCarreraId());
+            List<PreunivCarreraFacultad> preInscriptosCarrera = preunivCarreraFacultadConsumer.findAllByCarrera(facultadId, lectivoId, resumen.getGeograficaId(), resumen.getTurnoId(), resumen.getPlanId(), resumen.getCarreraId());
             List<String> keysFacultad = preInscriptosCarrera.stream().map(pre -> pre.getPersonaId() + "." + pre.getDocumentoId()).collect(Collectors.toList());
             Map<String, ChequeraPreuniv> chequerasPreInscriptos = chequeraPreunivService.findAllByFacultadIdAndLectivoIdAndGeograficaIdAndPersonakeyIn(resumen.getFacultadId(), resumen.getLectivoId() - 1, resumen.getGeograficaId(), keysFacultad).stream().collect(Collectors.toMap(ChequeraPreuniv::getPersonaKey, Function.identity(), (existing, chequera) -> chequera));
 
@@ -710,13 +710,13 @@ public class SheetService {
         Map<String, PersonaKey> personas = personaKeyService.findAllByUnifiedIn(keys, null).stream().collect(Collectors.toMap(PersonaKey::getUnified, persona -> persona));
         Map<String, LegajoKey> legajos = legajoKeyService.findAllByFacultadIdAndUnifiedIn(facultad.getFacultadId(), keys).stream().collect(Collectors.toMap(LegajoKey::getUnified, legajo -> legajo));
         // Turnos
-        Map<String, PreTurnoFacultad> turnos = preTurnoFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId).stream().collect(Collectors.toMap(PreTurnoFacultad::getKey, turno -> turno));
+        Map<String, PreTurnoFacultad> turnos = preTurnoFacultadConsumer.findAllByLectivo(facultad.getFacultadId(), lectivoId).stream().collect(Collectors.toMap(PreTurnoFacultad::getKey, turno -> turno));
         // Inscriptos preuniversitario
-        List<PreunivCarreraFacultad> preInscriptosCarrera = preunivCarreraFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivoId);
+        List<PreunivCarreraFacultad> preInscriptosCarrera = preunivCarreraFacultadConsumer.findAllByLectivo(facultad.getFacultadId(), lectivoId);
         Map<String, PreunivCarreraFacultad> preunivs_facultad = preInscriptosCarrera.stream().collect(Collectors.toMap(PreunivCarreraFacultad::getUnified, Function.identity(), (inscripcion, replacement) -> inscripcion));
         List<String> keysFacultad = preInscriptosCarrera.stream().map(pre -> pre.getPersonaId() + "." + pre.getDocumentoId()).collect(Collectors.toList());
         // Personas
-        Map<String, PersonaKeyFacultad> personas_facultad = personaKeyFacultadConsumer.findAllByUnifieds(facultad.getApiserver(), facultad.getApiport(), keysFacultad).stream().collect(Collectors.toMap(PersonaKeyFacultad::getUnified, persona -> persona));
+        Map<String, PersonaKeyFacultad> personas_facultad = personaKeyFacultadConsumer.findAllByUnifieds(facultad.getFacultadId(), keysFacultad).stream().collect(Collectors.toMap(PersonaKeyFacultad::getUnified, persona -> persona));
 
         // Busca diferencias entre facultad y tesoreria
         for (PersonaKey persona : personas.values()) {
@@ -885,13 +885,13 @@ public class SheetService {
         this.setCellString(row, 9, "Chequera", styleBold);
         this.setCellString(row, 10, "Curso", styleBold);
 
-        List<InscripcionFacultad> inscriptos = inscripcionFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultadId, lectivoId);
+        List<InscripcionFacultad> inscriptos = inscripcionFacultadConsumer.findAllByLectivo(facultadId, lectivoId);
         List<String> unifieds = inscriptos.stream().map(InscripcionFacultad::getPersonaKey).collect(Collectors.toList());
-        Map<String, PersonaKeyFacultad> personas = personaKeyFacultadConsumer.findAllByUnifieds(facultad.getApiserver(), facultad.getApiport(), unifieds).stream().collect(Collectors.toMap(PersonaKeyFacultad::getUnified, Function.identity(), (persona, replacement) -> persona));
-        Map<String, LegajoKeyFacultad> legajos = legajoKeyFacultadConsumer.findAllByFacultadAndKeys(facultad.getApiserver(), facultad.getApiport(), facultadId, unifieds).stream().collect(Collectors.toMap(LegajoKeyFacultad::getLegajoKey, Function.identity(), (legajo, replacemente) -> legajo));
+        Map<String, PersonaKeyFacultad> personas = personaKeyFacultadConsumer.findAllByUnifieds(facultadId, unifieds).stream().collect(Collectors.toMap(PersonaKeyFacultad::getUnified, Function.identity(), (persona, replacement) -> persona));
+        Map<String, LegajoKeyFacultad> legajos = legajoKeyFacultadConsumer.findAllByFacultadAndKeys(facultadId, unifieds).stream().collect(Collectors.toMap(LegajoKeyFacultad::getLegajoKey, Function.identity(), (legajo, replacemente) -> legajo));
         Map<Integer, Geografica> geograficas = geograficaService.findAll().stream().collect(Collectors.toMap(Geografica::getGeograficaId, geografica -> geografica));
-        Map<String, PlanFacultad> planes = planFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(PlanFacultad::getPlanKey, plan -> plan));
-        Map<String, CarreraFacultad> carreras = carreraFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
+        Map<String, PlanFacultad> planes = planFacultadConsumer.findAll(facultadId).stream().collect(Collectors.toMap(PlanFacultad::getPlanKey, plan -> plan));
+        Map<String, CarreraFacultad> carreras = carreraFacultadConsumer.findAll(facultadId).stream().collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
         Map<String, ChequeraSerie> chequeras = chequeraSerieService.findAllByLectivoIdAndFacultadId(lectivoId, facultadId).stream().collect(Collectors.toMap(ChequeraSerie::getFacultadKey, Function.identity(), (chequera, replacement) -> chequera));
         Map<Integer, TipoChequera> tipos = tipoChequeraService.findAll().stream().collect(Collectors.toMap(TipoChequera::getTipoChequeraId, tipo -> tipo));
         Map<Integer, ArancelTipoEntity> aranceles = arancelTipoService.findAll().stream().collect(Collectors.toMap(ArancelTipoEntity::getArancelTipoId, arancelTipo -> arancelTipo));
@@ -984,9 +984,9 @@ public class SheetService {
         this.setCellString(row, 7, "Egresos", styleBold);
 
         for (Facultad facultad : facultadService.findFacultades()) {
-            Map<String, PlanFacultad> planes = planFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(PlanFacultad::getPlanKey, plan -> plan));
-            Map<String, CarreraFacultad> carreras = carreraFacultadConsumer.findAll(facultad.getApiserver(), facultad.getApiport()).stream().collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
-            for (InscriptoCursoFacultad curso : inscriptoCursoFacultadConsumer.findAllByLectivo(facultad.getApiserver(), facultad.getApiport(), facultad.getFacultadId(), lectivo.getLectivoId())) {
+            Map<String, PlanFacultad> planes = planFacultadConsumer.findAll(facultad.getFacultadId()).stream().collect(Collectors.toMap(PlanFacultad::getPlanKey, plan -> plan));
+            Map<String, CarreraFacultad> carreras = carreraFacultadConsumer.findAll(facultad.getFacultadId()).stream().collect(Collectors.toMap(CarreraFacultad::getCarreraKey, carrera -> carrera));
+            for (InscriptoCursoFacultad curso : inscriptoCursoFacultadConsumer.findAllByLectivo(facultad.getFacultadId(), lectivo.getLectivoId())) {
                 row = sheet.createRow(++fila);
                 this.setCellString(row, 0, facultad.getNombre(), styleNormal);
                 if (geograficas.containsKey(curso.getGeograficaId())) {

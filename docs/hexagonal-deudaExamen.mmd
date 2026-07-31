@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - DeudaExamen (v3.44.0)
+title: Arquitectura Hexagonal - DeudaExamen (v3.46.0)
 ---
 
 classDiagram
@@ -26,7 +26,14 @@ classDiagram
             -SetupService setupService
             -ChequeraCuotaService chequeraCuotaService
             -LectivoService lectivoService
+            -TesoreriaEstadoFacultadService tesoreriaEstadoFacultadService
             +getDeudaExamenByFacultadAndPersona(Integer, BigDecimal, Integer, OffsetDateTime) DeudaExamen
+        }
+    }
+
+    namespace extern {
+        class TesoreriaEstadoFacultadService {
+            +findByUnique(Integer, BigDecimal, Integer) TesoreriaEstadoFacultad
         }
     }
 
@@ -51,6 +58,7 @@ classDiagram
     }
 
     GetDeudaExamenUseCaseImpl ..|> GetDeudaExamenUseCase : implements
+    GetDeudaExamenUseCaseImpl --> TesoreriaEstadoFacultadService : uses
 
     PersonaController --> PersonaDtoMapper : uses
     PersonaDtoMapper --> DeudaExamen : maps

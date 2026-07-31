@@ -1,7 +1,6 @@
 package um.tesoreria.core.hexagonal.ubicacion.infrastructure.web.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import um.tesoreria.core.hexagonal.ubicacion.application.service.UbicacionService;
@@ -22,7 +21,7 @@ public class UbicacionController {
         List<UbicacionResponse> responses = service.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/sede/{geograficaId}")
@@ -31,6 +30,6 @@ public class UbicacionController {
                 .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
-        return new ResponseEntity<>(responses, HttpStatus.OK);
+        return ResponseEntity.ok(responses);
     }
 }

@@ -3,10 +3,9 @@
  */
 package um.tesoreria.core.controller.view;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,15 +21,15 @@ import um.tesoreria.core.service.view.PlantillaArancelService;
  */
 @RestController
 @RequestMapping("/plantillaarancel")
+@RequiredArgsConstructor
 public class PlantillaArancelController {
-	@Autowired
-	private PlantillaArancelService service;
+	private final PlantillaArancelService service;
 
 	@GetMapping("/plantilla/{facultadId}/{lectivoId}/{tipochequeraId}/{aranceltipoId}")
 	public ResponseEntity<List<PlantillaArancelDto>> findAllByPlantilla(@PathVariable Integer facultadId,
                                                                         @PathVariable Integer lectivoId, @PathVariable Integer tipochequeraId,
                                                                         @PathVariable Integer aranceltipoId) {
-		return new ResponseEntity<List<PlantillaArancelDto>>(
-				service.findAllByPlantilla(facultadId, lectivoId, tipochequeraId, aranceltipoId), HttpStatus.OK);
+		return ResponseEntity.ok(
+				service.findAllByPlantilla(facultadId, lectivoId, tipochequeraId, aranceltipoId));
 	}
 }

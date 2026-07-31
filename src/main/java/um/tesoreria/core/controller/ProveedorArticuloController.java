@@ -3,10 +3,9 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,16 +24,16 @@ import um.tesoreria.core.kotlin.model.ProveedorArticulo;
  */
 @RestController
 @RequestMapping("/proveedorArticulo")
+@RequiredArgsConstructor
 public class ProveedorArticuloController {
 
-	@Autowired
-	private ProveedorArticuloService service;
+	private final ProveedorArticuloService service;
 
 	@PostMapping("/movimiento/")
 	public ResponseEntity<List<ProveedorArticulo>> findAllByProveedorMovimientoIds(
 			@RequestBody ProveedorArticuloAsignableDto asignables) throws JsonProcessingException {
-		return new ResponseEntity<>(service.findAllByProveedorMovimientoIds(
-				asignables.getProveedorMovimientoIds(), asignables.getAsignables()), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByProveedorMovimientoIds(
+				asignables.getProveedorMovimientoIds(), asignables.getAsignables()));
 	}
 
 }

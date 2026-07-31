@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.LocalidadException;
@@ -17,10 +17,10 @@ import um.tesoreria.core.repository.LocalidadRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class LocalidadService {
 
-	@Autowired
-	private LocalidadRepository repository;
+	private final LocalidadRepository repository;
 
 	public List<Localidad> findAllByProvinciaId(Integer facultadId, Integer provinciaId) {
 		return repository.findAllByFacultadIdAndProvinciaId(facultadId, provinciaId);

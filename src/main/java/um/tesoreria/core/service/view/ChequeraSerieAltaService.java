@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.service.view;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAlta;
@@ -16,10 +16,10 @@ import um.tesoreria.core.repository.view.ChequeraSerieAltaRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class ChequeraSerieAltaService {
 
-	@Autowired
-	private ChequeraSerieAltaRepository repository;
+	private final ChequeraSerieAltaRepository repository;
 
 	public List<ChequeraSerieAlta> findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer lectivoId, Integer facultadId,
 																				  Integer geograficaId) {

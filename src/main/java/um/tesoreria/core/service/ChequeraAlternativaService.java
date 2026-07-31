@@ -3,11 +3,11 @@
  */
 package um.tesoreria.core.service;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import jakarta.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ChequeraAlternativaException;
@@ -19,10 +19,10 @@ import um.tesoreria.core.repository.ChequeraAlternativaRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class ChequeraAlternativaService {
 
-	@Autowired
-	private ChequeraAlternativaRepository repository;
+	private final ChequeraAlternativaRepository repository;
 
 	public List<ChequeraAlternativa> findAllByChequera(Integer facultadId, Integer tipochequeraId, Long chequeraserieId,
 													   Integer alternativaId) {

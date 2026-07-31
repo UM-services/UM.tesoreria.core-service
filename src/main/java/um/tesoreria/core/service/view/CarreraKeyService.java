@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.service.view;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.model.view.CarreraKey;
@@ -16,10 +16,10 @@ import um.tesoreria.core.repository.view.CarreraKeyRepository;
  *
  */
 @Service
+@RequiredArgsConstructor
 public class CarreraKeyService {
 
-	@Autowired
-	private CarreraKeyRepository repository;
+	private final CarreraKeyRepository repository;
 
 	public List<CarreraKey> findAllByFacultadId(Integer facultadId) {
 		return repository.findAllByFacultadId(facultadId);

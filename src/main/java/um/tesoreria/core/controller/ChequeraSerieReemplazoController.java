@@ -1,6 +1,5 @@
 package um.tesoreria.core.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,8 +21,7 @@ public class ChequeraSerieReemplazoController {
     @GetMapping("/unique/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<ChequeraSerieReemplazo> findByUnique(@PathVariable Integer facultadId,
                                                                @PathVariable Integer tipoChequeraId, @PathVariable Long chequeraSerieId) {
-        return new ResponseEntity<>(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId),
-                HttpStatus.OK);
+        return ResponseEntity.ok(service.findByUnique(facultadId, tipoChequeraId, chequeraSerieId));
     }
 
 }

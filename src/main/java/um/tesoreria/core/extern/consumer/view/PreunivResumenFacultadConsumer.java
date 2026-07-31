@@ -1,26 +1,26 @@
-/**
- * 
- */
 package um.tesoreria.core.extern.consumer.view;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-
 import um.tesoreria.core.extern.model.view.PreunivResumenFacultad;
+import um.tesoreria.core.extern.resolver.FacultadUrlResolver;
 
 @Service
+@RequiredArgsConstructor
 public class PreunivResumenFacultadConsumer {
 
-	private final RestClient restClient = RestClient.create();
+	private final RestClient restClient;
+	private final FacultadUrlResolver urlResolver;
 
-	public List<PreunivResumenFacultad> findAllByLectivo(String server, Long port, Integer facultadId,
-			Integer lectivoId) {
-		String url = "http://" + server + ":" + port + "/preunivresumen/lectivo/" + facultadId + "/" + lectivoId;
-		return Arrays.asList(Objects.requireNonNull(restClient.get().uri(url).retrieve().toEntity(PreunivResumenFacultad[].class).getBody()));
+	public List<PreunivResumenFacultad> findAllByLectivo(Integer facultadId, Integer lectivoId) {
+		String baseUrl = urlResolver.getBaseUrl(facultadId);
+		return restClient.get()
+				.uri(baseUrl + "/preunivresumen/lectivo/{facultadId}/{lectivoId}", facultadId, lectivoId)
+				.retrieve()
+				.body(new ParameterizedTypeReference<List<PreunivResumenFacultad>>() {});
 	}
 
 }

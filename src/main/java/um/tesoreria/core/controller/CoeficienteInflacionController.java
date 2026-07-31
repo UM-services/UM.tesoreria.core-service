@@ -3,10 +3,9 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,31 +24,30 @@ import um.tesoreria.core.service.CoeficienteInflacionService;
  */
 @RestController
 @RequestMapping("/coeficienteinflacion")
+@RequiredArgsConstructor
 public class CoeficienteInflacionController {
 
-	@Autowired
-	private CoeficienteInflacionService service;
+	private final CoeficienteInflacionService service;
 
 	@GetMapping("/")
 	public ResponseEntity<List<CoeficienteInflacion>> findAll() {
-		return new ResponseEntity<List<CoeficienteInflacion>>(service.findAll(), HttpStatus.OK);
+		return ResponseEntity.ok(service.findAll());
 	}
 
 	@GetMapping("/unique/{anho}/{mes}")
 	public ResponseEntity<CoeficienteInflacion> findByUnique(@PathVariable Integer anho, @PathVariable Integer mes) {
-		return new ResponseEntity<CoeficienteInflacion>(service.findByUnique(anho, mes), HttpStatus.OK);
+		return ResponseEntity.ok(service.findByUnique(anho, mes));
 	}
 
 	@PostMapping("/")
 	public ResponseEntity<CoeficienteInflacion> add(@RequestBody CoeficienteInflacion coeficienteinflacion) {
-		return new ResponseEntity<CoeficienteInflacion>(service.add(coeficienteinflacion), HttpStatus.OK);
+		return ResponseEntity.ok(service.add(coeficienteinflacion));
 	}
 
 	@PutMapping("/{coeficienteinflacionId}")
 	public ResponseEntity<CoeficienteInflacion> update(@RequestBody CoeficienteInflacion coeficienteinflacion,
 			@PathVariable Long coeficienteinflacionId) {
-		return new ResponseEntity<CoeficienteInflacion>(service.update(coeficienteinflacion, coeficienteinflacionId),
-				HttpStatus.OK);
+		return ResponseEntity.ok(service.update(coeficienteinflacion, coeficienteinflacionId));
 	}
 
 }

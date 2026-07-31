@@ -3,9 +3,9 @@
  */
 package um.tesoreria.core.controller;
 
+import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,24 +26,22 @@ import um.tesoreria.core.service.LocalidadService;
  */
 @RestController
 @RequestMapping("/localidad")
+@RequiredArgsConstructor
 public class LocalidadController {
 
-	@Autowired
-	private LocalidadService service;
+	private final LocalidadService service;
 
 	@GetMapping("/provincia/{facultadId}/{provinciaId}")
 	public ResponseEntity<List<Localidad>> findAllByProvinciaId(@PathVariable Integer facultadId,
 			@PathVariable Integer provinciaId) {
-		return new ResponseEntity<List<Localidad>>(service.findAllByProvinciaId(facultadId, provinciaId),
-				HttpStatus.OK);
+		return ResponseEntity.ok(service.findAllByProvinciaId(facultadId, provinciaId));
 	}
 
 	@PostMapping("/nombre")
 	public ResponseEntity<Localidad> findByNombre(@RequestBody Localidad localidad) {
 		try {
-			return new ResponseEntity<Localidad>(
-					service.findByNombre(localidad.getFacultadId(), localidad.getProvinciaId(), localidad.getNombre()),
-					HttpStatus.OK);
+			return ResponseEntity.ok(
+					service.findByNombre(localidad.getFacultadId(), localidad.getProvinciaId(), localidad.getNombre()));
 		} catch (LocalidadException e) {
 			throw new ResponseStatusException(HttpStatus.OK, e.getMessage());
 		}
@@ -53,8 +51,7 @@ public class LocalidadController {
 	public ResponseEntity<Localidad> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer provinciaId,
 			@PathVariable Integer localidadId) {
 		try {
-			return new ResponseEntity<Localidad>(service.findByUnique(facultadId, provinciaId, localidadId),
-					HttpStatus.OK);
+			return ResponseEntity.ok(service.findByUnique(facultadId, provinciaId, localidadId));
 		} catch (LocalidadException e) {
 			throw new ResponseStatusException(HttpStatus.OK, e.getMessage());
 		}
@@ -63,7 +60,7 @@ public class LocalidadController {
 	@GetMapping("/last/{facultadId}/{provinciaId}")
 	public ResponseEntity<Localidad> findLast(@PathVariable Integer facultadId, @PathVariable Integer provinciaId) {
 		try {
-			return new ResponseEntity<Localidad>(service.findLast(facultadId, provinciaId), HttpStatus.OK);
+			return ResponseEntity.ok(service.findLast(facultadId, provinciaId));
 		} catch (LocalidadException e) {
 			throw new ResponseStatusException(HttpStatus.OK, e.getMessage());
 		}
