@@ -41,6 +41,10 @@ import um.tesoreria.core.hexagonal.chequera.producto.application.service.Product
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.*;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DomicilioDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaDto;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieDto;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.PreuniversitarioData;
 import um.tesoreria.core.model.ChequeraSerieControl;
 import um.tesoreria.core.model.Debito;
 import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;

@@ -2,15 +2,14 @@ package um.tesoreria.core.hexagonal.persona.application.usecases;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.ChequeraSerieException;
 import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.PreInscripcionFacultad;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.FindPreInscriptosSinChequeraUseCase;
-import um.tesoreria.core.model.view.PersonaKey;
-import um.tesoreria.core.service.view.PersonaKeyService;
+import um.tesoreria.core.hexagonal.persona.domain.model.PersonaKey;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaKeyService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +54,6 @@ public class FindPreInscriptosSinChequeraUseCaseImpl implements FindPreInscripto
             }
         }
         return personaKeyService.findAllByUnifiedIn(new ArrayList<>(pendientes.keySet()),
-                Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()));
+                List.of("apellido", "nombre"));
     }
 }

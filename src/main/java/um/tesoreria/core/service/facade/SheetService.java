@@ -28,7 +28,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.env.Environment;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,13 +72,14 @@ import um.tesoreria.core.hexagonal.compras.proveedor.application.service.Proveed
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.*;
-import um.tesoreria.core.model.dto.DeudaChequeraDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaChequeraDto;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaKeyService;
 import um.tesoreria.core.model.view.CarreraKey;
 import um.tesoreria.core.model.view.ChequeraPreuniv;
 import um.tesoreria.core.model.view.DomicilioKey;
 import um.tesoreria.core.model.view.IngresoPeriodo;
 import um.tesoreria.core.model.view.LegajoKey;
-import um.tesoreria.core.model.view.PersonaKey;
+import um.tesoreria.core.hexagonal.persona.domain.model.PersonaKey;
 import um.tesoreria.core.model.view.TipoPagoFechaAcreditacion;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.service.ArancelTipoService;
 import um.tesoreria.core.hexagonal.chequera.baja.application.service.BajaService;
@@ -291,7 +291,7 @@ public class SheetService {
             Map<String, LegajoKeyFacultad> legajosFacultad = legajoKeyFacultadConsumer.findAllByFacultadAndKeys(facultad.getFacultadId(), keys).stream().collect(Collectors.toMap(LegajoKeyFacultad::getPersonakey, Function.identity(), (legajo, replacement) -> legajo));
             Map<String, DomicilioKey> domicilios = domicilioKeyService.findAllByUnifiedIn(keys).stream().collect(Collectors.toMap(DomicilioKey::getUnified, domicilio -> domicilio));
 
-            for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, Sort.by("apellido").ascending().and(Sort.by("nombre").ascending()))) {
+            for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, List.of("apellido", "nombre"))) {
                 ChequeraSerie chequeraSerie = chequeras.get(persona.getUnified());
                 DeudaChequeraDto deudaChequeraDto = calculateDeudaUseCase.calculateDeuda(chequeraSerie);
                 boolean show = true;
@@ -598,7 +598,7 @@ public class SheetService {
                 List<String> keys = new ArrayList<>();
                 for (String key : keysFacultad)
                     if (!chequerasPreInscriptos.containsKey(key)) keys.add(key);
-                for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, Sort.by("apellido").ascending())) {
+                for (PersonaKey persona : personaKeyService.findAllByUnifiedIn(keys, List.of("apellido"))) {
                     row = sheet.createRow(++fila);
                     this.setCellString(row, 2, "(" + persona.getUnified() + ") - " + persona.getApellido() + ", " + persona.getNombre(), styleNormal);
                 }

@@ -1,4 +1,4 @@
-package um.tesoreria.core.extern.model.dto;
+package um.tesoreria.core.hexagonal.persona.infrastructure.web.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

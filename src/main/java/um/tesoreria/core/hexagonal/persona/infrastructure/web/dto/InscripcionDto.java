@@ -1,4 +1,4 @@
-package um.tesoreria.core.extern.model.dto;
+package um.tesoreria.core.hexagonal.persona.infrastructure.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;

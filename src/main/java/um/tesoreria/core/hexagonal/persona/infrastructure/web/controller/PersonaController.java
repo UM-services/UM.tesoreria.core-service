@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.InscripcionFullDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,15 +19,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import um.tesoreria.core.exception.PersonaException;
+import um.tesoreria.core.hexagonal.persona.application.exception.PersonaException;
 import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaExamenResponse;
 import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaRequest;
 import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaResponse;
 import um.tesoreria.core.hexagonal.persona.infrastructure.web.mapper.PersonaDtoMapper;
-import um.tesoreria.core.model.dto.DeudaPersonaDto;
-import um.tesoreria.core.model.view.PersonaKey;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaPersonaDto;
+import um.tesoreria.core.hexagonal.persona.domain.model.PersonaKey;
 
 @RestController
 @RequestMapping({"/persona", "/api/tesoreria/core/persona"})

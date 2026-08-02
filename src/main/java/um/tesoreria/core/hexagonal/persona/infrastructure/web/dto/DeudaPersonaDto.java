@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.model.dto;
+package um.tesoreria.core.hexagonal.persona.infrastructure.web.dto;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -13,6 +13,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaChequeraDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.VencimientoDto;
 
 /**
  * @author daniel

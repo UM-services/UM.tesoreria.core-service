@@ -1,7 +1,7 @@
 /**
  * 
  */
-package um.tesoreria.core.model.dto;
+package um.tesoreria.core.hexagonal.persona.infrastructure.web.dto;
 
 import java.io.Serial;
 import java.io.Serializable;
