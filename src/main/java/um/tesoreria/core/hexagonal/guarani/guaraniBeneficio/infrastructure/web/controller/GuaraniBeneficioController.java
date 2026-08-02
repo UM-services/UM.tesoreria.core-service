@@ -12,6 +12,9 @@ import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.infrastructure.web.d
 import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.infrastructure.web.dto.GuaraniBeneficioResponse;
 import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.infrastructure.web.mapper.GuaraniBeneficioDtoMapper;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/tesoreria/core/guaraniBeneficio")
 @RequiredArgsConstructor
@@ -19,6 +22,14 @@ public class GuaraniBeneficioController {
 
     private final GuaraniBeneficioService guaraniBeneficioService;
     private final GuaraniBeneficioDtoMapper guaraniBeneficioDtoMapper;
+
+    @GetMapping("/")
+    public ResponseEntity<List<GuaraniBeneficioResponse>> findAll() {
+        List<GuaraniBeneficioResponse> responses = guaraniBeneficioService.findAll().stream()
+                .map(guaraniBeneficioDtoMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
 
     @GetMapping("/requisito/{requisito}")
     public ResponseEntity<GuaraniBeneficioResponse> findByRequisito(@PathVariable Integer requisito) {
