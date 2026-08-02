@@ -24,6 +24,7 @@ public class FacultadService {
     // Hexagonal Ports
     private final GetAllFacultadesUseCase getAllFacultadesUseCase;
     private final GetFacultadesFiltradasUseCase getFacultadesFiltradasUseCase;
+    private final GetFacultadesConResponsableAcademicaUseCase getFacultadesConResponsableAcademicaUseCase;
     private final GetFacultadByIdUseCase getFacultadByIdUseCase;
     
     // Legacy View Repositories (Will be refactored to their own slices later)
@@ -37,6 +38,10 @@ public class FacultadService {
 
     public List<Facultad> findFacultades() {
         return getFacultadesFiltradasUseCase.getFacultadesFiltradas();
+    }
+
+    public List<Facultad> findFacultadesConResponsableAcademica() {
+        return getFacultadesConResponsableAcademicaUseCase.getFacultadesConResponsableAcademica();
     }
 
     public Facultad findByFacultadId(Integer facultadId) {

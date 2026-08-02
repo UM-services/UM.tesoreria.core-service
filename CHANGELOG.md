@@ -2,6 +2,24 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.47.0] - 2026-08-02
+### Added
+- feat(guarani/guaraniUbicacion): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniUbicacion`.
+  - Modelo de dominio, entidad JPA sobre `guarani_ubicacion`, repositorio, adaptadores, mappers, DTOs y excepción propios.
+  - Endpoints para listar, consultar por ID, crear, actualizar y eliminar ubicaciones Guarani.
+- feat(guarani/guaraniBeneficio): Nuevo listado completo mediante `GET /api/tesoreria/core/guaraniBeneficio/`.
+- feat(facultad): Nuevo endpoint `GET /facultad/con-responsable-academica` y consulta por `guaraniResponsableAcademica` no nulo.
+- refactor(persona): Migración de `PersonaKey`, su vista/repositorio y DTOs relacionados a paquetes hexagonales Java.
+- test(persona): Añadidos tests para `PersonaKeyMapper` y reemplazo de DTOs Kotlin.
+- feat(docs): Añadido `docs/hexagonal-guaraniUbicacion.mmd` y referencias en la documentación generada.
+
+### Changed
+- refactor(chequera): Sustituidos DTOs Kotlin de integración por implementaciones Java en infraestructura web.
+- refactor(persona): Actualizados servicios, casos de uso y controladores para consumir los nuevos tipos hexagonales.
+- fix(ci): El paginado de GitHub no falla cuando la respuesta no contiene cabecera `Link`.
+
+> Basado en `git diff HEAD`, `git log`, los archivos Java modificados y `pom.xml` (versión `3.46.0` → `3.47.0`).
+
 ## [3.46.0] - 2026-07-31
 ### Added
 - feat(extern/tesoreriaEstado): Nuevo módulo TesoreriaEstadoFacultad con arquitectura hexagonal completa bajo `hexagonal/extern/facultad/tesoreriaEstado/`

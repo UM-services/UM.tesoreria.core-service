@@ -1,6 +1,6 @@
 package um.tesoreria.core.hexagonal.persona.domain.ports.in;
 
-import um.tesoreria.core.model.dto.DeudaPersonaDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaPersonaDto;
 import java.math.BigDecimal;
 
 public interface GetDeudaPersonaUseCase {

@@ -3,8 +3,8 @@ package um.tesoreria.core.hexagonal.persona.application.usecases;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.FindByStringsUseCase;
-import um.tesoreria.core.model.view.PersonaKey;
-import um.tesoreria.core.service.view.PersonaKeyService;
+import um.tesoreria.core.hexagonal.persona.domain.model.PersonaKey;
+import um.tesoreria.core.hexagonal.persona.application.service.PersonaKeyService;
 
 import java.util.List;
 

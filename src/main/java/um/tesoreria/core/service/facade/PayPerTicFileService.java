@@ -32,7 +32,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.PayPerTicException;
-import um.tesoreria.core.exception.PersonaException;
+import um.tesoreria.core.hexagonal.persona.application.exception.PersonaException;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.ChequeraAlternativa;

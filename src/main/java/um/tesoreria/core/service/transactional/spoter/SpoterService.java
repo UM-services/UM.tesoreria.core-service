@@ -13,7 +13,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraT
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
 import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.LegajoException;
-import um.tesoreria.core.exception.PersonaException;
+import um.tesoreria.core.hexagonal.persona.application.exception.PersonaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;

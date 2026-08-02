@@ -3,7 +3,7 @@ package um.tesoreria.core.hexagonal.persona.application.usecases;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.extern.consumer.InscripcionFacultadConsumer;
-import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.InscripcionFullDto;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.GetInscripcionFullUseCase;
 
 import java.math.BigDecimal;

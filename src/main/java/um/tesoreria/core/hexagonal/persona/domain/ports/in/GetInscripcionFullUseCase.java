@@ -1,6 +1,6 @@
 package um.tesoreria.core.hexagonal.persona.domain.ports.in;
 
-import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.InscripcionFullDto;
 import java.math.BigDecimal;
 
 public interface GetInscripcionFullUseCase {

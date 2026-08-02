@@ -52,7 +52,7 @@ import um.tesoreria.core.exception.CarreraException;
 import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.hexagonal.lectivo.application.exception.LectivoException;
 import um.tesoreria.core.exception.LegajoException;
-import um.tesoreria.core.exception.PersonaException;
+import um.tesoreria.core.hexagonal.persona.application.exception.PersonaException;
 
 @Service
 @Slf4j

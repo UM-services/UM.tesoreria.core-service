@@ -8,7 +8,9 @@ import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.infrastructure.persi
 import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.infrastructure.persistence.mapper.GuaraniBeneficioMapper;
 import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.infrastructure.persistence.repository.JpaGuaraniBeneficioRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -16,6 +18,13 @@ public class JpaGuaraniBeneficioRepositoryAdapter implements GuaraniBeneficioRep
 
     private final JpaGuaraniBeneficioRepository jpaGuaraniBeneficioRepository;
     private final GuaraniBeneficioMapper guaraniBeneficioMapper;
+
+    @Override
+    public List<GuaraniBeneficio> findAll() {
+        return jpaGuaraniBeneficioRepository.findAll().stream()
+                .map(guaraniBeneficioMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public Optional<GuaraniBeneficio> findByRequisito(Integer requisito) {

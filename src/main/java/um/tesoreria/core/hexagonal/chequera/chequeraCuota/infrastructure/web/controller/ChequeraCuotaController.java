@@ -24,7 +24,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.Ch
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.CalculateDeudaUseCase;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.mapper.ChequeraSerieMapper;
 import um.tesoreria.core.kotlin.model.view.ChequeraCuotaDeuda;
-import um.tesoreria.core.model.dto.DeudaChequeraDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaChequeraDto;
 import um.tesoreria.core.model.internal.CuotaPeriodoDto;
 
 @RestController

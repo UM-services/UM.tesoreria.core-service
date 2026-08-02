@@ -11,9 +11,9 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraS
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.GetDeudaPersonaUseCase;
-import um.tesoreria.core.model.dto.DeudaChequeraDto;
-import um.tesoreria.core.model.dto.DeudaPersonaDto;
-import um.tesoreria.core.model.dto.VencimientoDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaChequeraDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaPersonaDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.VencimientoDto;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
 import um.tesoreria.core.service.facade.MercadoPagoCoreService;

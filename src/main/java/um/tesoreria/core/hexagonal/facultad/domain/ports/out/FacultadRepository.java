@@ -7,5 +7,6 @@ import java.util.Optional;
 public interface FacultadRepository {
     List<Facultad> findAll();
     List<Facultad> findAllIn(List<Integer> ids);
+    List<Facultad> findAllByGuaraniResponsableAcademicaNotNull();
     Optional<Facultad> findById(Integer facultadId);
 }

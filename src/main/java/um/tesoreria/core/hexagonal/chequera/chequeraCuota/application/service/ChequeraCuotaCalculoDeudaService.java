@@ -13,7 +13,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraS
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.DeudaData;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.out.ChequeraCuotaRepository;
-import um.tesoreria.core.model.dto.DeudaChequeraDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaChequeraDto;
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;

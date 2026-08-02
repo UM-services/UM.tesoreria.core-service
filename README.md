@@ -4,7 +4,21 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.46.0**
+**Versión actual (SemVer): 3.47.0**
+
+## Novedades 3.47.0 (verificado en código)
+- feat(guarani/guaraniUbicacion): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniUbicacion`
+  - Modelo `GuaraniUbicacion`, entidad JPA sobre `guarani_ubicacion`, repositorio, mappers y excepción propios
+  - Endpoints para listar, consultar por ID, crear, actualizar y eliminar ubicaciones Guarani
+- feat(guarani/guaraniBeneficio): Añadido listado completo mediante `GET /api/tesoreria/core/guaraniBeneficio/`
+- feat(facultad): Añadido `GET /facultad/con-responsable-academica` para listar facultades con responsable académica Guarani
+- refactor(persona): Migrado `PersonaKey`, su vista/repositorio y los DTOs asociados desde paquetes legacy/Kotlin a la arquitectura hexagonal Java
+  - Añadidos `PersonaKeyService`, adaptadores JPA y tests de mapper y reemplazo de DTOs
+- refactor(chequera): Migrados DTOs de integración a Java y actualizadas las firmas de cálculo de deuda y servicios relacionados
+- fix(ci): Evitada la terminación prematura del paginado de GitHub cuando la respuesta no incluye cabecera `Link`
+- feat(docs): Añadido el diagrama Mermaid `hexagonal-guaraniUbicacion.mmd` y validación de diagramas en el pipeline
+
+> Basado en `git diff HEAD` (106 archivos modificados, +1200/-347 líneas), `git log` y el código fuente de los módulos Guarani, Facultad, Persona y Chequera. La versión se actualiza de `3.46.0` a `3.47.0` en `pom.xml` por la incorporación de funcionalidad compatible y nuevos endpoints.
 
 ## Novedades 3.46.0 (verificado en código)
 - feat(extern/tesoreriaEstado): Nuevo modulo TesoreriaEstadoFacultad con arquitectura hexagonal completa bajo `hexagonal/extern/facultad/tesoreriaEstado/`

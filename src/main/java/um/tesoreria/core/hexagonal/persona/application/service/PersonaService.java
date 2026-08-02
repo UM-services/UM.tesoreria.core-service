@@ -3,12 +3,12 @@ package um.tesoreria.core.hexagonal.persona.application.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import um.tesoreria.core.extern.model.dto.InscripcionFullDto;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.InscripcionFullDto;
 import um.tesoreria.core.hexagonal.persona.domain.model.DeudaExamen;
 import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
 import um.tesoreria.core.hexagonal.persona.domain.ports.in.*;
-import um.tesoreria.core.model.dto.DeudaPersonaDto;
-import um.tesoreria.core.model.view.PersonaKey;
+import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaPersonaDto;
+import um.tesoreria.core.hexagonal.persona.domain.model.PersonaKey;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

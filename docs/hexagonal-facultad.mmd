@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Facultad (v3.34.0)
+title: Arquitectura Hexagonal - Módulo Facultad (v3.47.0)
 ---
 
 classDiagram
@@ -40,6 +40,7 @@ classDiagram
             +findAllByLectivoId(Integer) List~FacultadLectivo~
             +findAllByPersona(BigDecimal, Integer, Integer) List~FacultadPersona~
             +findAllByDisenho(Integer, Integer) List~FacultadLectivoSede~
+            +findFacultadesConResponsableAcademica() List~Facultad~
         }
 
     }
@@ -75,6 +76,11 @@ classDiagram
             <<interface>>
             +getFacultadesFiltradas() List~Facultad~
         }
+
+        class GetFacultadesConResponsableAcademicaUseCase {
+            <<interface>>
+            +getFacultadesConResponsableAcademica() List~Facultad~
+        }
     }
 
     namespace infrastructure_persistence {
@@ -103,6 +109,7 @@ classDiagram
                 +findAll() List~Facultad~
                 +findAllIn(List~Integer~) List~Facultad~
                 +findById(Integer) Optional~Facultad~
+                +findAllByGuaraniResponsableAcademicaNotNull() List~Facultad~
             }
 
             class FacultadMapper {
@@ -119,6 +126,7 @@ classDiagram
                 +findAllByLectivoId(Integer) ResponseEntity~List~FacultadLectivo~~
                 +findAllByPersona(BigDecimal, Integer, Integer) ResponseEntity~List~FacultadPersona~~
                 +findAllByDisenho(Integer, Integer) ResponseEntity~List~FacultadLectivoSede~~
+                +findFacultadesConResponsableAcademica() ResponseEntity~List~FacultadResponse~~
             }
 
             class FacultadResponse {
@@ -142,14 +150,17 @@ classDiagram
     FacultadService --> GetAllFacultadesUseCase : uses
     FacultadService --> GetFacultadesFiltradasUseCase : uses
     FacultadService --> GetFacultadByIdUseCase : uses
+    FacultadService --> GetFacultadesConResponsableAcademicaUseCase : uses
 
     GetAllFacultadesUseCaseImpl ..|> GetAllFacultadesUseCase : implements
     GetFacultadByIdUseCaseImpl ..|> GetFacultadByIdUseCase : implements
     GetFacultadesFiltradasUseCaseImpl ..|> GetFacultadesFiltradasUseCase : implements
+    GetFacultadesConResponsableAcademicaUseCaseImpl ..|> GetFacultadesConResponsableAcademicaUseCase : implements
 
     GetAllFacultadesUseCaseImpl --> FacultadRepository : uses
     GetFacultadByIdUseCaseImpl --> FacultadRepository : uses
     GetFacultadesFiltradasUseCaseImpl --> FacultadRepository : uses
+    GetFacultadesConResponsableAcademicaUseCaseImpl --> FacultadRepository : uses
 
     JpaFacultadRepositoryAdapter ..|> FacultadRepository : implements
     JpaFacultadRepositoryAdapter --> JpaFacultadRepository : uses
