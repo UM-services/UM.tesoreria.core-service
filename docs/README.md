@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.46.0** (actualizada: 2026-07-31)
+**Versión actual del servicio: 3.47.0** (actualizada: 2026-08-02)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -23,7 +23,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v3.14.0.
 - `hexagonal-dependencia.mmd`: Arquitectura hexagonal del módulo Dependencia (gestión de dependencias) - v3.17.0.
 - `hexagonal-facturaPendiente.mmd`: Arquitectura hexagonal del módulo FacturaPendiente (gestión de facturas pendientes) - v3.36.0 (reubicado bajo `compras/`).
-- `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.18.0.
+- `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.47.0 (nuevo listado por responsable académica).
 - `hexagonal-lectivoTotalImputacion.mmd`: Arquitectura hexagonal del módulo LectivoTotalImputacion (imputaciones contables por lectivo) - v3.31.0 (nuevo caso de uso FindAllByLectivo + enriquecimiento con asociaciones a Facultad/Lectivo/TipoChequera/Producto/Cuenta).
 - `hexagonal-contrato.mmd`: Arquitectura hexagonal del módulo Contrato (gestión de contratos) - v3.19.0.
 - `hexagonal-chequeraSerie.mmd`: Arquitectura hexagonal del módulo ChequeraSerie (15+ casos de uso individuales) - v3.30.0 (refactorización masiva a casos de uso).
@@ -48,8 +48,9 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-lectivoCuota.mmd`: Arquitectura hexagonal del módulo LectivoCuota (cuotas lectivas por facultad/lectivo/tipo) - v3.42.0 (nuevo caso de uso FindLectivoCuotaByFechaUseCase, formato ISO 8601).
 - `hexagonal-setup.mmd`: Arquitectura hexagonal del módulo Setup (configuración de tesorería) - v3.43.0 (nuevo módulo).
 - `hexagonal-deudaExamen.mmd`: Arquitectura hexagonal del módulo DeudaExamen (validación de habilitación para rendir exámenes) - v3.46.0 (integración con TesoreriaEstadoFacultadService para habilitación manual).
-- `hexagonal-guaraniBeneficio.mmd`: Arquitectura hexagonal del módulo GuaraniBeneficio (beneficios de estudiantes Guarani) - v3.45.0 (nuevo módulo).
+- `hexagonal-guaraniBeneficio.mmd`: Arquitectura hexagonal del módulo GuaraniBeneficio (beneficios de estudiantes Guarani) - v3.47.0 (nuevo listado completo).
 - `hexagonal-tesoreriaEstado.mmd`: Arquitectura hexagonal del módulo TesoreriaEstado (consulta de estado de tesorería del estudiante en el servicio de facultad) - v3.46.0 (nuevo módulo, consumer REST).
+- `hexagonal-guaraniUbicacion.mmd`: Arquitectura hexagonal del módulo GuaraniUbicacion (CRUD de ubicaciones Guarani) - v3.47.0 (nuevo módulo).
 
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 

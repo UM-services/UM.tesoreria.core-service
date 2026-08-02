@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo GuaraniBeneficio (v3.45.0)
+title: Arquitectura Hexagonal - Módulo GuaraniBeneficio (v3.47.0)
 ---
 
 classDiagram
@@ -26,6 +26,11 @@ classDiagram
             <<interface>>
             +updateByRequisito(Integer, GuaraniBeneficio) GuaraniBeneficio
         }
+
+        class GetAllGuaraniBeneficiosUseCase {
+            <<interface>>
+            +getAllGuaraniBeneficios() List~GuaraniBeneficio~
+        }
     }
 
     namespace application {
@@ -36,6 +41,7 @@ classDiagram
             +findByRequisito(Integer) GuaraniBeneficio
             +create(GuaraniBeneficio) GuaraniBeneficio
             +updateByRequisito(Integer, GuaraniBeneficio) GuaraniBeneficio
+            +findAll() List~GuaraniBeneficio~
         }
 
         class CreateGuaraniBeneficioUseCaseImpl {
@@ -52,6 +58,11 @@ classDiagram
             -GuaraniBeneficioRepository repository
             +updateByRequisito(Integer, GuaraniBeneficio) GuaraniBeneficio
         }
+
+        class GetAllGuaraniBeneficiosUseCaseImpl {
+            -GuaraniBeneficioRepository repository
+            +getAllGuaraniBeneficios() List~GuaraniBeneficio~
+        }
     }
 
     namespace domain_ports_out {
@@ -59,6 +70,7 @@ classDiagram
             <<interface>>
             +findByRequisito(Integer) Optional~GuaraniBeneficio~
             +save(GuaraniBeneficio) GuaraniBeneficio
+            +findAll() List~GuaraniBeneficio~
         }
     }
 
@@ -94,6 +106,7 @@ classDiagram
             +findByRequisito(Integer) ResponseEntity~GuaraniBeneficioResponse~
             +add(GuaraniBeneficioRequest) ResponseEntity~GuaraniBeneficioResponse~
             +updateByRequisito(Integer, GuaraniBeneficioRequest) ResponseEntity~GuaraniBeneficioResponse~
+            +findAll() ResponseEntity~List~GuaraniBeneficioResponse~~
         }
 
         class GuaraniBeneficioRequest {
@@ -116,16 +129,19 @@ classDiagram
     CreateGuaraniBeneficioUseCaseImpl ..|> CreateGuaraniBeneficioUseCase
     GetGuaraniBeneficioByRequisitoUseCaseImpl ..|> GetGuaraniBeneficioByRequisitoUseCase
     UpdateGuaraniBeneficioByRequisitoUseCaseImpl ..|> UpdateGuaraniBeneficioByRequisitoUseCase
+    GetAllGuaraniBeneficiosUseCaseImpl ..|> GetAllGuaraniBeneficiosUseCase
 
     JpaGuaraniBeneficioRepositoryAdapter ..|> GuaraniBeneficioRepository
 
     GuaraniBeneficioService --> CreateGuaraniBeneficioUseCase
     GuaraniBeneficioService --> GetGuaraniBeneficioByRequisitoUseCase
     GuaraniBeneficioService --> UpdateGuaraniBeneficioByRequisitoUseCase
+    GuaraniBeneficioService --> GetAllGuaraniBeneficiosUseCase
 
     CreateGuaraniBeneficioUseCaseImpl --> GuaraniBeneficioRepository
     GetGuaraniBeneficioByRequisitoUseCaseImpl --> GuaraniBeneficioRepository
     UpdateGuaraniBeneficioByRequisitoUseCaseImpl --> GuaraniBeneficioRepository
+    GetAllGuaraniBeneficiosUseCaseImpl --> GuaraniBeneficioRepository
 
     JpaGuaraniBeneficioRepositoryAdapter --> JpaGuaraniBeneficioRepository
     JpaGuaraniBeneficioRepositoryAdapter --> GuaraniBeneficioMapper

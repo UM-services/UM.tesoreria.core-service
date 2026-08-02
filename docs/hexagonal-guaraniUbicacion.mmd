@@ -1,0 +1,101 @@
+---
+title: Arquitectura Hexagonal - Módulo GuaraniUbicacion (v3.47.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class GuaraniUbicacion {
+            +Integer guaraniUbicacionId
+            +Integer ubicacion
+            +Integer geograficaId
+        }
+
+        class CreateGuaraniUbicacionUseCase {
+            <<interface>>
+            +create(GuaraniUbicacion) GuaraniUbicacion
+        }
+
+        class GetAllGuaraniUbicacionesUseCase {
+            <<interface>>
+            +getAll() List~GuaraniUbicacion~
+        }
+
+        class GetGuaraniUbicacionByIdUseCase {
+            <<interface>>
+            +getById(Integer) Optional~GuaraniUbicacion~
+        }
+
+        class UpdateGuaraniUbicacionUseCase {
+            <<interface>>
+            +update(GuaraniUbicacion) GuaraniUbicacion
+        }
+
+        class DeleteGuaraniUbicacionUseCase {
+            <<interface>>
+            +delete(Integer) void
+        }
+    }
+
+    namespace application {
+        class GuaraniUbicacionService {
+            +findAll() List~GuaraniUbicacion~
+            +findById(Integer) GuaraniUbicacion
+            +create(GuaraniUbicacion) GuaraniUbicacion
+            +update(GuaraniUbicacion) GuaraniUbicacion
+            +delete(Integer) void
+        }
+    }
+
+    namespace infrastructure_persistence {
+        class GuaraniUbicacionEntity {
+            +Integer guaraniUbicacionId
+            +Integer ubicacion
+            +Integer geograficaId
+        }
+
+        class JpaGuaraniUbicacionRepository {
+            <<interface>>
+            +findAll() List~GuaraniUbicacionEntity~
+            +findById(Integer) Optional~GuaraniUbicacionEntity~
+        }
+
+        class JpaGuaraniUbicacionRepositoryAdapter {
+            +findAll() List~GuaraniUbicacion~
+            +findById(Integer) Optional~GuaraniUbicacion~
+            +save(GuaraniUbicacion) GuaraniUbicacion
+            +deleteById(Integer) void
+        }
+    }
+
+    namespace infrastructure_web {
+        class GuaraniUbicacionController {
+            +findAll() ResponseEntity~List~GuaraniUbicacionResponse~~
+            +findById(Integer) ResponseEntity~GuaraniUbicacionResponse~
+            +add(GuaraniUbicacionRequest) ResponseEntity~GuaraniUbicacionResponse~
+            +update(Integer, GuaraniUbicacionRequest) ResponseEntity~GuaraniUbicacionResponse~
+            +delete(Integer) ResponseEntity~Void~
+        }
+
+        class GuaraniUbicacionRequest {
+            +Integer ubicacion
+            +Integer geograficaId
+        }
+
+        class GuaraniUbicacionResponse {
+            +Integer guaraniUbicacionId
+            +Integer ubicacion
+            +Integer geograficaId
+        }
+    }
+
+    GuaraniUbicacionService --> CreateGuaraniUbicacionUseCase
+    GuaraniUbicacionService --> GetAllGuaraniUbicacionesUseCase
+    GuaraniUbicacionService --> GetGuaraniUbicacionByIdUseCase
+    GuaraniUbicacionService --> UpdateGuaraniUbicacionUseCase
+    GuaraniUbicacionService --> DeleteGuaraniUbicacionUseCase
+    JpaGuaraniUbicacionRepositoryAdapter --> JpaGuaraniUbicacionRepository
+    GuaraniUbicacionController --> GuaraniUbicacionService
+    GuaraniUbicacionController --> GuaraniUbicacionRequest
+    GuaraniUbicacionController --> GuaraniUbicacionResponse
