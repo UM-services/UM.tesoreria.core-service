@@ -43,6 +43,13 @@ public class FacultadController {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/con-responsable-academica")
+    public ResponseEntity<List<FacultadResponse>> findFacultadesConResponsableAcademica() {
+        List<FacultadResponse> responses = service.findFacultadesConResponsableAcademica().stream()
+                .map(mapper::toResponse).collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
     @GetMapping("/{facultadId}")
     public ResponseEntity<FacultadResponse> findByFacultadId(@PathVariable Integer facultadId) {
         try {

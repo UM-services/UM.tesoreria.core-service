@@ -18,6 +18,7 @@ import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.Fa
 public interface JpaFacultadRepository extends JpaRepository<FacultadEntity, Integer> {
 
 	List<FacultadEntity> findAllByFacultadIdIn(List<Integer> facultadIds);
+	List<FacultadEntity> findAllByGuaraniResponsableAcademicaNotNull();
 	Optional<FacultadEntity> findByFacultadId(Integer facultadId);
 
 }
