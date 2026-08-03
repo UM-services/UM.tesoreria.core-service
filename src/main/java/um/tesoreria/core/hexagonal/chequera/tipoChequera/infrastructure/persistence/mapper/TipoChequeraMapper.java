@@ -6,6 +6,7 @@ import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persist
 import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequeraSearch;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity;
 
 @Component
@@ -53,5 +54,23 @@ public class TipoChequeraMapper {
         if (domain.getMultiple() != null) builder.multiple(domain.getMultiple());
         
         return builder.build();
+    }
+
+    public TipoChequeraSearch toSearchDomain(um.tesoreria.core.model.view.TipoChequeraSearch entity) {
+        if (entity == null) return null;
+        return TipoChequeraSearch.builder()
+                .tipoChequeraId(entity.getTipoChequeraId())
+                .nombre(entity.getNombre())
+                .prefijo(entity.getPrefijo())
+                .geograficaId(entity.getGeograficaId())
+                .claseChequeraId(entity.getClaseChequeraId())
+                .imprimir(entity.getImprimir())
+                .contado(entity.getContado())
+                .multiple(entity.getMultiple())
+                .emailCopia(entity.getEmailCopia())
+                .search(entity.getSearch())
+                .created(entity.getCreated())
+                .updated(entity.getUpdated())
+                .build();
     }
 }

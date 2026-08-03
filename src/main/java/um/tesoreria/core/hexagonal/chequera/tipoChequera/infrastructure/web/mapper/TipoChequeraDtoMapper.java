@@ -4,8 +4,10 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.web.mapper.ClaseChequeraDtoMapper;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.web.mapper.GeograficaDtoMapper;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequeraSearch;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.web.dto.TipoChequeraRequest;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.web.dto.TipoChequeraResponse;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.web.dto.TipoChequeraSearchResponse;
 
 @Component
 public class TipoChequeraDtoMapper {
@@ -47,6 +49,24 @@ public class TipoChequeraDtoMapper {
                 .emailCopia(domain.getEmailCopia())
                 .geografica(geograficaDtoMapper.toResponse(domain.getGeografica()))
                 .claseChequera(claseChequeraDtoMapper.toResponse(domain.getClaseChequera()))
+                .build();
+    }
+
+    public TipoChequeraSearchResponse toSearchResponse(TipoChequeraSearch domain) {
+        if (domain == null) return null;
+        return TipoChequeraSearchResponse.builder()
+                .tipoChequeraId(domain.getTipoChequeraId())
+                .nombre(domain.getNombre())
+                .prefijo(domain.getPrefijo())
+                .geograficaId(domain.getGeograficaId())
+                .claseChequeraId(domain.getClaseChequeraId())
+                .imprimir(domain.getImprimir())
+                .contado(domain.getContado())
+                .multiple(domain.getMultiple())
+                .emailCopia(domain.getEmailCopia())
+                .search(domain.getSearch())
+                .created(domain.getCreated())
+                .updated(domain.getUpdated())
                 .build();
     }
 }

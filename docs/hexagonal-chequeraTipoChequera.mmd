@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo TipoChequera (v3.30.0)
+title: Arquitectura Hexagonal - Módulo TipoChequera (v3.48.0)
 ---
 
 classDiagram
@@ -28,6 +28,7 @@ classDiagram
             +findAllByFacultadIdAndGeograficaId(Integer, Integer) List~TipoChequera~
             +findAllByClaseChequeraId(Integer) List~TipoChequera~
             +findAllByClaseChequeraIds(List~Integer~) List~TipoChequera~
+            +findAllByStrings(List~String~) List~TipoChequeraSearch~
             +findById(Integer) Optional~TipoChequera~
             +findLast() Optional~TipoChequera~
             +create(TipoChequera) TipoChequera
@@ -35,6 +36,19 @@ classDiagram
             +deleteById(Integer)
             +unmark()
             +mark(Integer, Byte) TipoChequera
+        }
+
+        class SearchTipoChequeraUseCase {
+            <<interface>>
+            +searchTipoChequeras(List~String~) List~TipoChequeraSearch~
+        }
+
+        class TipoChequeraSearch {
+            +Integer tipoChequeraId
+            +String nombre
+            +String prefijo
+            +Integer geograficaId
+            +Integer claseChequeraId
         }
     }
 
@@ -68,6 +82,7 @@ classDiagram
             class DeleteTipoChequeraUseCaseImpl
             class MarkTipoChequeraUseCaseImpl
             class UnmarkTipoChequeraUseCaseImpl
+            class SearchTipoChequeraUseCaseImpl
     }
     namespace application {
 
@@ -107,6 +122,12 @@ classDiagram
             class TipoChequeraMapper {
                 +toDomainModel(TipoChequeraEntity) TipoChequera
                 +toEntity(TipoChequera) TipoChequeraEntity
+                +toSearchDomain(TipoChequeraSearch) TipoChequeraSearch
+            }
+
+            class TipoChequeraSearchRepository {
+                <<interface>>
+                +findAllByStrings(List~String~) List~TipoChequeraSearch~
             }
     }
     namespace infrastructure_web {
@@ -121,6 +142,7 @@ classDiagram
                 +findAllAsignable(Integer, Integer, Integer, Integer) ResponseEntity~List~TipoChequeraResponse~~
                 +mark(Integer, Byte) ResponseEntity~Void~
                 +unmark() ResponseEntity~Void~
+                +findAllByStrings(List~String~) ResponseEntity~List~TipoChequeraSearchResponse~~
             }
 
             class TipoChequeraRequest {
@@ -152,6 +174,15 @@ classDiagram
             class TipoChequeraDtoMapper {
                 +toDomain(TipoChequeraRequest) TipoChequera
                 +toResponse(TipoChequera) TipoChequeraResponse
+                +toSearchResponse(TipoChequeraSearch) TipoChequeraSearchResponse
+            }
+
+            class TipoChequeraSearchResponse {
+                +Integer tipoChequeraId
+                +String nombre
+                +String prefijo
+                +Integer geograficaId
+                +Integer claseChequeraId
             }
     }
 
@@ -166,6 +197,7 @@ classDiagram
     TipoChequeraService --> DeleteTipoChequeraUseCase : uses
     TipoChequeraService --> MarkTipoChequeraUseCase : uses
     TipoChequeraService --> UnmarkTipoChequeraUseCase : uses
+    TipoChequeraService --> SearchTipoChequeraUseCase : uses
 
     GetAllTipoChequeraUseCaseImpl ..|> GetAllTipoChequeraUseCase : implements
     GetAllTipoChequeraAsignableUseCaseImpl ..|> GetAllTipoChequeraAsignableUseCase : implements
@@ -178,6 +210,7 @@ classDiagram
     DeleteTipoChequeraUseCaseImpl ..|> DeleteTipoChequeraUseCase : implements
     MarkTipoChequeraUseCaseImpl ..|> MarkTipoChequeraUseCase : implements
     UnmarkTipoChequeraUseCaseImpl ..|> UnmarkTipoChequeraUseCase : implements
+    SearchTipoChequeraUseCaseImpl ..|> SearchTipoChequeraUseCase : implements
 
     GetAllTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
     GetAllTipoChequeraAsignableUseCaseImpl --> TipoChequeraRepository : uses
@@ -190,10 +223,12 @@ classDiagram
     DeleteTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
     MarkTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
     UnmarkTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
+    SearchTipoChequeraUseCaseImpl --> TipoChequeraRepository : uses
 
     JpaTipoChequeraRepositoryAdapter ..|> TipoChequeraRepository : implements
     JpaTipoChequeraRepositoryAdapter --> JpaTipoChequeraRepository : uses
     JpaTipoChequeraRepositoryAdapter --> TipoChequeraMapper : uses
+    JpaTipoChequeraRepositoryAdapter --> TipoChequeraSearchRepository : uses
 
     TipoChequeraMapper --> TipoChequera : maps
     TipoChequeraMapper --> TipoChequeraEntity : maps

@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequeraSearch;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.ports.out.TipoChequeraRepository;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.mapper.TipoChequeraMapper;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.repository.JpaTipoChequeraRepository;
+import um.tesoreria.core.repository.view.TipoChequeraSearchRepository;
 import um.tesoreria.core.service.LectivoTotalService;
 import um.tesoreria.core.model.LectivoTotal;
 
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class JpaTipoChequeraRepositoryAdapter implements TipoChequeraRepository {
 
     private final JpaTipoChequeraRepository jpaTipoChequeraRepository;
+    private final TipoChequeraSearchRepository tipoChequeraSearchRepository;
     private final LectivoTotalService lectivoTotalService;
     private final TipoChequeraMapper tipoChequeraMapper;
 
@@ -27,6 +30,13 @@ public class JpaTipoChequeraRepositoryAdapter implements TipoChequeraRepository 
     public List<TipoChequera> findAll() {
         return jpaTipoChequeraRepository.findAll().stream()
                 .map(tipoChequeraMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TipoChequeraSearch> findAllByStrings(List<String> conditions) {
+        return tipoChequeraSearchRepository.findAllByStrings(conditions).stream()
+                .map(tipoChequeraMapper::toSearchDomain)
                 .collect(Collectors.toList());
     }
 

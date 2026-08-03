@@ -2,6 +2,23 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.48.0] - 2026-08-03
+### Added
+- feat(guarani/guaraniPropuestaTipoChequera): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniPropuestaTipoChequera`.
+  - Persistencia sobre `guarani_propuesta_tipo_chequera`, con restricción única para `propuestaGuarani` y `lectivoId`.
+  - Consulta por propuesta y lectivo, creación, actualización y eliminación.
+- feat(chequera/tipoChequera): Añadido `SearchTipoChequeraUseCase` para la búsqueda `POST /tipoChequera/search`.
+  - La consulta usa `vw_tipo_chequera_search`, aplica las condiciones sobre `search`, ordena por `nombre` y limita a 50 resultados.
+  - La respuesta se mapea a `TipoChequeraSearchResponse`, desacoplando la vista legacy de la API.
+- feat(docs): Añadido `docs/hexagonal-guaraniPropuestaTipoChequera.mmd` y registrado en la documentación generada.
+
+### Changed
+- chore(deps): Actualizado MySQL Connector/J de `9.7.0` a `26.7.0`.
+- chore(deps): Actualizado Springdoc OpenAPI de `3.0.3` a `3.1.0`.
+- refactor(docs): Actualizado el diagrama `hexagonal-chequeraTipoChequera.mmd` con el caso de uso de búsqueda y sus adaptadores.
+
+> Basado en `git diff HEAD`, `git log`, los archivos Java modificados y `pom.xml` (versión `3.47.0` → `3.48.0`).
+
 ## [3.47.0] - 2026-08-02
 ### Added
 - feat(guarani/guaraniUbicacion): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniUbicacion`.

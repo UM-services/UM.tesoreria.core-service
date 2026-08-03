@@ -1,0 +1,81 @@
+---
+title: Arquitectura Hexagonal - Módulo GuaraniPropuestaTipoChequera (v3.48.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class GuaraniPropuestaTipoChequera {
+            +Integer guaraniPropuestaTipoChequeraId
+            +Integer propuestaGuarani
+            +Integer lectivoId
+            +Integer tipoChequeraId
+        }
+
+        class GuaraniPropuestaTipoChequeraRepository {
+            <<interface>>
+            +findByPropuestaGuaraniAndLectivoId(Integer, Integer) Optional~GuaraniPropuestaTipoChequera~
+            +save(GuaraniPropuestaTipoChequera) GuaraniPropuestaTipoChequera
+            +existsById(Integer) boolean
+            +deleteById(Integer) void
+        }
+    }
+
+    namespace application {
+        class GuaraniPropuestaTipoChequeraService {
+            +create(GuaraniPropuestaTipoChequera) GuaraniPropuestaTipoChequera
+            +update(GuaraniPropuestaTipoChequera) GuaraniPropuestaTipoChequera
+            +findByPropuestaAndLectivo(Integer, Integer) GuaraniPropuestaTipoChequera
+            +delete(Integer) void
+        }
+    }
+
+    namespace application_usecases {
+        class CreateGuaraniPropuestaTipoChequeraUseCaseImpl
+        class UpdateGuaraniPropuestaTipoChequeraUseCaseImpl
+        class GetGuaraniPropuestaTipoChequeraByPropuestaAndLectivoUseCaseImpl
+        class DeleteGuaraniPropuestaTipoChequeraUseCaseImpl
+    }
+
+    namespace infrastructure_persistence {
+        class GuaraniPropuestaTipoChequeraEntity {
+            +Integer guaraniPropuestaTipoChequeraId
+            +Integer propuestaGuarani
+            +Integer lectivoId
+            +Integer tipoChequeraId
+        }
+
+        class JpaGuaraniPropuestaTipoChequeraRepository {
+            <<interface>>
+            +findByPropuestaGuaraniAndLectivoId(Integer, Integer) Optional~GuaraniPropuestaTipoChequeraEntity~
+        }
+
+        class JpaGuaraniPropuestaTipoChequeraRepositoryAdapter
+        class GuaraniPropuestaTipoChequeraMapper
+    }
+
+    namespace infrastructure_web {
+        class GuaraniPropuestaTipoChequeraController {
+            +findByPropuestaAndLectivo(Integer, Integer) ResponseEntity~GuaraniPropuestaTipoChequeraResponse~
+            +add(GuaraniPropuestaTipoChequeraRequest) ResponseEntity~GuaraniPropuestaTipoChequeraResponse~
+            +update(Integer, GuaraniPropuestaTipoChequeraRequest) ResponseEntity~GuaraniPropuestaTipoChequeraResponse~
+            +delete(Integer) ResponseEntity~Void~
+        }
+
+        class GuaraniPropuestaTipoChequeraRequest
+        class GuaraniPropuestaTipoChequeraResponse
+        class GuaraniPropuestaTipoChequeraDtoMapper
+    }
+
+    GuaraniPropuestaTipoChequeraService --> GuaraniPropuestaTipoChequeraRepository : uses
+    CreateGuaraniPropuestaTipoChequeraUseCaseImpl --> GuaraniPropuestaTipoChequeraRepository : uses
+    UpdateGuaraniPropuestaTipoChequeraUseCaseImpl --> GuaraniPropuestaTipoChequeraRepository : uses
+    GetGuaraniPropuestaTipoChequeraByPropuestaAndLectivoUseCaseImpl --> GuaraniPropuestaTipoChequeraRepository : uses
+    DeleteGuaraniPropuestaTipoChequeraUseCaseImpl --> GuaraniPropuestaTipoChequeraRepository : uses
+    JpaGuaraniPropuestaTipoChequeraRepositoryAdapter ..|> GuaraniPropuestaTipoChequeraRepository : implements
+    JpaGuaraniPropuestaTipoChequeraRepositoryAdapter --> JpaGuaraniPropuestaTipoChequeraRepository : uses
+    JpaGuaraniPropuestaTipoChequeraRepositoryAdapter --> GuaraniPropuestaTipoChequeraMapper : uses
+    JpaGuaraniPropuestaTipoChequeraRepository --> GuaraniPropuestaTipoChequeraEntity : persists
+    GuaraniPropuestaTipoChequeraController --> GuaraniPropuestaTipoChequeraService : calls
+    GuaraniPropuestaTipoChequeraController --> GuaraniPropuestaTipoChequeraDtoMapper : uses

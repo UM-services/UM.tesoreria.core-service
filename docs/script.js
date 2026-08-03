@@ -123,6 +123,7 @@ const diagrams = [
   { id: 'hexagonal-guaraniBeneficio', file: 'hexagonal-guaraniBeneficio.mmd', title: 'Arquitectura Hexagonal - GuaraniBeneficio' },
   { id: 'hexagonal-tesoreriaEstado', file: 'hexagonal-tesoreriaEstado.mmd', title: 'Arquitectura Hexagonal - TesoreriaEstado' },
   { id: 'hexagonal-guaraniUbicacion', file: 'hexagonal-guaraniUbicacion.mmd', title: 'Arquitectura Hexagonal - GuaraniUbicacion' },
+  { id: 'hexagonal-guaraniPropuestaTipoChequera', file: 'hexagonal-guaraniPropuestaTipoChequera.mmd', title: 'Arquitectura Hexagonal - GuaraniPropuestaTipoChequera' },
   { id: 'dependencies-diagram', file: 'dependencies.mmd', title: 'Diagrama de Dependencias' },
   { id: 'erd-diagram', file: 'entities.mmd', title: 'Diagrama de Entidad-Relacion (Simplificado)' },
   { id: 'deployment-diagram', file: 'deployment.mmd', title: 'Diagrama de Despliegue' },
