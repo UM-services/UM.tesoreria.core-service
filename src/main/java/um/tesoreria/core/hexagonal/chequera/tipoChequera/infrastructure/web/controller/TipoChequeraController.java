@@ -10,8 +10,8 @@ import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.Tip
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.web.dto.TipoChequeraRequest;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.web.dto.TipoChequeraResponse;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.web.dto.TipoChequeraSearchResponse;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.web.mapper.TipoChequeraDtoMapper;
-import um.tesoreria.core.model.view.TipoChequeraSearch;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,8 +33,11 @@ public class TipoChequeraController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<List<TipoChequeraSearch>> findAllByStrings(@RequestBody List<String> conditions) {
-        return ResponseEntity.ok(service.findAllByStrings(conditions));
+    public ResponseEntity<List<TipoChequeraSearchResponse>> findAllByStrings(@RequestBody List<String> conditions) {
+        List<TipoChequeraSearchResponse> responses = service.findAllByStrings(conditions).stream()
+                .map(tipoChequeraDtoMapper::toSearchResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/asignable/{facultadId}/{lectivoId}/{geograficaId}/{claseChequeraId}")

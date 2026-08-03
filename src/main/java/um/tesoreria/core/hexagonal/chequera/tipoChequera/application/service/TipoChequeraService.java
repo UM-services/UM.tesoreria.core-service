@@ -5,9 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.exception.TipoChequeraException;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequeraSearch;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.ports.in.*;
-import um.tesoreria.core.model.view.TipoChequeraSearch;
-import um.tesoreria.core.service.view.TipoChequeraSearchService;
 
 import java.util.List;
 
@@ -27,11 +26,11 @@ public class TipoChequeraService {
     private final DeleteTipoChequeraUseCase deleteTipoChequeraUseCase;
     private final MarkTipoChequeraUseCase markTipoChequeraUseCase;
     private final UnmarkTipoChequeraUseCase unmarkTipoChequeraUseCase;
-    private final TipoChequeraSearchService tipoChequeraSearchService;
+    private final SearchTipoChequeraUseCase searchTipoChequeraUseCase;
 
     public List<TipoChequeraSearch> findAllByStrings(List<String> conditions) {
         log.debug("Processing findAllByStrings");
-        return tipoChequeraSearchService.findAllByStrings(conditions);
+        return searchTipoChequeraUseCase.searchTipoChequeras(conditions);
     }
 
     public List<TipoChequera> findAll() {

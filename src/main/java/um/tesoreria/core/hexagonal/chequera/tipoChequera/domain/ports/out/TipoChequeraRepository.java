@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.ports.out;
 
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequeraSearch;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,7 @@ public interface TipoChequeraRepository {
     List<TipoChequera> findAllByFacultadIdAndGeograficaId(Integer facultadId, Integer geograficaId);
     List<TipoChequera> findAllByClaseChequeraId(Integer claseChequeraId);
     List<TipoChequera> findAllByClaseChequeraIds(List<Integer> claseChequeraIds);
+    List<TipoChequeraSearch> findAllByStrings(List<String> conditions);
     Optional<TipoChequera> findById(Integer tipoChequeraId);
     Optional<TipoChequera> findLast();
     TipoChequera create(TipoChequera tipoChequera);
