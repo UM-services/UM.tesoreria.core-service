@@ -4,7 +4,19 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.47.0**
+**Versión actual (SemVer): 3.48.0**
+
+## Novedades 3.48.0 (verificado en código)
+- feat(guarani/guaraniPropuestaTipoChequera): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniPropuestaTipoChequera`
+  - Persistencia sobre `guarani_propuesta_tipo_chequera`, con unicidad por propuesta Guarani y lectivo
+  - Consulta por `propuestaGuarani` y `lectivoId`, además de creación, actualización y eliminación
+- feat(chequera/tipoChequera): Migrada la búsqueda `POST /tipoChequera/search` al caso de uso hexagonal `SearchTipoChequeraUseCase`
+  - La búsqueda aplica las condiciones sobre la vista `vw_tipo_chequera_search`, ordena por nombre y limita la respuesta a 50 registros
+  - La respuesta REST usa `TipoChequeraSearchResponse` en lugar del tipo de vista legacy
+- chore(deps): Actualizado MySQL Connector/J de `9.7.0` a `26.7.0` y Springdoc OpenAPI de `3.0.3` a `3.1.0`
+- feat(docs): Añadido el diagrama Mermaid `hexagonal-guaraniPropuestaTipoChequera.mmd` y actualizado el diagrama de TipoChequera
+
+> Basado en `git diff HEAD` (31 archivos modificados, +631/-9 líneas), `git log` y el código de los módulos Guarani/TipoChequera. La versión se actualiza de `3.47.0` a `3.48.0` en `pom.xml` por la incorporación de un módulo REST nuevo y una búsqueda hexagonal expuesta por API.
 
 ## Novedades 3.47.0 (verificado en código)
 - feat(guarani/guaraniUbicacion): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniUbicacion`
