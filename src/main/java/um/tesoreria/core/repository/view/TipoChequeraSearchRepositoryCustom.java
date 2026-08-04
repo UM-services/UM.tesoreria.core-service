@@ -7,5 +7,6 @@ import java.util.List;
 public interface TipoChequeraSearchRepositoryCustom {
 
     List<TipoChequeraSearch> findAllByStrings(List<String> conditions);
+    List<TipoChequeraSearch> findAllByStringsAndGeograficaId(List<String> conditions, Integer geograficaId);
 
 }

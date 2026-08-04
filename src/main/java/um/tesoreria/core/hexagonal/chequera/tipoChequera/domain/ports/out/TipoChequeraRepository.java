@@ -13,6 +13,7 @@ public interface TipoChequeraRepository {
     List<TipoChequera> findAllByClaseChequeraId(Integer claseChequeraId);
     List<TipoChequera> findAllByClaseChequeraIds(List<Integer> claseChequeraIds);
     List<TipoChequeraSearch> findAllByStrings(List<String> conditions);
+    List<TipoChequeraSearch> findAllByStringsAndGeograficaId(List<String> conditions, Integer geograficaId);
     Optional<TipoChequera> findById(Integer tipoChequeraId);
     Optional<TipoChequera> findLast();
     TipoChequera create(TipoChequera tipoChequera);
