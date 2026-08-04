@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.persona.application.usecases;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
@@ -17,6 +18,7 @@ import java.time.OffsetDateTime;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
 
     private static final Integer PRODUCTO_MATRICULA = 2;
@@ -30,6 +32,7 @@ public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
 
     @Override
     public DeudaExamen getDeudaExamenByFacultadAndPersona(Integer facultadId, BigDecimal personaId, Integer documentoId, OffsetDateTime fechaExamen) {
+        log.debug("Processing GetDeudaExamenUseCaseImpl.getDeudaExamenByFacultadAndPersona");
         var lectivo = lectivoService.findByFecha(OffsetDateTime.now());
         TesoreriaEstadoFacultad tesoreriaEstado;
         try {
@@ -40,6 +43,7 @@ public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
                     .fechaTope(OffsetDateTime.now().plusHours(-7))
                     .build();
         }
+        log.debug("Tesoreria estado: {}", tesoreriaEstado.jsonify());
         var chequeras = chequeraSerieService.findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId(personaId, documentoId, facultadId, lectivo.getLectivoId());
         if (chequeras.isEmpty()) {
             return DeudaExamen.builder()

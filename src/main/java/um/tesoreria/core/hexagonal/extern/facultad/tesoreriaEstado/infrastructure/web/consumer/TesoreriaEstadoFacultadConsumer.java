@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.extern.facultad.tesoreriaEstado.infrastructure.web.consumer;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class TesoreriaEstadoFacultadConsumer implements TesoreriaEstadoRepository {
 
     private final RestClient restClient;
@@ -26,7 +28,9 @@ public class TesoreriaEstadoFacultadConsumer implements TesoreriaEstadoRepositor
     public Optional<TesoreriaEstadoFacultad> findByUnique(Integer facultadId,
                                                           BigDecimal personaId,
                                                           Integer documentoId) {
+        log.debug("Processing TesoreriaEstadoFacultadConsumer.findByUnique");
         String baseUrl = urlResolver.getBaseUrl(facultadId);
+        log.debug("\n\nbaseUrl: {}\n\n", baseUrl);
         TesoreriaEstadoFacultadResponse response;
         try {
             response = restClient.get()
