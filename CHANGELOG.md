@@ -2,6 +2,18 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.49.0] - 2026-08-04
+### Added
+- feat(chequera/tipoChequera): Añadida la búsqueda `POST /tipoChequera/search/{geograficaId}`.
+  - Reutiliza las condiciones de búsqueda, filtra por `geograficaId`, ordena por nombre y limita la respuesta a 50 registros.
+- feat(guarani/guaraniPropuestaTipoChequera): Enriquecida la respuesta con el objeto `tipoChequera` relacionado, incluyendo el mapeo de persistencia y DTO.
+- feat(docs): Actualizados los diagramas Mermaid de TipoChequera y GuaraniPropuestaTipoChequera a `v3.49.0`.
+
+### Changed
+- chore(observability): Añadidos logs de depuración en la consulta de estado de tesorería y en la obtención de deuda de examen.
+
+> Basado en `git diff HEAD`, `git log`, el código Java modificado y `pom.xml` (versión `3.48.0` → `3.49.0`).
+
 ## [3.48.0] - 2026-08-03
 ### Added
 - feat(guarani/guaraniPropuestaTipoChequera): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniPropuestaTipoChequera`.

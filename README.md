@@ -4,7 +4,16 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.48.0**
+**Versión actual (SemVer): 3.49.0**
+
+## Novedades 3.49.0 (verificado en código)
+- feat(chequera/tipoChequera): Añadida la búsqueda `POST /tipoChequera/search/{geograficaId}`.
+  - Reutiliza las condiciones de búsqueda, filtra por `geograficaId`, ordena por nombre y limita la respuesta a 50 registros.
+- feat(guarani/guaraniPropuestaTipoChequera): Enriquecida la respuesta con el objeto `tipoChequera` relacionado, incluyendo su mapeo de persistencia y DTO.
+- chore(observability): Añadidos logs de depuración en la consulta de estado de tesorería y en la obtención de deuda de examen.
+- feat(docs): Actualizados los diagramas Mermaid de TipoChequera y GuaraniPropuestaTipoChequera a `v3.49.0`.
+
+> Basado en `git diff HEAD`, `git log`, el código Java modificado y `pom.xml` (versión `3.48.0` → `3.49.0`). El cambio es compatible hacia atrás y añade funcionalidad REST, por lo que corresponde un incremento minor de SemVer.
 
 ## Novedades 3.48.0 (verificado en código)
 - feat(guarani/guaraniPropuestaTipoChequera): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniPropuestaTipoChequera`
