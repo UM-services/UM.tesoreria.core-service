@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.extern.facultad.tesoreriaEstado.domain.model;
 
 import lombok.*;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -10,7 +11,7 @@ import java.time.OffsetDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TesoreriaEstadoFacultad {
+public class TesoreriaEstadoFacultad implements Jsonifyable {
 
     private Long tesoreriaEstadoId;
     private Integer facultadId;
@@ -31,4 +32,5 @@ public class TesoreriaEstadoFacultad {
 
     @Builder.Default
     private String uuid = "";
+
 }

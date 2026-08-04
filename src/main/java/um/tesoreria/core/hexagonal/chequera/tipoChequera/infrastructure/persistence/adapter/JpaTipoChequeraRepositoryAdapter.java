@@ -41,6 +41,13 @@ public class JpaTipoChequeraRepositoryAdapter implements TipoChequeraRepository 
     }
 
     @Override
+    public List<TipoChequeraSearch> findAllByStringsAndGeograficaId(List<String> conditions, Integer geograficaId) {
+        return tipoChequeraSearchRepository.findAllByStringsAndGeograficaId(conditions, geograficaId).stream()
+                .map(tipoChequeraMapper::toSearchDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<TipoChequera> findAllAsignable(Integer facultadId, Integer lectivoId, Integer geograficaId, Integer claseChequeraId) {
         List<Integer> tipoChequeraIds = lectivoTotalService.findAllByLectivo(facultadId, lectivoId).stream()
                 .map(LectivoTotal::getTipoChequeraId).distinct().collect(Collectors.toList());

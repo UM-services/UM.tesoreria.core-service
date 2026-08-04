@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo TipoChequera (v3.48.0)
+title: Arquitectura Hexagonal - Módulo TipoChequera (v3.49.0)
 ---
 
 classDiagram
@@ -29,6 +29,7 @@ classDiagram
             +findAllByClaseChequeraId(Integer) List~TipoChequera~
             +findAllByClaseChequeraIds(List~Integer~) List~TipoChequera~
             +findAllByStrings(List~String~) List~TipoChequeraSearch~
+            +findAllByStringsAndGeograficaId(List~String~, Integer) List~TipoChequeraSearch~
             +findById(Integer) Optional~TipoChequera~
             +findLast() Optional~TipoChequera~
             +create(TipoChequera) TipoChequera
@@ -41,6 +42,7 @@ classDiagram
         class SearchTipoChequeraUseCase {
             <<interface>>
             +searchTipoChequeras(List~String~) List~TipoChequeraSearch~
+            +searchTipoChequerasByGeograficaId(List~String~, Integer) List~TipoChequeraSearch~
         }
 
         class TipoChequeraSearch {
@@ -67,6 +69,7 @@ classDiagram
             +unmark()
             +mark(Integer, Byte) TipoChequera
             +findAllByStrings(List~String~) List~TipoChequeraSearch~
+            +findAllByStringsAndGeograficaId(List~String~, Integer) List~TipoChequeraSearch~
         }
 
     }
@@ -128,6 +131,7 @@ classDiagram
             class TipoChequeraSearchRepository {
                 <<interface>>
                 +findAllByStrings(List~String~) List~TipoChequeraSearch~
+                +findAllByStringsAndGeograficaId(List~String~, Integer) List~TipoChequeraSearch~
             }
     }
     namespace infrastructure_web {
@@ -143,6 +147,7 @@ classDiagram
                 +mark(Integer, Byte) ResponseEntity~Void~
                 +unmark() ResponseEntity~Void~
                 +findAllByStrings(List~String~) ResponseEntity~List~TipoChequeraSearchResponse~~
+                +findAllByStringsAndGeograficaId(List~String~, Integer) ResponseEntity~List~TipoChequeraSearchResponse~~
             }
 
             class TipoChequeraRequest {

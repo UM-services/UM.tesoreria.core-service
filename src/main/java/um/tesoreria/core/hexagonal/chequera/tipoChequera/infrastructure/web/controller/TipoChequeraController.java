@@ -40,6 +40,15 @@ public class TipoChequeraController {
         return ResponseEntity.ok(responses);
     }
 
+    @PostMapping("/search/{geograficaId}")
+    public ResponseEntity<List<TipoChequeraSearchResponse>> findAllByStringsAndGeograficaId(
+            @RequestBody List<String> conditions, @PathVariable Integer geograficaId) {
+        List<TipoChequeraSearchResponse> responses = service.findAllByStringsAndGeograficaId(conditions, geograficaId).stream()
+                .map(tipoChequeraDtoMapper::toSearchResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
     @GetMapping("/asignable/{facultadId}/{lectivoId}/{geograficaId}/{claseChequeraId}")
     public ResponseEntity<List<TipoChequeraResponse>> findAllAsignable(@PathVariable Integer facultadId,
                                                                        @PathVariable Integer lectivoId,
