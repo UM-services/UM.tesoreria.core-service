@@ -32,6 +32,14 @@ public class AlumnoGuaraniController {
         return ResponseEntity.ok(created);
     }
 
+    @PostMapping("/create/personales")
+    public ResponseEntity<Boolean> createPersonales(@RequestBody AlumnoGuaraniRequest request) {
+        log.debug("\n\nProcessing AlumnoGuaraniController.createPersonales\n\n");
+        AlumnoGuarani domain = dtoMapper.toDomain(request);
+        Boolean created = alumnoGuaraniService.createPersonales(domain);
+        return ResponseEntity.ok(created);
+    }
+
     @PostMapping("/desmarcar/enviadas")
     public ResponseEntity<List<AlumnoDeteccionRequest>> desmarcarEnviados(@RequestBody List<AlumnoDeteccionRequest> encontrados) {
         List<AlumnoDeteccionRequest> result = alumnoGuaraniService.desmarcarEnviados(encontrados);

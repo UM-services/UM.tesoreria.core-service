@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CarreraException;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
-import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.exception.InfoLdapException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.exception.PlanException;
@@ -27,7 +26,6 @@ import um.tesoreria.core.extern.consumer.PlanFacultadConsumer;
 import um.tesoreria.core.extern.consumer.PreInscripcionFacultadConsumer;
 import um.tesoreria.core.extern.model.kotlin.*;
 import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
-import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.InfoLdap;
 import um.tesoreria.core.service.CarreraService;
@@ -36,7 +34,7 @@ import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioServic
 import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.InfoLdapService;
 import um.tesoreria.core.service.LegajoService;
-import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
+import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaService;
 import um.tesoreria.core.service.PlanService;
 import um.tesoreria.core.service.UsuarioLdapService;
 import um.tesoreria.core.service.view.ChequeraClaseService;

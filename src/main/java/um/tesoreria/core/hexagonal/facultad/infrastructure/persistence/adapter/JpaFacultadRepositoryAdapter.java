@@ -38,4 +38,9 @@ public class JpaFacultadRepositoryAdapter implements FacultadRepository {
     public Optional<Facultad> findById(Integer facultadId) {
         return repository.findByFacultadId(facultadId).map(mapper::toDomain);
     }
+
+    @Override
+    public Optional<Facultad> findByGuaraniResponsableAcademica(Integer responsableAcademica) {
+        return repository.findByGuaraniResponsableAcademica(responsableAcademica).map(mapper::toDomain);
+    }
 }

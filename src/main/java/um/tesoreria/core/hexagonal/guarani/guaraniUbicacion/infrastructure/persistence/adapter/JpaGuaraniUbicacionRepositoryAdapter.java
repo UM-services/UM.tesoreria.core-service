@@ -30,6 +30,12 @@ public class JpaGuaraniUbicacionRepositoryAdapter implements GuaraniUbicacionRep
     }
 
     @Override
+    public Optional<GuaraniUbicacion> findByUbicacion(Integer ubicacion) {
+        return jpaGuaraniUbicacionRepository.findByUbicacion(ubicacion)
+                .map(guaraniUbicacionMapper::toDomain);
+    }
+
+    @Override
     public GuaraniUbicacion save(GuaraniUbicacion guaraniUbicacion) {
         return guaraniUbicacionMapper.toDomain(
                 jpaGuaraniUbicacionRepository.save(guaraniUbicacionMapper.toEntity(guaraniUbicacion)));

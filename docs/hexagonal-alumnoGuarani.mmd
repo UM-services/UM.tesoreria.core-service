@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo AlumnoGuarani (v3.29.0)
+title: Arquitectura Hexagonal - Módulo AlumnoGuarani (v3.50.0)
 ---
 
 classDiagram
@@ -97,14 +97,21 @@ classDiagram
             <<interface>>
             +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
         }
+
+        class CreatePersonalesUseCase {
+            <<interface>>
+            +createPersonales(AlumnoGuarani) Boolean
+        }
     }
 
     namespace application {
         class AlumnoGuaraniService {
             -CreatePreuniversitarioUseCase createPreuniversitarioUseCase
             -CheckAllPreuniversitarioWithoutChequeraUseCase checkAllPreuniversitarioWithoutChequeraUseCase
+            -CreatePersonalesUseCase createPersonalesUseCase
             +createPreuniversitario(AlumnoGuarani) AlumnoGuarani
             +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+            +createPersonales(AlumnoGuarani) Boolean
         }
 
     }
@@ -120,6 +127,10 @@ classDiagram
                 -LectivoService lectivoService
                 +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
             }
+
+            class CreatePersonalesUseCaseImpl {
+                +createPersonales(AlumnoGuarani) Boolean
+            }
     }
     namespace application {
 
@@ -132,6 +143,7 @@ classDiagram
             class AlumnoGuaraniController {
                 -AlumnoGuaraniService alumnoGuaraniService
                 +createPreuniversitario(AlumnoGuaraniRequest) AlumnoGuarani
+                +createPersonales(AlumnoGuaraniRequest) Boolean
                 +desmarcarEnviadas(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
             }
 
@@ -168,9 +180,11 @@ classDiagram
 
     CreatePreuniversitarioUseCaseImpl ..|> CreatePreuniversitarioUseCase
     CheckAllPreuniversitarioWithoutChequeraUseCaseImpl ..|> CheckAllPreuniversitarioWithoutChequeraUseCase
+    CreatePersonalesUseCaseImpl ..|> CreatePersonalesUseCase
 
     AlumnoGuaraniService --> CreatePreuniversitarioUseCase
     AlumnoGuaraniService --> CheckAllPreuniversitarioWithoutChequeraUseCase
+    AlumnoGuaraniService --> CreatePersonalesUseCase
 
     CreatePreuniversitarioUseCaseImpl --> PreuniversitarioChequeraService
 

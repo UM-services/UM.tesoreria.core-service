@@ -30,13 +30,11 @@ import org.openpdf.text.pdf.PdfPTable;
 import org.openpdf.text.pdf.PdfWriter;
 
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
 import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
-import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
+import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.CarreraService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
@@ -45,14 +43,14 @@ import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.LectivoAlternativaService;
 import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.service.LegajoService;
-import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
+import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.CarreraException;
 import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.hexagonal.lectivo.application.exception.LectivoException;
 import um.tesoreria.core.exception.LegajoException;
-import um.tesoreria.core.hexagonal.persona.application.exception.PersonaException;
+import um.tesoreria.core.hexagonal.personas.persona.application.exception.PersonaException;
 
 @Service
 @Slf4j

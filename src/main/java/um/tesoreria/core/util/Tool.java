@@ -247,33 +247,4 @@ public class Tool {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
     }
 
-    public static ChequeraContextFromGuaraniInternal convert2Tesium(Integer ubicacion, Integer propuesta) {
-        // deteminar geograficaId
-        int geograficaId = switch (ubicacion) {
-            case 1 -> 1;
-            case 2 -> 5;
-            case 3 -> 2;
-            default -> 0;
-        };
-        int facultadId = switch (propuesta) {
-            case 70, 111, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134 -> 1;
-            case 72, 121, 122, 123 -> 2;
-            case 74, 120 -> 3;
-            case 75, 112, 113, 114, 115, 116, 117, 118 -> 4;
-            case 68, 124 -> 5;
-            case 69 -> 14;
-            default -> 0;
-        };
-        int tipoChequeraId = switch (geograficaId) {
-            case 1 -> 1;
-            case 2 -> 101;
-            default -> 0;
-        };
-        return ChequeraContextFromGuaraniInternal.builder()
-                .geograficaId(geograficaId)
-                .facultadId(facultadId)
-                .tipoChequeraId(tipoChequeraId)
-                .build();
-    }
-
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieDto;
 import um.tesoreria.core.kotlin.model.dto.FacultadDto;
 import um.tesoreria.core.kotlin.model.dto.LectivoDto;
-import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaDto;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.PersonaDto;
 
 import java.util.List;
 

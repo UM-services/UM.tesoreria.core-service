@@ -2,6 +2,20 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.50.0] - 2026-08-05
+### Added
+- feat(chequera/chequeraSerie): Nueva consulta de chequera preuniversitaria desde datos de Guaraní mediante `GET /chequeraSerie/preuniversitario/...`.
+- feat(guarani/alumno): Nuevo endpoint `POST /api/tesoreria/core/guarani/alumno/create/personales`.
+- feat(guarani/guaraniUbicacion): Nuevo caso de uso para consultar una ubicación por su identificador Guaraní.
+- feat(personas/documento): Nuevo caso de uso y endpoint `GET /documento/guaraniTipoDocumento/{guaraniTipoDocumento}`.
+
+### Changed
+- refactor(personas): Reubicados los módulos Persona y Documento bajo `hexagonal/personas`, con actualización de imports, servicios, adaptadores, DTOs y controladores.
+- refactor(chequera): Migrados a Java los DTOs de integración relacionados con ChequeraSerie.
+- feat(docs): Actualizados los diagramas Mermaid de Persona, Documento, Facultad, AlumnoGuarani, GuaraniUbicacion y ChequeraSerie.
+
+> Basado en `git diff HEAD`, `git log`, el código Java/Kotlin modificado y `pom.xml` (versión `3.49.0` → `3.50.0`). No se detectaron cambios de dependencias principales.
+
 ## [3.49.0] - 2026-08-04
 ### Added
 - feat(chequera/tipoChequera): Añadida la búsqueda `POST /tipoChequera/search/{geograficaId}`.

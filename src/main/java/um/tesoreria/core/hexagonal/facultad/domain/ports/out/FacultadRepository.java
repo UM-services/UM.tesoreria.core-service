@@ -9,4 +9,5 @@ public interface FacultadRepository {
     List<Facultad> findAllIn(List<Integer> ids);
     List<Facultad> findAllByGuaraniResponsableAcademicaNotNull();
     Optional<Facultad> findById(Integer facultadId);
+    Optional<Facultad> findByGuaraniResponsableAcademica(Integer responsableAcademica);
 }

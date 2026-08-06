@@ -16,7 +16,7 @@ import lombok.*;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
-import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.util.Jsonifier;
 
 /**

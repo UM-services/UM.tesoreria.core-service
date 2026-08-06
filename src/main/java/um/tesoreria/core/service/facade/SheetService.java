@@ -59,7 +59,6 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraS
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
-import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.hexagonal.compras.facturaPendiente.application.service.FacturaPendienteService;
 import um.tesoreria.core.hexagonal.compras.facturaPendiente.domain.model.FacturaPendiente;
@@ -72,14 +71,14 @@ import um.tesoreria.core.hexagonal.compras.proveedor.application.service.Proveed
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.*;
-import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DeudaChequeraDto;
-import um.tesoreria.core.hexagonal.persona.application.service.PersonaKeyService;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.DeudaChequeraDto;
+import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaKeyService;
 import um.tesoreria.core.model.view.CarreraKey;
 import um.tesoreria.core.model.view.ChequeraPreuniv;
 import um.tesoreria.core.model.view.DomicilioKey;
 import um.tesoreria.core.model.view.IngresoPeriodo;
 import um.tesoreria.core.model.view.LegajoKey;
-import um.tesoreria.core.hexagonal.persona.domain.model.PersonaKey;
+import um.tesoreria.core.hexagonal.personas.persona.domain.model.PersonaKey;
 import um.tesoreria.core.model.view.TipoPagoFechaAcreditacion;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.service.ArancelTipoService;
 import um.tesoreria.core.hexagonal.chequera.baja.application.service.BajaService;

@@ -3,6 +3,7 @@
  */
 package um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 
 /**
@@ -13,7 +14,8 @@ public class ChequeraSerieException extends RuntimeException {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1977749507964033206L;
+	@Serial
+    private static final long serialVersionUID = 1977749507964033206L;
 
 	public ChequeraSerieException(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
 		super("Cannot find ChequeraSerie " + facultadId + "/" + tipoChequeraId + "/" + chequeraSerieId);

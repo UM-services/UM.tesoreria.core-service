@@ -26,6 +26,7 @@ public class FacultadService {
     private final GetFacultadesFiltradasUseCase getFacultadesFiltradasUseCase;
     private final GetFacultadesConResponsableAcademicaUseCase getFacultadesConResponsableAcademicaUseCase;
     private final GetFacultadByIdUseCase getFacultadByIdUseCase;
+    private final GetFacultadByGuaraniResponsableAcademicaUseCase getFacultadByGuaraniResponsableAcademicaUseCase;
     
     // Legacy View Repositories (Will be refactored to their own slices later)
     private final FacultadLectivoSedeRepository facultadLectivoSedeRepository;
@@ -47,6 +48,12 @@ public class FacultadService {
     public Facultad findByFacultadId(Integer facultadId) {
         return getFacultadByIdUseCase.getById(facultadId)
                 .orElseThrow(() -> new FacultadException(facultadId));
+    }
+
+    public Facultad findByGuaraniResponsableAcademica(Integer responsableAcademica) {
+        return getFacultadByGuaraniResponsableAcademicaUseCase
+                .getByGuaraniResponsableAcademica(responsableAcademica)
+                .orElseThrow(() -> new FacultadException(responsableAcademica));
     }
 
     // Legacy logic wrapped for now

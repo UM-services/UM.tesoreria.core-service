@@ -11,7 +11,7 @@ import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.mapper.D
 import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.mapper.FacultadMapper;
 import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.mapper.LectivoMapper;
-import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.mapper.PersonaMapper;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.mapper.PersonaMapper;
 
 @Component
 @RequiredArgsConstructor

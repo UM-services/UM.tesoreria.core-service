@@ -4,6 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import um.tesoreria.core.hexagonal.guarani.guaraniUbicacion.infrastructure.persistence.entity.GuaraniUbicacionEntity;
 
+import java.util.Optional;
+
 @Repository
 public interface JpaGuaraniUbicacionRepository extends JpaRepository<GuaraniUbicacionEntity, Integer> {
+    Optional<GuaraniUbicacionEntity> findByUbicacion(Integer ubicacion);
 }

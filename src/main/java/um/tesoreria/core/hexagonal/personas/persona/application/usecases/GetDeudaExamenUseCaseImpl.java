@@ -1,0 +1,105 @@
+package um.tesoreria.core.hexagonal.personas.persona.application.usecases;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.extern.facultad.tesoreriaEstado.application.exception.TesoreriaEstadoException;
+import um.tesoreria.core.hexagonal.extern.facultad.tesoreriaEstado.application.service.TesoreriaEstadoFacultadService;
+import um.tesoreria.core.hexagonal.extern.facultad.tesoreriaEstado.domain.model.TesoreriaEstadoFacultad;
+import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
+import um.tesoreria.core.hexagonal.personas.persona.domain.model.DeudaExamen;
+import um.tesoreria.core.hexagonal.personas.persona.domain.ports.in.GetDeudaExamenUseCase;
+import um.tesoreria.core.hexagonal.setup.application.service.SetupService;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
+
+    private static final Integer PRODUCTO_MATRICULA = 2;
+    private static final Integer PRODUCTO_ARANCEL = 3;
+
+    private final ChequeraSerieService chequeraSerieService;
+    private final SetupService setupService;
+    private final ChequeraCuotaService chequeraCuotaService;
+    private final LectivoService lectivoService;
+    private final TesoreriaEstadoFacultadService tesoreriaEstadoFacultadService;
+
+    @Override
+    public DeudaExamen getDeudaExamenByFacultadAndPersona(Integer facultadId, BigDecimal personaId, Integer documentoId, OffsetDateTime fechaExamen) {
+        log.debug("Processing GetDeudaExamenUseCaseImpl.getDeudaExamenByFacultadAndPersona");
+        var lectivo = lectivoService.findByFecha(OffsetDateTime.now());
+        TesoreriaEstadoFacultad tesoreriaEstado;
+        try {
+            tesoreriaEstado = tesoreriaEstadoFacultadService.findByUnique(facultadId, personaId, documentoId);
+        } catch (TesoreriaEstadoException e) {
+            tesoreriaEstado = TesoreriaEstadoFacultad.builder()
+                    .tesoreriaEstadoId(0L)
+                    .fechaTope(OffsetDateTime.now().plusHours(-7))
+                    .build();
+        }
+        log.debug("Tesoreria estado: {}", tesoreriaEstado.jsonify());
+        var chequeras = chequeraSerieService.findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId(personaId, documentoId, facultadId, lectivo.getLectivoId());
+        if (chequeras.isEmpty()) {
+            return DeudaExamen.builder()
+                    .autorizadoRendir(false)
+                    .matriculaPagada(false)
+                    .cuotasAdeudadas(1000)
+                    .importeAdeudado(new BigDecimal("100000000"))
+                    .habilitadoTesoreria(false)
+                    .build();
+        }
+        var setup = setupService.findLastOrFail();
+        var cuotasAdeudadas = 0;
+        var matriculaPagada = true;
+        var habilitadoTesoreria = false;
+        var importeAdeudado = BigDecimal.ZERO;
+        for (var chequera : chequeras) {
+            var cuotasNoPagadas = chequeraCuotaService.findAllDebidasByProducto(chequera.getFacultadId(), chequera.getTipoChequeraId(), chequera.getChequeraSerieId(), chequera.getAlternativaId(), PRODUCTO_ARANCEL, fechaExamen);
+            cuotasAdeudadas += cuotasNoPagadas.size();
+            var matriculasNoPagadas = chequeraCuotaService.findAllDebidasByProducto(chequera.getFacultadId(), chequera.getTipoChequeraId(), chequera.getChequeraSerieId(), chequera.getAlternativaId(), PRODUCTO_MATRICULA, fechaExamen);
+            if (!matriculasNoPagadas.isEmpty()) {
+                matriculaPagada = false;
+            }
+            // Acumular cuotas usando Streams
+            importeAdeudado = cuotasNoPagadas.stream()
+                    .map(c -> c.getImporte1() != null ? c.getImporte1() : BigDecimal.ZERO)
+                    .reduce(importeAdeudado, BigDecimal::add);
+
+            // Acumular matrículas usando Streams
+            importeAdeudado = matriculasNoPagadas.stream()
+                    .map(m -> m.getImporte1() != null ? m.getImporte1() : BigDecimal.ZERO)
+                    .reduce(importeAdeudado, BigDecimal::add);
+        }
+        var autorizadoRendir = false;
+        if (matriculaPagada) {
+            if (cuotasAdeudadas <= setup.getCuotasPermitidas()) {
+                autorizadoRendir = true;
+            }
+        }
+
+        // Análisis de habilitación manual
+        if (tesoreriaEstado.getTesoreriaEstadoId() > 0) {
+            if (tesoreriaEstado.getFechaTope().isAfter(fechaExamen.plusDays(-1))) {
+                if (tesoreriaEstado.getManual() == 1) {
+                    autorizadoRendir = true;
+                    matriculaPagada = true;
+                    habilitadoTesoreria = true;
+                }
+            }
+        }
+
+        return DeudaExamen.builder()
+                .autorizadoRendir(autorizadoRendir)
+                .matriculaPagada(matriculaPagada)
+                .cuotasAdeudadas(cuotasAdeudadas)
+                .importeAdeudado(importeAdeudado)
+                .habilitadoTesoreria(habilitadoTesoreria)
+                .build();
+    }
+}

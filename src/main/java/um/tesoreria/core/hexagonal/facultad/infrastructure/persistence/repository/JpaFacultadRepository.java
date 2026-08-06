@@ -20,5 +20,6 @@ public interface JpaFacultadRepository extends JpaRepository<FacultadEntity, Int
 	List<FacultadEntity> findAllByFacultadIdIn(List<Integer> facultadIds);
 	List<FacultadEntity> findAllByGuaraniResponsableAcademicaNotNull();
 	Optional<FacultadEntity> findByFacultadId(Integer facultadId);
+	Optional<FacultadEntity> findByGuaraniResponsableAcademica(Integer responsableAcademica);
 
 }
