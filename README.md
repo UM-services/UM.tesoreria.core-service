@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.50.0**
+**Versión actual (SemVer): 3.50.1**
+
+## Novedades 3.50.1 (verificado en código)
+- fix(personas/documento): Restaurada la ruta corta `/documento` junto con `/api/tesoreria/core/documento`, manteniendo ambas rutas para compatibilidad de clientes.
+- feat(docs): Sincronizado el diagrama de Documento con el caso de uso de búsqueda por `guaraniTipoDocumento`.
+
+> Basado en el cambio local de `DocumentoController.java`, el historial de release `3.50.0` y `pom.xml`. No se modificaron dependencias principales; corresponde un incremento patch de SemVer.
 
 ## Novedades 3.50.0 (verificado en código)
 - feat(chequera/chequeraSerie): Añadida la consulta de chequera preuniversitaria desde datos de Guaraní mediante `GET /chequeraSerie/preuniversitario/...`.

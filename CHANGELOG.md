@@ -2,6 +2,15 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [3.50.1] - 2026-08-06
+### Fixed
+- fix(personas/documento): Restaurada la ruta corta `/documento` junto con `/api/tesoreria/core/documento`, manteniendo ambas rutas para compatibilidad de clientes.
+
+### Changed
+- feat(docs): Sincronizado `docs/hexagonal-documento.mmd` con el caso de uso de búsqueda por `guaraniTipoDocumento`.
+
+> Basado en el cambio local de `DocumentoController.java`, el historial de release `3.50.0` y `pom.xml`. No se modificaron dependencias principales.
+
 ## [3.50.0] - 2026-08-05
 ### Added
 - feat(chequera/chequeraSerie): Nueva consulta de chequera preuniversitaria desde datos de Guaraní mediante `GET /chequeraSerie/preuniversitario/...`.

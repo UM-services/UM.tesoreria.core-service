@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/tesoreria/core/documento")
+@RequestMapping({"/documento", "/api/tesoreria/core/documento"})
 @RequiredArgsConstructor
 public class DocumentoController {
 
