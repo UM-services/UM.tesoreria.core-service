@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.50.0** (actualizada: 2026-08-05)
+**Versión actual del servicio: 3.50.1** (actualizada: 2026-08-06)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -40,7 +40,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-arancelTipo.mmd`: Arquitectura hexagonal del módulo ArancelTipo (gestión de tipos de arancel) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-arancelPorcentaje.mmd`: Arquitectura hexagonal del módulo ArancelPorcentaje (porcentajes por producto) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-asiento.mmd`: Arquitectura hexagonal del módulo Asiento (asientos contables) - v3.29.0 (migración desde Kotlin legacy).
-- `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento bajo `personas`, incluyendo búsqueda por tipo Guaraní - v3.50.0.
+- `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento bajo `personas`, incluyendo búsqueda por tipo Guaraní y rutas REST compatibles - v3.50.1.
 - `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario (gestión de usuarios) - v3.35.0 (migración desde Kotlin legacy).
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v3.50.0.
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).

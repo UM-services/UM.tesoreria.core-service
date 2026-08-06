@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Documento bajo Personas (v3.50.0)
+title: Arquitectura Hexagonal - Módulo Documento bajo Personas (v3.50.1)
 ---
 
 classDiagram
@@ -16,6 +16,7 @@ classDiagram
             <<interface>>
             +findAll() List~Documento~
             +findById(Integer) Optional~Documento~
+            +findFirstByGuaraniTipoDocumento(Integer) Optional~Documento~
         }
     }
 
@@ -33,6 +34,7 @@ classDiagram
     namespace application_usecases {
             class GetAllDocumentosUseCaseImpl
             class GetDocumentoByIdUseCaseImpl
+            class GetDocumentoByGuaraniTipoDocumentoUseCaseImpl
     }
     namespace application {
 
@@ -45,11 +47,13 @@ classDiagram
             class DocumentoEntity {
                 +Integer documentoId
                 +String nombre
+                +Integer guaraniTipoDocumento
             }
 
             class JpaDocumentoRepository {
                 <<JpaRepository>>
                 +findByDocumentoId(Integer) Optional~DocumentoEntity~
+                +findFirstByGuaraniTipoDocumento(Integer) Optional~DocumentoEntity~
             }
 
             class JpaDocumentoRepositoryAdapter {
@@ -57,6 +61,7 @@ classDiagram
                 -DocumentoMapper mapper
                 +findAll() List~Documento~
                 +findById(Integer) Optional~Documento~
+                +findFirstByGuaraniTipoDocumento(Integer) Optional~Documento~
             }
 
             class DocumentoMapper {
@@ -70,6 +75,7 @@ classDiagram
                 -DocumentoDtoMapper dtoMapper
                 +findAll() ResponseEntity~List~DocumentoResponse~~
                 +findByDocumentoId(Integer) ResponseEntity~DocumentoResponse~
+                +findFirstByGuaraniTipoDocumento(Integer) ResponseEntity~DocumentoResponse~
             }
 
             class DocumentoRequest
