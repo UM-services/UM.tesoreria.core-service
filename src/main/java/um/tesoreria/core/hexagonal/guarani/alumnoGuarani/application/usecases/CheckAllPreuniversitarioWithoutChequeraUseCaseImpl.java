@@ -29,31 +29,31 @@ public class CheckAllPreuniversitarioWithoutChequeraUseCaseImpl implements Check
         List<AlumnoDeteccionRequest> pendientes = new ArrayList<>();
         var lectivoId = lectivoService.findByFecha(OffsetDateTime.now()).getLectivoId();
         for (var encontrado : encontrados) {
-            var context = Tool.convert2Tesium(encontrado.getUbicacion(), encontrado.getPropuesta());
-            log.debug("Context: {}", context.jsonify());
-            var personaId = new BigDecimal(encontrado.getNroDocumento());
-            var documentoId = Integer.valueOf(encontrado.getTipoDocumento() == 0 ? 1 : encontrado.getTipoDocumento());
-            try {
-                chequeraSerieService.findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaIdAndTipoChequeraId(
-                        personaId,
-                        documentoId,
-                        context.getFacultadId(),
-                        lectivoId,
-                        context.getGeograficaId(),
-                        context.getTipoChequeraId()
-                );
-                log.debug("\n\nChequera encontrada\n\n");
-            } catch (ChequeraSerieException e) {
-                log.error(e.getMessage());
-                pendientes.add(AlumnoDeteccionRequest.builder()
-                        .alumno(encontrado.getAlumno())
-                        .ubicacion(encontrado.getUbicacion())
-                        .propuesta(encontrado.getPropuesta())
-                        .nroDocumento(encontrado.getNroDocumento())
-                        .tipoDocumento(encontrado.getTipoDocumento())
-                        .pendiente(true)
-                        .build());
-            }
+//            var context = Tool.convert2Tesium(encontrado.getUbicacion(), encontrado.getPropuesta());
+//            log.debug("Context: {}", context.jsonify());
+//            var personaId = new BigDecimal(encontrado.getNroDocumento());
+//            var documentoId = Integer.valueOf(encontrado.getTipoDocumento() == 0 ? 1 : encontrado.getTipoDocumento());
+//            try {
+//                chequeraSerieService.findByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaIdAndTipoChequeraId(
+//                        personaId,
+//                        documentoId,
+//                        context.getFacultadId(),
+//                        lectivoId,
+//                        context.getGeograficaId(),
+//                        context.getTipoChequeraId()
+//                );
+//                log.debug("\n\nChequera encontrada\n\n");
+//            } catch (ChequeraSerieException e) {
+//                log.error(e.getMessage());
+//                pendientes.add(AlumnoDeteccionRequest.builder()
+//                        .alumno(encontrado.getAlumno())
+//                        .ubicacion(encontrado.getUbicacion())
+//                        .propuesta(encontrado.getPropuesta())
+//                        .nroDocumento(encontrado.getNroDocumento())
+//                        .tipoDocumento(encontrado.getTipoDocumento())
+//                        .pendiente(true)
+//                        .build());
+//            }
         }
         return pendientes;
     }

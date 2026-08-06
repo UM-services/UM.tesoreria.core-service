@@ -6,7 +6,8 @@ import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
 
-import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaKeyEntity;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.entity.PersonaKeyEntity;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.mapper.PersonaKeyMapper;
 
 class PersonaKeyMapperTest {
 

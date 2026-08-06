@@ -25,7 +25,6 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.Ch
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.service.ChequeraPagoService;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.domain.model.ChequeraPago;
-import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.entity.ChequeraPagoEntity;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
@@ -36,13 +35,13 @@ import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaServ
 import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
-import um.tesoreria.core.hexagonal.persona.application.service.PersonaService;
+import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.chequera.producto.application.service.ProductoService;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.dto.*;
-import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.DomicilioDto;
-import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.PersonaDto;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.DomicilioDto;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.PersonaDto;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieDto;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.PreuniversitarioData;
 import um.tesoreria.core.model.ChequeraSerieControl;

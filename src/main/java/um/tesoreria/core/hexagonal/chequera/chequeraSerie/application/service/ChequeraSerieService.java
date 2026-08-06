@@ -40,6 +40,7 @@ public class ChequeraSerieService {
     private final UpdateChequeraSerieUseCase updateChequeraSerieUseCase;
     private final DeleteChequeraSerieUseCase deleteChequeraSerieUseCase;
     private final GetResumenLectivoUseCase getResumenLectivoUseCase;
+    private final FindPreuniversitarioFromDatosGuaraniUseCase findPreuniversitarioFromDatosGuaraniUseCase;
 
     public List<ChequeraSerie> findAllByPersona(BigDecimal personaId, Integer documentoId) {
         return getChequeraSerieByPersonaUseCase.getAllByPersona(personaId, documentoId);
@@ -186,6 +187,15 @@ public class ChequeraSerieService {
                         personaId, documentoId, facultadId, lectivoId, geograficaId)
                 .orElseThrow(
                         () -> new ChequeraSerieException(personaId, documentoId, facultadId, lectivoId, geograficaId));
+    }
+
+    public ChequeraSerie findPreuniversitarioFromDatosGuarani(BigDecimal nroDocumento, Integer tipoDocumento,
+                                                              Integer ubicacion, Integer responsableAcademica,
+                                                              Integer lectivoId) {
+        return findPreuniversitarioFromDatosGuaraniUseCase
+                .find(nroDocumento, tipoDocumento, ubicacion, responsableAcademica, lectivoId)
+                .orElseThrow(() -> new ChequeraSerieException(nroDocumento, tipoDocumento, responsableAcademica,
+                        lectivoId, ubicacion));
     }
 
     public ChequeraSerie findLastPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadId(BigDecimal personaId,

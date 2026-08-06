@@ -4,7 +4,19 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.49.0**
+**Versión actual (SemVer): 3.50.0**
+
+## Novedades 3.50.0 (verificado en código)
+- feat(chequera/chequeraSerie): Añadida la consulta de chequera preuniversitaria desde datos de Guaraní mediante `GET /chequeraSerie/preuniversitario/...`.
+  - Resuelve documento, ubicación, responsable académica y persona antes de consultar la chequera.
+- feat(guarani/alumno): Añadido `POST /api/tesoreria/core/guarani/alumno/create/personales` para crear datos personales de un alumno.
+- feat(guarani/guaraniUbicacion): Añadida la consulta por ubicación mediante el caso de uso `GetGuaraniUbicacionByUbicacionUseCase`.
+- feat(personas/documento): Añadida la búsqueda por `guaraniTipoDocumento` y migrado el módulo Documento al contexto `personas`.
+- refactor(personas): Reubicados Persona, Documento, puertos, adaptadores, DTOs y controladores bajo `hexagonal/personas`, actualizando sus consumidores.
+- refactor(chequera): Migrados DTOs de integración relacionados con ChequeraSerie a implementaciones Java.
+- feat(docs): Actualizados los diagramas Mermaid de Persona, Documento, Facultad, AlumnoGuarani, GuaraniUbicacion y ChequeraSerie a `v3.50.0`.
+
+> Basado en `git diff HEAD`, `git log`, el código Java modificado y `pom.xml` (versión `3.49.0` → `3.50.0`). No se modificaron dependencias principales. La incorporación de casos de uso y endpoints REST requiere un incremento minor de SemVer.
 
 ## Novedades 3.49.0 (verificado en código)
 - feat(chequera/tipoChequera): Añadida la búsqueda `POST /tipoChequera/search/{geograficaId}`.

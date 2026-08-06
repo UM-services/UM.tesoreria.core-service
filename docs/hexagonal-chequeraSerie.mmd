@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraSerie (v3.30.0)
+title: Arquitectura Hexagonal - Módulo ChequeraSerie (v3.50.0)
 ---
 
 classDiagram
@@ -97,10 +97,15 @@ classDiagram
             class MarkSentUseCaseImpl
             class SetPayPerTicUseCaseImpl
             class UpdateChequeraSerieUseCaseImpl
+            class FindPreuniversitarioFromDatosGuaraniUseCaseImpl
     }
     namespace application {
 
         class ChequeraSerieException
+        class FindPreuniversitarioFromDatosGuaraniUseCase {
+            <<interface>>
+            +find(BigDecimal, Integer, Integer, Integer, Integer) ChequeraSerie
+        }
     }
 
     namespace infrastructure_persistence {
@@ -172,6 +177,7 @@ classDiagram
     MarkSentUseCaseImpl ..|> MarkSentUseCase
     SetPayPerTicUseCaseImpl ..|> SetPayPerTicUseCase
     UpdateChequeraSerieUseCaseImpl ..|> UpdateChequeraSerieUseCase
+    FindPreuniversitarioFromDatosGuaraniUseCaseImpl ..|> FindPreuniversitarioFromDatosGuaraniUseCase
 
     CreateChequeraSerieUseCaseImpl --> ChequeraSerieRepository : uses
     DeleteChequeraSerieUseCaseImpl --> ChequeraSerieRepository : uses
