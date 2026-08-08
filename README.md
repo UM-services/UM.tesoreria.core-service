@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.50.1**
+**Versión actual (SemVer): 3.51.0**
+
+## Novedades 3.51.0 (verificado en código)
+- feat(auth): Añadido `geograficaId` a `LoginResponse` y completado su mapeo desde `UsuarioAuth`, permitiendo a los clientes identificar la geográfica del usuario autenticado.
+- test(auth): Añadidas pruebas para el mapeo completo, el dominio nulo y la geográfica no encontrada.
+
+> Basado en `LoginResponse.java`, `AuthDtoMapper.java`, `AuthDtoMapperTest.java` y `pom.xml` (versión `3.50.1` → `3.51.0`). No se modificaron dependencias principales; corresponde un incremento minor de SemVer.
 
 ## Novedades 3.50.1 (verificado en código)
 - fix(personas/documento): Restaurada la ruta corta `/documento` junto con `/api/tesoreria/core/documento`, manteniendo ambas rutas para compatibilidad de clientes.
