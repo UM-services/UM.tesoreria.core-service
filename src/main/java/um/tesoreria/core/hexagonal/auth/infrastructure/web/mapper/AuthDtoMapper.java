@@ -19,6 +19,7 @@ public class AuthDtoMapper {
                 .token("dummy-jwt-token-replace-later")
                 .userId(domain.getUserId())
                 .nombre(domain.getNombre())
+                .geograficaId(domain.getGeograficaId())
                 .sede(geograficaService.findByGeograficaId(domain.getGeograficaId())
                         .map(Geografica::getNombre)
                         .orElse("Sede no encontrada"))

@@ -1,15 +1,18 @@
 package um.tesoreria.core.hexagonal.auth.infrastructure.web.dto;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginResponse {
 
     private String token;
     private Long userId;
     private String nombre;
+    private Integer geograficaId;
     private String sede;
 
 }
