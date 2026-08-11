@@ -21,7 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import um.tesoreria.core.hexagonal.contrato.infrastructure.persistence.entity.ContratoEntity;
+import um.tesoreria.core.hexagonal.contratos.contrato.infrastructure.persistence.entity.ContratoEntity;
 import um.tesoreria.core.util.Jsonifier;
 
 /**

@@ -11,12 +11,12 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraS
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
-import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
+import um.tesoreria.core.hexagonal.personas.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.LegajoException;
 import um.tesoreria.core.hexagonal.personas.persona.application.exception.PersonaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
-import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
-import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
+import um.tesoreria.core.hexagonal.personas.domicilio.application.service.DomicilioService;
+import um.tesoreria.core.hexagonal.personas.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.*;

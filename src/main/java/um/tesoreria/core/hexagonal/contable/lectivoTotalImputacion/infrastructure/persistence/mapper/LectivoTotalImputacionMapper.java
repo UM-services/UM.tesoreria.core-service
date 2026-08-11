@@ -7,7 +7,7 @@ import um.tesoreria.core.hexagonal.contable.lectivoTotalImputacion.domain.model.
 import um.tesoreria.core.hexagonal.contable.lectivoTotalImputacion.infrastructure.persistence.entity.LectivoTotalImputacionEntity;
 import um.tesoreria.core.hexagonal.chequera.producto.infrastructure.persistence.mapper.ProductoMapper;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.mapper.TipoChequeraMapper;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.mapper.FacultadMapper;
+import um.tesoreria.core.hexagonal.dependencias.facultad.infrastructure.persistence.mapper.FacultadMapper;
 import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.mapper.LectivoMapper;
 
 @Component

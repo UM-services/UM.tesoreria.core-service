@@ -21,7 +21,7 @@ import lombok.*;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.entity.ArticuloEntity;
 import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
-import um.tesoreria.core.hexagonal.ubicacion.infrastructure.persistence.entity.UbicacionEntity;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.entity.UbicacionEntity;
 
 /**
  * @author daniel

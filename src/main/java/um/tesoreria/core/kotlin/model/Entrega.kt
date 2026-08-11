@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import jakarta.persistence.OneToOne
 import jakarta.persistence.JoinColumn
 import um.tesoreria.core.hexagonal.track.infrastructure.persistence.entity.TrackEntity
-import um.tesoreria.core.hexagonal.ubicacion.infrastructure.persistence.entity.UbicacionEntity
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.entity.UbicacionEntity
 import um.tesoreria.core.model.Auditable
 import um.tesoreria.core.util.Jsonifier
 

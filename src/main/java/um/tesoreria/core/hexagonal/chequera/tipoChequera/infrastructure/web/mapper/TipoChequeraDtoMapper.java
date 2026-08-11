@@ -2,7 +2,7 @@ package um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.web.map
 
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.web.mapper.ClaseChequeraDtoMapper;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.web.mapper.GeograficaDtoMapper;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.web.mapper.GeograficaDtoMapper;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequeraSearch;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.web.dto.TipoChequeraRequest;

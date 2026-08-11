@@ -4,40 +4,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import um.tesoreria.core.exception.ChequeraSerieControlException;
-import um.tesoreria.core.exception.LegajoException;
-import um.tesoreria.core.hexagonal.personas.persona.application.exception.PersonaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
-import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
-import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
-import um.tesoreria.core.hexagonal.personas.documento.application.exception.DocumentoException;
 import um.tesoreria.core.hexagonal.personas.documento.application.service.DocumentoService;
-import um.tesoreria.core.hexagonal.domicilio.application.exception.DomicilioException;
-import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
-import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
+import um.tesoreria.core.hexagonal.personas.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.AlumnoGuarani;
 import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaService;
-import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.Build;
-import um.tesoreria.core.kotlin.model.ChequeraAlternativa;
-import um.tesoreria.core.kotlin.model.LectivoAlternativa;
-import um.tesoreria.core.kotlin.model.Legajo;
-import um.tesoreria.core.model.ChequeraSerieControl;
-import um.tesoreria.core.hexagonal.chequera.lectivoCuota.domain.model.LectivoCuota;
-import um.tesoreria.core.model.LectivoTotal;
 import um.tesoreria.core.service.*;
-import um.tesoreria.core.util.Jsonifier;
-import um.tesoreria.core.util.Tool;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Service
 @Slf4j

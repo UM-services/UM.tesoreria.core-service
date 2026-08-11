@@ -29,9 +29,9 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.Ch
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
-import um.tesoreria.core.hexagonal.domicilio.application.service.DomicilioService;
-import um.tesoreria.core.hexagonal.facultad.application.service.FacultadService;
-import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
+import um.tesoreria.core.hexagonal.personas.domicilio.application.service.DomicilioService;
+import um.tesoreria.core.hexagonal.dependencias.facultad.application.service.FacultadService;
+import um.tesoreria.core.hexagonal.dependencias.geografica.application.service.GeograficaService;
 import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;

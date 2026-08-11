@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.FindPreuniversitarioFromDatosGuaraniUseCase;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.GetChequeraSerieSpecialQueriesUseCase;
-import um.tesoreria.core.hexagonal.facultad.domain.ports.in.GetFacultadByGuaraniResponsableAcademicaUseCase;
+import um.tesoreria.core.hexagonal.dependencias.facultad.domain.ports.in.GetFacultadByGuaraniResponsableAcademicaUseCase;
 import um.tesoreria.core.hexagonal.guarani.guaraniUbicacion.domain.ports.in.GetGuaraniUbicacionByUbicacionUseCase;
 import um.tesoreria.core.hexagonal.personas.documento.domain.ports.in.GetDocumentoByGuaraniTipoDocumentoUseCase;
 

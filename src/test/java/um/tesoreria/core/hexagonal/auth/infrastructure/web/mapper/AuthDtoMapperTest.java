@@ -6,8 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import um.tesoreria.core.hexagonal.auth.domain.model.UsuarioAuth;
-import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
-import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
+import um.tesoreria.core.hexagonal.dependencias.geografica.application.service.GeograficaService;
+import um.tesoreria.core.hexagonal.dependencias.geografica.domain.model.Geografica;
 
 import java.util.Optional;
 
