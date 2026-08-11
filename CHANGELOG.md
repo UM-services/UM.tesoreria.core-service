@@ -2,6 +2,24 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.0.0] - 2026-08-11
+### Added
+- feat(guarani/alumno): Nuevo `PersonalesResultado` de dominio y DTO `PersonalesResponse` con `result`, `persona`, `domicilio` y `alumnoGuarani` para el alta de personales.
+  - `CreatePersonalesUseCase` ahora retorna `PersonalesResultado` y `AlumnoGuaraniDtoMapper` expone `toPersonalesResponse`.
+
+### Changed
+- refactor(hexagonal): Reorganizados los módulos hexagonales bajo nuevos contextos, actualizando imports y consumidores (~200 archivos):
+  - `contrato` y `cursoCargoContratado` → `hexagonal/contratos/`
+  - `dependencia`, `facultad`, `geografica` y `ubicacion` → `hexagonal/dependencias/`
+  - `domicilio` → `hexagonal/personas/`
+  - Las rutas REST se mantienen intactas; el cambio es interno a los paquetes Java.
+- breaking(guarani/alumno): `POST /api/tesoreria/core/guarani/alumno/create/personales` ahora responde `PersonalesResponse` (antes `Boolean`), incluyendo la persona y el domicilio creados.
+
+### Removed
+- breaking(guarani/alumno): Eliminado el endpoint `POST /api/tesoreria/core/guarani/alumno/desmarcar/enviadas` y el caso de uso `CheckAllPreuniversitarioWithoutChequera` que lo respaldaba.
+
+> Basado en `git diff HEAD` (239 archivos, +715/−759 líneas), `git log`, el código Java/Kotlin modificado y `pom.xml` (versión `3.51.0` → `4.0.0`). La eliminación de un endpoint público y el cambio de contrato de respuesta de `/create/personales` justifican un incremento major de SemVer.
+
 ## [3.51.0] - 2026-08-08
 ### Added
 - feat(auth): Añadido `geograficaId` a `LoginResponse` y completado su mapeo desde `UsuarioAuth`, permitiendo a los clientes identificar la geográfica del usuario autenticado.
@@ -1241,7 +1259,7 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
   - Eliminación de `FacultadRepository.java` del paquete `core/repository/`
   - Eliminación de `FacultadService.java` del paquete `core/service/`
   - Eliminación de `FacultadController.java` del paquete `core/controller/`
-  - Actualización de referencias de `um.tesoreria.core.kotlin.model.Facultad` a `um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity` en todos los modelos, servicios y controladores que dependían de la entidad legacy (~20+ archivos afectados)
+  - Actualización de referencias de `um.tesoreria.core.kotlin.model.Facultad` a `um.tesoreria.core.hexagonal.dependencias.facultad.infrastructure.persistence.entity.FacultadEntity` en todos los modelos, servicios y controladores que dependían de la entidad legacy (~20+ archivos afectados)
 
 > Basado en análisis profundo de `git diff HEAD` (archivos creados, eliminados y modificados, incluyendo cambios locales no commiteados).
 

@@ -4,7 +4,16 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.51.0**
+**Versión actual (SemVer): 4.0.0**
+
+## Novedades 4.0.0 (verificado en código)
+- breaking(guarani/alumno): Eliminado el endpoint `POST /api/tesoreria/core/guarani/alumno/desmarcar/enviadas` y el caso de uso `CheckAllPreuniversitarioWithoutChequera`.
+- breaking(guarani/alumno): `POST /api/tesoreria/core/guarani/alumno/create/personales` ahora responde `PersonalesResponse` (antes `Boolean`) con `result`, `persona`, `domicilio` y `alumnoGuarani`.
+- feat(guarani/alumno): Nuevos `PersonalesResultado` (dominio) y `PersonalesResponse` (DTO) para el alta de personales.
+- refactor(hexagonal): Reorganizados los módulos hexagonales bajo `hexagonal/contratos/` (`contrato`, `cursoCargoContratado`), `hexagonal/dependencias/` (`dependencia`, `facultad`, `geografica`, `ubicacion`) y `hexagonal/personas/` (`domicilio`); sin cambios en las rutas REST.
+- feat(docs): Actualizado el diagrama `hexagonal-alumnoGuarani.mmd` a `v4.0.0`.
+
+> Basado en `git diff HEAD` (239 archivos, +715/−759 líneas), `git log`, el código Java/Kotlin modificado y `pom.xml` (versión `3.51.0` → `4.0.0`). No se modificaron dependencias principales; la eliminación de un endpoint y el cambio de contrato de una respuesta existente justifican un incremento major de SemVer.
 
 ## Novedades 3.51.0 (verificado en código)
 - feat(auth): Añadido `geograficaId` a `LoginResponse` y completado su mapeo desde `UsuarioAuth`, permitiendo a los clientes identificar la geográfica del usuario autenticado.

@@ -4,9 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
-import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.dependencias.facultad.domain.model.Facultad;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
-import um.tesoreria.core.util.Jsonifier;
 import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;

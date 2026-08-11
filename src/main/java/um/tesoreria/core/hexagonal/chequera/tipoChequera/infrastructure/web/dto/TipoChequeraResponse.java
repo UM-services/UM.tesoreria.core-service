@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.web.dto.ClaseChequeraResponse;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.web.dto.GeograficaResponse;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.web.dto.GeograficaResponse;
 
 @Data
 @Builder

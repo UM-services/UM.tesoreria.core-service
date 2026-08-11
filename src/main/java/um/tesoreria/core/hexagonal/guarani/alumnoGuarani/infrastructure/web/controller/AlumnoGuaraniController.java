@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.application.service.AlumnoGuaraniService;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.AlumnoGuarani;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.PersonalesResultado;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.dto.AlumnoDeteccionRequest;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.dto.AlumnoGuaraniRequest;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.dto.PersonalesResponse;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.mapper.AlumnoGuaraniDtoMapper;
 
 import java.util.List;
@@ -33,17 +35,12 @@ public class AlumnoGuaraniController {
     }
 
     @PostMapping("/create/personales")
-    public ResponseEntity<Boolean> createPersonales(@RequestBody AlumnoGuaraniRequest request) {
+    public ResponseEntity<PersonalesResponse> createPersonales(@RequestBody AlumnoGuaraniRequest request) {
         log.debug("\n\nProcessing AlumnoGuaraniController.createPersonales\n\n");
         AlumnoGuarani domain = dtoMapper.toDomain(request);
-        Boolean created = alumnoGuaraniService.createPersonales(domain);
-        return ResponseEntity.ok(created);
-    }
-
-    @PostMapping("/desmarcar/enviadas")
-    public ResponseEntity<List<AlumnoDeteccionRequest>> desmarcarEnviados(@RequestBody List<AlumnoDeteccionRequest> encontrados) {
-        List<AlumnoDeteccionRequest> result = alumnoGuaraniService.desmarcarEnviados(encontrados);
-        return ResponseEntity.ok(result);
+        PersonalesResultado resultado = alumnoGuaraniService.createPersonales(domain);
+        PersonalesResponse response = dtoMapper.toPersonalesResponse(resultado, domain);
+        return ResponseEntity.ok(response);
     }
 
 }

@@ -6,7 +6,7 @@ import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.web.mapper.P
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoRequest;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoResponse;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.web.mapper.GeograficaDtoMapper;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.web.mapper.GeograficaDtoMapper;
 
 import java.util.stream.Collectors;
 

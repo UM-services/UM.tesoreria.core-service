@@ -3,8 +3,8 @@ package um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persist
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.claseChequera.domain.model.ClaseChequera;
 import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persistence.mapper.ClaseChequeraMapper;
-import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
+import um.tesoreria.core.hexagonal.dependencias.geografica.domain.model.Geografica;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequeraSearch;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity;

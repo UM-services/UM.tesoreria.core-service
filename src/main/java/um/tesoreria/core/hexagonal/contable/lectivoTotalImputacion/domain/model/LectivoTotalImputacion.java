@@ -2,7 +2,7 @@ package um.tesoreria.core.hexagonal.contable.lectivoTotalImputacion.domain.model
 
 import lombok.*;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
-import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.dependencias.facultad.domain.model.Facultad;
 import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
 import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;

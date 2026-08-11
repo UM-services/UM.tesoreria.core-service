@@ -11,7 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persistence.entity.ClaseChequeraEntity;
 import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.util.Jsonifier;

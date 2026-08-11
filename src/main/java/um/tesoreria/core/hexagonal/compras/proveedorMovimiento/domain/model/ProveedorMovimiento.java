@@ -4,7 +4,7 @@ import lombok.*;
 
 import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
-import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
+import um.tesoreria.core.hexagonal.dependencias.geografica.domain.model.Geografica;
 import um.tesoreria.core.kotlin.model.ProveedorArticulo;
 import um.tesoreria.core.kotlin.model.ProveedorPago;
 

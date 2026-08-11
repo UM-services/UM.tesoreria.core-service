@@ -2,7 +2,7 @@ package um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
+import um.tesoreria.core.hexagonal.personas.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 import um.tesoreria.core.hexagonal.umhub.campanha.domain.model.Campanha;
 import um.tesoreria.core.util.Jsonifier;

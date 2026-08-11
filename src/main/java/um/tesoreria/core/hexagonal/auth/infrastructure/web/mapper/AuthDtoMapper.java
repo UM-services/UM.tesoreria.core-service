@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.auth.domain.model.UsuarioAuth;
 import um.tesoreria.core.hexagonal.auth.infrastructure.web.dto.LoginResponse;
-import um.tesoreria.core.hexagonal.geografica.application.service.GeograficaService;
-import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
+import um.tesoreria.core.hexagonal.dependencias.geografica.application.service.GeograficaService;
+import um.tesoreria.core.hexagonal.dependencias.geografica.domain.model.Geografica;
 
 @Component
 @RequiredArgsConstructor

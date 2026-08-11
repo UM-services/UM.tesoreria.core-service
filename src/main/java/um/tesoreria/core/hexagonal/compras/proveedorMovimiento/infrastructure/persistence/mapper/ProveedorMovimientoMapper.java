@@ -6,7 +6,7 @@ import um.tesoreria.core.hexagonal.comprobante.infrastructure.persistence.mapper
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.mapper.ProveedorMapper;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 
 import java.util.stream.Collectors;
 
