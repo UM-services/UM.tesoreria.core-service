@@ -7,6 +7,7 @@ import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.AlumnoGuar
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.PersonalesResultado;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.ports.in.CreatePreuniversitarioUseCase;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.ports.in.CreatePersonalesUseCase;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.dto.PersonalesResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -16,9 +17,9 @@ public class AlumnoGuaraniService {
     private final CreatePreuniversitarioUseCase createPreuniversitarioUseCase;
     private final CreatePersonalesUseCase createPersonalesUseCase;
 
-    public AlumnoGuarani createPreuniversitario(AlumnoGuarani alumnoGuarani) {
+    public AlumnoGuarani createPreuniversitario(PersonalesResponse alumnoGuaraniFull) {
         log.debug("\n\nProcessing AlumnoGuaraniService.createPreuniversitario\n\n");
-        return createPreuniversitarioUseCase.createPreuniversitario(alumnoGuarani);
+        return createPreuniversitarioUseCase.createPreuniversitario(alumnoGuaraniFull);
     }
 
     public PersonalesResultado createPersonales(AlumnoGuarani alumnoGuarani) {

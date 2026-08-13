@@ -2,6 +2,7 @@ package um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PersonaGuarani {
+public class PersonaGuarani implements Jsonifyable {
 
     private Long persona;
     private String apellido;
@@ -33,6 +34,7 @@ public class PersonaGuarani {
     private Long documentoPrincipal;
     private DocumentoPrincipalGuarani documentoPrincipalRel;
     private List<ContactoGuarani> contactos;
+    private List<RequisitoPresentadoGuarani> requisitosPresentados;
     private String usuario;
     private String clave;
 
@@ -51,9 +53,5 @@ public class PersonaGuarani {
     private String puebloOriginarioOtro;
     private String araiIdentificadorSso;
     private String araiUuid;
-
-    public String jsonify() {
-        return um.tesoreria.core.util.Jsonifier.builder(this).build();
-    }
 
 }

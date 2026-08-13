@@ -18,6 +18,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 /**
  * @author daniel
@@ -30,11 +31,7 @@ import um.tesoreria.core.util.Jsonifier;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChequeraSerieControl extends Auditable implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -8628468519869914909L;
+public class ChequeraSerieControl extends Auditable implements Jsonifyable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -64,7 +61,4 @@ public class ChequeraSerieControl extends Auditable implements Serializable {
 
 	private Byte eliminada = 0;
 
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
-    }
 }

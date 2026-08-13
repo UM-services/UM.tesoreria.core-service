@@ -41,6 +41,15 @@ public class GuaraniBeneficioController {
         }
     }
 
+    @PostMapping("/requisitos")
+    public ResponseEntity<List<GuaraniBeneficioResponse>> findByRequisitos(
+            @RequestBody List<Integer> requisito) {
+        List<GuaraniBeneficioResponse> responses = guaraniBeneficioService.findByRequisitos(requisito).stream()
+                .map(guaraniBeneficioDtoMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
     @PostMapping("/")
     public ResponseEntity<GuaraniBeneficioResponse> add(@RequestBody GuaraniBeneficioRequest request) {
         GuaraniBeneficio domain = guaraniBeneficioDtoMapper.toDomain(request);

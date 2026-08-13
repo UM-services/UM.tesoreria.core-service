@@ -7,6 +7,7 @@ import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.model.Guarani
 import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.ports.in.CreateGuaraniBeneficioUseCase;
 import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.ports.in.GetAllGuaraniBeneficiosUseCase;
 import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.ports.in.GetGuaraniBeneficioByRequisitoUseCase;
+import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.ports.in.GetGuaraniBeneficiosByRequisitosUseCase;
 import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.ports.in.UpdateGuaraniBeneficioByRequisitoUseCase;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 public class GuaraniBeneficioService {
 
     private final GetGuaraniBeneficioByRequisitoUseCase getGuaraniBeneficioByRequisitoUseCase;
+    private final GetGuaraniBeneficiosByRequisitosUseCase getGuaraniBeneficiosByRequisitosUseCase;
     private final GetAllGuaraniBeneficiosUseCase getAllGuaraniBeneficiosUseCase;
     private final CreateGuaraniBeneficioUseCase createGuaraniBeneficioUseCase;
     private final UpdateGuaraniBeneficioByRequisitoUseCase updateGuaraniBeneficioByRequisitoUseCase;
@@ -23,6 +25,10 @@ public class GuaraniBeneficioService {
     public GuaraniBeneficio findByRequisito(Integer requisito) {
         return getGuaraniBeneficioByRequisitoUseCase.getGuaraniBeneficioByRequisito(requisito)
                 .orElseThrow(() -> new GuaraniBeneficioException(requisito));
+    }
+
+    public List<GuaraniBeneficio> findByRequisitos(List<Integer> requisitos) {
+        return getGuaraniBeneficiosByRequisitosUseCase.getGuaraniBeneficiosByRequisitos(requisitos);
     }
 
     public List<GuaraniBeneficio> findAll() {
