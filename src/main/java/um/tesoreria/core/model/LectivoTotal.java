@@ -30,11 +30,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class LectivoTotal extends Auditable implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -649709995943583891L;
+public class LectivoTotal extends Auditable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 4.0.0**
+**Versión actual (SemVer): 4.1.0**
+
+## Novedades 4.1.0 (verificado en código)
+- feat(guarani/guaraniBeneficio): Añadida la consulta de beneficios por múltiples requisitos mediante `POST /api/tesoreria/core/guaraniBeneficio/requisitos`.
+- feat(personas/legajo): Migrado el módulo Legajo a arquitectura hexagonal Java, conservando las rutas REST existentes y sus operaciones de consulta, alta y guardado masivo.
+- refactor(chequera/chequeraSerie): Separado el flujo preuniversitario en componentes de resolución de datos, gestión de legajos, creación de detalles y políticas.
+- test(chequera/chequeraSerie): Añadida una prueba para referencias requeridas no resolubles.
+
+> Basado en `git diff HEAD` (60 archivos modificados, +1312/-469 líneas), el código Java y los tests modificados, `git log` y `pom.xml` (versión `4.0.0` → `4.1.0`). La incorporación de una consulta REST y los refactors compatibles corresponden a un incremento minor de SemVer.
 
 ## Novedades 4.0.0 (verificado en código)
 - breaking(guarani/alumno): Eliminado el endpoint `POST /api/tesoreria/core/guarani/alumno/desmarcar/enviadas` y el caso de uso `CheckAllPreuniversitarioWithoutChequera`.

@@ -12,7 +12,10 @@ import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.Ch
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
 import um.tesoreria.core.hexagonal.personas.domicilio.application.exception.DomicilioException;
-import um.tesoreria.core.exception.LegajoException;
+import um.tesoreria.core.hexagonal.personas.legajo.application.exception.LegajoException;
+import um.tesoreria.core.hexagonal.personas.legajo.application.service.LegajoService;
+import um.tesoreria.core.hexagonal.personas.legajo.domain.model.Legajo;
+import um.tesoreria.core.hexagonal.personas.legajo.infrastructure.persistence.entity.LegajoEntity;
 import um.tesoreria.core.hexagonal.personas.persona.application.exception.PersonaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.personas.domicilio.application.service.DomicilioService;
@@ -140,7 +143,8 @@ public class SpoterService {
                 null,
                 0,
                 BigDecimal.ZERO,
-                null));
+                null,
+                true));
         log.debug("ChequeraSerie -> {}", chequeraSerie.jsonify());
 
         // Generar ChequeraTotal

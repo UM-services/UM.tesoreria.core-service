@@ -1,9 +1,6 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.domain.model.ArancelTipo;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.personas.domicilio.domain.model.Domicilio;
@@ -12,15 +9,17 @@ import um.tesoreria.core.hexagonal.dependencias.geografica.domain.model.Geografi
 import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
 import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChequeraSerie {
+public class ChequeraSerie implements Jsonifyable {
 
     private Long chequeraId;
     private Integer facultadId;
@@ -63,6 +62,9 @@ public class ChequeraSerie {
     private BigDecimal importeDeuda;
     private OffsetDateTime ultimoEnvio;
 
+    @Builder.Default
+    private Boolean justCreated = false;
+
     public String getPersonaKey() {
         return this.personaId.toString() + "." + this.documentoId;
     }
@@ -71,7 +73,4 @@ public class ChequeraSerie {
         return this.facultadId.toString() + "." + this.lectivoId + "." + this.geograficaId + "." + this.getPersonaKey();
     }
 
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
-    }
 }

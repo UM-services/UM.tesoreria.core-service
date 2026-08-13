@@ -34,6 +34,8 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraS
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.dependencias.facultad.domain.model.Facultad;
 import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
+import um.tesoreria.core.hexagonal.personas.legajo.domain.model.Legajo;
+import um.tesoreria.core.hexagonal.personas.legajo.infrastructure.persistence.entity.LegajoEntity;
 import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.CarreraService;
@@ -42,14 +44,14 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.Ch
 import um.tesoreria.core.hexagonal.dependencias.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.LectivoAlternativaService;
 import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
-import um.tesoreria.core.service.LegajoService;
+import um.tesoreria.core.hexagonal.personas.legajo.application.service.LegajoService;
 import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import lombok.extern.slf4j.Slf4j;
 import um.tesoreria.core.exception.CarreraException;
 import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.hexagonal.lectivo.application.exception.LectivoException;
-import um.tesoreria.core.exception.LegajoException;
+import um.tesoreria.core.hexagonal.personas.legajo.application.exception.LegajoException;
 import um.tesoreria.core.hexagonal.personas.persona.application.exception.PersonaException;
 
 @Service

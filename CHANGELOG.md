@@ -2,6 +2,18 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.1.0] - 2026-08-13
+### Added
+- feat(guarani/guaraniBeneficio): Añadida la consulta de beneficios por múltiples requisitos mediante `POST /api/tesoreria/core/guaraniBeneficio/requisitos`.
+- feat(personas/legajo): Añadida la implementación hexagonal Java del módulo Legajo, con endpoints para consultar, crear y guardar legajos.
+- test(chequera/chequeraSerie): Añadida una prueba para el flujo preuniversitario cuando no se pueden resolver las referencias requeridas.
+
+### Changed
+- refactor(chequera/chequeraSerie): Separada la resolución de datos, la gestión de legajos, la creación de detalles y las políticas del flujo de chequera preuniversitaria.
+- refactor(personas/legajo): Migrado Legajo desde el modelo Kotlin y los componentes legacy a dominio, puertos, casos de uso, adaptador JPA y DTOs Java, conservando las rutas REST existentes.
+
+> Basado en `git diff HEAD` (60 archivos modificados, +1312/-469 líneas), el código Java y los tests modificados, `git log` y `pom.xml` (versión `4.0.0` → `4.1.0`). La funcionalidad REST nueva y los refactors compatibles justifican un incremento minor de SemVer.
+
 ## [4.0.0] - 2026-08-11
 ### Added
 - feat(guarani/alumno): Nuevo `PersonalesResultado` de dominio y DTO `PersonalesResponse` con `result`, `persona`, `domicilio` y `alumnoGuarani` para el alta de personales.
