@@ -67,6 +67,7 @@ jobs:
   deploy:
     name: Deploy develop service
     needs: build-image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     runs-on: [self-hosted, linux, develop]
     environment:
       name: develop
