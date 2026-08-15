@@ -27,10 +27,9 @@ public class AlumnoGuaraniController {
     private final AlumnoGuaraniDtoMapper dtoMapper;
 
     @PostMapping("/create/preuniversitario")
-    public ResponseEntity<AlumnoGuarani> createPreuniversitario(@RequestBody AlumnoGuaraniRequest request) {
+    public ResponseEntity<AlumnoGuarani> createPreuniversitario(@RequestBody PersonalesResponse request) {
         log.debug("\n\nProcessing AlumnoGuaraniController.createPreuniversitario\n\n");
-        AlumnoGuarani domain = dtoMapper.toDomain(request);
-        AlumnoGuarani created = alumnoGuaraniService.createPreuniversitario(domain);
+        AlumnoGuarani created = alumnoGuaraniService.createPreuniversitario(request);
         return ResponseEntity.ok(created);
     }
 

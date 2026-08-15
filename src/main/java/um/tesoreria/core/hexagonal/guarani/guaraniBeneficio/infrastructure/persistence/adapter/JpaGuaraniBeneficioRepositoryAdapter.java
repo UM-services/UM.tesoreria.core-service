@@ -33,6 +33,13 @@ public class JpaGuaraniBeneficioRepositoryAdapter implements GuaraniBeneficioRep
     }
 
     @Override
+    public List<GuaraniBeneficio> findByRequisitos(List<Integer> requisitos) {
+        return jpaGuaraniBeneficioRepository.findByRequisitoIn(requisitos).stream()
+                .map(guaraniBeneficioMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public GuaraniBeneficio save(GuaraniBeneficio domain) {
         GuaraniBeneficioEntity entity = guaraniBeneficioMapper.toEntity(domain);
         return guaraniBeneficioMapper.toDomainModel(jpaGuaraniBeneficioRepository.save(entity));

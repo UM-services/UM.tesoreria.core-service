@@ -69,6 +69,8 @@ import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.persis
 import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.service.ProveedorService;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.personas.legajo.domain.model.Legajo;
+import um.tesoreria.core.hexagonal.personas.legajo.infrastructure.persistence.entity.LegajoEntity;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.model.*;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.DeudaChequeraDto;
@@ -89,7 +91,7 @@ import um.tesoreria.core.service.EjercicioService;
 import um.tesoreria.core.hexagonal.dependencias.facultad.application.service.FacultadService;
 import um.tesoreria.core.service.IngresoAsientoService;
 import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
-import um.tesoreria.core.service.LegajoService;
+import um.tesoreria.core.hexagonal.personas.legajo.application.service.LegajoService;
 import um.tesoreria.core.service.PersonaSuspendidoService;
 import um.tesoreria.core.service.PlanService;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
