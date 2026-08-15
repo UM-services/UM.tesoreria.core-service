@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo AlumnoGuarani (v3.29.0)
+title: Arquitectura Hexagonal - Módulo AlumnoGuarani (v4.0.0)
 ---
 
 classDiagram
@@ -93,18 +93,24 @@ classDiagram
             +createPreuniversitario(AlumnoGuarani) AlumnoGuarani
         }
 
-        class CheckAllPreuniversitarioWithoutChequeraUseCase {
+        class CreatePersonalesUseCase {
             <<interface>>
-            +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+            +createPersonales(AlumnoGuarani) PersonalesResultado
+        }
+
+        class PersonalesResultado {
+            +Boolean result
+            +Persona persona
+            +Domicilio domicilio
         }
     }
 
     namespace application {
         class AlumnoGuaraniService {
             -CreatePreuniversitarioUseCase createPreuniversitarioUseCase
-            -CheckAllPreuniversitarioWithoutChequeraUseCase checkAllPreuniversitarioWithoutChequeraUseCase
+            -CreatePersonalesUseCase createPersonalesUseCase
             +createPreuniversitario(AlumnoGuarani) AlumnoGuarani
-            +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+            +createPersonales(AlumnoGuarani) PersonalesResultado
         }
 
     }
@@ -115,10 +121,8 @@ classDiagram
                 +createPreuniversitario(AlumnoGuarani) AlumnoGuarani
             }
 
-            class CheckAllPreuniversitarioWithoutChequeraUseCaseImpl {
-                -ChequeraSerieService chequeraSerieService
-                -LectivoService lectivoService
-                +desmarcarEnviados(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+            class CreatePersonalesUseCaseImpl {
+                +createPersonales(AlumnoGuarani) PersonalesResultado
             }
     }
     namespace application {
@@ -132,18 +136,17 @@ classDiagram
             class AlumnoGuaraniController {
                 -AlumnoGuaraniService alumnoGuaraniService
                 +createPreuniversitario(AlumnoGuaraniRequest) AlumnoGuarani
-                +desmarcarEnviadas(List~AlumnoDeteccionRequest~) List~AlumnoDeteccionRequest~
+                +createPersonales(AlumnoGuaraniRequest) PersonalesResponse
             }
 
     }
     namespace infrastructure_web_dto {
                 class AlumnoGuaraniRequest
-                class AlumnoDeteccionRequest {
-                    +Integer ubicacion
-                    +Integer propuesta
-                    +Long nroDocumento
-                    +Integer tipoDocumento
-                    +String pendiente
+                class PersonalesResponse {
+                    +Boolean result
+                    +PersonaResponse persona
+                    +DomicilioResponse domicilio
+                    +AlumnoGuarani alumnoGuarani
                 }
                 class ChequeraContextFromGuaraniInternal {
                     +Integer facultadId
@@ -155,6 +158,7 @@ classDiagram
 
             class AlumnoGuaraniDtoMapper {
                 +toDomain(AlumnoGuaraniRequest) AlumnoGuarani
+                +toPersonalesResponse(PersonalesResultado, AlumnoGuarani) PersonalesResponse
             }
     }
 
@@ -167,13 +171,14 @@ classDiagram
     PropuestaGuarani --> PropuestaTipoGuarani
 
     CreatePreuniversitarioUseCaseImpl ..|> CreatePreuniversitarioUseCase
-    CheckAllPreuniversitarioWithoutChequeraUseCaseImpl ..|> CheckAllPreuniversitarioWithoutChequeraUseCase
+    CreatePersonalesUseCaseImpl ..|> CreatePersonalesUseCase
 
     AlumnoGuaraniService --> CreatePreuniversitarioUseCase
-    AlumnoGuaraniService --> CheckAllPreuniversitarioWithoutChequeraUseCase
+    AlumnoGuaraniService --> CreatePersonalesUseCase
 
     CreatePreuniversitarioUseCaseImpl --> PreuniversitarioChequeraService
 
     AlumnoGuaraniController --> AlumnoGuaraniService
     AlumnoGuaraniDtoMapper ..> AlumnoGuaraniRequest : maps from
     AlumnoGuaraniDtoMapper ..> AlumnoGuarani : maps to
+    AlumnoGuaraniDtoMapper ..> PersonalesResultado : maps from

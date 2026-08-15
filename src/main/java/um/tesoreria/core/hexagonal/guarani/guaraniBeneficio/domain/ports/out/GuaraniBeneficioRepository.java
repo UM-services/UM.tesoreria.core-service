@@ -8,5 +8,6 @@ import java.util.Optional;
 public interface GuaraniBeneficioRepository {
     List<GuaraniBeneficio> findAll();
     Optional<GuaraniBeneficio> findByRequisito(Integer requisito);
+    List<GuaraniBeneficio> findByRequisitos(List<Integer> requisitos);
     GuaraniBeneficio save(GuaraniBeneficio guaraniBeneficio);
 }

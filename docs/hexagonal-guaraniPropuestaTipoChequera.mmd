@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo GuaraniPropuestaTipoChequera (v3.48.0)
+title: Arquitectura Hexagonal - Módulo GuaraniPropuestaTipoChequera (v3.49.0)
 ---
 
 classDiagram
@@ -11,6 +11,13 @@ classDiagram
             +Integer propuestaGuarani
             +Integer lectivoId
             +Integer tipoChequeraId
+            +TipoChequera tipoChequera
+        }
+
+        class TipoChequera {
+            +Integer tipoChequeraId
+            +String nombre
+            +Integer geograficaId
         }
 
         class GuaraniPropuestaTipoChequeraRepository {
@@ -44,6 +51,13 @@ classDiagram
             +Integer propuestaGuarani
             +Integer lectivoId
             +Integer tipoChequeraId
+            +TipoChequeraEntity tipoChequera
+        }
+
+        class TipoChequeraEntity {
+            +Integer tipoChequeraId
+            +String nombre
+            +Integer geograficaId
         }
 
         class JpaGuaraniPropuestaTipoChequeraRepository {
@@ -65,6 +79,7 @@ classDiagram
 
         class GuaraniPropuestaTipoChequeraRequest
         class GuaraniPropuestaTipoChequeraResponse
+        class TipoChequeraResponse
         class GuaraniPropuestaTipoChequeraDtoMapper
     }
 
@@ -79,3 +94,6 @@ classDiagram
     JpaGuaraniPropuestaTipoChequeraRepository --> GuaraniPropuestaTipoChequeraEntity : persists
     GuaraniPropuestaTipoChequeraController --> GuaraniPropuestaTipoChequeraService : calls
     GuaraniPropuestaTipoChequeraController --> GuaraniPropuestaTipoChequeraDtoMapper : uses
+    GuaraniPropuestaTipoChequera --> TipoChequera : references
+    GuaraniPropuestaTipoChequeraEntity --> TipoChequeraEntity : loads
+    GuaraniPropuestaTipoChequeraResponse --> TipoChequeraResponse : includes

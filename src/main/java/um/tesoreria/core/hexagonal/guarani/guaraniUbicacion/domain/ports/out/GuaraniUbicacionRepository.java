@@ -9,6 +9,8 @@ public interface GuaraniUbicacionRepository {
 
     Optional<GuaraniUbicacion> findById(Integer id);
 
+    Optional<GuaraniUbicacion> findByUbicacion(Integer ubicacion);
+
     GuaraniUbicacion save(GuaraniUbicacion guaraniUbicacion);
 
     void deleteById(Integer id);

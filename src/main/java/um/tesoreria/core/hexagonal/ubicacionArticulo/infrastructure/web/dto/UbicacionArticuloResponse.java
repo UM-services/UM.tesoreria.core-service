@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
-import um.tesoreria.core.hexagonal.ubicacion.domain.model.Ubicacion;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.domain.model.Ubicacion;
 
 import java.math.BigDecimal;
 

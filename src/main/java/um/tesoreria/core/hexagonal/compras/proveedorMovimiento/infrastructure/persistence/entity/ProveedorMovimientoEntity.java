@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import um.tesoreria.core.hexagonal.comprobante.infrastructure.persistence.entity.ComprobanteEntity;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.entity.ProveedorEntity;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.kotlin.model.ProveedorArticulo;
 import um.tesoreria.core.kotlin.model.ProveedorPago;
 import um.tesoreria.core.model.Auditable;

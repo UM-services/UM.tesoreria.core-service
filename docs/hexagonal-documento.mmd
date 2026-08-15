@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Documento (v3.33.0)
+title: Arquitectura Hexagonal - Módulo Documento bajo Personas (v3.50.1)
 ---
 
 classDiagram
@@ -9,12 +9,14 @@ classDiagram
         class Documento {
             +Integer documentoId
             +String nombre
+            +Integer guaraniTipoDocumento
         }
 
         class DocumentoRepository {
             <<interface>>
             +findAll() List~Documento~
             +findById(Integer) Optional~Documento~
+            +findFirstByGuaraniTipoDocumento(Integer) Optional~Documento~
         }
     }
 
@@ -22,30 +24,36 @@ classDiagram
         class DocumentoService {
             -GetAllDocumentosUseCase getAllDocumentosUseCase
             -GetDocumentoByIdUseCase getDocumentoByIdUseCase
+            -GetDocumentoByGuaraniTipoDocumentoUseCase getDocumentoByGuaraniTipoDocumentoUseCase
             +findAll() List~Documento~
             +findByDocumentoId(Integer) Documento
+            +findFirstByGuaraniTipoDocumento(Integer) Documento
         }
 
     }
     namespace application_usecases {
             class GetAllDocumentosUseCaseImpl
             class GetDocumentoByIdUseCaseImpl
+            class GetDocumentoByGuaraniTipoDocumentoUseCaseImpl
     }
     namespace application {
 
         class GetAllDocumentosUseCase { <<interface>> }
         class GetDocumentoByIdUseCase { <<interface>> }
+        class GetDocumentoByGuaraniTipoDocumentoUseCase { <<interface>> }
     }
 
     namespace infrastructure_persistence {
             class DocumentoEntity {
                 +Integer documentoId
                 +String nombre
+                +Integer guaraniTipoDocumento
             }
 
             class JpaDocumentoRepository {
                 <<JpaRepository>>
                 +findByDocumentoId(Integer) Optional~DocumentoEntity~
+                +findFirstByGuaraniTipoDocumento(Integer) Optional~DocumentoEntity~
             }
 
             class JpaDocumentoRepositoryAdapter {
@@ -53,6 +61,7 @@ classDiagram
                 -DocumentoMapper mapper
                 +findAll() List~Documento~
                 +findById(Integer) Optional~Documento~
+                +findFirstByGuaraniTipoDocumento(Integer) Optional~Documento~
             }
 
             class DocumentoMapper {
@@ -66,6 +75,7 @@ classDiagram
                 -DocumentoDtoMapper dtoMapper
                 +findAll() ResponseEntity~List~DocumentoResponse~~
                 +findByDocumentoId(Integer) ResponseEntity~DocumentoResponse~
+                +findFirstByGuaraniTipoDocumento(Integer) ResponseEntity~DocumentoResponse~
             }
 
             class DocumentoRequest
@@ -78,12 +88,15 @@ classDiagram
 
     DocumentoService --> GetAllDocumentosUseCase : uses
     DocumentoService --> GetDocumentoByIdUseCase : uses
+    DocumentoService --> GetDocumentoByGuaraniTipoDocumentoUseCase : uses
 
     GetAllDocumentosUseCaseImpl ..|> GetAllDocumentosUseCase : implements
     GetDocumentoByIdUseCaseImpl ..|> GetDocumentoByIdUseCase : implements
+    GetDocumentoByGuaraniTipoDocumentoUseCaseImpl ..|> GetDocumentoByGuaraniTipoDocumentoUseCase : implements
 
     GetAllDocumentosUseCaseImpl --> DocumentoRepository : uses
     GetDocumentoByIdUseCaseImpl --> DocumentoRepository : uses
+    GetDocumentoByGuaraniTipoDocumentoUseCaseImpl --> DocumentoRepository : uses
 
     JpaDocumentoRepositoryAdapter ..|> DocumentoRepository : implements
     JpaDocumentoRepositoryAdapter --> JpaDocumentoRepository : uses

@@ -4,7 +4,57 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 3.48.0**
+**Versión actual (SemVer): 4.1.0**
+
+## Novedades 4.1.0 (verificado en código)
+- feat(guarani/guaraniBeneficio): Añadida la consulta de beneficios por múltiples requisitos mediante `POST /api/tesoreria/core/guaraniBeneficio/requisitos`.
+- feat(personas/legajo): Migrado el módulo Legajo a arquitectura hexagonal Java, conservando las rutas REST existentes y sus operaciones de consulta, alta y guardado masivo.
+- refactor(chequera/chequeraSerie): Separado el flujo preuniversitario en componentes de resolución de datos, gestión de legajos, creación de detalles y políticas.
+- test(chequera/chequeraSerie): Añadida una prueba para referencias requeridas no resolubles.
+
+> Basado en `git diff HEAD` (60 archivos modificados, +1312/-469 líneas), el código Java y los tests modificados, `git log` y `pom.xml` (versión `4.0.0` → `4.1.0`). La incorporación de una consulta REST y los refactors compatibles corresponden a un incremento minor de SemVer.
+
+## Novedades 4.0.0 (verificado en código)
+- breaking(guarani/alumno): Eliminado el endpoint `POST /api/tesoreria/core/guarani/alumno/desmarcar/enviadas` y el caso de uso `CheckAllPreuniversitarioWithoutChequera`.
+- breaking(guarani/alumno): `POST /api/tesoreria/core/guarani/alumno/create/personales` ahora responde `PersonalesResponse` (antes `Boolean`) con `result`, `persona`, `domicilio` y `alumnoGuarani`.
+- feat(guarani/alumno): Nuevos `PersonalesResultado` (dominio) y `PersonalesResponse` (DTO) para el alta de personales.
+- refactor(hexagonal): Reorganizados los módulos hexagonales bajo `hexagonal/contratos/` (`contrato`, `cursoCargoContratado`), `hexagonal/dependencias/` (`dependencia`, `facultad`, `geografica`, `ubicacion`) y `hexagonal/personas/` (`domicilio`); sin cambios en las rutas REST.
+- feat(docs): Actualizado el diagrama `hexagonal-alumnoGuarani.mmd` a `v4.0.0`.
+
+> Basado en `git diff HEAD` (239 archivos, +715/−759 líneas), `git log`, el código Java/Kotlin modificado y `pom.xml` (versión `3.51.0` → `4.0.0`). No se modificaron dependencias principales; la eliminación de un endpoint y el cambio de contrato de una respuesta existente justifican un incremento major de SemVer.
+
+## Novedades 3.51.0 (verificado en código)
+- feat(auth): Añadido `geograficaId` a `LoginResponse` y completado su mapeo desde `UsuarioAuth`, permitiendo a los clientes identificar la geográfica del usuario autenticado.
+- test(auth): Añadidas pruebas para el mapeo completo, el dominio nulo y la geográfica no encontrada.
+
+> Basado en `LoginResponse.java`, `AuthDtoMapper.java`, `AuthDtoMapperTest.java` y `pom.xml` (versión `3.50.1` → `3.51.0`). No se modificaron dependencias principales; corresponde un incremento minor de SemVer.
+
+## Novedades 3.50.1 (verificado en código)
+- fix(personas/documento): Restaurada la ruta corta `/documento` junto con `/api/tesoreria/core/documento`, manteniendo ambas rutas para compatibilidad de clientes.
+- feat(docs): Sincronizado el diagrama de Documento con el caso de uso de búsqueda por `guaraniTipoDocumento`.
+
+> Basado en el cambio local de `DocumentoController.java`, el historial de release `3.50.0` y `pom.xml`. No se modificaron dependencias principales; corresponde un incremento patch de SemVer.
+
+## Novedades 3.50.0 (verificado en código)
+- feat(chequera/chequeraSerie): Añadida la consulta de chequera preuniversitaria desde datos de Guaraní mediante `GET /chequeraSerie/preuniversitario/...`.
+  - Resuelve documento, ubicación, responsable académica y persona antes de consultar la chequera.
+- feat(guarani/alumno): Añadido `POST /api/tesoreria/core/guarani/alumno/create/personales` para crear datos personales de un alumno.
+- feat(guarani/guaraniUbicacion): Añadida la consulta por ubicación mediante el caso de uso `GetGuaraniUbicacionByUbicacionUseCase`.
+- feat(personas/documento): Añadida la búsqueda por `guaraniTipoDocumento` y migrado el módulo Documento al contexto `personas`.
+- refactor(personas): Reubicados Persona, Documento, puertos, adaptadores, DTOs y controladores bajo `hexagonal/personas`, actualizando sus consumidores.
+- refactor(chequera): Migrados DTOs de integración relacionados con ChequeraSerie a implementaciones Java.
+- feat(docs): Actualizados los diagramas Mermaid de Persona, Documento, Facultad, AlumnoGuarani, GuaraniUbicacion y ChequeraSerie a `v3.50.0`.
+
+> Basado en `git diff HEAD`, `git log`, el código Java modificado y `pom.xml` (versión `3.49.0` → `3.50.0`). No se modificaron dependencias principales. La incorporación de casos de uso y endpoints REST requiere un incremento minor de SemVer.
+
+## Novedades 3.49.0 (verificado en código)
+- feat(chequera/tipoChequera): Añadida la búsqueda `POST /tipoChequera/search/{geograficaId}`.
+  - Reutiliza las condiciones de búsqueda, filtra por `geograficaId`, ordena por nombre y limita la respuesta a 50 registros.
+- feat(guarani/guaraniPropuestaTipoChequera): Enriquecida la respuesta con el objeto `tipoChequera` relacionado, incluyendo su mapeo de persistencia y DTO.
+- chore(observability): Añadidos logs de depuración en la consulta de estado de tesorería y en la obtención de deuda de examen.
+- feat(docs): Actualizados los diagramas Mermaid de TipoChequera y GuaraniPropuestaTipoChequera a `v3.49.0`.
+
+> Basado en `git diff HEAD`, `git log`, el código Java modificado y `pom.xml` (versión `3.48.0` → `3.49.0`). El cambio es compatible hacia atrás y añade funcionalidad REST, por lo que corresponde un incremento minor de SemVer.
 
 ## Novedades 3.48.0 (verificado en código)
 - feat(guarani/guaraniPropuestaTipoChequera): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniPropuestaTipoChequera`

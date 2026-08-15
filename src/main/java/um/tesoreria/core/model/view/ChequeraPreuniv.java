@@ -21,10 +21,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.entity.GeograficaEntity;
+import um.tesoreria.core.hexagonal.dependencias.facultad.infrastructure.persistence.entity.FacultadEntity;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.persistence.entity.GeograficaEntity;
 import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.entity.LectivoEntity;
-import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.entity.PersonaEntity;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.entity.PersonaEntity;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity;
 
 /**

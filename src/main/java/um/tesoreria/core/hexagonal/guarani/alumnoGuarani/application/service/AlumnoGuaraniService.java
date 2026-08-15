@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.AlumnoGuarani;
-import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.ports.in.CheckAllPreuniversitarioWithoutChequeraUseCase;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.PersonalesResultado;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.ports.in.CreatePreuniversitarioUseCase;
-import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.dto.AlumnoDeteccionRequest;
-
-import java.util.List;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.ports.in.CreatePersonalesUseCase;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.dto.PersonalesResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -16,15 +15,16 @@ import java.util.List;
 public class AlumnoGuaraniService {
 
     private final CreatePreuniversitarioUseCase createPreuniversitarioUseCase;
-    private final CheckAllPreuniversitarioWithoutChequeraUseCase checkAllPreuniversitarioWithoutChequeraUseCase;
+    private final CreatePersonalesUseCase createPersonalesUseCase;
 
-    public AlumnoGuarani createPreuniversitario(AlumnoGuarani alumnoGuarani) {
+    public AlumnoGuarani createPreuniversitario(PersonalesResponse alumnoGuaraniFull) {
         log.debug("\n\nProcessing AlumnoGuaraniService.createPreuniversitario\n\n");
-        return createPreuniversitarioUseCase.createPreuniversitario(alumnoGuarani);
+        return createPreuniversitarioUseCase.createPreuniversitario(alumnoGuaraniFull);
     }
 
-    public List<AlumnoDeteccionRequest> desmarcarEnviados(List<AlumnoDeteccionRequest> encontrados) {
-        return checkAllPreuniversitarioWithoutChequeraUseCase.desmarcarEnviados(encontrados);
+    public PersonalesResultado createPersonales(AlumnoGuarani alumnoGuarani) {
+        log.debug("\n\nProcessing AlumnoGuaraniService.createPersonales\n\n");
+        return createPersonalesUseCase.createPersonales(alumnoGuarani);
     }
 
 }

@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 3.48.0** (actualizada: 2026-08-03)
+**Versión actual del servicio: 3.51.0** (actualizada: 2026-08-08)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -23,26 +23,26 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v3.14.0.
 - `hexagonal-dependencia.mmd`: Arquitectura hexagonal del módulo Dependencia (gestión de dependencias) - v3.17.0.
 - `hexagonal-facturaPendiente.mmd`: Arquitectura hexagonal del módulo FacturaPendiente (gestión de facturas pendientes) - v3.36.0 (reubicado bajo `compras/`).
-- `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.47.0 (nuevo listado por responsable académica).
+- `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.50.0 (caso de uso de responsable académica).
 - `hexagonal-lectivoTotalImputacion.mmd`: Arquitectura hexagonal del módulo LectivoTotalImputacion (imputaciones contables por lectivo) - v3.31.0 (nuevo caso de uso FindAllByLectivo + enriquecimiento con asociaciones a Facultad/Lectivo/TipoChequera/Producto/Cuenta).
 - `hexagonal-contrato.mmd`: Arquitectura hexagonal del módulo Contrato (gestión de contratos) - v3.19.0.
-- `hexagonal-chequeraSerie.mmd`: Arquitectura hexagonal del módulo ChequeraSerie (15+ casos de uso individuales) - v3.30.0 (refactorización masiva a casos de uso).
+- `hexagonal-chequeraSerie.mmd`: Arquitectura hexagonal del módulo ChequeraSerie (consulta preuniversitaria desde datos Guaraní) - v3.50.0.
 - `hexagonal-baja.mmd`: Arquitectura hexagonal del módulo Baja (gestión de bajas de chequeras) - v3.36.0 (reubicado bajo `chequera/`).
 - `hexagonal-campanha.mmd`: Arquitectura hexagonal del módulo Campanha (gestión de campañas UM Hub) - v3.24.0.
 - `hexagonal-chequeraProducto.mmd`: Arquitectura hexagonal del módulo Producto (gestión de productos chequera) - v3.30.0 (nuevo módulo).
-- `hexagonal-chequeraTipoChequera.mmd`: Arquitectura hexagonal del módulo TipoChequera (tipos de chequera con 12 casos de uso) - v3.48.0 (incluye búsqueda por condiciones).
-- `hexagonal-guaraniPropuestaTipoChequera.mmd`: Arquitectura hexagonal del módulo GuaraniPropuestaTipoChequera (asignación de tipo de chequera a propuesta y lectivo) - v3.48.0 (nuevo módulo).
+- `hexagonal-chequeraTipoChequera.mmd`: Arquitectura hexagonal del módulo TipoChequera (tipos de chequera con búsqueda por condiciones y geográfica) - v3.49.0.
+- `hexagonal-guaraniPropuestaTipoChequera.mmd`: Arquitectura hexagonal del módulo GuaraniPropuestaTipoChequera (asignación de tipo de chequera a propuesta y lectivo, con tipo de chequera enriquecido) - v3.49.0.
 - `hexagonal-claseChequera.mmd`: Arquitectura hexagonal del módulo ClaseChequera (clasificación de chequeras) - v3.39.0 (nuevo campo `tramite`, caso de uso `GetAllClaseChequeraByTramiteUseCase`, `ClaseChequeraEntity` implementa `Jsonifyable`).
 - `hexagonal-lectivo.mmd`: Arquitectura hexagonal del módulo Lectivo (gestión de lectivos con 8 casos de uso) - v3.30.0 (nuevo módulo).
 - `hexagonal-reservaVacante.mmd`: Arquitectura hexagonal del módulo ReservaVacante (gestión de reservas de vacantes UM Hub) - v3.32.0 (nuevo UpdateReservaVacanteUseCase con integración de pago MercadoPago).
 - `hexagonal-domicilio.mmd`: Arquitectura hexagonal del módulo Domicilio (gestión de domicilios) - v3.24.0.
-- `hexagonal-alumnoGuarani.mmd`: Arquitectura hexagonal del módulo AlumnoGuarani (integración con sistema Guarani) - v3.29.0 (simplificación de DTOs y extracción de PreuniversitarioChequeraService).
+- `hexagonal-alumnoGuarani.mmd`: Arquitectura hexagonal del módulo AlumnoGuarani (integración con sistema Guaraní y creación de datos personales) - v3.50.0.
 - `hexagonal-arancelTipo.mmd`: Arquitectura hexagonal del módulo ArancelTipo (gestión de tipos de arancel) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-arancelPorcentaje.mmd`: Arquitectura hexagonal del módulo ArancelPorcentaje (porcentajes por producto) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-asiento.mmd`: Arquitectura hexagonal del módulo Asiento (asientos contables) - v3.29.0 (migración desde Kotlin legacy).
-- `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento (gestión de tipos de documento) - v3.33.0 (nuevo módulo con migración desde Kotlin legacy).
+- `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento bajo `personas`, incluyendo búsqueda por tipo Guaraní y rutas REST compatibles - v3.50.1.
 - `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario (gestión de usuarios) - v3.35.0 (migración desde Kotlin legacy).
-- `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona (gestión de personas) - v3.24.0.
+- `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v3.50.0.
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).
 - `hexagonal-politicaArancelaria.mmd`: Arquitectura hexagonal del módulo PoliticaArancelaria (recálculo de cuotas por política arancelaria) - v3.42.0 (refactorización de RecalculateCuotaByUniqueIndexUseCaseImpl, fallback a LectivoCuota con importes cero).
@@ -51,7 +51,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-deudaExamen.mmd`: Arquitectura hexagonal del módulo DeudaExamen (validación de habilitación para rendir exámenes) - v3.46.0 (integración con TesoreriaEstadoFacultadService para habilitación manual).
 - `hexagonal-guaraniBeneficio.mmd`: Arquitectura hexagonal del módulo GuaraniBeneficio (beneficios de estudiantes Guarani) - v3.47.0 (nuevo listado completo).
 - `hexagonal-tesoreriaEstado.mmd`: Arquitectura hexagonal del módulo TesoreriaEstado (consulta de estado de tesorería del estudiante en el servicio de facultad) - v3.46.0 (nuevo módulo, consumer REST).
-- `hexagonal-guaraniUbicacion.mmd`: Arquitectura hexagonal del módulo GuaraniUbicacion (CRUD de ubicaciones Guarani) - v3.47.0 (nuevo módulo).
+- `hexagonal-guaraniUbicacion.mmd`: Arquitectura hexagonal del módulo GuaraniUbicacion (CRUD y consulta por ubicación Guaraní) - v3.50.0.
 
 - `deployment.mmd`: Diagrama de despliegue del microservicio.
 
@@ -78,6 +78,6 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - **Validación automática**: `docs/script.js` sanitiza bloques `namespace` vacíos al vuelo antes de renderizar, pero los archivos `.mmd` deben guardarse limpios.
 
 ## Notas sobre el pipeline
-- El pipeline de documentación debe validar la sintaxis Mermaid antes de publicar.
+- El workflow `.github/workflows/generate-docs.yml` valida automáticamente todos los archivos `docs/*.mmd` antes de publicar.
 - Si un archivo de diagrama falta o tiene error de sintaxis, debe mostrar una advertencia clara pero no fallar el build.
 - Los diagramas pueden ser visualizados en la documentación generada automáticamente.

@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface SearchTipoChequeraUseCase {
     List<TipoChequeraSearch> searchTipoChequeras(List<String> conditions);
+    List<TipoChequeraSearch> searchTipoChequerasByGeograficaId(List<String> conditions, Integer geograficaId);
 }

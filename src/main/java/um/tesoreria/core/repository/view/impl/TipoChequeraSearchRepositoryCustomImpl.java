@@ -37,4 +37,19 @@ public class TipoChequeraSearchRepositoryCustomImpl implements TipoChequeraSearc
         return entityManager.createQuery(criteriaQuery).setMaxResults(50).getResultList();
     }
 
+    @Override
+    public List<TipoChequeraSearch> findAllByStringsAndGeograficaId(List<String> conditions, Integer geograficaId) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<TipoChequeraSearch> criteriaQuery = criteriaBuilder.createQuery(TipoChequeraSearch.class);
+        Root<TipoChequeraSearch> root = criteriaQuery.from(TipoChequeraSearch.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+        conditions.forEach(condition ->
+                predicates.add(criteriaBuilder.like(root.get("search"), "%" + condition + "%")));
+        predicates.add(criteriaBuilder.equal(root.get("geograficaId"), geograficaId));
+        criteriaQuery.select(root).where(predicates.toArray(new Predicate[0]));
+        criteriaQuery.orderBy(criteriaBuilder.asc(root.get("nombre")));
+        return entityManager.createQuery(criteriaQuery).setMaxResults(50).getResultList();
+    }
+
 }

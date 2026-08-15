@@ -7,11 +7,11 @@ import um.tesoreria.core.hexagonal.chequera.arancelTipo.infrastructure.persisten
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.mapper.TipoChequeraMapper;
-import um.tesoreria.core.hexagonal.domicilio.infrastructure.persistence.mapper.DomicilioMapper;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.mapper.FacultadMapper;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.persistence.mapper.GeograficaMapper;
+import um.tesoreria.core.hexagonal.personas.domicilio.infrastructure.persistence.mapper.DomicilioMapper;
+import um.tesoreria.core.hexagonal.dependencias.facultad.infrastructure.persistence.mapper.FacultadMapper;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.mapper.LectivoMapper;
-import um.tesoreria.core.hexagonal.persona.infrastructure.persistence.mapper.PersonaMapper;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.mapper.PersonaMapper;
 
 @Component
 @RequiredArgsConstructor

@@ -14,9 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.ContratoFacturaException;
-import um.tesoreria.core.hexagonal.contrato.application.service.ContratoService;
-import um.tesoreria.core.hexagonal.contrato.domain.model.Contrato;
-import um.tesoreria.core.hexagonal.contrato.infrastructure.persistence.entity.ContratoEntity;
+import um.tesoreria.core.hexagonal.contratos.contrato.application.service.ContratoService;
+import um.tesoreria.core.hexagonal.contratos.contrato.domain.model.Contrato;
 import um.tesoreria.core.model.ContratoFactura;
 import um.tesoreria.core.repository.ContratoFacturaRepository;
 

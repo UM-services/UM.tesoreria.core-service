@@ -1,11 +1,18 @@
 package um.tesoreria.core.hexagonal.guarani.guaraniPropuestaTipoChequera.infrastructure.persistence.mapper;
 
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.mapper.TipoChequeraMapper;
 import um.tesoreria.core.hexagonal.guarani.guaraniPropuestaTipoChequera.domain.model.GuaraniPropuestaTipoChequera;
 import um.tesoreria.core.hexagonal.guarani.guaraniPropuestaTipoChequera.infrastructure.persistence.entity.GuaraniPropuestaTipoChequeraEntity;
 
 @Component
 public class GuaraniPropuestaTipoChequeraMapper {
+    private final TipoChequeraMapper tipoChequeraMapper;
+
+    public GuaraniPropuestaTipoChequeraMapper(TipoChequeraMapper tipoChequeraMapper) {
+        this.tipoChequeraMapper = tipoChequeraMapper;
+    }
+
     public GuaraniPropuestaTipoChequera toDomainModel(GuaraniPropuestaTipoChequeraEntity entity) {
         if (entity == null) {
             return null;
@@ -15,6 +22,7 @@ public class GuaraniPropuestaTipoChequeraMapper {
                 .propuestaGuarani(entity.getPropuestaGuarani())
                 .lectivoId(entity.getLectivoId())
                 .tipoChequeraId(entity.getTipoChequeraId())
+                .tipoChequera(tipoChequeraMapper.toDomainModel(entity.getTipoChequera()))
                 .build();
     }
 

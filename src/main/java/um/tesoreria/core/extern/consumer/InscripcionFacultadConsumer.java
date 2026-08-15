@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-import um.tesoreria.core.hexagonal.persona.infrastructure.web.dto.InscripcionFullDto;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.InscripcionFullDto;
 import um.tesoreria.core.extern.model.kotlin.InscripcionFacultad;
 import um.tesoreria.core.extern.resolver.FacultadUrlResolver;
 

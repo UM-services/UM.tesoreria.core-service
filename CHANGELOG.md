@@ -2,6 +2,78 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.1.0] - 2026-08-13
+### Added
+- feat(guarani/guaraniBeneficio): Añadida la consulta de beneficios por múltiples requisitos mediante `POST /api/tesoreria/core/guaraniBeneficio/requisitos`.
+- feat(personas/legajo): Añadida la implementación hexagonal Java del módulo Legajo, con endpoints para consultar, crear y guardar legajos.
+- test(chequera/chequeraSerie): Añadida una prueba para el flujo preuniversitario cuando no se pueden resolver las referencias requeridas.
+
+### Changed
+- refactor(chequera/chequeraSerie): Separada la resolución de datos, la gestión de legajos, la creación de detalles y las políticas del flujo de chequera preuniversitaria.
+- refactor(personas/legajo): Migrado Legajo desde el modelo Kotlin y los componentes legacy a dominio, puertos, casos de uso, adaptador JPA y DTOs Java, conservando las rutas REST existentes.
+
+> Basado en `git diff HEAD` (60 archivos modificados, +1312/-469 líneas), el código Java y los tests modificados, `git log` y `pom.xml` (versión `4.0.0` → `4.1.0`). La funcionalidad REST nueva y los refactors compatibles justifican un incremento minor de SemVer.
+
+## [4.0.0] - 2026-08-11
+### Added
+- feat(guarani/alumno): Nuevo `PersonalesResultado` de dominio y DTO `PersonalesResponse` con `result`, `persona`, `domicilio` y `alumnoGuarani` para el alta de personales.
+  - `CreatePersonalesUseCase` ahora retorna `PersonalesResultado` y `AlumnoGuaraniDtoMapper` expone `toPersonalesResponse`.
+
+### Changed
+- refactor(hexagonal): Reorganizados los módulos hexagonales bajo nuevos contextos, actualizando imports y consumidores (~200 archivos):
+  - `contrato` y `cursoCargoContratado` → `hexagonal/contratos/`
+  - `dependencia`, `facultad`, `geografica` y `ubicacion` → `hexagonal/dependencias/`
+  - `domicilio` → `hexagonal/personas/`
+  - Las rutas REST se mantienen intactas; el cambio es interno a los paquetes Java.
+- breaking(guarani/alumno): `POST /api/tesoreria/core/guarani/alumno/create/personales` ahora responde `PersonalesResponse` (antes `Boolean`), incluyendo la persona y el domicilio creados.
+
+### Removed
+- breaking(guarani/alumno): Eliminado el endpoint `POST /api/tesoreria/core/guarani/alumno/desmarcar/enviadas` y el caso de uso `CheckAllPreuniversitarioWithoutChequera` que lo respaldaba.
+
+> Basado en `git diff HEAD` (239 archivos, +715/−759 líneas), `git log`, el código Java/Kotlin modificado y `pom.xml` (versión `3.51.0` → `4.0.0`). La eliminación de un endpoint público y el cambio de contrato de respuesta de `/create/personales` justifican un incremento major de SemVer.
+
+## [3.51.0] - 2026-08-08
+### Added
+- feat(auth): Añadido `geograficaId` a `LoginResponse` y completado su mapeo desde `UsuarioAuth`, permitiendo a los clientes identificar la geográfica del usuario autenticado.
+- test(auth): Añadidas pruebas para el mapeo completo, el dominio nulo y la geográfica no encontrada.
+
+> Basado en `LoginResponse.java`, `AuthDtoMapper.java`, `AuthDtoMapperTest.java` y `pom.xml` (versión `3.50.1` → `3.51.0`). No se modificaron dependencias principales.
+
+## [3.50.1] - 2026-08-06
+### Fixed
+- fix(personas/documento): Restaurada la ruta corta `/documento` junto con `/api/tesoreria/core/documento`, manteniendo ambas rutas para compatibilidad de clientes.
+
+### Changed
+- feat(docs): Sincronizado `docs/hexagonal-documento.mmd` con el caso de uso de búsqueda por `guaraniTipoDocumento`.
+
+> Basado en el cambio local de `DocumentoController.java`, el historial de release `3.50.0` y `pom.xml`. No se modificaron dependencias principales.
+
+## [3.50.0] - 2026-08-05
+### Added
+- feat(chequera/chequeraSerie): Nueva consulta de chequera preuniversitaria desde datos de Guaraní mediante `GET /chequeraSerie/preuniversitario/...`.
+- feat(guarani/alumno): Nuevo endpoint `POST /api/tesoreria/core/guarani/alumno/create/personales`.
+- feat(guarani/guaraniUbicacion): Nuevo caso de uso para consultar una ubicación por su identificador Guaraní.
+- feat(personas/documento): Nuevo caso de uso y endpoint `GET /documento/guaraniTipoDocumento/{guaraniTipoDocumento}`.
+
+### Changed
+- refactor(personas): Reubicados los módulos Persona y Documento bajo `hexagonal/personas`, con actualización de imports, servicios, adaptadores, DTOs y controladores.
+- refactor(chequera): Migrados a Java los DTOs de integración relacionados con ChequeraSerie.
+- feat(docs): Actualizados los diagramas Mermaid de Persona, Documento, Facultad, AlumnoGuarani, GuaraniUbicacion y ChequeraSerie.
+
+> Basado en `git diff HEAD`, `git log`, el código Java/Kotlin modificado y `pom.xml` (versión `3.49.0` → `3.50.0`). No se detectaron cambios de dependencias principales.
+
+## [3.49.0] - 2026-08-04
+### Added
+- feat(chequera/tipoChequera): Añadida la búsqueda `POST /tipoChequera/search/{geograficaId}`.
+  - Reutiliza las condiciones de búsqueda, filtra por `geograficaId`, ordena por nombre y limita la respuesta a 50 registros.
+- feat(guarani/guaraniPropuestaTipoChequera): Enriquecida la respuesta con el objeto `tipoChequera` relacionado, incluyendo el mapeo de persistencia y DTO.
+- feat(docs): Actualizados los diagramas Mermaid de TipoChequera y GuaraniPropuestaTipoChequera a `v3.49.0`.
+
+### Changed
+- chore(observability): Añadidos logs de depuración en la consulta de estado de tesorería y en la obtención de deuda de examen.
+
+> Basado en `git diff HEAD`, `git log`, el código Java modificado y `pom.xml` (versión `3.48.0` → `3.49.0`).
+
 ## [3.48.0] - 2026-08-03
 ### Added
 - feat(guarani/guaraniPropuestaTipoChequera): Nuevo módulo hexagonal con CRUD REST bajo `/api/tesoreria/core/guaraniPropuestaTipoChequera`.
@@ -1199,7 +1271,7 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
   - Eliminación de `FacultadRepository.java` del paquete `core/repository/`
   - Eliminación de `FacultadService.java` del paquete `core/service/`
   - Eliminación de `FacultadController.java` del paquete `core/controller/`
-  - Actualización de referencias de `um.tesoreria.core.kotlin.model.Facultad` a `um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.entity.FacultadEntity` en todos los modelos, servicios y controladores que dependían de la entidad legacy (~20+ archivos afectados)
+  - Actualización de referencias de `um.tesoreria.core.kotlin.model.Facultad` a `um.tesoreria.core.hexagonal.dependencias.facultad.infrastructure.persistence.entity.FacultadEntity` en todos los modelos, servicios y controladores que dependían de la entidad legacy (~20+ archivos afectados)
 
 > Basado en análisis profundo de `git diff HEAD` (archivos creados, eliminados y modificados, incluyendo cambios locales no commiteados).
 

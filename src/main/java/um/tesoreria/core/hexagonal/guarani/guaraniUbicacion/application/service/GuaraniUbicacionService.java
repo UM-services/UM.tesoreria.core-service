@@ -9,6 +9,7 @@ import um.tesoreria.core.hexagonal.guarani.guaraniUbicacion.domain.ports.in.Crea
 import um.tesoreria.core.hexagonal.guarani.guaraniUbicacion.domain.ports.in.DeleteGuaraniUbicacionUseCase;
 import um.tesoreria.core.hexagonal.guarani.guaraniUbicacion.domain.ports.in.GetAllGuaraniUbicacionesUseCase;
 import um.tesoreria.core.hexagonal.guarani.guaraniUbicacion.domain.ports.in.GetGuaraniUbicacionByIdUseCase;
+import um.tesoreria.core.hexagonal.guarani.guaraniUbicacion.domain.ports.in.GetGuaraniUbicacionByUbicacionUseCase;
 import um.tesoreria.core.hexagonal.guarani.guaraniUbicacion.domain.ports.in.UpdateGuaraniUbicacionUseCase;
 
 @Service
@@ -16,6 +17,7 @@ import um.tesoreria.core.hexagonal.guarani.guaraniUbicacion.domain.ports.in.Upda
 public class GuaraniUbicacionService {
     private final GetAllGuaraniUbicacionesUseCase getAllUseCase;
     private final GetGuaraniUbicacionByIdUseCase getByIdUseCase;
+    private final GetGuaraniUbicacionByUbicacionUseCase getByUbicacionUseCase;
     private final CreateGuaraniUbicacionUseCase createUseCase;
     private final UpdateGuaraniUbicacionUseCase updateUseCase;
     private final DeleteGuaraniUbicacionUseCase deleteUseCase;
@@ -27,6 +29,11 @@ public class GuaraniUbicacionService {
     public GuaraniUbicacion findById(Integer id) {
         return getByIdUseCase.getById(id)
                 .orElseThrow(() -> new GuaraniUbicacionException(id));
+    }
+
+    public GuaraniUbicacion findByUbicacion(Integer ubicacion) {
+        return getByUbicacionUseCase.getByUbicacion(ubicacion)
+                .orElseThrow(() -> new GuaraniUbicacionException(ubicacion));
     }
 
     public GuaraniUbicacion create(GuaraniUbicacion guaraniUbicacion) {

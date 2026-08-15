@@ -33,6 +33,11 @@ public class TipoChequeraService {
         return searchTipoChequeraUseCase.searchTipoChequeras(conditions);
     }
 
+    public List<TipoChequeraSearch> findAllByStringsAndGeograficaId(List<String> conditions, Integer geograficaId) {
+        log.debug("Processing findAllByStringsAndGeograficaId");
+        return searchTipoChequeraUseCase.searchTipoChequerasByGeograficaId(conditions, geograficaId);
+    }
+
     public List<TipoChequera> findAll() {
         return getAllTipoChequeraUseCase.getAllTipoChequera();
     }

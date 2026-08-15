@@ -2,6 +2,7 @@ package um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model;
 
 import lombok.*;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;
 
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlumnoGuarani {
+public class AlumnoGuarani implements Jsonifyable {
 
     private Long alumno;
     private String legajo;
@@ -28,9 +29,5 @@ public class AlumnoGuarani {
     private PersonaGuarani personaRel;
     private PropuestaGuarani propuestaRel;
     private UbicacionGuarani ubicacionRel;
-
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
-    }
 
 }

@@ -6,7 +6,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraC
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.chequera.producto.infrastructure.persistence.mapper.ProductoMapper;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.mapper.ChequeraSerieMapper;
-import um.tesoreria.core.hexagonal.facultad.infrastructure.persistence.mapper.FacultadMapper;
+import um.tesoreria.core.hexagonal.dependencias.facultad.infrastructure.persistence.mapper.FacultadMapper;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.mapper.TipoChequeraMapper;
 
 @Component

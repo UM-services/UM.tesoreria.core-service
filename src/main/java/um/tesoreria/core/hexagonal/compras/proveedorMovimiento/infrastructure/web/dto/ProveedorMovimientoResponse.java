@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.hexagonal.comprobante.infrastructure.web.dto.ComprobanteResponse;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.web.dto.ProveedorResponse;
-import um.tesoreria.core.hexagonal.geografica.infrastructure.web.dto.GeograficaResponse;
+import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.web.dto.GeograficaResponse;
 import um.tesoreria.core.kotlin.model.ProveedorArticulo;
 import um.tesoreria.core.kotlin.model.ProveedorPago;
 

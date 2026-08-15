@@ -3,9 +3,11 @@ package um.tesoreria.core.hexagonal.guarani.alumnoGuarani.application.usecases;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.PreuniversitarioChequeraService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.PreuniversitarioChequeraData;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.CreatePreuniversitarioChequeraUseCase;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.AlumnoGuarani;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.ports.in.CreatePreuniversitarioUseCase;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.dto.PersonalesResponse;
 import um.tesoreria.core.service.facade.MailChequeraService;
 
 @Component
@@ -13,18 +15,29 @@ import um.tesoreria.core.service.facade.MailChequeraService;
 @RequiredArgsConstructor
 public class CreatePreuniversitarioUseCaseImpl implements CreatePreuniversitarioUseCase {
 
-    private final PreuniversitarioChequeraService preuniversitarioChequeraService;
+    private final CreatePreuniversitarioChequeraUseCase createPreuniversitarioChequeraUseCase;
     private final MailChequeraService mailChequeraService;
 
     @Override
-    public AlumnoGuarani createPreuniversitario(AlumnoGuarani alumnoGuarani) {
+    public AlumnoGuarani createPreuniversitario(PersonalesResponse alumnoGuaraniFull) {
         log.debug("\n\nProcessing CreatePreuniversitarioUseCaseImpl.createPreuniversitario\n\n");
         log.debug("\n\nGeneración de chequera\n\n");
-        var chequeraSerie = preuniversitarioChequeraService.create(alumnoGuarani);
+        var chequeraSerie = createPreuniversitarioChequeraUseCase.create(new PreuniversitarioChequeraData(
+                alumnoGuaraniFull.getAlumnoGuarani().getPropuesta(),
+                alumnoGuaraniFull.getPropuestaGuarani().getResponsablesAcademicas().getFirst()
+                        .getResponsableAcademica(),
+                alumnoGuaraniFull.getAlumnoGuarani().getUbicacion(),
+                alumnoGuaraniFull.getPersona().getPersonaId(),
+                alumnoGuaraniFull.getPersona().getDocumentoId()));
         if (chequeraSerie == null) {
             log.info("\n\nChequera serie nula\n\n");
-            return alumnoGuarani;
+            return alumnoGuaraniFull.getAlumnoGuarani();
         }
+        // si la chequera ya existía no la envío
+        if (!chequeraSerie.getJustCreated()) {
+            return alumnoGuaraniFull.getAlumnoGuarani();
+        }
+
         log.debug("\n\nEnvío de chequera\n\n");
         var result = mailChequeraService.sendChequera(chequeraSerie.getFacultadId(),
                 chequeraSerie.getTipoChequeraId(),
@@ -35,7 +48,7 @@ public class CreatePreuniversitarioUseCaseImpl implements CreatePreuniversitario
                 false
         );
         log.info("\n\nResult -> {}", result);
-        return alumnoGuarani;
+        return alumnoGuaraniFull.getAlumnoGuarani();
     }
 
 }

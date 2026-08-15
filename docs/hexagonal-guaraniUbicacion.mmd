@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo GuaraniUbicacion (v3.47.0)
+title: Arquitectura Hexagonal - Módulo GuaraniUbicacion (v3.50.0)
 ---
 
 classDiagram
@@ -35,6 +35,11 @@ classDiagram
         class DeleteGuaraniUbicacionUseCase {
             <<interface>>
             +delete(Integer) void
+        }
+
+        class GetGuaraniUbicacionByUbicacionUseCase {
+            <<interface>>
+            +findByUbicacion(Integer) GuaraniUbicacion
         }
     }
 

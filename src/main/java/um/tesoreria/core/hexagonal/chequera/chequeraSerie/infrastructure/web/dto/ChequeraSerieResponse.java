@@ -6,11 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.domain.model.ArancelTipo;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
-import um.tesoreria.core.hexagonal.domicilio.domain.model.Domicilio;
-import um.tesoreria.core.hexagonal.facultad.domain.model.Facultad;
-import um.tesoreria.core.hexagonal.geografica.domain.model.Geografica;
+import um.tesoreria.core.hexagonal.personas.domicilio.domain.model.Domicilio;
+import um.tesoreria.core.hexagonal.dependencias.facultad.domain.model.Facultad;
+import um.tesoreria.core.hexagonal.dependencias.geografica.domain.model.Geografica;
 import um.tesoreria.core.hexagonal.lectivo.domain.model.Lectivo;
-import um.tesoreria.core.hexagonal.persona.domain.model.Persona;
+import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

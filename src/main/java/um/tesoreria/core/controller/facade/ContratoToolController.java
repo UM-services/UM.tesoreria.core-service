@@ -18,8 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import um.tesoreria.core.hexagonal.contrato.domain.model.Contrato;
-import um.tesoreria.core.hexagonal.contrato.infrastructure.persistence.entity.ContratoEntity;
+import um.tesoreria.core.hexagonal.contratos.contrato.domain.model.Contrato;
 import um.tesoreria.core.model.ContratoFactura;
 import um.tesoreria.core.service.facade.ContratoToolService;
 

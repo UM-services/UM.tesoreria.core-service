@@ -18,4 +18,9 @@ public class SearchTipoChequeraUseCaseImpl implements SearchTipoChequeraUseCase 
     public List<TipoChequeraSearch> searchTipoChequeras(List<String> conditions) {
         return repository.findAllByStrings(conditions);
     }
+
+    @Override
+    public List<TipoChequeraSearch> searchTipoChequerasByGeograficaId(List<String> conditions, Integer geograficaId) {
+        return repository.findAllByStringsAndGeograficaId(conditions, geograficaId);
+    }
 }
