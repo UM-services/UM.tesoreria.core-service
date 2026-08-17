@@ -2,6 +2,13 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.1.1] - 2026-08-17
+### Changed
+- fix(ci): Limitado el despliegue del servicio de develop a eventos `push` sobre la rama `develop`.
+- feat(ci): Añadido workflow para verificar, construir, publicar y desplegar la imagen del servicio en staging.
+
+> Basado en los workflows `.github/workflows/deploy-develop.yml` y `.github/workflows/deploy-staging.yml`, `git diff HEAD` y `pom.xml` (versión `4.1.0` → `4.1.1`). Los cambios son internos de CI/CD y no modifican contratos ni comportamiento de la API; corresponden a un incremento patch de SemVer.
+
 ## [4.1.0] - 2026-08-13
 ### Added
 - feat(guarani/guaraniBeneficio): Añadida la consulta de beneficios por múltiples requisitos mediante `POST /api/tesoreria/core/guaraniBeneficio/requisitos`.
