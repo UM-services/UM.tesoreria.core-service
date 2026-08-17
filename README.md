@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
 
-**Versión actual (SemVer): 4.1.0**
+**Versión actual (SemVer): 4.1.1**
+
+## Novedades 4.1.1 (verificado en código)
+- fix(ci): Limitado el despliegue del servicio de develop a eventos `push` sobre la rama `develop`.
+- feat(ci): Añadido workflow para verificar, construir, publicar y desplegar la imagen del servicio en staging.
+
+> Basado en los workflows `.github/workflows/deploy-develop.yml` y `.github/workflows/deploy-staging.yml`, `git diff HEAD` y `pom.xml` (versión `4.1.0` → `4.1.1`). Los cambios son internos de CI/CD y corresponden a un incremento patch de SemVer.
 
 ## Novedades 4.1.0 (verificado en código)
 - feat(guarani/guaraniBeneficio): Añadida la consulta de beneficios por múltiples requisitos mediante `POST /api/tesoreria/core/guaraniBeneficio/requisitos`.
