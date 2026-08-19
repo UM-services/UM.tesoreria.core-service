@@ -1,0 +1,82 @@
+sequenceDiagram
+    autonumber
+    participant MP as MercadoPago
+    participant PC as PaymentController<br/>(mp-service)
+    participant PS as PaymentService<br/>(mp-service)
+    participant PEP as PaymentEventProducer<br/>(mp-service)
+    participant K as Kafka<br/>(topic: payment-processed)
+    participant PEL as PaymentEventListener<br/>(core-service)
+    participant MPCS as MercadoPagoContextService
+    participant UC as ProcessPaymentEventUseCaseImpl
+    participant FBID as FindByMercadoPagoContextIdUseCase<br/>(puerto in)
+    participant UMP as UpdateMercadoPagoContextUseCase<br/>(puerto in)
+    participant PGS as PagoService
+    participant CCS as ChequeraCuotaService
+    participant CPS as ChequeraPagoService
+    participant CTS as ChequeraTotalService
+
+    MP->>PC: POST webhook (payment notification)
+    activate PC
+    PC->>PS: processPaymentWebhook(...)
+    deactivate PC
+    activate PS
+    PS->>MP: GET /v1/payments/{id} (consulta el pago)
+    MP-->>PS: status, transactionAmount, dateApproved, etc.
+    PS->>PEP: publish(PaymentProcessedEvent)
+    deactivate PS
+    activate PEP
+    Note over PEP: Publica CUALQUIER estado que venga<br/>(no filtra approved/rejected/etc.)
+    PEP->>K: send(mercadoPagoContextId, event)
+    deactivate PEP
+
+    K->>PEL: consume(PaymentProcessedEvent)
+    activate PEL
+    PEL->>MPCS: processPaymentEvent(event)
+    activate MPCS
+    Note right of MPCS: MPCS solo reenvía al puerto<br/>ProcessPaymentEventUseCase.<br/>No interviene en el find/update de abajo.
+    MPCS->>UC: processPaymentEvent(event)
+    deactivate MPCS
+    activate UC
+
+    UC->>FBID: findByMercadoPagoContextId(event.mercadoPagoContextId)
+    activate FBID
+    FBID-->>UC: context
+    deactivate FBID
+    Note right of UC: Si no existe el contexto -><br/>MercadoPagoContextException (se propaga)
+
+    alt context.chequeraCuotaId != event.chequeraCuotaId
+        UC-->>PEL: log.error("Mismatch") + return
+        Note over UC: No se actualiza nada
+    else coincide chequeraCuotaId (pago de cuota)
+        UC->>UC: context.setStatus/setIdMercadoPago/<br/>setImportePagado/setFechaPago(...)
+        UC->>UMP: update(context, mercadoPagoContextId)
+        activate UMP
+        UMP-->>UC: context actualizado
+        deactivate UMP
+
+        alt status == "approved"
+            UC->>PGS: registraPagoMP(mercadoPagoContextId)
+            activate PGS
+            PGS->>MPCS: findByMercadoPagoContextId(id)
+            PGS->>CCS: findByChequeraCuotaId(chequeraCuotaId)
+            PGS->>CPS: findByIdMercadoPago(idMercadoPago)
+            Note right of PGS: Si YA existe un ChequeraPago<br/>con ese idMercadoPago -> return<br/>(idempotencia, no duplica)
+            PGS->>CPS: nextOrden(...)
+            PGS->>CPS: create(chequeraPago)
+            PGS->>MPCS: update(context.chequeraPagoId = nuevo)
+            PGS->>PGS: marcarPago(...)
+            activate PGS
+            PGS->>CPS: isPagado(...)
+            PGS->>CCS: findByUnique(...) + update(pagado=1)
+            PGS->>CTS: findByUnique(...)
+            PGS->>CCS: calculateTotalCuotasActivas / calculateTotalCuotasPagadas
+            PGS->>CTS: update(total, pagado)
+            deactivate PGS
+            deactivate PGS
+        else status in {rejected, refunded, cancelled, in_mediation, charged_back}
+            Note over UC,PGS: 🚧 HOY NO PASA NADA ACÁ.<br/>Este es el hueco a cerrar: falta un<br/>revertirPagoMP(mercadoPagoContextId)<br/>simétrico a registraPagoMP
+        end
+    end
+
+    deactivate UC
+    deactivate PEL
