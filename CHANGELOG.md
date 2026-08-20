@@ -2,6 +2,16 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.2.0] - 2026-08-20
+### Added
+- feat(chequera): Aplicado el beneficio de ingreso más alto sobre las tres cuotas preuniversitarias, conservando los importes de lista y registrando el porcentaje en la chequera.
+- feat(guarani): Validado el alta y la actualización de beneficios entre 0 % y 100 %, con conflicto explícito para requisitos duplicados.
+
+### Changed
+- refactor(chequera): Unificada la creación de cuotas para preuniversitario y Spoter, manteniendo Spoter sin beneficio y recalculando los totales por producto desde las cuotas activas.
+- fix(chequera): El detector de inconsistencias admite cuotas bonificadas y deja de abortar ante datos históricos incompletos.
+- test(chequera): Añadidos escenarios de beneficio, redondeo, totales, código de barras y regresión.
+
 ## [4.1.1] - 2026-08-17
 ### Changed
 - fix(ci): Limitado el despliegue del servicio de develop a eventos `push` sobre la rama `develop`.
