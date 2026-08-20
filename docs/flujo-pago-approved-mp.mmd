@@ -10,6 +10,8 @@ sequenceDiagram
     participant UC as ProcessPaymentEventUseCaseImpl
     participant FBID as FindByMercadoPagoContextIdUseCase<br/>(puerto in)
     participant UMP as UpdateMercadoPagoContextUseCase<br/>(puerto in)
+    participant FRV as FindReservaVacanteUseCase<br/>(puerto in)
+    participant URV as UpdateReservaVacanteUseCase<br/>(puerto in)
     participant PGS as PagoService
     participant CCS as ChequeraCuotaService
     participant CPS as ChequeraPagoService
@@ -44,37 +46,59 @@ sequenceDiagram
     deactivate FBID
     Note right of UC: Si no existe el contexto -><br/>MercadoPagoContextException (se propaga)
 
-    alt context.chequeraCuotaId != event.chequeraCuotaId
-        UC-->>PEL: log.error("Mismatch") + return
-        Note over UC: No se actualiza nada
-    else coincide chequeraCuotaId (pago de cuota)
-        UC->>UC: context.setStatus/setIdMercadoPago/<br/>setImportePagado/setFechaPago(...)
-        UC->>UMP: update(context, mercadoPagoContextId)
-        activate UMP
-        UMP-->>UC: context actualizado
-        deactivate UMP
+    alt context.reservaVacanteId != null (pago de reserva de vacante)
+        alt context.reservaVacanteId != event.reservaVacanteId
+            UC-->>PEL: log.error("Mismatch reservaVacanteId") + return
+            Note over UC: No se actualiza nada
+        else coincide reservaVacanteId
+            UC->>UC: context.setStatus/setIdMercadoPago/<br/>setImportePagado/setFechaPago(...)
+            UC->>UMP: update(context, mercadoPagoContextId)
+            activate UMP
+            UMP-->>UC: context actualizado
+            deactivate UMP
 
-        alt status == "approved"
-            UC->>PGS: registraPagoMP(mercadoPagoContextId)
-            activate PGS
-            PGS->>MPCS: findByMercadoPagoContextId(id)
-            PGS->>CCS: findByChequeraCuotaId(chequeraCuotaId)
-            PGS->>CPS: findByIdMercadoPago(idMercadoPago)
-            Note right of PGS: Si YA existe un ChequeraPago<br/>con ese idMercadoPago -> return<br/>(idempotencia, no duplica)
-            PGS->>CPS: nextOrden(...)
-            PGS->>CPS: create(chequeraPago)
-            PGS->>MPCS: update(context.chequeraPagoId = nuevo)
-            PGS->>PGS: marcarPago(...)
-            activate PGS
-            PGS->>CPS: isPagado(...)
-            PGS->>CCS: findByUnique(...) + update(pagado=1)
-            PGS->>CTS: findByUnique(...)
-            PGS->>CCS: calculateTotalCuotasActivas / calculateTotalCuotasPagadas
-            PGS->>CTS: update(total, pagado)
-            deactivate PGS
-            deactivate PGS
-        else status in {rejected, refunded, cancelled, in_mediation, charged_back}
-            Note over UC,PGS: 🚧 HOY NO PASA NADA ACÁ.<br/>Este es el hueco a cerrar: falta un<br/>revertirPagoMP(mercadoPagoContextId)<br/>simétrico a registraPagoMP
+            alt status == "approved"
+                UC->>FRV: findByReservaVacanteId(reservaVacanteId)
+                FRV-->>UC: reservaVacante
+                UC->>UC: reservaVacante.setEstado("pagado")
+                UC->>URV: update(reservaVacante, reservaVacanteId)
+            else status in {rejected, refunded, cancelled, in_mediation, charged_back}
+                Note over UC,URV: ⚪ Fuera del alcance actual.<br/>Hoy tampoco se revierte el estado<br/>de la reserva (mismo hueco que en<br/>cuota, pero no forma parte de este trabajo).
+            end
+        end
+    else pago de cuota (context.reservaVacanteId == null)
+        alt context.chequeraCuotaId != event.chequeraCuotaId
+            UC-->>PEL: log.error("Mismatch chequeraCuotaId") + return
+            Note over UC: No se actualiza nada
+        else coincide chequeraCuotaId
+            UC->>UC: context.setStatus/setIdMercadoPago/<br/>setImportePagado/setFechaPago(...)
+            UC->>UMP: update(context, mercadoPagoContextId)
+            activate UMP
+            UMP-->>UC: context actualizado
+            deactivate UMP
+
+            alt status == "approved"
+                UC->>PGS: registraPagoMP(mercadoPagoContextId)
+                activate PGS
+                PGS->>MPCS: findByMercadoPagoContextId(id)
+                PGS->>CCS: findByChequeraCuotaId(chequeraCuotaId)
+                PGS->>CPS: findByIdMercadoPago(idMercadoPago)
+                Note right of PGS: Si YA existe un ChequeraPago<br/>con ese idMercadoPago -> return<br/>(idempotencia, no duplica)
+                PGS->>CPS: nextOrden(...)
+                PGS->>CPS: create(chequeraPago)
+                PGS->>MPCS: update(context.chequeraPagoId = nuevo)
+                PGS->>PGS: marcarPago(...)
+                activate PGS
+                PGS->>CPS: isPagado(...)
+                PGS->>CCS: findByUnique(...) + update(pagado=1)
+                PGS->>CTS: findByUnique(...)
+                PGS->>CCS: calculateTotalCuotasActivas / calculateTotalCuotasPagadas
+                PGS->>CTS: update(total, pagado)
+                deactivate PGS
+                deactivate PGS
+            else status in {rejected, refunded, cancelled, in_mediation, charged_back}
+                Note over UC,PGS: 🚧 HOY NO PASA NADA ACÁ.<br/>Este es el hueco a cerrar: falta un<br/>revertirPagoMP(mercadoPagoContextId)<br/>simétrico a registraPagoMP.<br/>(Alcance de este trabajo: SOLO cuotas)
+            end
         end
     end
 

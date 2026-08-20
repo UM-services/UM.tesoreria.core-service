@@ -13,6 +13,7 @@ import um.tesoreria.core.hexagonal.mercadoPagoContext.application.exception.Merc
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.in.FindByMercadoPagoContextIdUseCase;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.in.UpdateMercadoPagoContextUseCase;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.FindReservaVacanteUseCase;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.UpdateReservaVacanteUseCase;
 import um.tesoreria.core.service.facade.PagoService;
@@ -20,6 +21,7 @@ import um.tesoreria.core.service.facade.PagoService;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -54,6 +56,7 @@ class ProcessPaymentEventUseCaseImplTest {
 
     private static final Long MERCADO_PAGO_CONTEXT_ID = 1L;
     private static final Long CHEQUERA_CUOTA_ID = 100L;
+    private static final UUID RESERVA_VACANTE_ID = UUID.randomUUID();
     private static final OffsetDateTime FECHA_APROBACION_FIJA = OffsetDateTime.of(2026, 3, 1, 10, 0, 0, 0, ZoneOffset.UTC);
 
     private PaymentProcessedEvent.PaymentProcessedEventBuilder eventForCuota(String status) {
@@ -64,6 +67,17 @@ class ProcessPaymentEventUseCaseImplTest {
                 .status(status)
                 .dateApproved(FECHA_APROBACION_FIJA)
                 .transactionAmount(new BigDecimal("15000.00"))
+                .paymentJson("{}");
+    }
+
+    private PaymentProcessedEvent.PaymentProcessedEventBuilder eventForReserva(String status) {
+        return PaymentProcessedEvent.builder()
+                .mercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)
+                .reservaVacanteId(RESERVA_VACANTE_ID)
+                .paymentId("MP-2")
+                .status(status)
+                .dateApproved(FECHA_APROBACION_FIJA)
+                .transactionAmount(new BigDecimal("50000.00"))
                 .paymentJson("{}");
     }
 
@@ -153,6 +167,91 @@ class ProcessPaymentEventUseCaseImplTest {
 
         verifyNoInteractions(updateMercadoPagoContextUseCase);
         verifyNoInteractions(pagoService);
+    }
+
+    // ---------- Pago de reserva de vacante ----------
+
+    /**
+     * Camino feliz de reserva de vacante: llega un evento "approved" para un
+     * contexto que coincide en reservaVacanteId. Debe: (1) volcar los datos
+     * del evento al contexto y persistirlo (igual que en cuota), y
+     * (2) marcar la ReservaVacante como "pagado". A diferencia de la rama de
+     * cuota, acá no interviene PagoService — se actualiza directo vía
+     * updateReservaVacanteUseCase.
+     */
+    @Test
+    void reservaVacante_approved_marcaLaReservaComoPagada() {
+        var context = MercadoPagoContext.builder()
+                .mercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)
+                .reservaVacanteId(RESERVA_VACANTE_ID)
+                .build();
+        var event = eventForReserva("approved").build();
+        var reservaVacante = ReservaVacante.builder()
+                .reservaVacanteId(RESERVA_VACANTE_ID)
+                .estado("pendiente")
+                .build();
+
+        when(findByMercadoPagoContextIdUseCase.findByMercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)).thenReturn(context);
+        when(updateMercadoPagoContextUseCase.update(any(MercadoPagoContext.class), eq(MERCADO_PAGO_CONTEXT_ID))).thenReturn(context);
+        when(findReservaVacanteUseCase.findByReservaVacanteId(RESERVA_VACANTE_ID)).thenReturn(reservaVacante);
+
+        useCase.processPaymentEvent(event);
+
+        var contextCaptor = ArgumentCaptor.forClass(MercadoPagoContext.class);
+        verify(updateMercadoPagoContextUseCase).update(contextCaptor.capture(), eq(MERCADO_PAGO_CONTEXT_ID));
+        assertThat(contextCaptor.getValue().getStatus()).isEqualTo("approved");
+        assertThat(contextCaptor.getValue().getIdMercadoPago()).isEqualTo(event.getPaymentId());
+
+        var reservaCaptor = ArgumentCaptor.forClass(ReservaVacante.class);
+        verify(updateReservaVacanteUseCase).update(reservaCaptor.capture(), eq(RESERVA_VACANTE_ID));
+        assertThat(reservaCaptor.getValue().getEstado()).isEqualTo("pagado");
+    }
+
+    /**
+     * EL MISMO HUECO QUE EN CUOTA, pero del lado de reserva de vacante: para
+     * los 5 estados nuevos, hoy no se toca la ReservaVacante para nada (ni se
+     * consulta ni se actualiza). Esto está fuera del alcance actual (solo
+     * cuotas), pero queda documentado como comportamiento existente por si
+     * en el futuro el equipo decide extender la reversión también acá.
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"rejected", "refunded", "cancelled", "in_mediation", "charged_back"})
+    void reservaVacante_estadoNoApproved_hoyNoTocaLaReserva(String status) {
+        var context = MercadoPagoContext.builder()
+                .mercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)
+                .reservaVacanteId(RESERVA_VACANTE_ID)
+                .build();
+        var event = eventForReserva(status).build();
+
+        when(findByMercadoPagoContextIdUseCase.findByMercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)).thenReturn(context);
+        when(updateMercadoPagoContextUseCase.update(any(MercadoPagoContext.class), eq(MERCADO_PAGO_CONTEXT_ID))).thenReturn(context);
+
+        useCase.processPaymentEvent(event);
+
+        verifyNoInteractions(findReservaVacanteUseCase);
+        verifyNoInteractions(updateReservaVacanteUseCase);
+    }
+
+    /**
+     * Guarda de integridad simétrica a la de cuota: si el reservaVacanteId
+     * del evento no coincide con el del contexto guardado, el use case debe
+     * cortar temprano sin actualizar nada ni consultar la reserva.
+     */
+    @Test
+    void reservaVacante_mismatchReservaVacanteId_noActualizaNiRegistraNada() {
+        var context = MercadoPagoContext.builder()
+                .mercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)
+                .reservaVacanteId(RESERVA_VACANTE_ID)
+                .build();
+        var event = eventForReserva("approved").reservaVacanteId(UUID.randomUUID()).build(); // no coincide
+
+        when(findByMercadoPagoContextIdUseCase.findByMercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)).thenReturn(context);
+
+        useCase.processPaymentEvent(event);
+
+        verifyNoInteractions(updateMercadoPagoContextUseCase);
+        verifyNoInteractions(findReservaVacanteUseCase);
+        verifyNoInteractions(updateReservaVacanteUseCase);
     }
 
     // ---------- Contexto inexistente ----------
