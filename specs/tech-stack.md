@@ -154,17 +154,17 @@ Deuda reconocida y aceptada, no descubrimientos.
 
 **El costo concreto:** cada módulo hexagonal nuevo implicó un `CREATE TABLE` manual y no versionado (`guarani_beneficio`, `guarani_ubicacion`, `guarani_propuesta_tipo_chequera`). No hay forma de reconstruir un ambiente desde cero ni de auditar cuándo cambió una columna. Los tests con H2 dependen de `ddl-auto` y de desactivar la integridad referencial, lo que los aleja del comportamiento real de MySQL.
 
-### H4 — Beneficios de Guaraní sin cablear  ▲ *en curso — es la feature activa*
+### H4 — Beneficios de Guaraní cableados, con validación externa pendiente
 
-**Evidencia verificada:** `GuaraniBeneficio` (`requisito` → `porcentajeBeneficio`) tiene módulo hexagonal completo —dominio, 5 casos de uso, adaptador JPA sobre `guarani_beneficio`, controller con 5 endpoints— pero **ninguna clase fuera de su propio paquete lo referencia**.
+**Evidencia local:** `GuaraniBeneficio` (`requisito` → `porcentajeBeneficio`) ya es consumido por el flujo preuniversitario. `CreatePreuniversitarioUseCaseImpl` transporta los requisitos presentados; `PreuniversitarioChequeraService` consulta los beneficios y `BeneficioPolicy` elige el porcentaje máximo de los requisitos de ingreso activos. La serie persiste `becaPorcentaje`.
 
-La cadena está cortada en tres puntos:
+La creación de cuotas quedó unificada en `ChequeraCuotaFactory`:
 
-1. `PersonaGuarani.requisitosPresentados` (`List<RequisitoPresentadoGuarani>`) solo entra por `AlumnoGuaraniRequest`; no existe caso de uso que consulte los requisitos vigentes de una persona.
-2. `PreuniversitarioChequeraDetailsCreator.createCuotas()` copia `importe1/2/3` desde `LectivoCuota` tal cual, sin aplicar bonificación. Además fija `importeN` e `importeNOriginal` con el **mismo** valor.
-3. `SpoterService` (líneas 180-206) duplica ese bloque casi literalmente, con el mismo problema.
+1. Conserva `importe1/2/3Original` como importe de lista y aplica el porcentaje a los tres tramos con redondeo `HALF_UP`.
+2. `PreuniversitarioChequeraDetailsCreator` recalcula los totales desde las cuotas activas; conserva la fila en cero cuando `lectivo_total` define un producto sin cuotas para la alternativa elegida.
+3. `SpoterService` consume la misma factory con beneficio 0 %, por lo que conserva sus importes de lista y elimina la duplicación anterior.
 
-**En alcance de `features/beneficio-requisitos-ingreso/spec.md`:** los puntos 1 y 2, más la extracción de una `ChequeraCuotaFactory` compartida que elimina la duplicación del punto 3.
+**Pendiente de validación en `features/beneficio-requisitos-ingreso/spec.md`:** payload real de staging con `requisitoRel`, matriz de emisión 0 %/parcial/100 %, endpoint de inconsistencias sobre chequeras bonificadas y conciliación de datos históricos.
 
 **Fuera de alcance, se mantiene como deuda:**
 
@@ -172,7 +172,7 @@ La cadena está cortada en tres puntos:
 - **`ArancelPorcentaje`** (`aranceltipoId` + `productoId` → `porcentaje`) sufre exactamente lo mismo: `ChequeraCuota.arancelTipoId` se persiste, pero `ArancelPorcentajeService` no tiene consumidores fuera de su paquete. Quedan **dos mecanismos de descuento**, y su relación entre sí sigue sin definir.
 - **`SpoterService` más allá de consumir la factory**: su migración a hexagonal no entra.
 
-**Interacción crítica con `FindAllInconsistenciasUseCaseImpl`:** ese caso de uso marca una cuota como inconsistente si `importe1 > importe2` o `importe2 > importe3`, y si `importeNOriginal * 49 < importeN`. Aplicar el beneficio a un solo tramo puede romper la relación creciente y disparar falsas alarmas. El segundo chequeo es asimétrico —solo detecta importes demasiado grandes—, así que reducir `importeN` dejando el original intacto no lo dispara. Está cubierto por la fase F4 del roadmap.
+**Interacción con `FindAllInconsistenciasUseCaseImpl`:** el caso de uso reconoce las cuotas bonificadas y trata los importes o vencimientos nulos como inconsistencias en vez de abortar. La validación con chequeras reales bonificadas permanece pendiente en la fase F4 del roadmap.
 
 ### H5 — Observabilidad instrumentada pero no explotada
 

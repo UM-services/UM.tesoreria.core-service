@@ -36,9 +36,9 @@ Guaraní es la autoridad académica; el core traduce esa realidad a consecuencia
 - Habilitación para rendir examen en función de la deuda (`DeudaExamen`, `TesoreriaEstado`).
 - Flujo preuniversitario completo: de un alumno en Guaraní a una chequera emitida y enviada.
 
-> **Estado real al 2026-08-19:** el punto de *beneficios por requisitos* está **incompleto**. `GuaraniBeneficio` existe como módulo hexagonal con persistencia y API REST, pero **ningún otro componente del servicio lo consume**: `PreuniversitarioChequeraDetailsCreator.createCuotas()` y `SpoterService` (líneas 180-206) copian importes desde `LectivoCuota` sin aplicar bonificación alguna, con código casi idéntico entre sí.
+> **Estado local al 2026-08-20:** el camino preuniversitario resuelve el beneficio máximo elegible a partir de los requisitos de ingreso activos, persiste el porcentaje en la serie y lo aplica a los tres tramos de cada cuota, preservando los importes originales. `PreuniversitarioChequeraDetailsCreator` y `SpoterService` comparten la factory de cuotas; Spoter mantiene beneficio 0 %.
 >
-> **Cerrar esa brecha en el camino preuniversitario es el trabajo activo** (ver `features/beneficio-requisitos-ingreso/spec.md`). El camino de recálculo por política arancelaria (`RecalculateCuotaByUniqueIndexUseCaseImpl`) y el mecanismo paralelo de `ArancelPorcentaje` quedan como deuda conocida y explícitamente fuera de alcance por ahora.
+> La validación con datos reales de staging, la matriz de emisión 0 %/parcial/100 % y la comunicación del beneficio al alumno permanecen como trabajo pendiente. El camino de recálculo por política arancelaria (`RecalculateCuotaByUniqueIndexUseCaseImpl`) y el mecanismo paralelo de `ArancelPorcentaje` siguen como deuda conocida y explícitamente fuera de alcance.
 
 ---
 
