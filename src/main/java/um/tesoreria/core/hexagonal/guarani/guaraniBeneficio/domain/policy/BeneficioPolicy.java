@@ -34,8 +34,8 @@ public class BeneficioPolicy {
                 .map(beneficiosPorRequisito::get)
                 .filter(Objects::nonNull)
                 .flatMap(List::stream)
+                .filter(this::tienePorcentajeFraccionalValido)
                 .map(GuaraniBeneficio::getPorcentajeBeneficio)
-                .filter(Objects::nonNull)
                 .max(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
     }
@@ -49,5 +49,16 @@ public class BeneficioPolicy {
 
         return "S".equalsIgnoreCase(requisito.getRequisitoRel().getRequisitoIngreso())
                 && "S".equalsIgnoreCase(requisito.getRequisitoRel().getActivo());
+    }
+
+    private boolean tienePorcentajeFraccionalValido(GuaraniBeneficio beneficio) {
+        BigDecimal porcentaje = beneficio.getPorcentajeBeneficio();
+        if (porcentaje == null || porcentaje.compareTo(BigDecimal.ZERO) < 0
+                || porcentaje.compareTo(BigDecimal.ONE) > 0) {
+            log.warn("Beneficio omitido: porcentaje fuera de la escala fraccional [0,1] para requisito={} porcentaje={}",
+                    beneficio.getRequisito(), porcentaje);
+            return false;
+        }
+        return true;
     }
 }

@@ -13,16 +13,16 @@ cuando se cumple íntegramente su apartado **Listo cuando**.
 
 | Fase | Estado | Evidencia local | Pendiente para cerrar |
 |---|---|---|---|
-| F0 — validación y conflicto | Parcial | Validaciones `@Valid`/rango y 409 implementadas; los tests de controller cubren 0/50/100, fuera de rango, negativo y nulos **sobre POST y PUT**, más el duplicado a 409 en el alta. | Verificar los mensajes HTTP legibles del 400 contra el formato que espera el cliente. |
+| F0 — validación y conflicto | Parcial | Validaciones `@Valid`/rango y 409 implementadas; los tests de controller cubren `0`/`0.50`/`1.00`, fuera de rango, escala mayor a dos decimales, negativo y nulos **sobre POST y PUT**, más el duplicado a 409 en el alta. | Verificar los mensajes HTTP legibles del 400 contra el formato que espera el cliente. |
 | F1 — caracterización | Parcial | `PreuniversitarioChequeraDetailsCreatorTest` cubre precio de lista/originales/barcode, alternativas, total, vencimientos vencidos, offset y lista vacía. | No puede demostrarse retrospectivamente la condición «antes de tocar producción»; faltan T1–T5 y los siete casos equivalentes de Spoter como contrato histórico. El test existente fija el orden **nuevo** (alternativas → cuotas → totales), no el que T4 debía congelar. |
-| F2 — factory | Implementada, pendiente de contrato F1 | `ChequeraCuotaFactory` es usada por preuniversitario y Spoter; pruebas de 0/20/33,33/100 %, HALF_UP, originales, vencimientos y datos incompletos pasan. El predicado de vencimiento (`vencio`) vive en la factory, así que los dos consumidores comparten la misma regla. | Validarla contra la suite histórica completa e inmutable de F1. |
+| F2 — factory | Implementada, pendiente de contrato F1 | `ChequeraCuotaFactory` es usada por preuniversitario y Spoter; pruebas de `0`/`0.20`/`0.33`/`1.00`, HALF_UP, originales, vencimientos y datos incompletos pasan. El predicado de vencimiento (`vencio`) vive en la factory, así que los dos consumidores comparten la misma regla. | Validarla contra la suite histórica completa e inmutable de F1. |
 | F3 — cálculo y persistencia | Implementada localmente, bloqueada para rollout | Política MAX filtrada por ingreso/activo, `becaPorcentaje`, factor en tres tramos, total de cuotas activas y fallbacks con `warn`. Los productos de `chequera_total` salen de `lectivo_total` unidos a los que generaron cuotas, así una alternativa sin cuotas para un producto conserva su fila en cero. | Confirmar en staging que `requisitoRel` llega poblado y ejecutar la matriz 0 %/parcial/100 % con payload real. |
 | F4 — inconsistencias | Completada localmente, bloqueada para rollout | Detector null-safe; pruebas para parcial, un tramo inválido, 0 %, 100 %, máximo y originales nulos, más endpoint local sin falsos positivos. | Ejecutar el endpoint sobre chequeras bonificadas en staging y confirmar que no aparezcan inconsistencias nuevas. **Los campos nulos ahora se reportan como inconsistentes** (antes lanzaban `NullPointerException`): medir el volumen sobre datos históricos antes de exponer el endpoint. |
 | F6-Core — calidad | Parcial | Tests de política, factory, servicio, cinco endpoints de beneficios, `ChequeraCuotaController` (JSON bonificado/original e ISO), inconsistencias, alta 100 % con `send-chequera`, Spoter sin beneficio, productos sin cuotas por alternativa e importes nulos. JaCoCo con `check` efectivo. | Falta la integración `AlumnoGuaraniController` y la regresión end-to-end de alta → cuotas → inconsistencias → evento, que requiere el payload/infraestructura de staging. |
 | Documentación | Completada | `docs/hexagonal-beneficioCuota.mmd`, registrado en `docs/script.js`, `docs/index.html` y `docs/README.md`. | — |
 
 **Resultado de la validación local:** `mvn -B verify` pasó el 2026-08-20 con
-108 tests, 0 fallos y el check JaCoCo activo.
+111 tests, 0 fallos y el check JaCoCo activo.
 
 **Corrección del gate de cobertura (2026-08-20).** La primera versión de la
 `<execution>` usaba `<element>BUNDLE</element>` con `<includes>` en formato de
@@ -107,7 +107,7 @@ ChequeraSerie.becaPorcentaje   ← congelado al emitir
         │
         ▼
 ChequeraCuotaFactory   ← nuevo, compartido con SpoterService
-        │   importeN = importeNLista × (1 - becaPorcentaje/100), scale 0 HALF_UP
+        │   importeN = importeNLista × (1 - becaPorcentaje), scale 0 HALF_UP
         │   importeNOriginal = importeNLista
         ▼
 createTotals(chequeraSerie, cuotas)   ← total = Σ importe1, orden invertido
@@ -117,7 +117,7 @@ createTotals(chequeraSerie, cuotas)   ← total = Σ importe1, orden invertido
 
 ```
 beneficioAplicado = MAX(porcentajeBeneficio de requisitos con requisitoIngreso='S' y activo='S')
-importeN          = importeNLista × (1 - beneficioAplicado/100)  .setScale(0, HALF_UP)
+importeN          = importeNLista × (1 - beneficioAplicado)  .setScale(0, HALF_UP)
 importeNOriginal  = importeNLista
 total             = Σ importe1 de cuotas activas, por productoId
 ```
@@ -126,10 +126,10 @@ Los tres tramos reciben el mismo factor. Sin requisitos elegibles → 0 % → co
 
 ## Criterios de aceptación
 
-1. `POST` y `PUT /guaraniBeneficio` aceptan `porcentajeBeneficio` en `[0, 100]` inclusive y devuelven **400** fuera de rango, con `requisito` nulo, o con porcentaje nulo.
+1. `POST` y `PUT /guaraniBeneficio` aceptan `porcentajeBeneficio` en `[0, 1]` inclusive, con hasta dos decimales, y devuelven **400** fuera de rango, con `requisito` nulo, o con porcentaje nulo.
 2. `POST /guaraniBeneficio/` sobre un requisito ya cargado devuelve **409**, no 500.
 3. Alumno sin requisitos elegibles → `importe1/2/3`, `importe1/2/3Original`, `vencimiento1/2/3`, `codigoBarras` y `chequera_total.total` **idénticos** a los valores que fijan los tests de caracterización de F1 (`PreuniversitarioChequeraDetailsCreatorTest`, casos 1-8 y T1-T5), sobre las mismas fixtures. Ningún test de F1 puede modificarse para que este criterio pase.
-4. Alumno con requisitos de 10 %, 30 % y 20 % elegibles → `becaPorcentaje = 30` en `ChequeraSerie`.
+4. Alumno con requisitos de `0.10`, `0.30` y `0.20` elegibles → `becaPorcentaje = 0.30` en `ChequeraSerie`.
 5. Requisito con `requisitoIngreso = 'N'` o `activo = 'N'` → excluido, aunque tenga el porcentaje más alto.
 6. `requisitoRel` nulo → excluido, con `log.warn` que incluya `persona` y `requisito`.
 7. Los tres tramos de cada cuota reflejan el mismo factor, redondeados a entero HALF_UP.
@@ -184,7 +184,7 @@ El cambio de `createTotals()` es el único que altera semántica de datos; es ad
 
 | Archivo | Cambio |
 |---|---|
-| `src/main/java/um/tesoreria/core/hexagonal/guarani/guaraniBeneficio/infrastructure/web/dto/GuaraniBeneficioRequest.java` | `@NotNull`, `@DecimalMin("0")`, `@DecimalMax("100")` |
+| `src/main/java/um/tesoreria/core/hexagonal/guarani/guaraniBeneficio/infrastructure/web/dto/GuaraniBeneficioRequest.java` | `@NotNull`, `@DecimalMin("0")`, `@DecimalMax("1")`, `@Digits(integer=1, fraction=2)` |
 | `src/main/java/um/tesoreria/core/hexagonal/guarani/guaraniBeneficio/infrastructure/web/controller/GuaraniBeneficioController.java:53,60` | `@Valid` en POST y PUT |
 | `src/main/java/um/tesoreria/core/hexagonal/guarani/guaraniBeneficio/application/usecases/CreateGuaraniBeneficioUseCaseImpl.java` | Duplicado → 409 |
 | `src/main/java/um/tesoreria/core/hexagonal/guarani/guaraniBeneficio/domain/policy/BeneficioPolicy.java` | **Nuevo** |
@@ -261,7 +261,8 @@ private Integer requisito;
 
 @NotNull
 @DecimalMin(value = "0",   inclusive = true)
-@DecimalMax(value = "100", inclusive = true)
+@DecimalMax(value = "1", inclusive = true)
+@Digits(integer = 1, fraction = 2)
 private BigDecimal porcentajeBeneficio;
 ```
 
@@ -269,16 +270,32 @@ private BigDecimal porcentajeBeneficio;
 
 **c) Manejo de duplicado** — `create()` hace `save()` directo; si el requisito ya tiene beneficio, la unique constraint de `guarani_beneficio` tira excepción de base sin manejar → **500 crudo**. Traducir a `409 Conflict` con `GuaraniBeneficioException`.
 
-**d) Tests** — `GuaraniBeneficioControllerTest` (`@WebMvcTest`): `porcentajeBeneficio` en 0 → aceptado; en 50 → aceptado; en **100 → aceptado**; en 100,01 → **400**; en 500 → **400**; negativo → **400**; nulo → **400**; `requisito` nulo → **400**; requisito duplicado → **409**. Mismos casos sobre el `PUT`.
+**d) Tests** — `GuaraniBeneficioControllerTest` (`@WebMvcTest`): `porcentajeBeneficio` en `0` → aceptado; en `0.50` → aceptado; en **`1.00` → aceptado**; en `1.01`, `50` o con más de dos decimales → **400**; negativo → **400**; nulo → **400**; `requisito` nulo → **400**; requisito duplicado → **409**. Mismos casos sobre el `PUT`.
 
-### Nota sobre el rango (corregido 2026-08-19)
+### Nota sobre la escala (confirmada contra la base real el 2026-08-20)
 
-El rango es `[0, 100]` **inclusive**. La cota de 99 de una versión anterior de este documento venía de la propuesta de **cascada multiplicativa**, donde el 100 % era inalcanzable por construcción y por eso se excluía.
+El rango persistido es `[0, 1]` **inclusive**, con dos decimales: `0.50` representa 50 % y `1.00`, 100 %. Tanto `guarani_beneficio.porcentaje_beneficio` como `chequera_serie.beca_porcentaje` son `DECIMAL(5,2)` y los datos reales usan esa escala fraccional.
 
-Con `MAX` esa lógica no aplica: el máximo de un conjunto de porcentajes válidos nunca supera el mayor de ellos, así que **no hace falta ningún tope adicional**. Y permitir 100 no es solo admisible: es **necesario**, porque la chequera debe confirmar que no queda deuda.
+Con `MAX` el resultado nunca supera el mayor de sus entradas, así que no hace falta ningún tope adicional. Y permitir `1.00` es necesario, porque la chequera debe confirmar que no queda deuda.
 
 ### Listo cuando
-Los nueve casos pasan, `100` se acepta, y `POST` / `PUT` con porcentaje fuera de `[0, 100]` devuelven 400 con mensaje legible.
+Los casos pasan, `1.00` se acepta, y `POST` / `PUT` con porcentaje fuera de `[0, 1]` o con más de dos decimales devuelven 400 con mensaje legible.
+
+### Gate de escala antes de desplegar
+
+La escala es parte del contrato de datos: `0.50` significa 50 %, no 0,50 %. Antes de promover el cambio, verificar en la base objetivo:
+
+```sql
+SELECT MIN(porcentaje_beneficio), MAX(porcentaje_beneficio),
+       SUM(porcentaje_beneficio < 0 OR porcentaje_beneficio > 1) AS fuera_de_rango
+FROM guarani_beneficio;
+
+SELECT MIN(beca_porcentaje), MAX(beca_porcentaje),
+       SUM(beca_porcentaje < 0 OR beca_porcentaje > 1) AS fuera_de_rango
+FROM chequera_serie;
+```
+
+Ambas consultas deben informar `fuera_de_rango = 0`. Confirmar además que las dos columnas siguen como `DECIMAL(5,2)`, que Sender muestra el porcentaje multiplicando el valor por 100 y que una emisión de prueba con `0.50` cobra exactamente la mitad de cada tramo.
 
 ---
 
@@ -369,7 +386,7 @@ F3 ya **no está bloqueada**.
 |---|---|---|
 | 1 | **Acumulación entre requisitos** | Gana el **más alto**. No se acumulan, no hay cascada |
 | 2 | **Vigencia** | **No hay**. La chequera del preuniversitario es un trámite puntual, no se reevalúa en el tiempo |
-| 3 | **Tope** | Ninguno adicional. Cada porcentaje acotado a `[0, 100]` inclusive por F0; `MAX` no puede superar el mayor de sus entradas |
+| 3 | **Tope** | Ninguno adicional. Cada porcentaje fraccional acotado a `[0, 1]` inclusive por F0; `MAX` no puede superar el mayor de sus entradas |
 | 4 | **Tramos** | Los **tres** (`importe1/2/3`) reciben el mismo factor |
 | 5 | **`importeNOriginal`** | Precio de **lista**, sin ningún descuento |
 | 6 | **Redondeo** | Pesos enteros, `setScale(0, RoundingMode.HALF_UP)` |
@@ -380,7 +397,7 @@ F3 ya **no está bloqueada**.
 beneficioAplicado = MAX(porcentajeBeneficio de los requisitos del alumno
                           con requisitoIngreso = 'S' y activo = 'S')
 
-importeN         = importeNLista × (1 - beneficioAplicado/100)
+importeN         = importeNLista × (1 - beneficioAplicado)
                        .setScale(0, RoundingMode.HALF_UP)
 importeNOriginal = importeNLista          // sin ningún descuento
 ```
@@ -389,7 +406,7 @@ Sin requisitos elegibles → `beneficioAplicado = 0` → importes idénticos a h
 
 ### El caso 100 % — **resuelto** (2026-08-19)
 
-El rango es `[0, 100]` inclusive y el 100 % es un caso **de primera clase**, no un borde a evitar: la chequera debe informar que no queda deuda.
+El rango fraccional es `[0, 1]` inclusive y `1.00` (100 %) es un caso **de primera clase**, no un borde a evitar: la chequera debe informar que no queda deuda.
 
 La cota de 99 que figuraba antes venía de la propuesta de cascada multiplicativa y quedó obsoleta al adoptar `MAX`. Con máximo no hay riesgo de combinación: el resultado nunca supera el mayor de los porcentajes de entrada, así que la validación por campo de F0 es el único control necesario.
 
@@ -490,7 +507,7 @@ El caso 10 es el que verifica que el orden de los dos pasos es el correcto. Inve
 
 ```java
 importeN = importeNLista.multiply(BigDecimal.ONE.subtract(
-               beneficio.divide(BigDecimal.valueOf(100))))
+               beneficio))
            .setScale(0, RoundingMode.HALF_UP);
 ```
 
@@ -630,7 +647,7 @@ El JSON que recibe sender-service incluye precio de lista y precio bonificado, v
 ## F6 — Calidad dividida entre Issue 1 e Issue 2 `[ ]`
 
 El Issue 1 cubre controllers, cálculo, inconsistencias y JaCoCo. El Issue 2 agrega los
-tests de contrato Core → sender y las fixtures documentales 0/30/100.
+tests de contrato Core → sender y las fixtures documentales 0 %/30 %/100 %.
 
 ### Alcance
 
@@ -674,7 +691,7 @@ F3 requiere además validar el payload en staging
 F5 comienza sólo después del despliegue del Issue 1
 ```
 
-Las seis decisiones de negocio y el rango `[0, 100]` están cerrados. Ver `decisiones.md`.
+Las seis decisiones de negocio y el rango fraccional `[0, 1]` están cerrados. Ver `decisiones.md`.
 
 ## Riesgos
 

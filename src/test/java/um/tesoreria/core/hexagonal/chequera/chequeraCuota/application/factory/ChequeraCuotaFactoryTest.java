@@ -24,14 +24,14 @@ class ChequeraCuotaFactoryTest {
     private ChequeraCuotaService chequeraCuotaService;
 
     @Test
-    void crear_appliesSameHalfUpFactorAndPreservesListPrices() {
+    void crear_appliesFractionalHalfUpFactorAndPreservesListPrices() {
         when(chequeraCuotaService.calculateCodigoBarras(any(ChequeraCuota.class))).thenReturn("barcode");
 
-        var cuota = new ChequeraCuotaFactory(chequeraCuotaService).crear(serie("33.33"), lectivo(), 0, referencia());
+        var cuota = new ChequeraCuotaFactory(chequeraCuotaService).crear(serie("0.33"), lectivo(), 0, referencia());
 
         assertThat(cuota.getImporte1()).isEqualByComparingTo("67");
         assertThat(cuota.getImporte2()).isEqualByComparingTo("134");
-        assertThat(cuota.getImporte3()).isEqualByComparingTo("200");
+        assertThat(cuota.getImporte3()).isEqualByComparingTo("201");
         assertThat(cuota.getImporte1Original()).isEqualByComparingTo("100.50");
         assertThat(cuota.getImporte2Original()).isEqualByComparingTo("200.50");
         assertThat(cuota.getImporte3Original()).isEqualByComparingTo("300.50");
@@ -61,7 +61,7 @@ class ChequeraCuotaFactoryTest {
         var factory = new ChequeraCuotaFactory(chequeraCuotaService);
 
         var sinBeneficio = factory.crear(serie("0"), lectivo(), 0, referencia());
-        var becaCompleta = factory.crear(serie("100"), lectivo(), 0, referencia());
+        var becaCompleta = factory.crear(serie("1"), lectivo(), 0, referencia());
 
         assertThat(sinBeneficio.getImporte1()).isEqualByComparingTo(sinBeneficio.getImporte1Original());
         assertThat(sinBeneficio.getImporte2()).isEqualByComparingTo(sinBeneficio.getImporte2Original());
@@ -76,7 +76,7 @@ class ChequeraCuotaFactoryTest {
     void crear_appliesTwentyPercentWithoutBreakingTramoOrder() {
         when(chequeraCuotaService.calculateCodigoBarras(any(ChequeraCuota.class))).thenReturn("barcode");
 
-        var cuota = new ChequeraCuotaFactory(chequeraCuotaService).crear(serie("20"), lectivo(), 0, referencia());
+        var cuota = new ChequeraCuotaFactory(chequeraCuotaService).crear(serie("0.20"), lectivo(), 0, referencia());
 
         assertThat(cuota.getImporte1()).isEqualByComparingTo("80");
         assertThat(cuota.getImporte2()).isEqualByComparingTo("160");
@@ -90,7 +90,7 @@ class ChequeraCuotaFactoryTest {
         var incompleta = lectivo();
         incompleta.setImporte2(null);
 
-        var cuota = new ChequeraCuotaFactory(chequeraCuotaService).crear(serie("20"), incompleta, 0, referencia());
+        var cuota = new ChequeraCuotaFactory(chequeraCuotaService).crear(serie("0.20"), incompleta, 0, referencia());
 
         assertThat(cuota.getImporte2()).isNull();
         assertThat(cuota.getImporte2Original()).isNull();
@@ -118,7 +118,7 @@ class ChequeraCuotaFactoryTest {
         var sinVencimiento = lectivo();
         sinVencimiento.setVencimiento1(null);
 
-        var cuota = new ChequeraCuotaFactory(chequeraCuotaService).crear(serie("20"), sinVencimiento, 3, referencia());
+        var cuota = new ChequeraCuotaFactory(chequeraCuotaService).crear(serie("0.20"), sinVencimiento, 3, referencia());
 
         assertThat(ChequeraCuotaFactory.vencio(sinVencimiento, referencia())).isFalse();
         assertThat(cuota.getVencimiento1()).isNull();
@@ -135,6 +135,17 @@ class ChequeraCuotaFactoryTest {
 
         assertThat(ChequeraCuotaFactory.vencio(vencida, referencia())).isTrue();
         assertThat(ChequeraCuotaFactory.vencio(lectivo(), referencia())).isFalse();
+    }
+
+    @Test
+    void crear_treatsAnOutOfScaleBenefitAsZeroInsteadOfApplyingAWrongDiscount() {
+        when(chequeraCuotaService.calculateCodigoBarras(any(ChequeraCuota.class))).thenReturn("barcode");
+
+        var cuota = new ChequeraCuotaFactory(chequeraCuotaService).crear(serie("50"), lectivo(), 0, referencia());
+
+        assertThat(cuota.getImporte1()).isEqualByComparingTo("100.50");
+        assertThat(cuota.getImporte2()).isEqualByComparingTo("200.50");
+        assertThat(cuota.getImporte3()).isEqualByComparingTo("300.50");
     }
 
     private static ChequeraSerie serie(String beneficio) {

@@ -41,15 +41,16 @@ class GuaraniBeneficioControllerTest {
                 .contentType(MediaType.APPLICATION_JSON).content(json(10, "0"))
                 .assertThat().hasStatusOk();
         mockMvc.post().uri("/api/tesoreria/core/guaraniBeneficio/")
-                .contentType(MediaType.APPLICATION_JSON).content(json(10, "100"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(10, "1"))
                 .assertThat().hasStatusOk();
     }
 
     @Test
     void add_rejectsInvalidBenefitConfiguration() throws Exception {
         assertBadRequest(json(10, "-0.01"));
-        assertBadRequest(json(10, "100.01"));
-        assertBadRequest(json(10, "500"));
+        assertBadRequest(json(10, "1.01"));
+        assertBadRequest(json(10, "50"));
+        assertBadRequest(json(10, "0.001"));
         assertBadRequest("{\"requisito\":10}");
         assertBadRequest("{\"porcentajeBeneficio\":10}");
     }
@@ -57,21 +58,21 @@ class GuaraniBeneficioControllerTest {
     @Test
     void add_translatesDuplicateToConflict() throws Exception {
         when(mapper.toDomain(any())).thenReturn(GuaraniBeneficio.builder().requisito(10)
-                .porcentajeBeneficio(BigDecimal.TEN).build());
+                .porcentajeBeneficio(new BigDecimal("0.50")).build());
         when(service.create(any())).thenThrow(new GuaraniBeneficioException("duplicado"));
 
         mockMvc.post().uri("/api/tesoreria/core/guaraniBeneficio/")
-                .contentType(MediaType.APPLICATION_JSON).content(json(10, "10"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(10, "0.50"))
                 .assertThat().hasStatus(409);
     }
 
     @Test
     void update_appliesSameInputValidation() throws Exception {
         mockMvc.put().uri("/api/tesoreria/core/guaraniBeneficio/requisito/10")
-                .contentType(MediaType.APPLICATION_JSON).content(json(10, "100.01"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(10, "1.01"))
                 .assertThat().hasStatus(400);
         mockMvc.put().uri("/api/tesoreria/core/guaraniBeneficio/requisito/10")
-                .contentType(MediaType.APPLICATION_JSON).content(json(10, "500"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(10, "50"))
                 .assertThat().hasStatus(400);
         mockMvc.put().uri("/api/tesoreria/core/guaraniBeneficio/requisito/10")
                 .contentType(MediaType.APPLICATION_JSON).content(json(10, "-0.01"))
@@ -92,7 +93,7 @@ class GuaraniBeneficioControllerTest {
         when(mapper.toResponse(domain)).thenReturn(GuaraniBeneficioResponse.builder()
                 .requisito(10).porcentajeBeneficio(BigDecimal.ZERO).build());
 
-        for (String porcentaje : List.of("0", "50", "100")) {
+        for (String porcentaje : List.of("0", "0.50", "1")) {
             mockMvc.put().uri("/api/tesoreria/core/guaraniBeneficio/requisito/10")
                     .contentType(MediaType.APPLICATION_JSON).content(json(10, porcentaje))
                     .assertThat().hasStatusOk();
@@ -101,8 +102,8 @@ class GuaraniBeneficioControllerTest {
 
     @Test
     void findEndpoints_returnMappedBenefitsAndNotFoundForMissingRequirement() throws Exception {
-        var domain = GuaraniBeneficio.builder().requisito(10).porcentajeBeneficio(BigDecimal.TEN).build();
-        var response = GuaraniBeneficioResponse.builder().requisito(10).porcentajeBeneficio(BigDecimal.TEN).build();
+        var domain = GuaraniBeneficio.builder().requisito(10).porcentajeBeneficio(new BigDecimal("0.50")).build();
+        var response = GuaraniBeneficioResponse.builder().requisito(10).porcentajeBeneficio(new BigDecimal("0.50")).build();
         when(service.findAll()).thenReturn(List.of(domain));
         when(service.findByRequisito(10)).thenReturn(domain);
         when(mapper.toResponse(domain)).thenReturn(response);
@@ -119,10 +120,10 @@ class GuaraniBeneficioControllerTest {
 
     @Test
     void findByRequisitos_returnsOnlyConfiguredBenefits() throws Exception {
-        var domain = GuaraniBeneficio.builder().requisito(10).porcentajeBeneficio(BigDecimal.TEN).build();
+        var domain = GuaraniBeneficio.builder().requisito(10).porcentajeBeneficio(new BigDecimal("0.50")).build();
         when(service.findByRequisitos(List.of(10, 99))).thenReturn(List.of(domain));
         when(mapper.toResponse(domain)).thenReturn(GuaraniBeneficioResponse.builder()
-                .requisito(10).porcentajeBeneficio(BigDecimal.TEN).build());
+                .requisito(10).porcentajeBeneficio(new BigDecimal("0.50")).build());
 
         mockMvc.post().uri("/api/tesoreria/core/guaraniBeneficio/requisitos")
                 .contentType(MediaType.APPLICATION_JSON).content("[10,99]")
@@ -131,14 +132,14 @@ class GuaraniBeneficioControllerTest {
 
     @Test
     void update_mapsAndReturnsUpdatedBenefit() throws Exception {
-        var domain = GuaraniBeneficio.builder().requisito(10).porcentajeBeneficio(BigDecimal.TEN).build();
+        var domain = GuaraniBeneficio.builder().requisito(10).porcentajeBeneficio(new BigDecimal("0.50")).build();
         when(mapper.toDomain(any())).thenReturn(domain);
         when(service.updateByRequisito(10, domain)).thenReturn(domain);
         when(mapper.toResponse(domain)).thenReturn(GuaraniBeneficioResponse.builder()
-                .requisito(10).porcentajeBeneficio(BigDecimal.TEN).build());
+                .requisito(10).porcentajeBeneficio(new BigDecimal("0.50")).build());
 
         mockMvc.put().uri("/api/tesoreria/core/guaraniBeneficio/requisito/10")
-                .contentType(MediaType.APPLICATION_JSON).content(json(10, "10"))
+                .contentType(MediaType.APPLICATION_JSON).content(json(10, "0.50"))
                 .assertThat().hasStatusOk();
     }
 

@@ -14,7 +14,7 @@
 beneficioAplicado = MAX(porcentajeBeneficio de los requisitos del alumno
                           con requisitoIngreso = 'S' y activo = 'S')
 
-importeN         = importeNLista × (1 - beneficioAplicado/100)
+importeN         = importeNLista × (1 - beneficioAplicado)
                        .setScale(0, RoundingMode.HALF_UP)
 
 importeNOriginal = importeNLista          // sin ningún descuento
@@ -32,7 +32,7 @@ Sin requisitos elegibles → `beneficioAplicado = 0` → importes idénticos al 
 
 Si un alumno presenta varios requisitos de ingreso con beneficio asociado, **se aplica el más alto**. No se suman, no se aplican en cascada.
 
-**Ejemplo:** alumno con tres requisitos elegibles de 10 %, 30 % y 20 % → `beneficioAplicado = 30 %`. Sobre una cuota de lista de $47.350, paga $33.145.
+**Ejemplo:** alumno con tres requisitos elegibles de `0.10`, `0.30` y `0.20` → `beneficioAplicado = 0.30` (30 %). Sobre una cuota de lista de $47.350, paga $33.145.
 
 **Consecuencias técnicas:**
 
@@ -57,15 +57,15 @@ El beneficio **no tiene vencimiento**. La chequera del preuniversitario es un tr
 
 ---
 
-## D3 — Tope: ninguno adicional; rango `[0, 100]` inclusive
+## D3 — Tope: ninguno adicional; rango fraccional `[0, 1]` inclusive
 
-**Decidido el 2026-08-19 por el equipo. Corrige una versión previa que fijaba `[0, 99]`.**
+**Confirmado contra la base real el 2026-08-20.**
 
-Cada `porcentajeBeneficio` individual se valida en `[0, 100]` **inclusive** al cargarse en `guarani_beneficio`. No hay ningún tope adicional en el cálculo.
+Cada `porcentajeBeneficio` individual se valida en `[0, 1]` **inclusive**, con dos decimales, al cargarse en `guarani_beneficio`. `0.50` representa 50 % y `1.00`, 100 %. No hay ningún tope adicional en el cálculo.
 
-**Por qué cambió:** la cota de 99 venía de la propuesta de cascada multiplicativa, donde el 100 % era inalcanzable por construcción. Con `MAX` ese razonamiento no aplica, y **permitir 100 es necesario**: es el caso que dispara el mail de beca completa.
+**Por qué esta escala:** `guarani_beneficio.porcentaje_beneficio` y `chequera_serie.beca_porcentaje` son `DECIMAL(5,2)` y los datos reales se guardan como fracción. Con `MAX`, permitir `1.00` es necesario: es el caso de beneficio completo.
 
-**Ejemplo:** `porcentajeBeneficio = 100` → cuota en cero → el alumno no debe nada.
+**Ejemplo:** `porcentajeBeneficio = 1.00` → cuota en cero → el alumno no debe nada.
 
 **Consecuencias verificadas del caso 100 %:**
 
@@ -213,7 +213,7 @@ Ningún mapper reconstruye `PersonaGuarani` desde la base ni copia campo por cam
 
 ## Abierto — pendiente de definición
 
-1. **Contenido del aviso complementario de beca completa (100 %)** — es la **fase F7** del roadmap, bloqueada por definición, **no está fuera de alcance**. La chequera bonificada se envía siempre con `send-chequera`; falta decidir qué mensaje adicional la acompaña, qué dice y si el disparo es `becaPorcentaje == 100` o deuda total cero. Requiere además un endpoint nuevo en `sender-service`: `ChequeraClient` no expone ninguno que sirva para un mail sin chequera.
+1. **Contenido del aviso complementario de beca completa (100 %)** — es la **fase F7** del roadmap, bloqueada por definición, **no está fuera de alcance**. La chequera bonificada se envía siempre con `send-chequera`; falta decidir qué mensaje adicional la acompaña, qué dice y si el disparo es `becaPorcentaje == 1.00` o deuda total cero. Requiere además un endpoint nuevo en `sender-service`: `ChequeraClient` no expone ninguno que sirva para un mail sin chequera.
 2. **Chequeras ya emitidas** sin beneficio — si se recalculan, se reemplazan, o se ajustan a mano. Declarado como no bloqueante el 2026-08-19.
 3. **Código de barras con importe cero** — confirmar con el banco si un código Gire con importe cero es operativamente válido, más allá de ser sintácticamente correcto.
 4. **`requisitoRel` poblado** — verificar contra un alta real en staging antes de empezar F3 (ver arriba).

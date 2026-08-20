@@ -119,7 +119,7 @@ orden de creación; toda F1 debe seguir verde sin modificaciones.
 5. Hacer que la factory lea `chequeraSerie.becaPorcentaje` y aplique a cada tramo:
 
 ```text
-importe = importeLista * (1 - beca / 100), scale 0, HALF_UP
+importe = importeLista * (1 - beca), scale 0, HALF_UP
 original = importeLista
 ```
 
@@ -127,7 +127,7 @@ original = importeLista
    activas en memoria por `productoId` y sumar `importe1`; no bonificar
    `LectivoTotal.total` por separado.
 7. Mantener en `CreatePreuniversitarioUseCaseImpl` la publicación normal de
-   `send-chequera` también cuando `becaPorcentaje` es 100%. Probar que el evento no se
+   `send-chequera` también cuando `becaPorcentaje` es `1.00` (100 %). Probar que el evento no se
    suprime. La proyección del PDF, sus filas en cero y el contrato de datos son alcance de
    la Issue 2.
 
@@ -172,7 +172,7 @@ por el alta preuniversitaria.
 
 - **Issue 1:** extender `GuaraniBeneficioControllerTest`, probar alta preuniversitaria,
   endpoints de cuotas e inconsistencias, y configurar JaCoCo.
-- **Issue 2:** pruebas de contrato Core → sender, fixtures 0/30/100 y validación del PDF.
+- **Issue 2:** pruebas de contrato Core → sender, fixtures 0 %/30 %/100 % y validación del PDF.
 - Configurar JaCoCo `check` con 80% de líneas, limitado a los paquetes de beneficio,
   cuota y serie afectados; `mvn -B verify` debe fallar si bajan del umbral.
 - Añadir y registrar `docs/hexagonal-beneficioCuota.mmd` si el diagrama de la feature se
@@ -374,13 +374,13 @@ es cero. `SpoterService` pasa una serie con beneficio cero/null normalizado a `B
 
 ```text
 POLÍTICA                         ORQUESTACIÓN                         INTEGRACIONES
-MAX elegible [unit]              requisitos completos [int]          send-chequera 0/30/100 [int]
+MAX elegible [unit]              requisitos completos [int]          send-chequera 0 %/30 %/100 % [int]
 sin elegible [unit]              persona/lista/requisito nulos [unit] MP importe cero -> sin contexto [unit]
 porcentaje nulo [unit]           consulta falla -> 0% + warn [int]    JSON conserva originales [contract]
-0/100/HALF_UP [unit]             serie existente -> sin reenvío [int]  PDF bonificado en staging [manual]
+0 %/100 %/HALF_UP [unit]         serie existente -> sin reenvío [int]  PDF bonificado en staging [manual]
 
 FACTORY Y TOTALES                DETECTOR
-fecha vigente/vencida [unit]     0/beneficio/100 [unit]
+fecha vigente/vencida [unit]     0 %/beneficio/100 % [unit]
 0% idéntico a F1 [regresión]     original nulo -> inconsistencia [unit]
 multi-producto/baja/redondeo [unit] límite multiplicador [unit]
 ```

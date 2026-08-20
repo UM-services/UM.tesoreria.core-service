@@ -18,8 +18,6 @@ import java.time.OffsetDateTime;
 @RequiredArgsConstructor
 public class ChequeraCuotaFactory {
 
-    private static final BigDecimal CIEN = BigDecimal.valueOf(100);
-
     private final ChequeraCuotaService chequeraCuotaService;
 
     /**
@@ -43,8 +41,7 @@ public class ChequeraCuotaFactory {
             vencimiento3 = fechaBase.plusDays(40 + 30L * offset);
         }
 
-        BigDecimal beneficio = chequeraSerie.getBecaPorcentaje() == null
-                ? BigDecimal.ZERO : chequeraSerie.getBecaPorcentaje();
+        BigDecimal beneficio = normalizarBeneficio(chequeraSerie);
         ChequeraCuota cuota = ChequeraCuota.builder()
                 .chequeraId(chequeraSerie.getChequeraId())
                 .facultadId(chequeraSerie.getFacultadId())
@@ -92,8 +89,26 @@ public class ChequeraCuotaFactory {
         if (beneficio.compareTo(BigDecimal.ZERO) == 0) {
             return importeLista;
         }
-        return importeLista.multiply(BigDecimal.ONE.subtract(beneficio.divide(CIEN)))
+        return importeLista.multiply(BigDecimal.ONE.subtract(beneficio))
                 .setScale(0, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * {@code becaPorcentaje} se persiste como fracción: {@code 0.50} representa 50 % y
+     * {@code 1.00}, 100 %. La defensa evita que un dato histórico fuera de esa escala genere
+     * importes negativos o una bonificación distinta de la configurada.
+     */
+    private BigDecimal normalizarBeneficio(ChequeraSerie chequeraSerie) {
+        BigDecimal beneficio = chequeraSerie.getBecaPorcentaje();
+        if (beneficio == null) {
+            return BigDecimal.ZERO;
+        }
+        if (beneficio.compareTo(BigDecimal.ZERO) < 0 || beneficio.compareTo(BigDecimal.ONE) > 0) {
+            log.warn("Beneficio fuera de la escala fraccional [0,1]; se emite con 0%. chequeraSerieId={} beneficio={}",
+                    chequeraSerie.getChequeraSerieId(), beneficio);
+            return BigDecimal.ZERO;
+        }
+        return beneficio;
     }
 
     /**

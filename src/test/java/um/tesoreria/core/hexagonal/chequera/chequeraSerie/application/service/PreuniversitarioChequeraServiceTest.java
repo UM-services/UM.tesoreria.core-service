@@ -70,22 +70,22 @@ class PreuniversitarioChequeraServiceTest {
                 new Build(1L));
         var control = new ChequeraSerieControl(null, 3, 2, 1L, (byte) 0, 0, 0, 0L, (byte) 0);
         var serie = ChequeraSerie.builder().facultadId(3).tipoChequeraId(2).chequeraSerieId(1L)
-                .becaPorcentaje(new BigDecimal("30")).build();
+                .becaPorcentaje(new BigDecimal("0.30")).build();
 
         when(dataResolver.resolve(data)).thenReturn(Optional.of(context));
         when(legajoManager.findOrCreate(context)).thenReturn(mock(Legajo.class));
         when(chequeraSerieService.findPreuniversitarioByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(
                 BigDecimal.ONE, 50, 3, 1, 4)).thenThrow(new ChequeraSerieException(1L));
         when(guaraniBeneficioService.findByRequisitos(List.of(99)))
-                .thenReturn(List.of(GuaraniBeneficio.builder().requisito(99).porcentajeBeneficio(new BigDecimal("30")).build()));
-        when(beneficioPolicy.porcentajeEfectivo(eq(List.of(requisito)), any())).thenReturn(new BigDecimal("30"));
+                .thenReturn(List.of(GuaraniBeneficio.builder().requisito(99).porcentajeBeneficio(new BigDecimal("0.30")).build()));
+        when(beneficioPolicy.porcentajeEfectivo(eq(List.of(requisito)), any())).thenReturn(new BigDecimal("0.30"));
         when(chequeraSerieControlService.findLastByTipoChequera(3, 2)).thenThrow(new um.tesoreria.core.exception.ChequeraSerieControlException(3, 2));
         when(chequeraSerieControlService.add(any())).thenReturn(control);
-        when(policy.createSerie(context, control, new BigDecimal("30"))).thenReturn(serie);
+        when(policy.createSerie(context, control, new BigDecimal("0.30"))).thenReturn(serie);
         when(chequeraSerieService.add(serie)).thenReturn(serie);
 
         assertThat(service.create(data)).isSameAs(serie);
-        assertThat(serie.getBecaPorcentaje()).isEqualByComparingTo(new BigDecimal("30"));
+        assertThat(serie.getBecaPorcentaje()).isEqualByComparingTo(new BigDecimal("0.30"));
         verify(detailsCreator).create(serie);
     }
 

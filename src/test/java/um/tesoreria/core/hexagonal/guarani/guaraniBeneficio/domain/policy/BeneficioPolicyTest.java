@@ -18,14 +18,14 @@ class BeneficioPolicyTest {
     void porcentajeEfectivo_usesMaximumOnlyAmongActiveIngresoRequirements() {
         var requisitos = List.of(requisito(1, "S", "S"), requisito(2, "s", "S"),
                 requisito(3, "N", "S"), requisito(4, "S", "N"));
-        var beneficios = List.of(beneficio(1, "10"), beneficio(2, "30"), beneficio(3, "90"), beneficio(4, "80"));
+        var beneficios = List.of(beneficio(1, "0.10"), beneficio(2, "0.30"), beneficio(3, "0.90"), beneficio(4, "0.80"));
 
-        assertThat(policy.porcentajeEfectivo(requisitos, beneficios)).isEqualByComparingTo("30");
+        assertThat(policy.porcentajeEfectivo(requisitos, beneficios)).isEqualByComparingTo("0.30");
     }
 
     @Test
     void porcentajeEfectivo_isNullSafeAndIgnoresLegacyNullPercentages() {
-        assertThat(policy.porcentajeEfectivo(null, List.of(beneficio(1, "50"))))
+        assertThat(policy.porcentajeEfectivo(null, List.of(beneficio(1, "0.50"))))
                 .isEqualByComparingTo(BigDecimal.ZERO);
         assertThat(policy.porcentajeEfectivo(List.of(requisito(1, "S", "S")), null))
                 .isEqualByComparingTo(BigDecimal.ZERO);
@@ -38,22 +38,29 @@ class BeneficioPolicyTest {
         var sinRelacion = RequisitoPresentadoGuarani.builder().persona(123).requisito(1).build();
 
         assertThat(policy.porcentajeEfectivo(List.of(sinRelacion, requisito(2, "S", "S")),
-                List.of(beneficio(1, "100"), beneficio(2, "20"), beneficio(3, "99"))))
-                .isEqualByComparingTo("20");
+                List.of(beneficio(1, "1"), beneficio(2, "0.20"), beneficio(3, "0.99"))))
+                .isEqualByComparingTo("0.20");
     }
 
     @Test
     void porcentajeEfectivo_isIdempotentForRepeatedEligibleRequirement() {
         var requisito = requisito(1, "S", "S");
 
-        assertThat(policy.porcentajeEfectivo(List.of(requisito, requisito), List.of(beneficio(1, "20"))))
-                .isEqualByComparingTo("20");
+        assertThat(policy.porcentajeEfectivo(List.of(requisito, requisito), List.of(beneficio(1, "0.20"))))
+                .isEqualByComparingTo("0.20");
     }
 
     @Test
     void porcentajeEfectivo_returnsZeroForEmptyOrUnconfiguredRequirements() {
         assertThat(policy.porcentajeEfectivo(List.of(), List.of())).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(policy.porcentajeEfectivo(List.of(requisito(1, "S", "S")), List.of(beneficio(2, "20"))))
+        assertThat(policy.porcentajeEfectivo(List.of(requisito(1, "S", "S")), List.of(beneficio(2, "0.20"))))
+                .isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
+    void porcentajeEfectivo_ignoresBenefitsOutsideTheFractionalScale() {
+        assertThat(policy.porcentajeEfectivo(List.of(requisito(1, "S", "S")),
+                List.of(beneficio(1, "50"), beneficio(1, "-0.10"))))
                 .isEqualByComparingTo(BigDecimal.ZERO);
     }
 
