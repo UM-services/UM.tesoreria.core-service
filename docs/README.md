@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 4.1.1** (actualizada: 2026-08-17)
+**Versión actual del servicio: 4.2.0** (actualizada: 2026-08-20)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -50,6 +50,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-setup.mmd`: Arquitectura hexagonal del módulo Setup (configuración de tesorería) - v3.43.0 (nuevo módulo).
 - `hexagonal-deudaExamen.mmd`: Arquitectura hexagonal del módulo DeudaExamen (validación de habilitación para rendir exámenes) - v3.46.0 (integración con TesoreriaEstadoFacultadService para habilitación manual).
 - `hexagonal-guaraniBeneficio.mmd`: Arquitectura hexagonal del módulo GuaraniBeneficio (beneficios de estudiantes Guarani) - v3.47.0 (nuevo listado completo).
+- `hexagonal-beneficioCuota.mmd`: Cableado del beneficio por requisitos de ingreso hasta los importes de cuota preuniversitaria (política MAX, `becaPorcentaje`, factory de cuotas y totales) - v4.2.0.
 - `hexagonal-tesoreriaEstado.mmd`: Arquitectura hexagonal del módulo TesoreriaEstado (consulta de estado de tesorería del estudiante en el servicio de facultad) - v3.46.0 (nuevo módulo, consumer REST).
 - `hexagonal-guaraniUbicacion.mmd`: Arquitectura hexagonal del módulo GuaraniUbicacion (CRUD y consulta por ubicación Guaraní) - v3.50.0.
 

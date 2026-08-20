@@ -97,6 +97,7 @@ public class ChequeraSerieEntity extends Auditable {
     private Byte hpum = 0;
 
     @Builder.Default
+    @Column(precision = 5, scale = 2, nullable = false)
     private BigDecimal becaPorcentaje = BigDecimal.ZERO;
 
     private String becaResolucion;
