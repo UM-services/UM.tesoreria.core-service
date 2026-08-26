@@ -39,11 +39,12 @@ public class PagoService {
     private final ChequeraTotalService chequeraTotalService;
     private final MercadoPagoContextService mercadoPagoContextService;
     private final ChequeraPagoAsientoService chequeraPagoAsientoService;
+    private final FacturacionElectronicaService facturacionElectronicaService;
 
     public List<PagoDto> getPagos(Integer tipoPagoId, OffsetDateTime fecha) {
         List<ChequeraPago> pagos = (tipoPagoId != TIPO_MERCADO_PAGO)
-            ? chequeraPagoService.findAllByTipoPagoIdAndFechaAcreditacion(tipoPagoId, fecha)
-            : chequeraPagoService.findAllByTipoPagoIdAndFechaPago(tipoPagoId, fecha);
+                ? chequeraPagoService.findAllByTipoPagoIdAndFechaAcreditacion(tipoPagoId, fecha)
+                : chequeraPagoService.findAllByTipoPagoIdAndFechaPago(tipoPagoId, fecha);
 
         var pagosUnificados = new ArrayList<>(pagos.stream()
                 .map(pago -> PagoDto.builder()
@@ -93,31 +94,31 @@ public class PagoService {
 
         // Agrupar y sumar importes por fecha, cuenta y debita
         return asientosPagos.stream()
-            .collect(Collectors.groupingBy(
-                asiento -> new AsientoKey(
-                    asiento.getFecha(),
-                    asiento.getCuenta(),
-                    asiento.getDebita()
-                ),
-                Collectors.reducing(
-                    BigDecimal.ZERO,
-                    ChequeraPagoAsiento::getImporte,
-                    BigDecimal::add
-                )
-            ))
-            .entrySet()
-            .stream()
-            .map(entry -> ItemAsientoDto.builder()
-                .fecha(entry.getKey().fecha)
-                .numeroCuenta(entry.getKey().cuenta)
-                .debita(entry.getKey().debita)
-                .importe(entry.getValue())
-                .build())
-            .sorted(Comparator
-                .comparing(ItemAsientoDto::getFecha)
-                .thenComparing(ItemAsientoDto::getNumeroCuenta)
-                .thenComparing(ItemAsientoDto::getDebita))
-            .collect(Collectors.toList());
+                .collect(Collectors.groupingBy(
+                        asiento -> new AsientoKey(
+                                asiento.getFecha(),
+                                asiento.getCuenta(),
+                                asiento.getDebita()
+                        ),
+                        Collectors.reducing(
+                                BigDecimal.ZERO,
+                                ChequeraPagoAsiento::getImporte,
+                                BigDecimal::add
+                        )
+                ))
+                .entrySet()
+                .stream()
+                .map(entry -> ItemAsientoDto.builder()
+                        .fecha(entry.getKey().fecha)
+                        .numeroCuenta(entry.getKey().cuenta)
+                        .debita(entry.getKey().debita)
+                        .importe(entry.getValue())
+                        .build())
+                .sorted(Comparator
+                        .comparing(ItemAsientoDto::getFecha)
+                        .thenComparing(ItemAsientoDto::getNumeroCuenta)
+                        .thenComparing(ItemAsientoDto::getDebita))
+                .collect(Collectors.toList());
     }
 
     // Clase auxiliar para agrupar por múltiples campos
@@ -138,8 +139,8 @@ public class PagoService {
             if (o == null || getClass() != o.getClass()) return false;
             AsientoKey that = (AsientoKey) o;
             return Objects.equals(fecha, that.fecha) &&
-                   Objects.equals(cuenta, that.cuenta) &&
-                   Objects.equals(debita, that.debita);
+                    Objects.equals(cuenta, that.cuenta) &&
+                    Objects.equals(debita, that.debita);
         }
 
         @Override
@@ -194,6 +195,97 @@ public class PagoService {
         marcarPago(chequeraCuota.getFacultadId(), chequeraCuota.getTipoChequeraId(), chequeraCuota.getChequeraSerieId(), chequeraCuota.getProductoId(), chequeraCuota.getAlternativaId(), chequeraCuota.getCuotaId(), chequeraCuotaService);
 
         return chequeraPago;
+    }
+
+    /**
+     * Deshace el pago de una cuota registrado previamente vía MercadoPago,
+     * cuando MP informa que ese pago ya no es válido (hoy: "rejected",
+     * "refunded" y "charged_back"; ver ESTADOS_REVERSION en
+     * ProcessPaymentEventUseCaseImpl).
+     * <p>
+     * Es el espejo inverso de {@link #registraPagoMP(Long)}: en vez de crear
+     * el ChequeraPago y marcar la cuota como pagada, lo busca, borra el
+     * asiento contable asociado (si existe) y el ChequeraPago en sí, limpia
+     * chequeraPagoId/importePagado/fechaPago/fechaAcreditacion del contexto
+     * (dejándolo como si ese pago nunca hubiera existido, más allá del
+     * status/idMercadoPago/payment que quedan con los datos del evento que
+     * disparó la reversión, para trazabilidad), y vuelve a llamar
+     * {@link #marcarPago} para que la cuota y el total de la chequera queden
+     * consistentes con eso.
+     * <p>
+     * Es idempotente a propósito: si no hay ningún ChequeraPago para el
+     * idMercadoPago del contexto —porque nunca se llegó a registrar (ej. un
+     * "rejected" que llega sin que antes hubo un "approved"), o porque ya se
+     * revirtió antes (MP reenvía la misma notificación)— el método no hace
+     * nada y corta ahí, sin tocar el contexto, la cuota ni el total.
+     * <p>
+     * OJO — si el pago ya tiene una o más facturas electrónicas generadas
+     * (FacturacionElectronica), no se las toca ni se las borra (ARCA
+     * gestiona el aspecto fiscal por su cuenta) pero SÍ se las desvincula
+     * del pago (chequeraPagoId → null, y también la referencia de objeto
+     * chequeraPago → null, en cada una), para poder borrar el ChequeraPago
+     * sin chocar con el FK real que existe en la base
+     * (facturacion_electronica → chequera_pago) ni con el
+     * TransientPropertyValueException que tira Hibernate si se borra el
+     * ChequeraPago en la misma transacción dejando esa asociación colgando.
+     *
+     * @param mercadoPagoContextId id del MercadoPagoContext asociado a la
+     *                             notificación de MercadoPago que disparó la
+     *                             reversión
+     */
+    public void revertirPagoMP(Long mercadoPagoContextId) {
+        log.debug("\n\nProcessing PagoService.revertirPagoMP\n\n");
+
+        var mercadoPagoContext = mercadoPagoContextService.findByMercadoPagoContextId(mercadoPagoContextId);
+        var chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(mercadoPagoContext.getChequeraCuotaId());
+
+        ChequeraPago chequeraPago;
+        try {
+            chequeraPago = chequeraPagoService.findByIdMercadoPago(mercadoPagoContext.getIdMercadoPago());
+        } catch (ChequeraPagoException e) {
+            // No hay ChequeraPago que revertir: o nunca se llegó a registrar
+            // el pago (ej. "rejected" directo), o ya se revirtió antes
+            // (notificacion de MP repetida). Idempotente, como registraPagoMP.
+            log.debug("No existe ChequeraPago para revertir (idMercadoPago={})", mercadoPagoContext.getIdMercadoPago());
+            return;
+        }
+
+        // Si el pago ya tiene facturas electrónicas generadas, hay un FK
+        // real en la base (facturacion_electronica -> chequera_pago) que
+        // impediría borrar el ChequeraPago mientras alguna factura lo siga
+        // apuntando. ARCA se encarga del aspecto fiscal por su cuenta, así
+        // que acá solo desvinculamos TODAS las facturas del pago (no se
+        // borra ninguna factura, quedan como registro histórico) para poder
+        // seguir con el borrado normal. Ojo: puede haber más de una factura
+        // para el mismo pago (ej. original + nota de crédito), por eso se
+        // usa findAllByChequeraPagoIds y no un findByChequeraPagoId único.
+        var facturasExistentes = facturacionElectronicaService.findAllByChequeraPagoIds(List.of(chequeraPago.getChequeraPagoId()));
+        for (var factura : facturasExistentes) {
+            log.info("El pago {} (mercadoPagoContextId={}) ya tiene una factura electrónica generada (facturacionElectronicaId={}). Se desvincula la factura del pago para poder revertirlo; ARCA gestiona el aspecto fiscal por su cuenta.",
+                    chequeraPago.getChequeraPagoId(), mercadoPagoContextId, factura.getFacturacionElectronicaId());
+            factura.setChequeraPagoId(null);
+            // También hay que limpiar la referencia de objeto (no solo el id
+            // escalar): si queda apuntando al ChequeraPagoEntity en memoria,
+            // Hibernate la trata como una asociación inconsistente al hacer
+            // flush una vez que ese ChequeraPago se borra más abajo, en la
+            // misma transacción (TransientPropertyValueException).
+            factura.setChequeraPago(null);
+            facturacionElectronicaService.update(factura, factura.getFacturacionElectronicaId());
+        }
+
+        // Se borra primero el asiento contable (depende del pago), y recién
+        // después el pago en sí — para no dejar nunca un asiento huérfano
+        // apuntando a un ChequeraPago que ya no existe.
+        chequeraPagoAsientoService.deleteAllByChequeraPagoId(chequeraPago.getChequeraPagoId());
+        chequeraPagoService.deleteByChequeraPagoId(chequeraPago.getChequeraPagoId());
+
+        mercadoPagoContext.setChequeraPagoId(null);
+        mercadoPagoContext.setImportePagado(BigDecimal.ZERO);
+        mercadoPagoContext.setFechaPago(null);
+        mercadoPagoContext.setFechaAcreditacion(null);
+        mercadoPagoContextService.update(mercadoPagoContext, mercadoPagoContextId);
+
+        marcarPago(chequeraCuota.getFacultadId(), chequeraCuota.getTipoChequeraId(), chequeraCuota.getChequeraSerieId(), chequeraCuota.getProductoId(), chequeraCuota.getAlternativaId(), chequeraCuota.getCuotaId(), chequeraCuotaService);
     }
 
     public void marcarPago(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, ChequeraCuotaService chequeraCuotaService) {

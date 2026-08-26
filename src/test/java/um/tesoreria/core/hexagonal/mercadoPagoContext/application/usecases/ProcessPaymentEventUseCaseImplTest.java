@@ -30,12 +30,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
- * Cubre el comportamiento ACTUAL de ProcessPaymentEventUseCaseImpl: hoy solo
- * reacciona al estado "approved". Los tests marcados como "hoy no revierte" (con
- * status rejected/refunded/cancelled/charged_back/in_mediation) documentan el
- * hueco que hay que cerrar: son la red de seguridad, y esos justamente son los
- * que van a cambiar de comportamiento (y por lo tanto de aserciones) cuando se
- * agregue revertirPagoMP.
+ * Cubre el comportamiento de ProcessPaymentEventUseCaseImpl: reacciona al
+ * estado "approved" (da de alta el pago vía PagoService.registraPagoMP) y a
+ * los estados "rejected", "refunded" y "charged_back" (deshace el pago vía
+ * PagoService.revertirPagoMP) — alcance acotado a pedido explícito del
+ * equipo. "cancelled" e "in_mediation" quedan documentados como pendientes
+ * de habilitar. Solo cubre la rama de cuota; la rama de reserva de vacante
+ * no forma parte del alcance de la reversión.
  */
 @ExtendWith(MockitoExtension.class)
 class ProcessPaymentEventUseCaseImplTest {
@@ -115,16 +116,15 @@ class ProcessPaymentEventUseCaseImplTest {
     }
 
     /**
-     * EL HUECO ACTUAL: para cada uno de los 5 estados nuevos, el contexto SÍ
-     * se actualiza con el status recibido, pero PagoService no se toca para
-     * nada (no se revierte el pago). Cuando se implemente revertirPagoMP,
-     * este test es el que hay que reescribir (cambiar verifyNoInteractions
-     * por verify(pagoService).revertirPagoMP(...)) para que siga siendo la
-     * red de seguridad correcta.
+     * Estados habilitados hoy (a pedido explícito del equipo): "rejected"
+     * (nunca se cobró), "refunded" y "charged_back" (se cobró y la plata
+     * volvió al alumno). Para los tres, el contexto se actualiza con el
+     * status recibido Y se delega en PagoService.revertirPagoMP para
+     * deshacer el pago de la cuota.
      */
     @ParameterizedTest
-    @ValueSource(strings = {"rejected", "refunded", "cancelled", "in_mediation", "charged_back"})
-    void cuota_estadoNoApproved_hoyActualizaElContextoPeroNoRevierteElPago(String status) {
+    @ValueSource(strings = {"rejected", "refunded", "charged_back"})
+    void cuota_estadoHabilitado_revierteElPago(String status) {
         var context = MercadoPagoContext.builder()
                 .mercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)
                 .chequeraCuotaId(CHEQUERA_CUOTA_ID)
@@ -136,14 +136,40 @@ class ProcessPaymentEventUseCaseImplTest {
 
         useCase.processPaymentEvent(event);
 
-        // El contexto SI se actualiza con el nuevo estado...
         var contextCaptor = ArgumentCaptor.forClass(MercadoPagoContext.class);
         verify(updateMercadoPagoContextUseCase).update(contextCaptor.capture(), eq(MERCADO_PAGO_CONTEXT_ID));
         assertThat(contextCaptor.getValue().getStatus()).isEqualTo(status);
 
-        // ...pero HOY no se revierte el pago de la cuota. Este assert es el que
-        // va a cambiar (a verify(pagoService).revertirPagoMP(...)) una vez que
-        // se implemente la reversion.
+        verify(pagoService, times(1)).revertirPagoMP(MERCADO_PAGO_CONTEXT_ID);
+        verify(pagoService, never()).registraPagoMP(any());
+    }
+
+    /**
+     * LOS 2 ESTADOS QUE TODAVÍA NO ESTÁN HABILITADOS: "cancelled" e
+     * "in_mediation" siguen fuera del alcance actual (el equipo pidió
+     * arrancar con rejected/refunded/charged_back). El contexto SÍ se
+     * actualiza con el status recibido, pero PagoService no se toca todavía.
+     * Cuando se habiliten, este test es el que hay que achicar (sacando el
+     * estado que se habilite) y sumarlo al parametrizado de arriba.
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {"cancelled", "in_mediation"})
+    void cuota_estadosAunNoHabilitados_actualizaContextoPeroNoRevierte(String status) {
+        var context = MercadoPagoContext.builder()
+                .mercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)
+                .chequeraCuotaId(CHEQUERA_CUOTA_ID)
+                .build();
+        var event = eventForCuota(status).build();
+
+        when(findByMercadoPagoContextIdUseCase.findByMercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)).thenReturn(context);
+        when(updateMercadoPagoContextUseCase.update(any(MercadoPagoContext.class), eq(MERCADO_PAGO_CONTEXT_ID))).thenReturn(context);
+
+        useCase.processPaymentEvent(event);
+
+        var contextCaptor = ArgumentCaptor.forClass(MercadoPagoContext.class);
+        verify(updateMercadoPagoContextUseCase).update(contextCaptor.capture(), eq(MERCADO_PAGO_CONTEXT_ID));
+        assertThat(contextCaptor.getValue().getStatus()).isEqualTo(status);
+
         verifyNoInteractions(pagoService);
     }
 
