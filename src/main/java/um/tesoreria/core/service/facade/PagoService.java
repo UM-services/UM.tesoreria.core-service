@@ -40,6 +40,7 @@ public class PagoService {
     private final MercadoPagoContextService mercadoPagoContextService;
     private final ChequeraPagoAsientoService chequeraPagoAsientoService;
     private final FacturacionElectronicaService facturacionElectronicaService;
+    private final ReciboMessageCheckService reciboMessageCheckService;
 
     public List<PagoDto> getPagos(Integer tipoPagoId, OffsetDateTime fecha) {
         List<ChequeraPago> pagos = (tipoPagoId != TIPO_MERCADO_PAGO)
@@ -220,12 +221,15 @@ public class PagoService {
      * nada y corta ahí, sin tocar el contexto, la cuota ni el total.
      * <p>
      * OJO — si el pago ya tiene una o más facturas electrónicas generadas
-     * (FacturacionElectronica), no se las toca ni se las borra (ARCA
-     * gestiona el aspecto fiscal por su cuenta) pero SÍ se las desvincula
-     * del pago (chequeraPagoId → null, y también la referencia de objeto
-     * chequeraPago → null, en cada una), para poder borrar el ChequeraPago
-     * sin chocar con el FK real que existe en la base
-     * (facturacion_electronica → chequera_pago) ni con el
+     * (FacturacionElectronica) o registros de mensaje/recibo enviados
+     * (ReciboMessageCheck), no se los toca ni se los borra (ARCA gestiona
+     * el aspecto fiscal por su cuenta, y el recibo es solo un log de
+     * auditoría) pero SÍ se los desvincula del pago (chequeraPagoId → null
+     * en cada uno, y también la referencia de objeto chequeraPago → null
+     * en el caso de la factura), para poder borrar el ChequeraPago sin
+     * chocar con los FK reales que existen en la base
+     * (facturacion_electronica → chequera_pago,
+     * recibo_message_check → chequera_pago) ni con el
      * TransientPropertyValueException que tira Hibernate si se borra el
      * ChequeraPago en la misma transacción dejando esa asociación colgando.
      *
@@ -271,6 +275,19 @@ public class PagoService {
             // misma transacción (TransientPropertyValueException).
             factura.setChequeraPago(null);
             facturacionElectronicaService.update(factura, factura.getFacturacionElectronicaId());
+        }
+
+        // Mismo problema, otra tabla: recibo_message_check también tiene un
+        // FK real contra chequera_pago (es el log del mensaje/recibo enviado
+        // al alumno avisándole del pago o la factura). Es un registro de
+        // auditoría, no un documento fiscal — igual lo desvinculamos en vez
+        // de borrarlo, para no perder ese historial.
+        var recibosExistentes = reciboMessageCheckService.findAllByChequeraPagoId(chequeraPago.getChequeraPagoId());
+        for (var recibo : recibosExistentes) {
+            log.info("El pago {} (mercadoPagoContextId={}) tiene un ReciboMessageCheck asociado ({}). Se desvincula para poder revertir el pago.",
+                    chequeraPago.getChequeraPagoId(), mercadoPagoContextId, recibo.getReciboMessageCheckId());
+            recibo.setChequeraPagoId(null);
+            reciboMessageCheckService.update(recibo);
         }
 
         // Se borra primero el asiento contable (depende del pago), y recién

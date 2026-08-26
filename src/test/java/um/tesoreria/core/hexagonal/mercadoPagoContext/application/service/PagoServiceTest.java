@@ -16,15 +16,18 @@ import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.Ch
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.model.FacturacionElectronica;
+import um.tesoreria.core.model.ReciboMessageCheck;
 import um.tesoreria.core.service.ChequeraPagoAsientoService;
 import um.tesoreria.core.service.ChequeraPagoReemplazoService;
 import um.tesoreria.core.service.FacturacionElectronicaService;
+import um.tesoreria.core.service.ReciboMessageCheckService;
 import um.tesoreria.core.service.facade.PagoService;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -55,6 +58,8 @@ class PagoServiceTest {
     private ChequeraPagoAsientoService chequeraPagoAsientoService;
     @Mock
     private FacturacionElectronicaService facturacionElectronicaService;
+    @Mock
+    private ReciboMessageCheckService reciboMessageCheckService;
 
     @InjectMocks
     private PagoService pagoService;
@@ -246,6 +251,7 @@ class PagoServiceTest {
         when(chequeraCuotaService.findByChequeraCuotaId(CHEQUERA_CUOTA_ID)).thenReturn(chequeraCuota);
         when(chequeraPagoService.findByIdMercadoPago(ID_MERCADO_PAGO)).thenReturn(pagoExistente);
         when(facturacionElectronicaService.findAllByChequeraPagoIds(List.of(999L))).thenReturn(List.of());
+        when(reciboMessageCheckService.findAllByChequeraPagoId(999L)).thenReturn(List.of());
         when(mercadoPagoContextService.update(any(MercadoPagoContext.class), eq(MERCADO_PAGO_CONTEXT_ID))).thenReturn(context);
 
         // Colaboradores de marcarPago -> calcularPagado. Tras revertir, la
@@ -322,6 +328,7 @@ class PagoServiceTest {
         when(chequeraPagoService.findByIdMercadoPago(ID_MERCADO_PAGO)).thenReturn(pagoExistente);
         when(facturacionElectronicaService.findAllByChequeraPagoIds(List.of(999L))).thenReturn(List.of(facturaExistente));
         when(facturacionElectronicaService.update(any(FacturacionElectronica.class), eq(555L))).thenReturn(facturaExistente);
+        when(reciboMessageCheckService.findAllByChequeraPagoId(999L)).thenReturn(List.of());
         when(mercadoPagoContextService.update(any(MercadoPagoContext.class), eq(MERCADO_PAGO_CONTEXT_ID))).thenReturn(context);
 
         when(chequeraPagoService.isPagado(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, PRODUCTO_ID, ALTERNATIVA_ID, CUOTA_ID))
@@ -353,6 +360,68 @@ class PagoServiceTest {
         assertThat(facturaCaptor.getValue().getChequeraPago()).isNull();
 
         // Y el resto del flujo sigue normal, como si nunca hubiera habido factura
+        verify(chequeraPagoAsientoService).deleteAllByChequeraPagoId(999L);
+        verify(chequeraPagoService).deleteByChequeraPagoId(999L);
+        verify(mercadoPagoContextService).update(any(MercadoPagoContext.class), eq(MERCADO_PAGO_CONTEXT_ID));
+        verify(chequeraCuotaService).update(any(ChequeraCuota.class), eq(CHEQUERA_CUOTA_ID));
+        verify(chequeraTotalService).update(any(ChequeraTotal.class), eq(500L));
+    }
+
+    /**
+     * Mismo tratamiento que la factura electrónica, pero para
+     * ReciboMessageCheck (el log del mensaje/recibo enviado al alumno): hay
+     * otro FK real en la base (recibo_message_check -> chequera_pago) que
+     * también impediría borrar el ChequeraPago mientras algún recibo lo
+     * siga referenciando. Se desvincula (chequeraPagoId → null) sin
+     * borrarlo, y el resto del flujo sigue normal.
+     */
+    @Test
+    void revertirPagoMP_whenPagoTieneReciboMessageCheck_loDesvinculaYRevierteIgual() {
+        var context = buildMercadoPagoContext();
+        var chequeraCuota = buildChequeraCuota();
+        var pagoExistente = ChequeraPago.builder()
+                .chequeraPagoId(999L)
+                .chequeraCuotaId(CHEQUERA_CUOTA_ID)
+                .idMercadoPago(ID_MERCADO_PAGO)
+                .build();
+        var reciboExistente = ReciboMessageCheck.builder()
+                .reciboMessageCheckId(UUID.randomUUID())
+                .chequeraPagoId(999L)
+                .build();
+
+        when(mercadoPagoContextService.findByMercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)).thenReturn(context);
+        when(chequeraCuotaService.findByChequeraCuotaId(CHEQUERA_CUOTA_ID)).thenReturn(chequeraCuota);
+        when(chequeraPagoService.findByIdMercadoPago(ID_MERCADO_PAGO)).thenReturn(pagoExistente);
+        when(facturacionElectronicaService.findAllByChequeraPagoIds(List.of(999L))).thenReturn(List.of());
+        when(reciboMessageCheckService.findAllByChequeraPagoId(999L)).thenReturn(List.of(reciboExistente));
+        when(mercadoPagoContextService.update(any(MercadoPagoContext.class), eq(MERCADO_PAGO_CONTEXT_ID))).thenReturn(context);
+
+        when(chequeraPagoService.isPagado(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, PRODUCTO_ID, ALTERNATIVA_ID, CUOTA_ID))
+                .thenReturn(false);
+        when(chequeraCuotaService.findByUnique(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, PRODUCTO_ID, ALTERNATIVA_ID, CUOTA_ID))
+                .thenReturn(chequeraCuota);
+        when(chequeraCuotaService.update(any(ChequeraCuota.class), eq(CHEQUERA_CUOTA_ID))).thenReturn(chequeraCuota);
+        var chequeraTotal = ChequeraTotal.builder()
+                .chequeraTotalId(500L)
+                .facultadId(FACULTAD_ID)
+                .tipoChequeraId(TIPO_CHEQUERA_ID)
+                .chequeraSerieId(CHEQUERA_SERIE_ID)
+                .productoId(PRODUCTO_ID)
+                .build();
+        when(chequeraTotalService.findByUnique(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, PRODUCTO_ID))
+                .thenReturn(chequeraTotal);
+        when(chequeraCuotaService.calculateTotalCuotasActivas(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, PRODUCTO_ID, ALTERNATIVA_ID))
+                .thenReturn(new BigDecimal("30000.00"));
+        when(chequeraCuotaService.calculateTotalCuotasPagadas(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, PRODUCTO_ID, ALTERNATIVA_ID))
+                .thenReturn(BigDecimal.ZERO);
+        when(chequeraTotalService.update(any(ChequeraTotal.class), eq(500L))).thenReturn(chequeraTotal);
+
+        pagoService.revertirPagoMP(MERCADO_PAGO_CONTEXT_ID);
+
+        var reciboCaptor = ArgumentCaptor.forClass(ReciboMessageCheck.class);
+        verify(reciboMessageCheckService).update(reciboCaptor.capture());
+        assertThat(reciboCaptor.getValue().getChequeraPagoId()).isNull();
+
         verify(chequeraPagoAsientoService).deleteAllByChequeraPagoId(999L);
         verify(chequeraPagoService).deleteByChequeraPagoId(999L);
         verify(mercadoPagoContextService).update(any(MercadoPagoContext.class), eq(MERCADO_PAGO_CONTEXT_ID));
