@@ -2,6 +2,17 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.2.0] - 2026-08-29
+### Added
+- feat(chequera/chequeraSerie): `GET /chequeraserie/{chequeraId}` y `GET /chequeraserie/extended/{chequeraId}` ahora exponen `ultimoEnvio` con la fecha del último envío de impresión (ajustada a UTC-3) obtenida de `ChequeraImpresionCabeceraService`, en paridad con las consultas `unique` y `persona`.
+
+### Changed
+- chore(deps): Actualización de Spring Boot de 4.1.0 a 4.1.1
+- chore(deps): Actualización de Spring Cloud de 2025.1.2 a 2025.1.3
+- refactor(chequera/chequeraSerie): `ChequeraSerieEntity` implementa `Jsonifyable`, eliminando su método `jsonify()` local en favor del método default de la interfaz.
+
+> Basado en `git diff HEAD` (staged: `pom.xml`, `GetChequeraSerieByIdUseCaseImpl.java`, `ChequeraSerieEntity.java`), el endpoint `ChequeraSerieController` y `pom.xml` (versión `4.1.1` → `4.2.0`). La exposición de `ultimoEnvio` en respuestas existentes es backward-compatible y justifica un incremento minor de SemVer.
+
 ## [4.1.1] - 2026-08-17
 ### Changed
 - fix(ci): Limitado el despliegue del servicio de develop a eventos `push` sobre la rama `develop`.

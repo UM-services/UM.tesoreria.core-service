@@ -12,6 +12,7 @@ import um.tesoreria.core.hexagonal.personas.domicilio.infrastructure.persistence
 import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.entity.LectivoEntity;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.entity.TipoChequeraEntity;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -23,7 +24,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChequeraSerieEntity extends Auditable {
+public class ChequeraSerieEntity extends Auditable implements Jsonifyable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -158,10 +159,6 @@ public class ChequeraSerieEntity extends Auditable {
 
     public String getFacultadKey() {
         return this.facultadId.toString() + "." + this.lectivoId + "." + this.geograficaId + "." + this.getPersonaKey();
-    }
-
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
     }
 
 }
