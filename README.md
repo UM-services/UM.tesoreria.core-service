@@ -2,9 +2,16 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 4.1.1**
+**Versión actual (SemVer): 4.2.0**
+
+## Novedades 4.2.0 (verificado en código)
+- feat(chequera/chequeraSerie): `GET /chequeraserie/{chequeraId}` y `GET /chequeraserie/extended/{chequeraId}` ahora exponen `ultimoEnvio` con la fecha del último envío de impresión (ajustada a UTC-3) obtenida de `ChequeraImpresionCabeceraService`, en paridad con las consultas `unique` y `persona`.
+- refactor(chequera/chequeraSerie): `ChequeraSerieEntity` implementa `Jsonifyable`, eliminando su método `jsonify()` local.
+- chore(deps): Actualización de Spring Boot 4.1.0 → 4.1.1 y Spring Cloud 2025.1.2 → 2025.1.3.
+
+> Basado en `git diff HEAD` (staged: `pom.xml`, `GetChequeraSerieByIdUseCaseImpl.java`, `ChequeraSerieEntity.java`), el endpoint `ChequeraSerieController` y `pom.xml` (versión `4.1.1` → `4.2.0`). Corresponde un incremento minor de SemVer.
 
 ## Novedades 4.1.1 (verificado en código)
 - fix(ci): Limitado el despliegue del servicio de develop a eventos `push` sobre la rama `develop`.
@@ -1161,9 +1168,9 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.0
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.1.0
-- Spring Cloud: 2025.1.2
-- Kotlin: 2.4.0
+- Spring Boot: 4.1.1
+- Spring Cloud: 2025.1.3
+- Kotlin: 2.4.10
 - MySQL Connector: 9.7.0
 - SpringDoc OpenAPI: 3.0.3
 - Apache POI: 5.5.1
@@ -1441,11 +1448,11 @@ Daniel Quinteros - daniel.quinterospinto@gmail.com
 Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](https://github.com/UM-services/um.tesoreria.core-service)
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.2-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.0-purple.svg)](https://kotlinlang.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.3-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-3.33.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-4.2.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
