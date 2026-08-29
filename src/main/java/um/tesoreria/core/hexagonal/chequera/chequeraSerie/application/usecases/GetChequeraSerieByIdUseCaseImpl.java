@@ -6,7 +6,9 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.Calcul
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.GetChequeraSerieByIdUseCase;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.out.ChequeraSerieRepository;
+import um.tesoreria.core.service.ChequeraImpresionCabeceraService;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -15,10 +17,12 @@ public class GetChequeraSerieByIdUseCaseImpl implements GetChequeraSerieByIdUseC
 
     private final ChequeraSerieRepository repository;
     private final CalculateDeudaUseCase calculateDeudaUseCase;
+    private final ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
 
     @Override
     public Optional<ChequeraSerie> getById(Long chequeraId) {
-        return repository.findByChequeraId(chequeraId);
+        return repository.findByChequeraId(chequeraId)
+                .map(this::setUltimoEnvio);
     }
 
     @Override
@@ -28,7 +32,20 @@ public class GetChequeraSerieByIdUseCaseImpl implements GetChequeraSerieByIdUseC
                     var deuda = calculateDeudaUseCase.calculateDeuda(chequera);
                     chequera.setCuotasDeuda(deuda.getCuotas());
                     chequera.setImporteDeuda(deuda.getDeuda());
-                    return chequera;
+                    return setUltimoEnvio(chequera);
                 });
+    }
+
+    private ChequeraSerie setUltimoEnvio(ChequeraSerie chequera) {
+        var ultimoEnvio = chequeraImpresionCabeceraService.findLastByUnique(
+                chequera.getFacultadId(),
+                chequera.getTipoChequeraId(),
+                chequera.getChequeraSerieId()
+        )
+        .map(cabecera -> Objects.requireNonNull(cabecera.getFecha()).plusHours(-3))
+        .orElse(null);
+
+        chequera.setUltimoEnvio(ultimoEnvio);
+        return chequera;
     }
 }
