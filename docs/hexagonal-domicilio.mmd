@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Domicilio (v3.24.0)
+title: Arquitectura Hexagonal - Módulo Domicilio (v4.2.1)
 ---
 
 classDiagram
@@ -26,6 +26,10 @@ classDiagram
             +String emailInstitucional
             +String laboral
             +String emailPagador
+        }
+
+        class Jsonifyable {
+            <<interface>>
             +jsonify() String
         }
 
@@ -58,7 +62,7 @@ classDiagram
             +create(Domicilio) Domicilio
             +update(Long, Domicilio) Optional~Domicilio~
             +sincronize(Domicilio) Domicilio
-            +capture(Integer, Integer) Domicilio
+            +capture(BigDecimal, Integer) Integer
             +findAllByUnifieds(String) List~Domicilio~
             +delete(Long) void
         }
@@ -146,7 +150,7 @@ classDiagram
                 +create(DomicilioRequest) ResponseEntity~DomicilioResponse~
                 +update(Long, DomicilioRequest) ResponseEntity~DomicilioResponse~
                 +sincronize(DomicilioRequest) ResponseEntity~DomicilioResponse~
-                +capture(Integer, Integer) ResponseEntity~DomicilioResponse~
+                +capture(BigDecimal, Integer) ResponseEntity~Integer~
                 +findByUnifieds(String) ResponseEntity~List~DomicilioResponse~~
                 +delete(Long) ResponseEntity~Void~
             }
@@ -168,6 +172,9 @@ classDiagram
     DomicilioService --> DeleteDomicilioUseCase : uses
     DomicilioService --> GetAllDomiciliosByUnifiedsUseCase : uses
     DomicilioService --> GetDomicilioByPersonaIdUseCase : uses
+
+    Domicilio ..|> Jsonifyable : implements
+    DomicilioEntity ..|> Jsonifyable : implements
 
     CreateDomicilioUseCaseImpl ..|> CreateDomicilioUseCase : implements
     GetDomicilioByIdUseCaseImpl ..|> GetDomicilioByIdUseCase : implements

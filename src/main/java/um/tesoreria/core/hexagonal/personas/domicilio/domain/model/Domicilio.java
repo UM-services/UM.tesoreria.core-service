@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -14,7 +15,7 @@ import java.time.OffsetDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Domicilio {
+public class Domicilio implements Jsonifyable {
     private Long domicilioId;
     private BigDecimal personaId;
     private Integer documentoId;
@@ -36,7 +37,4 @@ public class Domicilio {
     private String laboral;
     private String emailPagador;
 
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
-    }
 }

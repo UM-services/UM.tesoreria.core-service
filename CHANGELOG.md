@@ -2,6 +2,15 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.2.1] - 2026-08-30
+### Changed
+- fix(personas/domicilio): `CaptureDomicilioUseCaseImpl` ahora omite las facultades cuyo dato externo no incluye correos (`esCapturable`: `emailPersonal` o `emailInstitucional` no vacíos), evitando persistir domicilios vacíos y continuando con la siguiente facultad; retorna `0` si ninguna facultad devolvió datos capturables.
+- refactor(personas/domicilio): `Domicilio` y `DomicilioEntity` implementan `Jsonifyable`, eliminando sus métodos `jsonify()` locales en favor del método default de la interfaz.
+- fix(personas/domicilio): `DomicilioFacultadConsumer.findByUnique` lee la respuesta como texto crudo y la parsea con `ObjectMapper`, registrando el body recibido; una respuesta no parseable lanza `IllegalStateException` en lugar de propagar un error de deserialización opaco.
+- feat(docs): Actualizado el diagrama `hexagonal-domicilio.mmd` (v4.2.1): `Domicilio`/`DomicilioEntity` implementan `Jsonifyable` y se corrigen las firmas de `capture` en `DomicilioService` y `DomicilioController`.
+
+> Basado en `git diff HEAD` (staged: `DomicilioFacultadConsumer.java`, `CaptureDomicilioUseCaseImpl.java`, `Domicilio.java`, `JpaDomicilioRepositoryAdapter.java`, `DomicilioEntity.java`, `DomicilioController.java`) y `pom.xml` (versión `4.2.0` → `4.2.1`). No hay endpoints nuevos ni cambios de contrato REST; la validación de correos y el parseo defensivo son correcciones de comportamiento interno, correspondientes a un incremento patch de SemVer.
+
 ## [4.2.0] - 2026-08-29
 ### Added
 - feat(chequera/chequeraSerie): `GET /chequeraserie/{chequeraId}` y `GET /chequeraserie/extended/{chequeraId}` ahora exponen `ultimoEnvio` con la fecha del último envío de impresión (ajustada a UTC-3) obtenida de `ChequeraImpresionCabeceraService`, en paridad con las consultas `unique` y `persona`.
