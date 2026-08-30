@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.personas.domicilio.infrastructure.persistence.adapter;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.personas.domicilio.domain.model.Domicilio;
 import um.tesoreria.core.hexagonal.personas.domicilio.domain.ports.out.DomicilioRepository;
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JpaDomicilioRepositoryAdapter implements DomicilioRepository {
@@ -23,7 +25,11 @@ public class JpaDomicilioRepositoryAdapter implements DomicilioRepository {
     public Domicilio create(Domicilio domicilio) {
         domicilio.setFecha(OffsetDateTime.now());
         DomicilioEntity entity = domicilioMapper.toEntity(domicilio);
+        log.info("ADAPTER[Domicilio] -> save ({}): {}",
+                entity.getDomicilioId() == null ? "INSERT" : "MERGE/UPDATE domicilioId=" + entity.getDomicilioId(),
+                entity.jsonify());
         DomicilioEntity saved = jpaDomicilioRepository.save(entity);
+        log.info("ADAPTER[Domicilio] -> save resultado: {}", saved.jsonify());
         return domicilioMapper.toDomainModel(saved);
     }
 
@@ -34,8 +40,12 @@ public class JpaDomicilioRepositoryAdapter implements DomicilioRepository {
 
     @Override
     public Optional<Domicilio> findByUnique(BigDecimal personaId, Integer documentoId) {
-        return jpaDomicilioRepository.findByPersonaIdAndDocumentoId(personaId, documentoId)
+        var result = jpaDomicilioRepository.findByPersonaIdAndDocumentoId(personaId, documentoId)
                 .map(domicilioMapper::toDomainModel);
+        log.info("ADAPTER[Domicilio] -> findByUnique(personaId={}, documentoId={}) -> {}",
+                personaId, documentoId,
+                result.map(Domicilio::jsonify).orElse("NO ENCONTRADO"));
+        return result;
     }
 
     @Override
