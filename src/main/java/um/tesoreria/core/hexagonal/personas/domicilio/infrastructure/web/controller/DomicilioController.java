@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.personas.domicilio.infrastructure.web.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping({"/domicilio", "/api/tesoreria/core/domicilio"})
 @RequiredArgsConstructor
+@Slf4j
 public class DomicilioController {
 
     private final DomicilioService domicilioService;
@@ -79,6 +81,9 @@ public class DomicilioController {
 
     @GetMapping("/capture/{personaId}/{documentoId}")
     public ResponseEntity<Integer> capture(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
-        return ResponseEntity.ok(domicilioService.capture(personaId, documentoId));
+        log.info("CAPTURE[controller] -> inicio personaId={}, documentoId={}", personaId, documentoId);
+        var result = domicilioService.capture(personaId, documentoId);
+        log.info("CAPTURE[controller] -> resultado={}", result);
+        return ResponseEntity.ok(result);
     }
 }

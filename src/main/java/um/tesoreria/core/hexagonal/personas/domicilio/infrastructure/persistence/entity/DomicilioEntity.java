@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import um.tesoreria.core.model.Auditable;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -27,7 +28,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DomicilioEntity extends Auditable {
+public class DomicilioEntity extends Auditable implements Jsonifyable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -101,9 +102,5 @@ public class DomicilioEntity extends Auditable {
     @Transient
     @Builder.Default
     private String emailPagador = "";
-
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
-    }
 
 }
