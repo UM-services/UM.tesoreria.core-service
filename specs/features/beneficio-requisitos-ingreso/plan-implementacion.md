@@ -123,8 +123,8 @@ importe = importeLista * (1 - beca), scale 0, HALF_UP
 original = importeLista
 ```
 
-6. Invertir la creación: alternativas → cuotas guardadas → totales. Agrupar las cuotas
-   activas en memoria por `productoId` y sumar `importe1`; no bonificar
+6. Preparar las cuotas en memoria y persistir en orden de foreign keys: totales → alternativas →
+   cuotas. Agrupar las cuotas activas construidas por `productoId` y sumar `importe1`; no bonificar
    `LectivoTotal.total` por separado.
 7. Mantener en `CreatePreuniversitarioUseCaseImpl` la publicación normal de
    `send-chequera` también cuando `becaPorcentaje` es `1.00` (100 %). Probar que el evento no se
@@ -342,7 +342,8 @@ CreatePreuniversitarioUseCaseImpl
        -> ChequeraSerie(becaPorcentaje congelado)
        -> ChequeraCuotaFactory(referencia, serie, lectivoCuota)
             -> cuota bonificada + originales + barcode
-       -> save cuotas -> totals = SUM(cuotas activas por producto)
+       -> save totals -> save alternativas -> save cuotas
+            totals = SUM(cuotas activas construidas por producto)
   -> MailChequeraService.sendChequera [siempre, incluido 100 %]
 ```
 
@@ -357,8 +358,9 @@ es cero. `SpoterService` pasa una serie con beneficio cero/null normalizado a `B
 2. **Factory.** Recibe una única fecha de referencia por emisión, normaliza beneficio nulo a cero
    y crea cada tramo con `HALF_UP`; calcula barcode después de fijar los tres importes finales.
    El formato del barcode para importe cero queda como gate explícito con sender/Gire.
-3. **Transacción.** Guardar cuotas antes de totales es correcto, pero la suma debe usar el valor
-   devuelto por `saveAll` y filtrar `baja == 0`, para no depender de un objeto parcialmente creado.
+3. **Transacción.** Construir las cuotas en memoria permite calcular los totales y respetar el orden
+   de foreign keys al persistir `chequera_total` → `chequera_alternativa` → `chequera_cuota`.
+   La suma filtra `baja == 0` y la transacción revierte todos los padres si falla una cuota.
 4. **Inconsistencias.** Reemplazar accesos a originales, importes y vencimientos por una
    validación null-safe; cualquier campo requerido nulo es una inconsistencia, no una excepción
    de lectura masiva.

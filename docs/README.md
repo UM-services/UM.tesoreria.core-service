@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 4.2.0** (actualizada: 2026-08-20)
+**Versión actual del servicio: 4.2.1** (actualizada: 2026-08-31)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -76,7 +76,8 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 ## Reglas para la creación de Diagramas Mermaid
 - **No incluir namespaces vacíos**: En diagramas de clase (`classDiagram`), nunca incluir bloques vacíos como `namespace infrastructure { }`. Mermaid v10 arroja `Syntax Error` si un namespace no contiene al menos una clase.
 - **Formato de genéricos**: Utilizar tildes `~` para tipos genéricos (ej. `List~String~` en lugar de `<String>`).
-- **Validación automática**: `docs/script.js` sanitiza bloques `namespace` vacíos al vuelo antes de renderizar, pero los archivos `.mmd` deben guardarse limpios.
+- **Anotaciones con espacios**: En `classDiagram`, escribir las anotaciones como `<< interface >>`, `<< JpaRepository >>`, `<< external >>` (con espacios interiores). La forma apretada `<<interface>>` es interpretada por el navegador como etiquetas HTML al inyectar el `.mmd` con `innerHTML` en `index.html`, lo que corrompe el texto y produce `Syntax error in text` en el visor, aunque el CLI valide el archivo sin errores.
+- **Validación automática**: `docs/script.js` sanitiza bloques `namespace` vacíos al vuelo y escapa el contenido antes de inyectarlo, pero los archivos `.mmd` deben guardarse limpios.
 
 ## Notas sobre el pipeline
 - El workflow `.github/workflows/generate-docs.yml` valida automáticamente todos los archivos `docs/*.mmd` antes de publicar.

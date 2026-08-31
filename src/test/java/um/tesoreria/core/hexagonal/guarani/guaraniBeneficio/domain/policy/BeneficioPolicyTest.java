@@ -43,6 +43,15 @@ class BeneficioPolicyTest {
     }
 
     @Test
+    void porcentajeEfectivo_ignoresRequirementWhenRelationPointsToAnotherId() {
+        var inconsistente = requisito(1, "S", "S");
+        inconsistente.getRequisitoRel().setRequisito(2);
+
+        assertThat(policy.porcentajeEfectivo(List.of(inconsistente), List.of(beneficio(1, "1.00"))))
+                .isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+    @Test
     void porcentajeEfectivo_isIdempotentForRepeatedEligibleRequirement() {
         var requisito = requisito(1, "S", "S");
 
@@ -66,7 +75,8 @@ class BeneficioPolicyTest {
 
     private static RequisitoPresentadoGuarani requisito(Integer id, String ingreso, String activo) {
         return RequisitoPresentadoGuarani.builder().persona(123).requisito(id)
-                .requisitoRel(RequisitoGuarani.builder().requisitoIngreso(ingreso).activo(activo).build()).build();
+                .requisitoRel(RequisitoGuarani.builder().requisito(id).requisitoIngreso(ingreso).activo(activo).build())
+                .build();
     }
 
     private static GuaraniBeneficio beneficio(Integer requisito, String porcentaje) {

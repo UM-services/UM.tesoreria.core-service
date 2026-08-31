@@ -99,4 +99,4 @@ classDiagram
 
     note for BeneficioPolicy "Filtra elegibilidad antes de tomar el maximo. requisitoRel nulo falla cerrado con warn."
     note for ChequeraCuotaFactory "beneficio usa escala fraccional: 0.50 es 50 % y 1.00 es 100 %. importeN = importeNLista x (1 - beneficio), scale 0 HALF_UP. importeNOriginal conserva el precio de lista. Importe nulo se conserva nulo: no se aplica factor ni se calcula barras."
-    note for PreuniversitarioChequeraDetailsCreator "Orden: alternativas, cuotas, totales. Los productos salen de lectivo_total unidos a los que generaron cuotas, asi un producto sin cuotas en la alternativa conserva su fila en cero."
+    note for PreuniversitarioChequeraDetailsCreator "Orden de persistencia: totales, alternativas, cuotas. Las cuotas se preparan en memoria para calcular los totales; los productos salen de lectivo_total unidos a los que generaron cuotas, asi un producto sin cuotas en la alternativa conserva su fila en cero."

@@ -2,18 +2,33 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
-## [4.2.0] - 2026-08-20
+## [4.2.1] - 2026-08-30
+### Changed
+- fix(personas/domicilio): `CaptureDomicilioUseCaseImpl` ahora omite las facultades cuyo dato externo no incluye correos (`esCapturable`: `emailPersonal` o `emailInstitucional` no vacíos), evitando persistir domicilios vacíos y continuando con la siguiente facultad; retorna `0` si ninguna facultad devolvió datos capturables.
+- refactor(personas/domicilio): `Domicilio` y `DomicilioEntity` implementan `Jsonifyable`, eliminando sus métodos `jsonify()` locales en favor del método default de la interfaz.
+- fix(personas/domicilio): `DomicilioFacultadConsumer.findByUnique` lee la respuesta como texto crudo y la parsea con `ObjectMapper`, registrando el body recibido; una respuesta no parseable lanza `IllegalStateException` en lugar de propagar un error de deserialización opaco.
+- feat(docs): Actualizado el diagrama `hexagonal-domicilio.mmd` (v4.2.1): `Domicilio`/`DomicilioEntity` implementan `Jsonifyable` y se corrigen las firmas de `capture` en `DomicilioService` y `DomicilioController`.
+
+> Basado en `git diff HEAD` (staged: `DomicilioFacultadConsumer.java`, `CaptureDomicilioUseCaseImpl.java`, `Domicilio.java`, `JpaDomicilioRepositoryAdapter.java`, `DomicilioEntity.java`, `DomicilioController.java`) y `pom.xml` (versión `4.2.0` → `4.2.1`). No hay endpoints nuevos ni cambios de contrato REST; la validación de correos y el parseo defensivo son correcciones de comportamiento interno, correspondientes a un incremento patch de SemVer.
+
+## [4.2.0] - 2026-08-29
 ### Fixed
 - fix(chequera): Corregida la escala del beneficio a la fracción persistida entre `0.00` y `1.00`, para que `0.50` descuente correctamente el 50 % de cada tramo.
 
 ### Added
+- feat(chequera/chequeraSerie): `GET /chequeraserie/{chequeraId}` y `GET /chequeraserie/extended/{chequeraId}` ahora exponen `ultimoEnvio` con la fecha del último envío de impresión (ajustada a UTC-3) obtenida de `ChequeraImpresionCabeceraService`, en paridad con las consultas `unique` y `persona`.
 - feat(chequera): Aplicado el beneficio de ingreso más alto sobre las tres cuotas preuniversitarias, conservando los importes de lista y registrando el porcentaje en la chequera.
 - feat(guarani): Validado el alta y la actualización de beneficios entre 0 % y 100 %, con conflicto explícito para requisitos duplicados.
 
 ### Changed
+- chore(deps): Actualización de Spring Boot de 4.1.0 a 4.1.1
+- chore(deps): Actualización de Spring Cloud de 2025.1.2 a 2025.1.3
+- refactor(chequera/chequeraSerie): `ChequeraSerieEntity` implementa `Jsonifyable`, eliminando su método `jsonify()` local en favor del método default de la interfaz.
 - refactor(chequera): Unificada la creación de cuotas para preuniversitario y Spoter, manteniendo Spoter sin beneficio y recalculando los totales por producto desde las cuotas activas.
 - fix(chequera): El detector de inconsistencias admite cuotas bonificadas y deja de abortar ante datos históricos incompletos.
 - test(chequera): Añadidos escenarios de beneficio, redondeo, totales, código de barras y regresión.
+
+> Basado en `git diff HEAD` (staged: `pom.xml`, `GetChequeraSerieByIdUseCaseImpl.java`, `ChequeraSerieEntity.java`), el endpoint `ChequeraSerieController` y `pom.xml` (versión `4.1.1` → `4.2.0`). La exposición de `ultimoEnvio` en respuestas existentes es backward-compatible y justifica un incremento minor de SemVer.
 
 ## [4.1.1] - 2026-08-17
 ### Changed

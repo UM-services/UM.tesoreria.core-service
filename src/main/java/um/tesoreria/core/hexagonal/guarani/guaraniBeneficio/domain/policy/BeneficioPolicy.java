@@ -47,6 +47,12 @@ public class BeneficioPolicy {
             return false;
         }
 
+        if (!Objects.equals(requisito.getRequisito(), requisito.getRequisitoRel().getRequisito())) {
+            log.warn("Beneficio omitido: requisito y requisitoRel no coinciden para persona={} requisito={} requisitoRel={}",
+                    requisito.getPersona(), requisito.getRequisito(), requisito.getRequisitoRel().getRequisito());
+            return false;
+        }
+
         return "S".equalsIgnoreCase(requisito.getRequisitoRel().getRequisitoIngreso())
                 && "S".equalsIgnoreCase(requisito.getRequisitoRel().getActivo());
     }
