@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.factory.ChequeraCuotaFactory;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.ChequeraAlternativaFaltanteException;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
@@ -26,6 +27,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.inOrder;
@@ -58,7 +60,7 @@ class PreuniversitarioChequeraDetailsCreatorTest {
                 .vencimiento3(OffsetDateTime.now().plusDays(30)).importe3(new BigDecimal("140.50"))
                 .build();
 
-        when(lectivoAlternativaService.findAllByTipo(1, 2, 3, 5)).thenReturn(List.of());
+        when(lectivoAlternativaService.findAllByTipo(1, 2, 3, 5)).thenReturn(List.of(lectivoAlternativa(4, 5)));
         when(lectivoCuotaService.findAllByTipo(1, 2, 3, 5)).thenReturn(List.of(source));
         when(chequeraCuotaService.calculateCodigoBarras(any(ChequeraCuota.class))).thenReturn("barcode");
         when(chequeraCuotaService.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -88,9 +90,9 @@ class PreuniversitarioChequeraDetailsCreatorTest {
         assertThat(cuota.getCompensada()).isZero();
 
         InOrder order = inOrder(chequeraTotalService, chequeraAlternativaService, chequeraCuotaService);
+        order.verify(chequeraTotalService).saveAll(anyList());
         order.verify(chequeraAlternativaService).saveAll(anyList());
         order.verify(chequeraCuotaService).saveAll(anyList());
-        order.verify(chequeraTotalService).saveAll(anyList());
     }
 
     @Test
@@ -104,7 +106,7 @@ class PreuniversitarioChequeraDetailsCreatorTest {
                 .vencimiento3(OffsetDateTime.now().plusDays(30)).importe3(new BigDecimal("1001"))
                 .build();
 
-        when(lectivoAlternativaService.findAllByTipo(1, 2, 3, 5)).thenReturn(List.of());
+        when(lectivoAlternativaService.findAllByTipo(1, 2, 3, 5)).thenReturn(List.of(lectivoAlternativa(4, 5)));
         when(lectivoCuotaService.findAllByTipo(1, 2, 3, 5)).thenReturn(List.of(source));
         when(chequeraCuotaService.calculateCodigoBarras(any(ChequeraCuota.class))).thenReturn("barcode");
         when(chequeraCuotaService.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -161,11 +163,16 @@ class PreuniversitarioChequeraDetailsCreatorTest {
     void create_totalsOnlyActiveCuotasAndKeepsProductsSeparated() {
         var series = serie();
         var factory = org.mockito.Mockito.mock(ChequeraCuotaFactory.class);
-        var activaProducto1 = ChequeraCuota.builder().productoId(1).importe1(new BigDecimal("11")).baja((byte) 0).build();
-        var bajaProducto1 = ChequeraCuota.builder().productoId(1).importe1(new BigDecimal("99")).baja((byte) 1).build();
-        var activaProducto2 = ChequeraCuota.builder().productoId(2).importe1(new BigDecimal("22")).baja((byte) 0).build();
+        var activaProducto1 = ChequeraCuota.builder().productoId(1).alternativaId(5)
+                .importe1(new BigDecimal("11")).baja((byte) 0).build();
+        var bajaProducto1 = ChequeraCuota.builder().productoId(1).alternativaId(5)
+                .importe1(new BigDecimal("99")).baja((byte) 1).build();
+        var activaProducto2 = ChequeraCuota.builder().productoId(2).alternativaId(5)
+                .importe1(new BigDecimal("22")).baja((byte) 0).build();
         stubCreateSources(List.of(cuota(1, OffsetDateTime.now().plusDays(1)),
                 cuota(2, OffsetDateTime.now().plusDays(2)), cuota(3, OffsetDateTime.now().plusDays(3))));
+        when(lectivoAlternativaService.findAllByTipo(1, 2, 3, 5))
+                .thenReturn(List.of(lectivoAlternativa(1, 5), lectivoAlternativa(2, 5)));
         when(factory.crear(any(), any(), org.mockito.ArgumentMatchers.anyInt(), any()))
                 .thenReturn(activaProducto1, bajaProducto1, activaProducto2);
 
@@ -216,9 +223,9 @@ class PreuniversitarioChequeraDetailsCreatorTest {
     void create_excludesNullImportesFromTotalsWithoutAbortingEmission() {
         var series = serie();
         var factory = org.mockito.Mockito.mock(ChequeraCuotaFactory.class);
-        var conImporte = ChequeraCuota.builder().productoId(4).cuotaId(1)
+        var conImporte = ChequeraCuota.builder().productoId(4).alternativaId(5).cuotaId(1)
                 .importe1(new BigDecimal("70")).baja((byte) 0).build();
-        var sinImporte = ChequeraCuota.builder().productoId(4).cuotaId(2)
+        var sinImporte = ChequeraCuota.builder().productoId(4).alternativaId(5).cuotaId(2)
                 .importe1(null).baja((byte) 0).build();
         stubCreateSources(List.of(cuota(1, OffsetDateTime.now().plusDays(1)),
                 cuota(2, OffsetDateTime.now().plusDays(2))));
@@ -257,7 +264,7 @@ class PreuniversitarioChequeraDetailsCreatorTest {
     }
 
     @Test
-    void create_copiesAlternativesBeforeCreatingCuotas() {
+    void create_copiesAlternativesForTheConstructedCuotas() {
         var source = org.mockito.Mockito.mock(LectivoAlternativa.class);
         when(source.getProductoId()).thenReturn(7);
         when(source.getAlternativaId()).thenReturn(5);
@@ -280,12 +287,32 @@ class PreuniversitarioChequeraDetailsCreatorTest {
         });
     }
 
+    @Test
+    void create_failsWithTheMissingKeyWhenTheCuotaHasNoMatchingAlternative() {
+        var series = serie();
+        when(lectivoAlternativaService.findAllByTipo(1, 2, 3, 5)).thenReturn(List.of(lectivoAlternativa(8, 5)));
+        when(lectivoCuotaService.findAllByTipo(1, 2, 3, 5))
+                .thenReturn(List.of(cuota(1, OffsetDateTime.now().plusDays(1))));
+        when(chequeraAlternativaService.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertThatThrownBy(() -> creator().create(series))
+                .isInstanceOf(ChequeraAlternativaFaltanteException.class)
+                .hasMessageContaining("1/3/4/4/5");
+
+        org.mockito.Mockito.verify(chequeraCuotaService, org.mockito.Mockito.never()).saveAll(anyList());
+        org.mockito.Mockito.verify(chequeraTotalService).saveAll(anyList());
+    }
+
     private void stubCreateSources(List<LectivoCuota> cuotas) {
-        when(lectivoAlternativaService.findAllByTipo(1, 2, 3, 5)).thenReturn(List.of());
+        when(lectivoAlternativaService.findAllByTipo(1, 2, 3, 5)).thenReturn(List.of(lectivoAlternativa(4, 5)));
         when(lectivoCuotaService.findAllByTipo(1, 2, 3, 5)).thenReturn(cuotas);
         when(chequeraCuotaService.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
         when(chequeraTotalService.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
         when(chequeraAlternativaService.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    private static LectivoAlternativa lectivoAlternativa(int productoId, int alternativaId) {
+        return new LectivoAlternativa(null, 1, 2, 3, productoId, alternativaId, "Plan de pagos", 1, 0);
     }
 
     private static LectivoCuota cuota(int cuotaId, OffsetDateTime vencimiento1) {
