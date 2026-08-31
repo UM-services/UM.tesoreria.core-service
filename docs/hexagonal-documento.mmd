@@ -13,7 +13,7 @@ classDiagram
         }
 
         class DocumentoRepository {
-            <<interface>>
+            << interface >>
             +findAll() List~Documento~
             +findById(Integer) Optional~Documento~
             +findFirstByGuaraniTipoDocumento(Integer) Optional~Documento~
@@ -38,9 +38,9 @@ classDiagram
     }
     namespace application {
 
-        class GetAllDocumentosUseCase { <<interface>> }
-        class GetDocumentoByIdUseCase { <<interface>> }
-        class GetDocumentoByGuaraniTipoDocumentoUseCase { <<interface>> }
+        class GetAllDocumentosUseCase { << interface >> }
+        class GetDocumentoByIdUseCase { << interface >> }
+        class GetDocumentoByGuaraniTipoDocumentoUseCase { << interface >> }
     }
 
     namespace infrastructure_persistence {
@@ -51,7 +51,7 @@ classDiagram
             }
 
             class JpaDocumentoRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findByDocumentoId(Integer) Optional~DocumentoEntity~
                 +findFirstByGuaraniTipoDocumento(Integer) Optional~DocumentoEntity~
             }

@@ -153,13 +153,14 @@ const diagramPromises = diagrams.map(diag => {
       let content = data.startsWith('---') ? data.substring(data.indexOf('---', 3) + 3).trim() : data;
       content = content.replace(/[ \t]*namespace\s+[\w_-]+\s*\{\s*\}[ \t]*\r?\n?/g, '');
       const valid = /^(flowchart|sequenceDiagram|erDiagram|classDiagram|stateDiagram|gantt|pie|journey|requirementDiagram|gitGraph|mindmap|timeline|quadrantChart)/.test(content);
+      const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
       const container = document.getElementById(diag.id);
       const diagramElement = document.createElement('div');
       diagramElement.className = 'section';
 
       if (valid) {
-        diagramElement.innerHTML = `<h3>${diag.title}</h3><div class="mermaid">${content}</div>`;
+        diagramElement.innerHTML = `<h3>${diag.title}</h3><div class="mermaid">${escapeHtml(content)}</div>`;
       } else {
         diagramElement.innerHTML = `<div class="warn">El archivo <b>${diag.file}</b> no contiene un diagrama Mermaid valido.</div>`;
       }

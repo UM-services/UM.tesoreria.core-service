@@ -13,32 +13,32 @@ classDiagram
         }
 
         class CreateGuaraniUbicacionUseCase {
-            <<interface>>
+            << interface >>
             +create(GuaraniUbicacion) GuaraniUbicacion
         }
 
         class GetAllGuaraniUbicacionesUseCase {
-            <<interface>>
+            << interface >>
             +getAll() List~GuaraniUbicacion~
         }
 
         class GetGuaraniUbicacionByIdUseCase {
-            <<interface>>
+            << interface >>
             +getById(Integer) Optional~GuaraniUbicacion~
         }
 
         class UpdateGuaraniUbicacionUseCase {
-            <<interface>>
+            << interface >>
             +update(GuaraniUbicacion) GuaraniUbicacion
         }
 
         class DeleteGuaraniUbicacionUseCase {
-            <<interface>>
+            << interface >>
             +delete(Integer) void
         }
 
         class GetGuaraniUbicacionByUbicacionUseCase {
-            <<interface>>
+            << interface >>
             +findByUbicacion(Integer) GuaraniUbicacion
         }
     }
@@ -61,7 +61,7 @@ classDiagram
         }
 
         class JpaGuaraniUbicacionRepository {
-            <<interface>>
+            << interface >>
             +findAll() List~GuaraniUbicacionEntity~
             +findById(Integer) Optional~GuaraniUbicacionEntity~
         }

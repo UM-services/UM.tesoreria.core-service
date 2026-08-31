@@ -31,7 +31,7 @@ classDiagram
         }
 
         class MercadoPagoContextRepository {
-            <<interface>>
+            << interface >>
             +findByMercadoPagoContextId(Long) Optional~MercadoPagoContext~
             +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContext~
             +findByReservaVacanteIdAndActivo(UUID, Byte) Optional~MercadoPagoContext~
@@ -89,18 +89,18 @@ classDiagram
     }
     namespace application {
 
-        class AddMercadoPagoContextUseCase { <<interface>> }
-        class FindByMercadoPagoContextIdUseCase { <<interface>> }
-        class FindActiveByChequeraCuotaIdUseCase { <<interface>> }
-        class FindActiveByReservaVacanteIdUseCase { <<interface>> }
-        class FindAllActiveChequeraCuotaUseCase { <<interface>> }
-        class FindAllActiveToChangeUseCase { <<interface>> }
-        class FindAllByChequeraCuotaIdAndActivoUseCase { <<interface>> }
-        class FindAllByChequeraCuotaIdsUseCase { <<interface>> }
-        class FindAllSinImputarUseCase { <<interface>> }
-        class ProcessPaymentEventUseCase { <<interface>> }
-        class SaveAllMercadoPagoContextsUseCase { <<interface>> }
-        class UpdateMercadoPagoContextUseCase { <<interface>> }
+        class AddMercadoPagoContextUseCase { << interface >> }
+        class FindByMercadoPagoContextIdUseCase { << interface >> }
+        class FindActiveByChequeraCuotaIdUseCase { << interface >> }
+        class FindActiveByReservaVacanteIdUseCase { << interface >> }
+        class FindAllActiveChequeraCuotaUseCase { << interface >> }
+        class FindAllActiveToChangeUseCase { << interface >> }
+        class FindAllByChequeraCuotaIdAndActivoUseCase { << interface >> }
+        class FindAllByChequeraCuotaIdsUseCase { << interface >> }
+        class FindAllSinImputarUseCase { << interface >> }
+        class ProcessPaymentEventUseCase { << interface >> }
+        class SaveAllMercadoPagoContextsUseCase { << interface >> }
+        class UpdateMercadoPagoContextUseCase { << interface >> }
 
         class MercadoPagoContextException
     }
@@ -121,7 +121,7 @@ classDiagram
             }
 
             class JpaMercadoPagoContextRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findByMercadoPagoContextId(Long) Optional~MercadoPagoContextEntity~
                 +findByChequeraCuotaIdAndActivo(Long, Byte) Optional~MercadoPagoContextEntity~
                 +findByReservaVacanteId(UUID) Optional~MercadoPagoContextEntity~

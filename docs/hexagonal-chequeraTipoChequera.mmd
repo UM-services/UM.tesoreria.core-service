@@ -22,7 +22,7 @@ classDiagram
         }
 
         class TipoChequeraRepository {
-            <<interface>>
+            << interface >>
             +findAll() List~TipoChequera~
             +findAllAsignable(Integer, Integer, Integer, Integer) List~TipoChequera~
             +findAllByFacultadIdAndGeograficaId(Integer, Integer) List~TipoChequera~
@@ -40,7 +40,7 @@ classDiagram
         }
 
         class SearchTipoChequeraUseCase {
-            <<interface>>
+            << interface >>
             +searchTipoChequeras(List~String~) List~TipoChequeraSearch~
             +searchTipoChequerasByGeograficaId(List~String~, Integer) List~TipoChequeraSearch~
         }
@@ -108,7 +108,7 @@ classDiagram
             }
 
             class JpaTipoChequeraRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findAllByTipoChequeraIdInAndGeograficaId(List~Integer~, Integer) List~TipoChequeraEntity~
                 +findAllByClaseChequeraId(Integer) List~TipoChequeraEntity~
                 +findAllByClaseChequeraIdIn(List~Integer~) List~TipoChequeraEntity~
@@ -129,7 +129,7 @@ classDiagram
             }
 
             class TipoChequeraSearchRepository {
-                <<interface>>
+                << interface >>
                 +findAllByStrings(List~String~) List~TipoChequeraSearch~
                 +findAllByStringsAndGeograficaId(List~String~, Integer) List~TipoChequeraSearch~
             }

@@ -31,7 +31,7 @@ classDiagram
         }
 
         class ContratoRepository {
-            <<interface>>
+            << interface >>
             +create(Contrato) Contrato
             +findById(Long) Optional~Contrato~
             +findAllByFacultad(Integer, Integer) List~Contrato~
@@ -108,39 +108,39 @@ classDiagram
     namespace application {
 
         class CreateContratoUseCase {
-            <<interface>>
+            << interface >>
             +createContrato(Contrato) Contrato
         }
         class DeleteContratoUseCase {
-            <<interface>>
+            << interface >>
             +deleteContrato(Long) boolean
         }
         class GetAllContratosAjustablesUseCase {
-            <<interface>>
+            << interface >>
             +getContratosAjustables(OffsetDateTime) List~Contrato~
         }
         class GetAllContratosByFacultadUseCase {
-            <<interface>>
+            << interface >>
             +getContratosByFacultad(Integer, Integer) List~Contrato~
         }
         class GetAllContratosByPersonaUseCase {
-            <<interface>>
+            << interface >>
             +getContratosByPersona(BigDecimal, Integer) List~Contrato~
         }
         class GetAllContratosVigentesUseCase {
-            <<interface>>
+            << interface >>
             +getContratosVigentes(OffsetDateTime) List~Contrato~
         }
         class GetContratoByIdUseCase {
-            <<interface>>
+            << interface >>
             +getContratoById(Long) Optional~Contrato~
         }
         class SaveAllContratosUseCase {
-            <<interface>>
+            << interface >>
             +saveAllContratos(List~Contrato~) List~Contrato~
         }
         class UpdateContratoUseCase {
-            <<interface>>
+            << interface >>
             +updateContrato(Long, Contrato) Optional~Contrato~
         }
     }
@@ -171,7 +171,7 @@ classDiagram
             }
 
             class JpaContratoRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findAllByFacultadIdAndGeograficaId(Integer, Integer) List~ContratoEntity~
                 +findAllByAjusteAndHastaGreaterThanEqual(Byte, OffsetDateTime) List~ContratoEntity~
                 +findAllByHastaGreaterThanEqual(OffsetDateTime) List~ContratoEntity~

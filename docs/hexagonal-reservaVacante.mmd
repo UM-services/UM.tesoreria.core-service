@@ -22,7 +22,7 @@ classDiagram
         }
 
         class ReservaVacanteRepository {
-            <<interface>>
+            << interface >>
             +create(ReservaVacante) ReservaVacante
             +findByReservaVacanteId(UUID) Optional~ReservaVacante~
             +update(ReservaVacante, UUID) ReservaVacante
@@ -65,15 +65,15 @@ classDiagram
     namespace application {
 
         class CreateReservaVacanteUseCase {
-            <<interface>>
+            << interface >>
             +createReservaVacante(ReservaVacanteRequest) ReservaVacante
         }
         class FindReservaVacanteUseCase {
-            <<interface>>
+            << interface >>
             +findByReservaVacanteId(UUID) ReservaVacante
         }
         class UpdateReservaVacanteUseCase {
-            <<interface>>
+            << interface >>
             +update(ReservaVacante, UUID) ReservaVacante
         }
     }
@@ -91,7 +91,7 @@ classDiagram
             }
 
             class JpaReservaVacanteRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findByReservaVacanteId(UUID) Optional~ReservaVacanteEntity~
             }
 
