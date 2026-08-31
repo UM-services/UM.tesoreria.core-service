@@ -27,7 +27,7 @@ classDiagram
     }
     namespace application {
 
-        class RecalculateCuotaByUniqueIndexUseCase { <<interface>> }
+        class RecalculateCuotaByUniqueIndexUseCase { << interface >> }
     }
 
     namespace infrastructure_web {
@@ -85,27 +85,27 @@ classDiagram
     PoliticaArancelariaDtoMapper --> PoliticaArancelariaResponse : maps
 
     class ChequeraCuotaService {
-        <<external>>
+        << external >>
         +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
         +getCuotaActual(Integer, Integer, Long, Integer, Integer, OffsetDateTime) ChequeraCuota
     }
 
     class ChequeraCuota {
-        <<external>>
+        << external >>
     }
 
     class LectivoCuotaService {
-        <<external>>
+        << external >>
         +findCuotaByFecha(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) LectivoCuota
         +findAllByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
         +findAllByFacultadLectivoTipo(Integer, Integer, Integer) List~LectivoCuota~
     }
 
     class LectivoService {
-        <<external>>
+        << external >>
         +findByFecha(OffsetDateTime) Lectivo
     }
 
     class LectivoCuota {
-        <<external>>
+        << external >>
     }

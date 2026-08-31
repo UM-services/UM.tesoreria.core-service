@@ -39,7 +39,7 @@ classDiagram
         }
 
         class ArticuloRepository {
-            <<interface>>
+            << interface >>
             +create(Articulo) Articulo
             +findById(Long) Optional~Articulo~
             +findAll() List~Articulo~
@@ -114,42 +114,42 @@ classDiagram
     namespace application {
 
         class CreateArticuloUseCase {
-            <<interface>>
+            << interface >>
             +createArticulo(Articulo) Articulo
         }
 
         class GetArticuloByIdUseCase {
-            <<interface>>
+            << interface >>
             +getArticuloById(Long) Optional~Articulo~
         }
 
         class GetAllArticulosUseCase {
-            <<interface>>
+            << interface >>
             +getAllArticulos() List~Articulo~
         }
 
         class UpdateArticuloUseCase {
-            <<interface>>
+            << interface >>
             +updateArticulo(Long, Articulo) Optional~Articulo~
         }
 
         class DeleteArticuloUseCase {
-            <<interface>>
+            << interface >>
             +deleteArticulo(Long) boolean
         }
 
         class GetNewArticuloUseCase {
-            <<interface>>
+            << interface >>
             +getNewArticulo() Articulo
         }
 
         class GetPaginatedArticulosUseCase {
-            <<interface>>
+            << interface >>
             +getPaginated(int, int) PaginatedResponse~Articulo~
         }
 
         class SearchArticulosUseCase {
-            <<interface>>
+            << interface >>
             +searchArticulos(String) List~ArticuloSearch~
         }
     }
@@ -171,7 +171,7 @@ classDiagram
             }
 
             class JpaArticuloRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findTopByOrderByArticuloIdDesc() Optional~ArticuloEntity~
             }
 

@@ -22,7 +22,7 @@ classDiagram
         }
 
         class PersonaRepository {
-            <<interface>>
+            << interface >>
             +findByPersonaIdAndDocumentoId(BigDecimal, Integer) Optional~Persona~
             +findTopByPersonaId(BigDecimal) Optional~Persona~
             +findByUniqueId(Long) Optional~Persona~
@@ -81,20 +81,20 @@ classDiagram
     }
     namespace application {
 
-        class GetPersonaByUniqueUseCase { <<interface>> }
-        class GetPersonaByIdUseCase { <<interface>> }
-        class GetPersonaByUniqueIdUseCase { <<interface>> }
-        class FindAllSantanderUseCase { <<interface>> }
-        class SavePersonaUseCase { <<interface>> }
-        class FindInscriptosSinChequeraUseCase { <<interface>> }
-        class FindInscriptosSinChequeraDefaultUseCase { <<interface>> }
-        class FindPreInscriptosSinChequeraUseCase { <<interface>> }
-        class FindDeudoresByLectivoUseCase { <<interface>> }
-        class FindUnifiedsUseCase { <<interface>> }
-        class FindByStringsUseCase { <<interface>> }
-        class GetDeudaPersonaUseCase { <<interface>> }
-        class GetInscripcionFullUseCase { <<interface>> }
-        class GetDeudaExamenUseCase { <<interface>> }
+        class GetPersonaByUniqueUseCase { << interface >> }
+        class GetPersonaByIdUseCase { << interface >> }
+        class GetPersonaByUniqueIdUseCase { << interface >> }
+        class FindAllSantanderUseCase { << interface >> }
+        class SavePersonaUseCase { << interface >> }
+        class FindInscriptosSinChequeraUseCase { << interface >> }
+        class FindInscriptosSinChequeraDefaultUseCase { << interface >> }
+        class FindPreInscriptosSinChequeraUseCase { << interface >> }
+        class FindDeudoresByLectivoUseCase { << interface >> }
+        class FindUnifiedsUseCase { << interface >> }
+        class FindByStringsUseCase { << interface >> }
+        class GetDeudaPersonaUseCase { << interface >> }
+        class GetInscripcionFullUseCase { << interface >> }
+        class GetDeudaExamenUseCase { << interface >> }
     }
 
     namespace infrastructure_persistence {
@@ -107,7 +107,7 @@ classDiagram
             }
 
             class JpaPersonaRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findByPersonaIdAndDocumentoId(BigDecimal, Integer) Optional~PersonaEntity~
                 +findTopByPersonaId(BigDecimal) Optional~PersonaEntity~
                 +findByUniqueId(Long) Optional~PersonaEntity~

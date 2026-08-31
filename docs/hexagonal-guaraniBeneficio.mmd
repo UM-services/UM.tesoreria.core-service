@@ -13,22 +13,22 @@ classDiagram
         }
 
         class CreateGuaraniBeneficioUseCase {
-            <<interface>>
+            << interface >>
             +create(GuaraniBeneficio) GuaraniBeneficio
         }
 
         class GetGuaraniBeneficioByRequisitoUseCase {
-            <<interface>>
+            << interface >>
             +getGuaraniBeneficioByRequisito(Integer) Optional~GuaraniBeneficio~
         }
 
         class UpdateGuaraniBeneficioByRequisitoUseCase {
-            <<interface>>
+            << interface >>
             +updateByRequisito(Integer, GuaraniBeneficio) GuaraniBeneficio
         }
 
         class GetAllGuaraniBeneficiosUseCase {
-            <<interface>>
+            << interface >>
             +getAllGuaraniBeneficios() List~GuaraniBeneficio~
         }
     }
@@ -67,7 +67,7 @@ classDiagram
 
     namespace domain_ports_out {
         class GuaraniBeneficioRepository {
-            <<interface>>
+            << interface >>
             +findByRequisito(Integer) Optional~GuaraniBeneficio~
             +save(GuaraniBeneficio) GuaraniBeneficio
             +findAll() List~GuaraniBeneficio~
@@ -82,7 +82,7 @@ classDiagram
         }
 
         class JpaGuaraniBeneficioRepository {
-            <<interface>>
+            << interface >>
             +findByRequisito(Integer) Optional~GuaraniBeneficioEntity~
         }
 

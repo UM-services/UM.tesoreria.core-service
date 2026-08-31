@@ -23,7 +23,7 @@ classDiagram
         }
 
         class UsuarioRepository {
-            <<interface>>
+            << interface >>
             +findByLogin(String) Optional~Usuario~
             +findByPassword(String) Optional~Usuario~
             +findByUserId(Long) Optional~Usuario~
@@ -60,12 +60,12 @@ classDiagram
     }
     namespace application {
 
-        class CreateUsuarioUseCase { <<interface>> }
-        class FindUsuarioByGoogleMailUseCase { <<interface>> }
-        class FindUsuarioByLoginUseCase { <<interface>> }
-        class FindUsuarioByPasswordUseCase { <<interface>> }
-        class UpdateLastLogUseCase { <<interface>> }
-        class UpdateUsuarioUseCase { <<interface>> }
+        class CreateUsuarioUseCase { << interface >> }
+        class FindUsuarioByGoogleMailUseCase { << interface >> }
+        class FindUsuarioByLoginUseCase { << interface >> }
+        class FindUsuarioByPasswordUseCase { << interface >> }
+        class UpdateLastLogUseCase { << interface >> }
+        class UpdateUsuarioUseCase { << interface >> }
     }
 
     namespace infrastructure_persistence {
@@ -86,7 +86,7 @@ classDiagram
             }
 
             class JpaUsuarioRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findByLogin(String) Optional~UsuarioEntity~
                 +findByPassword(String) Optional~UsuarioEntity~
                 +findByUserId(Long) Optional~UsuarioEntity~

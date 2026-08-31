@@ -22,7 +22,7 @@ classDiagram
         }
 
         class FacultadRepository {
-            <<interface>>
+            << interface >>
             +findAll() List~Facultad~
             +findAllIn(List~Integer~) List~Facultad~
             +findById(Integer) Optional~Facultad~
@@ -63,22 +63,22 @@ classDiagram
     namespace application {
 
         class GetAllFacultadesUseCase {
-            <<interface>>
+            << interface >>
             +getAll() List~Facultad~
         }
 
         class GetFacultadByIdUseCase {
-            <<interface>>
+            << interface >>
             +getById(Integer) Optional~Facultad~
         }
 
         class GetFacultadesFiltradasUseCase {
-            <<interface>>
+            << interface >>
             +getFacultadesFiltradas() List~Facultad~
         }
 
         class GetFacultadesConResponsableAcademicaUseCase {
-            <<interface>>
+            << interface >>
             +getFacultadesConResponsableAcademica() List~Facultad~
         }
     }
@@ -98,7 +98,7 @@ classDiagram
             }
 
             class JpaFacultadRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findAllByFacultadIdIn(List~Integer~) List~FacultadEntity~
                 +findByFacultadId(Integer) Optional~FacultadEntity~
             }

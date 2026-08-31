@@ -15,7 +15,7 @@ classDiagram
         }
 
         class CampanhaRepository {
-            <<interface>>
+            << interface >>
             +create(Campanha) Campanha
             +findById(UUID) Optional~Campanha~
             +findAll() List~Campanha~
@@ -64,23 +64,23 @@ classDiagram
     namespace application {
 
         class CreateCampanhaUseCase {
-            <<interface>>
+            << interface >>
             +createCampanha(Campanha) Campanha
         }
         class GetCampanhaByIdUseCase {
-            <<interface>>
+            << interface >>
             +getCampanhaById(UUID) Optional~Campanha~
         }
         class GetAllCampanhasUseCase {
-            <<interface>>
+            << interface >>
             +getAllCampanhas() List~Campanha~
         }
         class UpdateCampanhaUseCase {
-            <<interface>>
+            << interface >>
             +updateCampanha(UUID, Campanha) Optional~Campanha~
         }
         class DeleteCampanhaUseCase {
-            <<interface>>
+            << interface >>
             +deleteCampanha(UUID) boolean
         }
     }
@@ -95,7 +95,7 @@ classDiagram
             }
 
             class JpaCampanhaRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findByCampanhaId(UUID) Optional~CampanhaEntity~
                 +existsByCampanhaId(UUID) boolean
                 +deleteByCampanhaId(UUID) void

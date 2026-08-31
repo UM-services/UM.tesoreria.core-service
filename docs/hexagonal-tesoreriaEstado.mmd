@@ -20,7 +20,7 @@ classDiagram
         }
 
         class FindTesoreriaEstadoByUniqueUseCase {
-            <<interface>>
+            << interface >>
             +findByUnique(Integer, BigDecimal, Integer) Optional~TesoreriaEstadoFacultad~
         }
     }
@@ -45,7 +45,7 @@ classDiagram
 
     namespace domain_ports_out {
         class TesoreriaEstadoRepository {
-            <<interface>>
+            << interface >>
             +findByUnique(Integer, BigDecimal, Integer) Optional~TesoreriaEstadoFacultad~
         }
     }

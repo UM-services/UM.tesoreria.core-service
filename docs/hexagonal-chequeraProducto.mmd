@@ -13,18 +13,18 @@ classDiagram
         }
 
         class ProductoRepository {
-            <<interface>>
+            << interface >>
             +findAll() List~Producto~
             +findById(Integer) Optional~Producto~
         }
 
         class GetAllProductosUseCase {
-            <<interface>>
+            << interface >>
             +getAllProductos() List~Producto~
         }
 
         class GetProductoByIdUseCase {
-            <<interface>>
+            << interface >>
             +getProductoById(Integer) Optional~Producto~
         }
     }
@@ -56,7 +56,7 @@ classDiagram
             }
 
             class JpaProductoRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findByProductoId(Integer) Optional~ProductoEntity~
             }
 
