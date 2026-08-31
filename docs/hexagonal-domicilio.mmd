@@ -29,12 +29,12 @@ classDiagram
         }
 
         class Jsonifyable {
-            <<interface>>
+            << interface >>
             +jsonify() String
         }
 
         class DomicilioRepository {
-            <<interface>>
+            << interface >>
             +create(Domicilio) Domicilio
             +findById(Long) Optional~Domicilio~
             +findByUnique(BigDecimal, Integer) Optional~Domicilio~
@@ -81,15 +81,15 @@ classDiagram
     }
     namespace application {
 
-        class CreateDomicilioUseCase { <<interface>> }
-        class GetDomicilioByIdUseCase { <<interface>> }
-        class GetDomicilioByUniqueUseCase { <<interface>> }
-        class GetDomicilioWithPagadorUseCase { <<interface>> }
-        class CaptureDomicilioUseCase { <<interface>> }
-        class SincronizeDomicilioUseCase { <<interface>> }
-        class DeleteDomicilioUseCase { <<interface>> }
-        class GetAllDomiciliosByUnifiedsUseCase { <<interface>> }
-        class GetDomicilioByPersonaIdUseCase { <<interface>> }
+        class CreateDomicilioUseCase { << interface >> }
+        class GetDomicilioByIdUseCase { << interface >> }
+        class GetDomicilioByUniqueUseCase { << interface >> }
+        class GetDomicilioWithPagadorUseCase { << interface >> }
+        class CaptureDomicilioUseCase { << interface >> }
+        class SincronizeDomicilioUseCase { << interface >> }
+        class DeleteDomicilioUseCase { << interface >> }
+        class GetAllDomiciliosByUnifiedsUseCase { << interface >> }
+        class GetDomicilioByPersonaIdUseCase { << interface >> }
 
         class DomicilioException
     }
@@ -118,7 +118,7 @@ classDiagram
             }
 
             class JpaDomicilioRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findByDomicilioId(Long) Optional~DomicilioEntity~
                 +findByPersonaIdAndDocumentoId(Integer, Integer) Optional~DomicilioEntity~
                 +findFirstByPersonaId(Integer) Optional~DomicilioEntity~

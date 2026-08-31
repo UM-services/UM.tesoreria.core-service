@@ -22,7 +22,7 @@ classDiagram
         }
 
         class DependenciaRepository {
-            <<interface>>
+            << interface >>
             +findAll() List~Dependencia~
             +findById(Integer) Optional~Dependencia~
             +save(Dependencia) Dependencia
@@ -59,17 +59,17 @@ classDiagram
     namespace application {
 
         class GetAllDependenciasUseCase {
-            <<interface>>
+            << interface >>
             +getAll() List~Dependencia~
         }
 
         class GetDependenciaByIdUseCase {
-            <<interface>>
+            << interface >>
             +getById(Integer) Optional~Dependencia~
         }
 
         class UpdateDependenciaUseCase {
-            <<interface>>
+            << interface >>
             +update(Integer, Dependencia) Dependencia
         }
     }
@@ -89,7 +89,7 @@ classDiagram
             }
 
             class JpaDependenciaRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findAllByOrderByNombre() List~DependenciaEntity~
                 +findByDependenciaId(Integer) Optional~DependenciaEntity~
             }

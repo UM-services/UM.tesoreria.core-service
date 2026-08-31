@@ -42,7 +42,7 @@ classDiagram
         class TipoChequera
 
         class ChequeraCuotaRepository {
-            <<interface>>
+            << interface >>
             +findAllByChequera(Integer, Integer, Long) List~ChequeraCuota~
             +findAllByChequeraIds(Integer, Integer, Long, Integer, Integer) List~ChequeraCuota~
             +findAllByAlternativa(Integer, Integer, Long, Integer, Integer) List~ChequeraCuota~
@@ -64,27 +64,27 @@ classDiagram
             +calculateTotalCuotasPagadas(Integer, Integer, Long, Integer, Integer) BigDecimal
         }
 
-        class CalculateDeudaUseCase { <<interface>> }
-        class CalculateTotalCuotasActivasUseCase { <<interface>> }
-        class CalculateTotalCuotasPagadasUseCase { <<interface>> }
-        class DeleteAllByChequeraUseCase { <<interface>> }
-        class FindAllByChequeraAlternativaConImporteUseCase { <<interface>> }
-        class FindAllByChequeraAlternativaUseCase { <<interface>> }
-        class FindAllByChequeraIdsUseCase { <<interface>> }
-        class FindAllByChequeraUseCase { <<interface>> }
-        class FindAllByFacultadTipoChequeraSerieIdsUseCase { <<interface>> }
-        class FindAllDebidasUseCase { <<interface>> }
-        class FindAllInconsistenciasUseCase { <<interface>> }
-        class FindAllPendientesBajaUseCase { <<interface>> }
-        class FindAllPendientesUseCase { <<interface>> }
-        class FindAllPeriodosLectivoUseCase { <<interface>> }
-        class GetChequeraCuotaByIdUseCase { <<interface>> }
-        class GetChequeraCuotaByUniqueUseCase { <<interface>> }
-        class GetCuotaActualUseCase { <<interface>> }
-        class GetOneActivaImpagaPreviaUseCase { <<interface>> }
-        class SaveAllChequeraCuotasUseCase { <<interface>> }
-        class UpdateBarrasUseCase { <<interface>> }
-        class UpdateChequeraCuotaUseCase { <<interface>> }
+        class CalculateDeudaUseCase { << interface >> }
+        class CalculateTotalCuotasActivasUseCase { << interface >> }
+        class CalculateTotalCuotasPagadasUseCase { << interface >> }
+        class DeleteAllByChequeraUseCase { << interface >> }
+        class FindAllByChequeraAlternativaConImporteUseCase { << interface >> }
+        class FindAllByChequeraAlternativaUseCase { << interface >> }
+        class FindAllByChequeraIdsUseCase { << interface >> }
+        class FindAllByChequeraUseCase { << interface >> }
+        class FindAllByFacultadTipoChequeraSerieIdsUseCase { << interface >> }
+        class FindAllDebidasUseCase { << interface >> }
+        class FindAllInconsistenciasUseCase { << interface >> }
+        class FindAllPendientesBajaUseCase { << interface >> }
+        class FindAllPendientesUseCase { << interface >> }
+        class FindAllPeriodosLectivoUseCase { << interface >> }
+        class GetChequeraCuotaByIdUseCase { << interface >> }
+        class GetChequeraCuotaByUniqueUseCase { << interface >> }
+        class GetCuotaActualUseCase { << interface >> }
+        class GetOneActivaImpagaPreviaUseCase { << interface >> }
+        class SaveAllChequeraCuotasUseCase { << interface >> }
+        class UpdateBarrasUseCase { << interface >> }
+        class UpdateChequeraCuotaUseCase { << interface >> }
     }
 
     namespace application {
@@ -165,7 +165,7 @@ classDiagram
             }
 
             class JpaChequeraCuotaRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(...) List~ChequeraCuotaEntity~
                 +findByChequeraCuotaId(Long) Optional~ChequeraCuotaEntity~
             }

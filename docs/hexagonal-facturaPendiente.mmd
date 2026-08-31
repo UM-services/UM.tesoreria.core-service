@@ -23,7 +23,7 @@ classDiagram
         }
 
         class FacturaPendienteRepository {
-            <<interface>>
+            << interface >>
             +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
             +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
         }
@@ -41,14 +41,14 @@ classDiagram
         }
 
         class GetFacturasPendientesUseCase {
-            <<interface>>
+            << interface >>
             +getFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
         }
     }
 
     namespace infrastructure_persistence {
             class FacturaPendienteEntity {
-                <<Immutable>>
+                << Immutable >>
                 +Long proveedorMovimientoId
                 +String razonSocial
                 +String cuit
@@ -65,7 +65,7 @@ classDiagram
             }
 
             class JpaFacturaPendienteRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
                 +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendienteEntity~
             }

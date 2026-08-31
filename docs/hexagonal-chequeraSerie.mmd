@@ -41,7 +41,7 @@ classDiagram
         }
 
         class ChequeraSerieRepository {
-            <<interface>>
+            << interface >>
             +findAll() List~ChequeraSerie~
             +findById(Long) Optional~ChequeraSerie~
             +findAllByFacultad(Integer, Integer) List~ChequeraSerie~
@@ -103,7 +103,7 @@ classDiagram
 
         class ChequeraSerieException
         class FindPreuniversitarioFromDatosGuaraniUseCase {
-            <<interface>>
+            << interface >>
             +find(BigDecimal, Integer, Integer, Integer, Integer) ChequeraSerie
         }
     }
@@ -118,7 +118,7 @@ classDiagram
             }
 
             class JpaChequeraSerieRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
             }
 
             class JpaChequeraSerieRepositoryAdapter {

@@ -36,7 +36,7 @@ classDiagram
         }
 
         class ChequeraPagoRepository {
-            <<interface>>
+            << interface >>
             +findAllByTipoPagoAndAcreditacion(Integer, OffsetDateTime) List~ChequeraPago~
             +findAllByTipoPagoAndFechaBetween(Integer, OffsetDateTime, OffsetDateTime) List~ChequeraPago~
             +findAllByChequera(Integer, Integer, Long) List~ChequeraPago~
@@ -101,18 +101,18 @@ classDiagram
 
         class ChequeraPagoException
 
-        class CreateChequeraPagoUseCase { <<interface>> }
-        class DeletePagosByChequeraUseCase { <<interface>> }
-        class FindPagosByChequeraUseCase { <<interface>> }
-        class FindPagosByCuotaUseCase { <<interface>> }
-        class FindPagosByFacultadAndTipoChequeraAndLectivoUseCase { <<interface>> }
-        class FindPagosByTipoPagoAndFechaAcreditacionUseCase { <<interface>> }
-        class FindPagosByTipoPagoAndFechaPagoUseCase { <<interface>> }
-        class FindPagosPendientesFacturaUseCase { <<interface>> }
-        class GetChequeraPagoByIdMercadoPagoUseCase { <<interface>> }
-        class GetChequeraPagoByIdUseCase { <<interface>> }
-        class GetNextOrdenUseCase { <<interface>> }
-        class IsPagadoUseCase { <<interface>> }
+        class CreateChequeraPagoUseCase { << interface >> }
+        class DeletePagosByChequeraUseCase { << interface >> }
+        class FindPagosByChequeraUseCase { << interface >> }
+        class FindPagosByCuotaUseCase { << interface >> }
+        class FindPagosByFacultadAndTipoChequeraAndLectivoUseCase { << interface >> }
+        class FindPagosByTipoPagoAndFechaAcreditacionUseCase { << interface >> }
+        class FindPagosByTipoPagoAndFechaPagoUseCase { << interface >> }
+        class FindPagosPendientesFacturaUseCase { << interface >> }
+        class GetChequeraPagoByIdMercadoPagoUseCase { << interface >> }
+        class GetChequeraPagoByIdUseCase { << interface >> }
+        class GetNextOrdenUseCase { << interface >> }
+        class IsPagadoUseCase { << interface >> }
     }
 
     namespace infrastructure_persistence {
@@ -143,7 +143,7 @@ classDiagram
             }
 
             class JpaChequeraPagoRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long) List~ChequeraPagoEntity~
                 +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Long, Integer, Integer, Integer) List~ChequeraPagoEntity~
                 +findAllByFechaBetweenAndTipoPagoIdGreaterThan(OffsetDateTime, OffsetDateTime, Integer) List~ChequeraPagoEntity~
@@ -311,38 +311,38 @@ classDiagram
     ChequeraPagoDtoMapper --> ChequeraPagoResponse : maps
 
     class ChequeraCuotaService {
-        <<external>>
+        << external >>
         +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
     }
 
     class FacturacionElectronicaService {
-        <<external>>
+        << external >>
         +findAllByChequeraPagoIds(List~Long~) List~FacturacionElectronica~
     }
 
     class TipoPago {
-        <<external>>
+        << external >>
         +Integer tipoPagoId
         +String descripcion
     }
 
     class Producto {
-        <<external>>
+        << external >>
         +Integer productoId
         +String nombre
     }
 
     class ChequeraCuota {
-        <<external>>
+        << external >>
         +Long chequeraCuotaId
     }
 
     class ProductoMapper {
-        <<external>>
+        << external >>
         +toDomainModel(ProductoEntity) Producto
     }
 
     class ChequeraCuotaMapper {
-        <<external>>
+        << external >>
         +toDomain(ChequeraCuotaEntity) ChequeraCuota
     }

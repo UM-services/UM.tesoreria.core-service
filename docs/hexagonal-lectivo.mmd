@@ -15,7 +15,7 @@ classDiagram
         }
 
         class LectivoRepository {
-            <<interface>>
+            << interface >>
             +findAll() List~Lectivo~
             +findAllReverse() List~Lectivo~
             +findAllByPersona(BigDecimal, Integer) List~Lectivo~
@@ -73,7 +73,7 @@ classDiagram
             }
 
             class JpaLectivoRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findAllByLectivoIdIn(List~Integer~, Sort) List~LectivoEntity~
                 +findByLectivoId(Integer) Optional~LectivoEntity~
                 +findByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqual(OffsetDateTime, OffsetDateTime) Optional~LectivoEntity~
