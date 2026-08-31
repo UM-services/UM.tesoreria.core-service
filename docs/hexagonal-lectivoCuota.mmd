@@ -27,29 +27,29 @@ classDiagram
 
     namespace domain_ports_in {
         class FindLectivoCuotaByUniqueKeyUseCase {
-            <<interface>>
+            << interface >>
             +findByUniqueKey(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuota~
         }
 
         class GetLectivoCuotasByFacultadLectivoTipoUseCase {
-            <<interface>>
+            << interface >>
             +getLectivoCuotasByFacultadLectivoTipo(Integer, Integer, Integer) List~LectivoCuota~
         }
 
         class GetLectivoCuotasByTipoUseCase {
-            <<interface>>
+            << interface >>
             +getLectivoCuotasByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
         }
 
         class FindLectivoCuotaByFechaUseCase {
-            <<interface>>
+            << interface >>
             +findCuotaByFecha(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) Optional~LectivoCuota~
         }
     }
 
     namespace domain_ports_out {
         class LectivoCuotaRepository {
-            <<interface>>
+            << interface >>
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoCuota~
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer, Integer, Integer, Integer) List~LectivoCuota~
             +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuota~
@@ -135,7 +135,7 @@ classDiagram
         }
 
         class JpaLectivoCuotaRepository {
-            <<interface>>
+            << interface >>
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~LectivoCuotaEntity~
             +findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer, Integer, Integer, Integer) List~LectivoCuotaEntity~
             +findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaIdAndCuotaId(Integer, Integer, Integer, Integer, Integer, Integer) Optional~LectivoCuotaEntity~

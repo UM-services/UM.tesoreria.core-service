@@ -21,7 +21,7 @@ classDiagram
         }
 
         class GuaraniPropuestaTipoChequeraRepository {
-            <<interface>>
+            << interface >>
             +findByPropuestaGuaraniAndLectivoId(Integer, Integer) Optional~GuaraniPropuestaTipoChequera~
             +save(GuaraniPropuestaTipoChequera) GuaraniPropuestaTipoChequera
             +existsById(Integer) boolean
@@ -61,7 +61,7 @@ classDiagram
         }
 
         class JpaGuaraniPropuestaTipoChequeraRepository {
-            <<interface>>
+            << interface >>
             +findByPropuestaGuaraniAndLectivoId(Integer, Integer) Optional~GuaraniPropuestaTipoChequeraEntity~
         }
 

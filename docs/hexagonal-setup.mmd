@@ -13,7 +13,7 @@ classDiagram
         }
 
         class SetupRepository {
-            <<interface>>
+            << interface >>
             +findLast() Optional~Setup~
         }
     }
@@ -26,7 +26,7 @@ classDiagram
         }
 
         class GetLastSetupUseCase {
-            <<interface>>
+            << interface >>
             +getLastSetup() Optional~Setup~
         }
 
@@ -49,7 +49,7 @@ classDiagram
         }
 
         class JpaSetupRepository {
-            <<JpaRepository>>
+            << JpaRepository >>
             +findTopByOrderBySetupIdDesc() Optional~SetupEntity~
         }
 

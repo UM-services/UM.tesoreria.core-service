@@ -20,7 +20,7 @@ classDiagram
         }
 
         class ClaseChequeraRepository {
-            <<interface>>
+            << interface >>
             +findAll() List~ClaseChequera~
             +findByPreuniversitario(Byte) List~ClaseChequera~
             +findByCurso(Byte) List~ClaseChequera~
@@ -30,27 +30,27 @@ classDiagram
         }
 
         class GetAllClaseChequeraUseCase {
-            <<interface>>
+            << interface >>
             +getAll() List~ClaseChequera~
         }
 
         class GetAllClaseChequeraByCursoUseCase {
-            <<interface>>
+            << interface >>
             +getAllByCurso() List~ClaseChequera~
         }
 
         class GetAllClaseChequeraByPosgradoUseCase {
-            <<interface>>
+            << interface >>
             +getAllByPosgrado() List~ClaseChequera~
         }
 
         class GetAllClaseChequeraByTituloUseCase {
-            <<interface>>
+            << interface >>
             +getAllByTitulo() List~ClaseChequera~
         }
 
         class GetAllClaseChequeraByTramiteUseCase {
-            <<interface>>
+            << interface >>
             +getAllClaseChequeraByTramite() List~ClaseChequera~
         }
     }
@@ -96,7 +96,7 @@ classDiagram
             }
 
             class JpaClaseChequeraRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findAllByOrderByNombre() List~ClaseChequeraEntity~
                 +findByPreuniversitario(Byte) List~ClaseChequeraEntity~
                 +findByCurso(Byte) List~ClaseChequeraEntity~

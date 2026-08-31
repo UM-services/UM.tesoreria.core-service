@@ -17,7 +17,7 @@ classDiagram
         }
 
         class ChequeraTotalRepository {
-            <<interface>>
+            << interface >>
             +findAllByChequera(Integer, Integer, Long) List~ChequeraTotal~
             +findByUnique(Integer, Integer, Long, Integer) Optional~ChequeraTotal~
             +findByChequeraTotalId(Long) Optional~ChequeraTotal~
@@ -53,11 +53,11 @@ classDiagram
 
         class ChequeraTotalException
 
-        class CreateChequeraTotalUseCase { <<interface>> }
-        class DeleteChequeraTotalUseCase { <<interface>> }
-        class FindAllTotalByChequeraUseCase { <<interface>> }
-        class FindByUniqueChequeraTotalUseCase { <<interface>> }
-        class UpdateChequeraTotalUseCase { <<interface>> }
+        class CreateChequeraTotalUseCase { << interface >> }
+        class DeleteChequeraTotalUseCase { << interface >> }
+        class FindAllTotalByChequeraUseCase { << interface >> }
+        class FindByUniqueChequeraTotalUseCase { << interface >> }
+        class UpdateChequeraTotalUseCase { << interface >> }
     }
 
     namespace infrastructure_persistence {
@@ -73,7 +73,7 @@ classDiagram
             }
 
             class JpaChequeraTotalRepository {
-                <<JpaRepository>>
+                << JpaRepository >>
                 +findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long) List~ChequeraTotalEntity~
                 +findByChequeraTotalId(Long) Optional~ChequeraTotalEntity~
                 +findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoId(Integer, Integer, Long, Integer) Optional~ChequeraTotalEntity~
