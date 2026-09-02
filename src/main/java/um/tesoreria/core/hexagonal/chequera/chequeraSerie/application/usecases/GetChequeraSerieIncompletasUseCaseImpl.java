@@ -15,7 +15,7 @@ public class GetChequeraSerieIncompletasUseCaseImpl implements GetChequeraSerieI
     private final ChequeraIncompletaService chequeraIncompletaService;
 
     @Override
-    public List<ChequeraIncompleta> getAllIncompletas(Integer lectivoId, Integer facultadId, Integer geograficaId) {
-        return chequeraIncompletaService.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId, facultadId, geograficaId);
+    public List<ChequeraIncompleta> getAllIncompletas(Integer lectivoId, Integer facultadId, Integer geograficaId, Integer claseChequeraId) {
+        return chequeraIncompletaService.findAllByLectivoIdAndFacultadIdAndGeograficaIdAndClaseChequeraId(lectivoId, facultadId, geograficaId, claseChequeraId);
     }
 }

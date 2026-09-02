@@ -16,7 +16,7 @@ import um.tesoreria.core.model.view.ChequeraIncompleta;
  */
 public interface ChequeraIncompletaRepository extends JpaRepository<ChequeraIncompleta, Long> {
 
-	public List<ChequeraIncompleta> findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer lectivoId,
-			Integer facultadId, Integer geograficaId, Sort sort);
+	List<ChequeraIncompleta> findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraClaseChequeraId(Integer lectivoId,
+			Integer facultadId, Integer geograficaId, Integer claseChequeraId, Sort sort);
 
 }
