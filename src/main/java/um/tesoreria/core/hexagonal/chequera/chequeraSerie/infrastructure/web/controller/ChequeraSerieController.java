@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -111,11 +110,12 @@ public class ChequeraSerieController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/incompletas/{lectivoId}/{facultadId}/{geograficaId}")
+    @GetMapping("/incompletas/{lectivoId}/{facultadId}/{geograficaId}/clase/{claseChequeraId}")
     public ResponseEntity<List<ChequeraIncompleta>> findAllIncompletas(@PathVariable Integer lectivoId,
                                                                        @PathVariable Integer facultadId,
-                                                                       @PathVariable Integer geograficaId) {
-        return ResponseEntity.ok(service.findAllIncompletas(lectivoId, facultadId, geograficaId));
+                                                                       @PathVariable Integer geograficaId,
+                                                                       @PathVariable Integer claseChequeraId) {
+        return ResponseEntity.ok(service.findAllIncompletas(lectivoId, facultadId, geograficaId, claseChequeraId));
     }
 
     @GetMapping("/altas/{lectivoId}/{facultadId}/{geograficaId}")
