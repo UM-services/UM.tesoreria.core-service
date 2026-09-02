@@ -2,6 +2,15 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.3.0] - 2026-09-02
+### Added
+- feat(chequera/chequeraSerie): La consulta de chequeras incompletas ahora filtra por clase de chequera. El endpoint `GET /chequeraserie/incompletas/{lectivoId}/{facultadId}/{geograficaId}` pasa a requerir el segmento adicional `clase/{claseChequeraId}`, y el nuevo parámetro se propaga por `GetChequeraSerieIncompletasUseCase`, `GetChequeraSerieIncompletasUseCaseImpl`, `ChequeraSerieService.findAllIncompletas` y `ChequeraSerieController.findAllIncompletas`.
+  - `ChequeraIncompletaService` expone `findAllByLectivoIdAndFacultadIdAndGeograficaIdAndClaseChequeraId` en lugar del método anterior de tres parámetros.
+  - `ChequeraIncompletaRepository` añade la consulta derivada `findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraClaseChequeraId`, resolviendo la clase a través de la asociación `tipoChequera` de la vista `vw_chequera_incompleta`; se conserva el ordenamiento por `persona.apellido` y `persona.nombre`.
+- feat(docs): Diagrama `hexagonal-chequeraSerie.mmd` sincronizado con el código (v4.3.0): el bloque `ChequeraSerieRepository` reemplaza métodos inexistentes (`findIncompletas`, `findAltas`, etc.) por las firmas reales del puerto; se corrigen las relaciones `uses` de `GetChequeraSerieAltasUseCaseImpl` (`ChequeraSerieAltaService`/`ChequeraSerieAltaFullService`), `GetChequeraSerieByCbuOrVisaUseCaseImpl` (`DebitoService`/`ChequeraKeyService`) y `GetChequeraSerieIncompletasUseCaseImpl` (`ChequeraIncompletaService`); nuevo namespace `view` con `ChequeraIncompletaService`, `ChequeraIncompletaRepository` y `ChequeraIncompleta`.
+
+> Basado en `git diff HEAD` (staged: `ChequeraSerieService.java`, `GetChequeraSerieIncompletasUseCaseImpl.java`, `GetChequeraSerieIncompletasUseCase.java`, `ChequeraSerieController.java`, `ChequeraIncompleta.java`, `ChequeraIncompletaRepository.java`, `ChequeraIncompletaService.java`), el código Java y `pom.xml` (versión `4.2.1` → `4.3.0`). La extensión del endpoint GET con un segmento de ruta adicional replica el patrón ya liberado como minor en `3.38.0` (`/plazo/{dias}`), por lo que corresponde un incremento minor de SemVer.
+
 ## [4.2.1] - 2026-08-30
 ### Changed
 - fix(personas/domicilio): `CaptureDomicilioUseCaseImpl` ahora omite las facultades cuyo dato externo no incluye correos (`esCapturable`: `emailPersonal` o `emailInstitucional` no vacíos), evitando persistir domicilios vacíos y continuando con la siguiente facultad; retorna `0` si ninguna facultad devolvió datos capturables.

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.core.service.view;
 
@@ -20,12 +20,18 @@ import um.tesoreria.core.repository.view.ChequeraIncompletaRepository;
 @RequiredArgsConstructor
 public class ChequeraIncompletaService {
 
-	private final ChequeraIncompletaRepository repository;
+    private final ChequeraIncompletaRepository repository;
 
-	public List<ChequeraIncompleta> findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer lectivoId,
-                                                                                   Integer facultadId, Integer geograficaId) {
-		return repository.findAllByLectivoIdAndFacultadIdAndGeograficaId(lectivoId, facultadId, geograficaId,
-				Sort.by("persona.apellido").ascending().and(Sort.by("persona.nombre").ascending()));
-	}
+    public List<ChequeraIncompleta> findAllByLectivoIdAndFacultadIdAndGeograficaIdAndClaseChequeraId(Integer lectivoId,
+                                                                                                     Integer facultadId,
+                                                                                                     Integer geograficaId,
+                                                                                                     Integer claseChequeraId) {
+        return repository.findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraClaseChequeraId(
+                lectivoId,
+                facultadId,
+                geograficaId,
+                claseChequeraId,
+                Sort.by("persona.apellido").ascending().and(Sort.by("persona.nombre").ascending()));
+    }
 
 }

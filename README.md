@@ -4,7 +4,14 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 4.2.1**
+**Versión actual (SemVer): 4.3.0**
+
+## Novedades 4.3.0 (verificado en código)
+- feat(chequera/chequeraSerie): la consulta de chequeras incompletas ahora filtra por clase de chequera. `GET /chequeraserie/incompletas/{lectivoId}/{facultadId}/{geograficaId}` pasa a requerir el segmento `clase/{claseChequeraId}`, con el parámetro propagado por puerto de entrada, caso de uso, servicio y controlador.
+  - `ChequeraIncompletaRepository` añade la consulta derivada `findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraClaseChequeraId` sobre la vista `vw_chequera_incompleta`, conservando el ordenamiento por `persona.apellido`/`persona.nombre`.
+- feat(docs): actualizado el diagrama `hexagonal-chequeraSerie.mmd` (v4.3.0) con las firmas reales del puerto `ChequeraSerieRepository`, el namespace `view` (`ChequeraIncompletaService`/`ChequeraIncompletaRepository`) y las dependencias correctas de los casos de uso Altas, CbuOrVisa e Incompletas.
+
+> Basado en `git diff HEAD` (staged: `ChequeraSerieService.java`, `GetChequeraSerieIncompletasUseCaseImpl.java`, `GetChequeraSerieIncompletasUseCase.java`, `ChequeraSerieController.java`, `ChequeraIncompleta.java`, `ChequeraIncompletaRepository.java`, `ChequeraIncompletaService.java`) y `pom.xml` (versión `4.2.1` → `4.3.0`). La adición de un segmento de ruta requerido al endpoint GET existente sigue el patrón liberado como minor en `3.38.0`; corresponde un incremento minor de SemVer.
 
 ## Novedades 4.2.1 (verificado en código)
 - fix(personas/domicilio): `CaptureDomicilioUseCaseImpl` omite las facultades cuyo dato externo no incluye correos (`esCapturable`), evitando persistir domicilios vacíos; el capture continúa con la siguiente facultad y retorna `0` si ninguna devuelve datos capturables.
@@ -1460,7 +1467,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.3-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-4.2.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-4.3.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
