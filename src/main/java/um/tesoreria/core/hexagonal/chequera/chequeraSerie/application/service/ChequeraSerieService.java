@@ -113,8 +113,8 @@ public class ChequeraSerieService {
         return getChequeraSerieByPersonaUseCase.getAllByPersonaLectivo(personaId, documentoId, lectivoId);
     }
 
-    public List<ChequeraIncompleta> findAllIncompletas(Integer lectivoId, Integer facultadId, Integer geograficaId) {
-        return getChequeraSerieIncompletasUseCase.getAllIncompletas(lectivoId, facultadId, geograficaId);
+    public List<ChequeraIncompleta> findAllIncompletas(Integer lectivoId, Integer facultadId, Integer geograficaId, Integer claseChequeraId) {
+        return getChequeraSerieIncompletasUseCase.getAllIncompletas(lectivoId, facultadId, geograficaId, claseChequeraId);
     }
 
     public List<ChequeraSerieAlta> findAllAltas(Integer lectivoId, Integer facultadId, Integer geograficaId) {

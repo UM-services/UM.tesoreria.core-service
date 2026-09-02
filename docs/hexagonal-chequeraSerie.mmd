@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraSerie (v3.50.0)
+title: Arquitectura Hexagonal - Módulo ChequeraSerie (v4.3.0)
 ---
 
 classDiagram
@@ -42,22 +42,30 @@ classDiagram
 
         class ChequeraSerieRepository {
             << interface >>
-            +findAll() List~ChequeraSerie~
-            +findById(Long) Optional~ChequeraSerie~
-            +findAllByFacultad(Integer, Integer) List~ChequeraSerie~
-            +findAllByPersona(BigDecimal, Integer) List~ChequeraSerie~
-            +findAllByNumber(Long) List~ChequeraSerie~
-            +findByUnique(Integer, Integer, Long, String) Optional~ChequeraSerie~
-            +findByCbuOrVisa(Long) Optional~ChequeraSerie~
-            +findAltas(BigDecimal, Integer) List~ChequeraSerie~
-            +findIncompletas(BigDecimal, Integer) List~ChequeraSerie~
-            +findLast(BigDecimal, Integer) Optional~ChequeraSerie~
+            +findAllByPersonaIdAndDocumentoId(BigDecimal, Integer, Sort) List~ChequeraSerie~
+            +findAllByFacultadIdAndChequeraSerieId(Integer, Long, Sort) List~ChequeraSerie~
+            +findAllByPersonaIdAndDocumentoIdAndLectivoIdAndFacultadId(BigDecimal, Integer, Integer, Integer) List~ChequeraSerie~
+            +findAllByLectivoIdAndFacultadId(Integer, Integer) List~ChequeraSerie~
+            +findAllByFacultadIdAndLectivoIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraSerie~
+            +findAllByLectivoIdAndFacultadIdAndPersonaId(Integer, Integer, BigDecimal) List~ChequeraSerie~
+            +findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraSerie~
+            +findAllByGeograficaIdAndFacultadIdInAndLectivoIdIn(Integer, List~Integer~, List~Integer~) List~ChequeraSerie~
+            +findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer, Integer, Integer) List~ChequeraSerie~
+            +findAllByPersonaIdAndDocumentoIdAndFacultadId(BigDecimal, Integer, Integer) List~ChequeraSerie~
+            +findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId(BigDecimal, Integer, Integer, Integer) List~ChequeraSerie~
+            +findAllByFacultadIdAndLectivoIdAndGeograficaIdAndPersonaIdIn(Integer, Integer, Integer, List~BigDecimal~) List~ChequeraSerie~
+            +findAllByPersonaIdAndDocumentoIdAndLectivoId(BigDecimal, Integer, Integer) List~ChequeraSerie~
+            +findFirstByFacultadIdAndPersonaIdAndDocumentoIdAndLectivoId(Integer, BigDecimal, Integer, Integer) Optional~ChequeraSerie~
+            +findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long) Optional~ChequeraSerie~
+            +findByChequeraId(Long) Optional~ChequeraSerie~
+            +findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaId(BigDecimal, Integer, Integer, Integer, Integer) Optional~ChequeraSerie~
+            +findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaIdAndTipoChequeraId(BigDecimal, Integer, Integer, Integer, Integer, Integer) Optional~ChequeraSerie~
+            +findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoIdAndGeograficaIdAndTipoChequeraIdIn(BigDecimal, Integer, Integer, Integer, Integer, List~Integer~) Optional~ChequeraSerie~
+            +findFirstByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdIn(BigDecimal, Integer, Integer, List~Integer~, Sort) Optional~ChequeraSerie~
+            +findAllByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdIn(BigDecimal, Integer, Integer, List~Integer~, Sort) List~ChequeraSerie~
+            +deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long)
+            +findAllFacultadSedeByLectivo(Integer) List~FacultadSedeChequeraDto~
             +save(ChequeraSerie) ChequeraSerie
-            +deleteById(Long)
-            +markSent(Long)
-            +setPayPerTic(Long, Byte)
-            +getResumenLectivo(Integer, Integer, Integer) List~Object[]~
-            +getSpecialQueries() List~ChequeraSerieQueryResult~
         }
     }
 
@@ -146,6 +154,40 @@ classDiagram
             }
     }
 
+    namespace view {
+        class ChequeraSerieAltaService {
+            +findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraSerieAlta~
+        }
+
+        class ChequeraSerieAltaFullService {
+            +findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraId(Integer, Integer, Integer, Integer, OffsetDateTime, ChequeraCuotaService) List~ChequeraSerieAltaFull~
+        }
+
+        class ChequeraIncompletaService {
+            +findAllByLectivoIdAndFacultadIdAndGeograficaIdAndClaseChequeraId(Integer, Integer, Integer, Integer) List~ChequeraIncompleta~
+        }
+
+        class ChequeraKeyService
+        class DebitoService
+
+        class ChequeraIncompletaRepository {
+            << JpaRepository >>
+            +findAllByLectivoIdAndFacultadIdAndGeograficaIdAndTipoChequeraClaseChequeraId(Integer, Integer, Integer, Integer, Sort) List~ChequeraIncompleta~
+        }
+
+        class ChequeraIncompleta {
+            +Long chequeraId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +BigDecimal personaId
+            +Integer documentoId
+            +Integer lectivoId
+            +Integer geograficaId
+            +TipoChequeraEntity tipoChequera
+        }
+    }
+
     ChequeraSerieService --> CreateChequeraSerieUseCase : uses
     ChequeraSerieService --> DeleteChequeraSerieUseCase : uses
     ChequeraSerieService --> GetChequeraSerieAltasUseCase : uses
@@ -181,14 +223,18 @@ classDiagram
 
     CreateChequeraSerieUseCaseImpl --> ChequeraSerieRepository : uses
     DeleteChequeraSerieUseCaseImpl --> ChequeraSerieRepository : uses
-    GetChequeraSerieAltasUseCaseImpl --> ChequeraSerieRepository : uses
-    GetChequeraSerieByCbuOrVisaUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieAltasUseCaseImpl --> ChequeraSerieAltaService : uses
+    GetChequeraSerieAltasUseCaseImpl --> ChequeraSerieAltaFullService : uses
+    GetChequeraSerieByCbuOrVisaUseCaseImpl --> DebitoService : uses
+    GetChequeraSerieByCbuOrVisaUseCaseImpl --> ChequeraKeyService : uses
     GetChequeraSerieByFacultadUseCaseImpl --> ChequeraSerieRepository : uses
     GetChequeraSerieByIdUseCaseImpl --> ChequeraSerieRepository : uses
     GetChequeraSerieByNumberUseCaseImpl --> ChequeraSerieRepository : uses
     GetChequeraSerieByPersonaUseCaseImpl --> ChequeraSerieRepository : uses
     GetChequeraSerieByUniqueUseCaseImpl --> ChequeraSerieRepository : uses
-    GetChequeraSerieIncompletasUseCaseImpl --> ChequeraSerieRepository : uses
+    GetChequeraSerieIncompletasUseCaseImpl --> ChequeraIncompletaService : uses
+    ChequeraIncompletaService --> ChequeraIncompletaRepository : uses
+    ChequeraIncompletaRepository --> ChequeraIncompleta : view
     GetChequeraSerieSpecialQueriesUseCaseImpl --> ChequeraSerieRepository : uses
     GetResumenLectivoUseCaseImpl --> ChequeraSerieRepository : uses
     MarkSentUseCaseImpl --> ChequeraSerieRepository : uses
