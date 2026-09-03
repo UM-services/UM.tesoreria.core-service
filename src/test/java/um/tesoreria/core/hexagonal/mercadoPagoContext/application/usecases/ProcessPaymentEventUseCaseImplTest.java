@@ -32,11 +32,12 @@ import static org.mockito.Mockito.*;
 /**
  * Cubre el comportamiento de ProcessPaymentEventUseCaseImpl: reacciona al
  * estado "approved" (da de alta el pago vía PagoService.registraPagoMP) y a
- * los estados "rejected", "refunded" y "charged_back" (deshace el pago vía
- * PagoService.revertirPagoMP) — alcance acotado a pedido explícito del
- * equipo. "cancelled" e "in_mediation" quedan documentados como pendientes
- * de habilitar. Solo cubre la rama de cuota; la rama de reserva de vacante
- * no forma parte del alcance de la reversión.
+ * los 4 estados finales negativos — "rejected", "cancelled", "refunded" y
+ * "charged_back" — (deshace el pago vía PagoService.revertirPagoMP).
+ * "in_mediation" es el único estado no final, y queda afuera de la
+ * reversión por eso, no por elección del equipo. Solo cubre la rama de
+ * cuota; la rama de reserva de vacante no forma parte del alcance de la
+ * reversión.
  */
 @ExtendWith(MockitoExtension.class)
 class ProcessPaymentEventUseCaseImplTest {
@@ -123,7 +124,7 @@ class ProcessPaymentEventUseCaseImplTest {
      * deshacer el pago de la cuota.
      */
     @ParameterizedTest
-    @ValueSource(strings = {"rejected", "refunded", "charged_back"})
+    @ValueSource(strings = {"rejected", "cancelled", "refunded", "charged_back"})
     void cuota_estadoHabilitado_revierteElPago(String status) {
         var context = MercadoPagoContext.builder()
                 .mercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)
@@ -145,21 +146,22 @@ class ProcessPaymentEventUseCaseImplTest {
     }
 
     /**
-     * LOS 2 ESTADOS QUE TODAVÍA NO ESTÁN HABILITADOS: "cancelled" e
-     * "in_mediation" siguen fuera del alcance actual (el equipo pidió
-     * arrancar con rejected/refunded/charged_back). El contexto SÍ se
-     * actualiza con el status recibido, pero PagoService no se toca todavía.
-     * Cuando se habiliten, este test es el que hay que achicar (sacando el
-     * estado que se habilite) y sumarlo al parametrizado de arriba.
+     * "in_mediation" es el ÚNICO estado negativo que no es final (dinero
+     * retenido, resultado pendiente de un reclamo) — por eso es el único
+     * que se queda afuera de ESTADOS_REVERSION, no por elección nuestra. El
+     * contexto SÍ se actualiza con "in_mediation" (queda trazado que hay un
+     * reclamo en curso), pero PagoService no se toca — el ChequeraPago
+     * sigue existiendo. Cuando el reclamo se resuelva, MP va a mandar un
+     * evento de seguimiento ("approved" o "charged_back") que sí dispara la
+     * lógica correspondiente con el código que ya existe.
      */
-    @ParameterizedTest
-    @ValueSource(strings = {"cancelled", "in_mediation"})
-    void cuota_estadosAunNoHabilitados_actualizaContextoPeroNoRevierte(String status) {
+    @Test
+    void cuota_inMediation_actualizaContextoPeroNoRevierte() {
         var context = MercadoPagoContext.builder()
                 .mercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)
                 .chequeraCuotaId(CHEQUERA_CUOTA_ID)
                 .build();
-        var event = eventForCuota(status).build();
+        var event = eventForCuota("in_mediation").build();
 
         when(findByMercadoPagoContextIdUseCase.findByMercadoPagoContextId(MERCADO_PAGO_CONTEXT_ID)).thenReturn(context);
         when(updateMercadoPagoContextUseCase.update(any(MercadoPagoContext.class), eq(MERCADO_PAGO_CONTEXT_ID))).thenReturn(context);
@@ -168,7 +170,7 @@ class ProcessPaymentEventUseCaseImplTest {
 
         var contextCaptor = ArgumentCaptor.forClass(MercadoPagoContext.class);
         verify(updateMercadoPagoContextUseCase).update(contextCaptor.capture(), eq(MERCADO_PAGO_CONTEXT_ID));
-        assertThat(contextCaptor.getValue().getStatus()).isEqualTo(status);
+        assertThat(contextCaptor.getValue().getStatus()).isEqualTo("in_mediation");
 
         verifyNoInteractions(pagoService);
     }

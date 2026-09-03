@@ -50,20 +50,44 @@ import java.util.Set;
 public class ProcessPaymentEventUseCaseImpl implements ProcessPaymentEventUseCase {
 
     // Estados de MercadoPago que implican deshacer un pago de cuota ya
-    // registrado. Alcance actual: "rejected" (nunca se cobró) + "refunded" y
-    // "charged_back" (se cobró y la plata volvió al alumno, ya sea por
-    // reembolso o por contracargo bancario). "cancelled" e "in_mediation"
-    // siguen afuera por ahora. Cuando se habiliten, solo hay que sumar el
-    // estado a este Set.
+    // registrado. Confirmado con el equipo: de los 5 estados negativos,
+    // TODOS son finales salvo "in_mediation" — por eso están los 4 acá:
+    //   - rejected:      final, nunca hubo débito de dinero
+    //   - cancelled:     final, nunca hubo débito de dinero (generalmente
+    //                    lo cancela el propio usuario)
+    //   - refunded:      final, el dinero SÍ se acreditó y después se
+    //                    devolvió (total o parcial), directo por MP o por
+    //                    gestión nuestra
+    //   - charged_back:  final, desconocimiento de compra (a favor o en
+    //                    contra del seller)
     //
-    // OJO: "refunded" y "charged_back" son justo los dos estados con más
-    // riesgo de toparse con un pago que YA tiene factura electrónica o
-    // asiento contable generado (son eventos tardíos: llegan después de que
-    // el pago ya estuvo "approved", a veces días o semanas después).
-    // revertirPagoMP hoy borra el ChequeraPago sin chequear ninguna de las
-    // dos cosas — ver issue. Confirmar con contaduría antes de que esto
-    // llegue a un ambiente con datos reales.
-    private static final Set<String> ESTADOS_REVERSION = Set.of("rejected", "refunded", "charged_back");
+    // Regla de negocio: "para poder anular el pago, debería estar
+    // acreditado". En este código eso ya se cumple solo, sin código
+    // adicional: revertirPagoMP busca el ChequeraPago por idMercadoPago
+    // (que solo existe si hubo un "approved" antes, vía registraPagoMP) y
+    // es un no-op si no lo encuentra — que es exactamente el caso de
+    // rejected/cancelled cuando el pago nunca se acreditó.
+    //
+    // "in_mediation" queda AFUERA a propósito, y no por elección nuestra:
+    // es el único estado NO final (dinero retenido por un reclamo,
+    // pendiente de resolución). No hace falta ningún manejo especial para
+    // este caso: como no está en este Set, ProcessPaymentEventUseCaseImpl
+    // ya actualiza el MercadoPagoContext con status="in_mediation" (queda
+    // trazado que hay un reclamo en curso) pero no toca PagoService — el
+    // ChequeraPago sigue existiendo, el pago sigue contando como hecho.
+    // Cuando el reclamo se resuelva, MercadoPago va a mandar un evento de
+    // seguimiento (otro "approved" si se acredita a favor del seller, o
+    // "charged_back" si se resuelve en contra) y ESE evento sí dispara la
+    // lógica que corresponda con el código que ya existe — no hace falta
+    // agregar nada para eso tampoco.
+    //
+    // OJO: "refunded" y "charged_back" son los estados con más riesgo de
+    // toparse con un pago que YA tiene factura electrónica/asiento contable
+    // generado (son eventos tardíos: llegan después de que el pago ya
+    // estuvo "approved", a veces días o semanas después) — ya resuelto:
+    // revertirPagoMP desvincula FacturacionElectronica/ReciboMessageCheck
+    // antes de borrar el ChequeraPago, no los borra.
+    private static final Set<String> ESTADOS_REVERSION = Set.of("rejected", "cancelled", "refunded", "charged_back");
 
     private final FindByMercadoPagoContextIdUseCase findByMercadoPagoContextIdUseCase;
     private final UpdateMercadoPagoContextUseCase updateMercadoPagoContextUseCase;
