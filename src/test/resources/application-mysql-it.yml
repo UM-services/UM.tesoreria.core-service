@@ -1,0 +1,46 @@
+# Perfil exclusivo de la reproducción PreuniversitarioChequeraMySqlIT.
+# Apunta a un tesium de prueba local y apaga todo lo que no haga falta para el flujo:
+# Consul, Kafka y mail. Ningún otro microservicio se levanta.
+spring:
+  main:
+    allow-circular-references: true
+  cloud:
+    consul:
+      enabled: false
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+  datasource:
+    url: jdbc:mysql://127.0.0.1:13306/tesium?useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 4
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+    hibernate:
+      # Jamás tocar el esquema: la FK chequera_cuota_ibfk_3 tiene que quedar tal cual está.
+      ddl-auto: none
+  kafka:
+    bootstrap-servers: localhost:9092
+    listener:
+      auto-startup: false
+  mail:
+    host: localhost
+
+management:
+  health:
+    mail:
+      enabled: false
+    db:
+      enabled: false
+
+logging:
+  level:
+    um.tesoreria.core: debug
+    org:
+      hibernate:
+        SQL: debug
