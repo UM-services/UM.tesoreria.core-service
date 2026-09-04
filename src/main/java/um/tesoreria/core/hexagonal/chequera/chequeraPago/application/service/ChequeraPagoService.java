@@ -16,6 +16,7 @@ public class ChequeraPagoService {
 
     private final CreateChequeraPagoUseCase createChequeraPagoUseCase;
     private final DeletePagosByChequeraUseCase deletePagosByChequeraUseCase;
+    private final DeleteChequeraPagoUseCase deleteChequeraPagoUseCase;
     private final FindPagosByTipoPagoAndFechaAcreditacionUseCase findPagosByTipoPagoAndFechaAcreditacionUseCase;
     private final FindPagosByTipoPagoAndFechaPagoUseCase findPagosByTipoPagoAndFechaPagoUseCase;
     private final FindPagosByChequeraUseCase findPagosByChequeraUseCase;
@@ -33,6 +34,11 @@ public class ChequeraPagoService {
 
     public void deleteByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         deletePagosByChequeraUseCase.deletePagosByChequera(facultadId, tipoChequeraId, chequeraSerieId);
+    }
+
+    /// NUEVOOOO///
+    public void deleteByChequeraPagoId(Long chequeraPagoId) {
+        deleteChequeraPagoUseCase.deleteChequeraPago(chequeraPagoId);
     }
 
     public List<ChequeraPago> findAllByTipoPagoIdAndFechaAcreditacion(Integer tipoPagoId, OffsetDateTime fechaAcreditacion) {

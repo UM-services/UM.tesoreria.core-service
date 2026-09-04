@@ -37,4 +37,9 @@ public class ChequeraPagoAsientoService {
 				chequeraSerieId);
 	}
 
+	@Transactional
+	public void deleteAllByChequeraPagoId(Long chequeraPagoId) {
+		repository.deleteAllByChequeraPagoId(chequeraPagoId);
+	}
+
 }
