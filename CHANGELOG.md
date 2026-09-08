@@ -2,6 +2,12 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.3.1] - 2026-09-08
+### Changed
+- fix(chequera/politicaArancelaria): `RecalculateCuotaByUniqueIndexUseCaseImpl.resolveImporteReferencia` usa ahora `cuotaReferencia.getImporte1()` (importe original de la cuota de referencia) como importe base, en lugar de `getImporte3()` (importe vigente tras recalculos previos), evitando que ajustes anteriores arrastren e inflen el importe recalculado de la cuota vencida.
+
+> Basado en `git diff HEAD` (staged: `RecalculateCuotaByUniqueIndexUseCaseImpl.java`) y `pom.xml` (versión `4.3.0` → `4.3.1`). No hay cambios de contrato REST ni de firmas de casos de uso; la corrección se limita a la resolución interna del importe de referencia y corresponde a un incremento patch de SemVer.
+
 ## [4.3.0] - 2026-09-02
 ### Added
 - feat(chequera/chequeraSerie): La consulta de chequeras incompletas ahora filtra por clase de chequera. El endpoint `GET /chequeraserie/incompletas/{lectivoId}/{facultadId}/{geograficaId}` pasa a requerir el segmento adicional `clase/{claseChequeraId}`, y el nuevo parámetro se propaga por `GetChequeraSerieIncompletasUseCase`, `GetChequeraSerieIncompletasUseCaseImpl`, `ChequeraSerieService.findAllIncompletas` y `ChequeraSerieController.findAllIncompletas`.
