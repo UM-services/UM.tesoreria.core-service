@@ -4,7 +4,12 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 4.3.0**
+**Versión actual (SemVer): 4.3.1**
+
+## Novedades 4.3.1 (verificado en código)
+- fix(chequera/politicaArancelaria): `RecalculateCuotaByUniqueIndexUseCaseImpl.resolveImporteReferencia` toma como importe base `cuotaReferencia.getImporte1()` (importe original) en lugar de `getImporte3()` (importe vigente tras recalculos previos), evitando que ajustes anteriores inflen el importe recalculado de la cuota vencida.
+
+> Basado en `git diff HEAD` (staged: `RecalculateCuotaByUniqueIndexUseCaseImpl.java`) y `pom.xml` (versión `4.3.0` → `4.3.1`). Sin cambios de contrato REST; corresponde un incremento patch de SemVer.
 
 ## Novedades 4.3.0 (verificado en código)
 - feat(chequera/chequeraSerie): la consulta de chequeras incompletas ahora filtra por clase de chequera. `GET /chequeraserie/incompletas/{lectivoId}/{facultadId}/{geograficaId}` pasa a requerir el segmento `clase/{claseChequeraId}`, con el parámetro propagado por puerto de entrada, caso de uso, servicio y controlador.

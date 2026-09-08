@@ -91,7 +91,7 @@ public class RecalculateCuotaByUniqueIndexUseCaseImpl implements RecalculateCuot
 
     private BigDecimal resolveImporteReferencia(ChequeraCuota cuotaEnRevision, ChequeraCuota cuotaReferencia) {
         log.debug("\n\nProcessing RecalculateCuotaByUniqueIndexUseCaseImpl.resolveImporteReferencia\n\n");
-        var importeBase = cuotaReferencia.getImporte3();
+        var importeBase = cuotaReferencia.getImporte1();
         if (cuotaEnRevision.getImporte3().compareTo(importeBase) > 0) {
             return cuotaEnRevision.getImporte3();
         }
