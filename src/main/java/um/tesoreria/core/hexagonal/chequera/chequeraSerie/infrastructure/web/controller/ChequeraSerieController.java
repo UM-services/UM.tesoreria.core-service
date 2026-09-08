@@ -5,6 +5,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -207,7 +208,7 @@ public class ChequeraSerieController {
     }
 
     @PutMapping("/{chequeraId}")
-    public ResponseEntity<ChequeraSerieResponse> update(@RequestBody ChequeraSerieRequest chequeraserieRequest,
+    public ResponseEntity<ChequeraSerieResponse> update(@Valid @RequestBody ChequeraSerieRequest chequeraserieRequest,
                                                       @PathVariable Long chequeraId) {
         ChequeraSerie domain = chequeraSerieDtoMapper.toDomain(chequeraserieRequest);
         ChequeraSerie updatedDomain = service.update(domain, chequeraId);
