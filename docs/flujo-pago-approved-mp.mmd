@@ -1,0 +1,126 @@
+sequenceDiagram
+    autonumber
+    participant MP as MercadoPago
+    participant PC as PaymentController<br/>(mp-service)
+    participant PS as PaymentService<br/>(mp-service)
+    participant PEP as PaymentEventProducer<br/>(mp-service)
+    participant K as Kafka<br/>(topic: payment-processed)
+    participant PEL as PaymentEventListener<br/>(core-service)
+    participant MPCS as MercadoPagoContextService
+    participant UC as ProcessPaymentEventUseCaseImpl
+    participant FBID as FindByMercadoPagoContextIdUseCase<br/>(puerto in)
+    participant UMP as UpdateMercadoPagoContextUseCase<br/>(puerto in)
+    participant FRV as FindReservaVacanteUseCase<br/>(puerto in)
+    participant URV as UpdateReservaVacanteUseCase<br/>(puerto in)
+    participant PGS as PagoService
+    participant CCS as ChequeraCuotaService
+    participant CPS as ChequeraPagoService
+    participant CTS as ChequeraTotalService
+
+    rect rgb(30, 35, 45)
+    Note over MP,PEP: mercadopago-service — recibe, valida, consulta, traduce y publica
+    MP->>PC: POST /payment/listener<br/>(data.id, sin estado)
+    activate PC
+    PC->>PS: processPaymentWebhook(request, dataId)
+    activate PS
+
+    PS->>PS: validateHeaders(x-signature, x-request-id)
+    PS->>PS: extractSignatureComponents(x-signature)
+    PS->>PS: buildManifest(dataId, xRequestId, ts)
+    PS->>PS: verifySignature(manifest, v1)
+    Note right of PS: ⚠️ El resultado de verifySignature<br/>se loguea pero NO rechaza el request:<br/>el "return" de rechazo está comentado<br/>en el código actual. Cualquier request<br/>con headers bien formados pasa.
+
+    PS->>MP: PaymentClient.get(dataId)<br/>GET /v1/payments/{id}
+    alt éxito
+        MP-->>PS: Payment {status, statusDetail,<br/>transactionAmount, dateApproved,<br/>externalReference, ...}
+        Note right of MP: status puede ser CUALQUIERA:<br/>approved, rejected, refunded,<br/>cancelled, in_mediation, charged_back
+        PS->>PS: parseExternalReference(externalReference)
+        Note right of PS: Decide si es pago de CUOTA<br/>o de RESERVA DE VACANTE<br/>según la cantidad de partes del string
+        PS->>PS: publishPaymentEvent(payment, dataId, referenceData)
+        PS->>PEP: publish(PaymentProcessedEvent)
+        activate PEP
+        Note over PEP: Publica el status TAL CUAL vino de MP.<br/>No filtra ni valida approved/rejected/etc.<br/>send() es fire-and-forget (no bloquea).
+        PEP->>K: send(mercadoPagoContextId, event)
+        deactivate PEP
+    else MPException / MPApiException<br/>(timeout, error de MP, etc.)
+        MP--xPS: falla la consulta
+        PS->>PS: log.error(...) + return
+        Note right of PS: ⚠️ No se publica nada a Kafka,<br/>pero el webhook igual responde 200 OK<br/>más abajo. MP no reintenta:<br/>la notificación se pierde en silencio.
+    end
+
+    PS-->>PC: "Payment processed"
+    deactivate PS
+    PC-->>MP: 200 OK
+    deactivate PC
+    Note right of PC: La respuesta a MP espera la consulta<br/>síncrona a la API de MP (bloqueante).<br/>NO espera confirmación de Kafka.
+    end
+
+    rect rgb(25, 40, 35)
+    Note over K,CTS: core-service — decide qué hacer con cada estado
+    K->>PEL: consume(PaymentProcessedEvent)
+    activate PEL
+    PEL->>MPCS: processPaymentEvent(event)
+    activate MPCS
+    Note right of MPCS: MPCS solo reenvía al puerto<br/>ProcessPaymentEventUseCase.<br/>No interviene en el find/update de abajo.
+    MPCS->>UC: processPaymentEvent(event)
+    deactivate MPCS
+    activate UC
+
+    UC->>FBID: findByMercadoPagoContextId(event.mercadoPagoContextId)
+    activate FBID
+    FBID-->>UC: context
+    deactivate FBID
+    Note right of UC: Si no existe el contexto -><br/>MercadoPagoContextException (se propaga)
+
+    alt context.reservaVacanteId != null (pago de reserva de vacante)
+        alt context.reservaVacanteId != event.reservaVacanteId
+            UC-->>PEL: log.error("Mismatch reservaVacanteId") + return
+        else coincide reservaVacanteId
+            UC->>UC: context.setStatus/setIdMercadoPago/<br/>setImportePagado/setFechaPago(...)
+            UC->>UMP: update(context, mercadoPagoContextId)
+            UMP-->>UC: context actualizado
+
+            alt status == "approved"
+                UC->>FRV: findByReservaVacanteId(reservaVacanteId)
+                FRV-->>UC: reservaVacante
+                UC->>UC: reservaVacante.setEstado("pagado")
+                UC->>URV: update(reservaVacante, reservaVacanteId)
+            else cualquier otro status
+                Note over UC,URV: No forma parte del alcance actual
+            end
+        end
+    else pago de cuota (context.reservaVacanteId == null)
+        alt context.chequeraCuotaId != event.chequeraCuotaId
+            UC-->>PEL: log.error("Mismatch chequeraCuotaId") + return
+        else coincide chequeraCuotaId
+            UC->>UC: context.setStatus/setIdMercadoPago/<br/>setImportePagado/setFechaPago(...)
+            UC->>UMP: update(context, mercadoPagoContextId)
+            UMP-->>UC: context actualizado
+
+            alt status == "approved"
+                UC->>PGS: registraPagoMP(mercadoPagoContextId)
+                activate PGS
+                Note right of PGS: ⚠️ Ningún método de esta cadena<br/>está anotado @Transactional.<br/>Si algo falla a mitad de camino<br/>(ej. el update del total), lo anterior<br/>no se revierte.
+                PGS->>MPCS: findByMercadoPagoContextId(id)
+                PGS->>CCS: findByChequeraCuotaId(chequeraCuotaId)
+                PGS->>CPS: findByIdMercadoPago(idMercadoPago)
+                Note right of PGS: Si YA existe un ChequeraPago<br/>con ese idMercadoPago -> return<br/>(idempotencia, no duplica)
+                PGS->>CPS: nextOrden(...)
+                PGS->>CPS: create(chequeraPago)
+                PGS->>MPCS: update(context.chequeraPagoId = nuevo)
+                PGS->>PGS: marcarPago(...)
+                PGS->>CPS: isPagado(...)
+                PGS->>CCS: findByUnique(...) + update(pagado=1)
+                PGS->>CTS: findByUnique(...)
+                PGS->>CCS: calculateTotalCuotasActivas / calculateTotalCuotasPagadas
+                PGS->>CTS: update(total, pagado)
+                deactivate PGS
+            else status in {rejected, refunded, cancelled, in_mediation, charged_back}
+                Note over UC,PGS: Procesamiento de estos estados<br/>en definición — no incluido en<br/>este diagrama todavía
+            end
+        end
+    end
+
+    deactivate UC
+    deactivate PEL
+    end
