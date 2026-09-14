@@ -1,0 +1,102 @@
+---
+title: Beneficio por requisitos de ingreso en cuotas preuniversitarias (v4.2.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class RequisitoPresentadoGuarani {
+            +Integer persona
+            +Integer requisito
+            +RequisitoGuarani requisitoRel
+        }
+
+        class RequisitoGuarani {
+            +Integer requisito
+            +String requisitoIngreso
+            +String activo
+        }
+
+        class GuaraniBeneficio {
+            +Integer guaraniBeneficioId
+            +Integer requisito
+            +BigDecimal porcentajeBeneficio
+        }
+
+        class BeneficioPolicy {
+            +porcentajeEfectivo(List~RequisitoPresentadoGuarani~, List~GuaraniBeneficio~) BigDecimal
+            -esRequisitoElegible(RequisitoPresentadoGuarani) boolean
+        }
+
+        class ChequeraSerie {
+            +Long chequeraSerieId
+            +Integer alternativaId
+            +BigDecimal becaPorcentaje
+        }
+
+        class ChequeraCuota {
+            +Integer productoId
+            +BigDecimal importe1
+            +BigDecimal importe1Original
+            +String codigoBarras
+        }
+
+        class ChequeraTotal {
+            +Integer productoId
+            +BigDecimal total
+            +BigDecimal pagado
+        }
+    }
+
+    namespace application {
+        class PreuniversitarioChequeraService {
+            -GuaraniBeneficioService guaraniBeneficioService
+            -BeneficioPolicy beneficioPolicy
+            +create(PersonalesResponse) ChequeraSerie
+            -resolverBeneficio(PreuniversitarioChequeraData) BigDecimal
+        }
+
+        class PreuniversitarioChequeraDetailsCreator {
+            -LectivoTotalService lectivoTotalService
+            -ChequeraCuotaFactory chequeraCuotaFactory
+            +create(ChequeraSerie) void
+            -createCuotas(ChequeraSerie) List~ChequeraCuota~
+            -createTotals(ChequeraSerie, List~ChequeraCuota~) void
+            -productos(ChequeraSerie, Set~Integer~) Collection~Integer~
+            -sumarActivas(ChequeraSerie, Integer, List~ChequeraCuota~) BigDecimal
+        }
+
+        class ChequeraCuotaFactory {
+            +vencio(LectivoCuota, OffsetDateTime) boolean
+            +crear(ChequeraSerie, LectivoCuota, int, OffsetDateTime) ChequeraCuota
+            -aplicarBeneficio(BigDecimal, BigDecimal, ChequeraSerie, LectivoCuota, int) BigDecimal
+            -calcularCodigoBarras(ChequeraCuota, ChequeraSerie, LectivoCuota) String
+        }
+
+        class SpoterService {
+            -ChequeraCuotaFactory chequeraCuotaFactory
+        }
+
+        class FindAllInconsistenciasUseCaseImpl {
+            +findAllInconsistencias(OffsetDateTime, OffsetDateTime) List~ChequeraCuota~
+            -multiplicadorInvalido(BigDecimal, BigDecimal, BigDecimal) boolean
+        }
+    }
+
+    RequisitoPresentadoGuarani --> RequisitoGuarani : requisitoRel
+    PreuniversitarioChequeraService --> BeneficioPolicy : porcentajeEfectivo
+    BeneficioPolicy ..> RequisitoPresentadoGuarani : filtra ingreso='S' y activo='S'
+    BeneficioPolicy ..> GuaraniBeneficio : MAX(porcentajeBeneficio)
+    PreuniversitarioChequeraService --> ChequeraSerie : congela becaPorcentaje
+    PreuniversitarioChequeraService --> PreuniversitarioChequeraDetailsCreator : create
+    PreuniversitarioChequeraDetailsCreator --> ChequeraCuotaFactory : crear
+    SpoterService --> ChequeraCuotaFactory : crear (becaPorcentaje = 0)
+    ChequeraCuotaFactory ..> ChequeraSerie : lee becaPorcentaje
+    ChequeraCuotaFactory --> ChequeraCuota : importeN con factor, importeNOriginal de lista
+    PreuniversitarioChequeraDetailsCreator --> ChequeraTotal : total = suma importe1 activas
+    FindAllInconsistenciasUseCaseImpl ..> ChequeraCuota : verifica invariantes
+
+    note for BeneficioPolicy "Filtra elegibilidad antes de tomar el maximo. requisitoRel nulo falla cerrado con warn."
+    note for ChequeraCuotaFactory "beneficio usa escala fraccional: 0.50 es 50 % y 1.00 es 100 %. importeN = importeNLista x (1 - beneficio), scale 0 HALF_UP. importeNOriginal conserva el precio de lista. Importe nulo se conserva nulo: no se aplica factor ni se calcula barras."
+    note for PreuniversitarioChequeraDetailsCreator "Orden de persistencia: totales, alternativas, cuotas. Las cuotas se preparan en memoria para calcular los totales; los productos salen de lectivo_total unidos a los que generaron cuotas, asi un producto sin cuotas en la alternativa conserva su fila en cero."
