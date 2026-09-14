@@ -2,6 +2,7 @@ package um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.
 
 import java.math.BigDecimal;
 
+import lombok.*;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.Column;
@@ -9,18 +10,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import um.tesoreria.core.model.Auditable;
+import um.tesoreria.core.util.Jsonifyable;
 
-@Data
+@Getter
+@Setter
 @Entity
 @Immutable
 @Table(name = "vw_persona_key")
 @NoArgsConstructor
 @AllArgsConstructor
-public class PersonaKeyEntity extends Auditable {
+public class PersonaKeyEntity extends Auditable implements Jsonifyable {
 
     @Id
     private String unified;
@@ -30,6 +30,9 @@ public class PersonaKeyEntity extends Auditable {
 
     @Column(name = "per_id")
     private BigDecimal personaId;
+
+    private String numeroPrefijo;
+    private String numeroPosfijo;
 
     @Column(name = "per_doc_id")
     private Integer documentoId;
@@ -55,8 +58,12 @@ public class PersonaKeyEntity extends Auditable {
     @Column(name = "per_contrasenha")
     private String password = "";
 
+    private Byte hpum;
+    private Long guaraniPersona;
+
     private String search = "";
 
     @Transient
     private Boolean mark_facultad = false;
+
 }

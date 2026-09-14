@@ -23,6 +23,14 @@ public class Persona {
     private String password;
     private Byte hpum;
 
+    @Builder.Default
+    private String numeroPrefijo = "";
+
+    @Builder.Default
+    private String numeroPosfijo = "";
+
+    private Long guaraniPersona;
+
     public String jsonify() {
         return Jsonifier.builder(this).build();
     }

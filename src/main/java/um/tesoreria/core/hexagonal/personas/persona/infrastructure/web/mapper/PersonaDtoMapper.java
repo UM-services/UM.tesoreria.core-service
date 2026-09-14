@@ -24,6 +24,9 @@ public class PersonaDtoMapper {
                 .cbu(request.getCbu())
                 .password(request.getPassword())
                 .hpum(request.getHpum())
+                .numeroPrefijo(request.getNumeroPrefijo())
+                .numeroPosfijo(request.getNumeroPosfijo())
+                .guaraniPersona(request.getGuaraniPersona())
                 .build();
     }
 
@@ -41,6 +44,9 @@ public class PersonaDtoMapper {
                 .cbu(domain.getCbu())
                 .password(domain.getPassword())
                 .hpum(domain.getHpum())
+                .numeroPrefijo(domain.getNumeroPrefijo())
+                .numeroPosfijo(domain.getNumeroPosfijo())
+                .guaraniPersona(domain.getGuaraniPersona())
                 .build();
     }
 

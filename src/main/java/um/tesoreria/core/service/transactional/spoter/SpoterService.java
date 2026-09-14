@@ -64,7 +64,7 @@ public class SpoterService {
             persona = personaService.findByUnique(spoterData.getPersonaId(), spoterData.getDocumentoId());
         } catch (PersonaException e) {
             persona = personaService.create(new Persona(null, spoterData.getPersonaId(), spoterData.getDocumentoId(),
-                    spoterData.getApellido(), spoterData.getNombre(), "", (byte) 0, "", "", "", (byte) 0));
+                    spoterData.getApellido(), spoterData.getNombre(), "", (byte) 0, "", "", "", (byte) 0, "", "", null));
         }
         log.debug("PersonaEntity: {}", persona.jsonify());
         Domicilio domicilio;

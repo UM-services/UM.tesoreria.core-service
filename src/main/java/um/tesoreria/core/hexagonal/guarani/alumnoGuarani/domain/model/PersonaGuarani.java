@@ -19,6 +19,13 @@ public class PersonaGuarani implements Jsonifyable {
     private String nombres;
     private String apellidoElegido;
     private String nombresElegido;
+
+    @Builder.Default
+    private String numeroPrefijo = "";
+
+    @Builder.Default
+    private String numeroPosfijo = "";
+
     private String sexo;
     private Integer identidadGenero;
     private String identidadGeneroOtro;
