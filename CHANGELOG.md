@@ -2,6 +2,24 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.4.0] - 2026-09-14
+### Added
+- feat(personas/persona): Nuevos campos `numeroPrefijo`, `numeroPosfijo` y `guaraniPersona` en `Persona`, `PersonaEntity`, `PersonaKey`, `PersonaKeyEntity` y los DTOs REST `PersonaRequest`/`PersonaResponse`, propagados por `PersonaMapper`, `PersonaKeyMapper` y `PersonaDtoMapper`; `PersonaEntity` pasa a construirse con `@Builder` en `PersonaMapper.toEntity`.
+- feat(personas/persona): Nuevo `PersonaNombresNormalizer` (dominio) que normaliza `apellido` a mayúsculas completas (admite compuestos: "DE LA CRUZ") y `nombre` con iniciales en mayúscula por palabra separada por espacio o guión ("Juan Pablo", "María-Eugenia"), Unicode-aware y colapsando espacios múltiples; `SavePersonaUseCaseImpl` lo aplica en `create` y `update`.
+- feat(guarani/alumnoGuarani): `PersonaGuarani` acepta `numeroPrefijo`/`numeroPosfijo`; `CreatePersonalesUseCaseImpl` persiste prefijo/posfijo y el id de Guarani (`guaraniPersona`) al crear la persona desde el payload de alumno.
+- feat(guarani/alumnoGuarani): `CreatePersonalesUseCaseImpl` sincroniza con Guarani los datos pendientes de personas ya existentes (`numeroPrefijo`/`numeroPosfijo`/`guaraniPersona`) y de domicilios existentes (emails, teléfonos, observaciones), únicamente cuando el valor local está vacío.
+- feat(guarani/alumnoGuarani): Extracción de datos de contacto por tipo de contacto Guarani: `MP` → `emailPersonal`, `MI` → `emailInstitucional` (con fallback a cualquier correo no-MI y a `emailTemporal`), teléfonos `C` → `movil`, `TF` → `telefono`, `TL` → `laboral` con formato `(codigoArea) numero`, fallback de números no clasificados y `otrosContactos` agregados a `observaciones` separados por `" | "`, todos limitados a 100 caracteres; se persisten al crear el domicilio.
+- test: Nuevas pruebas `PersonaNombresNormalizerTest`, `SavePersonaUseCaseImplTest`, `CreatePersonalesUseCaseImplTest` (creación, sincronización, extracción de contactos y validación de documento) y `PersonaDtoMapperTest`; se extiende `PersonaKeyMapperTest` con los nuevos campos.
+- feat(docs): Diagramas `hexagonal-persona.mmd` y `hexagonal-alumnoGuarani.mmd` sincronizados con el código (v4.4.0).
+
+### Changed
+- fix(chequera/chequeraSerie): `GET /chequeraserie/preuniversitario/guarani/lectivo/{lectivoId}/nroDocumento/{nroDocumento}/...` extrae la parte numérica de `nroDocumento` antes de construir el `BigDecimal` y responde 404 si carece de dígitos, en lugar de propagar un error de parseo por prefijos/posfijos incrustados.
+- fix(guarani/alumnoGuarani): `CreatePersonalesUseCaseImpl` valida que `nroDocumento` sea numérico y retorna `result=false` con log de error si el cliente envía caracteres no dígitos, exigiendo prefijo/posfijo por separado.
+- refactor(personas/persona): `PersonaEntity` e `PersonaKeyEntity` implementan `Jsonifyable` (eliminando `jsonify()` local en `PersonaEntity`); `PersonaKeyEntity` migra de `@Data` a `@Getter/@Setter` preservando `@AllArgsConstructor`/`@NoArgsConstructor`.
+- chore: `SpoterService` adapta la construcción de `Persona` legacy al nuevo constructor de 14 argumentos.
+
+> Basado en `git diff HEAD` (staged: `Persona.java`, `PersonaKey.java`, `PersonaNombresNormalizer.java`, `SavePersonaUseCaseImpl.java`, `PersonaEntity.java`, `PersonaKeyEntity.java`, `PersonaMapper.java`, `PersonaKeyMapper.java`, `PersonaRequest.java`, `PersonaResponse.java`, `PersonaDtoMapper.java`, `PersonaGuarani.java`, `CreatePersonalesUseCaseImpl.java`, `ChequeraSerieController.java`, `SpoterService.java` y las pruebas nuevas), el código Java y `pom.xml` (versión `4.3.1` → `4.4.0`). Las adiciones a los DTOs REST y los campos del payload de Guarani son aditivas y backward-compatible; la normalización de nombres y la sincronización Guarani son capacidades nuevas sin ruptura de contrato, por lo que corresponde un incremento minor de SemVer. Nota de despliegue: los nuevos campos requieren las columnas correspondientes en `persona` y las vistas `vw_persona_key`/buscadores que la base exponga.
+
 ## [4.3.1] - 2026-09-08
 ### Changed
 - fix(chequera/politicaArancelaria): `RecalculateCuotaByUniqueIndexUseCaseImpl.resolveImporteReferencia` usa ahora `cuotaReferencia.getImporte1()` (importe original de la cuota de referencia) como importe base, en lugar de `getImporte3()` (importe vigente tras recalculos previos), evitando que ajustes anteriores arrastren e inflen el importe recalculado de la cuota vencida.

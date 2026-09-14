@@ -22,4 +22,7 @@ public class PersonaRequest {
     private String cbu;
     private String password;
     private Byte hpum;
+    private String numeroPrefijo;
+    private String numeroPosfijo;
+    private Long guaraniPersona;
 }

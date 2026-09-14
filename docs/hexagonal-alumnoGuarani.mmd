@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo AlumnoGuarani (v4.0.0)
+title: Arquitectura Hexagonal - Módulo AlumnoGuarani (v4.4.0)
 ---
 
 classDiagram
@@ -27,27 +27,32 @@ classDiagram
         }
 
         class PersonaGuarani {
-            +Long personaId
+            +Long persona
             +String apellido
             +String nombres
+            +String numeroPrefijo
+            +String numeroPosfijo
             +String sexo
-            +String fechaNacimiento
-            +String nacionalidad
-            +DocumentoPrincipalGuarani documentoPrincipal
+            +LocalDate fechaNacimiento
+            +Integer nacionalidad
+            +DocumentoPrincipalGuarani documentoPrincipalRel
             +List~ContactoGuarani~ contactos
+            +String emailTemporal
         }
 
         class DocumentoPrincipalGuarani {
             +Long documento
-            +TipoDocumentoGuarani tipoDocumento
+            +Long persona
+            +Integer tipoDocumento
+            +TipoDocumentoGuarani tipoDocumentoRel
             +String nroDocumento
-            +String fechaOtorgamiento
-            +String fechaVencimiento
-            +Boolean validadoConRenaper
+            +LocalDate fechaOtorgamiento
+            +LocalDate fechaVencimiento
+            +String validadoConRenaper
         }
 
         class TipoDocumentoGuarani {
-            +Long tipoDocumento
+            +Integer tipoDocumento
             +String descripcion
             +String descAbreviada
             +String expRegularValidacion
@@ -57,6 +62,7 @@ classDiagram
             +Long personaContacto
             +Long persona
             +String contactoTipo
+            +String otrosContactos
             +String email
             +String telefonoCodigoArea
             +String telefonoNumero
@@ -114,6 +120,22 @@ classDiagram
         }
 
     }
+    namespace application {
+
+        class PersonaService {
+            +findByUnique(BigDecimal, Integer) Persona
+            +create(Persona) Persona
+        }
+
+        class DomicilioService {
+            +findByUnique(BigDecimal, Integer) Domicilio
+            +create(Domicilio) Domicilio
+        }
+
+        class DocumentoService {
+            +findFirstByGuaraniTipoDocumento(Integer) Documento
+        }
+    }
     namespace application_usecases {
             class CreatePreuniversitarioUseCaseImpl {
                 -PreuniversitarioChequeraService preuniversitarioChequeraService
@@ -122,6 +144,9 @@ classDiagram
             }
 
             class CreatePersonalesUseCaseImpl {
+                -DocumentoService documentoService
+                -PersonaService personaService
+                -DomicilioService domicilioService
                 +createPersonales(AlumnoGuarani) PersonalesResultado
             }
     }
@@ -177,6 +202,10 @@ classDiagram
     AlumnoGuaraniService --> CreatePersonalesUseCase
 
     CreatePreuniversitarioUseCaseImpl --> PreuniversitarioChequeraService
+
+    CreatePersonalesUseCaseImpl --> DocumentoService
+    CreatePersonalesUseCaseImpl --> PersonaService
+    CreatePersonalesUseCaseImpl --> DomicilioService
 
     AlumnoGuaraniController --> AlumnoGuaraniService
     AlumnoGuaraniDtoMapper ..> AlumnoGuaraniRequest : maps from

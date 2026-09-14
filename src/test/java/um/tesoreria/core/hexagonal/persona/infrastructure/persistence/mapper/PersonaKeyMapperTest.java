@@ -19,6 +19,8 @@ class PersonaKeyMapperTest {
                 "1.2.3.4",
                 99L,
                 new BigDecimal("123.45"),
+                "444",
+                "888",
                 8,
                 "Perez",
                 "Ana",
@@ -27,6 +29,8 @@ class PersonaKeyMapperTest {
                 "20-12345678-9",
                 "CBU",
                 "secret",
+                (byte) 7,
+                4242L,
                 "perez ana",
                 true);
 
@@ -35,6 +39,8 @@ class PersonaKeyMapperTest {
         assertThat(domain.getUnified()).isEqualTo("1.2.3.4");
         assertThat(domain.getUniqueId()).isEqualTo(99L);
         assertThat(domain.getPersonaId()).isEqualByComparingTo("123.45");
+        assertThat(domain.getNumeroPrefijo()).isEqualTo("444");
+        assertThat(domain.getNumeroPosfijo()).isEqualTo("888");
         assertThat(domain.getDocumentoId()).isEqualTo(8);
         assertThat(domain.getApellido()).isEqualTo("Perez");
         assertThat(domain.getNombre()).isEqualTo("Ana");
@@ -43,6 +49,8 @@ class PersonaKeyMapperTest {
         assertThat(domain.getCuit()).isEqualTo("20-12345678-9");
         assertThat(domain.getCbu()).isEqualTo("CBU");
         assertThat(domain.getPassword()).isEqualTo("secret");
+        assertThat(domain.getHpum()).isEqualTo((byte) 7);
+        assertThat(domain.getGuaraniPersona()).isEqualTo(4242L);
         assertThat(domain.getSearch()).isEqualTo("perez ana");
         assertThat(domain.getMark_facultad()).isTrue();
     }

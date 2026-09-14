@@ -1,6 +1,5 @@
 package um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.entity;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 
@@ -14,16 +13,17 @@ import jakarta.persistence.UniqueConstraint;
 
 import lombok.*;
 import um.tesoreria.core.model.Auditable;
-import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 @Getter
 @Setter
 @Entity
+@Builder
 @Table(name = "persona", uniqueConstraints = { @UniqueConstraint(columnNames = { "per_id", "per_doc_id" }) })
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class PersonaEntity extends Auditable implements Serializable {
+public class PersonaEntity extends Auditable implements Jsonifyable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +32,12 @@ public class PersonaEntity extends Auditable implements Serializable {
 
     @Column(name = "per_id")
     private BigDecimal personaId;
+
+    @Builder.Default
+    private String numeroPrefijo = "";
+
+    @Builder.Default
+    private String numeroPosfijo = "";
 
     @Column(name = "per_doc_id")
     private Integer documentoId;
@@ -58,12 +64,10 @@ public class PersonaEntity extends Auditable implements Serializable {
     private String password;
 
     private Byte hpum;
+    private Long guaraniPersona;
 
     public String getApellidoNombre() {
         return MessageFormat.format("{0}, {1}", apellido, nombre);
     }
 
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
-    }
 }
