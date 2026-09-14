@@ -21,23 +21,29 @@ public class PersonaMapper {
                 .cbu(entity.getCbu())
                 .password(entity.getPassword())
                 .hpum(entity.getHpum())
+                .numeroPrefijo(entity.getNumeroPrefijo())
+                .numeroPosfijo(entity.getNumeroPosfijo())
+                .guaraniPersona(entity.getGuaraniPersona())
                 .build();
     }
 
     public PersonaEntity toEntity(Persona domain) {
         if (domain == null) return null;
-        PersonaEntity entity = new PersonaEntity();
-        entity.setUniqueId(domain.getUniqueId());
-        entity.setPersonaId(domain.getPersonaId());
-        entity.setDocumentoId(domain.getDocumentoId());
-        entity.setApellido(domain.getApellido());
-        entity.setNombre(domain.getNombre());
-        entity.setSexo(domain.getSexo());
-        entity.setPrimero(domain.getPrimero());
-        entity.setCuit(domain.getCuit());
-        entity.setCbu(domain.getCbu());
-        entity.setPassword(domain.getPassword());
-        entity.setHpum(domain.getHpum());
-        return entity;
+        return PersonaEntity.builder()
+                .uniqueId(domain.getUniqueId())
+                .personaId(domain.getPersonaId())
+                .numeroPrefijo(domain.getNumeroPrefijo())
+                .numeroPosfijo(domain.getNumeroPosfijo())
+                .documentoId(domain.getDocumentoId())
+                .apellido(domain.getApellido())
+                .nombre(domain.getNombre())
+                .sexo(domain.getSexo())
+                .primero(domain.getPrimero())
+                .cuit(domain.getCuit())
+                .cbu(domain.getCbu())
+                .password(domain.getPassword())
+                .hpum(domain.getHpum())
+                .guaraniPersona(domain.getGuaraniPersona())
+                .build();
     }
 }

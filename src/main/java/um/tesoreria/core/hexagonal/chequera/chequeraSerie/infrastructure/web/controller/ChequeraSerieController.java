@@ -229,8 +229,12 @@ public class ChequeraSerieController {
     @GetMapping("/preuniversitario/guarani/lectivo/{lectivoId}/nroDocumento/{nroDocumento}/tipoDocumento/{tipoDocumento}/ubicacion/{ubicacion}/responsableAcademica/{responsableAcademica}")
     public ResponseEntity<ChequeraSerieResponse> findPreuniversitarioFromDatosGuarani(@PathVariable Integer lectivoId, @PathVariable String nroDocumento, @PathVariable Integer tipoDocumento, @PathVariable Integer ubicacion, @PathVariable Integer responsableAcademica) {
         try {
+            String digitos = nroDocumento != null ? nroDocumento.replaceAll("\\D+", "") : "";
+            if (digitos.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Documento sin parte numérica");
+            }
             ChequeraSerie chequeraSerie = service.findPreuniversitarioFromDatosGuarani(
-                    new BigDecimal(nroDocumento), tipoDocumento, ubicacion, responsableAcademica, lectivoId);
+                    new BigDecimal(digitos), tipoDocumento, ubicacion, responsableAcademica, lectivoId);
             return ResponseEntity.ok(chequeraSerieDtoMapper.toResponse(chequeraSerie));
         } catch (ChequeraSerieException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());

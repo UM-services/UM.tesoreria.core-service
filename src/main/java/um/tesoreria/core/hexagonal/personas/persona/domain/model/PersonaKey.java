@@ -19,6 +19,12 @@ public class PersonaKey {
     private Integer documentoId;
 
     @Builder.Default
+    private String numeroPrefijo = "";
+
+    @Builder.Default
+    private String numeroPosfijo = "";
+
+    @Builder.Default
     private String apellido = "";
 
     @Builder.Default
@@ -38,6 +44,9 @@ public class PersonaKey {
 
     @Builder.Default
     private String password = "";
+
+    private Byte hpum;
+    private Long guaraniPersona;
 
     @Builder.Default
     private String search = "";

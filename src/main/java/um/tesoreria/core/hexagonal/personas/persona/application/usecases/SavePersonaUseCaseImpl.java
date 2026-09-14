@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.personas.persona.application.exception.PersonaException;
 import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
+import um.tesoreria.core.hexagonal.personas.persona.domain.model.PersonaNombresNormalizer;
 import um.tesoreria.core.hexagonal.personas.persona.domain.ports.in.SavePersonaUseCase;
 import um.tesoreria.core.hexagonal.personas.persona.domain.ports.out.PersonaRepository;
 
@@ -15,11 +16,13 @@ public class SavePersonaUseCaseImpl implements SavePersonaUseCase {
 
     @Override
     public Persona create(Persona persona) {
+        normalizarNombres(persona);
         return repository.save(persona);
     }
 
     @Override
     public Persona update(Persona newpersona, Long uniqueId) {
+        normalizarNombres(newpersona);
         return repository.findByUniqueId(uniqueId).map(persona -> {
             persona.setPersonaId(newpersona.getPersonaId());
             persona.setDocumentoId(newpersona.getDocumentoId());
@@ -31,7 +34,18 @@ public class SavePersonaUseCaseImpl implements SavePersonaUseCase {
             persona.setCbu(newpersona.getCbu());
             persona.setPassword(newpersona.getPassword());
             persona.setHpum(newpersona.getHpum());
+            persona.setNumeroPrefijo(newpersona.getNumeroPrefijo());
+            persona.setNumeroPosfijo(newpersona.getNumeroPosfijo());
+            persona.setGuaraniPersona(newpersona.getGuaraniPersona());
             return repository.save(persona);
         }).orElseThrow(() -> new PersonaException(uniqueId));
+    }
+
+    private void normalizarNombres(Persona persona) {
+        if (persona == null) {
+            return;
+        }
+        persona.setApellido(PersonaNombresNormalizer.normalizarApellido(persona.getApellido()));
+        persona.setNombre(PersonaNombresNormalizer.normalizarNombre(persona.getNombre()));
     }
 }
