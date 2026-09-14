@@ -17,6 +17,8 @@ public class PersonaKeyMapper {
                 .uniqueId(entity.getUniqueId())
                 .personaId(entity.getPersonaId())
                 .documentoId(entity.getDocumentoId())
+                .numeroPrefijo(entity.getNumeroPrefijo())
+                .numeroPosfijo(entity.getNumeroPosfijo())
                 .apellido(entity.getApellido())
                 .nombre(entity.getNombre())
                 .sexo(entity.getSexo())
@@ -24,6 +26,8 @@ public class PersonaKeyMapper {
                 .cuit(entity.getCuit())
                 .cbu(entity.getCbu())
                 .password(entity.getPassword())
+                .hpum(entity.getHpum())
+                .guaraniPersona(entity.getGuaraniPersona())
                 .search(entity.getSearch())
                 .mark_facultad(entity.getMark_facultad())
                 .build();

@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Modulo Persona bajo Personas (v3.50.0)
+title: Arquitectura Hexagonal - Modulo Persona bajo Personas (v4.4.0)
 ---
 
 classDiagram
@@ -13,12 +13,20 @@ classDiagram
             +String apellido
             +String nombre
             +String sexo
-            +String primero
+            +Byte primero
             +String cuit
             +String cbu
             +String password
             +Byte hpum
+            +String numeroPrefijo
+            +String numeroPosfijo
+            +Long guaraniPersona
             +jsonify() String
+        }
+
+        class PersonaNombresNormalizer {
+            +normalizarApellido(String) String
+            +normalizarNombre(String) String
         }
 
         class PersonaRepository {
@@ -100,10 +108,18 @@ classDiagram
     namespace infrastructure_persistence {
             class PersonaEntity {
                 +Long uniqueId
-                +Integer personaId
+                +BigDecimal personaId
                 +Integer documentoId
+                +String numeroPrefijo
+                +String numeroPosfijo
                 +String apellido
                 +String nombre
+                +Long guaraniPersona
+            }
+
+            class Jsonifyable {
+                << interface >>
+                +jsonify() String
             }
 
             class JpaPersonaRepository {
@@ -182,6 +198,7 @@ classDiagram
     GetPersonaByUniqueIdUseCaseImpl ..|> GetPersonaByUniqueIdUseCase : implements
     FindAllSantanderUseCaseImpl ..|> FindAllSantanderUseCase : implements
     SavePersonaUseCaseImpl ..|> SavePersonaUseCase : implements
+    SavePersonaUseCaseImpl ..> PersonaNombresNormalizer : uses
     FindInscriptosSinChequeraUseCaseImpl ..|> FindInscriptosSinChequeraUseCase : implements
     FindDeudoresByLectivoUseCaseImpl ..|> FindDeudoresByLectivoUseCase : implements
     FindUnifiedsUseCaseImpl ..|> FindUnifiedsUseCase : implements
@@ -201,6 +218,7 @@ classDiagram
 
     PersonaMapper --> Persona : maps
     PersonaMapper --> PersonaEntity : maps
+    PersonaEntity ..|> Jsonifyable : implements
     JpaPersonaRepository --> PersonaEntity : persists
 
     PersonaController --> PersonaService : calls

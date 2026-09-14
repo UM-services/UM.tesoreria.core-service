@@ -4,7 +4,18 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 4.3.1**
+**Versión actual (SemVer): 4.4.0**
+
+## Novedades 4.4.0 (verificado en código)
+- feat(personas/persona): `Persona`, `PersonaKey`, sus entidades y los DTOs REST (`PersonaRequest`/`PersonaResponse`) incorporan los campos `numeroPrefijo`, `numeroPosfijo` y `guaraniPersona`, propagados por los mappers de persistencia y web.
+- feat(personas/persona): Nuevo `PersonaNombresNormalizer` normaliza `apellido` (mayúsculas completas, admite compuestos) y `nombre` (inicial en mayúscula por palabra, Unicode-aware); `SavePersonaUseCaseImpl` lo aplica en `create` y `update`.
+- feat(guarani/alumnoGuarani): `CreatePersonalesUseCaseImpl` sincroniza con Guarani los datos pendientes de personas y domicilios existentes, extrae emails por tipo de contacto (`MP`/`MI`), teléfonos por tipo (`C`/`TF`/`TL`) con fallbacks, y persiste prefijo/posfijo e identificador de persona Guarani al crear personales.
+- fix(chequera/chequeraSerie): La consulta preuniversitaria por datos de Guarani extrae la parte numérica de `nroDocumento` y responde 404 si no tiene dígitos, en lugar de fallar por prefijos/posfijos incrustados.
+- refactor(personas/persona): `PersonaEntity` e `PersonaKeyEntity` implementan `Jsonifyable`; `PersonaEntity` se construye vía `@Builder`.
+- test: Nuevas pruebas para `PersonaNombresNormalizer`, `SavePersonaUseCaseImpl`, `CreatePersonalesUseCaseImpl` y `PersonaDtoMapper`.
+- feat(docs): Diagramas `hexagonal-persona.mmd` y `hexagonal-alumnoGuarani.mmd` sincronizados (v4.4.0).
+
+> Basado en `git diff HEAD` (20 archivos staged, +892/−39 líneas), el código Java y `pom.xml` (versión `4.3.1` → `4.4.0`). Las adiciones de campos a DTOs y al payload de Guarani son aditivas y backward-compatible; corresponde un incremento minor de SemVer.
 
 ## Novedades 4.3.1 (verificado en código)
 - fix(chequera/politicaArancelaria): `RecalculateCuotaByUniqueIndexUseCaseImpl.resolveImporteReferencia` toma como importe base `cuotaReferencia.getImporte1()` (importe original) en lugar de `getImporte3()` (importe vigente tras recalculos previos), evitando que ajustes anteriores inflen el importe recalculado de la cuota vencida.
