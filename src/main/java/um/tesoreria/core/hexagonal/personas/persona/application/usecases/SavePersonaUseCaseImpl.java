@@ -17,12 +17,14 @@ public class SavePersonaUseCaseImpl implements SavePersonaUseCase {
     @Override
     public Persona create(Persona persona) {
         normalizarNombres(persona);
+        normalizarNumeros(persona);
         return repository.save(persona);
     }
 
     @Override
     public Persona update(Persona newpersona, Long uniqueId) {
         normalizarNombres(newpersona);
+        normalizarNumeros(newpersona);
         return repository.findByUniqueId(uniqueId).map(persona -> {
             persona.setPersonaId(newpersona.getPersonaId());
             persona.setDocumentoId(newpersona.getDocumentoId());
@@ -47,5 +49,13 @@ public class SavePersonaUseCaseImpl implements SavePersonaUseCase {
         }
         persona.setApellido(PersonaNombresNormalizer.normalizarApellido(persona.getApellido()));
         persona.setNombre(PersonaNombresNormalizer.normalizarNombre(persona.getNombre()));
+    }
+
+    private void normalizarNumeros(Persona persona) {
+        if (persona == null) {
+            return;
+        }
+        persona.setNumeroPrefijo(Persona.numeroOrEmpty(persona.getNumeroPrefijo()));
+        persona.setNumeroPosfijo(Persona.numeroOrEmpty(persona.getNumeroPosfijo()));
     }
 }

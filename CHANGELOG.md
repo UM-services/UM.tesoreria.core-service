@@ -2,6 +2,14 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.4.1] - 2026-09-16
+### Changed
+- fix(personas/persona): Invariante de dominio para los números de documento: `numeroPrefijo`/`numeroPosfijo` no admiten `null`; `Persona.numeroOrEmpty` representa el valor ausente como cadena vacía y `SavePersonaUseCaseImpl.normalizarNumeros` lo aplica en `create` y `update` (valores nulos se persisten como `""`, los valores con contenido se conservan intactos).
+- refactor(personas/persona): `Persona` implementa `Jsonifyable` y elimina su método `jsonify()` local en favor del método default de la interfaz (comportamiento idéntico: `Jsonifier.builder(this).build()`).
+- test: Nuevas pruebas en `SavePersonaUseCaseImplTest` que cubren `create` y `update` con `numeroPrefijo`/`numeroPosfijo` nulos (se guardan vacíos) y con valor (se conservan).
+
+> Basado en `git diff HEAD` (unstaged: `Persona.java`, `SavePersonaUseCaseImpl.java`, `SavePersonaUseCaseImplTest.java`) y `pom.xml` (versión `4.4.0` → `4.4.1`). No hay endpoints nuevos ni cambios de contrato REST ni de firmas de casos de uso; la normalización nulo→cadena vacía y la adopción de `Jsonifyable` son correcciones de comportamiento interno y refactors sin capacidad pública nueva, por lo que corresponde un incremento patch de SemVer.
+
 ## [4.4.0] - 2026-09-14
 ### Added
 - feat(personas/persona): Nuevos campos `numeroPrefijo`, `numeroPosfijo` y `guaraniPersona` en `Persona`, `PersonaEntity`, `PersonaKey`, `PersonaKeyEntity` y los DTOs REST `PersonaRequest`/`PersonaResponse`, propagados por `PersonaMapper`, `PersonaKeyMapper` y `PersonaDtoMapper`; `PersonaEntity` pasa a construirse con `@Builder` en `PersonaMapper.toEntity`.
