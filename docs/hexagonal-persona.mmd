@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Modulo Persona bajo Personas (v4.4.0)
+title: Arquitectura Hexagonal - Modulo Persona bajo Personas (v4.4.1)
 ---
 
 classDiagram
@@ -21,7 +21,7 @@ classDiagram
             +String numeroPrefijo
             +String numeroPosfijo
             +Long guaraniPersona
-            +jsonify() String
+            +numeroOrEmpty(String) String
         }
 
         class PersonaNombresNormalizer {
@@ -219,6 +219,7 @@ classDiagram
     PersonaMapper --> Persona : maps
     PersonaMapper --> PersonaEntity : maps
     PersonaEntity ..|> Jsonifyable : implements
+    Persona ..|> Jsonifyable : implements
     JpaPersonaRepository --> PersonaEntity : persists
 
     PersonaController --> PersonaService : calls
