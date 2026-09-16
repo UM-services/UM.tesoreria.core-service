@@ -2,6 +2,7 @@ package um.tesoreria.core.hexagonal.personas.persona.domain.model;
 
 import lombok.*;
 import um.tesoreria.core.util.Jsonifier;
+import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;
 
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Persona {
+public class Persona implements Jsonifyable {
     private Long uniqueId;
     private BigDecimal personaId;
     private Integer documentoId;
@@ -31,7 +32,12 @@ public class Persona {
 
     private Long guaraniPersona;
 
-    public String jsonify() {
-        return Jsonifier.builder(this).build();
+    /**
+     * Invariante de dominio: los campos de número de documento (prefijo/posfijo) no admiten
+     * {@code null}; un valor ausente se representa como cadena vacía.
+     */
+    public static String numeroOrEmpty(String numero) {
+        return numero == null ? "" : numero;
     }
+
 }

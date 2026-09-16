@@ -67,4 +67,98 @@ class SavePersonaUseCaseImplTest {
         assertThat(actualizado.getApellido()).isEqualTo("FERNANDEZ SAAVEDRA");
         assertThat(actualizado.getNombre()).isEqualTo("Ana Sofía");
     }
+
+    @Test
+    void createConPrefijoYPosfijoNullLosGuardaComoVacio() {
+        Persona persona = Persona.builder()
+                .personaId(new BigDecimal("1234567"))
+                .documentoId(1)
+                .apellido("GOMEZ")
+                .nombre("Luis")
+                .numeroPrefijo(null)
+                .numeroPosfijo(null)
+                .build();
+        when(repository.save(any(Persona.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        useCase.create(persona);
+
+        ArgumentCaptor<Persona> captor = ArgumentCaptor.forClass(Persona.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getNumeroPrefijo()).isEmpty();
+        assertThat(captor.getValue().getNumeroPosfijo()).isEmpty();
+    }
+
+    @Test
+    void createConservaPrefijoYPosfijoCuandoVienenConValor() {
+        Persona persona = Persona.builder()
+                .personaId(new BigDecimal("1234567"))
+                .documentoId(1)
+                .apellido("GOMEZ")
+                .nombre("Luis")
+                .numeroPrefijo("456")
+                .numeroPosfijo("8")
+                .build();
+        when(repository.save(any(Persona.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        useCase.create(persona);
+
+        ArgumentCaptor<Persona> captor = ArgumentCaptor.forClass(Persona.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getNumeroPrefijo()).isEqualTo("456");
+        assertThat(captor.getValue().getNumeroPosfijo()).isEqualTo("8");
+    }
+
+    @Test
+    void updateConPrefijoYPosfijoNullLosGuardaComoVacio() {
+        Persona existente = Persona.builder()
+                .uniqueId(9L)
+                .personaId(new BigDecimal("1234567"))
+                .documentoId(1)
+                .apellido("LOPEZ")
+                .nombre("Maria")
+                .numeroPrefijo("456")
+                .numeroPosfijo("8")
+                .build();
+        Persona nuevo = Persona.builder()
+                .personaId(new BigDecimal("1234567"))
+                .documentoId(1)
+                .apellido("LOPEZ")
+                .nombre("Maria")
+                .numeroPrefijo(null)
+                .numeroPosfijo(null)
+                .build();
+        when(repository.findByUniqueId(9L)).thenReturn(Optional.of(existente));
+        when(repository.save(any(Persona.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Persona actualizado = useCase.update(nuevo, 9L);
+
+        assertThat(actualizado.getNumeroPrefijo()).isEmpty();
+        assertThat(actualizado.getNumeroPosfijo()).isEmpty();
+    }
+
+    @Test
+    void updateConservaPrefijoYPosfijoCuandoVienenConValor() {
+        Persona existente = Persona.builder()
+                .uniqueId(9L)
+                .personaId(new BigDecimal("1234567"))
+                .documentoId(1)
+                .apellido("LOPEZ")
+                .nombre("Maria")
+                .build();
+        Persona nuevo = Persona.builder()
+                .personaId(new BigDecimal("1234567"))
+                .documentoId(1)
+                .apellido("LOPEZ")
+                .nombre("Maria")
+                .numeroPrefijo("741")
+                .numeroPosfijo("2")
+                .build();
+        when(repository.findByUniqueId(9L)).thenReturn(Optional.of(existente));
+        when(repository.save(any(Persona.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Persona actualizado = useCase.update(nuevo, 9L);
+
+        assertThat(actualizado.getNumeroPrefijo()).isEqualTo("741");
+        assertThat(actualizado.getNumeroPosfijo()).isEqualTo("2");
+    }
 }

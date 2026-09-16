@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 4.4.0**
+**Versión actual (SemVer): 4.4.1**
+
+## Novedades 4.4.1 (verificado en código)
+- fix(personas/persona): `numeroPrefijo`/`numeroPosfijo` no admiten `null`; `Persona.numeroOrEmpty` representa el valor ausente como cadena vacía y `SavePersonaUseCaseImpl` aplica la normalización en `create` y `update`, conservando los valores con contenido.
+- refactor(personas/persona): `Persona` implementa `Jsonifyable` y elimina su método `jsonify()` local en favor del default de la interfaz.
+- test: Nuevas pruebas de normalización de prefijo/posfijo (nulo y con valor) en `SavePersonaUseCaseImplTest`.
+- feat(docs): Diagrama `hexagonal-persona.mmd` sincronizado (v4.4.1).
+
+> Basado en `git diff HEAD` (unstaged: `Persona.java`, `SavePersonaUseCaseImpl.java`, `SavePersonaUseCaseImplTest.java`) y `pom.xml` (versión `4.4.0` → `4.4.1`). Sin cambios de contrato REST; corresponde un incremento patch de SemVer.
 
 ## Novedades 4.4.0 (verificado en código)
 - feat(personas/persona): `Persona`, `PersonaKey`, sus entidades y los DTOs REST (`PersonaRequest`/`PersonaResponse`) incorporan los campos `numeroPrefijo`, `numeroPosfijo` y `guaraniPersona`, propagados por los mappers de persistencia y web.
