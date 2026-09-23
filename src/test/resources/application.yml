@@ -22,7 +22,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: chequeras@um.edu.ar
-    password: 8VlfKS44o8YbOutcm2VT
+    password: unused-test-password
     properties:
       mail:
         smtp:

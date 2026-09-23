@@ -1258,6 +1258,31 @@ cd um.tesoreria.core-service
 mvn clean install
 ```
 
+### Pruebas de integración con MySQL
+
+El perfil `it` ejecuta los tests unitarios y los tests de integración (`*IT`) contra una base MySQL existente. Requiere acceso de red a la base; se recomienda usar una cuenta de solo lectura. Los IT actuales buscan una asignación de facultad con al menos una chequera; si no la hay, fallan con un mensaje explícito.
+
+Crear un archivo `.env` en la raíz del proyecto (está ignorado por Git):
+
+```dotenv
+IT_DB_HOST=host-de-mysql
+IT_DB_PORT=3306
+IT_DB_NAME=tesium
+IT_DB_USER=usuario-de-solo-lectura
+IT_DB_PASSWORD=contraseña
+```
+
+Maven no carga `.env` automáticamente. Para ejecutar las pruebas desde una terminal:
+
+```bash
+set -a
+. ./.env
+set +a
+mvn -Pit verify
+```
+
+El perfil usa `ddl-auto: none` y conexiones de solo lectura; no prepara datos de prueba ni modifica el esquema.
+
 ## Uso
 
 ### Endpoints de Personas

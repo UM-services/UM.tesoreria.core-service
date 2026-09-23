@@ -7,7 +7,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -30,6 +33,13 @@ public interface JpaChequeraSerieRepository extends JpaRepository<ChequeraSerieE
 	                                                                                    Integer documentoId, Integer lectivoId, Integer facultadId);
 
 	List<ChequeraSerieEntity> findAllByLectivoIdAndFacultadId(Integer lectivoId, Integer facultadId);
+
+	@EntityGraph(attributePaths = {"facultad", "persona", "tipoChequera"})
+	Page<ChequeraSerieEntity> findAllByLectivoIdAndFacultadIdIn(Integer lectivoId, List<Integer> facultadIds, Pageable pageable);
+
+	@EntityGraph(attributePaths = {"facultad", "persona", "tipoChequera"})
+	Page<ChequeraSerieEntity> findAllByLectivoIdAndFacultadIdInAndPersonaIdAndDocumentoId(
+			Integer lectivoId, List<Integer> facultadIds, BigDecimal personaId, Integer documentoId, Pageable pageable);
 
     List<ChequeraSerieEntity> findAllByFacultadIdAndLectivoIdAndGeograficaId(Integer facultadId, Integer lectivoId, Integer geograficaId);
 
