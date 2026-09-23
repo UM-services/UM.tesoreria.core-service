@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.auth.domain.model.UsuarioAuth;
 import um.tesoreria.core.hexagonal.auth.domain.ports.out.UsuarioAuthRepository;
 import um.tesoreria.core.hexagonal.auth.infrastructure.persistence.mapper.UsuarioAuthMapper;
-import um.tesoreria.core.hexagonal.usuario.infrastructure.persistence.entity.UsuarioEntity;
-import um.tesoreria.core.hexagonal.usuario.infrastructure.persistence.repository.JpaUsuarioRepository;
+import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.persistence.entity.UsuarioEntity;
+import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.persistence.repository.JpaUsuarioRepository;
 
 import java.util.Optional;
 
