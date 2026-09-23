@@ -9,4 +9,6 @@ interface ReciboMessageCheckRepository : JpaRepository<ReciboMessageCheck, UUID>
 
     fun findByReciboMessageCheckId(reciboMessageCheckId: UUID): Optional<ReciboMessageCheck?>?
 
+    fun findAllByChequeraPagoId(chequeraPagoId: Long): List<ReciboMessageCheck>
+
 }
