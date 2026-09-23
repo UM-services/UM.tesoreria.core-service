@@ -1,0 +1,124 @@
+---
+title: Arquitectura Hexagonal - Módulo UsuarioChequeraFacultad (v4.5.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class UsuarioChequeraFacultad {
+            +Long usuarioChequeraFacultadId
+            +Long userId
+            +Integer facultadId
+            +LocalDateTime created
+            +LocalDateTime updated
+            +Usuario usuario
+            +Facultad facultad
+        }
+
+        class Usuario {
+            << domain >>
+            +Long userId
+            +String login
+            +String nombre
+        }
+
+        class Facultad {
+            << domain >>
+            +Integer facultadId
+            +String nombre
+        }
+
+        class UsuarioChequeraFacultadRepository {
+            << interface >>
+            +findAllByUserId(Long) List~UsuarioChequeraFacultad~
+        }
+    }
+
+    namespace application {
+        class UsuarioChequeraFacultadService {
+            -GetUsuarioChequeraFacultadesByUserIdUseCase getUsuarioChequeraFacultadesByUserIdUseCase
+            +findAllByUserId(Long) List~UsuarioChequeraFacultad~
+        }
+
+        class GetUsuarioChequeraFacultadesByUserIdUseCase {
+            << interface >>
+            +getByUserId(Long) List~UsuarioChequeraFacultad~
+        }
+    }
+
+    namespace application_usecases {
+        class GetUsuarioChequeraFacultadesByUserIdUseCaseImpl
+    }
+
+    namespace infrastructure_persistence {
+        class UsuarioChequeraFacultadEntity {
+            +Long usuarioChequeraFacultadId
+            +Long userId
+            +Integer facultadId
+            +UsuarioEntity usuario
+            +FacultadEntity facultad
+        }
+
+        class JpaUsuarioChequeraFacultadRepository {
+            << JpaRepository >>
+            +findAllByUserId(Long) List~UsuarioChequeraFacultadEntity~
+        }
+
+        class JpaUsuarioChequeraFacultadRepositoryAdapter {
+            -JpaUsuarioChequeraFacultadRepository repository
+            -UsuarioChequeraFacultadMapper mapper
+            +findAllByUserId(Long) List~UsuarioChequeraFacultad~
+        }
+
+        class UsuarioChequeraFacultadMapper {
+            -UsuarioMapper usuarioMapper
+            -FacultadMapper facultadMapper
+            +toDomain(UsuarioChequeraFacultadEntity) UsuarioChequeraFacultad
+            +toEntity(UsuarioChequeraFacultad) UsuarioChequeraFacultadEntity
+        }
+    }
+
+    namespace infrastructure_web {
+        class UsuarioChequeraFacultadController {
+            -UsuarioChequeraFacultadService service
+            -UsuarioChequeraFacultadDtoMapper mapper
+            +findAllByUserId(Long) ResponseEntity~List~UsuarioChequeraFacultadResponse~~
+        }
+
+        class UsuarioChequeraFacultadResponse {
+            +Long usuarioChequeraFacultadId
+            +Long userId
+            +Integer facultadId
+            +LocalDateTime created
+            +LocalDateTime updated
+            +UsuarioResponse usuario
+            +FacultadResponse facultad
+        }
+
+        class UsuarioChequeraFacultadDtoMapper {
+            -UsuarioDtoMapper usuarioDtoMapper
+            -FacultadDtoMapper facultadDtoMapper
+            +toResponse(UsuarioChequeraFacultad) UsuarioChequeraFacultadResponse
+        }
+    }
+
+    UsuarioChequeraFacultad --> Usuario : referencia
+    UsuarioChequeraFacultad --> Facultad : referencia
+
+    UsuarioChequeraFacultadService --> GetUsuarioChequeraFacultadesByUserIdUseCase : uses
+    GetUsuarioChequeraFacultadesByUserIdUseCaseImpl ..|> GetUsuarioChequeraFacultadesByUserIdUseCase : implements
+    GetUsuarioChequeraFacultadesByUserIdUseCaseImpl --> UsuarioChequeraFacultadRepository : uses
+
+    JpaUsuarioChequeraFacultadRepositoryAdapter ..|> UsuarioChequeraFacultadRepository : implements
+    JpaUsuarioChequeraFacultadRepositoryAdapter --> JpaUsuarioChequeraFacultadRepository : uses
+    JpaUsuarioChequeraFacultadRepositoryAdapter --> UsuarioChequeraFacultadMapper : uses
+
+    UsuarioChequeraFacultadMapper --> UsuarioChequeraFacultad : maps
+    UsuarioChequeraFacultadMapper --> UsuarioChequeraFacultadEntity : maps
+    JpaUsuarioChequeraFacultadRepository --> UsuarioChequeraFacultadEntity : persists
+
+    UsuarioChequeraFacultadController --> UsuarioChequeraFacultadService : calls
+    UsuarioChequeraFacultadController --> UsuarioChequeraFacultadDtoMapper : uses
+    UsuarioChequeraFacultadDtoMapper --> UsuarioChequeraFacultad : maps
+    UsuarioChequeraFacultadDtoMapper --> UsuarioChequeraFacultadResponse : maps

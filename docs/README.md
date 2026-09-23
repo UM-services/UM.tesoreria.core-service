@@ -41,7 +41,8 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-arancelPorcentaje.mmd`: Arquitectura hexagonal del módulo ArancelPorcentaje (porcentajes por producto) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-asiento.mmd`: Arquitectura hexagonal del módulo Asiento (asientos contables) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento bajo `personas`, incluyendo búsqueda por tipo Guaraní y rutas REST compatibles - v3.50.1.
-- `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario (gestión de usuarios) - v3.35.0 (migración desde Kotlin legacy).
+- `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario bajo `usuarios/` (gestión de usuarios) - v4.5.0 (reubicado de `hexagonal/usuario/` a `hexagonal/usuarios/usuario/`, rutas y contratos REST intactos).
+- `hexagonal-usuarioChequeraFacultad.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraFacultad bajo `usuarios/` (facultades de chequera por usuario) - v4.5.0 (nuevo slice; migra el módulo legacy `core/model` + `core/repository` + `core/service` + `core/controller` con respuesta DTO que ya no expone `password`).
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v3.50.0.
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).

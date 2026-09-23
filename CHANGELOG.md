@@ -2,6 +2,20 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [4.5.0] - 2026-09-23
+### Added
+- feat(usuarios/usuarioChequeraFacultad): Nuevo slice hexagonal `usuarioChequeraFacultad` migrado desde el legacy (`core/model`, `core/repository`, `core/service`, `core/controller`): modelo de dominio `UsuarioChequeraFacultad` (con `usuario` y `facultad` enriquecidos), puerto de entrada `GetUsuarioChequeraFacultadesByUserIdUseCase`, puerto de salida `UsuarioChequeraFacultadRepository`, `UsuarioChequeraFacultadService`, `UsuarioChequeraFacultadException`, entidad `UsuarioChequeraFacultadEntity` (misma tabla `usuario_chequera_facultad`, ahora con `@Table(name = ...)` explícito), adaptador `JpaUsuarioChequeraFacultadRepositoryAdapter`, repositorio Spring Data con `findAllByUserId`, mappers de persistencia y web, DTO `UsuarioChequeraFacultadResponse` y controlador REST `GET /api/tesoreria/core/usuarioChequeraFacultad/user/{userId}` (URL idéntica a la del controller legacy eliminado).
+- feat(docs): Nuevo diagrama Mermaid `hexagonal-usuarioChequeraFacultad.mmd` y registro en el visor de documentación (`docs/script.js`, `docs/index.html`, `docs/README.md`).
+
+### Changed
+- refactor(usuarios/usuario): Reubicación del slice `usuario` de `hexagonal/usuario/` a `hexagonal/usuarios/usuario/` (movimiento de paquete sin cambios de comportamiento; rutas REST `/usuario` y `/api/tesoreria/core/usuario` y sus contratos permanecen intactos).
+- refactor(legacy): Eliminación de `core/controller/UsuarioChequeraFacultadController`, `core/service/UsuarioChequeraFacultadService`, `core/repository/UsuarioChequeraFacultadRepository` y `core/model/UsuarioChequeraFacultad`, reemplazados por el nuevo slice hexagonal.
+- refactor(auth): `UsuarioAuthMapper` y `JpaUsuarioAuthRepositoryAdapter` actualizan sus imports a `UsuarioEntity`/`JpaUsuarioRepository` en el nuevo paquete `hexagonal/usuarios/usuario/` (sin cambio de lógica).
+- refactor(usuarioChequeraFacultad): La respuesta de `GET /api/tesoreria/core/usuarioChequeraFacultad/user/{userId}` se serializa ahora vía DTO: mantiene `usuarioChequeraFacultadId`, `userId`, `facultadId`, `created`, `updated`, `usuario` y `facultad`, pero `usuario` pasa a `UsuarioResponse` (ya no expone `password`) y `facultad` a `FacultadResponse` (campos idénticos a la entidad).
+- docs: `hexagonal-usuario.mmd` sincronizado con el nuevo paquete `usuarios/usuario` (v4.5.0).
+
+> Basado en `git diff HEAD` (staged: 49 archivos, +367/−168 líneas), el código Java del nuevo slice y las comparaciones de contenido de los archivos renombrados (solo cambios de paquete/import; la entidad conserva la misma tabla y el endpoint conserva la misma URL), `docs/script.js`/`docs/index.html` como pipeline explícito de diagramas, y `pom.xml` (versión `4.4.1` → `4.5.0`). La incorporación de un slice hexagonal nuevo con capa DTO corresponde a un incremento minor de SemVer (mismo patrón de las migraciones legacy→hexagonal `3.35.0`/`3.36.0`); la única diferencia observable en el payload es la exclusión de `password` en el usuario anidado, coherente con el contrato de `UsuarioResponse`.
+
 ## [4.4.1] - 2026-09-16
 ### Changed
 - fix(personas/persona): Invariante de dominio para los números de documento: `numeroPrefijo`/`numeroPosfijo` no admiten `null`; `Persona.numeroOrEmpty` representa el valor ausente como cadena vacía y `SavePersonaUseCaseImpl.normalizarNumeros` lo aplica en `create` y `update` (valores nulos se persisten como `""`, los valores con contenido se conservan intactos).
@@ -656,7 +670,7 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 - refactor(usuario): Eliminación de `UsuarioController.java` (legacy) del paquete `core/controller/`
 - refactor(auth): Actualización de `UsuarioAuthMapper` para usar `UsuarioEntity` en lugar de `Usuario` legacy
 - refactor(auth): Actualización de `JpaUsuarioAuthRepositoryAdapter` para usar `JpaUsuarioRepository` en lugar de `UsuarioRepository` legacy
-- refactor(model): Actualización de `UsuarioChequeraFacultad` para usar `UsuarioEntity` en lugar de `Usuario` legacy
+- refactor (model): Actualización de `UsuarioChequeraFacultadEntity` para usar `UsuarioEntity` en lugar de `Usuario` legacy
 
 ### Added
 - feat(docs): Nuevo diagrama Mermaid `hexagonal-usuario.mmd` para el módulo Usuario

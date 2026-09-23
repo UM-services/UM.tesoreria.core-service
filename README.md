@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 4.4.1**
+**Versión actual (SemVer): 4.5.0**
+
+## Novedades 4.5.0 (verificado en código)
+- feat(usuarios/usuarioChequeraFacultad): Nuevo slice hexagonal `usuarioChequeraFacultad` que migra el módulo legacy (`core/model` + `core/repository` + `core/service` + `core/controller`): dominio `UsuarioChequeraFacultad` con `usuario`/`facultad` enriquecidos, puerto de entrada `GetUsuarioChequeraFacultadesByUserIdUseCase`, puerto de salida `UsuarioChequeraFacultadRepository`, adaptador JPA sobre la misma tabla `usuario_chequera_facultad` y controlador REST `GET /api/tesoreria/core/usuarioChequeraFacultad/user/{userId}` (misma URL que el controller legacy eliminado).
+- refactor(usuarios/usuario): Reubicación del slice `usuario` de `hexagonal/usuario/` a `hexagonal/usuarios/usuario/` (solo paquete; rutas y contratos REST `/usuario` y `/api/tesoreria/core/usuario` sin cambios) y actualización de imports en `auth` (`UsuarioAuthMapper`, `JpaUsuarioAuthRepositoryAdapter`).
+- refactor(usuarioChequeraFacultad): La respuesta del endpoint usa DTO `UsuarioChequeraFacultadResponse`: mismos campos base y `facultad` equivalente, pero `usuario` ya no expone `password`.
+- feat(docs): Nuevo diagrama `hexagonal-usuarioChequeraFacultad.mmd` y `hexagonal-usuario.mmd` sincronizado (v4.5.0).
+
+> Basado en `git diff HEAD` (staged: 49 archivos, +367/−168 líneas), el código Java del nuevo slice y `pom.xml` (versión `4.4.1` → `4.5.0`). Migración legacy→hexagonal con slice y capa DTO nuevos, sin endpoints nuevos ni eliminados; corresponde un incremento minor de SemVer.
 
 ## Novedades 4.4.1 (verificado en código)
 - fix(personas/persona): `numeroPrefijo`/`numeroPosfijo` no admiten `null`; `Persona.numeroOrEmpty` representa el valor ausente como cadena vacía y `SavePersonaUseCaseImpl` aplica la normalización en `create` y `update`, conservando los valores con contenido.
@@ -369,7 +377,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1
 - refactor(usuario): Eliminación de `UsuarioController.java` (legacy) del paquete `core/controller/`
 - refactor(auth): Actualización de `UsuarioAuthMapper` para usar `UsuarioEntity` en lugar de `Usuario` legacy
 - refactor(auth): Actualización de `JpaUsuarioAuthRepositoryAdapter` para usar `JpaUsuarioRepository` en lugar de `UsuarioRepository` legacy
-- refactor(model): Actualización de `UsuarioChequeraFacultad` para usar `UsuarioEntity` en lugar de `Usuario` legacy
+- refactor (model): Actualización de `UsuarioChequeraFacultadEntity` para usar `UsuarioEntity` en lugar de `Usuario` legacy
 - feat(docs): Nuevo diagrama Mermaid `hexagonal-usuario.mmd` para el módulo Usuario
 
 > Basado en análisis profundo de `git diff HEAD` (30 archivos staged, +1000/-200 líneas, incluyendo migración completa del módulo Usuario a hexagonal) y `pom.xml` (versión 3.34.0 → 3.35.0).
