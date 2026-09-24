@@ -972,7 +972,7 @@ public class FormulariosToPdfService {
      * facultad, número de hoja, título, datos del titular/tipo de chequera/arancel/lectivo/
      * impresión, el código de chequera y la leyenda "NO VALIDO COMO COMPROBANTE DE PAGO".
      * Se llama una vez por hoja para que ambas queden idénticas. Estilo: nombre de la universidad
-     * y línea de acento en {@code colorAcento}, etiquetas ("Titular:", "Tipo Chequera:", etc.) en
+     * en {@code colorAcento}, etiquetas ("Titular:", "Tipo Chequera:", etc.) en
      * {@code colorEtiqueta} y valores en negro — misma tipografía base (Helvetica) que el resto
      * del proyecto, con la jerarquía dada por color/peso en vez de tipografías distintas.
      */
@@ -1010,15 +1010,6 @@ public class FormulariosToPdfService {
         headerTable.addCell(cell);
         document.add(headerTable);
 
-        // Línea de acento fina, separando el logo/título de los datos del titular
-        PdfPTable lineaAcento = new PdfPTable(1);
-        lineaAcento.setWidthPercentage(100);
-        cell = new PdfPCell();
-        cell.setFixedHeight(2f);
-        cell.setBackgroundColor(colorAcento);
-        cell.setBorder(Rectangle.NO_BORDER);
-        lineaAcento.addCell(cell);
-        document.add(lineaAcento);
         document.add(new Paragraph(" ", new Font(Font.HELVETICA, 4)));
 
         paragraph = new Paragraph("Estado de Chequera", new Font(Font.HELVETICA, 16, Font.BOLD, colorAcento));
@@ -1041,6 +1032,11 @@ public class FormulariosToPdfService {
 
         paragraph = new Paragraph(new Phrase("Ciclo Lectivo: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
         paragraph.add(new Phrase(lectivo.getNombre(), new Font(Font.HELVETICA, 11, Font.BOLD)));
+        document.add(paragraph);
+
+        paragraph = new Paragraph(new Phrase("Porcentaje de beca: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
+        paragraph.add(new Phrase((serie.getBecaPorcentaje() == null ? BigDecimal.ZERO : serie.getBecaPorcentaje())
+                .movePointRight(2).stripTrailingZeros().toPlainString() + "%", new Font(Font.HELVETICA, 11, Font.BOLD)));
         document.add(paragraph);
 
         paragraph = new Paragraph(new Phrase("Tipo Impresion: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));

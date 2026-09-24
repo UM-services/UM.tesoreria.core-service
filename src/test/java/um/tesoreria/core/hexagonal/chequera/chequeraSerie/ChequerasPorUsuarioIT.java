@@ -52,6 +52,15 @@ class ChequerasPorUsuarioIT {
                   AND cs.chs_per_id = ? AND cs.chs_doc_id = ?
                 """, Long.class, userId, lectivoId, personaId, documentoId);
         assertThat(expected).isNotNull().isPositive();
+        BigDecimal expectedBecaPorcentaje = jdbc.queryForObject("""
+                SELECT COALESCE(cs.beca_porcentaje, 0)
+                FROM chequera_serie cs
+                JOIN usuario_chequera_facultad ucf ON ucf.facultad_id = cs.chs_fac_id
+                WHERE ucf.user_id = ? AND cs.chs_lec_id = ?
+                  AND cs.chs_per_id = ? AND cs.chs_doc_id = ?
+                ORDER BY cs.clave DESC
+                LIMIT 1
+                """, BigDecimal.class, userId, lectivoId, personaId, documentoId);
 
         var result = mockMvc.get().uri("/api/tesoreria/core/chequeraSerie/usuario/" + userId
                         + "/lectivo/" + lectivoId + "?personaId=" + personaId.toPlainString()
@@ -60,6 +69,7 @@ class ChequerasPorUsuarioIT {
 
         result.extractingPath("$.totalElements").isEqualTo(expected.intValue());
         result.extractingPath("$.content[0].documentoId").isNotNull();
+        result.extractingPath("$.content[0].becaPorcentaje").isEqualTo(expectedBecaPorcentaje.doubleValue());
         result.extractingPath("$.content[0].importeDeuda").isNotNull();
         result.extractingPath("$.content[0].estadoDeuda")
                 .isIn("CON_DEUDA_VENCIDA", "SIN_DEUDA_VENCIDA");
