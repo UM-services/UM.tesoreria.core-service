@@ -39,3 +39,6 @@ app.log.2019-09-18.0.gz app.log.2019-09-19.0.gz app.log.2019-09-19.1.gz
 app.log.2019-09-18.0.gz app.log.2019-09-19.0.gz app.log.2019-09-19.1.gz
 /bin/
 /.apt_generated_tests/
+/.conductor/
+/.context/
+/.env

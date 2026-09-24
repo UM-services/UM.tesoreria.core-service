@@ -18,6 +18,7 @@ public class AuthDtoMapper {
         return LoginResponse.builder()
                 .token("dummy-jwt-token-replace-later")
                 .userId(domain.getUserId())
+                .login(domain.getLogin())
                 .nombre(domain.getNombre())
                 .geograficaId(domain.getGeograficaId())
                 .sede(geograficaService.findByGeograficaId(domain.getGeograficaId())

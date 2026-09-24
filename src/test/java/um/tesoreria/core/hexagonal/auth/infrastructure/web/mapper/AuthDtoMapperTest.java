@@ -37,6 +37,7 @@ class AuthDtoMapperTest {
 
         var usuario = new UsuarioAuth();
         usuario.setUserId(1L);
+        usuario.setLogin("daniel");
         usuario.setNombre("Daniel");
         usuario.setGeograficaId(7);
 
@@ -45,6 +46,7 @@ class AuthDtoMapperTest {
         assertThat(response).isNotNull();
         assertThat(response.getToken()).isNotBlank();
         assertThat(response.getUserId()).isEqualTo(1L);
+        assertThat(response.getLogin()).isEqualTo("daniel");
         assertThat(response.getNombre()).isEqualTo("Daniel");
         assertThat(response.getGeograficaId()).isEqualTo(7);
         assertThat(response.getSede()).isEqualTo("Sede Centro");

@@ -1,5 +1,7 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.out;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.model.internal.FacultadSedeChequeraDto;
@@ -18,6 +20,11 @@ public interface ChequeraSerieRepository {
                                                                                         Integer documentoId, Integer lectivoId, Integer facultadId);
 
     List<ChequeraSerie> findAllByLectivoIdAndFacultadId(Integer lectivoId, Integer facultadId);
+
+    Page<ChequeraSerie> findAllByLectivoIdAndFacultadIdIn(Integer lectivoId, List<Integer> facultadIds, Pageable pageable);
+
+    Page<ChequeraSerie> findAllByLectivoIdAndFacultadIdInAndPersonaIdAndDocumentoId(
+            Integer lectivoId, List<Integer> facultadIds, BigDecimal personaId, Integer documentoId, Pageable pageable);
 
     List<ChequeraSerie> findAllByFacultadIdAndLectivoIdAndGeograficaId(Integer facultadId, Integer lectivoId, Integer geograficaId);
 

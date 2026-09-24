@@ -11,6 +11,7 @@ public class LoginResponse {
 
     private String token;
     private Long userId;
+    private String login;
     private String nombre;
     private Integer geograficaId;
     private String sede;

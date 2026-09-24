@@ -1,16 +1,18 @@
 ---
-title: Arquitectura Hexagonal - Módulo Auth (v3.8.0)
+title: Arquitectura Hexagonal - Módulo Auth (v4.6.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
         UA[UsuarioAuth<br/>Entidad de Dominio]
         LUC[LoginUseCase<br/>Puerto de Entrada]
+        CPUC[ChangePasswordUseCase<br/>Puerto de Entrada]
         UAR[UsuarioAuthRepository<br/>Puerto de Salida]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
         AS[AuthService<br/>Servicio de Aplicación]
         LUCImpl[LoginUseCaseImpl<br/>Implementación de Caso de Uso]
+        CPI[ChangePasswordUseCaseImpl<br/>Implementación de Caso de Uso]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
@@ -18,6 +20,7 @@ flowchart TD
         JPA[JpaUsuarioAuthRepositoryAdapter<br/>Adaptador JPA]
         MAP[UsuarioAuthMapper<br/>Mapeo Entidad-Dominio]
         DTO[LoginRequest<br/>LoginResponse]
+        DTO2[ChangePasswordRequest<br/>DTO Web]
     end
 
     subgraph Externo ["Externo (External)"]
@@ -26,13 +29,20 @@ flowchart TD
     end
 
     %% Flujo de Dependencias
-    AC -->|usa| LUC
+    AC -->|usa| AS
     AS -->|usa| LUC
+    AS -->|usa| CPUC
+    AS -->|usa| UAR
     
     LUCImpl -->|implementa| LUC
     LUCImpl -->|depende| UAR
     LUCImpl -->|usa| HASH
     LUCImpl -->|valida| UA
+
+    CPI -->|implementa| CPUC
+    CPI -->|depende| UAR
+    CPI -->|usa| HASH
+    CPI -->|valida| UA
     
     UAR -->|implementa| JPA
     JPA -->|usa| MAP
@@ -41,13 +51,17 @@ flowchart TD
 
     AC -->|recibe| DTO
     AC -->|envía| DTO
+    AC -->|recibe| DTO2
 
     style UA fill:#e1f5fe
     style LUC fill:#f3e5f5
+    style CPUC fill:#f3e5f5
     style UAR fill:#f3e5f5
     style AS fill:#fff3e0
     style LUCImpl fill:#fff3e0
+    style CPI fill:#fff3e0
     style AC fill:#e8f5e8
     style JPA fill:#e8f5e8
     style MAP fill:#fff8e1
     style DTO fill:#fff8e1
+    style DTO2 fill:#fff8e1

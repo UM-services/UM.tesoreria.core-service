@@ -7,11 +7,14 @@ import um.tesoreria.core.hexagonal.chequera.arancelTipo.infrastructure.persisten
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.infrastructure.persistence.mapper.TipoChequeraMapper;
+import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
 import um.tesoreria.core.hexagonal.personas.domicilio.infrastructure.persistence.mapper.DomicilioMapper;
 import um.tesoreria.core.hexagonal.dependencias.facultad.infrastructure.persistence.mapper.FacultadMapper;
+import um.tesoreria.core.hexagonal.dependencias.facultad.domain.model.Facultad;
 import um.tesoreria.core.hexagonal.dependencias.geografica.infrastructure.persistence.mapper.GeograficaMapper;
 import um.tesoreria.core.hexagonal.lectivo.infrastructure.persistence.mapper.LectivoMapper;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.mapper.PersonaMapper;
+import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 
 @Component
 @RequiredArgsConstructor
@@ -65,6 +68,32 @@ public class ChequeraSerieMapper {
                 .cuotasDeuda(entity.getCuotasDeuda())
                 .importeDeuda(entity.getImporteDeuda() != null ? entity.getImporteDeuda() : BigDecimal.ZERO)
                 .ultimoEnvio(entity.getUltimoEnvio())
+                .build();
+    }
+
+    public ChequeraSerie toEstadoUsuarioDomain(ChequeraSerieEntity entity) {
+        if (entity == null) return null;
+        return ChequeraSerie.builder()
+                .chequeraId(entity.getChequeraId())
+                .facultadId(entity.getFacultadId())
+                .tipoChequeraId(entity.getTipoChequeraId())
+                .chequeraSerieId(entity.getChequeraSerieId())
+                .personaId(entity.getPersonaId())
+                .documentoId(entity.getDocumentoId())
+                .lectivoId(entity.getLectivoId())
+                .geograficaId(entity.getGeograficaId())
+                .alternativaId(entity.getAlternativaId())
+                .becaPorcentaje(entity.getBecaPorcentaje() != null ? entity.getBecaPorcentaje() : BigDecimal.ZERO)
+                .asentado(entity.getAsentado())
+                .enviado(entity.getEnviado())
+                .retenida(entity.getRetenida())
+                .facultad(entity.getFacultad() == null ? null : Facultad.builder()
+                        .nombre(entity.getFacultad().getNombre()).build())
+                .tipoChequera(entity.getTipoChequera() == null ? null : TipoChequera.builder()
+                        .nombre(entity.getTipoChequera().getNombre()).build())
+                .persona(entity.getPersona() == null ? null : Persona.builder()
+                        .apellido(entity.getPersona().getApellido())
+                        .nombre(entity.getPersona().getNombre()).build())
                 .build();
     }
 
