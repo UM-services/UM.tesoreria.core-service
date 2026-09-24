@@ -18,6 +18,11 @@ public class JpaUsuarioAuthRepositoryAdapter implements UsuarioAuthRepository {
     private final UsuarioAuthMapper usuarioAuthMapper;
 
     @Override
+    public Optional<UsuarioAuth> findById(Long userId) {
+        return usuarioRepository.findById(userId).map(usuarioAuthMapper::toDomainModel);
+    }
+
+    @Override
     public Optional<UsuarioAuth> findByLogin(String login) {
         return usuarioRepository.findByLogin(login).map(usuarioAuthMapper::toDomainModel);
     }
