@@ -4,7 +4,25 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 4.4.1**
+**Versión actual (SemVer): 4.6.0**
+
+## Novedades 4.6.0 (verificado en código)
+- feat(chequera/chequeraSerie): Nuevo endpoint paginado `GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}` (alias `/api/tesoreria/core/chequeraSerie/...`) con las chequeras de las facultades asignadas al usuario: filtro opcional `personaId`+`documentoId` (400 si viene incompleto), deuda vencida calculada por `CalculateDeudaUseCase`, tamaño de página 1..100 (defecto 20) y contrato estable `ChequeraEstadoUsuarioPageResponse`/`ChequeraEstadoUsuarioResponse` con `titular`, `estadoDeuda` (`CON_DEUDA_VENCIDA`/`SIN_DEUDA_VENCIDA`) y `becaPorcentaje` (fracción: `0.5` = 50 %). Nuevas firmas `Page` en `ChequeraSerieRepository` y `ChequeraSerieMapper.toEstadoUsuarioDomain`.
+- feat(chequera): Nuevo endpoint `GET /chequera/generateEstadoPdf/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{debitoTipoId}` que descarga el PDF "Estado de Chequera" con primer vencimiento contractual, porcentaje de beca, tipo de impresión (nuevos `TipoImpresion`/`TipoImpresionService`/`TipoImpresionException`), encabezado sin línea de acento y leyenda "NO VALIDO COMO COMPROBANTE DE PAGO".
+- feat(personas/persona): Nuevo endpoint `GET /persona/sugerencias/usuario/{userId}?q=&limite=8` de sugerencias de personas con chequeras en las facultades del usuario: `PersonaSugerenciaService` (valida ≥3 caracteres alfanuméricos, `limite` 1..20, términos AND), puerto `PersonaSugerenciaRepository` y `JdbcPersonaSugerenciaRepositoryAdapter` con `EXISTS` sobre `chequera_serie`/`usuario_chequera_facultad`, `LIKE ... ESCAPE '!'` y ranking por prefijo del apellido.
+- feat(auth): Nuevo puerto `ChangePasswordUseCase` expuesto en `POST /api/tesoreria/core/auth/change-password` (verifica clave anterior SHA-256, coincidencia de confirmación, bloqueo de cuentas "admin*" y claves duplicadas en otros usuarios) y `GET /api/tesoreria/core/auth/me/{userId}`; `UsuarioAuthRepository` añade `findById` y `LoginResponse` incorpora el campo aditivo `login`.
+- test/infra: Perfil Maven `it` (failsafe + `application-it.yml`) para `*IT` contra MySQL de solo lectura con variables `IT_DB_*`; nuevas pruebas unitarias, de controlador y de integración.
+- feat(docs): Diagramas `hexagonal-auth.mmd`, `hexagonal-chequeraSerie.mmd` y `hexagonal-persona.mmd` sincronizados con el código (v4.6.0).
+
+> Basado en `git diff b3528dc..HEAD` (PRs #378/#379/#380), `git diff HEAD` (staged: slice `auth`) y `pom.xml` (versión `4.5.0` → `4.6.0`). Endpoints, puertos y contratos JSON aditivos sin ruptura de APIs públicas existentes; corresponde un incremento minor de SemVer.
+
+## Novedades 4.5.0 (verificado en código)
+- feat(usuarios/usuarioChequeraFacultad): Nuevo slice hexagonal `usuarioChequeraFacultad` que migra el módulo legacy (`core/model` + `core/repository` + `core/service` + `core/controller`): dominio `UsuarioChequeraFacultad` con `usuario`/`facultad` enriquecidos, puerto de entrada `GetUsuarioChequeraFacultadesByUserIdUseCase`, puerto de salida `UsuarioChequeraFacultadRepository`, adaptador JPA sobre la misma tabla `usuario_chequera_facultad` y controlador REST `GET /api/tesoreria/core/usuarioChequeraFacultad/user/{userId}` (misma URL que el controller legacy eliminado).
+- refactor(usuarios/usuario): Reubicación del slice `usuario` de `hexagonal/usuario/` a `hexagonal/usuarios/usuario/` (solo paquete; rutas y contratos REST `/usuario` y `/api/tesoreria/core/usuario` sin cambios) y actualización de imports en `auth` (`UsuarioAuthMapper`, `JpaUsuarioAuthRepositoryAdapter`).
+- refactor(usuarioChequeraFacultad): La respuesta del endpoint usa DTO `UsuarioChequeraFacultadResponse`: mismos campos base y `facultad` equivalente, pero `usuario` ya no expone `password`.
+- feat(docs): Nuevo diagrama `hexagonal-usuarioChequeraFacultad.mmd` y `hexagonal-usuario.mmd` sincronizado (v4.5.0).
+
+> Basado en `git diff HEAD` (staged: 49 archivos, +367/−168 líneas), el código Java del nuevo slice y `pom.xml` (versión `4.4.1` → `4.5.0`). Migración legacy→hexagonal con slice y capa DTO nuevos, sin endpoints nuevos ni eliminados; corresponde un incremento minor de SemVer.
 
 ## Novedades 4.4.1 (verificado en código)
 - fix(personas/persona): `numeroPrefijo`/`numeroPosfijo` no admiten `null`; `Persona.numeroOrEmpty` representa el valor ausente como cadena vacía y `SavePersonaUseCaseImpl` aplica la normalización en `create` y `update`, conservando los valores con contenido.
@@ -369,7 +387,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1
 - refactor(usuario): Eliminación de `UsuarioController.java` (legacy) del paquete `core/controller/`
 - refactor(auth): Actualización de `UsuarioAuthMapper` para usar `UsuarioEntity` en lugar de `Usuario` legacy
 - refactor(auth): Actualización de `JpaUsuarioAuthRepositoryAdapter` para usar `JpaUsuarioRepository` en lugar de `UsuarioRepository` legacy
-- refactor(model): Actualización de `UsuarioChequeraFacultad` para usar `UsuarioEntity` en lugar de `Usuario` legacy
+- refactor (model): Actualización de `UsuarioChequeraFacultadEntity` para usar `UsuarioEntity` en lugar de `Usuario` legacy
 - feat(docs): Nuevo diagrama Mermaid `hexagonal-usuario.mmd` para el módulo Usuario
 
 > Basado en análisis profundo de `git diff HEAD` (30 archivos staged, +1000/-200 líneas, incluyendo migración completa del módulo Usuario a hexagonal) y `pom.xml` (versión 3.34.0 → 3.35.0).
@@ -1249,6 +1267,31 @@ git clone https://github.com/UM-services/um.tesoreria.core-service.git
 cd um.tesoreria.core-service
 mvn clean install
 ```
+
+### Pruebas de integración con MySQL
+
+El perfil `it` ejecuta los tests unitarios y los tests de integración (`*IT`) contra una base MySQL existente. Requiere acceso de red a la base; se recomienda usar una cuenta de solo lectura. Los IT actuales buscan una asignación de facultad con al menos una chequera; si no la hay, fallan con un mensaje explícito.
+
+Crear un archivo `.env` en la raíz del proyecto (está ignorado por Git):
+
+```dotenv
+IT_DB_HOST=host-de-mysql
+IT_DB_PORT=3306
+IT_DB_NAME=tesium
+IT_DB_USER=usuario-de-solo-lectura
+IT_DB_PASSWORD=contraseña
+```
+
+Maven no carga `.env` automáticamente. Para ejecutar las pruebas desde una terminal:
+
+```bash
+set -a
+. ./.env
+set +a
+mvn -Pit verify
+```
+
+El perfil usa `ddl-auto: none` y conexiones de solo lectura; no prepara datos de prueba ni modifica el esquema.
 
 ## Uso
 

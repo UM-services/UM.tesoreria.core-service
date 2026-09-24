@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.InscripcionFullDto;
 import org.springframework.http.HttpStatus;
@@ -16,15 +18,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.hexagonal.personas.persona.application.exception.PersonaException;
 import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaService;
+import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaSugerenciaService;
 import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.DeudaExamenResponse;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.PersonaRequest;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.PersonaResponse;
+import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.PersonaSugerenciaResponse;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.mapper.PersonaDtoMapper;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.DeudaPersonaDto;
 import um.tesoreria.core.hexagonal.personas.persona.domain.model.PersonaKey;
@@ -36,6 +41,26 @@ public class PersonaController {
 
 	private final PersonaService service;
 	private final PersonaDtoMapper dtoMapper;
+	private final PersonaSugerenciaService sugerenciaService;
+
+	@Operation(summary = "Sugerencias de personas con chequeras en facultades del usuario",
+			description = "Busca por apellido o nombre en cualquier lectivo. q requiere al menos tres caracteres "
+					+ "alfanuméricos; todos los términos deben coincidir, sin distinguir mayúsculas ni tildes. "
+					+ "Prioriza apellidos que comienzan con el primer término. limite es 8 por defecto y admite hasta 20. "
+					+ "El userId es un filtro y no acredita la identidad del solicitante; el gateway debe vincularlo a la sesión.")
+	@ApiResponse(responseCode = "200", description = "Hasta limite sugerencias; sin coincidencias, lista vacía")
+	@ApiResponse(responseCode = "400", description = "Búsqueda de menos de tres caracteres útiles o parámetros inválidos")
+	@GetMapping("/sugerencias/usuario/{userId}")
+	public ResponseEntity<List<PersonaSugerenciaResponse>> sugerenciasPorUsuario(
+			@PathVariable Long userId, @RequestParam String q,
+			@RequestParam(defaultValue = "8") int limite) {
+		try {
+			return ResponseEntity.ok(sugerenciaService.findByUsuario(userId, q, limite).stream()
+					.map(PersonaSugerenciaResponse::from).toList());
+		} catch (IllegalArgumentException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+	}
 
 	@GetMapping("/santander")
 	public ResponseEntity<List<PersonaResponse>> findAllSantander() {
