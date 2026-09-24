@@ -1,11 +1,11 @@
 package um.tesoreria.core.service.facade;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -27,10 +27,8 @@ import org.openpdf.text.Paragraph;
 import org.openpdf.text.Phrase;
 import org.openpdf.text.Rectangle;
 import org.openpdf.text.pdf.BarcodeInter25;
-import org.openpdf.text.pdf.ColumnText;
 import org.openpdf.text.pdf.PdfPCell;
 import org.openpdf.text.pdf.PdfPTable;
-import org.openpdf.text.pdf.PdfPageEventHelper;
 import org.openpdf.text.pdf.PdfWriter;
 
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
@@ -603,8 +601,7 @@ public class FormulariosToPdfService {
      * segunda hoja con la adhesión al débito automático. El encabezado (logo, Universidad de
      * Mendoza, facultad, número de hoja, título, datos del titular/chequera y la leyenda "NO
      * VALIDO COMO COMPROBANTE DE PAGO") se repite igual en ambas hojas — ver
-     * {@link #writeEncabezadoEstadoChequera}. Cada página lleva además, abajo a la derecha, la
-     * fecha y hora de emisión del PDF — ver {@link FechaEmisionPageEvent}.
+     * {@link #writeEncabezadoEstadoChequera}.
      * <p>
      * Fuente de datos de la hoja 1, según la consulta SQL de referencia (chequera_serie +
      * tipo_chequera + lectivo + arancel_tipo + chequera_total + persona + facultad +
@@ -683,26 +680,27 @@ public class FormulariosToPdfService {
                 + serie.getTipoChequeraId() + "-" + serie.getChequeraSerieId() + ".pdf";
 
         DecimalFormat decimalFormat = new DecimalFormat("#,##0.00");
-        // Mendoza es UTC-3 todo el año (sin horario de verano); si se calculara con la hora del
-        // servidor (normalmente en UTC) quedaría 3 horas adelantada.
-        String fechaHoraEmision = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
-                .format(OffsetDateTime.now(ZoneOffset.of("-03:00")));
+        // Paleta para un estilo más moderno: acento institucional, gris para etiquetas, gris claro
+        // para líneas finas (en vez de negro) y un fondo muy suave para las filas alternadas.
+        Color colorAcento = new Color(30, 58, 95);
+        Color colorEtiqueta = new Color(110, 110, 110);
+        Color colorLinea = new Color(210, 210, 215);
+        Color colorFilaAlterna = new Color(247, 247, 250);
 
         try {
             Document document = new Document(new Rectangle(PageSize.A4));
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(filename));
-            writer.setPageEvent(new FechaEmisionPageEvent(fechaHoraEmision));
-            document.setMargins(40, 25, 25, 20);
+            PdfWriter.getInstance(document, new FileOutputStream(filename));
+            document.setMargins(40, 25, 18, 14);
             document.open();
 
             // --- Hoja 1: encabezado + cuotas por producto ---
             writeEncabezadoEstadoChequera(document, facultad, facultadId, tipoChequera, arancelTipo, tipoImpresion,
-                    lectivo, persona, serie, 1);
+                    lectivo, persona, serie, 1, colorAcento, colorEtiqueta);
 
-            Paragraph paragraph = new Paragraph("Alternativa: " + alternativaId, new Font(Font.HELVETICA, 11, Font.BOLD));
+            Paragraph paragraph = new Paragraph("Alternativa: " + alternativaId, new Font(Font.HELVETICA, 11, Font.BOLD, colorAcento));
             paragraph.setAlignment(Element.ALIGN_CENTER);
             document.add(paragraph);
-            document.add(new Paragraph(" "));
+            document.add(new Paragraph(" ", new Font(Font.HELVETICA, 5)));
 
             PdfPCell cell;
 
@@ -739,10 +737,10 @@ public class FormulariosToPdfService {
                 float[] columnProductoHeader = {1, 1};
                 PdfPTable productoHeaderTable = new PdfPTable(columnProductoHeader);
                 productoHeaderTable.setWidthPercentage(100);
-                cell = new PdfPCell(new Phrase("Producto: " + nombreProducto, new Font(Font.HELVETICA, 11, Font.BOLD)));
+                cell = new PdfPCell(new Phrase("Producto: " + nombreProducto, new Font(Font.HELVETICA, 11, Font.BOLD, colorAcento)));
                 cell.setBorder(Rectangle.NO_BORDER);
                 productoHeaderTable.addCell(cell);
-                paragraph = new Paragraph(new Phrase("Subtotal Producto: ", new Font(Font.HELVETICA, 9)));
+                paragraph = new Paragraph(new Phrase("Subtotal Producto: ", new Font(Font.HELVETICA, 9, Font.NORMAL, colorEtiqueta)));
                 paragraph.add(new Phrase(decimalFormat.format(subtotalProducto), new Font(Font.HELVETICA, 9, Font.BOLD)));
                 paragraph.setAlignment(Element.ALIGN_RIGHT);
                 cell = new PdfPCell();
@@ -752,9 +750,25 @@ public class FormulariosToPdfService {
                 document.add(productoHeaderTable);
                 document.add(new Paragraph(" ", new Font(Font.HELVETICA, 3)));
 
-                float[] columnCuota = {2f, 2f, 1.3f, 1.8f};
+                float[] columnCuota = {2.1f, 1.7f, 1.1f, 1.3f, 1.4f};
                 PdfPTable table = new PdfPTable(columnCuota);
                 table.setWidthPercentage(100);
+
+                // Encabezado de columnas (A Pagar / Fecha Pago / Pagado) — las dos primeras
+                // columnas (cuota / período) no llevan rótulo, igual que en el PDF de referencia.
+                Font fontColHeader = new Font(Font.HELVETICA, 7, Font.BOLD, colorEtiqueta);
+                String[] cuotaHeaders = {"", "", "A Pagar", "Fecha Pago", "Pagado"};
+                int[] alineacionHeaders = {Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_RIGHT,
+                        Element.ALIGN_CENTER, Element.ALIGN_RIGHT};
+                for (int h = 0; h < cuotaHeaders.length; h++) {
+                    cell = new PdfPCell(new Phrase(cuotaHeaders[h], fontColHeader));
+                    cell.setHorizontalAlignment(alineacionHeaders[h]);
+                    cell.setVerticalAlignment(Element.ALIGN_TOP);
+                    cell.setBorder(Rectangle.BOTTOM);
+                    cell.setBorderColor(colorLinea);
+                    cell.setPaddingBottom(2f);
+                    table.addCell(cell);
+                }
 
                 for (int i = 0; i < cuotasProducto.size(); i++) {
                     ChequeraCuotaPagosDto cuota = cuotasProducto.get(i);
@@ -763,6 +777,8 @@ public class FormulariosToPdfService {
                     int bordeFila = (i == cuotasProducto.size() - 1)
                             ? (Rectangle.TOP | Rectangle.BOTTOM)
                             : Rectangle.TOP;
+                    // Filas alternadas con un fondo muy suave, para un look más moderno/legible
+                    Color fondoFila = (i % 2 == 0) ? colorFilaAlterna : Color.WHITE;
 
                     BigDecimal importe = cuota.getImporte1() != null ? cuota.getImporte1() : BigDecimal.ZERO;
 
@@ -775,24 +791,40 @@ public class FormulariosToPdfService {
                     cell = new PdfPCell(new Phrase(
                             tituloFila + ": " + cuota.getCuotaId() + "/" + totalCuotas,
                             new Font(Font.HELVETICA, 8, Font.BOLD)));
+                    cell.setVerticalAlignment(Element.ALIGN_TOP);
                     cell.setBorder(bordeFila);
+                    cell.setBorderColor(colorLinea);
+                    cell.setBackgroundColor(fondoFila);
+                    cell.setPadding(3f);
                     table.addCell(cell);
 
                     // Columna 2: "Periodo: mes/año (chp_orden)"
                     String ordenTexto = pago != null && pago.getOrden() != null ? String.valueOf(pago.getOrden()) : "";
-                    paragraph = new Paragraph(new Phrase("Periodo: ", new Font(Font.HELVETICA, 8)));
+                    paragraph = new Paragraph(new Phrase("Periodo: ", new Font(Font.HELVETICA, 8, Font.NORMAL, colorEtiqueta)));
                     paragraph.add(new Phrase(cuota.getMes() + "/" + cuota.getAnho() + " (" + ordenTexto + ")",
                             new Font(Font.HELVETICA, 8, Font.BOLD)));
                     cell = new PdfPCell();
                     cell.addElement(paragraph);
+                    cell.setVerticalAlignment(Element.ALIGN_TOP);
                     cell.setBorder(bordeFila);
+                    cell.setBorderColor(colorLinea);
+                    cell.setBackgroundColor(fondoFila);
+                    cell.setPadding(3f);
                     table.addCell(cell);
 
+                    // Columna 3: A Pagar (importe de la cuota)
                     cell = new PdfPCell(new Phrase(decimalFormat.format(importe), new Font(Font.HELVETICA, 8, Font.BOLD)));
                     cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                    cell.setVerticalAlignment(Element.ALIGN_TOP);
                     cell.setBorder(bordeFila);
+                    cell.setBorderColor(colorLinea);
+                    cell.setBackgroundColor(fondoFila);
+                    cell.setPadding(3f);
                     table.addCell(cell);
 
+                    // Columna 4: Fecha Pago — solo la fecha, centrada para alinear con su encabezado
+                    // y con la misma altura que "A Pagar" (la referencia del pago ahora va bajo
+                    // "Pagado", no acá, para no desalinear la fecha).
                     String fechaPago = "";
                     String referenciaPago = "";
                     if (pago != null) {
@@ -804,42 +836,60 @@ public class FormulariosToPdfService {
                         // o el literal "MercadoPago", según cómo se haya registrado el pago)
                         referenciaPago = pago.getArchivo() != null ? pago.getArchivo() : "";
                     }
-                    paragraph = new Paragraph(fechaPago, new Font(Font.HELVETICA, 8, Font.BOLD));
+                    cell = new PdfPCell(new Phrase(fechaPago, new Font(Font.HELVETICA, 8, Font.BOLD)));
+                    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    cell.setVerticalAlignment(Element.ALIGN_TOP);
+                    cell.setBorder(bordeFila);
+                    cell.setBorderColor(colorLinea);
+                    cell.setBackgroundColor(fondoFila);
+                    cell.setPadding(3f);
+                    table.addCell(cell);
+
+                    // Columna 5: Pagado (importe realmente pagado — ChP_Importe; puede diferir del
+                    // "A Pagar" si hubo un pago parcial), con la referencia del pago debajo
+                    BigDecimal pagadoCuota = pago != null && pago.getImporte() != null ? pago.getImporte() : null;
+                    paragraph = new Paragraph(new Phrase(pagadoCuota != null ? decimalFormat.format(pagadoCuota) : "—",
+                            new Font(Font.HELVETICA, 8, Font.BOLD)));
+                    paragraph.setAlignment(Element.ALIGN_RIGHT);
                     if (!referenciaPago.isEmpty()) {
                         paragraph.add(Chunk.NEWLINE);
-                        paragraph.add(new Phrase(referenciaPago, new Font(Font.HELVETICA, 6)));
+                        paragraph.add(new Phrase(referenciaPago, new Font(Font.HELVETICA, 6, Font.NORMAL, colorEtiqueta)));
                     }
                     cell = new PdfPCell();
                     cell.addElement(paragraph);
+                    cell.setVerticalAlignment(Element.ALIGN_TOP);
                     cell.setBorder(bordeFila);
+                    cell.setBorderColor(colorLinea);
+                    cell.setBackgroundColor(fondoFila);
+                    cell.setPadding(3f);
                     table.addCell(cell);
                 }
                 document.add(table);
 
-                paragraph = new Paragraph(new Phrase("Subtotal Pagado: ", new Font(Font.HELVETICA, 9)));
+                paragraph = new Paragraph(new Phrase("Subtotal Pagado: ", new Font(Font.HELVETICA, 9, Font.NORMAL, colorEtiqueta)));
                 paragraph.add(new Phrase(decimalFormat.format(subtotalPagado), new Font(Font.HELVETICA, 9, Font.BOLD)));
                 paragraph.setAlignment(Element.ALIGN_RIGHT);
                 document.add(paragraph);
-                paragraph = new Paragraph(new Phrase("Subtotal Deuda: ", new Font(Font.HELVETICA, 9)));
+                paragraph = new Paragraph(new Phrase("Subtotal Deuda: ", new Font(Font.HELVETICA, 9, Font.NORMAL, colorEtiqueta)));
                 paragraph.add(new Phrase(decimalFormat.format(subtotalProducto.subtract(subtotalPagado)),
                         new Font(Font.HELVETICA, 9, Font.BOLD)));
                 paragraph.setAlignment(Element.ALIGN_RIGHT);
                 document.add(paragraph);
 
                 // Espacio entre el cierre de este producto y el siguiente (o la hoja 2)
-                document.add(new Paragraph(" "));
+                document.add(new Paragraph(" ", new Font(Font.HELVETICA, 6)));
             }
 
             // --- Hoja 2: mismo encabezado que la hoja 1 + adhesión al débito automático ---
             document.newPage();
             writeEncabezadoEstadoChequera(document, facultad, facultadId, tipoChequera, arancelTipo, tipoImpresion,
-                    lectivo, persona, serie, 2);
+                    lectivo, persona, serie, 2, colorAcento, colorEtiqueta);
 
             List<Debito> debitos = debitoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId,
                     debitoTipoId);
 
             paragraph = new Paragraph("Adhesión de chequera al Débito Automático",
-                    new Font(Font.HELVETICA, 12, Font.BOLD));
+                    new Font(Font.HELVETICA, 12, Font.BOLD, colorAcento));
             document.add(paragraph);
             document.add(new Paragraph(" "));
 
@@ -848,12 +898,18 @@ public class FormulariosToPdfService {
             debitoTable.setWidthPercentage(100);
             String[] headers = {"Cuo", "Importe", "Fecha Vto", "CBU", "Envío al Banco", "Rech", "Motivo de Rechazo"};
             for (String h : headers) {
-                cell = new PdfPCell(new Phrase(h, new Font(Font.HELVETICA, 8, Font.BOLD)));
+                cell = new PdfPCell(new Phrase(h, new Font(Font.HELVETICA, 7, Font.BOLD, colorEtiqueta)));
+                cell.setBorder(Rectangle.BOTTOM);
+                cell.setBorderColor(colorLinea);
+                cell.setPaddingBottom(3f);
                 debitoTable.addCell(cell);
             }
 
             DateTimeFormatter fechaHora = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            for (Debito debito : debitos) {
+            for (int i = 0; i < debitos.size(); i++) {
+                Debito debito = debitos.get(i);
+                Color fondoFila = (i % 2 == 0) ? colorFilaAlterna : Color.WHITE;
+
                 // Importe: Debito no tiene un campo propio, se busca en las cuotas ya cargadas
                 BigDecimal importeDebito = cuotaPagos.stream()
                         .filter(c -> c.getProductoId().equals(debito.getProductoId())
@@ -863,25 +919,28 @@ public class FormulariosToPdfService {
                         .findFirst()
                         .orElse(BigDecimal.ZERO);
 
-                debitoTable.addCell(new Phrase(String.valueOf(debito.getCuotaId()), new Font(Font.HELVETICA, 8)));
-                debitoTable.addCell(new Phrase(decimalFormat.format(importeDebito), new Font(Font.HELVETICA, 8)));
-                debitoTable.addCell(new Phrase(
+                String[] valoresFila = {
+                        String.valueOf(debito.getCuotaId()),
+                        decimalFormat.format(importeDebito),
                         debito.getFechaVencimiento() != null
                                 ? DateTimeFormatter.ofPattern("dd/MM/yyyy")
                                 .format(debito.getFechaVencimiento().withOffsetSameInstant(ZoneOffset.UTC))
                                 : "",
-                        new Font(Font.HELVETICA, 8)));
-                debitoTable.addCell(new Phrase(debito.getCbu() != null ? debito.getCbu() : "", new Font(Font.HELVETICA, 8)));
-                debitoTable.addCell(new Phrase(
+                        debito.getCbu() != null ? debito.getCbu() : "",
                         debito.getFechaEnvio() != null
                                 ? fechaHora.format(debito.getFechaEnvio().withOffsetSameInstant(ZoneOffset.UTC))
                                 : "",
-                        new Font(Font.HELVETICA, 8)));
-                debitoTable.addCell(new Phrase(
                         debito.getRechazado() != null && debito.getRechazado() != 0 ? "*" : "",
-                        new Font(Font.HELVETICA, 8)));
-                debitoTable.addCell(new Phrase(debito.getMotivoRechazo() != null ? debito.getMotivoRechazo() : "",
-                        new Font(Font.HELVETICA, 8)));
+                        debito.getMotivoRechazo() != null ? debito.getMotivoRechazo() : ""
+                };
+                for (String valor : valoresFila) {
+                    cell = new PdfPCell(new Phrase(valor, new Font(Font.HELVETICA, 8)));
+                    cell.setBorder(Rectangle.TOP);
+                    cell.setBorderColor(colorLinea);
+                    cell.setBackgroundColor(fondoFila);
+                    cell.setPadding(4f);
+                    debitoTable.addCell(cell);
+                }
             }
             document.add(debitoTable);
 
@@ -898,12 +957,16 @@ public class FormulariosToPdfService {
      * Encabezado común a ambas hojas del "Estado de Chequera": logo, Universidad de Mendoza,
      * facultad, número de hoja, título, datos del titular/tipo de chequera/arancel/lectivo/
      * impresión, el código de chequera y la leyenda "NO VALIDO COMO COMPROBANTE DE PAGO".
-     * Se llama una vez por hoja para que ambas queden idénticas.
+     * Se llama una vez por hoja para que ambas queden idénticas. Estilo: nombre de la universidad
+     * y línea de acento en {@code colorAcento}, etiquetas ("Titular:", "Tipo Chequera:", etc.) en
+     * {@code colorEtiqueta} y valores en negro — misma tipografía base (Helvetica) que el resto
+     * del proyecto, con la jerarquía dada por color/peso en vez de tipografías distintas.
      */
     private void writeEncabezadoEstadoChequera(Document document, Facultad facultad, Integer facultadId,
                                                TipoChequera tipoChequera, ArancelTipoEntity arancelTipo,
                                                TipoImpresion tipoImpresion, Lectivo lectivo, Persona persona,
-                                               ChequeraSerie serie, int hoja) throws Exception {
+                                               ChequeraSerie serie, int hoja, Color colorAcento, Color colorEtiqueta)
+            throws Exception {
         float[] columnHeader = {1, 1};
         PdfPTable headerTable = new PdfPTable(columnHeader);
         headerTable.setWidthPercentage(100);
@@ -918,78 +981,70 @@ public class FormulariosToPdfService {
         cell.setBorder(Rectangle.NO_BORDER);
         headerTable.addCell(cell);
 
-        Paragraph paragraph = new Paragraph("UNIVERSIDAD DE MENDOZA", new Font(Font.HELVETICA, 16, Font.BOLD));
+        Paragraph paragraph = new Paragraph("UNIVERSIDAD DE MENDOZA",
+                new Font(Font.HELVETICA, 16, Font.BOLD, colorAcento));
         paragraph.setAlignment(Element.ALIGN_RIGHT);
         cell = new PdfPCell();
         cell.setBorder(Rectangle.NO_BORDER);
         cell.addElement(paragraph);
-        paragraph = new Paragraph(facultad.getNombre(), new Font(Font.HELVETICA, 14, Font.BOLD));
+        paragraph = new Paragraph(facultad.getNombre(), new Font(Font.HELVETICA, 14, Font.BOLD, colorAcento));
         paragraph.setAlignment(Element.ALIGN_RIGHT);
         cell.addElement(paragraph);
-        paragraph = new Paragraph("Hoja: " + hoja, new Font(Font.HELVETICA, 9));
+        paragraph = new Paragraph("Hoja: " + hoja, new Font(Font.HELVETICA, 9, Font.NORMAL, colorEtiqueta));
         paragraph.setAlignment(Element.ALIGN_RIGHT);
         cell.addElement(paragraph);
         headerTable.addCell(cell);
         document.add(headerTable);
 
-        paragraph = new Paragraph("Estado de Chequera", new Font(Font.HELVETICA, 16, Font.BOLD));
+        // Línea de acento fina, separando el logo/título de los datos del titular
+        PdfPTable lineaAcento = new PdfPTable(1);
+        lineaAcento.setWidthPercentage(100);
+        cell = new PdfPCell();
+        cell.setFixedHeight(2f);
+        cell.setBackgroundColor(colorAcento);
+        cell.setBorder(Rectangle.NO_BORDER);
+        lineaAcento.addCell(cell);
+        document.add(lineaAcento);
+        document.add(new Paragraph(" ", new Font(Font.HELVETICA, 4)));
+
+        paragraph = new Paragraph("Estado de Chequera", new Font(Font.HELVETICA, 16, Font.BOLD, colorAcento));
         paragraph.setAlignment(Element.ALIGN_CENTER);
         document.add(paragraph);
         document.add(new Paragraph(" ", new Font(Font.HELVETICA, 6)));
 
         paragraph = new Paragraph(
-                new Phrase("Titular: (" + persona.getPersonaId() + ") ", new Font(Font.HELVETICA, 11)));
-        paragraph.add(new Phrase(persona.getApellido() + ", " + persona.getNombre(),
-                new Font(Font.HELVETICA, 11, Font.BOLD)));
+                new Phrase("Titular: (" + persona.getPersonaId() + ") ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
+        paragraph.add(new Phrase(persona.getApellido() + ", " + persona.getNombre(), new Font(Font.HELVETICA, 11, Font.BOLD)));
         document.add(paragraph);
 
-        paragraph = new Paragraph(new Phrase("Tipo Chequera: ", new Font(Font.HELVETICA, 11)));
+        paragraph = new Paragraph(new Phrase("Tipo Chequera: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
         paragraph.add(new Phrase(tipoChequera.getNombre(), new Font(Font.HELVETICA, 11, Font.BOLD)));
         document.add(paragraph);
 
-        paragraph = new Paragraph(new Phrase("Tipo Arancel: ", new Font(Font.HELVETICA, 11)));
+        paragraph = new Paragraph(new Phrase("Tipo Arancel: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
         paragraph.add(new Phrase(arancelTipo.getDescripcion(), new Font(Font.HELVETICA, 11, Font.BOLD)));
         document.add(paragraph);
 
-        paragraph = new Paragraph(new Phrase("Ciclo Lectivo: ", new Font(Font.HELVETICA, 11)));
+        paragraph = new Paragraph(new Phrase("Ciclo Lectivo: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
         paragraph.add(new Phrase(lectivo.getNombre(), new Font(Font.HELVETICA, 11, Font.BOLD)));
         document.add(paragraph);
 
-        paragraph = new Paragraph(new Phrase("Tipo Impresion: ", new Font(Font.HELVETICA, 11)));
+        paragraph = new Paragraph(new Phrase("Tipo Impresion: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
         paragraph.add(new Phrase(tipoImpresion.getNombre(), new Font(Font.HELVETICA, 11, Font.BOLD)));
         document.add(paragraph);
 
-        paragraph = new Paragraph(new Phrase("Chequera: ", new Font(Font.HELVETICA, 11)));
+        paragraph = new Paragraph(new Phrase("Chequera: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
         paragraph.add(new Phrase(serie.getFacultadId() + "/" + serie.getTipoChequeraId() + "/"
                 + serie.getChequeraSerieId(), new Font(Font.HELVETICA, 11, Font.BOLD)));
         paragraph.setAlignment(Element.ALIGN_RIGHT);
         document.add(paragraph);
 
-        document.add(new Paragraph(" "));
-        paragraph = new Paragraph("NO VALIDO COMO COMPROBANTE DE PAGO", new Font(Font.HELVETICA, 9, Font.BOLD));
+        document.add(new Paragraph(" ", new Font(Font.HELVETICA, 5)));
+        paragraph = new Paragraph("NO VALIDO COMO COMPROBANTE DE PAGO",
+                new Font(Font.HELVETICA, 9, Font.BOLDITALIC, colorEtiqueta));
         paragraph.setAlignment(Element.ALIGN_CENTER);
         document.add(paragraph);
-        document.add(new Paragraph(" "));
-    }
-
-    /**
-     * Imprime la fecha y hora de emisión del PDF abajo a la derecha, en cada página del
-     * documento (se registra una sola vez con {@code writer.setPageEvent(...)}).
-     */
-    private static class FechaEmisionPageEvent extends PdfPageEventHelper {
-
-        private final String fechaHoraEmision;
-
-        private FechaEmisionPageEvent(String fechaHoraEmision) {
-            this.fechaHoraEmision = fechaHoraEmision;
-        }
-
-        @Override
-        public void onEndPage(PdfWriter writer, Document document) {
-            ColumnText.showTextAligned(writer.getDirectContent(), Element.ALIGN_RIGHT,
-                    new Phrase(fechaHoraEmision, new Font(Font.HELVETICA, 7)),
-                    document.right(), document.bottom() + 15, 0);
-        }
+        document.add(new Paragraph(" ", new Font(Font.HELVETICA, 5)));
     }
 
 }
