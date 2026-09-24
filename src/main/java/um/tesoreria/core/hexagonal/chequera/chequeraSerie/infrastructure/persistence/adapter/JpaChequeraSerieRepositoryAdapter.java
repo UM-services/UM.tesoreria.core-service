@@ -1,6 +1,8 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.adapter;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
@@ -49,6 +51,20 @@ public class JpaChequeraSerieRepositoryAdapter implements ChequeraSerieRepositor
         return jpaRepository.findAllByLectivoIdAndFacultadId(lectivoId, facultadId).stream()
                 .map(mapper::toDomainModel)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<ChequeraSerie> findAllByLectivoIdAndFacultadIdIn(Integer lectivoId, List<Integer> facultadIds, Pageable pageable) {
+        return jpaRepository.findAllByLectivoIdAndFacultadIdIn(lectivoId, facultadIds, pageable)
+                .map(mapper::toEstadoUsuarioDomain);
+    }
+
+    @Override
+    public Page<ChequeraSerie> findAllByLectivoIdAndFacultadIdInAndPersonaIdAndDocumentoId(
+            Integer lectivoId, List<Integer> facultadIds, BigDecimal personaId, Integer documentoId, Pageable pageable) {
+        return jpaRepository.findAllByLectivoIdAndFacultadIdInAndPersonaIdAndDocumentoId(
+                        lectivoId, facultadIds, personaId, documentoId, pageable)
+                .map(mapper::toEstadoUsuarioDomain);
     }
 
     @Override
