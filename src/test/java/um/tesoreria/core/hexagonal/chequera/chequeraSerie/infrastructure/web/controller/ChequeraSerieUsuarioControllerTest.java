@@ -45,11 +45,15 @@ class ChequeraSerieUsuarioControllerTest {
         when(chequerasPorUsuarioService.findAll(7L, 2026, null, null, 0, 20))
                 .thenReturn(new PageImpl<>(List.of(chequera), PageRequest.of(0, 20), 1));
 
-        mockMvc.get().uri("/api/tesoreria/core/chequeraSerie/usuario/7/lectivo/2026")
+        var response = mockMvc.get().uri("/api/tesoreria/core/chequeraSerie/usuario/7/lectivo/2026")
                 .accept(MediaType.APPLICATION_JSON)
                 .assertThat()
-                .hasStatusOk()
-                .bodyJson().extractingPath("$.content[0].estadoDeuda").isEqualTo("CON_DEUDA_VENCIDA");
+                .hasStatusOk();
+        response.bodyJson().extractingPath("$.content[0].estadoDeuda").isEqualTo("CON_DEUDA_VENCIDA");
+        response.bodyJson().extractingPath("$.totalElements").isEqualTo(1);
+        response.bodyJson().extractingPath("$.number").isEqualTo(0);
+        response.bodyJson().extractingPath("$.size").isEqualTo(20);
+        response.bodyJson().extractingPath("$.totalPages").isEqualTo(1);
     }
 
     @Test

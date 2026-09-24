@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +27,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraS
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieRequest;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieResponse;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraEstadoUsuarioResponse;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraEstadoUsuarioPageResponse;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.mapper.ChequeraSerieDtoMapper;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAlta;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAltaFull;
@@ -58,7 +58,7 @@ public class ChequeraSerieController {
     @ApiResponse(responseCode = "200", description = "Página de chequeras; sin resultados, content vacío")
     @ApiResponse(responseCode = "400", description = "Parámetros inválidos o filtro de alumno incompleto")
     @GetMapping("/usuario/{userId}/lectivo/{lectivoId}")
-    public ResponseEntity<Page<ChequeraEstadoUsuarioResponse>> findAllByUsuario(
+    public ResponseEntity<ChequeraEstadoUsuarioPageResponse> findAllByUsuario(
             @PathVariable Long userId,
             @PathVariable Integer lectivoId,
             @RequestParam(required = false) BigDecimal personaId,
@@ -66,9 +66,10 @@ public class ChequeraSerieController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         try {
-            return ResponseEntity.ok(chequerasPorUsuarioService
+            var chequeras = chequerasPorUsuarioService
                     .findAll(userId, lectivoId, personaId, documentoId, page, size)
-                    .map(ChequeraEstadoUsuarioResponse::from));
+                    .map(ChequeraEstadoUsuarioResponse::from);
+            return ResponseEntity.ok(ChequeraEstadoUsuarioPageResponse.from(chequeras));
         } catch (ChequerasPorUsuarioService.InvalidQueryException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
