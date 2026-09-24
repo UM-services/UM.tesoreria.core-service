@@ -6,9 +6,12 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.PreuniversitarioChequeraData;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.CreatePreuniversitarioChequeraUseCase;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.AlumnoGuarani;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.RequisitoPresentadoGuarani;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.ports.in.CreatePreuniversitarioUseCase;
 import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.infrastructure.web.dto.PersonalesResponse;
 import um.tesoreria.core.service.facade.MailChequeraService;
+
+import java.util.List;
 
 @Component
 @Slf4j
@@ -28,7 +31,8 @@ public class CreatePreuniversitarioUseCaseImpl implements CreatePreuniversitario
                         .getResponsableAcademica(),
                 alumnoGuaraniFull.getAlumnoGuarani().getUbicacion(),
                 alumnoGuaraniFull.getPersona().getPersonaId(),
-                alumnoGuaraniFull.getPersona().getDocumentoId()));
+                alumnoGuaraniFull.getPersona().getDocumentoId(),
+                requisitosPresentados(alumnoGuaraniFull)));
         if (chequeraSerie == null) {
             log.info("\n\nChequera serie nula\n\n");
             return alumnoGuaraniFull.getAlumnoGuarani();
@@ -49,6 +53,15 @@ public class CreatePreuniversitarioUseCaseImpl implements CreatePreuniversitario
         );
         log.info("\n\nResult -> {}", result);
         return alumnoGuaraniFull.getAlumnoGuarani();
+    }
+
+    private List<RequisitoPresentadoGuarani> requisitosPresentados(PersonalesResponse alumnoGuaraniFull) {
+        if (alumnoGuaraniFull.getAlumnoGuarani() == null
+                || alumnoGuaraniFull.getAlumnoGuarani().getPersonaRel() == null
+                || alumnoGuaraniFull.getAlumnoGuarani().getPersonaRel().getRequisitosPresentados() == null) {
+            return List.of();
+        }
+        return alumnoGuaraniFull.getAlumnoGuarani().getPersonaRel().getRequisitosPresentados();
     }
 
 }
