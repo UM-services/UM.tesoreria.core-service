@@ -119,6 +119,26 @@ public class ChequeraController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
     }
 
+    @GetMapping("/generateEstadoPdf/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{debitoTipoId}")
+    public ResponseEntity<Resource> generateEstadoPdf(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
+                                                      @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
+                                                      @PathVariable Integer debitoTipoId) throws FileNotFoundException {
+        String filename = formularioToPdfService.generateEstadoChequeraPdf(facultadId, tipoChequeraId, chequeraSerieId,
+                alternativaId, debitoTipoId);
+        if (filename == null) {
+            return ResponseEntity.internalServerError().build();
+        }
+        File file = new File(filename);
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=estado-chequera.pdf");
+        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+        headers.add("Pragma", "no-cache");
+        headers.add("Expires", "0");
+        return ResponseEntity.ok().headers(headers).contentLength(file.length())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+    }
+
     @GetMapping("/extendDebito/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<Void> extendDebito(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
                                              @PathVariable Long chequeraSerieId) {
