@@ -10,6 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.openpdf.text.pdf.PdfReader;
+import org.openpdf.text.pdf.parser.PdfTextExtractor;
 
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.service.ArancelTipoService;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
@@ -45,6 +47,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -60,9 +63,6 @@ import static org.mockito.Mockito.when;
  * corra el IDE o Maven, {@link #asegurarLogoDisponible()} crea un PNG mínimo válido en esa
  * ruta relativa si todavía no existe uno ahí, y {@link #limpiarLogoDummy()} lo borra al
  * terminar — sin tocar un marca_um.png real si ya estaba presente.
- * <p>
- * No pude compilar este archivo contra el proyecto real (no tengo el resto de las dependencias
- * Maven acá), así que si algo no compila avisame y lo ajusto.
  */
 @ExtendWith(MockitoExtension.class)
 class FormulariosToPdfServiceGenerateEstadoChequeraPdfTest {
@@ -186,10 +186,12 @@ class FormulariosToPdfServiceGenerateEstadoChequeraPdfTest {
         assertThat(pdf).exists();
         assertThat(pdf.length()).isGreaterThan(0);
 
-        // No comparo el texto del PDF acá porque extraerlo requiere PdfReader/PdfTextExtractor de
-        // openpdf, cuyo paquete exacto no pude verificar sin compilar contra el proyecto real.
-        // Si querés esa verificación (orden Matrícula antes que Arancel, "Hoja: 2", etc.), decime
-        // y la agrego una vez que confirmemos el import correcto.
+        try (PdfReader reader = new PdfReader(filename)) {
+            assertThat(reader.getNumberOfPages()).isEqualTo(2);
+            String primeraHoja = new PdfTextExtractor(reader).getTextFromPage(1);
+            assertThat(primeraHoja).contains("Primer vencimiento", "19/06/2026", "19/11/2026", "19/03/2026");
+            assertThat(primeraHoja.indexOf("Matrícula: 1/2")).isLessThan(primeraHoja.indexOf("Arancel Mensual: 1/1"));
+        }
     }
 
     @Test
@@ -236,6 +238,7 @@ class FormulariosToPdfServiceGenerateEstadoChequeraPdfTest {
                 .cuotaId(cuotaId)
                 .mes(mes)
                 .anho(anho)
+                .vencimiento1(OffsetDateTime.of(anho, mes, 19, 0, 0, 0, 0, ZoneOffset.UTC))
                 .importe1(new BigDecimal(importe))
                 .producto(Producto.builder().productoId(productoId).nombre(nombreProducto).build())
                 .chequeraPagos(pago == null ? List.of() : List.of(pago))

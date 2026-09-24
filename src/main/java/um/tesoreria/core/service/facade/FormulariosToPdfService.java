@@ -614,6 +614,8 @@ public class FormulariosToPdfService {
      *   (a la derecha), igual que en el PDF de referencia, para no gastar una línea aparte.
      * - El prefijo de cada fila de cuota (ej. "Arancel Mensual: 1/12") y el total de cuotas
      *   salen de chequera_alternativa (ChA_Titulo / ChA_Cuotas), no del nombre del producto.
+     * - "Primer vencimiento" sale de ChequeraCuotaPagosDto.vencimiento1 y conserva su día
+     *   calendario, sin convertir el huso horario.
      * - "Tipo Impresion" (ej. "Rapipago") sale de la nueva entidad {@link TipoImpresion}, agregada
      *   junto con este método porque no existía antes en el proyecto.
      * <p>
@@ -750,16 +752,15 @@ public class FormulariosToPdfService {
                 document.add(productoHeaderTable);
                 document.add(new Paragraph(" ", new Font(Font.HELVETICA, 3)));
 
-                float[] columnCuota = {2.1f, 1.7f, 1.1f, 1.3f, 1.4f};
+                float[] columnCuota = {1.8f, 1.4f, 1.25f, 1.1f, 1.1f, 1.55f};
                 PdfPTable table = new PdfPTable(columnCuota);
                 table.setWidthPercentage(100);
 
-                // Encabezado de columnas (A Pagar / Fecha Pago / Pagado) — las dos primeras
-                // columnas (cuota / período) no llevan rótulo, igual que en el PDF de referencia.
+                // Mantener el mismo orden de columnas que el reporte web.
                 Font fontColHeader = new Font(Font.HELVETICA, 7, Font.BOLD, colorEtiqueta);
-                String[] cuotaHeaders = {"", "", "A Pagar", "Fecha Pago", "Pagado"};
-                int[] alineacionHeaders = {Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_RIGHT,
-                        Element.ALIGN_CENTER, Element.ALIGN_RIGHT};
+                String[] cuotaHeaders = {"Cuota", "Período", "Primer vencimiento", "A Pagar", "Fecha Pago", "Pagado"};
+                int[] alineacionHeaders = {Element.ALIGN_LEFT, Element.ALIGN_LEFT, Element.ALIGN_LEFT,
+                        Element.ALIGN_RIGHT, Element.ALIGN_CENTER, Element.ALIGN_RIGHT};
                 for (int h = 0; h < cuotaHeaders.length; h++) {
                     cell = new PdfPCell(new Phrase(cuotaHeaders[h], fontColHeader));
                     cell.setHorizontalAlignment(alineacionHeaders[h]);
@@ -812,7 +813,20 @@ public class FormulariosToPdfService {
                     cell.setPadding(3f);
                     table.addCell(cell);
 
-                    // Columna 3: A Pagar (importe de la cuota)
+                    // Columna 3: fecha contractual del primer vencimiento (no es un instante de pago).
+                    String primerVencimiento = cuota.getVencimiento1() != null
+                            ? cuota.getVencimiento1().toLocalDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                            : "—";
+                    cell = new PdfPCell(new Phrase(primerVencimiento, new Font(Font.HELVETICA, 8, Font.BOLD)));
+                    cell.setHorizontalAlignment(Element.ALIGN_LEFT);
+                    cell.setVerticalAlignment(Element.ALIGN_TOP);
+                    cell.setBorder(bordeFila);
+                    cell.setBorderColor(colorLinea);
+                    cell.setBackgroundColor(fondoFila);
+                    cell.setPadding(3f);
+                    table.addCell(cell);
+
+                    // Columna 4: A Pagar (importe de la cuota)
                     cell = new PdfPCell(new Phrase(decimalFormat.format(importe), new Font(Font.HELVETICA, 8, Font.BOLD)));
                     cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
                     cell.setVerticalAlignment(Element.ALIGN_TOP);
@@ -822,7 +836,7 @@ public class FormulariosToPdfService {
                     cell.setPadding(3f);
                     table.addCell(cell);
 
-                    // Columna 4: Fecha Pago — solo la fecha, centrada para alinear con su encabezado
+                    // Columna 5: Fecha Pago — solo la fecha, centrada para alinear con su encabezado
                     // y con la misma altura que "A Pagar" (la referencia del pago ahora va bajo
                     // "Pagado", no acá, para no desalinear la fecha).
                     String fechaPago = "";
@@ -845,7 +859,7 @@ public class FormulariosToPdfService {
                     cell.setPadding(3f);
                     table.addCell(cell);
 
-                    // Columna 5: Pagado (importe realmente pagado — ChP_Importe; puede diferir del
+                    // Columna 6: Pagado (importe realmente pagado — ChP_Importe; puede diferir del
                     // "A Pagar" si hubo un pago parcial), con la referencia del pago debajo
                     BigDecimal pagadoCuota = pago != null && pago.getImporte() != null ? pago.getImporte() : null;
                     paragraph = new Paragraph(new Phrase(pagadoCuota != null ? decimalFormat.format(pagadoCuota) : "—",

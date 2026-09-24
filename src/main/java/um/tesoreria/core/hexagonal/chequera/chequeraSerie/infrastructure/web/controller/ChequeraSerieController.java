@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.server.ResponseStatusException;
@@ -23,6 +26,8 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieRequest;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieResponse;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraEstadoUsuarioResponse;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraEstadoUsuarioPageResponse;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.mapper.ChequeraSerieDtoMapper;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAlta;
 import um.tesoreria.core.kotlin.model.view.ChequeraSerieAltaFull;
@@ -31,6 +36,7 @@ import um.tesoreria.core.model.view.ChequeraIncompleta;
 import um.tesoreria.core.model.view.ChequeraKey;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioService;
 
 @RestController
 @RequestMapping({"/chequeraserie", "/api/tesoreria/core/chequeraSerie"})
@@ -41,6 +47,33 @@ public class ChequeraSerieController {
     private final ChequeraSerieService service;
     private final ChequeraCuotaService chequeraCuotaService;
     private final ChequeraSerieDtoMapper chequeraSerieDtoMapper;
+    private final ChequerasPorUsuarioService chequerasPorUsuarioService;
+
+    @Operation(
+            summary = "Estado de chequeras por usuario y lectivo",
+            description = "Devuelve chequeras de las facultades asignadas al userId, con deuda vencida calculada. "
+                    + "Para limitar a un alumno, enviar personaId y documentoId juntos. "
+                    + "estadoDeuda indica CON_DEUDA_VENCIDA o SIN_DEUDA_VENCIDA; no describe cuotas futuras ni estado administrativo. "
+                    + "El userId recibido es un filtro y no acredita la identidad del solicitante.")
+    @ApiResponse(responseCode = "200", description = "Página de chequeras; sin resultados, content vacío")
+    @ApiResponse(responseCode = "400", description = "Parámetros inválidos o filtro de alumno incompleto")
+    @GetMapping("/usuario/{userId}/lectivo/{lectivoId}")
+    public ResponseEntity<ChequeraEstadoUsuarioPageResponse> findAllByUsuario(
+            @PathVariable Long userId,
+            @PathVariable Integer lectivoId,
+            @RequestParam(required = false) BigDecimal personaId,
+            @RequestParam(required = false) Integer documentoId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        try {
+            var chequeras = chequerasPorUsuarioService
+                    .findAll(userId, lectivoId, personaId, documentoId, page, size)
+                    .map(ChequeraEstadoUsuarioResponse::from);
+            return ResponseEntity.ok(ChequeraEstadoUsuarioPageResponse.from(chequeras));
+        } catch (ChequerasPorUsuarioService.InvalidQueryException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 
     @GetMapping("/lectivo/{facultadId}/{lectivoId}")
     public ResponseEntity<List<ChequeraSerieResponse>> findAllByLectivo(@PathVariable Integer facultadId,
