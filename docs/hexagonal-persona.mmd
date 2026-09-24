@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Modulo Persona bajo Personas (v4.4.1)
+title: Arquitectura Hexagonal - Modulo Persona bajo Personas (v4.6.0)
 ---
 
 classDiagram
@@ -37,6 +37,20 @@ classDiagram
             +findAllByCbuLike(String) List~Persona~
             +save(Persona) Persona
         }
+
+        class PersonaSugerenciaRepository {
+            << interface >>
+            +findByUsuarioAndTerms(Long, List~String~, int) List~PersonaSugerencia~
+        }
+
+        class PersonaSugerencia {
+            << record >>
+            +BigDecimal personaId
+            +Integer documentoId
+            +String documento
+            +String apellido
+            +String nombre
+        }
     }
 
     namespace application {
@@ -68,6 +82,11 @@ classDiagram
             +getDeudaExamenByFacultadAndPersona(...) DeudaExamen
             +create(Persona) Persona
             +update(Persona) Persona
+        }
+
+        class PersonaSugerenciaService {
+            -PersonaSugerenciaRepository repository
+            +findByUsuario(Long, String, int) List~PersonaSugerencia~
         }
 
     }
@@ -144,6 +163,12 @@ classDiagram
                 +toEntity(Persona) PersonaEntity
                 +toDomain(PersonaEntity) Persona
             }
+
+            class JdbcPersonaSugerenciaRepositoryAdapter {
+                -NamedParameterJdbcTemplate jdbc
+                implements PersonaSugerenciaRepository
+                +findByUsuarioAndTerms(Long, List~String~, int) List~PersonaSugerencia~
+            }
     }
     namespace infrastructure_web {
             class PersonaController {
@@ -162,10 +187,12 @@ classDiagram
                 +getDeudaExamenByFacultadAndPersona(...) ResponseEntity~DeudaExamenResponse~
                 +create(PersonaRequest) ResponseEntity~PersonaResponse~
                 +update(PersonaRequest) ResponseEntity~PersonaResponse~
+                +sugerenciasPorUsuario(Long, String, int) ResponseEntity~List~PersonaSugerenciaResponse~~
             }
 
             class PersonaRequest
             class PersonaResponse
+            class PersonaSugerenciaResponse
             class DeudaExamenResponse {
                 +Boolean autorizadoRendir
                 +Boolean matriculaPagada
@@ -224,6 +251,10 @@ classDiagram
 
     PersonaController --> PersonaService : calls
     PersonaController --> PersonaDtoMapper : uses
+    PersonaController --> PersonaSugerenciaService : calls
+    PersonaSugerenciaService --> PersonaSugerenciaRepository : uses
+    JdbcPersonaSugerenciaRepositoryAdapter ..|> PersonaSugerenciaRepository : implements
+    PersonaSugerenciaResponse --> PersonaSugerencia : maps
     PersonaDtoMapper --> Persona : maps
     PersonaDtoMapper --> PersonaRequest : maps
     PersonaDtoMapper --> PersonaResponse : maps
