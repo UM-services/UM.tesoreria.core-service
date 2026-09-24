@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraSerie (v4.3.0)
+title: Arquitectura Hexagonal - Módulo ChequeraSerie (v4.6.0)
 ---
 
 classDiagram
@@ -46,6 +46,8 @@ classDiagram
             +findAllByFacultadIdAndChequeraSerieId(Integer, Long, Sort) List~ChequeraSerie~
             +findAllByPersonaIdAndDocumentoIdAndLectivoIdAndFacultadId(BigDecimal, Integer, Integer, Integer) List~ChequeraSerie~
             +findAllByLectivoIdAndFacultadId(Integer, Integer) List~ChequeraSerie~
+            +findAllByLectivoIdAndFacultadIdIn(Integer, List~Integer~, Pageable) Page~ChequeraSerie~
+            +findAllByLectivoIdAndFacultadIdInAndPersonaIdAndDocumentoId(Integer, List~Integer~, BigDecimal, Integer, Pageable) Page~ChequeraSerie~
             +findAllByFacultadIdAndLectivoIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraSerie~
             +findAllByLectivoIdAndFacultadIdAndPersonaId(Integer, Integer, BigDecimal) List~ChequeraSerie~
             +findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraSerie~
@@ -86,6 +88,13 @@ classDiagram
             -MarkSentUseCase markSentUseCase
             -SetPayPerTicUseCase payPerTicUseCase
             -UpdateChequeraSerieUseCase updateUseCase
+        }
+
+        class ChequerasPorUsuarioService {
+            -UsuarioChequeraFacultadService facultadService
+            -ChequeraSerieRepository chequeraRepository
+            -CalculateDeudaUseCase calculateDeudaUseCase
+            +findAll(Long, Integer, BigDecimal, Integer, int, int) Page~ChequeraSerie~
         }
 
     }
@@ -137,6 +146,7 @@ classDiagram
 
             class ChequeraSerieMapper {
                 +toDomainModel(ChequeraSerieEntity) ChequeraSerie
+                +toEstadoUsuarioDomain(ChequeraSerieEntity) ChequeraSerie
                 +toEntity(ChequeraSerie) ChequeraSerieEntity
             }
     }
@@ -144,10 +154,14 @@ classDiagram
             class ChequeraSerieController {
                 -ChequeraSerieService service
                 -ChequeraSerieDtoMapper dtoMapper
+                -ChequerasPorUsuarioService chequerasPorUsuarioService
+                +findAllByUsuario(Long, Integer, BigDecimal, Integer, int, int) ResponseEntity~ChequeraEstadoUsuarioPageResponse~
             }
 
             class ChequeraSerieRequest
             class ChequeraSerieResponse
+            class ChequeraEstadoUsuarioResponse
+            class ChequeraEstadoUsuarioPageResponse
             class ChequeraSerieDtoMapper {
                 +toDomain(ChequeraSerieRequest) ChequeraSerie
                 +toResponse(ChequeraSerie) ChequeraSerieResponse
@@ -169,6 +183,12 @@ classDiagram
 
         class ChequeraKeyService
         class DebitoService
+        class UsuarioChequeraFacultadService {
+            +findAllByUserId(Long) List~UsuarioChequeraFacultad~
+        }
+        class CalculateDeudaUseCase {
+            << interface >>
+        }
 
         class ChequeraIncompletaRepository {
             << JpaRepository >>
@@ -251,5 +271,11 @@ classDiagram
 
     ChequeraSerieController --> ChequeraSerieService : calls
     ChequeraSerieController --> ChequeraSerieDtoMapper : uses
+    ChequeraSerieController --> ChequerasPorUsuarioService : calls
+    ChequerasPorUsuarioService --> ChequeraSerieRepository : uses
+    ChequerasPorUsuarioService --> UsuarioChequeraFacultadService : uses
+    ChequerasPorUsuarioService --> CalculateDeudaUseCase : uses
+    ChequeraEstadoUsuarioPageResponse --> ChequeraEstadoUsuarioResponse : contains
+    ChequeraEstadoUsuarioResponse --> ChequeraSerie : maps
     ChequeraSerieDtoMapper --> ChequeraSerie : maps
     ChequeraSerieDtoMapper --> ChequeraSerieResponse : maps

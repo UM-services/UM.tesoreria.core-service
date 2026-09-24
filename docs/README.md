@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 4.3.1** (actualizada: 2026-09-08)
+**Versión actual del servicio: 4.6.0** (actualizada: 2026-09-24)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -14,7 +14,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-track.mmd`: Arquitectura hexagonal del módulo Track (seguimiento) - v3.36.0 (nuevo módulo, 4 casos de uso).
 - `hexagonal-chequeraCuota.mmd`: Arquitectura hexagonal del módulo ChequeraCuota (21 casos de uso individuales) - v3.38.0 (nuevo caso de uso GetCuotaActualUseCase + endpoint cuotaActual).
 - `hexagonal-mercadoPagoContext.mmd`: Arquitectura hexagonal del módulo MercadoPagoContext (contexto de pagos MP) - v3.26.0.
-- `hexagonal-auth.mmd`: Arquitectura hexagonal del módulo Auth (autenticación de usuarios).
+- `hexagonal-auth.mmd`: Arquitectura hexagonal del módulo Auth (autenticación de usuarios) - v4.6.0 (puerto `ChangePasswordUseCase` y endpoints `change-password`/`me/{userId}`).
 - `hexagonal-geografica.mmd`: Arquitectura hexagonal del módulo Geografica (entidades geográficas).
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores) - v3.36.0 (reubicado bajo `compras/`).
 - `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta (gestión de cuentas contables) - v3.8.0.
@@ -26,7 +26,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.50.0 (caso de uso de responsable académica).
 - `hexagonal-lectivoTotalImputacion.mmd`: Arquitectura hexagonal del módulo LectivoTotalImputacion (imputaciones contables por lectivo) - v3.31.0 (nuevo caso de uso FindAllByLectivo + enriquecimiento con asociaciones a Facultad/Lectivo/TipoChequera/Producto/Cuenta).
 - `hexagonal-contrato.mmd`: Arquitectura hexagonal del módulo Contrato (gestión de contratos) - v3.19.0.
-- `hexagonal-chequeraSerie.mmd`: Arquitectura hexagonal del módulo ChequeraSerie (consulta preuniversitaria desde datos Guaraní e incompletas por `claseChequeraId`) - v4.3.0.
+- `hexagonal-chequeraSerie.mmd`: Arquitectura hexagonal del módulo ChequeraSerie (consulta preuniversitaria desde datos Guaraní, incompletas por `claseChequeraId` y chequeras por usuario con deuda vencida) - v4.6.0.
 - `hexagonal-baja.mmd`: Arquitectura hexagonal del módulo Baja (gestión de bajas de chequeras) - v3.36.0 (reubicado bajo `chequera/`).
 - `hexagonal-campanha.mmd`: Arquitectura hexagonal del módulo Campanha (gestión de campañas UM Hub) - v3.24.0.
 - `hexagonal-chequeraProducto.mmd`: Arquitectura hexagonal del módulo Producto (gestión de productos chequera) - v3.30.0 (nuevo módulo).
@@ -43,7 +43,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento bajo `personas`, incluyendo búsqueda por tipo Guaraní y rutas REST compatibles - v3.50.1.
 - `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario bajo `usuarios/` (gestión de usuarios) - v4.5.0 (reubicado de `hexagonal/usuario/` a `hexagonal/usuarios/usuario/`, rutas y contratos REST intactos).
 - `hexagonal-usuarioChequeraFacultad.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraFacultad bajo `usuarios/` (facultades de chequera por usuario) - v4.5.0 (nuevo slice; migra el módulo legacy `core/model` + `core/repository` + `core/service` + `core/controller` con respuesta DTO que ya no expone `password`).
-- `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v3.50.0.
+- `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v4.6.0 (sugerencias de personas con chequeras por usuario).
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).
 - `hexagonal-politicaArancelaria.mmd`: Arquitectura hexagonal del módulo PoliticaArancelaria (recálculo de cuotas por política arancelaria) - v3.42.0 (refactorización de RecalculateCuotaByUniqueIndexUseCaseImpl, fallback a LectivoCuota con importes cero).

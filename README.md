@@ -4,7 +4,17 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 4.5.0**
+**Versión actual (SemVer): 4.6.0**
+
+## Novedades 4.6.0 (verificado en código)
+- feat(chequera/chequeraSerie): Nuevo endpoint paginado `GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}` (alias `/api/tesoreria/core/chequeraSerie/...`) con las chequeras de las facultades asignadas al usuario: filtro opcional `personaId`+`documentoId` (400 si viene incompleto), deuda vencida calculada por `CalculateDeudaUseCase`, tamaño de página 1..100 (defecto 20) y contrato estable `ChequeraEstadoUsuarioPageResponse`/`ChequeraEstadoUsuarioResponse` con `titular`, `estadoDeuda` (`CON_DEUDA_VENCIDA`/`SIN_DEUDA_VENCIDA`) y `becaPorcentaje` (fracción: `0.5` = 50 %). Nuevas firmas `Page` en `ChequeraSerieRepository` y `ChequeraSerieMapper.toEstadoUsuarioDomain`.
+- feat(chequera): Nuevo endpoint `GET /chequera/generateEstadoPdf/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{debitoTipoId}` que descarga el PDF "Estado de Chequera" con primer vencimiento contractual, porcentaje de beca, tipo de impresión (nuevos `TipoImpresion`/`TipoImpresionService`/`TipoImpresionException`), encabezado sin línea de acento y leyenda "NO VALIDO COMO COMPROBANTE DE PAGO".
+- feat(personas/persona): Nuevo endpoint `GET /persona/sugerencias/usuario/{userId}?q=&limite=8` de sugerencias de personas con chequeras en las facultades del usuario: `PersonaSugerenciaService` (valida ≥3 caracteres alfanuméricos, `limite` 1..20, términos AND), puerto `PersonaSugerenciaRepository` y `JdbcPersonaSugerenciaRepositoryAdapter` con `EXISTS` sobre `chequera_serie`/`usuario_chequera_facultad`, `LIKE ... ESCAPE '!'` y ranking por prefijo del apellido.
+- feat(auth): Nuevo puerto `ChangePasswordUseCase` expuesto en `POST /api/tesoreria/core/auth/change-password` (verifica clave anterior SHA-256, coincidencia de confirmación, bloqueo de cuentas "admin*" y claves duplicadas en otros usuarios) y `GET /api/tesoreria/core/auth/me/{userId}`; `UsuarioAuthRepository` añade `findById` y `LoginResponse` incorpora el campo aditivo `login`.
+- test/infra: Perfil Maven `it` (failsafe + `application-it.yml`) para `*IT` contra MySQL de solo lectura con variables `IT_DB_*`; nuevas pruebas unitarias, de controlador y de integración.
+- feat(docs): Diagramas `hexagonal-auth.mmd`, `hexagonal-chequeraSerie.mmd` y `hexagonal-persona.mmd` sincronizados con el código (v4.6.0).
+
+> Basado en `git diff b3528dc..HEAD` (PRs #378/#379/#380), `git diff HEAD` (staged: slice `auth`) y `pom.xml` (versión `4.5.0` → `4.6.0`). Endpoints, puertos y contratos JSON aditivos sin ruptura de APIs públicas existentes; corresponde un incremento minor de SemVer.
 
 ## Novedades 4.5.0 (verificado en código)
 - feat(usuarios/usuarioChequeraFacultad): Nuevo slice hexagonal `usuarioChequeraFacultad` que migra el módulo legacy (`core/model` + `core/repository` + `core/service` + `core/controller`): dominio `UsuarioChequeraFacultad` con `usuario`/`facultad` enriquecidos, puerto de entrada `GetUsuarioChequeraFacultadesByUserIdUseCase`, puerto de salida `UsuarioChequeraFacultadRepository`, adaptador JPA sobre la misma tabla `usuario_chequera_facultad` y controlador REST `GET /api/tesoreria/core/usuarioChequeraFacultad/user/{userId}` (misma URL que el controller legacy eliminado).
