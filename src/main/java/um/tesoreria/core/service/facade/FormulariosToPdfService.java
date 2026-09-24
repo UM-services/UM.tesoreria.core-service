@@ -1043,6 +1043,11 @@ public class FormulariosToPdfService {
         paragraph.add(new Phrase(lectivo.getNombre(), new Font(Font.HELVETICA, 11, Font.BOLD)));
         document.add(paragraph);
 
+        paragraph = new Paragraph(new Phrase("Porcentaje de beca: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
+        paragraph.add(new Phrase((serie.getBecaPorcentaje() == null ? BigDecimal.ZERO : serie.getBecaPorcentaje())
+                .movePointRight(2).stripTrailingZeros().toPlainString() + "%", new Font(Font.HELVETICA, 11, Font.BOLD)));
+        document.add(paragraph);
+
         paragraph = new Paragraph(new Phrase("Tipo Impresion: ", new Font(Font.HELVETICA, 11, Font.NORMAL, colorEtiqueta)));
         paragraph.add(new Phrase(tipoImpresion.getNombre(), new Font(Font.HELVETICA, 11, Font.BOLD)));
         document.add(paragraph);

@@ -126,6 +126,7 @@ class FormulariosToPdfServiceGenerateEstadoChequeraPdfTest {
                 .lectivoId(37)
                 .arancelTipoId(5)
                 .tipoImpresionId(1)
+                .becaPorcentaje(new BigDecimal("0.5"))
                 .build();
         when(chequeraSerieService.findByUnique(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID)).thenReturn(serie);
 
@@ -189,6 +190,9 @@ class FormulariosToPdfServiceGenerateEstadoChequeraPdfTest {
         try (PdfReader reader = new PdfReader(filename)) {
             assertThat(reader.getNumberOfPages()).isEqualTo(2);
             String primeraHoja = new PdfTextExtractor(reader).getTextFromPage(1);
+            String segundaHoja = new PdfTextExtractor(reader).getTextFromPage(2);
+            assertThat(primeraHoja).contains("Porcentaje de beca: 50%");
+            assertThat(segundaHoja).contains("Porcentaje de beca: 50%");
             assertThat(primeraHoja).contains("Primer vencimiento", "19/06/2026", "19/11/2026", "19/03/2026");
             assertThat(primeraHoja.indexOf("Matrícula: 1/2")).isLessThan(primeraHoja.indexOf("Arancel Mensual: 1/1"));
         }

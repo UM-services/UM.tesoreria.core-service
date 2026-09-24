@@ -1,5 +1,6 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 
 import java.math.BigDecimal;
@@ -17,6 +18,8 @@ public record ChequeraEstadoUsuarioResponse(
         Integer lectivoId,
         Integer geograficaId,
         Integer alternativaId,
+        @Schema(description = "Porcentaje de beca expresado como fracción: 0.5 equivale a 50 %", example = "0.5")
+        BigDecimal becaPorcentaje,
         BigDecimal importeDeuda,
         int cuotasDeuda,
         String estadoDeuda,
@@ -39,6 +42,7 @@ public record ChequeraEstadoUsuarioResponse(
                 chequera.getLectivoId(),
                 chequera.getGeograficaId(),
                 chequera.getAlternativaId(),
+                chequera.getBecaPorcentaje(),
                 importeDeuda,
                 chequera.getCuotasDeuda(),
                 importeDeuda.signum() > 0 ? "CON_DEUDA_VENCIDA" : "SIN_DEUDA_VENCIDA",
