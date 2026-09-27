@@ -7,12 +7,14 @@ import um.tesoreria.core.hexagonal.chequera.claseChequera.domain.model.ClaseCheq
 import um.tesoreria.core.hexagonal.chequera.claseChequera.domain.ports.in.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ClaseChequeraService {
 
     private final GetAllClaseChequeraUseCase getAllClaseChequeraUseCase;
+    private final GetClaseChequeraByIdUseCase getClaseChequeraByIdUseCase;
     private final GetAllClaseChequeraByPosgradoUseCase getAllClaseChequeraByPosgradoUseCase;
     private final GetAllClaseChequeraByCursoUseCase getAllClaseChequeraByCursoUseCase;
     private final GetAllClaseChequeraByTituloUseCase getAllClaseChequeraByTituloUseCase;
@@ -20,6 +22,10 @@ public class ClaseChequeraService {
 
     public List<ClaseChequera> findAll() {
         return getAllClaseChequeraUseCase.getAllClaseChequera();
+    }
+
+    public Optional<ClaseChequera> findById(Integer claseChequeraId) {
+        return getClaseChequeraByIdUseCase.getClaseChequeraById(claseChequeraId);
     }
 
     public List<ClaseChequera> findAllByPosgrado() {

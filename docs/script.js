@@ -113,6 +113,8 @@ const diagrams = [
   { id: 'hexagonal-documento', file: 'hexagonal-documento.mmd', title: 'Arquitectura Hexagonal - Documento' },
   { id: 'hexagonal-usuario', file: 'hexagonal-usuario.mmd', title: 'Arquitectura Hexagonal - Usuario' },
   { id: 'hexagonal-usuarioChequeraFacultad', file: 'hexagonal-usuarioChequeraFacultad.mmd', title: 'Arquitectura Hexagonal - UsuarioChequeraFacultad' },
+  { id: 'hexagonal-usuarioChequeraClaseChequera', file: 'hexagonal-usuarioChequeraClaseChequera.mmd', title: 'Arquitectura Hexagonal - UsuarioChequeraClaseChequera' },
+  { id: 'hexagonal-usuarioChequeraGeografica', file: 'hexagonal-usuarioChequeraGeografica.mmd', title: 'Arquitectura Hexagonal - UsuarioChequeraGeografica' },
   { id: 'hexagonal-setup', file: 'hexagonal-setup.mmd', title: 'Arquitectura Hexagonal - Setup' },
   { id: 'hexagonal-deudaExamen', file: 'hexagonal-deudaExamen.mmd', title: 'Arquitectura Hexagonal - DeudaExamen' },
   { id: 'hexagonal-chequeraPago', file: 'hexagonal-chequeraPago.mmd', title: 'Arquitectura Hexagonal - ChequeraPago' },

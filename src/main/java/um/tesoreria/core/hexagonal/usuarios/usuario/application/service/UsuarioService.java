@@ -6,6 +6,9 @@ import um.tesoreria.core.hexagonal.usuarios.usuario.application.exception.Usuari
 import um.tesoreria.core.hexagonal.usuarios.usuario.domain.model.Usuario;
 import um.tesoreria.core.hexagonal.usuarios.usuario.domain.ports.in.*;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
@@ -16,10 +19,20 @@ public class UsuarioService {
     private final UpdateUsuarioUseCase updateUsuarioUseCase;
     private final UpdateLastLogUseCase updateLastLogUseCase;
     private final FindUsuarioByGoogleMailUseCase findUsuarioByGoogleMailUseCase;
+    private final GetUsuarioByIdUseCase getUsuarioByIdUseCase;
+    private final FindUsuariosBySearchUseCase findUsuariosBySearchUseCase;
 
     public Usuario findByLogin(String login) {
         return findUsuarioByLoginUseCase.findUsuarioByLogin(login)
                 .orElseThrow(() -> new UsuarioException(login));
+    }
+
+    public Optional<Usuario> findByUserId(Long userId) {
+        return getUsuarioByIdUseCase.getUsuarioById(userId);
+    }
+
+    public List<Usuario> search(String texto) {
+        return findUsuariosBySearchUseCase.findUsuariosBySearch(texto);
     }
 
     public Usuario findByPassword(String password) {

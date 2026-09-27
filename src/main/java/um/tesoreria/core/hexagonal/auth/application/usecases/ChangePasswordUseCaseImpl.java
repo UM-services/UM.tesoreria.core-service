@@ -67,12 +67,14 @@ public class ChangePasswordUseCaseImpl implements ChangePasswordUseCase {
         }
 
         // 4. Actualiza contraseña y nombre si aplica
+        String newNombre = (nombre != null && !nombre.trim().isEmpty()) ? nombre.trim() : null;
         usuario.setPassword(newHashed);
-        if (nombre != null && !nombre.trim().isEmpty()) {
-            usuario.setNombre(nombre.trim());
+        if (newNombre != null) {
+            usuario.setNombre(newNombre);
         }
 
         log.info("Cambio de clave exitoso para usuario: {}", usuario.getLogin());
-        return usuarioAuthRepository.save(usuario);
+        usuarioAuthRepository.updateCredentials(usuario.getUserId(), newHashed, newNombre);
+        return usuario;
     }
 }

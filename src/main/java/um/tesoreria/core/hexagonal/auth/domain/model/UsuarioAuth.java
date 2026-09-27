@@ -1,11 +1,13 @@
 package um.tesoreria.core.hexagonal.auth.domain.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.OffsetDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsuarioAuth {
@@ -18,9 +20,12 @@ public class UsuarioAuth {
     private Byte numeroOpManual;
     private Byte habilitaOpEliminacion;
     private Byte eliminaChequera;
+    private Byte modificaChequera;
     private OffsetDateTime lastLog;
     private String googleMail;
     private Byte activo;
+    private Byte administrador;
+    private Byte usuarioExterno;
 
     public boolean isActivo() {
         return this.activo != null && this.activo == 1;

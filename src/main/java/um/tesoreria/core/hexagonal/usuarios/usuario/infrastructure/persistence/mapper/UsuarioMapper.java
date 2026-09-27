@@ -23,6 +23,8 @@ public class UsuarioMapper {
                 .lastLog(entity.getLastLog())
                 .googleMail(entity.getGoogleMail())
                 .activo(entity.getActivo())
+                .administrador(entity.getAdministrador())
+                .usuarioExterno(entity.getUsuarioExterno())
                 .build();
     }
 
@@ -43,7 +45,33 @@ public class UsuarioMapper {
         if (domain.getEliminaChequera() != null) builder.eliminaChequera(domain.getEliminaChequera());
         if (domain.getModificaChequera() != null) builder.modificaChequera(domain.getModificaChequera());
         if (domain.getActivo() != null) builder.activo(domain.getActivo());
+        if (domain.getAdministrador() != null) builder.administrador(domain.getAdministrador());
+        if (domain.getUsuarioExterno() != null) builder.usuarioExterno(domain.getUsuarioExterno());
 
         return builder.build();
+    }
+
+    /**
+     * Aplica los campos del dominio sobre una entidad YA MANAGED (cargada por id).
+     * Los flags null se ignoran: "no vino = no se toca". Las columnas que no existen
+     * en el dominio quedan intactas por definicion (dirty checking solo emite UPDATE
+     * de lo efectivamente modificado).
+     */
+    public void updateEntity(Usuario domain, UsuarioEntity entity) {
+        if (domain == null || entity == null) return;
+        entity.setLogin(domain.getLogin());
+        entity.setPassword(domain.getPassword());
+        entity.setNombre(domain.getNombre());
+        entity.setGeograficaId(domain.getGeograficaId());
+        entity.setLastLog(domain.getLastLog());
+        entity.setGoogleMail(domain.getGoogleMail());
+        if (domain.getImprimeChequera() != null) entity.setImprimeChequera(domain.getImprimeChequera());
+        if (domain.getNumeroOpManual() != null) entity.setNumeroOpManual(domain.getNumeroOpManual());
+        if (domain.getHabilitaOpEliminacion() != null) entity.setHabilitaOpEliminacion(domain.getHabilitaOpEliminacion());
+        if (domain.getEliminaChequera() != null) entity.setEliminaChequera(domain.getEliminaChequera());
+        if (domain.getModificaChequera() != null) entity.setModificaChequera(domain.getModificaChequera());
+        if (domain.getActivo() != null) entity.setActivo(domain.getActivo());
+        if (domain.getAdministrador() != null) entity.setAdministrador(domain.getAdministrador());
+        if (domain.getUsuarioExterno() != null) entity.setUsuarioExterno(domain.getUsuarioExterno());
     }
 }
