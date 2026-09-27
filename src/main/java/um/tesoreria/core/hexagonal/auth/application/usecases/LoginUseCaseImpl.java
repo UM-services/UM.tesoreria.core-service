@@ -64,7 +64,9 @@ public class LoginUseCaseImpl implements LoginUseCase {
         }
 
         log.info("Login exitoso para usuario: {}", safeLogin);
-        usuario.setLastLog(OffsetDateTime.now());
-        return usuarioAuthRepository.save(usuario);
+        OffsetDateTime newLastLog = OffsetDateTime.now();
+        usuario.setLastLog(newLastLog);
+        usuarioAuthRepository.updateLastLog(usuario.getUserId(), newLastLog);
+        return usuario;
     }
 }

@@ -29,4 +29,8 @@ public class Usuario {
     private String googleMail;
     @Builder.Default
     private Byte activo = 1;
+    @Builder.Default
+    private Byte administrador = 0;
+    @Builder.Default
+    private Byte usuarioExterno = 0;
 }

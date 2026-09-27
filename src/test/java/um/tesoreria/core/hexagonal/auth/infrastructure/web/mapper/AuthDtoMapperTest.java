@@ -40,6 +40,13 @@ class AuthDtoMapperTest {
         usuario.setLogin("daniel");
         usuario.setNombre("Daniel");
         usuario.setGeograficaId(7);
+        usuario.setImprimeChequera((byte) 1);
+        usuario.setNumeroOpManual((byte) 0);
+        usuario.setHabilitaOpEliminacion((byte) 1);
+        usuario.setEliminaChequera((byte) 0);
+        usuario.setModificaChequera((byte) 1);
+        usuario.setAdministrador((byte) 1);
+        usuario.setUsuarioExterno((byte) 1);
 
         var response = mapper.toResponse(usuario);
 
@@ -50,6 +57,13 @@ class AuthDtoMapperTest {
         assertThat(response.getNombre()).isEqualTo("Daniel");
         assertThat(response.getGeograficaId()).isEqualTo(7);
         assertThat(response.getSede()).isEqualTo("Sede Centro");
+        assertThat(response.getImprimeChequera()).isEqualTo((byte) 1);
+        assertThat(response.getNumeroOpManual()).isEqualTo((byte) 0);
+        assertThat(response.getHabilitaOpEliminacion()).isEqualTo((byte) 1);
+        assertThat(response.getEliminaChequera()).isEqualTo((byte) 0);
+        assertThat(response.getModificaChequera()).isEqualTo((byte) 1);
+        assertThat(response.getAdministrador()).isEqualTo((byte) 1);
+        assertThat(response.getUsuarioExterno()).isEqualTo((byte) 1);
     }
 
     @Test

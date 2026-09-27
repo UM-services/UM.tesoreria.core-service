@@ -8,6 +8,7 @@ import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persist
 import um.tesoreria.core.hexagonal.chequera.claseChequera.infrastructure.persistence.repository.JpaClaseChequeraRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -22,6 +23,11 @@ public class JpaClaseChequeraRepositoryAdapter implements ClaseChequeraRepositor
         return jpaClaseChequeraRepository.findAll().stream()
                 .map(claseChequeraMapper::toDomainModel)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<ClaseChequera> findByClaseChequeraId(Integer claseChequeraId) {
+        return jpaClaseChequeraRepository.findById(claseChequeraId).map(claseChequeraMapper::toDomainModel);
     }
 
     @Override

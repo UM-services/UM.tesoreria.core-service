@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo UsuarioChequeraFacultad (v4.5.0)
+title: Arquitectura Hexagonal - Módulo UsuarioChequeraFacultad (v4.7.0)
 ---
 
 classDiagram
@@ -32,23 +32,54 @@ classDiagram
         class UsuarioChequeraFacultadRepository {
             << interface >>
             +findAllByUserId(Long) List~UsuarioChequeraFacultad~
+            +findByUserIdAndFacultadId(Long, Integer) Optional~UsuarioChequeraFacultad~
+            +save(UsuarioChequeraFacultad) UsuarioChequeraFacultad
+            +deleteByUserIdAndFacultadId(Long, Integer) void
         }
     }
 
     namespace application {
         class UsuarioChequeraFacultadService {
             -GetUsuarioChequeraFacultadesByUserIdUseCase getUsuarioChequeraFacultadesByUserIdUseCase
+            -CreateUsuarioChequeraFacultadUseCase createUsuarioChequeraFacultadUseCase
+            -DeleteUsuarioChequeraFacultadUseCase deleteUsuarioChequeraFacultadUseCase
             +findAllByUserId(Long) List~UsuarioChequeraFacultad~
+            +add(UsuarioChequeraFacultad) UsuarioChequeraFacultad
+            +delete(Long, Integer) void
         }
 
         class GetUsuarioChequeraFacultadesByUserIdUseCase {
             << interface >>
             +getByUserId(Long) List~UsuarioChequeraFacultad~
         }
+
+        class CreateUsuarioChequeraFacultadUseCase {
+            << interface >>
+            +createUsuarioChequeraFacultad(UsuarioChequeraFacultad) UsuarioChequeraFacultad
+        }
+
+        class DeleteUsuarioChequeraFacultadUseCase {
+            << interface >>
+            +deleteUsuarioChequeraFacultad(Long, Integer) void
+        }
     }
 
     namespace application_usecases {
         class GetUsuarioChequeraFacultadesByUserIdUseCaseImpl
+        class CreateUsuarioChequeraFacultadUseCaseImpl
+        class DeleteUsuarioChequeraFacultadUseCaseImpl
+    }
+
+    namespace external {
+        class GetUsuarioByIdUseCase {
+            << external >>
+            +getUsuarioById(Long) Optional~Usuario~
+        }
+
+        class GetFacultadByIdUseCase {
+            << external >>
+            +getById(Integer) Optional~Facultad~
+        }
     }
 
     namespace infrastructure_persistence {
@@ -63,12 +94,17 @@ classDiagram
         class JpaUsuarioChequeraFacultadRepository {
             << JpaRepository >>
             +findAllByUserId(Long) List~UsuarioChequeraFacultadEntity~
+            +findByUserIdAndFacultadId(Long, Integer) Optional~UsuarioChequeraFacultadEntity~
+            +deleteByUserIdAndFacultadId(Long, Integer) void
         }
 
         class JpaUsuarioChequeraFacultadRepositoryAdapter {
             -JpaUsuarioChequeraFacultadRepository repository
             -UsuarioChequeraFacultadMapper mapper
             +findAllByUserId(Long) List~UsuarioChequeraFacultad~
+            +findByUserIdAndFacultadId(Long, Integer) Optional~UsuarioChequeraFacultad~
+            +save(UsuarioChequeraFacultad) UsuarioChequeraFacultad
+            +deleteByUserIdAndFacultadId(Long, Integer) void
         }
 
         class UsuarioChequeraFacultadMapper {
@@ -84,6 +120,13 @@ classDiagram
             -UsuarioChequeraFacultadService service
             -UsuarioChequeraFacultadDtoMapper mapper
             +findAllByUserId(Long) ResponseEntity~List~UsuarioChequeraFacultadResponse~~
+            +add(UsuarioChequeraFacultadRequest) ResponseEntity~UsuarioChequeraFacultadResponse~
+            +delete(Long, Integer) ResponseEntity~Void~
+        }
+
+        class UsuarioChequeraFacultadRequest {
+            +Long userId
+            +Integer facultadId
         }
 
         class UsuarioChequeraFacultadResponse {
@@ -99,6 +142,7 @@ classDiagram
         class UsuarioChequeraFacultadDtoMapper {
             -UsuarioDtoMapper usuarioDtoMapper
             -FacultadDtoMapper facultadDtoMapper
+            +toDomain(UsuarioChequeraFacultadRequest) UsuarioChequeraFacultad
             +toResponse(UsuarioChequeraFacultad) UsuarioChequeraFacultadResponse
         }
     }
@@ -107,8 +151,16 @@ classDiagram
     UsuarioChequeraFacultad --> Facultad : referencia
 
     UsuarioChequeraFacultadService --> GetUsuarioChequeraFacultadesByUserIdUseCase : uses
+    UsuarioChequeraFacultadService --> CreateUsuarioChequeraFacultadUseCase : uses
+    UsuarioChequeraFacultadService --> DeleteUsuarioChequeraFacultadUseCase : uses
     GetUsuarioChequeraFacultadesByUserIdUseCaseImpl ..|> GetUsuarioChequeraFacultadesByUserIdUseCase : implements
+    CreateUsuarioChequeraFacultadUseCaseImpl ..|> CreateUsuarioChequeraFacultadUseCase : implements
+    DeleteUsuarioChequeraFacultadUseCaseImpl ..|> DeleteUsuarioChequeraFacultadUseCase : implements
     GetUsuarioChequeraFacultadesByUserIdUseCaseImpl --> UsuarioChequeraFacultadRepository : uses
+    CreateUsuarioChequeraFacultadUseCaseImpl --> UsuarioChequeraFacultadRepository : uses
+    DeleteUsuarioChequeraFacultadUseCaseImpl --> UsuarioChequeraFacultadRepository : uses
+    CreateUsuarioChequeraFacultadUseCaseImpl --> GetUsuarioByIdUseCase : valida userId
+    CreateUsuarioChequeraFacultadUseCaseImpl --> GetFacultadByIdUseCase : valida facultadId
 
     JpaUsuarioChequeraFacultadRepositoryAdapter ..|> UsuarioChequeraFacultadRepository : implements
     JpaUsuarioChequeraFacultadRepositoryAdapter --> JpaUsuarioChequeraFacultadRepository : uses
@@ -121,4 +173,5 @@ classDiagram
     UsuarioChequeraFacultadController --> UsuarioChequeraFacultadService : calls
     UsuarioChequeraFacultadController --> UsuarioChequeraFacultadDtoMapper : uses
     UsuarioChequeraFacultadDtoMapper --> UsuarioChequeraFacultad : maps
+    UsuarioChequeraFacultadDtoMapper --> UsuarioChequeraFacultadRequest : maps
     UsuarioChequeraFacultadDtoMapper --> UsuarioChequeraFacultadResponse : maps
