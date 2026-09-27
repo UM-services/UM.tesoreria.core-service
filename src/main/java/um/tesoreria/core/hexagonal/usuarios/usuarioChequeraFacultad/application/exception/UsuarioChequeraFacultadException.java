@@ -12,4 +12,8 @@ public class UsuarioChequeraFacultadException extends RuntimeException {
         super("Could not find UsuarioChequeraFacultad with id: " + usuarioChequeraFacultadId);
     }
 
+    public UsuarioChequeraFacultadException(String message) {
+        super(message);
+    }
+
 }
