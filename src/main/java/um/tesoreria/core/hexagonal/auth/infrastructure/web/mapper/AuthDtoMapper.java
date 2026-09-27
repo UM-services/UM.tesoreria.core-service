@@ -24,6 +24,13 @@ public class AuthDtoMapper {
                 .sede(geograficaService.findByGeograficaId(domain.getGeograficaId())
                         .map(Geografica::getNombre)
                         .orElse("Sede no encontrada"))
+                .imprimeChequera(domain.getImprimeChequera())
+                .numeroOpManual(domain.getNumeroOpManual())
+                .habilitaOpEliminacion(domain.getHabilitaOpEliminacion())
+                .eliminaChequera(domain.getEliminaChequera())
+                .modificaChequera(domain.getModificaChequera())
+                .administrador(domain.getAdministrador())
+                .usuarioExterno(domain.getUsuarioExterno())
                 .build();
     }
 }

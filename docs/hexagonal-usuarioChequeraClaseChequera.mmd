@@ -1,0 +1,174 @@
+---
+title: Arquitectura Hexagonal - Módulo UsuarioChequeraClaseChequera (v4.7.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class UsuarioChequeraClaseChequera {
+            +Long usuarioChequeraClaseChequeraId
+            +Long userId
+            +Integer claseChequeraId
+            +LocalDateTime created
+            +LocalDateTime updated
+            +ClaseChequera claseChequera
+        }
+
+        class Usuario {
+            << domain >>
+            +Long userId
+            +String login
+            +String nombre
+        }
+
+        class ClaseChequera {
+            << domain >>
+            +Integer claseChequeraId
+            +String nombre
+        }
+
+        class UsuarioChequeraClaseChequeraRepository {
+            << interface >>
+            +findAllByUserId(Long) List~UsuarioChequeraClaseChequera~
+            +findByUserIdAndClaseChequeraId(Long, Integer) Optional~UsuarioChequeraClaseChequera~
+            +save(UsuarioChequeraClaseChequera) UsuarioChequeraClaseChequera
+            +deleteByUserIdAndClaseChequeraId(Long, Integer) void
+        }
+    }
+
+    namespace application {
+        class UsuarioChequeraClaseChequeraService {
+            -GetUsuarioChequeraClaseChequerasByUserIdUseCase getUsuarioChequeraClaseChequerasByUserIdUseCase
+            -CreateUsuarioChequeraClaseChequeraUseCase createUsuarioChequeraClaseChequeraUseCase
+            -DeleteUsuarioChequeraClaseChequeraUseCase deleteUsuarioChequeraClaseChequeraUseCase
+            +findAllByUserId(Long) List~UsuarioChequeraClaseChequera~
+            +add(UsuarioChequeraClaseChequera) UsuarioChequeraClaseChequera
+            +delete(Long, Integer) void
+        }
+
+        class GetUsuarioChequeraClaseChequerasByUserIdUseCase {
+            << interface >>
+            +getByUserId(Long) List~UsuarioChequeraClaseChequera~
+        }
+
+        class CreateUsuarioChequeraClaseChequeraUseCase {
+            << interface >>
+            +createUsuarioChequeraClaseChequera(UsuarioChequeraClaseChequera) UsuarioChequeraClaseChequera
+        }
+
+        class DeleteUsuarioChequeraClaseChequeraUseCase {
+            << interface >>
+            +deleteUsuarioChequeraClaseChequera(Long, Integer) void
+        }
+
+        class UsuarioChequeraClaseChequeraException
+    }
+
+    namespace application_usecases {
+        class GetUsuarioChequeraClaseChequerasByUserIdUseCaseImpl
+        class CreateUsuarioChequeraClaseChequeraUseCaseImpl
+        class DeleteUsuarioChequeraClaseChequeraUseCaseImpl
+    }
+
+    namespace external {
+        class GetUsuarioByIdUseCase {
+            << external >>
+            +getUsuarioById(Long) Optional~Usuario~
+        }
+
+        class GetClaseChequeraByIdUseCase {
+            << external >>
+            +getClaseChequeraById(Integer) Optional~ClaseChequera~
+        }
+    }
+
+    namespace infrastructure_persistence {
+        class UsuarioChequeraClaseChequeraEntity {
+            +Long usuarioChequeraClaseChequeraId
+            +Long userId
+            +Integer claseChequeraId
+            +ClaseChequeraEntity claseChequera
+        }
+
+        class JpaUsuarioChequeraClaseChequeraRepository {
+            << JpaRepository >>
+            +findAllByUserId(Long) List~UsuarioChequeraClaseChequeraEntity~
+            +findByUserIdAndClaseChequeraId(Long, Integer) Optional~UsuarioChequeraClaseChequeraEntity~
+            +deleteByUserIdAndClaseChequeraId(Long, Integer) void
+        }
+
+        class JpaUsuarioChequeraClaseChequeraRepositoryAdapter {
+            -JpaUsuarioChequeraClaseChequeraRepository repository
+            -UsuarioChequeraClaseChequeraMapper mapper
+            +findAllByUserId(Long) List~UsuarioChequeraClaseChequera~
+            +findByUserIdAndClaseChequeraId(Long, Integer) Optional~UsuarioChequeraClaseChequera~
+            +save(UsuarioChequeraClaseChequera) UsuarioChequeraClaseChequera
+            +deleteByUserIdAndClaseChequeraId(Long, Integer) void
+        }
+
+        class UsuarioChequeraClaseChequeraMapper {
+            -ClaseChequeraMapper claseChequeraMapper
+            +toDomain(UsuarioChequeraClaseChequeraEntity) UsuarioChequeraClaseChequera
+            +toEntity(UsuarioChequeraClaseChequera) UsuarioChequeraClaseChequeraEntity
+        }
+    }
+
+    namespace infrastructure_web {
+        class UsuarioChequeraClaseChequeraController {
+            -UsuarioChequeraClaseChequeraService service
+            -UsuarioChequeraClaseChequeraDtoMapper mapper
+            +findAllByUserId(Long) ResponseEntity~List~UsuarioChequeraClaseChequeraResponse~~
+            +add(UsuarioChequeraClaseChequeraRequest) ResponseEntity~UsuarioChequeraClaseChequeraResponse~
+            +delete(Long, Integer) ResponseEntity~Void~
+        }
+
+        class UsuarioChequeraClaseChequeraRequest {
+            +Long userId
+            +Integer claseChequeraId
+        }
+
+        class UsuarioChequeraClaseChequeraResponse {
+            +Long usuarioChequeraClaseChequeraId
+            +Long userId
+            +Integer claseChequeraId
+            +LocalDateTime created
+            +LocalDateTime updated
+            +ClaseChequeraResponse claseChequera
+        }
+
+        class UsuarioChequeraClaseChequeraDtoMapper {
+            -ClaseChequeraDtoMapper claseChequeraDtoMapper
+            +toDomain(UsuarioChequeraClaseChequeraRequest) UsuarioChequeraClaseChequera
+            +toResponse(UsuarioChequeraClaseChequera) UsuarioChequeraClaseChequeraResponse
+        }
+    }
+
+    UsuarioChequeraClaseChequera --> Usuario : referencia
+    UsuarioChequeraClaseChequera --> ClaseChequera : referencia
+
+    UsuarioChequeraClaseChequeraService --> GetUsuarioChequeraClaseChequerasByUserIdUseCase : uses
+    UsuarioChequeraClaseChequeraService --> CreateUsuarioChequeraClaseChequeraUseCase : uses
+    UsuarioChequeraClaseChequeraService --> DeleteUsuarioChequeraClaseChequeraUseCase : uses
+    GetUsuarioChequeraClaseChequerasByUserIdUseCaseImpl ..|> GetUsuarioChequeraClaseChequerasByUserIdUseCase : implements
+    CreateUsuarioChequeraClaseChequeraUseCaseImpl ..|> CreateUsuarioChequeraClaseChequeraUseCase : implements
+    DeleteUsuarioChequeraClaseChequeraUseCaseImpl ..|> DeleteUsuarioChequeraClaseChequeraUseCase : implements
+    GetUsuarioChequeraClaseChequerasByUserIdUseCaseImpl --> UsuarioChequeraClaseChequeraRepository : uses
+    CreateUsuarioChequeraClaseChequeraUseCaseImpl --> UsuarioChequeraClaseChequeraRepository : uses
+    DeleteUsuarioChequeraClaseChequeraUseCaseImpl --> UsuarioChequeraClaseChequeraRepository : uses
+    CreateUsuarioChequeraClaseChequeraUseCaseImpl --> GetUsuarioByIdUseCase : valida userId
+    CreateUsuarioChequeraClaseChequeraUseCaseImpl --> GetClaseChequeraByIdUseCase : valida claseChequeraId
+
+    JpaUsuarioChequeraClaseChequeraRepositoryAdapter ..|> UsuarioChequeraClaseChequeraRepository : implements
+    JpaUsuarioChequeraClaseChequeraRepositoryAdapter --> JpaUsuarioChequeraClaseChequeraRepository : uses
+    JpaUsuarioChequeraClaseChequeraRepositoryAdapter --> UsuarioChequeraClaseChequeraMapper : uses
+
+    UsuarioChequeraClaseChequeraMapper --> UsuarioChequeraClaseChequera : maps
+    UsuarioChequeraClaseChequeraMapper --> UsuarioChequeraClaseChequeraEntity : maps
+    JpaUsuarioChequeraClaseChequeraRepository --> UsuarioChequeraClaseChequeraEntity : persists
+
+    UsuarioChequeraClaseChequeraController --> UsuarioChequeraClaseChequeraService : calls
+    UsuarioChequeraClaseChequeraController --> UsuarioChequeraClaseChequeraDtoMapper : uses
+    UsuarioChequeraClaseChequeraDtoMapper --> UsuarioChequeraClaseChequera : maps
+    UsuarioChequeraClaseChequeraDtoMapper --> UsuarioChequeraClaseChequeraRequest : maps
+    UsuarioChequeraClaseChequeraDtoMapper --> UsuarioChequeraClaseChequeraResponse : maps

@@ -104,13 +104,24 @@ class ChangePasswordUseCaseImplTest {
         when(usuarioAuthRepository.findById(10L)).thenReturn(Optional.of(usuario));
         String newHash = DigestUtils.sha256Hex("nuevaClaveSegura123");
         when(usuarioAuthRepository.findByPassword(newHash)).thenReturn(Optional.empty());
-        when(usuarioAuthRepository.save(any(UsuarioAuth.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         UsuarioAuth result = useCase.changePassword(10L, "operador1", "claveVieja123", "nuevaClaveSegura123", "nuevaClaveSegura123", "Operador Renombrado");
 
         assertThat(result).isNotNull();
         assertThat(result.getPassword()).isEqualTo(newHash);
         assertThat(result.getNombre()).isEqualTo("Operador Renombrado");
-        verify(usuarioAuthRepository).save(usuario);
+        verify(usuarioAuthRepository).updateCredentials(10L, newHash, "Operador Renombrado");
+    }
+
+    @Test
+    void changePassword_withoutNombre_passesNullNombre() {
+        when(usuarioAuthRepository.findById(10L)).thenReturn(Optional.of(usuario));
+        String newHash = DigestUtils.sha256Hex("nuevaClaveSegura123");
+        when(usuarioAuthRepository.findByPassword(newHash)).thenReturn(Optional.empty());
+
+        UsuarioAuth result = useCase.changePassword(10L, "operador1", "claveVieja123", "nuevaClaveSegura123", "nuevaClaveSegura123", "  ");
+
+        assertThat(result.getNombre()).isEqualTo("Operador Uno");
+        verify(usuarioAuthRepository).updateCredentials(10L, newHash, null);
     }
 }

@@ -1,5 +1,6 @@
 package um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,9 @@ import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.Usuar
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioResponse;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.mapper.UsuarioDtoMapper;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping({"/usuario", "/api/tesoreria/core/usuario"})
 @RequiredArgsConstructor
@@ -19,6 +23,15 @@ public class UsuarioController {
 
     private final UsuarioService service;
     private final UsuarioDtoMapper dtoMapper;
+
+    /** Búsqueda de usuarios activos por login o nombre (texto vacío = padrón completo). */
+    @GetMapping("/search")
+    public ResponseEntity<List<UsuarioResponse>> search(@RequestParam(name = "q", required = false) String q) {
+        List<UsuarioResponse> responses = service.search(q).stream()
+                .map(dtoMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
 
     @GetMapping("/usuario/{login}")
     public ResponseEntity<UsuarioResponse> findByLogin(@PathVariable String login) {
@@ -38,7 +51,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/usuario/{userId}")
-    public ResponseEntity<UsuarioResponse> update(@RequestBody UsuarioRequest request, @PathVariable Long userId) {
+    public ResponseEntity<UsuarioResponse> update(@Valid @RequestBody UsuarioRequest request, @PathVariable Long userId) {
         Usuario domain = dtoMapper.toDomain(request);
         Usuario updated = service.update(domain, userId);
         return ResponseEntity.ok(dtoMapper.toResponse(updated));

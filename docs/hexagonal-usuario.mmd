@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Usuario (v4.5.0)
+title: Arquitectura Hexagonal - Módulo Usuario (v4.7.0)
 ---
 
 classDiagram
@@ -20,11 +20,14 @@ classDiagram
             +OffsetDateTime lastLog
             +String googleMail
             +Byte activo
+            +Byte administrador
+            +Byte usuarioExterno
         }
 
         class UsuarioRepository {
             << interface >>
             +findByLogin(String) Optional~Usuario~
+            +findUsuariosBySearch(String) List~Usuario~
             +findByPassword(String) Optional~Usuario~
             +findByUserId(Long) Optional~Usuario~
             +findByGoogleMailAndActivo(String, Byte) Optional~Usuario~
@@ -41,7 +44,11 @@ classDiagram
             -UpdateUsuarioUseCase updateUsuarioUseCase
             -UpdateLastLogUseCase updateLastLogUseCase
             -FindUsuarioByGoogleMailUseCase findUsuarioByGoogleMailUseCase
+            -GetUsuarioByIdUseCase getUsuarioByIdUseCase
+            -FindUsuariosBySearchUseCase findUsuariosBySearchUseCase
             +findByLogin(String) Usuario
+            +findByUserId(Long) Optional~Usuario~
+            +search(String) List~Usuario~
             +findByPassword(String) Usuario
             +add(Usuario) Usuario
             +update(Usuario, Long) Usuario
@@ -57,6 +64,8 @@ classDiagram
             class FindUsuarioByPasswordUseCaseImpl
             class UpdateLastLogUseCaseImpl
             class UpdateUsuarioUseCaseImpl
+            class GetUsuarioByIdUseCaseImpl
+            class FindUsuariosBySearchUseCaseImpl
     }
     namespace application {
 
@@ -66,6 +75,14 @@ classDiagram
         class FindUsuarioByPasswordUseCase { << interface >> }
         class UpdateLastLogUseCase { << interface >> }
         class UpdateUsuarioUseCase { << interface >> }
+        class GetUsuarioByIdUseCase {
+            << interface >>
+            +getUsuarioById(Long) Optional~Usuario~
+        }
+        class FindUsuariosBySearchUseCase {
+            << interface >>
+            +findUsuariosBySearch(String) List~Usuario~
+        }
     }
 
     namespace infrastructure_persistence {
@@ -83,6 +100,8 @@ classDiagram
                 +OffsetDateTime lastLog
                 +String googleMail
                 +Byte activo
+                +Byte administrador
+                +Byte usuarioExterno
             }
 
             class JpaUsuarioRepository {
@@ -90,6 +109,7 @@ classDiagram
                 +findByLogin(String) Optional~UsuarioEntity~
                 +findByPassword(String) Optional~UsuarioEntity~
                 +findByUserId(Long) Optional~UsuarioEntity~
+                +findUsuariosBySearch(String) List~UsuarioEntity~
                 +findByGoogleMailAndActivo(String, Byte) Optional~UsuarioEntity~
                 +updateLastLog(Long, OffsetDateTime) void
             }
@@ -98,6 +118,7 @@ classDiagram
                 -JpaUsuarioRepository jpaUsuarioRepository
                 -UsuarioMapper usuarioMapper
                 +findByLogin(String) Optional~Usuario~
+                +findUsuariosBySearch(String) List~Usuario~
                 +findByPassword(String) Optional~Usuario~
                 +findByUserId(Long) Optional~Usuario~
                 +findByGoogleMailAndActivo(String, Byte) Optional~Usuario~
@@ -106,14 +127,16 @@ classDiagram
             }
 
             class UsuarioMapper {
-                +toDomain(UsuarioEntity) Usuario
+                +toDomainModel(UsuarioEntity) Usuario
                 +toEntity(Usuario) UsuarioEntity
+                +updateEntity(Usuario, UsuarioEntity) void
             }
     }
     namespace infrastructure_web {
             class UsuarioController {
                 -UsuarioService service
                 -UsuarioDtoMapper dtoMapper
+                +search(String) ResponseEntity~List~UsuarioResponse~~
                 +findByLogin(String) ResponseEntity~UsuarioResponse~
                 +add(UsuarioRequest) ResponseEntity~UsuarioResponse~
                 +update(UsuarioRequest, Long) ResponseEntity~UsuarioResponse~
@@ -149,6 +172,8 @@ classDiagram
                 +OffsetDateTime lastLog
                 +String googleMail
                 +Byte activo
+                +Byte administrador
+                +Byte usuarioExterno
             }
 
             class UsuarioDtoMapper {
@@ -163,6 +188,8 @@ classDiagram
     UsuarioService --> FindUsuarioByPasswordUseCase : uses
     UsuarioService --> UpdateLastLogUseCase : uses
     UsuarioService --> UpdateUsuarioUseCase : uses
+    UsuarioService --> GetUsuarioByIdUseCase : uses
+    UsuarioService --> FindUsuariosBySearchUseCase : uses
 
     CreateUsuarioUseCaseImpl ..|> CreateUsuarioUseCase : implements
     FindUsuarioByGoogleMailUseCaseImpl ..|> FindUsuarioByGoogleMailUseCase : implements
@@ -170,6 +197,8 @@ classDiagram
     FindUsuarioByPasswordUseCaseImpl ..|> FindUsuarioByPasswordUseCase : implements
     UpdateLastLogUseCaseImpl ..|> UpdateLastLogUseCase : implements
     UpdateUsuarioUseCaseImpl ..|> UpdateUsuarioUseCase : implements
+    GetUsuarioByIdUseCaseImpl ..|> GetUsuarioByIdUseCase : implements
+    FindUsuariosBySearchUseCaseImpl ..|> FindUsuariosBySearchUseCase : implements
 
     CreateUsuarioUseCaseImpl --> UsuarioRepository : uses
     FindUsuarioByGoogleMailUseCaseImpl --> UsuarioRepository : uses
@@ -177,6 +206,8 @@ classDiagram
     FindUsuarioByPasswordUseCaseImpl --> UsuarioRepository : uses
     UpdateLastLogUseCaseImpl --> UsuarioRepository : uses
     UpdateUsuarioUseCaseImpl --> UsuarioRepository : uses
+    GetUsuarioByIdUseCaseImpl --> UsuarioRepository : uses
+    FindUsuariosBySearchUseCaseImpl --> UsuarioRepository : uses
 
     JpaUsuarioRepositoryAdapter ..|> UsuarioRepository : implements
     JpaUsuarioRepositoryAdapter --> JpaUsuarioRepository : uses

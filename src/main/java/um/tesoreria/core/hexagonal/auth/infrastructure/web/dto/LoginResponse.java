@@ -15,5 +15,12 @@ public class LoginResponse {
     private String nombre;
     private Integer geograficaId;
     private String sede;
+    private Byte imprimeChequera;
+    private Byte numeroOpManual;
+    private Byte habilitaOpEliminacion;
+    private Byte eliminaChequera;
+    private Byte modificaChequera;
+    private Byte administrador;
+    private Byte usuarioExterno;
 
 }

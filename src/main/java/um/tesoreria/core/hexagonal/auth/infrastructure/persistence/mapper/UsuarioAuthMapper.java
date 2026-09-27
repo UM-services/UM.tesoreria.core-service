@@ -7,39 +7,24 @@ import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.persistence.e
 @Component
 public class UsuarioAuthMapper {
 
-    public UsuarioEntity toEntity(UsuarioAuth domain) {
-        if (domain == null) return null;
-        UsuarioEntity entity = new UsuarioEntity();
-        entity.setUserId(domain.getUserId());
-        entity.setLogin(domain.getLogin());
-        entity.setPassword(domain.getPassword());
-        entity.setNombre(domain.getNombre());
-        entity.setGeograficaId(domain.getGeograficaId());
-        entity.setImprimeChequera(domain.getImprimeChequera());
-        entity.setNumeroOpManual(domain.getNumeroOpManual());
-        entity.setHabilitaOpEliminacion(domain.getHabilitaOpEliminacion());
-        entity.setEliminaChequera(domain.getEliminaChequera());
-        entity.setLastLog(domain.getLastLog());
-        entity.setGoogleMail(domain.getGoogleMail());
-        entity.setActivo(domain.getActivo());
-        return entity;
-    }
-
     public UsuarioAuth toDomainModel(UsuarioEntity entity) {
         if (entity == null) return null;
-        return new UsuarioAuth(
-            entity.getUserId(),
-            entity.getLogin(),
-            entity.getPassword(),
-            entity.getNombre(),
-            entity.getGeograficaId(),
-            entity.getImprimeChequera(),
-            entity.getNumeroOpManual(),
-            entity.getHabilitaOpEliminacion(),
-            entity.getEliminaChequera(),
-            entity.getLastLog(),
-            entity.getGoogleMail(),
-            entity.getActivo()
-        );
+        return UsuarioAuth.builder()
+                .userId(entity.getUserId())
+                .login(entity.getLogin())
+                .password(entity.getPassword())
+                .nombre(entity.getNombre())
+                .geograficaId(entity.getGeograficaId())
+                .imprimeChequera(entity.getImprimeChequera())
+                .numeroOpManual(entity.getNumeroOpManual())
+                .habilitaOpEliminacion(entity.getHabilitaOpEliminacion())
+                .eliminaChequera(entity.getEliminaChequera())
+                .modificaChequera(entity.getModificaChequera())
+                .lastLog(entity.getLastLog())
+                .googleMail(entity.getGoogleMail())
+                .activo(entity.getActivo())
+                .administrador(entity.getAdministrador())
+                .usuarioExterno(entity.getUsuarioExterno())
+                .build();
     }
 }

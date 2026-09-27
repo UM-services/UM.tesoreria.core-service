@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.dependencias.facultad.infrastructure.web.mapper.FacultadDtoMapper;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.mapper.UsuarioDtoMapper;
 import um.tesoreria.core.hexagonal.usuarios.usuarioChequeraFacultad.domain.model.UsuarioChequeraFacultad;
+import um.tesoreria.core.hexagonal.usuarios.usuarioChequeraFacultad.infrastructure.web.dto.UsuarioChequeraFacultadRequest;
 import um.tesoreria.core.hexagonal.usuarios.usuarioChequeraFacultad.infrastructure.web.dto.UsuarioChequeraFacultadResponse;
 
 @Component
@@ -13,6 +14,14 @@ public class UsuarioChequeraFacultadDtoMapper {
 
     private final UsuarioDtoMapper usuarioDtoMapper;
     private final FacultadDtoMapper facultadDtoMapper;
+
+    public UsuarioChequeraFacultad toDomain(UsuarioChequeraFacultadRequest request) {
+        if (request == null) return null;
+        return UsuarioChequeraFacultad.builder()
+                .userId(request.getUserId())
+                .facultadId(request.getFacultadId())
+                .build();
+    }
 
     public UsuarioChequeraFacultadResponse toResponse(UsuarioChequeraFacultad domain) {
         if (domain == null) return null;

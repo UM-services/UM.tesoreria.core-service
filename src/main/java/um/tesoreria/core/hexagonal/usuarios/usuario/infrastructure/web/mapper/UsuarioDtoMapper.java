@@ -42,6 +42,8 @@ public class UsuarioDtoMapper {
                 .lastLog(domain.getLastLog())
                 .googleMail(domain.getGoogleMail())
                 .activo(domain.getActivo())
+                .administrador(domain.getAdministrador())
+                .usuarioExterno(domain.getUsuarioExterno())
                 .build();
     }
 }

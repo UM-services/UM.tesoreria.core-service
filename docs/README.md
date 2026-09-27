@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 4.6.0** (actualizada: 2026-09-24)
+**Versión actual del servicio: 4.7.0** (actualizada: 2026-09-26)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -14,7 +14,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-track.mmd`: Arquitectura hexagonal del módulo Track (seguimiento) - v3.36.0 (nuevo módulo, 4 casos de uso).
 - `hexagonal-chequeraCuota.mmd`: Arquitectura hexagonal del módulo ChequeraCuota (21 casos de uso individuales) - v3.38.0 (nuevo caso de uso GetCuotaActualUseCase + endpoint cuotaActual).
 - `hexagonal-mercadoPagoContext.mmd`: Arquitectura hexagonal del módulo MercadoPagoContext (contexto de pagos MP) - v3.26.0.
-- `hexagonal-auth.mmd`: Arquitectura hexagonal del módulo Auth (autenticación de usuarios) - v4.6.0 (puerto `ChangePasswordUseCase` y endpoints `change-password`/`me/{userId}`).
+- `hexagonal-auth.mmd`: Arquitectura hexagonal del módulo Auth (autenticación de usuarios) - v4.7.0 (puerto `ChangePasswordUseCase`, endpoints `change-password`/`me/{userId}` y updates dirigidos `updateLastLog`/`updateCredentials` en `UsuarioAuthRepository`).
 - `hexagonal-geografica.mmd`: Arquitectura hexagonal del módulo Geografica (entidades geográficas).
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores) - v3.36.0 (reubicado bajo `compras/`).
 - `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta (gestión de cuentas contables) - v3.8.0.
@@ -32,7 +32,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-chequeraProducto.mmd`: Arquitectura hexagonal del módulo Producto (gestión de productos chequera) - v3.30.0 (nuevo módulo).
 - `hexagonal-chequeraTipoChequera.mmd`: Arquitectura hexagonal del módulo TipoChequera (tipos de chequera con búsqueda por condiciones y geográfica) - v3.49.0.
 - `hexagonal-guaraniPropuestaTipoChequera.mmd`: Arquitectura hexagonal del módulo GuaraniPropuestaTipoChequera (asignación de tipo de chequera a propuesta y lectivo, con tipo de chequera enriquecido) - v3.49.0.
-- `hexagonal-claseChequera.mmd`: Arquitectura hexagonal del módulo ClaseChequera (clasificación de chequeras) - v3.39.0 (nuevo campo `tramite`, caso de uso `GetAllClaseChequeraByTramiteUseCase`, `ClaseChequeraEntity` implementa `Jsonifyable`).
+- `hexagonal-claseChequera.mmd`: Arquitectura hexagonal del módulo ClaseChequera (clasificación de chequeras) - v4.7.0 (puerto de entrada `GetClaseChequeraByIdUseCase`, `ClaseChequeraService.findById`, alias `/api/tesoreria/core/clasechequera` y firmas reales del puerto de salida sincronizadas).
 - `hexagonal-lectivo.mmd`: Arquitectura hexagonal del módulo Lectivo (gestión de lectivos con 8 casos de uso) - v3.30.0 (nuevo módulo).
 - `hexagonal-reservaVacante.mmd`: Arquitectura hexagonal del módulo ReservaVacante (gestión de reservas de vacantes UM Hub) - v3.32.0 (nuevo UpdateReservaVacanteUseCase con integración de pago MercadoPago).
 - `hexagonal-domicilio.mmd`: Arquitectura hexagonal del módulo Domicilio (gestión de domicilios) - v4.2.1 (`Domicilio`/`DomicilioEntity` implementan `Jsonifyable`, captura defensiva de correos).
@@ -41,8 +41,10 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-arancelPorcentaje.mmd`: Arquitectura hexagonal del módulo ArancelPorcentaje (porcentajes por producto) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-asiento.mmd`: Arquitectura hexagonal del módulo Asiento (asientos contables) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento bajo `personas`, incluyendo búsqueda por tipo Guaraní y rutas REST compatibles - v3.50.1.
-- `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario bajo `usuarios/` (gestión de usuarios) - v4.5.0 (reubicado de `hexagonal/usuario/` a `hexagonal/usuarios/usuario/`, rutas y contratos REST intactos).
-- `hexagonal-usuarioChequeraFacultad.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraFacultad bajo `usuarios/` (facultades de chequera por usuario) - v4.5.0 (nuevo slice; migra el módulo legacy `core/model` + `core/repository` + `core/service` + `core/controller` con respuesta DTO que ya no expone `password`).
+- `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario bajo `usuarios/` (gestión de usuarios) - v4.7.0 (`GET /usuario/search`, puertos `GetUsuarioByIdUseCase`/`FindUsuariosBySearchUseCase`, campos `administrador`/`usuarioExterno`, `UsuarioMapper.updateEntity` y PUT estricto con `@Valid`).
+- `hexagonal-usuarioChequeraFacultad.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraFacultad bajo `usuarios/` (facultades de chequera por usuario) - v4.7.0 (nuevo slice en `4.5.0`; en `4.7.0` agrega administración `POST /` idempotente y `DELETE /user/{userId}/facultad/{facultadId}` con validación de referencias vía puertos de `usuario`/`facultad`).
+- `hexagonal-usuarioChequeraClaseChequera.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraClaseChequera bajo `usuarios/` (clases de chequera habilitadas por usuario para filtrar la consulta de chequeras) - v4.7.0 (nuevo slice: `GET /user/{userId}`, `POST /` idempotente y `DELETE /user/{userId}/claseChequera/{claseChequeraId}` con validación vía puertos de `usuario`/`claseChequera`).
+- `hexagonal-usuarioChequeraGeografica.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraGeografica bajo `usuarios/` (sedes geográficas asignadas al usuario) - v4.7.0 (nuevo slice: `GET /user/{userId}`, `POST /` idempotente y `DELETE /user/{userId}/geografica/{geograficaId}` con validación vía puertos de `usuario`/`geografica`).
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v4.6.0 (sugerencias de personas con chequeras por usuario).
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).
