@@ -8,8 +8,6 @@ import um.tesoreria.core.hexagonal.usuarios.usuario.domain.ports.in.UpdateUsuari
 import um.tesoreria.core.hexagonal.usuarios.usuario.domain.ports.out.UsuarioRepository;
 import um.tesoreria.core.util.Tool;
 
-import java.util.Objects;
-
 @Component
 @RequiredArgsConstructor
 public class UpdateUsuarioUseCaseImpl implements UpdateUsuarioUseCase {
@@ -18,18 +16,21 @@ public class UpdateUsuarioUseCaseImpl implements UpdateUsuarioUseCase {
     @Override
     public Usuario updateUsuario(Usuario newUsuario, Long userId) {
         return repository.findByUserId(userId).map(usuario -> {
+            // PUT estricto: los flags obligatorios se validan en la frontera (UsuarioRequest @NotNull).
+            // Si un flag llega null (llamada interna sin validacion), updateEntity lo ignora
+            // y el valor existente queda intacto: nunca se pisa implicitamente.
             usuario.setLogin(newUsuario.getLogin());
             usuario.setPassword(DigestUtils.sha256Hex(newUsuario.getPassword()));
             usuario.setNombre(newUsuario.getNombre());
             usuario.setGeograficaId(newUsuario.getGeograficaId());
-            usuario.setImprimeChequera(Objects.requireNonNullElse(newUsuario.getImprimeChequera(), (byte) 0));
-            usuario.setNumeroOpManual(Objects.requireNonNullElse(newUsuario.getNumeroOpManual(), (byte) 0));
-            usuario.setHabilitaOpEliminacion(Objects.requireNonNullElse(newUsuario.getHabilitaOpEliminacion(), (byte) 0));
-            usuario.setEliminaChequera(Objects.requireNonNullElse(newUsuario.getEliminaChequera(), (byte) 0));
+            usuario.setImprimeChequera(newUsuario.getImprimeChequera());
+            usuario.setNumeroOpManual(newUsuario.getNumeroOpManual());
+            usuario.setHabilitaOpEliminacion(newUsuario.getHabilitaOpEliminacion());
+            usuario.setEliminaChequera(newUsuario.getEliminaChequera());
             usuario.setModificaChequera(newUsuario.getModificaChequera());
             usuario.setLastLog(Tool.hourAbsoluteArgentina());
             usuario.setGoogleMail(newUsuario.getGoogleMail());
-            usuario.setActivo(Objects.requireNonNullElse(newUsuario.getActivo(), (byte) 1));
+            usuario.setActivo(newUsuario.getActivo());
             return repository.save(usuario);
         }).orElse(null);
     }
