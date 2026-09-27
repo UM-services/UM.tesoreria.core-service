@@ -1,0 +1,174 @@
+---
+title: Arquitectura Hexagonal - Módulo UsuarioChequeraGeografica (v4.7.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain {
+        class UsuarioChequeraGeografica {
+            +Long usuarioChequeraGeograficaId
+            +Long userId
+            +Integer geograficaId
+            +LocalDateTime created
+            +LocalDateTime updated
+            +Geografica geografica
+        }
+
+        class Usuario {
+            << domain >>
+            +Long userId
+            +String login
+            +String nombre
+        }
+
+        class Geografica {
+            << domain >>
+            +Integer geograficaId
+            +String nombre
+        }
+
+        class UsuarioChequeraGeograficaRepository {
+            << interface >>
+            +findAllByUserId(Long) List~UsuarioChequeraGeografica~
+            +findByUserIdAndGeograficaId(Long, Integer) Optional~UsuarioChequeraGeografica~
+            +save(UsuarioChequeraGeografica) UsuarioChequeraGeografica
+            +deleteByUserIdAndGeograficaId(Long, Integer) void
+        }
+    }
+
+    namespace application {
+        class UsuarioChequeraGeograficaService {
+            -GetUsuarioChequeraGeograficasByUserIdUseCase getUsuarioChequeraGeograficasByUserIdUseCase
+            -CreateUsuarioChequeraGeograficaUseCase createUsuarioChequeraGeograficaUseCase
+            -DeleteUsuarioChequeraGeograficaUseCase deleteUsuarioChequeraGeograficaUseCase
+            +findAllByUserId(Long) List~UsuarioChequeraGeografica~
+            +add(UsuarioChequeraGeografica) UsuarioChequeraGeografica
+            +delete(Long, Integer) void
+        }
+
+        class GetUsuarioChequeraGeograficasByUserIdUseCase {
+            << interface >>
+            +getByUserId(Long) List~UsuarioChequeraGeografica~
+        }
+
+        class CreateUsuarioChequeraGeograficaUseCase {
+            << interface >>
+            +createUsuarioChequeraGeografica(UsuarioChequeraGeografica) UsuarioChequeraGeografica
+        }
+
+        class DeleteUsuarioChequeraGeograficaUseCase {
+            << interface >>
+            +deleteUsuarioChequeraGeografica(Long, Integer) void
+        }
+
+        class UsuarioChequeraGeograficaException
+    }
+
+    namespace application_usecases {
+        class GetUsuarioChequeraGeograficasByUserIdUseCaseImpl
+        class CreateUsuarioChequeraGeograficaUseCaseImpl
+        class DeleteUsuarioChequeraGeograficaUseCaseImpl
+    }
+
+    namespace external {
+        class GetUsuarioByIdUseCase {
+            << external >>
+            +getUsuarioById(Long) Optional~Usuario~
+        }
+
+        class GetGeograficaByIdUseCase {
+            << external >>
+            +getGeograficaById(Integer) Optional~Geografica~
+        }
+    }
+
+    namespace infrastructure_persistence {
+        class UsuarioChequeraGeograficaEntity {
+            +Long usuarioChequeraGeograficaId
+            +Long userId
+            +Integer geograficaId
+            +GeograficaEntity geografica
+        }
+
+        class JpaUsuarioChequeraGeograficaRepository {
+            << JpaRepository >>
+            +findAllByUserId(Long) List~UsuarioChequeraGeograficaEntity~
+            +findByUserIdAndGeograficaId(Long, Integer) Optional~UsuarioChequeraGeograficaEntity~
+            +deleteByUserIdAndGeograficaId(Long, Integer) void
+        }
+
+        class JpaUsuarioChequeraGeograficaRepositoryAdapter {
+            -JpaUsuarioChequeraGeograficaRepository repository
+            -UsuarioChequeraGeograficaMapper mapper
+            +findAllByUserId(Long) List~UsuarioChequeraGeografica~
+            +findByUserIdAndGeograficaId(Long, Integer) Optional~UsuarioChequeraGeografica~
+            +save(UsuarioChequeraGeografica) UsuarioChequeraGeografica
+            +deleteByUserIdAndGeograficaId(Long, Integer) void
+        }
+
+        class UsuarioChequeraGeograficaMapper {
+            -GeograficaMapper geograficaMapper
+            +toDomain(UsuarioChequeraGeograficaEntity) UsuarioChequeraGeografica
+            +toEntity(UsuarioChequeraGeografica) UsuarioChequeraGeograficaEntity
+        }
+    }
+
+    namespace infrastructure_web {
+        class UsuarioChequeraGeograficaController {
+            -UsuarioChequeraGeograficaService service
+            -UsuarioChequeraGeograficaDtoMapper mapper
+            +findAllByUserId(Long) ResponseEntity~List~UsuarioChequeraGeograficaResponse~~
+            +add(UsuarioChequeraGeograficaRequest) ResponseEntity~UsuarioChequeraGeograficaResponse~
+            +delete(Long, Integer) ResponseEntity~Void~
+        }
+
+        class UsuarioChequeraGeograficaRequest {
+            +Long userId
+            +Integer geograficaId
+        }
+
+        class UsuarioChequeraGeograficaResponse {
+            +Long usuarioChequeraGeograficaId
+            +Long userId
+            +Integer geograficaId
+            +LocalDateTime created
+            +LocalDateTime updated
+            +GeograficaResponse geografica
+        }
+
+        class UsuarioChequeraGeograficaDtoMapper {
+            -GeograficaDtoMapper geograficaDtoMapper
+            +toDomain(UsuarioChequeraGeograficaRequest) UsuarioChequeraGeografica
+            +toResponse(UsuarioChequeraGeografica) UsuarioChequeraGeograficaResponse
+        }
+    }
+
+    UsuarioChequeraGeografica --> Usuario : referencia
+    UsuarioChequeraGeografica --> Geografica : referencia
+
+    UsuarioChequeraGeograficaService --> GetUsuarioChequeraGeograficasByUserIdUseCase : uses
+    UsuarioChequeraGeograficaService --> CreateUsuarioChequeraGeograficaUseCase : uses
+    UsuarioChequeraGeograficaService --> DeleteUsuarioChequeraGeograficaUseCase : uses
+    GetUsuarioChequeraGeograficasByUserIdUseCaseImpl ..|> GetUsuarioChequeraGeograficasByUserIdUseCase : implements
+    CreateUsuarioChequeraGeograficaUseCaseImpl ..|> CreateUsuarioChequeraGeograficaUseCase : implements
+    DeleteUsuarioChequeraGeograficaUseCaseImpl ..|> DeleteUsuarioChequeraGeograficaUseCase : implements
+    GetUsuarioChequeraGeograficasByUserIdUseCaseImpl --> UsuarioChequeraGeograficaRepository : uses
+    CreateUsuarioChequeraGeograficaUseCaseImpl --> UsuarioChequeraGeograficaRepository : uses
+    DeleteUsuarioChequeraGeograficaUseCaseImpl --> UsuarioChequeraGeograficaRepository : uses
+    CreateUsuarioChequeraGeograficaUseCaseImpl --> GetUsuarioByIdUseCase : valida userId
+    CreateUsuarioChequeraGeograficaUseCaseImpl --> GetGeograficaByIdUseCase : valida geograficaId
+
+    JpaUsuarioChequeraGeograficaRepositoryAdapter ..|> UsuarioChequeraGeograficaRepository : implements
+    JpaUsuarioChequeraGeograficaRepositoryAdapter --> JpaUsuarioChequeraGeograficaRepository : uses
+    JpaUsuarioChequeraGeograficaRepositoryAdapter --> UsuarioChequeraGeograficaMapper : uses
+
+    UsuarioChequeraGeograficaMapper --> UsuarioChequeraGeografica : maps
+    UsuarioChequeraGeograficaMapper --> UsuarioChequeraGeograficaEntity : maps
+    JpaUsuarioChequeraGeograficaRepository --> UsuarioChequeraGeograficaEntity : persists
+
+    UsuarioChequeraGeograficaController --> UsuarioChequeraGeograficaService : calls
+    UsuarioChequeraGeograficaController --> UsuarioChequeraGeograficaDtoMapper : uses
+    UsuarioChequeraGeograficaDtoMapper --> UsuarioChequeraGeografica : maps
+    UsuarioChequeraGeograficaDtoMapper --> UsuarioChequeraGeograficaRequest : maps
+    UsuarioChequeraGeograficaDtoMapper --> UsuarioChequeraGeograficaResponse : maps
