@@ -26,6 +26,14 @@ public interface ChequeraSerieRepository {
     Page<ChequeraSerie> findAllByLectivoIdAndFacultadIdInAndPersonaIdAndDocumentoId(
             Integer lectivoId, List<Integer> facultadIds, BigDecimal personaId, Integer documentoId, Pageable pageable);
 
+    Page<ChequeraSerie> findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdIn(
+            Integer lectivoId, List<Integer> facultadIds, List<Integer> geograficaIds,
+            List<Integer> tipoChequeraIds, Pageable pageable);
+
+    Page<ChequeraSerie> findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdInAndPersonaIdAndDocumentoId(
+            Integer lectivoId, List<Integer> facultadIds, List<Integer> geograficaIds,
+            List<Integer> tipoChequeraIds, BigDecimal personaId, Integer documentoId, Pageable pageable);
+
     List<ChequeraSerie> findAllByFacultadIdAndLectivoIdAndGeograficaId(Integer facultadId, Integer lectivoId, Integer geograficaId);
 
     List<ChequeraSerie> findAllByLectivoIdAndFacultadIdAndPersonaId(Integer lectivoId, Integer facultadId, BigDecimal personaId);

@@ -41,6 +41,16 @@ public interface JpaChequeraSerieRepository extends JpaRepository<ChequeraSerieE
 	Page<ChequeraSerieEntity> findAllByLectivoIdAndFacultadIdInAndPersonaIdAndDocumentoId(
 			Integer lectivoId, List<Integer> facultadIds, BigDecimal personaId, Integer documentoId, Pageable pageable);
 
+	@EntityGraph(attributePaths = {"facultad", "persona", "tipoChequera"})
+	Page<ChequeraSerieEntity> findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdIn(
+			Integer lectivoId, List<Integer> facultadIds, List<Integer> geograficaIds,
+			List<Integer> tipoChequeraIds, Pageable pageable);
+
+	@EntityGraph(attributePaths = {"facultad", "persona", "tipoChequera"})
+	Page<ChequeraSerieEntity> findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdInAndPersonaIdAndDocumentoId(
+			Integer lectivoId, List<Integer> facultadIds, List<Integer> geograficaIds,
+			List<Integer> tipoChequeraIds, BigDecimal personaId, Integer documentoId, Pageable pageable);
+
     List<ChequeraSerieEntity> findAllByFacultadIdAndLectivoIdAndGeograficaId(Integer facultadId, Integer lectivoId, Integer geograficaId);
 
     List<ChequeraSerieEntity> findAllByLectivoIdAndFacultadIdAndPersonaId(Integer lectivoId, Integer facultadId, BigDecimal bigDecimal);
