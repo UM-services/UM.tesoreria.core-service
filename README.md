@@ -4,7 +4,16 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 4.7.0**
+**Versión actual (SemVer): 4.8.0**
+
+## Novedades 4.8.0 (verificado en código)
+- feat(chequera/chequeraSerie): Nuevo endpoint paginado `GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}/asignaciones` (alias `/api/tesoreria/core/chequeraSerie/...`) con las chequeras del cruce de las **tres** asignaciones del usuario: facultad (`usuario_chequera_facultad`), sede geográfica (`usuario_chequera_geografica`) y clase de chequera (`usuario_chequera_clase_chequera`, traducida a `tipoChequeraId` vía `tipo_chequera.clase_chequera_id`). Reutiliza el contrato existente `ChequeraEstadoUsuarioPageResponse`/`ChequeraEstadoUsuarioResponse`; responde 400 con parámetros inválidos o filtro de alumno incompleto (`personaId`+`documentoId` juntos), pagina 1..100 (defecto 20) con orden `chequeraId DESC` y calcula la deuda vencida con `CalculateDeudaUseCase`.
+- feat(chequera/chequeraSerie): Nuevo servicio de aplicación `ChequerasPorUsuarioAsignadasService`, que a diferencia de `ChequerasPorUsuarioService` (sólo facultad) devuelve `Page.empty()` sin consultar el repositorio si el usuario no tiene asignaciones en CUALQUIER dimensión.
+- feat(chequera/chequeraSerie): Nuevas firmas paginadas en el puerto `ChequeraSerieRepository` (`findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdIn` y `...AndPersonaIdAndDocumentoId`), implementadas por `JpaChequeraSerieRepositoryAdapter` (`toEstadoUsuarioDomain`) y `JpaChequeraSerieRepository` con `@EntityGraph({"facultad","persona","tipoChequera"})`. Sin cambios de esquema: solo lectura sobre tablas ya requeridas en `4.7.0`.
+- test: Nuevas pruebas `ChequerasPorUsuarioAsignadasServiceTest` (cruce de las tres dimensiones, corto-circuitos por dimensión vacía, validaciones) y `ChequerasPorUsuarioAsignadasIT` (perfil `it`); `ChequeraSerieUsuarioControllerTest` cubre el endpoint `asignaciones` (200 y 400 por `size` excesivo).
+- feat(docs): Diagrama `hexagonal-chequeraSerie.mmd` sincronizado con el código (v4.8.0) y su registro en `docs/README.md` actualizado.
+
+> Basado en `git diff HEAD` (staged: 8 archivos, +489/−0 líneas) y el código Java real de `ChequerasPorUsuarioAsignadasService`, `ChequeraSerieController`, `ChequeraSerieRepository`, `JpaChequeraSerieRepositoryAdapter`/`JpaChequeraSerieRepository` y las pruebas nuevas, verificando además que las dependencias consumidas (`UsuarioChequeraFacultadService`/`UsuarioChequeraGeograficaService`/`UsuarioChequeraClaseChequeraService.findAllByUserId` y `TipoChequeraService.findAllByClaseChequeraIds`) ya existían en `4.7.0`, y `pom.xml` (versión `4.7.0` → `4.8.0`). Todos los cambios son aditivos (endpoint, puerto y adaptador nuevos, ningún contrato REST eliminado); corresponde un incremento minor de SemVer.
 
 ## Novedades 4.7.0 (verificado en código)
 - feat(usuarios/usuarioChequeraClaseChequera): Nuevo slice hexagonal con las clases de chequera habilitadas por usuario (tabla `usuario_chequera_clase_chequera`, única `userId+claseChequeraId`, `claseChequera` enriquecido): `GET /api/tesoreria/core/usuarioChequeraClaseChequera/user/{userId}`, `POST /` idempotente (payload `userId`+`claseChequeraId` `@NotNull`, valida referencias vía `GetUsuarioByIdUseCase`/`GetClaseChequeraByIdUseCase`, 400) y `DELETE /user/{userId}/claseChequera/{claseChequeraId}` (204; 404 si no existía).

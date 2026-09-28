@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraSerie (v4.6.0)
+title: Arquitectura Hexagonal - Módulo ChequeraSerie (v4.8.0)
 ---
 
 classDiagram
@@ -48,6 +48,8 @@ classDiagram
             +findAllByLectivoIdAndFacultadId(Integer, Integer) List~ChequeraSerie~
             +findAllByLectivoIdAndFacultadIdIn(Integer, List~Integer~, Pageable) Page~ChequeraSerie~
             +findAllByLectivoIdAndFacultadIdInAndPersonaIdAndDocumentoId(Integer, List~Integer~, BigDecimal, Integer, Pageable) Page~ChequeraSerie~
+            +findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdIn(Integer, List~Integer~, List~Integer~, List~Integer~, Pageable) Page~ChequeraSerie~
+            +findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdInAndPersonaIdAndDocumentoId(Integer, List~Integer~, List~Integer~, List~Integer~, BigDecimal, Integer, Pageable) Page~ChequeraSerie~
             +findAllByFacultadIdAndLectivoIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraSerie~
             +findAllByLectivoIdAndFacultadIdAndPersonaId(Integer, Integer, BigDecimal) List~ChequeraSerie~
             +findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraSerie~
@@ -92,6 +94,16 @@ classDiagram
 
         class ChequerasPorUsuarioService {
             -UsuarioChequeraFacultadService facultadService
+            -ChequeraSerieRepository chequeraRepository
+            -CalculateDeudaUseCase calculateDeudaUseCase
+            +findAll(Long, Integer, BigDecimal, Integer, int, int) Page~ChequeraSerie~
+        }
+
+        class ChequerasPorUsuarioAsignadasService {
+            -UsuarioChequeraFacultadService facultadService
+            -UsuarioChequeraGeograficaService geograficaService
+            -UsuarioChequeraClaseChequeraService claseChequeraService
+            -TipoChequeraService tipoChequeraService
             -ChequeraSerieRepository chequeraRepository
             -CalculateDeudaUseCase calculateDeudaUseCase
             +findAll(Long, Integer, BigDecimal, Integer, int, int) Page~ChequeraSerie~
@@ -155,7 +167,9 @@ classDiagram
                 -ChequeraSerieService service
                 -ChequeraSerieDtoMapper dtoMapper
                 -ChequerasPorUsuarioService chequerasPorUsuarioService
+                -ChequerasPorUsuarioAsignadasService chequerasPorUsuarioAsignadasService
                 +findAllByUsuario(Long, Integer, BigDecimal, Integer, int, int) ResponseEntity~ChequeraEstadoUsuarioPageResponse~
+                +findAllByUsuarioAsignaciones(Long, Integer, BigDecimal, Integer, int, int) ResponseEntity~ChequeraEstadoUsuarioPageResponse~
             }
 
             class ChequeraSerieRequest
@@ -185,6 +199,15 @@ classDiagram
         class DebitoService
         class UsuarioChequeraFacultadService {
             +findAllByUserId(Long) List~UsuarioChequeraFacultad~
+        }
+        class UsuarioChequeraGeograficaService {
+            +findAllByUserId(Long) List~UsuarioChequeraGeografica~
+        }
+        class UsuarioChequeraClaseChequeraService {
+            +findAllByUserId(Long) List~UsuarioChequeraClaseChequera~
+        }
+        class TipoChequeraService {
+            +findAllByClaseChequeraIds(List~Integer~) List~TipoChequera~
         }
         class CalculateDeudaUseCase {
             << interface >>
@@ -272,9 +295,16 @@ classDiagram
     ChequeraSerieController --> ChequeraSerieService : calls
     ChequeraSerieController --> ChequeraSerieDtoMapper : uses
     ChequeraSerieController --> ChequerasPorUsuarioService : calls
+    ChequeraSerieController --> ChequerasPorUsuarioAsignadasService : calls
     ChequerasPorUsuarioService --> ChequeraSerieRepository : uses
     ChequerasPorUsuarioService --> UsuarioChequeraFacultadService : uses
     ChequerasPorUsuarioService --> CalculateDeudaUseCase : uses
+    ChequerasPorUsuarioAsignadasService --> ChequeraSerieRepository : uses
+    ChequerasPorUsuarioAsignadasService --> UsuarioChequeraFacultadService : uses
+    ChequerasPorUsuarioAsignadasService --> UsuarioChequeraGeograficaService : uses
+    ChequerasPorUsuarioAsignadasService --> UsuarioChequeraClaseChequeraService : uses
+    ChequerasPorUsuarioAsignadasService --> TipoChequeraService : uses
+    ChequerasPorUsuarioAsignadasService --> CalculateDeudaUseCase : uses
     ChequeraEstadoUsuarioPageResponse --> ChequeraEstadoUsuarioResponse : contains
     ChequeraEstadoUsuarioResponse --> ChequeraSerie : maps
     ChequeraSerieDtoMapper --> ChequeraSerie : maps

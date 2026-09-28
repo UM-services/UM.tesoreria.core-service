@@ -37,6 +37,7 @@ import um.tesoreria.core.model.view.ChequeraKey;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioAsignadasService;
 
 @RestController
 @RequestMapping({"/chequeraserie", "/api/tesoreria/core/chequeraSerie"})
@@ -48,6 +49,7 @@ public class ChequeraSerieController {
     private final ChequeraCuotaService chequeraCuotaService;
     private final ChequeraSerieDtoMapper chequeraSerieDtoMapper;
     private final ChequerasPorUsuarioService chequerasPorUsuarioService;
+    private final ChequerasPorUsuarioAsignadasService chequerasPorUsuarioAsignadasService;
 
     @Operation(
             summary = "Estado de chequeras por usuario y lectivo",
@@ -71,6 +73,35 @@ public class ChequeraSerieController {
                     .map(ChequeraEstadoUsuarioResponse::from);
             return ResponseEntity.ok(ChequeraEstadoUsuarioPageResponse.from(chequeras));
         } catch (ChequerasPorUsuarioService.InvalidQueryException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "Estado de chequeras por asignaciones completas del usuario y lectivo",
+            description = "Devuelve chequeras sólo del cruce de las asignaciones del userId: "
+                    + "facultad (usuario_chequera_facultad), sede geográfica (usuario_chequera_geografica) "
+                    + "y clase de chequera (usuario_chequera_clase_chequera, traducida a tipos de chequera). "
+                    + "Sin asignaciones en alguna dimensión, el usuario no ve nada por esa dimensión. "
+                    + "Para limitar a un alumno, enviar personaId y documentoId juntos. "
+                    + "estadoDeuda indica CON_DEUDA_VENCIDA o SIN_DEUDA_VENCIDA; no describe cuotas futuras ni estado administrativo. "
+                    + "El userId recibido es un filtro y no acredita la identidad del solicitante.")
+    @ApiResponse(responseCode = "200", description = "Página de chequeras; sin resultados, content vacío")
+    @ApiResponse(responseCode = "400", description = "Parámetros inválidos o filtro de alumno incompleto")
+    @GetMapping("/usuario/{userId}/lectivo/{lectivoId}/asignaciones")
+    public ResponseEntity<ChequeraEstadoUsuarioPageResponse> findAllByUsuarioAsignaciones(
+            @PathVariable Long userId,
+            @PathVariable Integer lectivoId,
+            @RequestParam(required = false) BigDecimal personaId,
+            @RequestParam(required = false) Integer documentoId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        try {
+            var chequeras = chequerasPorUsuarioAsignadasService
+                    .findAll(userId, lectivoId, personaId, documentoId, page, size)
+                    .map(ChequeraEstadoUsuarioResponse::from);
+            return ResponseEntity.ok(ChequeraEstadoUsuarioPageResponse.from(chequeras));
+        } catch (ChequerasPorUsuarioAsignadasService.InvalidQueryException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
