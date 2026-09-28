@@ -10,6 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioAsignadasService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.mapper.ChequeraSerieDtoMapper;
@@ -32,6 +33,8 @@ class ChequeraSerieUsuarioControllerTest {
     private ChequeraSerieDtoMapper chequeraSerieDtoMapper;
     @MockitoBean
     private ChequerasPorUsuarioService chequerasPorUsuarioService;
+    @MockitoBean
+    private ChequerasPorUsuarioAsignadasService chequerasPorUsuarioAsignadasService;
 
     @Test
     void exposesPaginatedDebtStatusForAssignedUser() {
@@ -64,6 +67,38 @@ class ChequeraSerieUsuarioControllerTest {
                 .thenThrow(new ChequerasPorUsuarioService.InvalidQueryException());
 
         mockMvc.get().uri("/api/tesoreria/core/chequeraSerie/usuario/7/lectivo/2026?personaId=123")
+                .assertThat()
+                .hasStatus(400);
+    }
+
+    @Test
+    void asignacionesEndpointUsesTheThreeDimensionService() {
+        var chequera = ChequeraSerie.builder()
+                .chequeraId(11L)
+                .facultadId(2)
+                .geograficaId(1)
+                .lectivoId(2026)
+                .importeDeuda(BigDecimal.ZERO)
+                .cuotasDeuda(0)
+                .build();
+        when(chequerasPorUsuarioAsignadasService.findAll(7L, 2026, null, null, 0, 20))
+                .thenReturn(new PageImpl<>(List.of(chequera), PageRequest.of(0, 20), 1));
+
+        var response = mockMvc.get()
+                .uri("/api/tesoreria/core/chequeraSerie/usuario/7/lectivo/2026/asignaciones")
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatusOk();
+        response.bodyJson().extractingPath("$.content[0].estadoDeuda").isEqualTo("SIN_DEUDA_VENCIDA");
+        response.bodyJson().extractingPath("$.totalElements").isEqualTo(1);
+    }
+
+    @Test
+    void asignacionesEndpointRejectsOversizedPage() {
+        when(chequerasPorUsuarioAsignadasService.findAll(7L, 2026, null, null, 0, 101))
+                .thenThrow(new ChequerasPorUsuarioAsignadasService.InvalidQueryException());
+
+        mockMvc.get().uri("/api/tesoreria/core/chequeraSerie/usuario/7/lectivo/2026/asignaciones?size=101")
                 .assertThat()
                 .hasStatus(400);
     }

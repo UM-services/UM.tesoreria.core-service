@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 4.7.0** (actualizada: 2026-09-26)
+**Versión actual del servicio: 4.8.0** (actualizada: 2026-09-28)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -26,7 +26,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.50.0 (caso de uso de responsable académica).
 - `hexagonal-lectivoTotalImputacion.mmd`: Arquitectura hexagonal del módulo LectivoTotalImputacion (imputaciones contables por lectivo) - v3.31.0 (nuevo caso de uso FindAllByLectivo + enriquecimiento con asociaciones a Facultad/Lectivo/TipoChequera/Producto/Cuenta).
 - `hexagonal-contrato.mmd`: Arquitectura hexagonal del módulo Contrato (gestión de contratos) - v3.19.0.
-- `hexagonal-chequeraSerie.mmd`: Arquitectura hexagonal del módulo ChequeraSerie (consulta preuniversitaria desde datos Guaraní, incompletas por `claseChequeraId` y chequeras por usuario con deuda vencida) - v4.6.0.
+- `hexagonal-chequeraSerie.mmd`: Arquitectura hexagonal del módulo ChequeraSerie (consulta preuniversitaria desde datos Guaraní, incompletas por `claseChequeraId`, chequeras por usuario con deuda vencida y chequeras por las tres asignaciones del usuario —facultad, sede y clase— en `/usuario/{userId}/lectivo/{lectivoId}/asignaciones`) - v4.8.0.
 - `hexagonal-baja.mmd`: Arquitectura hexagonal del módulo Baja (gestión de bajas de chequeras) - v3.36.0 (reubicado bajo `chequera/`).
 - `hexagonal-campanha.mmd`: Arquitectura hexagonal del módulo Campanha (gestión de campañas UM Hub) - v3.24.0.
 - `hexagonal-chequeraProducto.mmd`: Arquitectura hexagonal del módulo Producto (gestión de productos chequera) - v3.30.0 (nuevo módulo).
