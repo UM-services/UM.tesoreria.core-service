@@ -68,6 +68,24 @@ public class JpaChequeraSerieRepositoryAdapter implements ChequeraSerieRepositor
     }
 
     @Override
+    public Page<ChequeraSerie> findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdIn(
+            Integer lectivoId, List<Integer> facultadIds, List<Integer> geograficaIds,
+            List<Integer> tipoChequeraIds, Pageable pageable) {
+        return jpaRepository.findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdIn(
+                        lectivoId, facultadIds, geograficaIds, tipoChequeraIds, pageable)
+                .map(mapper::toEstadoUsuarioDomain);
+    }
+
+    @Override
+    public Page<ChequeraSerie> findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdInAndPersonaIdAndDocumentoId(
+            Integer lectivoId, List<Integer> facultadIds, List<Integer> geograficaIds,
+            List<Integer> tipoChequeraIds, BigDecimal personaId, Integer documentoId, Pageable pageable) {
+        return jpaRepository.findAllByLectivoIdAndFacultadIdInAndGeograficaIdInAndTipoChequeraIdInAndPersonaIdAndDocumentoId(
+                        lectivoId, facultadIds, geograficaIds, tipoChequeraIds, personaId, documentoId, pageable)
+                .map(mapper::toEstadoUsuarioDomain);
+    }
+
+    @Override
     public List<ChequeraSerie> findAllByFacultadIdAndLectivoIdAndGeograficaId(Integer facultadId, Integer lectivoId, Integer geograficaId) {
         return jpaRepository.findAllByFacultadIdAndLectivoIdAndGeograficaId(facultadId, lectivoId, geograficaId).stream()
                 .map(mapper::toDomainModel)
