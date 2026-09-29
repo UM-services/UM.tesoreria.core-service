@@ -43,7 +43,7 @@ class EstadoChequeraControllerTest {
                 "1234567890123456789012", LocalDateTime.of(2026, 7, 3, 13, 30), true, "0011000100");
         when(service.getEstadoChequera(1, 2, 12345L, 1, 2)).thenReturn(new EstadoChequera(1, "Facultad de Ingeniería", 2,
                 "Matrícula y Arancel", 12345L, new BigDecimal("12345678"), "MUÑOZ", "Ana Ejemplo", "Ciclo Completo",
-                "Lectivo 2026 - 2027", new BigDecimal("0.15"), "Rapipago", 1, List.of(producto), List.of(debito)));
+                "Lectivo 2026 - 2027", new BigDecimal("0.15"), "Rapipago", 1, true, List.of(producto), List.of(debito)));
 
         var response = mockMvc.get().uri(URL)
                 .accept(MediaType.APPLICATION_JSON)
@@ -53,6 +53,7 @@ class EstadoChequeraControllerTest {
         response.bodyJson().extractingPath("$.facultadNombre").isEqualTo("Facultad de Ingeniería");
         response.bodyJson().extractingPath("$.personaId").isEqualTo(12345678);
         response.bodyJson().extractingPath("$.personaApellido").isEqualTo("MUÑOZ");
+        response.bodyJson().extractingPath("$.hpum").isEqualTo(true);
         response.bodyJson().extractingPath("$.tipoImpresionNombre").isEqualTo("Rapipago");
         response.bodyJson().extractingPath("$.becaPorcentaje").isEqualTo(0.15);
         response.bodyJson().extractingPath("$.alternativaId").isEqualTo(1);

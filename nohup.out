@@ -4057,3 +4057,6 @@ Caused by: java.net.SocketException: Connection reset
 2026-09-29 11:22:35,470 [88530422]   WARN - #c.i.o.v.ExternallyAddedFilesProcessorImpl - Cannot find project config directory for non-default and non-directory based project um.tesoreria.report-service
 2026-09-29 11:22:53,593 [88548545]   WARN - #o.j.k.i.s.r.KotlinCompilerReferenceIndexStorage - kotlin-data-container is not found
 2026-09-29 11:23:10,493 [88565445]   WARN - #o.j.k.i.s.r.KotlinCompilerReferenceIndexStorage - kotlin-data-container is not found
+2026-09-29 18:40:38,653 [114813605]   WARN - #o.j.k.i.s.r.KotlinCompilerReferenceIndexStorage - kotlin-data-container is not found
+2026-09-29 18:41:02,399 [114837351]   WARN - #o.j.k.i.s.r.KotlinCompilerReferenceIndexStorage - kotlin-data-container is not found
+2026-09-29 18:41:19,291 [114854243]   WARN - #o.j.k.i.s.r.KotlinCompilerReferenceIndexStorage - kotlin-data-container is not found

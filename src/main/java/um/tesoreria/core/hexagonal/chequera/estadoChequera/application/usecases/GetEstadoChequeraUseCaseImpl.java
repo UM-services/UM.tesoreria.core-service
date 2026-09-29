@@ -159,6 +159,7 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
                 serie.getBecaPorcentaje(),
                 tipoImpresion == null ? null : tipoImpresion.getNombre(),
                 alternativaId,
+                serie.getHpum() != null && serie.getHpum() != 0,
                 productos,
                 debitos);
     }

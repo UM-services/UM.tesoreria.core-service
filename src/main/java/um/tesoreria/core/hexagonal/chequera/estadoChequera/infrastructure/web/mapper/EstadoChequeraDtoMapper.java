@@ -29,6 +29,7 @@ public class EstadoChequeraDtoMapper {
                 estado.becaPorcentaje(),
                 estado.tipoImpresionNombre(),
                 estado.alternativaId(),
+                estado.hpum(),
                 estado.productos().stream().map(this::toResponse).toList(),
                 estado.debitos().stream().map(this::toResponse).toList());
     }

@@ -75,9 +75,8 @@ class GetEstadoChequeraUseCaseImplTest {
             facultadService, tipoChequeraService, personaService, lectivoService, arancelTipoService,
             tipoImpresionService, chequeraService, chequeraTotalService, chequeraAlternativaService, debitoService);
 
-    @BeforeEach
-    void datosDeLaChequera() {
-        ChequeraSerie serie = ChequeraSerie.builder()
+    private ChequeraSerie.ChequeraSerieBuilder serieBuilder() {
+        return ChequeraSerie.builder()
                 .facultadId(FACULTAD_ID)
                 .tipoChequeraId(TIPO_CHEQUERA_ID)
                 .chequeraSerieId(CHEQUERA_SERIE_ID)
@@ -86,8 +85,12 @@ class GetEstadoChequeraUseCaseImplTest {
                 .lectivoId(37)
                 .arancelTipoId(5)
                 .tipoImpresionId(1)
-                .becaPorcentaje(new BigDecimal("0.15"))
-                .build();
+                .becaPorcentaje(new BigDecimal("0.15"));
+    }
+
+    @BeforeEach
+    void datosDeLaChequera() {
+        ChequeraSerie serie = serieBuilder().hpum((byte) 1).build();
         when(chequeraSerieService.findByUnique(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID)).thenReturn(serie);
         when(facultadService.findByFacultadId(FACULTAD_ID))
                 .thenReturn(Facultad.builder().facultadId(FACULTAD_ID).nombre("Facultad de Ingeniería").build());
@@ -108,6 +111,8 @@ class GetEstadoChequeraUseCaseImplTest {
     @Test
     void mapsTheHeaderFromTheChequeraSerieAndItsLookups() {
         EstadoChequera estado = estado();
+
+        assertThat(estado.hpum()).isTrue();
 
         assertThat(estado.facultadId()).isEqualTo(FACULTAD_ID);
         assertThat(estado.facultadNombre()).isEqualTo("Facultad de Ingeniería");
@@ -271,6 +276,22 @@ class GetEstadoChequeraUseCaseImplTest {
                 .thenThrow(new ChequeraSerieException(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID));
 
         assertThatThrownBy(this::estado).isInstanceOf(ChequeraSerieException.class);
+    }
+
+    @Test
+    void hpumIsFalseWhenTheChequeraSerieHasNoHpumFlag() {
+        when(chequeraSerieService.findByUnique(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID))
+                .thenReturn(serieBuilder().hpum(null).build());
+
+        assertThat(estado().hpum()).isFalse();
+    }
+
+    @Test
+    void hpumIsFalseWhenTheChequeraSerieHasHpumZero() {
+        when(chequeraSerieService.findByUnique(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID))
+                .thenReturn(serieBuilder().hpum((byte) 0).build());
+
+        assertThat(estado().hpum()).isFalse();
     }
 
     private EstadoChequera estado() {
