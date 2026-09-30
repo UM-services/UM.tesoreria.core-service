@@ -23,15 +23,14 @@ public class EstadoChequeraController {
     private final EstadoChequeraDtoMapper dtoMapper;
 
     @Operation(summary = "Estado de una chequera: datos del titular, cuotas por producto con sus subtotales y adhesión al débito automático. Lo consume report-service para generar el PDF \"Estado de Chequera\".")
-    @GetMapping("/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{debitoTipoId}")
+    @GetMapping("/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
     public ResponseEntity<EstadoChequeraResponse> getEstadoChequera(@PathVariable Integer facultadId,
                                                                     @PathVariable Integer tipoChequeraId,
                                                                     @PathVariable Long chequeraSerieId,
-                                                                    @PathVariable Integer alternativaId,
-                                                                    @PathVariable Integer debitoTipoId) {
+                                                                    @PathVariable Integer alternativaId) {
         try {
             return ResponseEntity.ok(dtoMapper.toResponse(service.getEstadoChequera(facultadId, tipoChequeraId,
-                    chequeraSerieId, alternativaId, debitoTipoId)));
+                    chequeraSerieId, alternativaId)));
         } catch (ChequeraSerieException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }

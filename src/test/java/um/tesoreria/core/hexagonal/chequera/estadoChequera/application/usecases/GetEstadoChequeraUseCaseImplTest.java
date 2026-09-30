@@ -27,12 +27,14 @@ import um.tesoreria.core.hexagonal.personas.persona.application.exception.Person
 import um.tesoreria.core.hexagonal.personas.persona.application.service.PersonaService;
 import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.ChequeraAlternativa;
+import um.tesoreria.core.kotlin.model.DebitoTipo;
 import um.tesoreria.core.model.Debito;
 import um.tesoreria.core.model.TipoImpresion;
 import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
 import um.tesoreria.core.model.dto.ChequeraPagoDto;
 import um.tesoreria.core.service.ChequeraAlternativaService;
 import um.tesoreria.core.service.DebitoService;
+import um.tesoreria.core.service.DebitoTipoService;
 import um.tesoreria.core.service.TipoImpresionService;
 import um.tesoreria.core.service.facade.ChequeraService;
 
@@ -70,10 +72,12 @@ class GetEstadoChequeraUseCaseImplTest {
     private final ChequeraTotalService chequeraTotalService = mock(ChequeraTotalService.class);
     private final ChequeraAlternativaService chequeraAlternativaService = mock(ChequeraAlternativaService.class);
     private final DebitoService debitoService = mock(DebitoService.class);
+    private final DebitoTipoService debitoTipoService = mock(DebitoTipoService.class);
 
     private final GetEstadoChequeraUseCaseImpl useCase = new GetEstadoChequeraUseCaseImpl(chequeraSerieService,
             facultadService, tipoChequeraService, personaService, lectivoService, arancelTipoService,
-            tipoImpresionService, chequeraService, chequeraTotalService, chequeraAlternativaService, debitoService);
+            tipoImpresionService, chequeraService, chequeraTotalService, chequeraAlternativaService, debitoService,
+            debitoTipoService);
 
     private ChequeraSerie.ChequeraSerieBuilder serieBuilder() {
         return ChequeraSerie.builder()
@@ -243,6 +247,7 @@ class GetEstadoChequeraUseCaseImplTest {
         debito.setProductoId(ARANCEL_ID);
         debito.setAlternativaId(ALTERNATIVA_ID);
         debito.setCuotaId(1);
+        debito.setDebitoTipoId(DEBITO_TIPO_ID);
         debito.setCbu("1234567890123456789012");
         debito.setFechaVencimiento(OffsetDateTime.of(2026, 7, 22, 21, 0, 0, 0, MENDOZA));
         debito.setFechaEnvio(OffsetDateTime.of(2026, 7, 3, 10, 30, 0, 0, MENDOZA));
@@ -252,14 +257,21 @@ class GetEstadoChequeraUseCaseImplTest {
         sinCuota.setProductoId(ARANCEL_ID);
         sinCuota.setAlternativaId(ALTERNATIVA_ID);
         sinCuota.setCuotaId(99);
-        when(debitoService.findAllByChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, DEBITO_TIPO_ID))
+        sinCuota.setDebitoTipoId(DEBITO_TIPO_ID);
+        // findAllByChequera de 3 args: trae TODOS los tipos de débito juntos, no uno solo.
+        when(debitoService.findAllByChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID))
                 .thenReturn(List.of(debito, sinCuota));
+        DebitoTipo directo = new DebitoTipo();
+        directo.setDebitoTipoId(DEBITO_TIPO_ID);
+        directo.setNombre("Débito Directo");
+        when(debitoTipoService.findByDebitoTipoId(DEBITO_TIPO_ID)).thenReturn(directo);
 
         List<DebitoEstado> debitos = estado().debitos();
 
         assertThat(debitos).hasSize(2);
         assertThat(debitos.get(0).importe()).isEqualByComparingTo("331000");
         assertThat(debitos.get(0).cbu()).isEqualTo("1234567890123456789012");
+        assertThat(debitos.get(0).tipoDebito()).isEqualTo("Débito Directo");
         assertThat(debitos.get(0).fechaVencimiento()).isEqualTo(LocalDate.of(2026, 7, 23));
         assertThat(debitos.get(0).fechaEnvio()).isEqualTo(LocalDateTime.of(2026, 7, 3, 13, 30));
         assertThat(debitos.get(0).rechazado()).isTrue();
@@ -268,6 +280,22 @@ class GetEstadoChequeraUseCaseImplTest {
         assertThat(debitos.get(1).importe()).isEqualByComparingTo("0");
         assertThat(debitos.get(1).rechazado()).isFalse();
         assertThat(debitos.get(1).fechaEnvio()).isNull();
+    }
+
+    @Test
+    void tipoDebitoIsNullWhenTheDebitoTipoIsNotFound() {
+        when(chequeraService.findAllCuotaPagosByChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, ALTERNATIVA_ID))
+                .thenReturn(List.of());
+        Debito debito = new Debito();
+        debito.setProductoId(ARANCEL_ID);
+        debito.setAlternativaId(ALTERNATIVA_ID);
+        debito.setCuotaId(1);
+        debito.setDebitoTipoId(99);
+        when(debitoService.findAllByChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID))
+                .thenReturn(List.of(debito));
+        when(debitoTipoService.findByDebitoTipoId(99)).thenThrow(new IllegalStateException("sin tipo de débito"));
+
+        assertThat(estado().debitos().get(0).tipoDebito()).isNull();
     }
 
     @Test
@@ -295,7 +323,7 @@ class GetEstadoChequeraUseCaseImplTest {
     }
 
     private EstadoChequera estado() {
-        return useCase.getEstadoChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, ALTERNATIVA_ID, DEBITO_TIPO_ID);
+        return useCase.getEstadoChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, ALTERNATIVA_ID);
     }
 
     private static ChequeraCuotaPagosDto cuota(Integer productoId, Integer cuotaId, String importe, ChequeraPagoDto pago) {

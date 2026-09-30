@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 @Import(EstadoChequeraDtoMapper.class)
 class EstadoChequeraControllerTest {
 
-    private static final String URL = "/api/tesoreria/core/chequera/estado/1/2/12345/1/2";
+    private static final String URL = "/api/tesoreria/core/chequera/estado/1/2/12345/1";
 
     @Autowired
     private MockMvcTester mockMvc;
@@ -40,8 +40,8 @@ class EstadoChequeraControllerTest {
         ProductoEstado producto = new ProductoEstado(1, "Matrícula", "Matrícula", 2,
                 new BigDecimal("375000.00"), new BigDecimal("182000.00"), List.of(cuota));
         DebitoEstado debito = new DebitoEstado(5, new BigDecimal("364000.00"), LocalDate.of(2026, 7, 22),
-                "1234567890123456789012", LocalDateTime.of(2026, 7, 3, 13, 30), true, "0011000100");
-        when(service.getEstadoChequera(1, 2, 12345L, 1, 2)).thenReturn(new EstadoChequera(1, "Facultad de Ingeniería", 2,
+                "1234567890123456789012", "Débito Directo", LocalDateTime.of(2026, 7, 3, 13, 30), true, "0011000100");
+        when(service.getEstadoChequera(1, 2, 12345L, 1)).thenReturn(new EstadoChequera(1, "Facultad de Ingeniería", 2,
                 "Matrícula y Arancel", 12345L, new BigDecimal("12345678"), "MUÑOZ", "Ana Ejemplo", "Ciclo Completo",
                 "Lectivo 2026 - 2027", new BigDecimal("0.15"), "Rapipago", 1, true, List.of(producto), List.of(debito)));
 
@@ -64,6 +64,7 @@ class EstadoChequeraControllerTest {
         response.bodyJson().extractingPath("$.productos[0].cuotas[0].primerVencimiento").isEqualTo("2026-06-10");
         response.bodyJson().extractingPath("$.productos[0].cuotas[0].fechaPago").isEqualTo("2026-06-19");
         response.bodyJson().extractingPath("$.productos[0].cuotas[0].referenciaPago").isEqualTo("D2026062301_30000000000");
+        response.bodyJson().extractingPath("$.debitos[0].tipoDebito").isEqualTo("Débito Directo");
         response.bodyJson().extractingPath("$.debitos[0].fechaVencimiento").isEqualTo("2026-07-22");
         response.bodyJson().extractingPath("$.debitos[0].fechaEnvio").isEqualTo("2026-07-03T13:30:00");
         response.bodyJson().extractingPath("$.debitos[0].rechazado").isEqualTo(true);
@@ -72,7 +73,7 @@ class EstadoChequeraControllerTest {
 
     @Test
     void respondsBadRequestWhenTheChequeraDoesNotExist() {
-        when(service.getEstadoChequera(1, 2, 12345L, 1, 2)).thenThrow(new ChequeraSerieException(1, 2, 12345L));
+        when(service.getEstadoChequera(1, 2, 12345L, 1)).thenThrow(new ChequeraSerieException(1, 2, 12345L));
 
         mockMvc.get().uri(URL)
                 .accept(MediaType.APPLICATION_JSON)
