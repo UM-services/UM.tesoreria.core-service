@@ -1,0 +1,239 @@
+---
+title: Arquitectura Hexagonal - Módulo EstadoChequera (v5.0.0)
+---
+
+classDiagram
+    direction TB
+
+    %% Estado de una chequera como JSON de solo lectura: lo consume report-service
+    %% (EstadoChequeraDto) para dibujar el PDF "Estado de Chequera". En 5.0.0 se retiro
+    %% el endpoint GET /chequera/generateEstadoPdf/... y el metodo
+    %% FormulariosToPdfService.generateEstadoChequeraPdf; este slice arma los mismos datos.
+
+    namespace domain {
+        class EstadoChequera {
+            +Integer facultadId
+            +String facultadNombre
+            +Integer tipoChequeraId
+            +String tipoChequeraNombre
+            +Long chequeraSerieId
+            +BigDecimal personaId
+            +String personaApellido
+            +String personaNombre
+            +String arancelTipoDescripcion
+            +String lectivoNombre
+            +BigDecimal becaPorcentaje
+            +String tipoImpresionNombre
+            +Integer alternativaId
+            +boolean hpum
+            +List~ProductoEstado~ productos
+            +List~DebitoEstado~ debitos
+        }
+
+        class ProductoEstado {
+            +Integer productoId
+            +String nombre
+            +String tituloCuota
+            +Integer totalCuotas
+            +BigDecimal total
+            +BigDecimal pagado
+            +List~CuotaEstado~ cuotas
+        }
+
+        class CuotaEstado {
+            +Integer cuotaId
+            +Integer mes
+            +Integer anho
+            +LocalDate primerVencimiento
+            +BigDecimal importe
+            +Integer ordenPago
+            +LocalDate fechaPago
+            +BigDecimal importePagado
+            +String referenciaPago
+        }
+
+        class DebitoEstado {
+            +Integer cuotaId
+            +BigDecimal importe
+            +LocalDate fechaVencimiento
+            +String cbu
+            +LocalDateTime fechaEnvio
+            +boolean rechazado
+            +String motivoRechazo
+        }
+
+        class GetEstadoChequeraUseCase {
+            << interface >>
+            +getEstadoChequera(Integer, Integer, Long, Integer, Integer) EstadoChequera
+        }
+    }
+
+    namespace application {
+        class EstadoChequeraService {
+            -GetEstadoChequeraUseCase getEstadoChequeraUseCase
+            +getEstadoChequera(Integer, Integer, Long, Integer, Integer) EstadoChequera
+        }
+
+        class GetEstadoChequeraUseCaseImpl {
+            -ChequeraSerieService chequeraSerieService
+            -FacultadService facultadService
+            -TipoChequeraService tipoChequeraService
+            -PersonaService personaService
+            -LectivoService lectivoService
+            -ArancelTipoService arancelTipoService
+            -TipoImpresionService tipoImpresionService
+            -ChequeraService chequeraService
+            -ChequeraTotalService chequeraTotalService
+            -ChequeraAlternativaService chequeraAlternativaService
+            -DebitoService debitoService
+            +getEstadoChequera(Integer, Integer, Long, Integer, Integer) EstadoChequera
+        }
+    }
+
+    namespace external {
+        class ChequeraSerieService {
+            << external >>
+            +findByUnique(Integer, Integer, Long) ChequeraSerie
+        }
+
+        class FacultadService {
+            << external >>
+            +findByFacultadId(Integer) Facultad
+        }
+
+        class TipoChequeraService {
+            << external >>
+            +findByTipoChequeraId(Integer) TipoChequera
+        }
+
+        class PersonaService {
+            << external >>
+            +findByUnique(BigDecimal, Integer) Persona
+        }
+
+        class LectivoService {
+            << external >>
+            +findByLectivoId(Integer) Lectivo
+        }
+
+        class ArancelTipoService {
+            << external >>
+            +findByArancelTipoId(Integer) ArancelTipoEntity
+        }
+
+        class TipoImpresionService {
+            << external >>
+            +findByTipoImpresionId(Integer) TipoImpresion
+        }
+
+        class ChequeraService {
+            << external >>
+            +findAllCuotaPagosByChequera(Integer, Integer, Long, Integer) List~ChequeraCuotaPagosDto~
+        }
+
+        class ChequeraTotalService {
+            << external >>
+            +findAllByChequera(Integer, Integer, Long) List~ChequeraTotal~
+        }
+
+        class ChequeraAlternativaService {
+            << external >>
+            +findByUnique(Integer, Integer, Long, Integer, Integer) ChequeraAlternativa
+        }
+
+        class DebitoService {
+            << external >>
+            +findAllByChequera(Integer, Integer, Long, Integer) List~Debito~
+        }
+    }
+
+    namespace infrastructure_web {
+        class EstadoChequeraController {
+            -EstadoChequeraService service
+            -EstadoChequeraDtoMapper dtoMapper
+            +getEstadoChequera(Integer, Integer, Long, Integer, Integer) ResponseEntity~EstadoChequeraResponse~
+        }
+
+        class EstadoChequeraDtoMapper {
+            +toResponse(EstadoChequera) EstadoChequeraResponse
+        }
+
+        class EstadoChequeraResponse {
+            +Integer facultadId
+            +String facultadNombre
+            +Integer tipoChequeraId
+            +String tipoChequeraNombre
+            +Long chequeraSerieId
+            +BigDecimal personaId
+            +String personaApellido
+            +String personaNombre
+            +String arancelTipoDescripcion
+            +String lectivoNombre
+            +BigDecimal becaPorcentaje
+            +String tipoImpresionNombre
+            +Integer alternativaId
+            +boolean hpum
+            +List~ProductoEstadoResponse~ productos
+            +List~DebitoEstadoResponse~ debitos
+        }
+
+        class ProductoEstadoResponse {
+            +Integer productoId
+            +String nombre
+            +String tituloCuota
+            +Integer totalCuotas
+            +BigDecimal total
+            +BigDecimal pagado
+            +List~CuotaEstadoResponse~ cuotas
+        }
+
+        class CuotaEstadoResponse {
+            +Integer cuotaId
+            +Integer mes
+            +Integer anho
+            +LocalDate primerVencimiento
+            +BigDecimal importe
+            +Integer ordenPago
+            +LocalDate fechaPago
+            +BigDecimal importePagado
+            +String referenciaPago
+        }
+
+        class DebitoEstadoResponse {
+            +Integer cuotaId
+            +BigDecimal importe
+            +LocalDate fechaVencimiento
+            +String cbu
+            +LocalDateTime fechaEnvio
+            +boolean rechazado
+            +String motivoRechazo
+        }
+    }
+
+    EstadoChequera *-- ProductoEstado : productos
+    ProductoEstado *-- CuotaEstado : cuotas
+    EstadoChequera *-- DebitoEstado : debitos
+
+    EstadoChequeraResponse *-- ProductoEstadoResponse : productos
+    ProductoEstadoResponse *-- CuotaEstadoResponse : cuotas
+    EstadoChequeraResponse *-- DebitoEstadoResponse : debitos
+
+    EstadoChequeraService --> GetEstadoChequeraUseCase : uses
+    GetEstadoChequeraUseCaseImpl ..|> GetEstadoChequeraUseCase : implements
+
+    GetEstadoChequeraUseCaseImpl --> ChequeraSerieService : carga la chequera
+    GetEstadoChequeraUseCaseImpl --> FacultadService : encabezado
+    GetEstadoChequeraUseCaseImpl --> TipoChequeraService : encabezado
+    GetEstadoChequeraUseCaseImpl --> PersonaService : titular
+    GetEstadoChequeraUseCaseImpl --> LectivoService : encabezado
+    GetEstadoChequeraUseCaseImpl --> ArancelTipoService : encabezado
+    GetEstadoChequeraUseCaseImpl --> TipoImpresionService : encabezado
+    GetEstadoChequeraUseCaseImpl --> ChequeraService : cuotas con sus pagos
+    GetEstadoChequeraUseCaseImpl --> ChequeraTotalService : subtotales oficiales
+    GetEstadoChequeraUseCaseImpl --> ChequeraAlternativaService : titulo y cantidad de cuotas
+    GetEstadoChequeraUseCaseImpl --> DebitoService : debitos adheridos
+
+    EstadoChequeraController --> EstadoChequeraService : calls
+    EstadoChequeraController --> EstadoChequeraDtoMapper : maps
+    EstadoChequeraDtoMapper ..> EstadoChequera : lee
+    EstadoChequeraDtoMapper ..> EstadoChequeraResponse : construye
