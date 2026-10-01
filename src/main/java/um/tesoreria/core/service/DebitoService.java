@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.core.service;
 
@@ -28,14 +28,22 @@ public class DebitoService {
 	private final DebitoRepository repository;
 
 	public List<Debito> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-			Integer debitoTipoId) {
+										  Integer debitoTipoId) {
 		return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndDebitoTipoId(facultadId,
 				tipoChequeraId, chequeraSerieId, debitoTipoId, Sort.by("productoId").ascending()
 						.and(Sort.by("alternativaId").ascending()).and(Sort.by("cuotaId").ascending()));
 	}
 
+	/** Igual que {@link #findAllByChequera(Integer, Integer, Long, Integer)} pero trae todos los
+	 * tipos de débito de la chequera juntos (VISA + Directo), no uno solo. */
+	public List<Debito> findAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
+		return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId,
+				chequeraSerieId, Sort.by("productoId").ascending().and(Sort.by("alternativaId").ascending())
+						.and(Sort.by("cuotaId").ascending()));
+	}
+
 	public List<Debito> findAllByFechaEnvio(OffsetDateTime fechaEnvio, Boolean soloSantander, Boolean soloOtrosBancos,
-			Integer debitoTipoId) {
+											Integer debitoTipoId) {
 		if (soloSantander) {
 			return repository.findAllByFechaEnvioAndCbuLikeAndDebitoTipoId(fechaEnvio, "072%", debitoTipoId);
 		}
@@ -56,21 +64,21 @@ public class DebitoService {
 	}
 
 	public List<Debito> findAllByEnviados(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-			Integer productoId, Integer alternativaId, Integer debitoTipoId) {
+										  Integer productoId, Integer alternativaId, Integer debitoTipoId) {
 		return repository
 				.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndFechaEnvioNotNullAndDebitoTipoId(
 						facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, debitoTipoId);
 	}
 
 	public List<Debito> findAllPendientesChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-			OffsetDateTime fechaVencimiento) {
+												  OffsetDateTime fechaVencimiento) {
 		return repository
 				.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndFechaVencimientoGreaterThanEqualAndFechaBajaIsNullAndFechaEnvioIsNull(
 						facultadId, tipoChequeraId, chequeraSerieId, fechaVencimiento);
 	}
 
 	public List<Debito> findAllPendientes(OffsetDateTime desde, OffsetDateTime hasta, Boolean soloSantander,
-			Boolean soloOtrosBancos, Integer debitoTipoId) {
+										  Boolean soloOtrosBancos, Integer debitoTipoId) {
 		if (soloSantander) {
 			return repository
 					.findAllByFechaVencimientoBetweenAndFechaEnvioIsNullAndFechaBajaIsNullAndCbuLikeAndDebitoTipoId(
@@ -86,7 +94,7 @@ public class DebitoService {
 	}
 
 	public List<Debito> findAllByAlternativa(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-			Integer alternativaId, Integer debitoTipoId) {
+											 Integer alternativaId, Integer debitoTipoId) {
 		return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndDebitoTipoId(
 				facultadId, tipoChequeraId, chequeraSerieId, alternativaId, debitoTipoId);
 	}
@@ -100,24 +108,24 @@ public class DebitoService {
 	}
 
 	public List<Debito> findAllAsociados(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-			Integer productoId, Integer alternativaId, Integer cuotaId) {
+										 Integer productoId, Integer alternativaId, Integer cuotaId) {
 		return repository.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(
 				facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
 	}
 
 	public Debito findByCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId,
-			Integer alternativaId, Integer cuotaId, Integer debitoTipoId) {
-        var cuota = repository
-                .findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdAndDebitoTipoId(
-                        facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, debitoTipoId)
-                .orElseThrow(() -> new DebitoException(facultadId, tipoChequeraId, chequeraSerieId, productoId,
-                        alternativaId, cuotaId, debitoTipoId));
-        log.debug("Debito -> {}", cuota.jsonify());
+							  Integer alternativaId, Integer cuotaId, Integer debitoTipoId) {
+		var cuota = repository
+				.findByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdAndDebitoTipoId(
+						facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, debitoTipoId)
+				.orElseThrow(() -> new DebitoException(facultadId, tipoChequeraId, chequeraSerieId, productoId,
+						alternativaId, cuotaId, debitoTipoId));
+		log.debug("Debito -> {}", cuota.jsonify());
 		return cuota;
 	}
 
 	public Debito findLastByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-			Integer alternativaId) {
+									 Integer alternativaId) {
 		return repository
 				.findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdOrderByFechaVencimientoDesc(
 						facultadId, tipoChequeraId, chequeraSerieId, alternativaId)
