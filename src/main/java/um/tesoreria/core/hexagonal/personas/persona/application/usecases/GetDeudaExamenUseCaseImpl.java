@@ -44,6 +44,18 @@ public class GetDeudaExamenUseCaseImpl implements GetDeudaExamenUseCase {
                     .build();
         }
         log.debug("Tesoreria estado: {}", tesoreriaEstado.jsonify());
+        // * * * * * * * * * * * * * *
+        // Esto no debería estar acá, es un parche
+        if (tesoreriaEstado.getManual() == 1) {
+            return DeudaExamen.builder()
+                    .autorizadoRendir(true)
+                    .matriculaPagada(true)
+                    .cuotasAdeudadas(0)
+                    .importeAdeudado(BigDecimal.ZERO)
+                    .habilitadoTesoreria(true)
+                    .build();
+        }
+        // * * * * * * * * * * * * * *
         var chequeras = chequeraSerieService.findAllByPersonaIdAndDocumentoIdAndFacultadIdAndLectivoId(personaId, documentoId, facultadId, lectivo.getLectivoId());
         if (chequeras.isEmpty()) {
             return DeudaExamen.builder()
