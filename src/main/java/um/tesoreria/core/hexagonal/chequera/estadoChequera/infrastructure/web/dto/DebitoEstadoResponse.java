@@ -9,6 +9,7 @@ public record DebitoEstadoResponse(
         BigDecimal importe,
         LocalDate fechaVencimiento,
         String cbu,
+        String tipoDebito,
         LocalDateTime fechaEnvio,
         boolean rechazado,
         String motivoRechazo) {

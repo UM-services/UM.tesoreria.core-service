@@ -33,6 +33,7 @@ import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
 import um.tesoreria.core.model.dto.ChequeraPagoDto;
 import um.tesoreria.core.service.ChequeraAlternativaService;
 import um.tesoreria.core.service.DebitoService;
+import um.tesoreria.core.service.DebitoTipoService;
 import um.tesoreria.core.service.TipoImpresionService;
 import um.tesoreria.core.service.facade.ChequeraService;
 
@@ -60,6 +61,8 @@ import java.util.TreeMap;
  *   <li>De cada cuota se toma su primer pago ({@code chequera_pago}), que puede no existir.</li>
  *   <li>Los datos del encabezado (facultad, titular, lectivo, tipo de arancel, tipo de impresión) son
  *       opcionales: si falta alguno queda en {@code null}. La chequera y su tipo son obligatorios.</li>
+ *   <li>Se traen los débitos de TODOS los tipos de la chequera (VISA + Directo), no uno solo; cada uno
+ *       lleva su {@code tipoDebito} (nombre de {@code debito_tipo}) para distinguirlos.</li>
  *   <li>El importe de cada débito se toma de la cuota correspondiente ({@code productoId}, {@code alternativaId},
  *       {@code cuotaId}); {@code Debito} no tiene un importe propio mapeado.</li>
  * </ul>
@@ -80,10 +83,11 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
     private final ChequeraTotalService chequeraTotalService;
     private final ChequeraAlternativaService chequeraAlternativaService;
     private final DebitoService debitoService;
+    private final DebitoTipoService debitoTipoService;
 
     @Override
     public EstadoChequera getEstadoChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-                                            Integer alternativaId, Integer debitoTipoId) {
+                                            Integer alternativaId) {
         log.debug("Processing GetEstadoChequeraUseCaseImpl.getEstadoChequera");
         ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
 
@@ -141,7 +145,7 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
         }
 
         List<DebitoEstado> debitos = new ArrayList<>();
-        for (Debito debito : debitoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId, debitoTipoId)) {
+        for (Debito debito : debitoService.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId)) {
             debitos.add(toDebito(debito, cuotaPagos));
         }
 
@@ -232,11 +236,19 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
                 ? debito.getFechaEnvio().withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime()
                 : null;
 
+        String tipoDebito = null;
+        try {
+            tipoDebito = debitoTipoService.findByDebitoTipoId(debito.getDebitoTipoId()).getNombre();
+        } catch (Exception e) {
+            log.debug("Tipo de débito {} no encontrado para el estado de chequera", debito.getDebitoTipoId());
+        }
+
         return new DebitoEstado(
                 debito.getCuotaId(),
                 importe,
                 fechaVencimiento,
                 debito.getCbu(),
+                tipoDebito,
                 fechaEnvio,
                 debito.getRechazado() != null && debito.getRechazado() != 0,
                 debito.getMotivoRechazo());
