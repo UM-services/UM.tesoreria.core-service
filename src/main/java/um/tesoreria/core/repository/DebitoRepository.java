@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.core.repository;
 
@@ -21,12 +21,16 @@ import um.tesoreria.core.model.Debito;
 public interface DebitoRepository extends JpaRepository<Debito, Long> {
 
 	public List<Debito> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndDebitoTipoId(Integer facultadId,
-			Integer tipoChequeraId, Long chequeraSerieId, Integer debitoTipoId, Sort sort);
+																							  Integer tipoChequeraId, Long chequeraSerieId, Integer debitoTipoId, Sort sort);
+
+	/** Igual que la anterior pero sin filtrar por tipo de débito (VISA + Directo juntos). */
+	public List<Debito> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId,
+																			   Integer tipoChequeraId, Long chequeraSerieId, Sort sort);
 
 	public List<Debito> findAllByFechaEnvioAndDebitoTipoId(OffsetDateTime fechaEnvio, Integer debitoTipoId);
 
 	public List<Debito> findAllByFechaVencimientoBetweenAndFechaBajaAndFechaEnvioAndDebitoTipoId(OffsetDateTime desde,
-			OffsetDateTime hasta, OffsetDateTime fechaBaja, OffsetDateTime fechaEnvio, Integer debitoTipoId);
+																								 OffsetDateTime hasta, OffsetDateTime fechaBaja, OffsetDateTime fechaEnvio, Integer debitoTipoId);
 
 	public List<Debito> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndFechaEnvioNotNullAndDebitoTipoId(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId,
@@ -42,10 +46,10 @@ public interface DebitoRepository extends JpaRepository<Debito, Long> {
 			OffsetDateTime desde, OffsetDateTime hasta, String cbu, Integer debitoTipoId);
 
 	public List<Debito> findAllByFechaEnvioAndCbuLikeAndDebitoTipoId(OffsetDateTime fechaEnvio, String cbu,
-			Integer debitoTipoId);
+																	 Integer debitoTipoId);
 
 	public List<Debito> findAllByFechaEnvioAndCbuNotLikeAndDebitoTipoId(OffsetDateTime fechaEnvio, String string,
-			Integer debitoTipoId);
+																		Integer debitoTipoId);
 
 	public List<Debito> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndDebitoTipoId(
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
@@ -67,7 +71,7 @@ public interface DebitoRepository extends JpaRepository<Debito, Long> {
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId);
 
 	public Optional<Debito> findTop1ByCbuStartingWithAndCbuEndingWithAndFechaBajaIsNullOrderByDebitoIdDesc(String cbu1,
-			String cbu2);
+																										   String cbu2);
 
 	public Optional<Debito> findByDebitoId(Long debitoId);
 

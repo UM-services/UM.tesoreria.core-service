@@ -64,6 +64,7 @@ public class EstadoChequeraDtoMapper {
                 debito.importe(),
                 debito.fechaVencimiento(),
                 debito.cbu(),
+                debito.tipoDebito(),
                 debito.fechaEnvio(),
                 debito.rechazado(),
                 debito.motivoRechazo());

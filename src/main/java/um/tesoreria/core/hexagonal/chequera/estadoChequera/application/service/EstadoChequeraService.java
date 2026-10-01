@@ -12,8 +12,8 @@ public class EstadoChequeraService {
     private final GetEstadoChequeraUseCase getEstadoChequeraUseCase;
 
     public EstadoChequera getEstadoChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-                                            Integer alternativaId, Integer debitoTipoId) {
+                                            Integer alternativaId) {
         return getEstadoChequeraUseCase.getEstadoChequera(facultadId, tipoChequeraId, chequeraSerieId,
-                alternativaId, debitoTipoId);
+                alternativaId);
     }
 }

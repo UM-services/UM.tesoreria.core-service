@@ -5,5 +5,5 @@ import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoCh
 public interface GetEstadoChequeraUseCase {
 
     EstadoChequera getEstadoChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-                                     Integer alternativaId, Integer debitoTipoId);
+                                     Integer alternativaId);
 }
