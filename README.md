@@ -4,7 +4,12 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 5.0.0**
+**Versión actual (SemVer): 5.0.1**
+
+## Novedades 5.0.1 (verificado en código)
+- **fix(personas/deudaExamen)**: Parche temporal en `GetDeudaExamenUseCaseImpl`: cuando el estado de tesorería de la persona tiene `manual = 1`, `GET /persona/deudaExamen/...` habilita de inmediato (`autorizadoRendir=true`, `matriculaPagada=true`, `cuotasAdeudadas=0`, `importeAdeudado=0`, `habilitadoTesoreria=true`) sin evaluar chequeras ni cuotas y sin exigir el guard previo de `tesoreriaEstadoId > 0`/`fechaTope`; antes del parche, una habilitación manual con `fechaTope` vencido podía responder `habilitadoTesoreria=false` con deuda real. El contrato `DeudaExamenResponse` y el comportamiento para `manual != 1` no cambian; el unboxing `getManual() == 1` es seguro (`manual` es `Byte` con `@Builder.Default = 0` y el mapper sólo lo asigna si no es `nulo`). Sin pruebas nuevas: el caso de uso sigue sin cobertura directa.
+
+> Basado en `git diff HEAD` (staged: 1 archivo, +12/−0 líneas), `git diff 7b33302f..HEAD` vacío (sin commits desde 5.0.0) y el código de `GetDeudaExamenUseCaseImpl`, `TesoreriaEstadoFacultad`, `TesoreriaEstadoFacultadMapper` y `PersonaController`. Fix correctivo sobre un endpoint existente sin cambios de contrato público, dependencias ni esquema: incremento patch de SemVer (`5.0.0` → `5.0.1`, `pom.xml`). Diagrama `hexagonal-deudaExamen.mmd` sin cambios (estructura intacta). Fecha: día en curso del entorno (2026-10-01).
 
 ## Novedades 5.0.0 (verificado en código)
 - **breaking(chequera)**: Eliminado el endpoint público `GET /chequera/generateEstadoPdf/...` de core junto con `FormulariosToPdfService.generateEstadoChequeraPdf` (≈467 líneas): el dibujo del PDF "Estado de Chequera" pasa a `report-service`. Los demás PDFs (`generateChequeraPdf`, `generateCuotaPdf`, `generateMatriculaPdf`) quedan intactos. `report-service` debe migrar al nuevo endpoint JSON; un consumidor del viejo `generateEstadoPdf` recibirá 404 hasta entonces.
