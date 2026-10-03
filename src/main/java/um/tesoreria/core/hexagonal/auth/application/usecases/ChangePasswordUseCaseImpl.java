@@ -40,14 +40,7 @@ public class ChangePasswordUseCaseImpl implements ChangePasswordUseCase {
             throw new IllegalArgumentException("ERROR: Usuario NO Encontrado");
         }
 
-        // 1. Verifica que no sea cuenta admin
-        String safeLogin = usuario.getLogin() != null ? usuario.getLogin().trim().toLowerCase() : "";
-        if (safeLogin.startsWith("admin")) {
-            log.warn("Intento denegado de cambio de clave a cuenta administradora: {}", usuario.getLogin());
-            throw new IllegalArgumentException("ERROR: NO se puede Cambiar ESTA Clave");
-        }
-
-        // 2. Verifica la clave anterior
+        // 1. Verifica la clave anterior
         if (currentPassword == null || currentPassword.trim().isEmpty()) {
             throw new IllegalArgumentException("ERROR: Falta Clave Anterior");
         }
@@ -58,7 +51,7 @@ public class ChangePasswordUseCaseImpl implements ChangePasswordUseCase {
             throw new IllegalArgumentException("ERROR: Usuario NO Autenticado");
         }
 
-        // 3. Verifica si otro usuario ya tiene la nueva clave
+        // 2. Verifica si otro usuario ya tiene la nueva clave
         String newHashed = DigestUtils.sha256Hex(newPassword.trim());
         Optional<UsuarioAuth> existingWithPassword = usuarioAuthRepository.findByPassword(newHashed);
         if (existingWithPassword.isPresent() && !existingWithPassword.get().getUserId().equals(usuario.getUserId())) {
@@ -66,7 +59,7 @@ public class ChangePasswordUseCaseImpl implements ChangePasswordUseCase {
             throw new IllegalArgumentException("ERROR: Clave NO Válida");
         }
 
-        // 4. Actualiza contraseña y nombre si aplica
+        // 3. Actualiza contraseña y nombre si aplica
         String newNombre = (nombre != null && !nombre.trim().isEmpty()) ? nombre.trim() : null;
         usuario.setPassword(newHashed);
         if (newNombre != null) {

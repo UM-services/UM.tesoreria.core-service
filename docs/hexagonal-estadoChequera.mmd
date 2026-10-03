@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo EstadoChequera (v5.0.0)
+title: Arquitectura Hexagonal - Módulo EstadoChequera (v6.0.0)
 ---
 
 classDiagram
@@ -9,6 +9,8 @@ classDiagram
     %% (EstadoChequeraDto) para dibujar el PDF "Estado de Chequera". En 5.0.0 se retiro
     %% el endpoint GET /chequera/generateEstadoPdf/... y el metodo
     %% FormulariosToPdfService.generateEstadoChequeraPdf; este slice arma los mismos datos.
+    %% En 6.0.0 la ruta pierde {debitoTipoId}: se traen los debitos de TODOS los tipos
+    %% (VISA + Directo) y cada DebitoEstado/DebitoEstadoResponse lleva su tipoDebito.
 
     namespace domain {
         class EstadoChequera {
@@ -57,6 +59,7 @@ classDiagram
             +BigDecimal importe
             +LocalDate fechaVencimiento
             +String cbu
+            +String tipoDebito
             +LocalDateTime fechaEnvio
             +boolean rechazado
             +String motivoRechazo
@@ -64,14 +67,14 @@ classDiagram
 
         class GetEstadoChequeraUseCase {
             << interface >>
-            +getEstadoChequera(Integer, Integer, Long, Integer, Integer) EstadoChequera
+            +getEstadoChequera(Integer, Integer, Long, Integer) EstadoChequera
         }
     }
 
     namespace application {
         class EstadoChequeraService {
             -GetEstadoChequeraUseCase getEstadoChequeraUseCase
-            +getEstadoChequera(Integer, Integer, Long, Integer, Integer) EstadoChequera
+            +getEstadoChequera(Integer, Integer, Long, Integer) EstadoChequera
         }
 
         class GetEstadoChequeraUseCaseImpl {
@@ -86,7 +89,8 @@ classDiagram
             -ChequeraTotalService chequeraTotalService
             -ChequeraAlternativaService chequeraAlternativaService
             -DebitoService debitoService
-            +getEstadoChequera(Integer, Integer, Long, Integer, Integer) EstadoChequera
+            -DebitoTipoService debitoTipoService
+            +getEstadoChequera(Integer, Integer, Long, Integer) EstadoChequera
         }
     }
 
@@ -143,7 +147,12 @@ classDiagram
 
         class DebitoService {
             << external >>
-            +findAllByChequera(Integer, Integer, Long, Integer) List~Debito~
+            +findAllByChequera(Integer, Integer, Long) List~Debito~
+        }
+
+        class DebitoTipoService {
+            << external >>
+            +findByDebitoTipoId(Integer) DebitoTipo
         }
     }
 
@@ -151,7 +160,7 @@ classDiagram
         class EstadoChequeraController {
             -EstadoChequeraService service
             -EstadoChequeraDtoMapper dtoMapper
-            +getEstadoChequera(Integer, Integer, Long, Integer, Integer) ResponseEntity~EstadoChequeraResponse~
+            +getEstadoChequera(Integer, Integer, Long, Integer) ResponseEntity~EstadoChequeraResponse~
         }
 
         class EstadoChequeraDtoMapper {
@@ -204,6 +213,7 @@ classDiagram
             +BigDecimal importe
             +LocalDate fechaVencimiento
             +String cbu
+            +String tipoDebito
             +LocalDateTime fechaEnvio
             +boolean rechazado
             +String motivoRechazo
@@ -231,7 +241,8 @@ classDiagram
     GetEstadoChequeraUseCaseImpl --> ChequeraService : cuotas con sus pagos
     GetEstadoChequeraUseCaseImpl --> ChequeraTotalService : subtotales oficiales
     GetEstadoChequeraUseCaseImpl --> ChequeraAlternativaService : titulo y cantidad de cuotas
-    GetEstadoChequeraUseCaseImpl --> DebitoService : debitos adheridos
+    GetEstadoChequeraUseCaseImpl --> DebitoService : debitos de todos los tipos
+    GetEstadoChequeraUseCaseImpl --> DebitoTipoService : nombre del tipo de debito
 
     EstadoChequeraController --> EstadoChequeraService : calls
     EstadoChequeraController --> EstadoChequeraDtoMapper : maps
