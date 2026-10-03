@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 /**
  * Evento de historial de una escritura (alta, edición o baja).
@@ -22,7 +22,7 @@ import java.time.OffsetDateTime;
 public class EscrituraHistorial {
 
     private Long escrituraHistorialId;
-    private OffsetDateTime fecha;
+    private LocalDateTime fecha;
     private EscrituraOperacion operacion;
     private String entidad;
     private String entidadClave;
@@ -33,7 +33,7 @@ public class EscrituraHistorial {
      * Resumen seguro para diagnóstico (sin valores de negocio).
      */
     public String resumenSeguro() {
-        return "EscrituraHistorial[id=%s, fecha=%s, operacion=%s, entidad=%s, clave=%s]"
-                .formatted(escrituraHistorialId, fecha, operacion, entidad, entidadClave);
+        return "EscrituraHistorial[id=%s, operacion=%s, entidad=%s]"
+                .formatted(escrituraHistorialId, operacion, entidad);
     }
 }

@@ -4,7 +4,7 @@
 
 CREATE TABLE IF NOT EXISTS gestion_escritura_historial (
     escritura_historial_id BIGINT NOT NULL AUTO_INCREMENT,
-    fecha                  DATETIME(6) NOT NULL,
+    fecha                  DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     operacion              VARCHAR(16) NOT NULL,
     entidad                VARCHAR(128) NOT NULL,
     entidad_clave          VARCHAR(255) NOT NULL,

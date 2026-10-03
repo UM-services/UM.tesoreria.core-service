@@ -1,8 +1,8 @@
 package um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.out;
 
 /**
- * Serializa el estado de una entidad a texto compacto para el historial.
- * Un valor nulo o ausente se representa como cadena vacía (caso baja / alta).
+ * Serializa una copia del estado a JSON compacto para el historial.
+ * {@code null} se persiste como NULL (anterior del alta, nuevo de la baja).
  */
 public interface EscrituraValorSerializer {
 

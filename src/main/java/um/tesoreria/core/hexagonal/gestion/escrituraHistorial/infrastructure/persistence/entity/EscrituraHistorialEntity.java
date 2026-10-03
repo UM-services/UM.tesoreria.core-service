@@ -13,19 +13,23 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.model.EscrituraOperacion;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 
 /**
  * Persistencia del historial transaccional de escrituras de Gestión.
  * No extiende {@code Auditable}: la fecha del evento es {@code fecha}.
+ * {@code @Immutable}: un evento registrado no se actualiza.
  */
 @Getter
 @Setter
 @Entity
+@Immutable
 @Table(name = "gestion_escritura_historial")
 @Builder
 @NoArgsConstructor
@@ -37,8 +41,11 @@ public class EscrituraHistorialEntity {
     @Column(name = "escritura_historial_id")
     private Long escrituraHistorialId;
 
-    @Column(name = "fecha", nullable = false)
-    private OffsetDateTime fecha;
+    // La asigna MySQL (hora del servidor, -03), igual que los Now() de VB6.
+    // No se relee tras el insert: con serverTimezone=UTC, una JVM fuera de UTC la vería corrida.
+    @ColumnDefault("CURRENT_TIMESTAMP(6)")
+    @Column(name = "fecha", nullable = false, insertable = false, updatable = false)
+    private LocalDateTime fecha;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "operacion", nullable = false, length = 16)

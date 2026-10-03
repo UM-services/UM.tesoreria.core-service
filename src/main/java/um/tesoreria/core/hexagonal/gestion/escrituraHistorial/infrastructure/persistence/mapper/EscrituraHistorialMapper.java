@@ -28,7 +28,6 @@ public class EscrituraHistorialMapper {
         }
         return EscrituraHistorialEntity.builder()
                 .escrituraHistorialId(domain.getEscrituraHistorialId())
-                .fecha(domain.getFecha())
                 .operacion(domain.getOperacion())
                 .entidad(domain.getEntidad())
                 .entidadClave(domain.getEntidadClave())

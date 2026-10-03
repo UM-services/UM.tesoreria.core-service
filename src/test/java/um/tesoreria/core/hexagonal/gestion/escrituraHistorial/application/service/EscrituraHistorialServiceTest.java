@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,23 +41,24 @@ class EscrituraHistorialServiceTest {
     }
 
     @Test
-    void registrarAlta_dejaAnteriorVacioYPersisteNuevo() {
+    void registrarAlta_dejaAnteriorNullYPersisteNuevo() {
         Map<String, Object> nuevo = new LinkedHashMap<>();
         nuevo.put("nombre", "A");
 
-        var result = service.registrarAlta("ejercicio", "10", nuevo);
+        var result = service.registrarAlta("ejercicio", "clave-secreta-123", nuevo);
 
         ArgumentCaptor<EscrituraHistorial> captor = ArgumentCaptor.forClass(EscrituraHistorial.class);
         verify(repository).save(captor.capture());
         var saved = captor.getValue();
         assertThat(saved.getOperacion()).isEqualTo(EscrituraOperacion.ALTA);
         assertThat(saved.getEntidad()).isEqualTo("ejercicio");
-        assertThat(saved.getEntidadClave()).isEqualTo("10");
-        assertThat(saved.getValorAnterior()).isEmpty();
+        assertThat(saved.getEntidadClave()).isEqualTo("clave-secreta-123");
+        assertThat(saved.getValorAnterior()).isNull();
         assertThat(saved.getValorNuevo()).isEqualTo("{\"nombre\":\"A\"}");
-        assertThat(saved.getFecha()).isNotNull();
+        assertThat(saved.getFecha()).as("la asigna la base").isNull();
         assertThat(result.getEscrituraHistorialId()).isEqualTo(1L);
-        assertThat(result.resumenSeguro()).contains("ejercicio", "10", "ALTA").doesNotContain("\"nombre\"");
+        assertThat(result.resumenSeguro()).contains("ejercicio", "ALTA")
+                .doesNotContain("clave-secreta-123", "\"nombre\"");
     }
 
     @Test
@@ -76,7 +78,7 @@ class EscrituraHistorialServiceTest {
     }
 
     @Test
-    void registrarBaja_conservaPrevioYDejaNuevoVacio() {
+    void registrarBaja_conservaPrevioYDejaNuevoNull() {
         Map<String, Object> previo = new LinkedHashMap<>();
         previo.put("activo", true);
 
@@ -86,14 +88,60 @@ class EscrituraHistorialServiceTest {
         verify(repository).save(captor.capture());
         assertThat(captor.getValue().getOperacion()).isEqualTo(EscrituraOperacion.BAJA);
         assertThat(captor.getValue().getValorAnterior()).isEqualTo("{\"activo\":true}");
-        assertThat(captor.getValue().getValorNuevo()).isEmpty();
+        assertThat(captor.getValue().getValorNuevo()).isNull();
     }
 
     @Test
     void rechazaEntidadOClaveVacias() {
+        // Nulas o en blanco se rechazan antes de tocar el repositorio
+        assertThatThrownBy(() -> service.registrarAlta(null, "1", Map.of()))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.registrarEdicion("cuenta", null, Map.of(), Map.of()))
+                .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> service.registrarAlta(" ", "1", Map.of()))
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> service.registrarAlta("cuenta", " ", Map.of()))
                 .isInstanceOf(IllegalArgumentException.class);
+        // String.valueOf(null) de un id sin asignar
+        assertThatThrownBy(() -> service.registrarAlta("cuenta", "null", Map.of("n", 1)))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void normalizaEntidadYClaveConTrim() {
+        // " 3 " tiene que quedar ligado al mismo historial que "3"
+        service.registrarBaja("  bancaria ", " 3 ", Map.of("activo", true));
+
+        ArgumentCaptor<EscrituraHistorial> captor = ArgumentCaptor.forClass(EscrituraHistorial.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getEntidad()).isEqualTo("bancaria");
+        assertThat(captor.getValue().getEntidadClave()).isEqualTo("3");
+    }
+
+    @Test
+    void rechazaEntidadOClaveMasLargasQueLaColumna() {
+        // Sin depender del sql_mode de MySQL: no se trunca ni falla recién en el flush
+        assertThatThrownBy(() -> service.registrarAlta("e".repeat(129), "1", Map.of("n", 1)))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.registrarAlta("cuenta", "k".repeat(256), Map.of("n", 1)))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(repository, never()).save(any());
+
+        service.registrarAlta("e".repeat(128), " " + "k".repeat(255) + " ", Map.of("n", 1));
+        verify(repository).save(any());
+    }
+
+    @Test
+    void exigeLosEstadosDeCadaOperacion() {
+        assertThatThrownBy(() -> service.registrarAlta("cuenta", "1", null))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.registrarEdicion("cuenta", "1", null, Map.of("n", 1)))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.registrarEdicion("cuenta", "1", Map.of("n", 1), null))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> service.registrarBaja("cuenta", "1", null))
+                .isInstanceOf(IllegalArgumentException.class);
+        verify(repository, never()).save(any());
     }
 }

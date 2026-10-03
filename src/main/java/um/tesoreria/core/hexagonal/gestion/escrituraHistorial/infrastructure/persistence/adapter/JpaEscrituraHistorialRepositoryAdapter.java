@@ -2,12 +2,11 @@ package um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.pe
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.model.EscrituraHistorial;
 import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.out.EscrituraHistorialRepository;
 import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.persistence.mapper.EscrituraHistorialMapper;
 import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.persistence.repository.JpaEscrituraHistorialRepository;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -18,18 +17,10 @@ public class JpaEscrituraHistorialRepositoryAdapter implements EscrituraHistoria
 
     @Override
     public EscrituraHistorial save(EscrituraHistorial historial) {
+        // Con id, Spring Data haría merge y pisaría un evento ya registrado
+        Assert.isNull(historial.getEscrituraHistorialId(), "un evento de historial no se modifica");
         var entity = escrituraHistorialMapper.toEntity(historial);
         var saved = jpaEscrituraHistorialRepository.save(entity);
         return escrituraHistorialMapper.toDomain(saved);
-    }
-
-    @Override
-    public List<EscrituraHistorial> findAllByEntidadAndEntidadClaveOrderByFechaAscEscrituraHistorialIdAsc(
-            String entidad, String entidadClave) {
-        return jpaEscrituraHistorialRepository
-                .findAllByEntidadAndEntidadClaveOrderByFechaAscEscrituraHistorialIdAsc(entidad, entidadClave)
-                .stream()
-                .map(escrituraHistorialMapper::toDomain)
-                .toList();
     }
 }

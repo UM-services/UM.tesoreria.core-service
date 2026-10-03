@@ -9,7 +9,7 @@ flowchart TD
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
-        Svc["EscrituraHistorialService<br/>@Transactional REQUIRED"]
+        Svc["EscrituraHistorialService<br/>@Transactional MANDATORY"]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
@@ -40,3 +40,6 @@ flowchart TD
     style Svc fill:#e8f5e8
     style Adp fill:#fff3e0
     style Ent fill:#fff3e0
+    style Map fill:#fff3e0
+    style Ser fill:#fff3e0
+    style Jpa fill:#fff3e0
