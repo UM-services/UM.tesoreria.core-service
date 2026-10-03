@@ -24,7 +24,8 @@ import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.model.Escri
  * <p>Los valores se pasan como copia del estado (DTO, record o {@code Map}), no como entidad JPA:
  * el {@code save} del caller pisa la entidad administrada y el historial guardaría el estado nuevo
  * como anterior. El serializer rechaza entidades, proxies lazy y colecciones o mapas de Hibernate en
- * cualquier nivel del valor. Se guardan como JSON compacto con claves ordenadas y fechas ISO-8601;
+ * cualquier nivel del valor, también como clave de un {@code Map}; las claves de un {@code Map} solo
+ * pueden ser texto, enteros, enums o booleanos. Se guardan como JSON compacto con claves ordenadas y fechas ISO-8601;
  * un {@code String} se guarda como cadena JSON, no como JSON crudo.
  *
  * <p>El evento devuelto no trae {@code fecha}: la asigna MySQL al insertar.

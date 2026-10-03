@@ -8,9 +8,11 @@ import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -92,6 +94,58 @@ class JacksonEscrituraValorSerializerTest {
         assertThat(serializer.serialize(new CopiaSuperficial(List.of("a"), Map.of("a", "b"))))
                 .isEqualTo("{\"lista\":[\"a\"],\"mapa\":{\"a\":\"b\"}}");
     }
+
+    @Test
+    void clavesDecimalesQueComparanIgual_seRechazanEnVezDePerderEntradas() {
+        // Al ordenar claves, 1.0 y 1.00 compararían igual y una entrada pisaría a la otra sin aviso
+        Map<Object, Object> valor = new LinkedHashMap<>();
+        valor.put(new BigDecimal("1.0"), "PRIMERO");
+        valor.put(new BigDecimal("1.00"), "SEGUNDO");
+
+        assertThatThrownBy(() -> serializer.serialize(valor))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Clave de Map no permitida")
+                .hasMessageContaining("BigDecimal");
+    }
+
+    @Test
+    void entidadJpaComoClaveDeMap_seRechaza() {
+        // Como clave se guardaría con su toString(), sin el id del registro
+        Map<ProveedorEntity, String> porProveedor = new TreeMap<>(Comparator.comparing(ProveedorEntity::getRazonSocial));
+        porProveedor.put(new ProveedorEntity(), "x");
+
+        assertThatThrownBy(() -> serializer.serialize(Map.of("porProveedor", porProveedor)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("ProveedorEntity");
+    }
+
+    @Test
+    void clavesPermitidas_textoEnterosEnumsYBooleanos() {
+        Map<String, Object> valor = new LinkedHashMap<>();
+        valor.put("texto", Map.of("nombre", 1));
+        valor.put("enteros", Map.of(7L, 2));
+        valor.put("enums", Map.of(Operacion.ALTA, 3));
+        valor.put("booleanos", Map.of(true, 4));
+
+        assertThat(serializer.serialize(valor)).isEqualTo(
+                "{\"booleanos\":{\"true\":4},\"enteros\":{\"7\":2},\"enums\":{\"ALTA\":3},\"texto\":{\"nombre\":1}}");
+    }
+
+    @Test
+    void clavesDistintasConElMismoNombreEnJson_seRechazan() {
+        // 1, 1L y "1" son claves distintas para el TreeMap pero las tres se escriben como "1"
+        Map<Object, String> valor = new TreeMap<>(
+                Comparator.comparing((Object k) -> k.getClass().getName()).thenComparing(Object::toString));
+        valor.put(1, "INTEGER");
+        valor.put(1L, "LONG");
+        valor.put("1", "STRING");
+
+        assertThatThrownBy(() -> serializer.serialize(valor))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("claves que se repiten");
+    }
+
+    enum Operacion { ALTA }
 
     record CopiaSuperficial(List<String> lista, Map<String, String> mapa) {
     }
