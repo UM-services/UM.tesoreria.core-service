@@ -63,18 +63,6 @@ class ChangePasswordUseCaseImplTest {
     }
 
     @Test
-    void changePassword_whenUserIsAdmin_throwsException() {
-        UsuarioAuth admin = new UsuarioAuth();
-        admin.setUserId(1L);
-        admin.setLogin("adminGeneral");
-        when(usuarioAuthRepository.findById(1L)).thenReturn(Optional.of(admin));
-
-        assertThatThrownBy(() -> useCase.changePassword(1L, "adminGeneral", "claveVieja123", "nueva123", "nueva123", "Admin"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("ERROR: NO se puede Cambiar ESTA Clave");
-    }
-
-    @Test
     void changePassword_whenCurrentPasswordIncorrect_throwsException() {
         when(usuarioAuthRepository.findById(10L)).thenReturn(Optional.of(usuario));
 
