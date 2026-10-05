@@ -21,6 +21,7 @@ public class PersonaService {
 
     private final GetPersonaByUniqueUseCase getPersonaByUniqueUseCase;
     private final GetPersonaByIdUseCase getPersonaByIdUseCase;
+    private final GetPersonasByNumeroUseCase getPersonasByNumeroUseCase;
     private final GetPersonaByUniqueIdUseCase getPersonaByUniqueIdUseCase;
     private final FindAllSantanderUseCase findAllSantanderUseCase;
     private final SavePersonaUseCase savePersonaUseCase;
@@ -40,6 +41,10 @@ public class PersonaService {
 
     public Persona findByPersonaId(BigDecimal personaId) {
         return getPersonaByIdUseCase.findByPersonaId(personaId);
+    }
+
+    public List<Persona> findAllByNumeroDocumento(BigDecimal numeroDocumento) {
+        return getPersonasByNumeroUseCase.findAllByNumeroDocumento(numeroDocumento);
     }
 
     public List<Persona> findAllSantander() {
