@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 6.0.0** (actualizada: 2026-10-03)
+**Versión actual del servicio: 6.1.0** (actualizada: 2026-10-04)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -36,6 +36,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-claseChequera.mmd`: Arquitectura hexagonal del módulo ClaseChequera (clasificación de chequeras) - v4.7.0 (puerto de entrada `GetClaseChequeraByIdUseCase`, `ClaseChequeraService.findById`, alias `/api/tesoreria/core/clasechequera` y firmas reales del puerto de salida sincronizadas).
 - `hexagonal-lectivo.mmd`: Arquitectura hexagonal del módulo Lectivo (gestión de lectivos con 8 casos de uso) - v3.30.0 (nuevo módulo).
 - `hexagonal-reservaVacante.mmd`: Arquitectura hexagonal del módulo ReservaVacante (gestión de reservas de vacantes UM Hub) - v3.32.0 (nuevo UpdateReservaVacanteUseCase con integración de pago MercadoPago).
+- `hexagonal-consulta.mmd`: Arquitectura hexagonal del módulo Consulta (UM Hub): datos personales + domicilio/contacto y deuda agregada por **número de documento sin tipo** (`GET /api/tesoreria/core/umhub/consulta/persona/{numeroDocumento}` y `.../deuda[?extended=]`), DTOs filtrados sin `password`/`cbu`/`cuit`/`emailPagador`, fusión de todos los tipos del mismo titular (caso LE/LC=DNI) y regla anti-colisión de identidad - v6.1.0.
 - `hexagonal-domicilio.mmd`: Arquitectura hexagonal del módulo Domicilio (gestión de domicilios) - v4.2.1 (`Domicilio`/`DomicilioEntity` implementan `Jsonifyable`, captura defensiva de correos).
 - `hexagonal-alumnoGuarani.mmd`: Arquitectura hexagonal del módulo AlumnoGuarani (integración con sistema Guaraní y creación de datos personales) - v3.50.0.
 - `hexagonal-arancelTipo.mmd`: Arquitectura hexagonal del módulo ArancelTipo (gestión de tipos de arancel) - v3.29.0 (migración desde Kotlin legacy).
@@ -46,7 +47,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-usuarioChequeraFacultad.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraFacultad bajo `usuarios/` (facultades de chequera por usuario) - v4.7.0 (nuevo slice en `4.5.0`; en `4.7.0` agrega administración `POST /` idempotente y `DELETE /user/{userId}/facultad/{facultadId}` con validación de referencias vía puertos de `usuario`/`facultad`).
 - `hexagonal-usuarioChequeraClaseChequera.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraClaseChequera bajo `usuarios/` (clases de chequera habilitadas por usuario para filtrar la consulta de chequeras) - v4.7.0 (nuevo slice: `GET /user/{userId}`, `POST /` idempotente y `DELETE /user/{userId}/claseChequera/{claseChequeraId}` con validación vía puertos de `usuario`/`claseChequera`).
 - `hexagonal-usuarioChequeraGeografica.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraGeografica bajo `usuarios/` (sedes geográficas asignadas al usuario) - v4.7.0 (nuevo slice: `GET /user/{userId}`, `POST /` idempotente y `DELETE /user/{userId}/geografica/{geograficaId}` con validación vía puertos de `usuario`/`geografica`).
-- `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v4.6.0 (sugerencias de personas con chequeras por usuario).
+- `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v6.1.0 (sugerencias de personas con chequeras por usuario, v4.6.0; nuevo puerto de entrada `GetPersonasByNumeroUseCase` y método `findAllByPersonaId` en `PersonaRepository`/`JpaPersonaRepositoryAdapter` para consultar todas las filas de un número de documento sin exigir el tipo).
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).
 - `hexagonal-politicaArancelaria.mmd`: Arquitectura hexagonal del módulo PoliticaArancelaria (recálculo de cuotas por política arancelaria) - v3.42.0 (refactorización de RecalculateCuotaByUniqueIndexUseCaseImpl, fallback a LectivoCuota con importes cero).
