@@ -98,6 +98,7 @@ const diagrams = [
   { id: 'hexagonal-baja', file: 'hexagonal-baja.mmd', title: 'Arquitectura Hexagonal - Baja' },
   { id: 'hexagonal-campanha', file: 'hexagonal-campanha.mmd', title: 'Arquitectura Hexagonal - Campanha (UM Hub)' },
   { id: 'hexagonal-reservaVacante', file: 'hexagonal-reservaVacante.mmd', title: 'Arquitectura Hexagonal - ReservaVacante (UM Hub)' },
+  { id: 'hexagonal-consulta', file: 'hexagonal-consulta.mmd', title: 'Arquitectura Hexagonal - Consulta Persona/Deuda (UM Hub)' },
   { id: 'hexagonal-domicilio', file: 'hexagonal-domicilio.mmd', title: 'Arquitectura Hexagonal - Domicilio' },
   { id: 'hexagonal-alumnoGuarani', file: 'hexagonal-alumnoGuarani.mmd', title: 'Arquitectura Hexagonal - AlumnoGuarani (Guarani)' },
   { id: 'hexagonal-persona', file: 'hexagonal-persona.mmd', title: 'Arquitectura Hexagonal - Persona' },

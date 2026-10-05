@@ -20,6 +20,8 @@ public interface JpaPersonaRepository extends JpaRepository<PersonaEntity, Long>
 
 	Optional<PersonaEntity> findTopByPersonaId(BigDecimal personaId);
 
+	List<PersonaEntity> findAllByPersonaId(BigDecimal personaId);
+
 	Optional<PersonaEntity> findByUniqueId(Long uniqueId);
 
 	List<PersonaEntity> findAllByCbuLike(String cbu);
