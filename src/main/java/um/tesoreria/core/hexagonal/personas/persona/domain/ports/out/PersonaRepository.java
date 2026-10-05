@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface PersonaRepository {
     Optional<Persona> findByPersonaIdAndDocumentoId(BigDecimal personaId, Integer documentoId);
     Optional<Persona> findTopByPersonaId(BigDecimal personaId);
+    List<Persona> findAllByPersonaId(BigDecimal personaId);
     Optional<Persona> findByUniqueId(Long uniqueId);
     List<Persona> findAllByCbuLike(String cbu);
     Persona save(Persona persona);

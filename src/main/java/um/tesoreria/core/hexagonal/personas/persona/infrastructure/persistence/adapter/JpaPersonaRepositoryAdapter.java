@@ -33,6 +33,13 @@ public class JpaPersonaRepositoryAdapter implements PersonaRepository {
     }
 
     @Override
+    public List<Persona> findAllByPersonaId(BigDecimal personaId) {
+        return jpaPersonaRepository.findAllByPersonaId(personaId).stream()
+                .map(personaMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<Persona> findByUniqueId(Long uniqueId) {
         return jpaPersonaRepository.findByUniqueId(uniqueId)
                 .map(personaMapper::toDomainModel);

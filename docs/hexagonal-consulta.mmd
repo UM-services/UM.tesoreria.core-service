@@ -1,0 +1,158 @@
+---
+title: Arquitectura Hexagonal - Módulo Consulta (UM Hub) (v6.1.0)
+---
+
+classDiagram
+    direction TB
+
+    %% Slice de solo lectura para el hub externo (tesoreria-umhub-service):
+    %% datos personales + domicilio/contacto y deuda agregada por NUMERO de
+    %% documento (sin tipo). Rutas expuestas:
+    %%   GET /api/tesoreria/core/umhub/consulta/persona/{numeroDocumento}
+    %%   GET /api/tesoreria/core/umhub/consulta/persona/{numeroDocumento}/deuda (query extended=false|true)
+    %% Expone DTOs filtrados: nunca password/cbu/cuit/uniqueId/hpum/guaraniPersona,
+    %% nunca emailPagador/laboral (datos de terceros). El agregado de tipos
+    %% cubre el caso real LE/LC que comparten numero con DNI: se recorren
+    %% todos los tipos del mismo titular y se fusionan deudas/vencimientos.
+    %% Regla de colision: filas del mismo numero con titular divergente ->
+    %% solo se expone la primaria (menor documentoId), con log.warn.
+    %% Validaciones del controller: 400 si el numero no cumple ^\d{6,10}$
+    %% (6 a 10 digitos) y 404 "Persona no encontrada" si ninguna fila coincide.
+    %% Deuda cross-slice documentada en CHANGELOG 6.1.0: domain/model/ConsultaDeuda
+    %% usa DeudaChequeraDto/VencimientoDto de personas/persona (precedente:
+    %% ChequeraCuotaController ya los expone) y la implementacion consume los
+    %% servicios legacy ProvinciaService/LocalidadService (precedente:
+    %% personas/domicilio CaptureDomicilioUseCaseImpl).
+
+    namespace domain {
+        class ConsultaPersona {
+            << domain >>
+            +BigDecimal numeroDocumento
+            +String nombre
+            +String apellido
+            +String sexo
+            +String numeroPrefijo
+            +String numeroPosfijo
+            +List~TipoDocumentoConsulta~ documentos
+            +ConsultaDomicilio domicilio
+        }
+        class TipoDocumentoConsulta {
+            << domain >>
+            +Integer documentoId
+            +String nombre
+        }
+        class ConsultaDomicilio {
+            << domain >>
+            +String calle
+            +String puerta
+            +String piso
+            +String dpto
+            +String codigoPostal
+            +Integer provinciaId
+            +String provinciaNombre
+            +Integer localidadId
+            +String localidadNombre
+            +String telefono
+            +String movil
+            +String emailPersonal
+            +String emailInstitucional
+        }
+        class ConsultaDeuda {
+            << domain >>
+            +BigDecimal numeroDocumento
+            +Integer cuotas
+            +BigDecimal deuda
+            +List~DeudaChequeraDto~ deudas
+            +List~VencimientoDto~ vencimientos
+        }
+        class GetConsultaPersonaUseCase {
+            << interface >>
+            +findByNumeroDocumento(BigDecimal) Optional~ConsultaPersona~
+        }
+        class GetConsultaDeudaUseCase {
+            << interface >>
+            +findByNumeroDocumento(BigDecimal, boolean) Optional~ConsultaDeuda~
+        }
+    }
+
+    namespace application {
+        class GetConsultaPersonaUseCaseImpl {
+            -PersonaService personaService
+            -DomicilioService domicilioService
+            -DocumentoService documentoService
+            -ProvinciaService provinciaService
+            -LocalidadService localidadService
+        }
+        class GetConsultaDeudaUseCaseImpl {
+            -GetConsultaPersonaUseCase personaUseCase
+            -GetDeudaPersonaUseCase deudaUseCase
+        }
+        class ConsultaPersonaDeudaService {
+            +findPersona(BigDecimal) Optional~ConsultaPersona~
+            +findDeuda(BigDecimal, boolean) Optional~ConsultaDeuda~
+        }
+    }
+
+    namespace infrastructure {
+        class ConsultaPersonaDeudaController {
+            -ConsultaPersonaDeudaService service
+            -ConsultaDtoMapper dtoMapper
+            +getPersona(String) ResponseEntity~ConsultaPersonaResponse~
+            +getDeuda(String, boolean) ResponseEntity~ConsultaDeudaResponse~
+        }
+        class ConsultaDtoMapper {
+            +toPersonaResponse(ConsultaPersona) ConsultaPersonaResponse
+            +toDeudaResponse(ConsultaDeuda) ConsultaDeudaResponse
+        }
+        class ConsultaPersonaResponse
+        class ConsultaDeudaResponse
+    }
+
+    namespace external {
+        class PersonaService {
+            << external >>
+            +findAllByNumeroDocumento(BigDecimal) List~Persona~
+        }
+        class DomicilioService {
+            << external >>
+            +findFirstByPersonaId(BigDecimal) Optional~Domicilio~
+        }
+        class DocumentoService {
+            << external >>
+            +findByDocumentoId(Integer) Documento
+        }
+        class ProvinciaService {
+            << external >>
+            +findByUnique(Integer, Integer) Provincia
+        }
+        class LocalidadService {
+            << external >>
+            +findByUnique(Integer, Integer, Integer) Localidad
+        }
+        class GetDeudaPersonaUseCase {
+            << external >>
+            +deudaByPersona(BigDecimal, Integer) DeudaPersonaDto
+            +deudaByPersonaExtended(BigDecimal, Integer) DeudaPersonaDto
+        }
+    }
+
+    GetConsultaPersonaUseCase <|.. GetConsultaPersonaUseCaseImpl
+    GetConsultaDeudaUseCase <|.. GetConsultaDeudaUseCaseImpl
+    ConsultaPersonaDeudaService --> GetConsultaPersonaUseCase
+    ConsultaPersonaDeudaService --> GetConsultaDeudaUseCase
+    ConsultaPersonaDeudaController --> ConsultaPersonaDeudaService
+    ConsultaPersonaDeudaController --> ConsultaDtoMapper
+    ConsultaDtoMapper --> ConsultaPersonaResponse
+    ConsultaDtoMapper --> ConsultaDeudaResponse
+    GetConsultaPersonaUseCaseImpl --> PersonaService : personas slice
+    GetConsultaPersonaUseCaseImpl --> DomicilioService : personas slice
+    GetConsultaPersonaUseCaseImpl --> DocumentoService : personas slice
+    GetConsultaPersonaUseCaseImpl --> ProvinciaService : legacy
+    GetConsultaPersonaUseCaseImpl --> LocalidadService : legacy
+    GetConsultaDeudaUseCaseImpl --> GetDeudaPersonaUseCase : personas slice
+    GetConsultaDeudaUseCaseImpl --> GetConsultaPersonaUseCase : usa
+    GetConsultaPersonaUseCaseImpl ..> ConsultaPersona : devuelve
+    GetConsultaPersonaUseCaseImpl ..> ConsultaDomicilio : devuelve
+    GetConsultaDeudaUseCaseImpl ..> ConsultaDeuda : devuelve
+    ConsultaPersona *-- TipoDocumentoConsulta
+    ConsultaPersona *-- ConsultaDomicilio
