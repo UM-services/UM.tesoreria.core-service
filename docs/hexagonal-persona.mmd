@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Modulo Persona bajo Personas (v4.6.0)
+title: Arquitectura Hexagonal - Modulo Persona bajo Personas (v6.1.0)
 ---
 
 classDiagram
@@ -33,6 +33,7 @@ classDiagram
             << interface >>
             +findByPersonaIdAndDocumentoId(BigDecimal, Integer) Optional~Persona~
             +findTopByPersonaId(BigDecimal) Optional~Persona~
+            +findAllByPersonaId(BigDecimal) List~Persona~
             +findByUniqueId(Long) Optional~Persona~
             +findAllByCbuLike(String) List~Persona~
             +save(Persona) Persona
@@ -57,6 +58,7 @@ classDiagram
         class PersonaService {
             -GetPersonaByUniqueUseCase getPersonaByUniqueUseCase
             -GetPersonaByIdUseCase getPersonaByIdUseCase
+            -GetPersonasByNumeroUseCase getPersonasByNumeroUseCase
             -GetPersonaByUniqueIdUseCase getPersonaByUniqueIdUseCase
             -FindAllSantanderUseCase findAllSantanderUseCase
             -SavePersonaUseCase savePersonaUseCase
@@ -71,6 +73,7 @@ classDiagram
             -GetDeudaExamenUseCase getDeudaExamenUseCase
             +findByUnique(BigDecimal, Integer) Persona
             +findTopByPersonaId(BigDecimal) Optional~Persona~
+            +findAllByNumeroDocumento(BigDecimal) List~Persona~
             +findByUniqueId(Long) Optional~Persona~
             +findAllSantander() List~Persona~
             +findInscriptosSinChequera(...) List~Persona~
@@ -93,6 +96,7 @@ classDiagram
     namespace application_usecases {
             class GetPersonaByUniqueUseCaseImpl
             class GetPersonaByIdUseCaseImpl
+            class GetPersonasByNumeroUseCaseImpl
             class GetPersonaByUniqueIdUseCaseImpl
             class FindAllSantanderUseCaseImpl
             class SavePersonaUseCaseImpl
@@ -110,6 +114,7 @@ classDiagram
 
         class GetPersonaByUniqueUseCase { << interface >> }
         class GetPersonaByIdUseCase { << interface >> }
+        class GetPersonasByNumeroUseCase { << interface >> }
         class GetPersonaByUniqueIdUseCase { << interface >> }
         class FindAllSantanderUseCase { << interface >> }
         class SavePersonaUseCase { << interface >> }
@@ -145,6 +150,7 @@ classDiagram
                 << JpaRepository >>
                 +findByPersonaIdAndDocumentoId(BigDecimal, Integer) Optional~PersonaEntity~
                 +findTopByPersonaId(BigDecimal) Optional~PersonaEntity~
+                +findAllByPersonaId(BigDecimal) List~PersonaEntity~
                 +findByUniqueId(Long) Optional~PersonaEntity~
                 +findAllByCbuLike(String) List~PersonaEntity~
             }
@@ -154,6 +160,7 @@ classDiagram
                 -PersonaMapper mapper
                 +findByPersonaIdAndDocumentoId(BigDecimal, Integer) Optional~Persona~
                 +findTopByPersonaId(BigDecimal) Optional~Persona~
+                +findAllByPersonaId(BigDecimal) List~Persona~
                 +findByUniqueId(Long) Optional~Persona~
                 +findAllByCbuLike(String) List~Persona~
                 +save(Persona) Persona
@@ -209,6 +216,7 @@ classDiagram
 
     PersonaService --> GetPersonaByUniqueUseCase : uses
     PersonaService --> GetPersonaByIdUseCase : uses
+    PersonaService --> GetPersonasByNumeroUseCase : uses
     PersonaService --> GetPersonaByUniqueIdUseCase : uses
     PersonaService --> FindAllSantanderUseCase : uses
     PersonaService --> SavePersonaUseCase : uses
@@ -222,6 +230,7 @@ classDiagram
 
     GetPersonaByUniqueUseCaseImpl ..|> GetPersonaByUniqueUseCase : implements
     GetPersonaByIdUseCaseImpl ..|> GetPersonaByIdUseCase : implements
+    GetPersonasByNumeroUseCaseImpl ..|> GetPersonasByNumeroUseCase : implements
     GetPersonaByUniqueIdUseCaseImpl ..|> GetPersonaByUniqueIdUseCase : implements
     FindAllSantanderUseCaseImpl ..|> FindAllSantanderUseCase : implements
     SavePersonaUseCaseImpl ..|> SavePersonaUseCase : implements
@@ -236,6 +245,7 @@ classDiagram
 
     GetPersonaByUniqueUseCaseImpl --> PersonaRepository : uses
     GetPersonaByIdUseCaseImpl --> PersonaRepository : uses
+    GetPersonasByNumeroUseCaseImpl --> PersonaRepository : uses
     SavePersonaUseCaseImpl --> PersonaRepository : uses
     FindAllSantanderUseCaseImpl --> PersonaRepository : uses
 
