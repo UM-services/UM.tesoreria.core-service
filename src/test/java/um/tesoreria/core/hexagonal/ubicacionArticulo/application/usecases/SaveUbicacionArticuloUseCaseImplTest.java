@@ -6,6 +6,8 @@ import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.Ubica
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.out.UbicacionArticuloRepository;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
@@ -35,6 +37,16 @@ class SaveUbicacionArticuloUseCaseImplTest {
     void articuloNulo_400SinEscribir() {
         assertThatThrownBy(() -> useCase.save(UbicacionArticulo.builder().ubicacionId(1).build()))
                 .isInstanceOfSatisfying(UbicacionArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo("articuloId"));
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void cuentaFueraDeDecimal11_0_400SinEscribir() {
+        for (var cuenta : new String[]{"1e999999999", "100000000000", "51010101.5"}) {
+            assertThatThrownBy(() -> useCase.save(UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).numeroCuenta(new BigDecimal(cuenta)).build()))
+                    .as(cuenta)
+                    .isInstanceOfSatisfying(UbicacionArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo("numeroCuenta"));
+        }
         verifyNoInteractions(repository);
     }
 

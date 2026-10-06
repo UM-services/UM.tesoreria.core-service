@@ -8,6 +8,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.ErrorResponse;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import tools.jackson.core.JacksonException;
@@ -77,9 +78,12 @@ public class UbicacionArticuloController {
 
     @ExceptionHandler(UbicacionArticuloConflictException.class)
     public ProblemDetail conflicto(UbicacionArticuloConflictException ex, HttpServletRequest request) {
-        return problema(HttpStatus.CONFLICT, "CONFLICTO",
-                "Otra operación modificó la misma asignación al mismo tiempo. Consultá GET /ubicacionArticulo/{ubicacionId}/{articuloId} y reintentá si hace falta.",
-                null, request);
+        var detail = ex.isReintentable()
+                ? "Otra operación modificó la misma asignación al mismo tiempo. Consultá la asignación y reintentá si hace falta."
+                : ex.isBloqueado()
+                        ? "Otra operación tiene tomada la asignación. Reintentá en unos segundos."
+                        : "La asignación choca con otro dato y no se guardó.";
+        return problema(HttpStatus.CONFLICT, "CONFLICTO", detail, null, request);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -95,15 +99,28 @@ public class UbicacionArticuloController {
     }
 
     @ExceptionHandler(Exception.class)
-    public ProblemDetail errorInterno(Exception ex, HttpServletRequest request) throws Exception {
-        if (ex instanceof ErrorResponse) {
-            throw ex; // 405, 415, etc.: los resuelve Spring con su propio estado
+    public ResponseEntity<ProblemDetail> errorInterno(Exception ex, HttpServletRequest request) throws Exception {
+        if (ex instanceof HttpMediaTypeNotAcceptableException) {
+            throw ex; // el cliente no acepta ningún formato en el que se pueda responder: lo resuelve Spring
+        }
+        if (ex instanceof ErrorResponse error) {
+            // 415, parámetro faltante, etc.: estado y encabezados de Spring con el mismo contrato de error
+            var problema = error.getBody();
+            if (error.getStatusCode().value() == HttpStatus.UNSUPPORTED_MEDIA_TYPE.value()) {
+                problema.setDetail("El cuerpo tiene que enviarse como application/json.");
+                problema.setProperty("codigo", "TIPO_DE_CONTENIDO_NO_SOPORTADO");
+            } else {
+                problema.setProperty("codigo", error.getStatusCode().is5xxServerError() ? "ERROR_INTERNO" : "SOLICITUD_INVALIDA");
+            }
+            log.info("{} {} -> {} {}: {}", request.getMethod(), request.getRequestURI(), error.getStatusCode().value(),
+                    problema.getProperties().get("codigo"), problema.getDetail());
+            return ResponseEntity.status(error.getStatusCode()).headers(error.getHeaders()).body(problema);
         }
         log.error("{} {}: error no controlado", request.getMethod(), request.getRequestURI(), ex);
         // Sin el mensaje de la excepción: puede traer SQL o nombres de restricción
         var detalle = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno. El detalle quedó en el log del servicio.");
         detalle.setProperty("codigo", "ERROR_INTERNO");
-        return detalle;
+        return ResponseEntity.internalServerError().body(detalle);
     }
 
     private static ProblemDetail problema(HttpStatus status, String codigo, String detail, String campo, HttpServletRequest request) {

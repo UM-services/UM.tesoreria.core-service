@@ -50,15 +50,24 @@ public class JpaArticuloRepositoryAdapter implements ArticuloRepository {
 
     @Override
     public Optional<Articulo> findByIdForUpdate(Long id) {
-        // Primero sin bloqueo: un SELECT ... FOR UPDATE de un id inexistente tomaría un bloqueo de brecha.
-        // FOR UPDATE nativo: con PESSIMISTIC_WRITE, Hibernate 7 genera "FOR UPDATE OF", que MySQL 5.7 no acepta.
-        return jpaArticuloRepository.findById(id)
-                .filter(entity -> !entityManager.createNativeQuery("SELECT Art_ID FROM articulos WHERE Art_ID = :id FOR UPDATE")
-                        .setParameter("id", id).getResultList().isEmpty())
-                .map(entity -> {
-                    entityManager.refresh(entity); // el estado leído después del bloqueo
-                    return articuloMapper.toDomainModel(entity);
-                });
+        // Existencia sin cargar la entidad: un SELECT ... FOR UPDATE de un id inexistente tomaría un bloqueo de brecha
+        if (!jpaArticuloRepository.existsById(id)) {
+            return Optional.empty();
+        }
+        // El estado sale de la lectura con bloqueo: en REPEATABLE READ es la única que ve lo último confirmado
+        // (una lectura común, como un refresh, devuelve la foto del primer SELECT de la transacción).
+        // Nativo porque con PESSIMISTIC_WRITE Hibernate 7 genera "FOR UPDATE OF", que MySQL 5.7 no acepta.
+        // Debe ser la primera carga del artículo en la transacción: si ya estuviera en el contexto, Hibernate
+        // devolvería la instancia cargada y no la fila leída.
+        List<?> filas;
+        try {
+            filas = entityManager.createNativeQuery("SELECT * FROM articulos WHERE Art_ID = :id FOR UPDATE", ArticuloEntity.class)
+                    .setParameter("id", id)
+                    .getResultList();
+        } catch (RuntimeException ex) {
+            throw ArticuloRestricciones.traducir(ex, id, "bloqueo");
+        }
+        return filas.stream().map(ArticuloEntity.class::cast).findFirst().map(articuloMapper::toDomainModel);
     }
 
     @Override

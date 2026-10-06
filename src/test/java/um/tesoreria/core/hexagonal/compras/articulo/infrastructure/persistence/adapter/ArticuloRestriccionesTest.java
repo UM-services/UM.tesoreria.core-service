@@ -82,6 +82,31 @@ class ArticuloRestriccionesTest {
     }
 
     @Test
+    void fkSinNombreExtraido_respuestaGenericaSinNpe() {
+        assertThat(ArticuloRestricciones.traducir(violacion(1452, "a foreign key constraint fails", null), 7L, "alta"))
+                .isInstanceOfSatisfying(ArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isNull());
+        assertThat(ArticuloRestricciones.traducir(violacion(1451, "a foreign key constraint fails", null), 7L, "baja"))
+                .isInstanceOfSatisfying(ArticuloConflictException.class, ex -> assertThat(ex.getReferencias()).isEmpty());
+    }
+
+    @Test
+    void interbloqueo_bloqueadoReintentable_yEsperaVencida_bloqueadoSinReintento() {
+        var interbloqueo = new org.springframework.dao.CannotAcquireLockException("x",
+                new org.hibernate.exception.LockAcquisitionException("x", new SQLException("Deadlock found", "40001", 1213)));
+        var esperaVencida = new org.springframework.dao.CannotAcquireLockException("x",
+                new org.hibernate.exception.LockAcquisitionException("x", new SQLException("Lock wait timeout exceeded", "HY000", 1205)));
+
+        assertThat(ArticuloRestricciones.traducir(interbloqueo, 7L, "edición")).isInstanceOfSatisfying(ArticuloConflictException.class, ex -> {
+            assertThat(ex.getMotivo()).isEqualTo(Motivo.BLOQUEADO);
+            assertThat(ex.isReintentable()).isTrue();
+        });
+        assertThat(ArticuloRestricciones.traducir(esperaVencida, 7L, "bloqueo")).isInstanceOfSatisfying(ArticuloConflictException.class, ex -> {
+            assertThat(ex.getMotivo()).isEqualTo(Motivo.BLOQUEADO);
+            assertThat(ex.isReintentable()).isFalse();
+        });
+    }
+
+    @Test
     void otroError_sigueSinTraducir() {
         var original = new DataIntegrityViolationException("x", new SQLException("Data too long", "22001", 1406));
 

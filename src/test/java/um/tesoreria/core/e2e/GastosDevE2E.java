@@ -14,8 +14,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -30,25 +28,22 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * Escribe en tablas reales de dev, por eso solo corre a pedido: requiere {@code E2E_BASE_URL} además de {@code IT_DB_*}
  * y no lo levantan ni surefire ni failsafe por nombre ({@code -Dit.test=GastosDevE2E} lo ejecuta).
  * <p>
- * Aislamiento: solo usa ids reservados (999001..999004) marcados con {@link #MARCA}; si alguno existe, aborta sin escribir.
- * Cada escenario limpia lo suyo aunque falle; al final se barre por la marca, se restauran los AUTO_INCREMENT y se
- * comprueba que el CHECKSUM de las tablas tocadas es el de antes. La base se usa solo para verificar estado y limpiar;
- * el comportamiento se ejerce únicamente por HTTP.
+ * Aislamiento ({@link DevDbReservas}): solo ids reservados con la marca; si alguno existe, aborta sin escribir. Cada
+ * escenario limpia lo suyo aunque falle; al final se restauran los AUTO_INCREMENT y se exige el mismo CHECKSUM que antes.
+ * La única baja sobre un artículo real (con entregas) lleva respaldo y se repone si una regresión la dejara pasar.
+ * La base se usa solo para verificar estado y limpiar; el comportamiento se ejerce únicamente por HTTP.
  */
 @EnabledIfEnvironmentVariable(named = "E2E_BASE_URL", matches = ".+")
 @EnabledIfEnvironmentVariable(named = "IT_DB_HOST", matches = ".+")
 class GastosDevE2E {
 
-    static final String MARCA = "E2E-405";
+    static final String MARCA = DevDbReservas.MARCA;
     static final long ID_ALTA = 999_001L, ID_ASIGNACION = 999_002L, ID_BAJA = 999_003L, ID_INEXISTENTE = 999_404L;
-    static final List<String> TABLAS = List.of("articulos", "ubicacion_articulo", "gestion_escritura_historial");
 
     static final HttpClient HTTP = HttpClient.newBuilder().connectTimeout(java.time.Duration.ofSeconds(5)).build();
     static final JsonMapper JSON = JsonMapper.builder().build();
     static String base;
-    static Connection db;
-    static Map<String, Long> estadoInicial;
-    static Map<String, Long> autoIncrementInicial;
+    static DevDbReservas dev;
 
     Integer ubicacion;
     BigDecimal cuentaA, cuentaB, cuentaInexistente;
@@ -56,44 +51,33 @@ class GastosDevE2E {
     @BeforeAll
     static void conectarYFotografiar() throws Exception {
         base = System.getenv("E2E_BASE_URL").replaceAll("/$", "");
-        db = DriverManager.getConnection("jdbc:mysql://%s:%s/%s?useSSL=false&connectTimeout=5000".formatted(
-                        System.getenv("IT_DB_HOST"), System.getenv().getOrDefault("IT_DB_PORT", "3306"),
-                        System.getenv().getOrDefault("IT_DB_NAME", "tesium")),
-                System.getenv("IT_DB_USER"), System.getenv("IT_DB_PASSWORD"));
-        assumeTrue(numero("SELECT COUNT(*) FROM articulos WHERE Art_ID BETWEEN 999001 AND 999404") == 0,
-                "los ids reservados del E2E ya existen en dev: no se toca nada");
-        assumeTrue(numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id BETWEEN 999001 AND 999404") == 0,
-                "hay vínculos con ids reservados del E2E: no se toca nada");
-        estadoInicial = checksums();
-        autoIncrementInicial = autoIncrements();
+        dev = DevDbReservas.abrir();
+        assumeTrue(dev.rangoLibre(), "hay filas con ids reservados del E2E en dev: no se toca nada");
+        dev.fotografiar();
     }
 
     @BeforeEach
     void datosDeReferencia() throws SQLException {
         ubicacion = (int) numero("SELECT MIN(ubicacion_id) FROM ubicacion");
-        var cuentas = db.createStatement().executeQuery("SELECT pla_cuenta FROM plancta ORDER BY pla_cuenta LIMIT 2");
-        cuentas.next(); cuentaA = cuentas.getBigDecimal(1);
-        cuentas.next(); cuentaB = cuentas.getBigDecimal(1);
+        try (var st = dev.db.createStatement(); var cuentas = st.executeQuery("SELECT pla_cuenta FROM plancta ORDER BY pla_cuenta LIMIT 2")) {
+            cuentas.next(); cuentaA = cuentas.getBigDecimal(1);
+            cuentas.next(); cuentaB = cuentas.getBigDecimal(1);
+        }
         cuentaInexistente = BigDecimal.valueOf(numero("SELECT MAX(pla_cuenta) + 1 FROM plancta"));
     }
 
     @AfterEach
     void limpiarLoPropio() throws SQLException {
-        barrer();
+        dev.barrer();
     }
 
     @AfterAll
     static void restaurarYVerificar() throws Exception {
-        if (db == null) return;
+        if (dev == null) return;
         try {
-            if (estadoInicial == null) return; // abortó antes de escribir
-            barrer();
-            restaurarAutoIncrements();
-            assertThat(autoIncrements()).as("AUTO_INCREMENT como antes").isEqualTo(autoIncrementInicial);
-            assertThat(checksums()).as("tablas tocadas idénticas a antes del E2E (si difiere, ver si otro usuario escribió en dev)")
-                    .isEqualTo(estadoInicial);
+            if (dev.fotografiado()) dev.restaurarYVerificar(); // si abortó antes de escribir, no hay nada que restaurar
         } finally {
-            db.close();
+            dev.close();
         }
     }
 
@@ -164,8 +148,15 @@ class GastosDevE2E {
     void bajaDeArticuloRealConEntregas_409SinBorrar() throws Exception {
         long real = numero("SELECT MIN(NeD_Art_ID) FROM entrega_detalle WHERE NeD_Art_ID > 0");
         var antes = numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = " + real);
+        // Es un artículo real: si una regresión dejara pasar la baja, se repone tal cual estaba
+        var respaldo = dev.respaldar(real);
 
-        var baja = delete("/articulo/" + real);
+        HttpResponse<String> baja;
+        try {
+            baja = delete("/articulo/" + real);
+        } finally {
+            assertThat(respaldo.restaurarSiFalta()).as("la baja de un artículo con entregas no debe borrar nada").isFalse();
+        }
 
         assertProblema(baja, 409, "ARTICULO_REFERENCIADO");
         // MySQL informa la primera FK que falla; este artículo tiene entregas y vínculos
@@ -184,66 +175,14 @@ class GastosDevE2E {
         assertProblema(delete("/articulo/" + ID_BAJA), 404, "ARTICULO_NO_ENCONTRADO");
     }
 
-    // --- limpieza y estado ---
-
-    /** Borra solo filas de ids reservados; un artículo sin la marca no se toca (lo habría creado otro). */
-    static void barrer() throws SQLException {
-        try (var st = db.createStatement()) {
-            st.executeUpdate("DELETE FROM ubicacion_articulo WHERE articulo_id BETWEEN 999001 AND 999404");
-            st.executeUpdate("DELETE FROM articulos WHERE Art_ID BETWEEN 999001 AND 999404 AND Art_Nombre LIKE '" + MARCA + "%'");
-        }
-    }
-
-    static void restaurarAutoIncrements() throws SQLException {
-        try (var st = db.createStatement()) {
-            // Sin trabar a otros: si alguien tiene la tabla tomada, falla rápido en lugar de encolar
-            st.execute("SET SESSION lock_wait_timeout = 5");
-            for (var e : autoIncrementInicial.entrySet()) {
-                if (!e.getValue().equals(autoIncrements().get(e.getKey()))) {
-                    st.execute("ALTER TABLE " + e.getKey() + " AUTO_INCREMENT = " + e.getValue());
-                }
-            }
-        }
-    }
-
-    static Map<String, Long> checksums() throws SQLException {
-        Map<String, Long> r = new LinkedHashMap<>();
-        for (var t : TABLAS) {
-            try (var rs = db.createStatement().executeQuery("CHECKSUM TABLE " + t)) {
-                rs.next();
-                r.put(t + ".checksum", rs.getLong(2));
-            }
-            r.put(t + ".filas", numero("SELECT COUNT(*) FROM " + t));
-        }
-        return r;
-    }
-
-    static Map<String, Long> autoIncrements() throws SQLException {
-        Map<String, Long> r = new LinkedHashMap<>();
-        // information_schema.TABLES cachea AUTO_INCREMENT en 5.7: se fuerza la lectura
-        try (var st = db.createStatement()) {
-            st.execute("SET SESSION information_schema_stats_expiry = 0");
-        } catch (SQLException sinVariable) {
-            // MySQL 5.7 no tiene esa variable y lee el valor actual
-        }
-        for (var t : List.of("articulos", "ubicacion_articulo")) {
-            try (var rs = db.createStatement().executeQuery("SHOW TABLE STATUS LIKE '" + t + "'")) {
-                rs.next();
-                r.put(t, rs.getLong("Auto_increment"));
-            }
-        }
-        return r;
-    }
+    // --- estado ---
 
     static long numero(String sql) throws SQLException {
-        try (var rs = db.createStatement().executeQuery(sql)) {
-            rs.next();
-            return rs.getLong(1);
-        }
+        return dev.numero(sql);
     }
 
     static Map<String, Object> fila(long id) throws SQLException {
-        try (var rs = db.createStatement().executeQuery(
+        try (var st = dev.db.createStatement(); var rs = st.executeQuery(
                 "SELECT Art_Nombre, Art_Tipo, Art_Habilitado + 0, Art_Cuenta FROM articulos WHERE Art_ID = " + id)) {
             assertThat(rs.next()).as("existe el artículo " + id).isTrue();
             Map<String, Object> r = new LinkedHashMap<>();

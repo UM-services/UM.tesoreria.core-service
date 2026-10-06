@@ -18,6 +18,7 @@ final class UbicacionArticuloRestricciones {
 
     static final int CLAVE_DUPLICADA = 1062;
     static final int INTERBLOQUEO = 1213;
+    static final int ESPERA_DE_BLOQUEO_VENCIDA = 1205;
     static final int FK_HIJO_EXISTENTE = 1451;
     static final int FK_PADRE_INEXISTENTE = 1452;
 
@@ -41,6 +42,11 @@ final class UbicacionArticuloRestricciones {
         if (codigo == INTERBLOQUEO) {
             return new UbicacionArticuloConflictException(true, "interbloqueo al asignar " + clave);
         }
+        if (codigo == ESPERA_DE_BLOQUEO_VENCIDA) {
+            // Reintentar sería esperar de nuevo lo mismo: sale como 409
+            log.warn("Asignación {}: espera de bloqueo vencida", clave);
+            return UbicacionArticuloConflictException.bloqueado("espera de bloqueo vencida al asignar " + clave);
+        }
         if (codigo != CLAVE_DUPLICADA && codigo != FK_HIJO_EXISTENTE && codigo != FK_PADRE_INEXISTENTE) {
             return ex;
         }
@@ -48,7 +54,7 @@ final class UbicacionArticuloRestricciones {
         if (codigo == CLAVE_DUPLICADA && UNICO_PAR.equals(restriccion)) {
             return new UbicacionArticuloConflictException(true, "otra transacción insertó " + clave);
         }
-        if (codigo == FK_PADRE_INEXISTENTE && CAMPO_POR_FK.containsKey(restriccion)) {
+        if (codigo == FK_PADRE_INEXISTENTE && restriccion != null && CAMPO_POR_FK.containsKey(restriccion)) {
             var campo = CAMPO_POR_FK.get(restriccion);
             // La validación previa no lo frenó: lo frenó la base
             log.warn("Asignación {}: la base rechazó la escritura por {}", clave, restriccion);
@@ -70,7 +76,7 @@ final class UbicacionArticuloRestricciones {
         return 0;
     }
 
-    /** Nombre que extrae el dialecto de Hibernate (MySQL 8 lo antepone con la tabla: se deja solo el nombre). */
+    /** Nombre que extrae el dialecto de Hibernate (MySQL 8 lo antepone con la tabla: se deja solo el nombre); nulo si no lo extrajo. */
     static String nombreRestriccion(Throwable ex) {
         for (var t = ex; t != null; t = t.getCause()) {
             if (t instanceof ConstraintViolationException cve && cve.getConstraintName() != null) {

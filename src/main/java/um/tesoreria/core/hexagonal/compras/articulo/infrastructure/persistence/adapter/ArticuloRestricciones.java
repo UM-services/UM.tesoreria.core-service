@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Traduce las violaciones de restricción de MySQL al escribir {@code articulos}. Distingue por código de error
+ * Traduce las violaciones de restricción y los errores de bloqueo de MySQL al escribir {@code articulos}. Distingue por código de error
  * y nombre de restricción (leídos de {@code information_schema} de dev el 2026-10-05), nunca por el texto.
  * Un nombre desconocido recibe la respuesta genérica de su código; cualquier otro error sigue sin traducir (500).
  */
@@ -19,6 +19,8 @@ import java.util.Map;
 final class ArticuloRestricciones {
 
     static final int CLAVE_DUPLICADA = 1062;
+    static final int ESPERA_DE_BLOQUEO_VENCIDA = 1205;
+    static final int INTERBLOQUEO = 1213;
     static final int FK_HIJO_EXISTENTE = 1451;
     static final int FK_PADRE_INEXISTENTE = 1452;
 
@@ -32,6 +34,10 @@ final class ArticuloRestricciones {
 
     static RuntimeException traducir(RuntimeException ex, Long articuloId, String operacion) {
         var codigo = codigoMysql(ex);
+        if (codigo == INTERBLOQUEO || codigo == ESPERA_DE_BLOQUEO_VENCIDA) {
+            log.warn("Artículo {} ({}): {}", articuloId, operacion, codigo == INTERBLOQUEO ? "interbloqueo" : "espera de bloqueo vencida");
+            return ArticuloConflictException.bloqueado(articuloId, codigo == INTERBLOQUEO);
+        }
         if (codigo != CLAVE_DUPLICADA && codigo != FK_HIJO_EXISTENTE && codigo != FK_PADRE_INEXISTENTE) {
             return ex;
         }
@@ -40,12 +46,12 @@ final class ArticuloRestricciones {
             case CLAVE_DUPLICADA -> "PRIMARY".equals(restriccion)
                     ? conocida(ArticuloConflictException.idDuplicado(articuloId), restriccion, articuloId, operacion)
                     : desconocida(ArticuloConflictException.conflicto(articuloId), codigo, restriccion, articuloId, operacion);
-            case FK_PADRE_INEXISTENTE -> CAMPO_POR_FK.containsKey(restriccion)
+            case FK_PADRE_INEXISTENTE -> restriccion != null && CAMPO_POR_FK.containsKey(restriccion)
                     ? conocida(new ArticuloValidationException(CAMPO_POR_FK.get(restriccion),
                             "La cuenta indicada no existe en el plan de cuentas."), restriccion, articuloId, operacion)
                     : desconocida(new ArticuloValidationException(null, "Algún dato referenciado no existe."),
                             codigo, restriccion, articuloId, operacion);
-            default -> TABLA_POR_FK.containsKey(restriccion)
+            default -> restriccion != null && TABLA_POR_FK.containsKey(restriccion)
                     ? conocida(ArticuloConflictException.referenciado(articuloId,
                             List.of(new ReferenciaArticulo(TABLA_POR_FK.get(restriccion), null))), restriccion, articuloId, operacion)
                     : desconocida(ArticuloConflictException.referenciado(articuloId, List.of()),
@@ -74,7 +80,7 @@ final class ArticuloRestricciones {
         return 0;
     }
 
-    /** Nombre que extrae el dialecto de Hibernate (MySQL 8 lo antepone con la tabla: se deja solo el nombre). */
+    /** Nombre que extrae el dialecto de Hibernate (MySQL 8 lo antepone con la tabla: se deja solo el nombre); nulo si no lo extrajo. */
     static String nombreRestriccion(Throwable ex) {
         for (var t = ex; t != null; t = t.getCause()) {
             if (t instanceof ConstraintViolationException cve && cve.getConstraintName() != null) {

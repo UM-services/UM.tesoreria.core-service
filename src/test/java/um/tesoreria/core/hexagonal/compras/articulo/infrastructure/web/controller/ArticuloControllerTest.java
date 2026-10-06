@@ -76,6 +76,39 @@ class ArticuloControllerTest {
     }
 
     @Test
+    void edicion_conflictoGenerico_409Conflicto() {
+        when(service.updateArticulo(eq(16L), any())).thenThrow(ArticuloConflictException.conflicto(16L));
+
+        var respuesta = mockMvc.put().uri("/articulo/16").contentType(MediaType.APPLICATION_JSON).content("{\"nombre\":\"x\"}").exchange();
+
+        assertThat(respuesta).hasStatus(409).hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+        assertThat(respuesta).bodyJson().extractingPath("$.codigo").isEqualTo("CONFLICTO");
+        assertThat(respuesta).bodyJson().extractingPath("$.detail").asString().contains("Releé").doesNotContain("Duplicate");
+    }
+
+    @Test
+    void edicion_bloqueada_409ConflictoQuePideReintentar() {
+        when(service.updateArticulo(eq(17L), any())).thenThrow(ArticuloConflictException.bloqueado(17L, false));
+
+        var respuesta = mockMvc.put().uri("/articulo/17").contentType(MediaType.APPLICATION_JSON).content("{}").exchange();
+
+        assertThat(respuesta).hasStatus(409);
+        assertThat(respuesta).bodyJson().extractingPath("$.codigo").isEqualTo("CONFLICTO");
+        assertThat(respuesta).bodyJson().extractingPath("$.detail").asString().contains("tiene tomado el artículo 17");
+    }
+
+    @Test
+    void contenidoNoJson_415ConElMismoContrato() {
+        var respuesta = mockMvc.post().uri("/articulo/").contentType(MediaType.TEXT_PLAIN).content("hola").exchange();
+
+        assertThat(respuesta).hasStatus(415).hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+        assertThat(respuesta).bodyJson().extractingPath("$.codigo").isEqualTo("TIPO_DE_CONTENIDO_NO_SOPORTADO");
+        assertThat(respuesta).bodyJson().extractingPath("$.detail").isEqualTo("El cuerpo tiene que enviarse como application/json.");
+        assertThat(respuesta).headers().containsHeader("Accept");
+        verifyNoInteractions(service);
+    }
+
+    @Test
     void cuerpoMalFormado_400CuerpoInvalido() {
         var respuesta = post("/articulo/", "{\"articuloId\": ");
 

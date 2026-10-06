@@ -68,6 +68,38 @@ class UbicacionArticuloControllerTest {
     }
 
     @Test
+    void asignacion_conflictoNoReintentable_409SinInvitarAReintentar() {
+        when(service.save(any())).thenThrow(new UbicacionArticuloConflictException(false, "1062 desconocido"));
+
+        var respuesta = post(ASIGNACION);
+
+        assertThat(respuesta).hasStatus(409);
+        assertThat(respuesta).bodyJson().extractingPath("$.codigo").isEqualTo("CONFLICTO");
+        assertThat(respuesta).bodyJson().extractingPath("$.detail").asString().contains("choca con otro dato").doesNotContain("reintentá");
+    }
+
+    @Test
+    void asignacion_bloqueada_409QuePideReintentarMasTarde() {
+        when(service.save(any())).thenThrow(UbicacionArticuloConflictException.bloqueado("espera de bloqueo vencida"));
+
+        var respuesta = post(ASIGNACION);
+
+        assertThat(respuesta).hasStatus(409);
+        assertThat(respuesta).bodyJson().extractingPath("$.detail").asString().contains("tiene tomada la asignación");
+    }
+
+    @Test
+    void contenidoNoJson_415ConElMismoContrato() {
+        var respuesta = mockMvc.post().uri("/ubicacionArticulo/").contentType(MediaType.TEXT_PLAIN).content("hola").exchange();
+
+        assertThat(respuesta).hasStatus(415).hasContentType(MediaType.APPLICATION_PROBLEM_JSON);
+        assertThat(respuesta).bodyJson().extractingPath("$.codigo").isEqualTo("TIPO_DE_CONTENIDO_NO_SOPORTADO");
+        assertThat(respuesta).bodyJson().extractingPath("$.detail").isEqualTo("El cuerpo tiene que enviarse como application/json.");
+        assertThat(respuesta).headers().containsHeader("Accept");
+        verifyNoInteractions(service);
+    }
+
+    @Test
     void cuerpoConTipoInvalido_400CuerpoInvalidoConCampo() {
         var respuesta = post("{\"ubicacionId\": \"x\", \"articuloId\": 2}");
 

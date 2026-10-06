@@ -8,6 +8,8 @@ import um.tesoreria.core.hexagonal.compras.articulo.application.exception.Articu
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ArticuloRepository;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -87,6 +89,36 @@ class CreateArticuloUseCaseImplTest {
         rechaza(valido().nombre("n".repeat(151)).build(), "nombre");
         rechaza(valido().descripcion("d".repeat(65)).build(), "descripcion");
         rechaza(valido().unidad("u".repeat(17)).build(), "unidad");
+    }
+
+    @Test
+    void numerosQueEntranEnSusColumnas_seAceptan() {
+        useCase.createArticulo(valido().precio(new BigDecimal("99999999999999.99")).numeroCuenta(new BigDecimal("99999999999"))
+                .stockMinimo(2147483647L).inventariable((byte) 1).build());
+        useCase.createArticulo(valido().precio(new BigDecimal("-0.50")).numeroCuenta(new BigDecimal("5.101E+7"))
+                .stockMinimo(-2147483648L).build());
+    }
+
+    @Test
+    void precioFueraDeDecimal16_2_400() {
+        rechaza(valido().precio(new BigDecimal("1e999999999")).build(), "precio");
+        rechaza(valido().precio(new BigDecimal("1e-999999999")).build(), "precio");
+        rechaza(valido().precio(new BigDecimal("100000000000000")).build(), "precio");
+        rechaza(valido().precio(new BigDecimal("1.234")).build(), "precio");
+    }
+
+    @Test
+    void cuentaFueraDeDecimal11_0_400() {
+        rechaza(valido().numeroCuenta(new BigDecimal("1e999999999")).build(), "numeroCuenta");
+        rechaza(valido().numeroCuenta(new BigDecimal("100000000000")).build(), "numeroCuenta");
+        rechaza(valido().numeroCuenta(new BigDecimal("51010101.5")).build(), "numeroCuenta");
+    }
+
+    @Test
+    void inventariableYStockFueraDeColumna_400() {
+        rechaza(valido().inventariable((byte) 2).build(), "inventariable");
+        rechaza(valido().stockMinimo(2147483648L).build(), "stockMinimo");
+        rechaza(valido().stockMinimo(-2147483649L).build(), "stockMinimo");
     }
 
     private void rechaza(Articulo articulo, String campo) {

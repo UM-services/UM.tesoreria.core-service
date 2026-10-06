@@ -37,6 +37,17 @@ class UbicacionArticuloRestriccionesTest {
     }
 
     @Test
+    void esperaDeBloqueoVencida_bloqueadoSinReintento() {
+        var sql = new SQLException("Lock wait timeout exceeded; try restarting transaction", "HY000", 1205);
+        var original = new CannotAcquireLockException("x", new LockAcquisitionException("x", sql));
+
+        assertThat(UbicacionArticuloRestricciones.traducir(original, 1, 2L)).isInstanceOfSatisfying(UbicacionArticuloConflictException.class, ex -> {
+            assertThat(ex.isReintentable()).isFalse();
+            assertThat(ex.isBloqueado()).isTrue();
+        });
+    }
+
+    @Test
     void duplicadoDeOtraClave_conflictoNoReintentable() {
         var traducida = UbicacionArticuloRestricciones.traducir(violacion(1062, "PRIMARY"), 1, 2L);
 
@@ -56,6 +67,12 @@ class UbicacionArticuloRestriccionesTest {
         var traducida = UbicacionArticuloRestricciones.traducir(violacion(1452, "ubicacion_articulo_ibfk_9"), 1, 2L);
 
         assertThat(traducida).isInstanceOfSatisfying(UbicacionArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isNull());
+    }
+
+    @Test
+    void fkSinNombreExtraido_respuestaGenericaSinNpe() {
+        assertThat(UbicacionArticuloRestricciones.traducir(violacion(1452, null), 1, 2L))
+                .isInstanceOfSatisfying(UbicacionArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isNull());
     }
 
     @Test
