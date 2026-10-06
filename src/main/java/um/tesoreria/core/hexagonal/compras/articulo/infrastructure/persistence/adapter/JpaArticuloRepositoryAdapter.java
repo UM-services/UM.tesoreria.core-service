@@ -1,7 +1,9 @@
 package um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.adapter;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloException;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ArticuloRepository;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.entity.ArticuloEntity;
@@ -26,17 +28,37 @@ public class JpaArticuloRepositoryAdapter implements ArticuloRepository {
     private final JpaArticuloRepository jpaArticuloRepository;
     private final ArticuloMapper articuloMapper;
     private final ArticuloKeyRepository articuloKeyRepository;
+    private final EntityManager entityManager;
 
     @Override
     public Articulo create(Articulo articulo) {
         ArticuloEntity entity = articuloMapper.toEntity(articulo);
-        ArticuloEntity saved = jpaArticuloRepository.save(entity);
-        return articuloMapper.toDomainModel(saved);
+        try {
+            // persist inserta siempre (save haría merge y pisaría un id existente); el flush trae el error acá
+            entityManager.persist(entity);
+            entityManager.flush();
+        } catch (RuntimeException ex) {
+            throw ArticuloRestricciones.traducir(ex, articulo.getArticuloId(), "alta");
+        }
+        return articuloMapper.toDomainModel(entity);
     }
 
     @Override
     public Optional<Articulo> findById(Long id) {
         return jpaArticuloRepository.findById(id).map(articuloMapper::toDomainModel);
+    }
+
+    @Override
+    public Optional<Articulo> findByIdForUpdate(Long id) {
+        // Primero sin bloqueo: un SELECT ... FOR UPDATE de un id inexistente tomaría un bloqueo de brecha.
+        // FOR UPDATE nativo: con PESSIMISTIC_WRITE, Hibernate 7 genera "FOR UPDATE OF", que MySQL 5.7 no acepta.
+        return jpaArticuloRepository.findById(id)
+                .filter(entity -> !entityManager.createNativeQuery("SELECT Art_ID FROM articulos WHERE Art_ID = :id FOR UPDATE")
+                        .setParameter("id", id).getResultList().isEmpty())
+                .map(entity -> {
+                    entityManager.refresh(entity); // el estado leído después del bloqueo
+                    return articuloMapper.toDomainModel(entity);
+                });
     }
 
     @Override
@@ -64,23 +86,27 @@ public class JpaArticuloRepositoryAdapter implements ArticuloRepository {
     }
 
     @Override
-    public Optional<Articulo> update(Long id, Articulo articulo) {
-        if (jpaArticuloRepository.existsById(id)) {
-            ArticuloEntity entity = articuloMapper.toEntity(articulo);
-            entity.setArticuloId(id);
-            ArticuloEntity updated = jpaArticuloRepository.save(entity);
-            return Optional.of(articuloMapper.toDomainModel(updated));
+    public Articulo update(Articulo articulo) {
+        Long id = articulo.getArticuloId();
+        ArticuloEntity entity = jpaArticuloRepository.findById(id).orElseThrow(() -> new ArticuloException(id));
+        articuloMapper.copyBusinessFields(articulo, entity);
+        try {
+            entityManager.flush();
+        } catch (RuntimeException ex) {
+            throw ArticuloRestricciones.traducir(ex, id, "edición");
         }
-        return Optional.empty();
+        return articuloMapper.toDomainModel(entity);
     }
 
     @Override
-    public boolean deleteById(Long id) {
-        if (jpaArticuloRepository.existsById(id)) {
-            jpaArticuloRepository.deleteById(id);
-            return true;
+    public void deleteById(Long id) {
+        ArticuloEntity entity = jpaArticuloRepository.findById(id).orElseThrow(() -> new ArticuloException(id));
+        try {
+            entityManager.remove(entity);
+            entityManager.flush();
+        } catch (RuntimeException ex) {
+            throw ArticuloRestricciones.traducir(ex, id, "baja");
         }
-        return false;
     }
 
     @Override

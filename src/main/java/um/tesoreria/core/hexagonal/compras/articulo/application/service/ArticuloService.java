@@ -36,12 +36,12 @@ public class ArticuloService {
         return getAllArticulosUseCase.getAllArticulos();
     }
 
-    public Optional<Articulo> updateArticulo(Long id, Articulo articulo) {
-        return updateArticuloUseCase.updateArticulo(id, articulo);
+    public Articulo updateArticulo(Long id, Articulo cambios) {
+        return updateArticuloUseCase.updateArticulo(id, cambios);
     }
 
-    public boolean deleteArticulo(Long id) {
-        return deleteArticuloUseCase.deleteArticulo(id);
+    public void deleteArticulo(Long id) {
+        deleteArticuloUseCase.deleteArticulo(id);
     }
 
     public Articulo getNewArticulo() {

@@ -1,0 +1,88 @@
+package um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.adapter;
+
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
+import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloConflictException;
+import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloValidationException;
+import um.tesoreria.core.hexagonal.compras.articulo.domain.model.ReferenciaArticulo;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Traduce las violaciones de restricción de MySQL al escribir {@code articulos}. Distingue por código de error
+ * y nombre de restricción (leídos de {@code information_schema} de dev el 2026-10-05), nunca por el texto.
+ * Un nombre desconocido recibe la respuesta genérica de su código; cualquier otro error sigue sin traducir (500).
+ */
+@Slf4j
+final class ArticuloRestricciones {
+
+    static final int CLAVE_DUPLICADA = 1062;
+    static final int FK_HIJO_EXISTENTE = 1451;
+    static final int FK_PADRE_INEXISTENTE = 1452;
+
+    static final Map<String, String> CAMPO_POR_FK = Map.of("articulos_ibfk_1", "numeroCuenta");
+    static final Map<String, String> TABLA_POR_FK = Map.of(
+            "entrega_detalle_ibfk_2", "entrega_detalle",
+            "ubicacion_articulo_ibfk_2", "ubicacion_articulo");
+
+    private ArticuloRestricciones() {
+    }
+
+    static RuntimeException traducir(RuntimeException ex, Long articuloId, String operacion) {
+        var codigo = codigoMysql(ex);
+        if (codigo != CLAVE_DUPLICADA && codigo != FK_HIJO_EXISTENTE && codigo != FK_PADRE_INEXISTENTE) {
+            return ex;
+        }
+        var restriccion = nombreRestriccion(ex);
+        return switch (codigo) {
+            case CLAVE_DUPLICADA -> "PRIMARY".equals(restriccion)
+                    ? conocida(ArticuloConflictException.idDuplicado(articuloId), restriccion, articuloId, operacion)
+                    : desconocida(ArticuloConflictException.conflicto(articuloId), codigo, restriccion, articuloId, operacion);
+            case FK_PADRE_INEXISTENTE -> CAMPO_POR_FK.containsKey(restriccion)
+                    ? conocida(new ArticuloValidationException(CAMPO_POR_FK.get(restriccion),
+                            "La cuenta indicada no existe en el plan de cuentas."), restriccion, articuloId, operacion)
+                    : desconocida(new ArticuloValidationException(null, "Algún dato referenciado no existe."),
+                            codigo, restriccion, articuloId, operacion);
+            default -> TABLA_POR_FK.containsKey(restriccion)
+                    ? conocida(ArticuloConflictException.referenciado(articuloId,
+                            List.of(new ReferenciaArticulo(TABLA_POR_FK.get(restriccion), null))), restriccion, articuloId, operacion)
+                    : desconocida(ArticuloConflictException.referenciado(articuloId, List.of()),
+                            codigo, restriccion, articuloId, operacion);
+        };
+    }
+
+    private static RuntimeException conocida(RuntimeException traducida, String restriccion, Long articuloId, String operacion) {
+        // La validación previa no lo frenó: lo frenó la base
+        log.warn("Artículo {} ({}): la base rechazó la escritura por {}", articuloId, operacion, restriccion);
+        return traducida;
+    }
+
+    private static RuntimeException desconocida(RuntimeException traducida, int codigo, String restriccion, Long articuloId, String operacion) {
+        log.error("Artículo {} ({}): restricción desconocida {} (error {}); respuesta genérica", articuloId, operacion, restriccion, codigo);
+        return traducida;
+    }
+
+    /** Código de error de MySQL de la primera {@link SQLException} de la cadena; 0 si no hay. */
+    static int codigoMysql(Throwable ex) {
+        for (var t = ex; t != null; t = t.getCause()) {
+            if (t instanceof SQLException sql) {
+                return sql.getErrorCode();
+            }
+        }
+        return 0;
+    }
+
+    /** Nombre que extrae el dialecto de Hibernate (MySQL 8 lo antepone con la tabla: se deja solo el nombre). */
+    static String nombreRestriccion(Throwable ex) {
+        for (var t = ex; t != null; t = t.getCause()) {
+            if (t instanceof ConstraintViolationException cve && cve.getConstraintName() != null) {
+                var nombre = cve.getConstraintName();
+                return nombre.substring(nombre.lastIndexOf('.') + 1);
+            }
+        }
+        return null;
+    }
+
+}

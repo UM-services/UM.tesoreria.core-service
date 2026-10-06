@@ -8,12 +8,16 @@ import um.tesoreria.core.model.PaginatedResponse;
 
 
 public interface ArticuloRepository {
+    /** Inserta; nunca sobrescribe un artículo existente. */
     Articulo create(Articulo articulo);
     Optional<Articulo> findById(Long id);
+    /** Lee y bloquea la fila hasta el fin de la transacción; si no existe no bloquea nada. */
+    Optional<Articulo> findByIdForUpdate(Long id);
     List<Articulo> findAll();
     PaginatedResponse<Articulo> findAllPaginatedByTipo(String tipo, int page, int size);
     List<ArticuloSearch> findAllByStrings(List<String> conditions);
-    Optional<Articulo> update(Long id, Articulo articulo);
-    boolean deleteById(Long id);
+    /** Guarda los campos de negocio sobre la fila existente {@code articulo.articuloId}. */
+    Articulo update(Articulo articulo);
+    void deleteById(Long id);
     Optional<Articulo> findLast();
 }
