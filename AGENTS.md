@@ -42,11 +42,11 @@ mvn -q -DskipTests compile                 # chequeo rápido de compilación (lo
 mvn test                                   # suites unitarias + slice tests (H2 en memoria, sin red/BD/Kafka)
 mvn -Dtest=GetEstadoChequeraUseCaseImplTest test     # un test puntual
 mvn -B verify                              # todo + JaCoCo (es lo que corre CI)
-mvn -Pit verify                            # + 3 IT contra MySQL REAL (ver .env abajo; requiere red a la BD)
+mvn -Pit verify                            # + 4 IT contra MySQL REAL (ver .env abajo; requiere red a la BD)
 mvn spring-boot:run                        # local: levanta en :8092 (APP_PORT); necesita MySQL alcanzable; Consul/Kafka pueden fallar → ver overrides §8
 ```
 
-- Pruebas de integración (perfil `it`, en memoria: `mvn -Pit verify`): crear `.env` en la raíz (ignorada por Git) con `IT_DB_HOST/IT_DB_PORT/IT_DB_NAME/IT_DB_USER/IT_DB_PASSWORD` (cuenta de solo lectura; `application-it.yml` deshabilita Consul, Kafka y mail, usa `ddl-auto: none` y pool read-only). Maven no carga `.env` solo: `set -a; . ./.env; set +a`. Si no hay datos esperados (p. ej. asignaciones de facultad con chequeras), los IT fallan con mensaje explícito.
+- Pruebas de integración (perfil `it`, en memoria: `mvn -Pit verify`): crear `.env` en la raíz (ignorada por Git) con `IT_DB_HOST/IT_DB_PORT/IT_DB_NAME/IT_DB_USER/IT_DB_PASSWORD` (cuenta de solo lectura; `application-it.yml` deshabilita Consul, Kafka y mail, usa `ddl-auto: none` y pool read-only). Maven no carga `.env` solo: `set -a; . ./.env; set +a`. Si no hay datos esperados (p. ej. asignaciones de facultad con chequeras), los IT fallan con mensaje explícito. Excepción: `EscrituraHistorialDevDbIT` (#404) usa su propia conexión con escritura **solo sobre tablas `TEMPORARY`** de la sesión y un `StatementInspector` que corta cualquier escritura a tablas reales; necesita además el permiso `CREATE TEMPORARY TABLES` (sin `IT_DB_HOST` se saltea).
 - Swagger UI: `/swagger-ui/index.html` · spec: `/v3/api-docs` · actuator/prometheus expuestos (`management.endpoints.web.exposure.include: "*"`).
 - Docker (multi-stage `maven:3-eclipse-temurin-25-alpine` → `temurin:25-jre-alpine`, usuario no-root): `docker build -t tesoreria-core .` — el JAR se nombra `um.tesoreria.core-service.jar` (`finalName`).
 

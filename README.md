@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 6.1.0**
+**Versión actual (SemVer): 6.2.0**
+
+## Novedades 6.2.0 (verificado en código)
+- **feat(gestion/escrituraHistorial)**: Historial transaccional de escrituras de Gestión (#404). `RegistrarEscrituraHistorialUseCase` registra alta, edición y baja (operación, entidad, clave, valores anterior/nuevo en JSON con formato fijo) en la misma transacción de la operación de negocio (`MANDATORY`); si una falla, no queda ninguna. Sin actor verificado ni consulta pública. Tabla `gestion_escritura_historial` (`docs/sql/V404__gestion_escritura_historial.sql`, aplicada en desarrollo); `fecha` la pone MySQL como el `Now()` de VB6. Contrato y guía: `docs/gestion-escritura-historial.md`.
+- **test**: `EscrituraHistorialDevDbIT` prueba el historial contra la base de desarrollo real con tablas `TEMPORARY`, sin dejar datos (ver "Pruebas de integración con MySQL").
+
+> Basado en `git diff origin/develop` y en `.conductor/run-it.sh` (219 unitarias + 11 IT en verde contra la base de desarrollo, con `develop` 6.1.0 integrado). Capacidad nueva y aditiva: incremento minor de SemVer (`6.1.0` → `6.2.0`, `pom.xml`). Fecha: 2026-10-05.
 
 ## Novedades 6.1.0 (verificado en código)
 - feat(umhub/consulta): Nuevo slice hexagonal de **solo lectura** `hexagonal/umhub/consulta/` con los endpoints `GET /api/tesoreria/core/umhub/consulta/persona/{numeroDocumento}` (identidad + tipos de documento registrados + contacto: `emailPersonal`, `emailInstitucional`, `telefono`, `movil` + domicilio con provincia/localidad **con nombres resueltos** vía `ProvinciaService`/`LocalidadService`) y `GET .../persona/{numeroDocumento}/deuda[?extended=true]` (deuda agregada por chequera y, en extendido, vencimientos con `init_point` de MercadoPago). Pensados para `tesoreria-umhub-service`: la consulta usa **sólo el número de documento** (validado `^\d{6,10}$`, 400 si no; 404 si no existe la persona). DTOs filtrados: nunca `password`/`cbu`/`cuit`/`uniqueId`/`hpum`/`guaraniPersona` y nunca `emailPagador`/`laboral` (datos de terceros).
@@ -1343,6 +1349,12 @@ mvn -Pit verify
 ```
 
 El perfil usa `ddl-auto: none` y conexiones de solo lectura; no prepara datos de prueba ni modifica el esquema.
+
+Excepción: `EscrituraHistorialDevDbIT` (historial de escrituras, #404) usa una conexión propia con escritura sobre
+tablas `TEMPORARY` de su sesión (la tabla del historial y una copia de `proveedores`), que desaparecen al cerrarse.
+Hibernate tiene prohibido escribir en cualquier otra tabla durante el test. Necesita que `IT_DB_USER` tenga el
+permiso `CREATE TEMPORARY TABLES`; lo más seguro es un usuario con solo `SELECT` y `CREATE TEMPORARY TABLES`, así
+ninguna escritura puede llegar a una tabla real. Sin `IT_DB_HOST` el test se saltea.
 
 ## Uso
 

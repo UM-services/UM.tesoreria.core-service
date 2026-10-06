@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 6.1.0** (actualizada: 2026-10-04)
+**Versión actual del servicio: 6.2.0** (actualizada: 2026-10-05)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -28,6 +28,8 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-contrato.mmd`: Arquitectura hexagonal del módulo Contrato (gestión de contratos) - v3.19.0.
 - `hexagonal-chequeraSerie.mmd`: Arquitectura hexagonal del módulo ChequeraSerie (consulta preuniversitaria desde datos Guaraní, incompletas por `claseChequeraId`, chequeras por usuario con deuda vencida y chequeras por las tres asignaciones del usuario —facultad, sede y clase— en `/usuario/{userId}/lectivo/{lectivoId}/asignaciones`) - v4.8.0.
 - `hexagonal-estadoChequera.mmd`: Arquitectura hexagonal del módulo EstadoChequera bajo `chequera/` (estado de la chequera como JSON de solo lectura para el PDF "Estado de Chequera" de report-service: `GET /api/tesoreria/core/chequera/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` — sin `{debitoTipoId}` desde `6.0.0` —, puerto `GetEstadoChequeraUseCase` de 4 argumentos, records `EstadoChequera`/`ProductoEstado`/`CuotaEstado`/`DebitoEstado` con `tipoDebito` (débitos de todos los tipos VISA + Directo), sin persistencia propia y sin salida del `generateEstadoPdf` eliminado en `5.0.0`) - v5.0.0 (nuevo módulo; v6.0.0 retira `debitoTipoId` de la ruta y agrega `tipoDebito`).
+- `hexagonal-escrituraHistorial.mmd`: Arquitectura hexagonal del módulo EscrituraHistorial (historial transaccional de altas/ediciones/bajas de Gestión; contrato `RegistrarEscrituraHistorialUseCase` con propagación `MANDATORY`; sin consulta pública ni actor verificado; script `docs/sql/V404__gestion_escritura_historial.sql`) - v6.2.0 (nuevo módulo, issue #404).
+- `gestion-escritura-historial.md`: Contrato reutilizable y guía de integración del historial de escrituras (#404).
 - `hexagonal-baja.mmd`: Arquitectura hexagonal del módulo Baja (gestión de bajas de chequeras) - v3.36.0 (reubicado bajo `chequera/`).
 - `hexagonal-campanha.mmd`: Arquitectura hexagonal del módulo Campanha (gestión de campañas UM Hub) - v3.24.0.
 - `hexagonal-chequeraProducto.mmd`: Arquitectura hexagonal del módulo Producto (gestión de productos chequera) - v3.30.0 (nuevo módulo).
