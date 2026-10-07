@@ -15,6 +15,7 @@ public class UsuarioAuth {
     private String login;
     private String password;
     private String nombre;
+    private Integer dependenciaId;
     private Integer geograficaId;
     private Byte imprimeChequera;
     private Byte numeroOpManual;

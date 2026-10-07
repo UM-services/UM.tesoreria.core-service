@@ -25,7 +25,7 @@ import um.tesoreria.core.service.LocalidadService;
  *
  */
 @RestController
-@RequestMapping("/localidad")
+@RequestMapping({"/localidad", "/api/tesoreria/core/localidad"})
 @RequiredArgsConstructor
 public class LocalidadController {
 
