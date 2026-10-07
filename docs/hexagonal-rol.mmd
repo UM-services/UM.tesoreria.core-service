@@ -1,0 +1,51 @@
+---
+title: Arquitectura Hexagonal - Módulo Rol (v6.3.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["Rol<br/>nombre, descripcion, aplicacion, activo"]
+        IN["CreateRolUseCase<br/>GetRolByIdUseCase<br/>GetAllRolesUseCase<br/>UpdateRolUseCase<br/>DeleteRolUseCase"]
+        OUT["RolRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["RolService"]
+        UCs["Create/Get/GetAll/Update/Delete<br/>RolUseCaseImpl"]
+        Exc["RolException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["RolController<br/>/api/tesoreria/core/rol"]
+        DTO["RolRequest<br/>RolResponse"]
+        Map["RolDtoMapper<br/>RolMapper"]
+        Adp["JpaRolRepositoryAdapter"]
+        Ent["RolEntity<br/>tabla rol"]
+        Jpa["JpaRolRepository"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0

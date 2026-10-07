@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 6.2.0** (actualizada: 2026-10-05)
+**Versión actual del servicio: 6.3.0** (actualizada: 2026-10-07)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -45,10 +45,19 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-arancelPorcentaje.mmd`: Arquitectura hexagonal del módulo ArancelPorcentaje (porcentajes por producto) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-asiento.mmd`: Arquitectura hexagonal del módulo Asiento (asientos contables) - v3.29.0 (migración desde Kotlin legacy).
 - `hexagonal-documento.mmd`: Arquitectura hexagonal del módulo Documento bajo `personas`, incluyendo búsqueda por tipo Guaraní y rutas REST compatibles - v3.50.1.
-- `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario bajo `usuarios/` (gestión de usuarios) - v4.7.0 (`GET /usuario/search`, puertos `GetUsuarioByIdUseCase`/`FindUsuariosBySearchUseCase`, campos `administrador`/`usuarioExterno`, `UsuarioMapper.updateEntity` y PUT estricto con `@Valid`).
+- `hexagonal-usuario.mmd`: Arquitectura hexagonal del módulo Usuario bajo `usuarios/` (gestión de usuarios) - v6.3.0 (`GET /usuario/search`, puertos `GetUsuarioByIdUseCase`/`FindUsuariosBySearchUseCase`, campos `administrador`/`usuarioExterno`/`dependenciaId`, `UsuarioMapper.updateEntity` y PUT estricto con `@Valid`).
 - `hexagonal-usuarioChequeraFacultad.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraFacultad bajo `usuarios/` (facultades de chequera por usuario) - v4.7.0 (nuevo slice en `4.5.0`; en `4.7.0` agrega administración `POST /` idempotente y `DELETE /user/{userId}/facultad/{facultadId}` con validación de referencias vía puertos de `usuario`/`facultad`).
 - `hexagonal-usuarioChequeraClaseChequera.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraClaseChequera bajo `usuarios/` (clases de chequera habilitadas por usuario para filtrar la consulta de chequeras) - v4.7.0 (nuevo slice: `GET /user/{userId}`, `POST /` idempotente y `DELETE /user/{userId}/claseChequera/{claseChequeraId}` con validación vía puertos de `usuario`/`claseChequera`).
 - `hexagonal-usuarioChequeraGeografica.mmd`: Arquitectura hexagonal del módulo UsuarioChequeraGeografica bajo `usuarios/` (sedes geográficas asignadas al usuario) - v4.7.0 (nuevo slice: `GET /user/{userId}`, `POST /` idempotente y `DELETE /user/{userId}/geografica/{geograficaId}` con validación vía puertos de `usuario`/`geografica`).
+- `hexagonal-permiso.mmd`: Arquitectura hexagonal del módulo Permiso (catálogo de claves `modulo.accion`) - v6.3.0 (nuevo slice con CRUD en `/api/tesoreria/core/permiso`).
+- `hexagonal-rol.mmd`: Arquitectura hexagonal del módulo Rol (roles de permisos) - v6.3.0 (nuevo slice con CRUD en `/api/tesoreria/core/rol`).
+- `hexagonal-rolPermiso.mmd`: Arquitectura hexagonal del módulo RolPermiso (matriz rol×permiso) - v6.3.0 (nuevo slice: `GET /rol/{rolId}`, `POST /` idempotente y `DELETE /rol/{rolId}/permiso/{permisoId}`).
+- `hexagonal-usuarioRol.mmd`: Arquitectura hexagonal del módulo UsuarioRol (roles del usuario) - v6.3.0 (nuevo slice: `GET /user/{userId}`, `POST /` idempotente y `DELETE /user/{userId}/rol/{rolId}`).
+- `hexagonal-usuarioPermiso.mmd`: Arquitectura hexagonal del módulo UsuarioPermiso (override individual por usuario) - v6.3.0 (nuevo slice: `GET /user/{userId}`, `PUT /user/{userId}/permiso/{permisoId}` con `{ otorgado: 1|0 }` y `DELETE`).
+- `hexagonal-permisoEfectivo.mmd`: Arquitectura hexagonal del módulo PermisoEfectivo (bundle efectivo del usuario) - v6.3.0 (nuevo slice `GET /api/tesoreria/core/permisoEfectivo/usuario/{userId}`, composición de puertos de entrada de los slices de permisos + puente con los flags legacy de `usuario`).
+- `hexagonal-compraPedido.mmd`: Arquitectura hexagonal del módulo CompraPedido (pedido de compra: ciclo de vida y correlativo al enviar) - v6.3.0 (nuevo slice bajo `compras/pedidos/`, ruta `/api/tesoreria/core/compraPedido`).
+- `hexagonal-compraPedidoItem.mmd`: Arquitectura hexagonal del módulo CompraPedidoItem (detalle del pedido, alta/edición a través del pedido) - v6.3.0 (nuevo slice, `GET /api/tesoreria/core/compraPedidoItem/pedido/{compraPedidoId}`).
+- `hexagonal-compraPedidoSecuencia.mmd`: Arquitectura hexagonal del módulo CompraPedidoSecuencia (correlativo anual atómico con `LAST_INSERT_ID`) - v6.3.0 (nuevo slice interno, sin REST).
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v6.1.0 (sugerencias de personas con chequeras por usuario, v4.6.0; nuevo puerto de entrada `GetPersonasByNumeroUseCase` y método `findAllByPersonaId` en `PersonaRepository`/`JpaPersonaRepositoryAdapter` para consultar todas las filas de un número de documento sin exigir el tipo).
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).

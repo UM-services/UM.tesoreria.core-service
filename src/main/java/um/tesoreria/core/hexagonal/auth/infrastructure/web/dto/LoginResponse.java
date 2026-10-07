@@ -13,6 +13,7 @@ public class LoginResponse {
     private Long userId;
     private String login;
     private String nombre;
+    private Integer dependenciaId;
     private Integer geograficaId;
     private String sede;
     private Byte imprimeChequera;

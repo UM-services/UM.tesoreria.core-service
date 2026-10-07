@@ -11,6 +11,7 @@ public class UsuarioRequest {
     private String password;
     @NotNull
     private String nombre;
+    private Integer dependenciaId;
     @NotNull
     private Integer geograficaId;
     @NotNull
