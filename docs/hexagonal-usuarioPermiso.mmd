@@ -1,0 +1,51 @@
+---
+title: Arquitectura Hexagonal - Módulo UsuarioPermiso (v6.3.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["UsuarioPermiso<br/>userId, permisoId, otorgado, permiso"]
+        IN["SetUsuarioPermisoUseCase<br/>GetUsuarioPermisosByUserIdUseCase<br/>DeleteUsuarioPermisoUseCase"]
+        OUT["UsuarioPermisoRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["UsuarioPermisoService"]
+        UCs["*UseCaseImpl<br/>otorgado 1 otorga / 0 revoca"]
+        Exc["UsuarioPermisoException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["UsuarioPermisoController<br/>/api/tesoreria/core/usuarioPermiso"]
+        DTO["UsuarioPermisoRequest<br/>UsuarioPermisoResponse"]
+        Map["UsuarioPermisoDtoMapper<br/>UsuarioPermisoMapper"]
+        Adp["JpaUsuarioPermisoRepositoryAdapter"]
+        Ent["UsuarioPermisoEntity<br/>tabla usuario_permiso"]
+        Jpa["JpaUsuarioPermisoRepository"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0

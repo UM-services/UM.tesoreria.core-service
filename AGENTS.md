@@ -1,182 +1,208 @@
-# AGENTS.md — Contexto para agentes de IA
+# AGENTS.md — Context for AI agents
 
-Punto de entrada operativo para trabajar en `UM.tesoreria.core-service`. Denso y navegable: usa este archivo para ubicarte y luego abre la fuente de verdad indicada (§9). No dupliques aquí lo que ya vive en `docs/` o en la skill `hexagonal-arch`.
+Operational entry point for working on `UM.tesoreria.core-service`. Dense and navigable: use this file to get oriented and then open the source of truth indicated (§9). Do not duplicate here what already lives in `docs/` or in the `hexagonal-arch` skill.
 
-## 1. Qué es este servicio
+## 1. What this service is
 
-Microservicio **core de Tesorería** de la plataforma UM (GitHub org `UM-services`, repo `UM.tesoreria.core-service`). Gestiona: chequeras (serie/cuota/pago/débito/tipo/clase/estado), personas, domicilios, documentos, legajos, facultades/dependencias/geográficas/ubicaciones, lectivos y cuotas lectivas, política arancelaria, comprobantes AFIP, cuentas y movimientos contables, contratos y cursos-cargo, compras (artículos, proveedores, facturas pendientes), integración **Guaraní** (preuniversitaria/beneficios/ubicaciones), **UM Hub** (campañas y reservas de vacante), usuarios + autenticación, y contexto de pagos **Mercado Pago**.
+**Treasury core** microservice of the UM platform (GitHub org `UM-services`, repo `UM.tesoreria.core-service`). It manages: chequeras (serie/cuota/pago/débito/tipo/clase/estado), personas, domicilios, documentos, legajos, facultades/dependencias/geográficas/ubicaciones, lectivos and lective fees, arancelaria policy, AFIP receipts, accounting accounts and movements, contracts and course-cargo, compras (articles, suppliers, pending invoices, purchase requests — pedido de compra), **Guaraní** integration (preuniversitaria/beneficios/ubicaciones), **UM Hub** (campaigns and vacancy reservations), users + authentication, and **Mercado Pago** payment context.
 
-Contexto distribuido — con quién se habla:
+Distributed context — who it talks to:
 
-| Interlocutor | Canal | Detalle |
+| Counterpart | Channel | Detail |
 |---|---|---|
-| Servicios de facultad (multi-tenant) | REST vía `*FacultadConsumer` (`core/extern/consumer/`, 13 clases + variantes en `view/`) | URL base dinámica por `facultad.apiserver`+`facultad.apiport` (default 80) usando `extern/resolver/FacultadUrlResolver` |
-| `tesoreria-mercadopago-service` | Feign (`core/client/tesoreria/mercadopago/`) | `PreferenceClient`/`PreferenceVacanteClient` crean preferencias de pago |
-| Mercado Pago → core | Kafka | Consume topic `payment-processed` (grupo `tesoreria-core-group`) → `PaymentEventListener` → `MercadoPagoContextService.processPaymentEvent`. Mapeo de tipo: `um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent` → `um.tesoreria.core.event.PaymentProcessedEvent` |
-| Core → envío de chequeras | Kafka | Produce topic `send-chequera` (`service/facade/MailChequeraService`) |
+| Faculty services (multi-tenant) | REST via `*FacultadConsumer` (`core/extern/consumer/`, 13 classes + variants under `view/`) | Dynamic base URL per `facultad.apiserver`+`facultad.apiport` (default 80) using `extern/resolver/FacultadUrlResolver` |
+| `tesoreria-mercadopago-service` | Feign (`core/client/tesoreria/mercadopago/`) | `PreferenceClient`/`PreferenceVacanteClient` create payment preferences |
+| Mercado Pago → core | Kafka | Consumes topic `payment-processed` (group `tesoreria-core-group`) → `PaymentEventListener` → `MercadoPagoContextService.processPaymentEvent`. Type mapping: `um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent` → `um.tesoreria.core.event.PaymentProcessedEvent` |
+| Core → chequera sending | Kafka | Produces topic `send-chequera` (`service/facade/MailChequeraService`) |
 | `haberes-core-service` | Feign (`core/client/haberes/`) | `CargoTipoClient`, `CursoClient` |
-| `tesoreria-sender-service` | Feign (`core/client/tesoreria/sender/ChequeraClient`) | notificación de chequeras |
-| `report-service` | HTTP (consumidor) | Le sirve el JSON del slice `chequera/estadoChequera` (campo a campo: los nombres del contrato NO se cambian sin romper al lector) |
+| `tesoreria-sender-service` | Feign (`core/client/tesoreria/sender/ChequeraClient`) | chequera notification |
+| `report-service` | HTTP (consumer) | Served the JSON of the `chequera/estadoChequera` slice (field by field: the contract names are NOT changed without breaking the reader) |
 
-- **Sin Spring Security** (no está en `pom.xml`): la autenticación vive en el slice `auth` + LDAP legacy (`core/service/UsuarioLdapService`). El servicio confía en la red/gateway; no agregues seguridad por tu cuenta.
-- Registro en **Consul** (descubrimiento; nombre de aplicación `tesoreria-core-service`, tags `tesoreria,core`).
-- Base de datos: MySQL `tesium` con esquema gestionado **fuera** de la app (`ddl-auto: none`); casi todas las tablas ya existen — un cambio de columna exige DDL manual externo.
+- **No Spring Security** (not in `pom.xml`): authentication lives in the `auth` slice + legacy LDAP (`core/service/UsuarioLdapService`). The service trusts the network/gateway; do not add security on your own. See §11 (permissions: catalog, assignment and gating).
+- Registers in **Consul** (discovery; application name `tesoreria-core-service`, tags `tesoreria,core`).
+- Database: MySQL `tesium` with schema managed **outside** the app (`ddl-auto: none`); almost all tables already exist — a column change requires external manual DDL.
 
-## 2. Stack (verificado en `pom.xml`, la fuente de verdad)
+## 2. Stack (verified in `pom.xml`, the source of truth)
 
-- Java **25**, Spring Boot **4.1.1**, Spring Cloud **2025.1.3** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.10** (solo legacy, §4)
-- Version artefacto = versión del servicio: **6.0.0** (SemVer; se bump-ea en release, §7)
-- Datos: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
-- Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient de los consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.0** (Swagger UI)
-- Docs/exports: Apache POI + `openpdf` (reportes), `modelmapper` (solo legacy), Guava, Caffeine (`starter-cache`)
+- Java **25**, Spring Boot **4.1.1**, Spring Cloud **2025.1.3** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.10** (legacy only, §4)
+- Artifact version = service version: **6.0.0** (SemVer; bumped on release, §7)
+- Data: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
+- Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.0** (Swagger UI)
+- Docs/exports: Apache POI + `openpdf` (reports), `modelmapper` (legacy only), Guava, Caffeine (`starter-cache`)
 - `spring-kafka`, `starter-mail`, `starter-actuator` + `micrometer-registry-prometheus`, `json-path`, `jackson-datatype-jsr310`
-- Calidad: JaCoCo (reporte en `target/site/jacoco/jacoco.xml`) → **SonarCloud** (org `um-services`, projectKey `UM-services_UM.tesoreria.core-service`)
-- El README §"Versiones de Dependencias" puede estar desactualizado vs `pom.xml` (p. ej. connector/springdoc): ante duda, `pom.xml`.
+- Quality: JaCoCo (report at `target/site/jacoco/jacoco.xml`) → **SonarCloud** (org `um-services`, projectKey `UM-services_UM.tesoreria.core-service`)
+- The README §"Versiones de Dependencias" may be outdated vs `pom.xml` (e.g. connector/springdoc): when in doubt, `pom.xml`.
 
-## 3. Comandos
+## 3. Commands
 
-No hay wrapper Maven: usa el `mvn` del sistema (JDK 25 vía sdkman; en CI: `setup-java` temurin 25 + Maven cache).
+There is no Maven wrapper: use the system `mvn` (JDK 25 via sdkman; in CI: `setup-java` temurin 25 + Maven cache).
 
 ```bash
-mvn -q -DskipTests compile                 # chequeo rápido de compilación (lo que la mayoría de agentes necesita)
-mvn test                                   # suites unitarias + slice tests (H2 en memoria, sin red/BD/Kafka)
-mvn -Dtest=GetEstadoChequeraUseCaseImplTest test     # un test puntual
-mvn -B verify                              # todo + JaCoCo (es lo que corre CI)
-mvn -Pit verify                            # + 4 IT contra MySQL REAL (ver .env abajo; requiere red a la BD)
-mvn spring-boot:run                        # local: levanta en :8092 (APP_PORT); necesita MySQL alcanzable; Consul/Kafka pueden fallar → ver overrides §8
+mvn -q -DskipTests compile                 # quick compile check (what most agents need)
+mvn test                                   # unit suites + slice tests (in-memory H2, no network/DB/Kafka)
+mvn -Dtest=GetEstadoChequeraUseCaseImplTest test     # a single test
+mvn -B verify                              # everything + JaCoCo (what CI runs)
+mvn -Pit verify                            # + 4 ITs against REAL MySQL (see .env below; needs network to the DB)
+mvn spring-boot:run                        # local: starts on :8092 (APP_PORT); needs reachable MySQL; Consul/Kafka may fail → see overrides §8
 ```
 
-- Pruebas de integración (perfil `it`, en memoria: `mvn -Pit verify`): crear `.env` en la raíz (ignorada por Git) con `IT_DB_HOST/IT_DB_PORT/IT_DB_NAME/IT_DB_USER/IT_DB_PASSWORD` (**ojo: la cuenta de dev en uso tiene ALL PRIVILEGES**, no es de solo lectura: la protección contra escrituras la ponen las pruebas, no la cuenta; `application-it.yml` deshabilita Consul, Kafka y mail, usa `ddl-auto: none` y pool read-only). Maven no carga `.env` solo: `set -a; . ./.env; set +a`. Si no hay datos esperados (p. ej. asignaciones de facultad con chequeras), los IT fallan con mensaje explícito. Excepción: `EscrituraHistorialDevDbIT` (#404) usa su propia conexión con escritura **solo sobre tablas `TEMPORARY`** de la sesión y un `StatementInspector` que corta cualquier escritura a tablas reales; necesita además el permiso `CREATE TEMPORARY TABLES` (sin `IT_DB_HOST` se saltea). Igual `ArticuloDevDbIT` y `UbicacionArticuloDevDbIT` (#405), con copias `TEMPORARY` de `articulos`, `ubicacion_articulo` y `gestion_escritura_historial`. Las E2E `GastosDevE2E` (HTTP contra la app levantada, `E2E_BASE_URL`) y `GastosConcurrenciaDevE2E` escriben en tablas reales y solo corren a pedido (`E2E_DEV_ESCRITURA=si`, `-Dit.test='*IT,*E2E'`): ids reservados 999001..999404, `DevDbReservas` barre lo propio, restaura los AUTO_INCREMENT y compara CHECKSUM; si una corrida se corta, revisar a mano los AUTO_INCREMENT de esas tres tablas.
-- Swagger UI: `/swagger-ui/index.html` · spec: `/v3/api-docs` · actuator/prometheus expuestos (`management.endpoints.web.exposure.include: "*"`).
-- Docker (multi-stage `maven:3-eclipse-temurin-25-alpine` → `temurin:25-jre-alpine`, usuario no-root): `docker build -t tesoreria-core .` — el JAR se nombra `um.tesoreria.core-service.jar` (`finalName`).
+- Integration tests (`it` profile, in-memory: `mvn -Pit verify`): create `.env` at the root (ignored by Git) with `IT_DB_HOST/IT_DB_PORT/IT_DB_NAME/IT_DB_USER/IT_DB_PASSWORD` (**careful: the dev account in use has ALL PRIVILEGES**, it is not read-only: protection against writes comes from the tests, not from the account; `application-it.yml` disables Consul, Kafka and mail, uses `ddl-auto: none` and a read-only pool). Maven does not load `.env` by itself: `set -a; . ./.env; set +a`. If the expected data is missing (e.g. faculty assignments with chequeras), the ITs fail with an explicit message. Exception: `EscrituraHistorialDevDbIT` (#404) uses its own connection with writes **only on `TEMPORARY` tables** of the session and a `StatementInspector` that blocks any write to real tables; it also needs the `CREATE TEMPORARY TABLES` privilege (skipped without `IT_DB_HOST`). Same for `ArticuloDevDbIT` and `UbicacionArticuloDevDbIT` (#405), with `TEMPORARY` copies of `articulos`, `ubicacion_articulo` and `gestion_escritura_historial`. The E2E tests `GastosDevE2E` (HTTP against the running app, `E2E_BASE_URL`) and `GastosConcurrenciaDevE2E` write to real tables and only run on demand (`E2E_DEV_ESCRITURA=si`, `-Dit.test='*IT,*E2E'`): reserved ids 999001..999404, `DevDbReservas` sweeps its own rows, restores AUTO_INCREMENT and compares CHECKSUM; if a run is interrupted, check the AUTO_INCREMENT of those three tables by hand.
+- Swagger UI: `/swagger-ui/index.html` · spec: `/v3/api-docs` · actuator/prometheus exposed (`management.endpoints.web.exposure.include: "*"`).
+- Docker (multi-stage `maven:3-eclipse-temurin-25-alpine` → `temurin:25-jre-alpine`, non-root user): `docker build -t tesoreria-core .` — the JAR is named `um.tesoreria.core-service.jar` (`finalName`).
 
-## 4. Mapa del código (`src/main/java/um/tesoreria/core/`)
+## 4. Code map (`src/main/java/um/tesoreria/core/`)
 
-Tres capas coexisten. **Regla de trabajo: el desarrollo nuevo va al layer hexagonal; el legacy se mantiene y se migra por módulos, no se le agregan features.**
+Three layers coexist. **Working rule: new development goes to the hexagonal layer; legacy is maintained and migrated module by module, no features are added to it.**
 
 ```
-TesoreriaCoreApplication.java        # único @SpringBootApplication, sin profiles extra
-hexagonal/        (51 slices, ~1186 archivos) → §5
-controller/       67 controladores legacy (+ facade/, dto/, view/) — endpoints aún activos
-service/          106 servicios legacy (+ facade/, dto/, transactional/, view/)
-repository/       85 repos legacy · model/ 74 entidades JPA legacy (base Auditable)
-exception/        64 excepciones legacy — NO hay @ControllerAdvice global: cada controlador
-                  maneja errores inline (try/catch → ResponseStatusException 404/400)
-extern/           consumers REST hacia servicios de facultad + FacultadUrlResolver
+TesoreriaCoreApplication.java        # single @SpringBootApplication, no extra profiles
+hexagonal/        (51 slices, ~1186 files) → §5
+controller/       67 legacy controllers (+ facade/, dto/, view/) — endpoints still active
+service/          106 legacy services (+ facade/, dto/, transactional/, view/)
+repository/       85 legacy repos · model/ 74 legacy JPA entities (base Auditable)
+exception/        64 legacy exceptions — there is NO global @ControllerAdvice: each controller
+                  handles errors inline (try/catch → ResponseStatusException 404/400)
+extern/           REST consumers to faculty services + FacultadUrlResolver
 client/           Feign: haberes/core, tesoreria/mercadopago, tesoreria/sender
-listener/ event/  PaymentEventListener + PaymentProcessedEvent (consumo) · SendChequeraEvent (producción)
+listener/ event/  PaymentEventListener + PaymentProcessedEvent (consume) · SendChequeraEvent (produce)
 configuration/    KafkaConsumerConfig, KafkaProducerConfig, RestClientConfig, TesoreriaConfiguration
-kotlin/           60 archivos .kt legacy (model + repository) en proceso de migración a slices
-                  (p. ej. arancelTipo/arancelPorcentaje/asiento migrated, docs/README.md)
+kotlin/           60 legacy .kt files (model + repository) being migrated to slices
+                  (e.g. arancelTipo/arancelPorcentaje/asiento migrated, docs/README.md)
 util/             Tool, Jsonifyable, etc.
-resources/        bootstrap.yml (config principal), config/tesoreria.properties (path.files=/tmp/), banner.txt
+resources/        bootstrap.yml (main config), config/tesoreria.properties (path.files=/tmp/), banner.txt
 ```
 
-## 5. Layers hexagonales: reglas y estado real
+## 5. Hexagonal layers: rules and real state
 
-**Guía formal: skill global `hexagonal-arch`** (`/home/daniel/.agents/skills/hexagonal-arch`). Estructura por slice: `domain/{model,ports/in,ports/out}` → `application/{service,usecases,exception}` → `infrastructure/{persistence/{entity,mapper,repository,adapter},web/{controller,dto,mapper}}`. Nombres: `Find{X}ByIdUseCase`, `Jpa{X}RepositoryAdapter`, `{X}Request/Response`, `{X}DtoMapper`. Reglas duras: `domain/` 100% puro (solo `java.*`+Lombok); `application/` importa solo `domain/`; controladores hablan DTOs, nunca `{X}Entity`; `@Builder.Default` → omitir del builder cuando el origen es null en los mappers; necesidad cross-slice → **detenerse y preguntar al usuario** (no improvisar).
+**Formal guide: global `hexagonal-arch` skill** (`/home/daniel/.agents/skills/hexagonal-arch`). Per-slice structure: `domain/{model,ports/in,ports/out}` → `application/{service,usecases,exception}` → `infrastructure/{persistence/{entity,mapper,repository,adapter},web/{controller,dto,mapper}}`. Names: `Find{X}ByIdUseCase`, `Jpa{X}RepositoryAdapter`, `{X}Request/Response`, `{X}DtoMapper`. Hard rules: `domain/` 100% pure (only `java.*`+Lombok); `application/` imports only `domain/`; controllers speak DTOs, never `{X}Entity`; `@Builder.Default` → omit from the builder when the source is null in the mappers; cross-slice need → **stop and ask the user** (do not improvise).
 
-Estado real a tener en cuenta:
+Real state to keep in mind:
 
-- **Slices estrictos (modelo a seguir):** `chequera/estadoChequera`, `usuarios/usuario`, `auth` — `domain/` sin ningún import fuera de `java.*`/Lombok (o `java.*` en modelos record).
-- **Desviaciones toleradas (no copiarlas sin motivo):** `personas/persona` — `domain/model/Persona` implementa el `core.util.Jsonifyable` legacy y sus puertos `in` devuelven tipos de `infrastructure.web.dto` (`DeudaPersonaDto`, `InscripcionFullDto`); `extern/facultad/tesoreriaEstado` — `TesoreriaEstadoFacultad implements Jsonifyable`. Si tocás esos slices, reducí esa dependencia en vez de aumentarla.
-- **Deuda de migración (151 archivos de `hexagonal/` importan packages legacy o de otros slices):** casos notorios `chequera/chequeraCuota`, `chequera/chequeraSerie`, `chequera/arancelTipo` (domain importa modelos de otros slices y `core.util.Jsonifyable`). Son targets de refactor al tocarlos, **no** plantilla para código nuevo: nunca agregues imports legacy a un slice al crear/editar.
-- **Composición existente (patrón "composición de servicios de aplicación"):** `estadoChequera` orquesta `ChequeraSerieService`, `ChequeraTotalService`, `TipoChequeraService`, `ArancelTipoService`, `FacultadService` (servicios de aplicación de otros slices, no sus puertos); `personas/persona` expone `GET /persona/deudaExamen/...` usando `TesoreriaEstadoFacultadService`. Si necesitas algo análogo nuevo, preguntá primero.
-- **Cross-slice autorizado por puertos `in` públicos (patrón de `CreateUsuarioChequeraFacultadUseCaseImpl`):** `compras/articulo` y `ubicacionArticulo` (#405) validan con `GetCuentaByNumeroCuentaUseCase`, `GetUbicacionByIdUseCase` y `GetArticuloByIdUseCase`; la baja de artículo borra los vínculos con `DeleteUbicacionArticulosByArticuloUseCase` (`MANDATORY`) y ambos registran en `RegistrarEscrituraHistorialUseCase`. Cada uso lleva el comentario "Excepción cross-slice autorizada". Para un caso nuevo, igual hay que preguntar (§10).
-- **Bloqueo pesimista con MySQL 5.7:** `PESSIMISTIC_WRITE` de Hibernate 7 genera `FOR UPDATE OF ...`, que MySQL 5.7 rechaza. Usar `SELECT * ... FOR UPDATE` nativo mapeado a la entidad (ver `JpaArticuloRepositoryAdapter.findByIdForUpdate`) y no cargar la entidad antes en la misma transacción: en `REPEATABLE READ` una lectura común (incluido `refresh`) devuelve la foto del primer SELECT, y Hibernate devolvería la instancia ya cargada en vez de la fila bloqueada.
-- **Tests spec en paquetes viejos:** `src/test/.../hexagonal/persona/` vs `personas/persona`, `hexagonal/lectivoTotalImputacion` vs `contable/...` — residuos de renames de paquetes; el `package` real del test importa lo que teste. No asumas que el directorio del test refleja el paquete main.
+- **Strict slices (role models):** `chequera/estadoChequera`, `usuarios/usuario`, `auth` — `domain/` with no import outside `java.*`/Lombok (or `java.*` in record models).
+- **Tolerated deviations (do not copy without reason):** `personas/persona` — `domain/model/Persona` implements the legacy `core.util.Jsonifyable` and its `in` ports return types from `infrastructure.web.dto` (`DeudaPersonaDto`, `InscripcionFullDto`); `extern/facultad/tesoreriaEstado` — `TesoreriaEstadoFacultad implements Jsonifyable`. If you touch those slices, reduce that dependency instead of increasing it.
+- **Migration debt (151 files under `hexagonal/` import legacy packages or other slices):** notable cases `chequera/chequeraCuota`, `chequera/chequeraSerie`, `chequera/arancelTipo` (domain imports models from other slices and `core.util.Jsonifyable`). They are refactor targets when touched, **not** a template for new code: never add legacy imports to a slice when creating/editing.
+- **Existing composition ("application service composition" pattern):** `estadoChequera` orchestrates `ChequeraSerieService`, `ChequeraTotalService`, `TipoChequeraService`, `ArancelTipoService`, `FacultadService` (application services of other slices, not their ports); `personas/persona` exposes `GET /persona/deudaExamen/...` using `TesoreriaEstadoFacultadService`. If you need something analogous and new, ask first.
+- **Authorized cross-slice via public `in` ports (pattern of `CreateUsuarioChequeraFacultadUseCaseImpl`):** `compras/articulo` and `ubicacionArticulo` (#405) validate with `GetCuentaByNumeroCuentaUseCase`, `GetUbicacionByIdUseCase` and `GetArticuloByIdUseCase`; deleting an article removes its links through `DeleteUbicacionArticulosByArticuloUseCase` (`MANDATORY`), and both record into `RegistrarEscrituraHistorialUseCase`. Each use carries the comment "Excepción cross-slice autorizada". A new case still requires asking.
+- **Pessimistic locking with MySQL 5.7:** Hibernate 7 `PESSIMISTIC_WRITE` generates `FOR UPDATE OF ...`, which MySQL 5.7 rejects. Use a native `SELECT * ... FOR UPDATE` mapped to the entity (see `JpaArticuloRepositoryAdapter.findByIdForUpdate`) and do not load the entity earlier in the same transaction: under `REPEATABLE READ` a plain read (including `refresh`) returns the snapshot of the first SELECT, and Hibernate would return the already-loaded instance instead of the locked row.
+- **Spec tests in old packages:** `src/test/.../hexagonal/persona/` vs `personas/persona`, `hexagonal/lectivoTotalImputacion` vs `contable/...` — leftovers from package renames; the test's real `package` imports what it tests. Do not assume the test directory reflects the main package.
 
-### Tabla de slices → rutas base REST (47 exponen endpoints; alias corto + largo conviven)
+### Slice → REST base route table (47 expose endpoints; short + long alias coexist)
 
-| Grupo | Slice (paquete bajo `hexagonal/`) | Base REST |
+| Group | Slice (package under `hexagonal/`) | REST base |
 |---|---|---|
-| raíz | `auth` | `/api/tesoreria/core/auth` (login, `change-password`, `me/{userId}`) |
-| raíz | `comprobante` | `/comprobante` + alias largo |
-| raíz | `lectivo` | `/lectivo` + alias |
-| raíz | `matriculacionContext` | `/matriculacionContext` + alias (controller sin subpaquete `controller/`) |
-| raíz | `mercadoPagoContext` | `/api/tesoreria/core/mercadoPagoContext` |
-| raíz | `setup` | `/setup` + alias |
-| raíz | `track` | `/track` + alias |
-| raíz | `ubicacionArticulo` | `/ubicacionArticulo` + alias |
-| `chequera/` | `arancelPorcentaje` | `/arancelporcentaje` (solo corto) |
-| `chequera/` | `arancelTipo` | `/aranceltipo` (solo corto) |
+| root | `auth` | `/api/tesoreria/core/auth` (login, `change-password`, `me/{userId}`) |
+| root | `comprobante` | `/comprobante` + long alias |
+| root | `lectivo` | `/lectivo` + alias |
+| root | `matriculacionContext` | `/matriculacionContext` + alias (controller without a `controller/` subpackage) |
+| root | `mercadoPagoContext` | `/api/tesoreria/core/mercadoPagoContext` |
+| root | `setup` | `/setup` + alias |
+| root | `track` | `/track` + alias |
+| root | `ubicacionArticulo` | `/ubicacionArticulo` + alias |
+| `chequera/` | `arancelPorcentaje` | `/arancelporcentaje` (short only) |
+| `chequera/` | `arancelTipo` | `/aranceltipo` (short only) |
 | `chequera/` | `baja` | `/baja` + alias |
 | `chequera/` | `chequeraCuota` | `/chequeraCuota` + alias |
 | `chequera/` | `chequeraPago` | `/chequeraPago` + alias |
 | `chequera/` | `chequeraSerie` | `/chequeraserie` + alias |
-| `chequera/` | `chequeraTotal` | `/chequeratotal` (solo corto) |
+| `chequera/` | `chequeraTotal` | `/chequeratotal` (short only) |
 | `chequera/` | `claseChequera` | `/clasechequera` + alias |
-| `chequera/` | `estadoChequera` | `/api/tesoreria/core/chequera` → solo `/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` (contrato de `report-service`, 6.0.0 quitó `{debitoTipoId}`) |
-| `chequera/` | `lectivoCuota` | — sin REST; puerto interno (lo consume `politicaArancelaria`) |
-| `chequera/` | `politicaArancelaria` | `/api/tesoreria/core/politicaArancelaria` (solo largo) |
+| `chequera/` | `estadoChequera` | `/api/tesoreria/core/chequera` → only `/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` (`report-service` contract, 6.0.0 removed `{debitoTipoId}`) |
+| `chequera/` | `lectivoCuota` | — no REST; internal port (consumed by `politicaArancelaria`) |
+| `chequera/` | `politicaArancelaria` | `/api/tesoreria/core/politicaArancelaria` (long only) |
 | `chequera/` | `producto` | `/producto` + alias |
 | `chequera/` | `tipoChequera` | `/tipoChequera` + alias |
 | `compras/` | `articulo` | `/articulo` + alias |
-| `compras/` | `facturaPendiente` | — sin REST; lo expone el legacy `FacturacionElectronicaController` (`/api/tesoreria/core/facturacionElectronica`) |
+| `compras/` | `facturaPendiente` | — no REST; exposed by the legacy `FacturacionElectronicaController` (`/api/tesoreria/core/facturacionElectronica`) |
 | `compras/` | `proveedor` | `/proveedor` + alias |
-| `compras/` | `proveedorMovimiento` | `/proveedorMovimiento` (solo corto) |
-| `contable/` | `asiento` | — sin REST (web/controller vacío) |
+| `compras/` | `proveedorMovimiento` | `/proveedorMovimiento` (short only) |
+| `compras/pedidos/` | `compraPedido` | `/api/tesoreria/core/compraPedido` (long only) |
+| `compras/pedidos/` | `compraPedidoItem` | `/api/tesoreria/core/compraPedidoItem` (long only) |
+| `compras/pedidos/` | `compraPedidoSecuencia` | — no REST; internal port (correlativo anual) |
+| `contable/` | `asiento` | — no REST (empty web/controller) |
 | `contable/` | `cuenta` | `/cuenta` + alias |
 | `contable/` | `cuentaMovimiento` | `/cuentaMovimiento` + alias |
 | `contable/` | `lectivoTotalImputacion` | `/lectivototalimputacion` + alias |
-| `contratos/` | `contrato` | `/contrato` (solo corto) |
-| `contratos/` | `cursoCargoContratado` | `/cursocargocontratado` + alias `/api/core/cursocargocontratado` (ojo: **sin** `/tesoreria`) |
-| `dependencias/` | `dependencia`, `facultad`, `geografica`, `ubicacion` | cada uno `/{entidad}` + alias largo |
-| `extern/facultad/` | `tesoreriaEstado` | — sin REST; adapter es consumer hacia el servicio de facultad |
-| `guarani/` | `alumnoGuarani` | `/api/tesoreria/core/guarani/alumno` (solo largo) |
-| `guarani/` | `guaraniBeneficio`, `guaraniPropuestaTipoChequera`, `guaraniUbicacion` | cada uno `/api/tesoreria/core/{slice}` (solo largo) |
-| `personas/` | `documento`, `domicilio`, `persona` | cada uno `/{entidad}` + alias |
-| `personas/` | `legajo` | `/api/tesoreria/core/legajo` (solo largo) |
-| `umhub/` | `campanha`, `reservaVacante`, `consulta` | cada uno `/api/tesoreria/core/umhub/{slice}` (solo largo) |
+| `contratos/` | `contrato` | `/contrato` (short only) |
+| `contratos/` | `cursoCargoContratado` | `/cursocargocontratado` + alias `/api/core/cursocargocontratado` (careful: **without** `/tesoreria`) |
+| `dependencias/` | `dependencia`, `facultad`, `geografica`, `ubicacion` | each `/{entidad}` + long alias |
+| `extern/facultad/` | `tesoreriaEstado` | — no REST; the adapter is a consumer to the faculty service |
+| `guarani/` | `alumnoGuarani` | `/api/tesoreria/core/guarani/alumno` (long only) |
+| `guarani/` | `guaraniBeneficio`, `guaraniPropuestaTipoChequera`, `guaraniUbicacion` | each `/api/tesoreria/core/{slice}` (long only) |
+| `personas/` | `documento`, `domicilio`, `persona` | each `/{entidad}` + alias |
+| `personas/` | `legajo` | `/api/tesoreria/core/legajo` (long only) |
+| `umhub/` | `campanha`, `reservaVacante`, `consulta` | each `/api/tesoreria/core/umhub/{slice}` (long only) |
 | `usuarios/` | `usuario` | `/usuario` + alias |
-| `usuarios/` | `usuarioChequeraClaseChequera`, `usuarioChequeraFacultad`, `usuarioChequeraGeografica` | cada uno `/api/tesoreria/core/{slice}` (solo largo) |
+| `usuarios/` | `usuarioChequeraClaseChequera`, `usuarioChequeraFacultad`, `usuarioChequeraGeografica` | each `/api/tesoreria/core/{slice}` (long only) |
 
-Reglas sobre las rutas:
+Rules about routes:
 
-- El **alias corto** (`/chequeraCuota`) existe por compatibilidad con frontends viejos; el **largo** (`/api/tesoreria/core/...`) es el estándar para slices nuevos. Al crear un slice nuevo usa solo el largo, salvo indicación contraria.
-- `personas/persona` además expone deuda de examen: `GET /persona/deudaExamen/facultad/{facultadId}/persona/{personaId}/{documentoId}/fecha/{fechaExamen}` (con parche temporal `manual == 1` marcado en el código — ver CHANGELOG 5.0.1).
-- La ruta pública es contrato: remover segmentos o campos → major SemVer + migración documentada del consumidor (`report-service`, frontends, otros servicios).
+- The **short alias** (`/chequeraCuota`) exists for compatibility with old frontends; the **long** one (`/api/tesoreria/core/...`) is the standard for new slices. When creating a new slice use only the long one, unless told otherwise.
+- `personas/persona` also exposes exam debt: `GET /persona/deudaExamen/facultad/{facultadId}/persona/{personaId}/{documentoId}/fecha/{fechaExamen}` (with a temporary `manual == 1` patch marked in the code — see CHANGELOG 5.0.1).
+- The public route is a contract: removing segments or fields → major SemVer + documented consumer migration (`report-service`, frontends, other services).
 
-## 6. Capa legacy (qué hay, qué no hacer)
+## 6. Legacy layer (what there is, what not to do)
 
-Los ~67 controllers legacy sirven todavía áreas sin slice equivalente: `chequera` (altas/bajas/reemplazos/impresión), `pago`, `debito`, `balance`, `contabilidad`, `cuentaMensual`, `compra`, `costo`, `carrera/plan/materia/curso/cargoMateria`, `notificacion`/`examen`, `payPerTic`, `postales`, `bancaria`/`bancoMovimiento`/`valorMovimiento`, `proveedor*` (artículos/pagos/valores/track), `contrato*` (periodo/excluido/persona), `reciboMessageCheck`/`chequeraMessageCheck` (verificación de mensajes, issues 101/105), `sincronize`, `tool` (`/tool/mailvalidate`), LDAP (`InfoLdapService`/`UsuarioLdapService`). Modelos legacy JPA en `model/` (heredan `Auditable`), mapeo con ModelMapper, DTOs sufijo `Dto`.
+The ~67 legacy controllers still serve areas without an equivalent slice: `chequera` (creations/deletions/replacements/printing), `pago`, `debito`, `balance`, `contabilidad`, `cuentaMensual`, `compra`, `costo`, `carrera/plan/materia/curso/cargoMateria`, `notificacion`/`examen`, `payPerTic`, `postales`, `bancaria`/`bancoMovimiento`/`valorMovimiento`, `proveedor*` (articles/payments/values/track), `contrato*` (period/excluded/person), `reciboMessageCheck`/`chequeraMessageCheck` (message verification, issues 101/105), `sincronize`, `tool` (`/tool/mailvalidate`), LDAP (`InfoLdapService`/`UsuarioLdapService`). Legacy JPA models in `model/` (extend `Auditable`), mapping with ModelMapper, DTOs suffixed `Dto`.
 
-- Legacy **sí puede** importar servicios de aplicación hexagonales (patrón actual: `FacturacionElectronicaController`, `SheetService`). Un slice **no debe** importar legacy (§5).
-- No migrés "por migrar": la migración de un módulo legacy/kotlin a slice se pide explícitamente y se documenta en CHANGELOG + diagrama.
+- Legacy **may** import hexagonal application services (current pattern: `FacturacionElectronicaController`, `SheetService`). A slice **must not** import legacy (§5).
+- Do not migrate "just to migrate": migrating a legacy/kotlin module to a slice is explicitly requested and documented in CHANGELOG + diagram.
 
-## 7. Flujo de trabajo y release (Git + docs)
+## 7. Workflow and release (Git + docs)
 
-- **Ramas:** una rama por issue GitHub, `<número>-<título-kebab>` (p. ej. `413-chorerelease-preparar-version-600-...`); PR → `develop`; `main` para release/CI JVM+Sonar; `develop`→deploy-develop, `staging`→deploy-staging. Labels: `feature`, `breaking-change`, `refactoring`, `documentation` (+ milestone).
-- **Commits:** Conventional Commits con scope de slice: `feat(chequera/estadoChequera): ...`, `fix(personas/deudaExamen): ...`, `chore(release): prepare version X.Y.Z`. Para commits usá la skill `git-commit-expert`; issues/PRs: `github-issue-creator`/`github-pr-creator`.
-- **SemVer (decisión de release, no arbitraria):** `pom.xml` = versión del servicio. Breaking en API pública (URL, contrato, esquema expuesto) → **major** (criterio usado en 5.0.0/6.0.0); feature aditivo → minor; fixes → patch.
-- **Release (skill `release-documentation`):** actualiza a la par `pom.xml`, `CHANGELOG.md` (Keep a Changelog: `## [X.Y.Z] - fecha` + secciones `### Added/Changed/Fixed/Removed` **con bloque cita `> Basado en git diff …`** verificando cada afirmación contra el código real), `README.md` (sección nueva `## Novedades X.Y.Z (verificado en código)` arriba de todas, y "Versión actual" en el header), `docs/README.md` (header de versión + línea del slice tocado) y los `docs/hexagonal-*.mmd` que cambiaron de estructura. Fecha = día del entorno.
-- **Diagramas Mermaid (`docs/*.mmd`):** el workflow `generate-docs.yml` los valida con `@mermaid-js/mermaid-cli` (chrome-headless-shell) y publica a GitHub Pages (`https://um-services.github.io/UM.tesoreria.core-service/`). Reglas obligatorias (de `docs/README.md`): sin `namespace` vacíos; genéricos con `~T~`; estereotipos con espacios `<< interface >>` (la forma compacta rompe el visor); archivos limpios (no confíes en el sanitize de runtime de `docs/script.js`). Visor local: `docs/index.html`. Usá la skill `mermaid-diagram-generator`.
-- **README tiene secciones viejas:** §"Estructura del Proyecto" muestra slices planos (hoy están agrupados por subdominio: `chequera/`, `personas/`, `compras/`…) y §"API Endpoints Principales" cita rutas sin alias actual (p. ej. `/legajo/facultad/{facultadId}` solo existe como `/api/tesoreria/core/legajo/facultad/{facultadId}`). Verificar siempre contra `@RequestMapping` reales; la verdad de rutas es la tabla §5.
+- **Branches:** one branch per GitHub issue, `<number>-<kebab-title>` (e.g. `413-chorerelease-preparar-version-600-...`); PR → `develop`; `main` for release/CI JVM+Sonar; `develop`→deploy-develop, `staging`→deploy-staging. Labels: `feature`, `breaking-change`, `refactoring`, `documentation` (+ milestone).
+- **Commits:** Conventional Commits with slice scope: `feat(chequera/estadoChequera): ...`, `fix(personas/deudaExamen): ...`, `chore(release): prepare version X.Y.Z`. For commits use the `git-commit-expert` skill; issues/PRs: `github-issue-creator`/`github-pr-creator`.
+- **SemVer (release decision, not arbitrary):** `pom.xml` = service version. Breaking in the public API (URL, contract, exposed schema) → **major** (criterion used in 5.0.0/6.0.0); additive feature → minor; fixes → patch.
+- **Release (`release-documentation` skill):** update together `pom.xml`, `CHANGELOG.md` (Keep a Changelog: `## [X.Y.Z] - date` + `### Added/Changed/Fixed/Removed` sections **with a `> Based on git diff …` quote block** verifying each claim against the real code), `README.md` (new `## Novedades X.Y.Z (verificado en código)` section on top of all, and "Versión actual" in the header), `docs/README.md` (version header + line for the touched slice) and the `docs/hexagonal-*.mmd` that changed structure. Date = the environment's current day.
+- **Mermaid diagrams (`docs/*.mmd`):** the `generate-docs.yml` workflow validates them with `@mermaid-js/mermaid-cli` (chrome-headless-shell) and publishes to GitHub Pages (`https://um-services.github.io/UM.tesoreria.core-service/`). Mandatory rules (from `docs/README.md`): no empty `namespace`; generics with `~T~`; stereotypes with spaces `<< interface >>` (the compact form breaks the viewer); clean files (do not trust `docs/script.js` runtime sanitize). Local viewer: `docs/index.html`. Use the `mermaid-diagram-generator` skill.
+- **README has old sections:** §"Estructura del Proyecto" shows flat slices (today they are grouped by subdomain: `chequera/`, `personas/`, `compras/`…) and §"API Endpoints Principales" cites routes without the current alias (e.g. `/legajo/facultad/{facultadId}` only exists as `/api/tesoreria/core/legajo/facultad/{facultadId}`). Always verify against real `@RequestMapping`; the truth of routes is the §5 table.
 
-## 8. Runtime y config (`src/main/resources/bootstrap.yml`)
+## 8. Runtime and config (`src/main/resources/bootstrap.yml`)
 
-- Puerto `${APP_PORT:8092}`; app `tesoreria-core-service` registrado en Consul `consul-service:8500` (tags `tesoreria,core`).
-- Datasource: `jdbc:mysql://${app.server}/${app.database}` — defaults hardcodeados de desarrollo (`10.147.20.20:3306`, `tesium`, `root/root`): sobrepone con `APP_SERVER`, `APP_DATABASE`, `APP_USER`, `APP_PASSWORD`. Hikari: pool 100, leak-detection 60s.
-- JPA: `ddl-auto: none`, `open-in-view: false`, MySQLDialect. Kafka: `kafka:9092` (overrides con `SPRING_KAFKA_*`), trusted packages `*`. Mail: SMTP Gmail vía `app.mail.username/password` (defaults placeholder `uid`/`pwd` en `bootstrap.yml`; el yml de tests trae `chequeras@um.edu.ar`). Logging: nivel `${app.logging}` (debug por default → en prod se setea vía env).
-- Tests unitarios (`src/test/resources/application.yml`): H2 en memoria `tesium_test` + `ddl-auto: create-drop` + `allow-circular-references: true` (hay ciclos legacy: **no** agregar más), Kafka listener `auto-startup: false`. Perfil `it`: `application-it.yml` con `IT_DB_*`.
-- **`MERCADO_PAGO_ACCESS_TOKEN` (la menciona el README §Variables de Entorno) no se lee en este código.** El token de Mercado Pago vive en `tesoreria-mercadopago-service`; core se integra con él solo por Feign (crear preferencias) + eventos Kafka. En legacy, Mercado Pago es el `tipoPagoId = 18` (`TIPO_PAGO_MERCADO_PAGO` en `PagoService`/`TipoPagoFechaService`).
+- Port `${APP_PORT:8092}`; app `tesoreria-core-service` registered in Consul `consul-service:8500` (tags `tesoreria,core`).
+- Datasource: `jdbc:mysql://${app.server}/${app.database}` — hardcoded development defaults (`10.147.20.20:3306`, `tesium`, `root/root`): override with `APP_SERVER`, `APP_DATABASE`, `APP_USER`, `APP_PASSWORD`. Hikari: pool 100, leak-detection 60s.
+- JPA: `ddl-auto: none`, `open-in-view: false`, MySQLDialect. Kafka: `kafka:9092` (overrides with `SPRING_KAFKA_*`), trusted packages `*`. Mail: SMTP Gmail via `app.mail.username/password` (placeholder defaults `uid`/`pwd` in `bootstrap.yml`; the test yml ships `chequeras@um.edu.ar`). Logging: level `${app.logging}` (debug by default → in prod it is set via env).
+- Unit tests (`src/test/resources/application.yml`): in-memory H2 `tesium_test` + `ddl-auto: create-drop` + `allow-circular-references: true` (there are legacy cycles: **do not** add more), Kafka listener `auto-startup: false`. `it` profile: `application-it.yml` with `IT_DB_*`.
+- **`MERCADO_PAGO_ACCESS_TOKEN` (mentioned by the README §Variables de Entorno) is not read in this code.** The Mercado Pago token lives in `tesoreria-mercadopago-service`; core integrates with it only via Feign (create preferences) + Kafka events. In legacy, Mercado Pago is `tipoPagoId = 18` (`TIPO_PAGO_MERCADO_PAGO` in `PagoService`/`TipoPagoFechaService`).
 
-## 9. Fuentes de verdad (orden)
+## 9. Sources of truth (order)
 
-1. **El código** (`src/main/java`) y `pom.xml` — siempre ante conflicto con docs.
-2. Skill global **`hexagonal-arch`** — reglas de slices (estructura, naming, purity, cross-slice "ask").
-3. `docs/hexagonal-<slice>.mmd` + índice `docs/README.md` — estructura y endpoints por módulo (mantenidos release a release; si un slice cambia y su diagrama no, corregirlo es parte del cambio).
-4. `CHANGELOG.md` — qué cambió y **por qué** (cada release cita el diff y el criterio SemVer).
-5. `README.md` — onboarding humano; "Novedades" recientes arriba; cuidado con secciones viejas (§7).
-6. Skills: `java-expert`, `spring-boot-expert`, `github-actions(-expert)`, `mermaid-diagrams`, `report` (issues de opencode). No hay configuración de agente en el repo (ni `opencode.json` ni `.claude/commands`); `.claude/settings.local.json` solo tiene permisos Bash/Read locales.
+1. **The code** (`src/main/java`) and `pom.xml` — always when in conflict with docs.
+2. Global **`hexagonal-arch`** skill — slice rules (structure, naming, purity, cross-slice "ask").
+3. `docs/hexagonal-<slice>.mmd` + index `docs/README.md` — structure and endpoints per module (kept release by release; if a slice changes and its diagram does not, fixing it is part of the change).
+4. `CHANGELOG.md` — what changed and **why** (each release cites the diff and the SemVer criterion).
+5. `README.md` — human onboarding; recent "Novedades" on top; beware of old sections (§7).
+6. Skills: `java-expert`, `spring-boot-expert`, `github-actions(-expert)`, `mermaid-diagrams`, `report` (opencode issues). There is no agent configuration in the repo (no `opencode.json` and no `.claude/commands`); `.claude/settings.local.json` only has local Bash/Read permissions.
 
-## 10. Checklist al tocar código (anti-patterns reales de este repo)
+## 10. Checklist when touching code (real anti-patterns of this repo)
 
-- [ ] ¿Modifico un slice? Primero `hexagonal-arch` (puridad, builder-default, naming) y su diagrama en `docs/`.
-- [ ] ¿Necesito un tipo de otro slice? **Preguntar al usuario** (opciones del skill: copia propia / solo-id / puerto out hacia el puerto público de B / shared kernel / merge). No silenciar el problema.
-- [ ] ¿Cambio una URL pública o campo de DTO? Major + migración del consumidor documentada.
-- [ ] ¿Toco legacy y hace falta feature nueva? Evaluar slice; no inflar legacy.
-- [ ] ¿Violación pre-existente dentro del slice que toco? La limpio en el mismo cambio (es regla del skill).
-- [ ] Test: unit test espejo de la estructura del slice; `@WebMvcTest` + `@Import(XDtoMapper.class)` + `@MockitoBean` + `MockMvcTester` para controllers; Mockito a mano para use cases (ver `GetEstadoChequeraUseCaseImplTest`). Sonar mide cobertura vía JaCoCo.
-- [ ] Docs: `mvn -q -DskipTests compile` + `mvn -Dtest=... test` antes de dar por hecho; diagramas validados por CI en el PR.
-- [ ] Release: checklist §7 completo (pom + CHANGELOG + README + docs/README + .mmd) con bloques `> Basado en git diff …`.
+- [ ] Modifying a slice? First `hexagonal-arch` (purity, builder-default, naming) and its diagram in `docs/`.
+- [ ] Need a type from another slice? **Ask the user** (skill options: own copy / id-only / outbound port to B's public port / shared kernel / merge). Do not silence the problem.
+- [ ] Changing a public URL or DTO field? Major + documented consumer migration.
+- [ ] Adding a feature that requires a permission? Key `modulo.accion` in the catalog + wiring in the **new** code; **never** security on existing/legacy endpoints (§11).
+- [ ] Touching legacy and a new feature is needed? Evaluate a slice; do not inflate legacy.
+- [ ] Pre-existing violation inside the slice you touch? Clean it in the same change (skill rule).
+- [ ] Test: unit test mirroring the slice structure; `@WebMvcTest` + `@Import(XDtoMapper.class)` + `@MockitoBean` + `MockMvcTester` for controllers; manual Mockito for use cases (see `GetEstadoChequeraUseCaseImplTest`). Sonar measures coverage via JaCoCo.
+- [ ] Docs: `mvn -q -DskipTests compile` + `mvn -Dtest=... test` before considering it done; diagrams validated by CI in the PR.
+- [ ] Release: full §7 checklist (pom + CHANGELOG + README + docs/README + .mmd) with `> Based on git diff …` blocks.
+
+## 11. Permissions: catalog, assignment and feature gating
+
+The permission system lives in the `hexagonal/usuarios/` subdomain (slices `permiso`, `rol`, `rolPermiso`, `usuarioRol`, `usuarioPermiso`, `permisoEfectivo`). Two-halves model: the **key in the catalog** `permiso` (data, administrable) and the **reference in the code** (behavior). They are linked **only by the key text**, with the `modulo.accion` convention (e.g. `pagos.reembolsos`; the `modulo` groups the UI).
+
+Current state (verified in code):
+- **Assignment: complete.** Catalog with CRUD (`POST/PUT/DELETE /api/tesoreria/core/permiso`), roles, role×permission matrix (`rolPermiso`), overrides (`usuarioPermiso`), and effective bundle (`GET /api/tesoreria/core/permisoEfectivo/usuario/{userId}`).
+- **Backend gating: implemented and opt-in.** `@RequierePermiso("<clave>")` annotation + `RequierePermisoInterceptor` under `configuration/security`, registered by `PermissionWebConfig`. **Disabled by default** (`app.permissions.enforce`, env `APP_PERMISSIONS_ENFORCE`): it only acts on annotated endpoints, so legacy stays intact. Until real identity exists (JWT, M3), identity is resolved transitionally via the `X-User-Id` header (spoofable): it is PEP plumbing, not definitive security.
+
+### Golden rule — LEGACY (do not break)
+**Never add or change security (neither `@RequierePermiso`, nor filters, nor token validation) on existing endpoints** consumed by the legacy system (VB6, old frontends, other services) **nor on the legacy layer**. The legacy system sends no token or permissions: any enforcement there **breaks it**. Gating applies **only to new features**. When in doubt, **stop and ask** (§1 rule: "do not add security on your own").
+
+### How to add a new feature that requires a permission
+1. **Choose the key** `modulo.accion` and **register it in the catalog** `permiso` (from the administrador module, or a versioned seed/SQL in the same PR).
+2. **Wire the key into the new code**:
+   - **Backend:** `@RequierePermiso("<clave>")` on the **new** endpoint (the interceptor only acts on annotated endpoints and with enforcement turned on).
+   - **Frontend:** `permisoGuard('<clave>')` on the route, `permiso` on the menu item and `*uiPermiso` on actions.
+3. The feature is born **deny-by-default**: it is enabled from the administrador (checking the key on a **role** and assigning it, or with a direct **override** for the user).
+4. **Verify** with the Simulator that the user has it and where it comes from.
+
+### Anti-pattern: "phantom permission"
+Do not register keys that no code reads. Declaring the key **in the same change** that wires the feature avoids switches with no effect. The key is a **contract**: changing it forces updating code + catalog + migrating the assignments.

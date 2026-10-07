@@ -14,6 +14,7 @@ public class UsuarioAuthMapper {
                 .login(entity.getLogin())
                 .password(entity.getPassword())
                 .nombre(entity.getNombre())
+                .dependenciaId(entity.getDependenciaId())
                 .geograficaId(entity.getGeograficaId())
                 .imprimeChequera(entity.getImprimeChequera())
                 .numeroOpManual(entity.getNumeroOpManual())
