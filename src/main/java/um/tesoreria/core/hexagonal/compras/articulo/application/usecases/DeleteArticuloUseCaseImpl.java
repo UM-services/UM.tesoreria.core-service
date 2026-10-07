@@ -8,6 +8,7 @@ import um.tesoreria.core.hexagonal.compras.articulo.application.exception.Articu
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.DeleteArticuloUseCase;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ArticuloRepository;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ReferenciasArticuloRepository;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.in.RegistrarEscrituraHistorialUseCase;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloConflictException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.in.DeleteUbicacionArticulosByArticuloUseCase;
 
@@ -25,21 +26,25 @@ public class DeleteArticuloUseCaseImpl implements DeleteArticuloUseCase {
     // Excepción cross-slice autorizada: los vínculos los borra su slice, con su puerto público
     // (patrón de CreateUsuarioChequeraFacultadUseCaseImpl).
     private final DeleteUbicacionArticulosByArticuloUseCase deleteUbicacionArticulosByArticuloUseCase;
+    // Excepción cross-slice autorizada: historial #404 en la misma transacción (RegistrarEscrituraHistorialUseCase es MANDATORY)
+    private final RegistrarEscrituraHistorialUseCase registrarEscrituraHistorialUseCase;
 
     @Override
     @Transactional
     public void deleteArticulo(Long id) {
-        repository.findByIdForUpdate(id).orElseThrow(() -> new ArticuloException(id));
+        var antes = ArticuloEstado.de(repository.findByIdForUpdate(id).orElseThrow(() -> new ArticuloException(id)));
         var referencias = referenciasRepository.findReferencias(id);
         if (!referencias.isEmpty()) {
             throw ArticuloConflictException.referenciado(id, referencias);
         }
         try {
+            // Cada vínculo borrado registra su propia baja en el historial (lo hace su slice)
             deleteUbicacionArticulosByArticuloUseCase.deleteByArticuloId(id);
         } catch (UbicacionArticuloConflictException ex) {
             // Solo un bloqueo puede frenar el borrado de vínculos; ArticuloService reintenta el interbloqueo
             throw ArticuloConflictException.bloqueado(id, ex.isReintentable());
         }
         repository.deleteById(id);
+        registrarEscrituraHistorialUseCase.registrarBaja(ArticuloEstado.ENTIDAD, antes.clave(), antes);
     }
 }

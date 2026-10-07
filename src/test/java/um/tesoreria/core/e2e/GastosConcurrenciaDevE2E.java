@@ -39,6 +39,10 @@ import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.re
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.application.usecases.GetUbicacionByIdUseCaseImpl;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.adapter.JpaUbicacionRepositoryAdapter;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.mapper.UbicacionMapper;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.application.service.EscrituraHistorialService;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.persistence.adapter.JpaEscrituraHistorialRepositoryAdapter;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.persistence.mapper.EscrituraHistorialMapper;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.serialization.JacksonEscrituraValorSerializer;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloConflictException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.service.UbicacionArticuloService;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.DeleteUbicacionArticulosByArticuloUseCaseImpl;
@@ -87,7 +91,9 @@ import static org.assertj.core.api.Assertions.fail;
         UbicacionArticuloMapper.class, UbicacionMapper.class, GastosConcurrenciaDevE2E.Auditoria.class,
         GetUbicacionByIdUseCaseImpl.class, JpaUbicacionRepositoryAdapter.class,
         GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class,
-        JpaReferenciasArticuloAdapter.class, DeleteUbicacionArticulosByArticuloUseCaseImpl.class})
+        JpaReferenciasArticuloAdapter.class, DeleteUbicacionArticulosByArticuloUseCaseImpl.class,
+        EscrituraHistorialService.class, JpaEscrituraHistorialRepositoryAdapter.class, EscrituraHistorialMapper.class,
+        JacksonEscrituraValorSerializer.class})
 class GastosConcurrenciaDevE2E {
 
     static final String MARCA = DevDbReservas.MARCA + " conc";
@@ -116,10 +122,11 @@ class GastosConcurrenciaDevE2E {
         registry.add("spring.jpa.properties.hibernate.session_factory.statement_inspector", SoloTablasDelFlujo.class::getName);
     }
 
-    /** Hibernate solo puede escribir en las dos tablas del flujo (los ids los controla la prueba). */
+    /** Hibernate solo puede escribir en las tablas del flujo y su historial (los ids los controla la prueba). */
     public static class SoloTablasDelFlujo implements StatementInspector {
 
-        private static final Set<String> PERMITIDAS = Set.of("articulos", "ubicacion_articulo");
+        // El historial #404 de los ids reservados lo barre DevDbReservas
+        private static final Set<String> PERMITIDAS = Set.of("articulos", "ubicacion_articulo", "gestion_escritura_historial");
         private static final Pattern ESCRITURA = Pattern.compile(
                 "^\\s*(?:insert\\s+into|update|delete\\s+from)\\s+`?(\\w+)`?", Pattern.CASE_INSENSITIVE);
 

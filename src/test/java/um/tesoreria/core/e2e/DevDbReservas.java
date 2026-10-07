@@ -22,7 +22,7 @@ final class DevDbReservas implements AutoCloseable {
     static final String MARCA = "E2E-405-" + java.util.UUID.randomUUID().toString().substring(0, 8);
     static final long DESDE = 999_001L, HASTA = 999_404L;
     static final List<String> TABLAS = List.of("articulos", "ubicacion_articulo", "gestion_escritura_historial");
-    static final List<String> CON_AUTO_INCREMENT = List.of("articulos", "ubicacion_articulo");
+    static final List<String> CON_AUTO_INCREMENT = List.of("articulos", "ubicacion_articulo", "gestion_escritura_historial");
 
     final Connection db;
     private Map<String, Long> estadoInicial;
@@ -54,8 +54,20 @@ final class DevDbReservas implements AutoCloseable {
         return estadoInicial != null;
     }
 
-    /** Borra solo artículos del rango con la marca y sus vínculos; lo que no tiene la marca lo creó otro. */
+    /**
+     * Borra solo artículos del rango con la marca y sus vínculos; lo que no tiene la marca lo creó otro. El historial
+     * #404 de los ids reservados se borra por clave: sus eventos no llevan la marca (la de un vínculo, por ejemplo).
+     */
     void barrer() throws SQLException {
+        try (var st = db.prepareStatement("DELETE FROM gestion_escritura_historial WHERE"
+                + " (entidad = 'articulo' AND CAST(entidad_clave AS UNSIGNED) BETWEEN ? AND ?)"
+                + " OR (entidad = 'ubicacion_articulo' AND CAST(SUBSTRING_INDEX(entidad_clave, ':', -1) AS UNSIGNED) BETWEEN ? AND ?)")) {
+            st.setLong(1, DESDE);
+            st.setLong(2, HASTA);
+            st.setLong(3, DESDE);
+            st.setLong(4, HASTA);
+            st.executeUpdate();
+        }
         try (var st = db.prepareStatement("DELETE u FROM ubicacion_articulo u JOIN articulos a ON a.Art_ID = u.articulo_id"
                 + " WHERE u.articulo_id BETWEEN ? AND ? AND a.Art_Nombre LIKE ?")) {
             st.setLong(1, DESDE);

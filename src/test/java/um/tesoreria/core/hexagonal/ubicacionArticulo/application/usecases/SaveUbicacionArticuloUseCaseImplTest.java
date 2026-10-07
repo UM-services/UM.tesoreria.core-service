@@ -10,6 +10,8 @@ import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.GetCuentaByNu
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.domain.model.Ubicacion;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.domain.ports.in.GetUbicacionByIdUseCase;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloValidationException;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.in.RegistrarEscrituraHistorialUseCase;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.AsignacionGuardada;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.out.UbicacionArticuloRepository;
 
@@ -34,6 +36,7 @@ class SaveUbicacionArticuloUseCaseImplTest {
     private GetUbicacionByIdUseCase ubicaciones;
     private GetArticuloByIdUseCase articulos;
     private GetCuentaByNumeroCuentaUseCase cuentas;
+    private RegistrarEscrituraHistorialUseCase historial;
     private SaveUbicacionArticuloUseCaseImpl useCase;
 
     @BeforeEach
@@ -42,7 +45,8 @@ class SaveUbicacionArticuloUseCaseImplTest {
         ubicaciones = mock(GetUbicacionByIdUseCase.class);
         articulos = mock(GetArticuloByIdUseCase.class);
         cuentas = mock(GetCuentaByNumeroCuentaUseCase.class);
-        useCase = new SaveUbicacionArticuloUseCaseImpl(repository, ubicaciones, articulos, cuentas);
+        historial = mock(RegistrarEscrituraHistorialUseCase.class);
+        useCase = new SaveUbicacionArticuloUseCaseImpl(repository, ubicaciones, articulos, cuentas, historial);
         when(ubicaciones.getUbicacionById(anyInt())).thenAnswer(inv -> Optional.of(Ubicacion.builder().ubicacionId(inv.getArgument(0)).build()));
         when(articulos.getArticuloById(anyLong())).thenAnswer(inv -> Optional.of(Articulo.builder().articuloId(inv.getArgument(0)).build()));
         when(cuentas.getCuentaByNumeroCuenta(any())).thenAnswer(inv -> Optional.of(Cuenta.builder().numeroCuenta(inv.getArgument(0)).build()));
@@ -89,7 +93,7 @@ class SaveUbicacionArticuloUseCaseImplTest {
         assertThatThrownBy(() -> useCase.save(UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).numeroCuenta(new BigDecimal("100e2147483647")).build()))
                 .isInstanceOf(UbicacionArticuloValidationException.class);
         var pedido = UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).numeroCuenta(new BigDecimal("0e-1000000000")).build();
-        when(repository.save(pedido)).thenReturn(pedido);
+        when(repository.save(pedido)).thenReturn(new AsignacionGuardada(null, pedido));
 
         assertThat(useCase.save(pedido).getNumeroCuenta().scale()).isZero();
     }
@@ -97,7 +101,7 @@ class SaveUbicacionArticuloUseCaseImplTest {
     @Test
     void cuentaNula_seAcepta() {
         var pedido = UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).build();
-        when(repository.save(pedido)).thenReturn(pedido);
+        when(repository.save(pedido)).thenReturn(new AsignacionGuardada(null, pedido));
 
         assertThat(useCase.save(pedido)).isSameAs(pedido);
         verify(repository).save(pedido);
@@ -136,7 +140,7 @@ class SaveUbicacionArticuloUseCaseImplTest {
     @Test
     void referenciasExistentes_seValidanAntesDeEscribir_conLaCuentaNormalizada() {
         var pedido = UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).numeroCuenta(new BigDecimal("5.101E+7")).build();
-        when(repository.save(pedido)).thenReturn(pedido);
+        when(repository.save(pedido)).thenReturn(new AsignacionGuardada(null, pedido));
 
         useCase.save(pedido);
 
@@ -150,7 +154,7 @@ class SaveUbicacionArticuloUseCaseImplTest {
     @Test
     void cuentaNula_noSeConsulta() {
         var pedido = UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).build();
-        when(repository.save(pedido)).thenReturn(pedido);
+        when(repository.save(pedido)).thenReturn(new AsignacionGuardada(null, pedido));
 
         useCase.save(pedido);
 
@@ -162,6 +166,50 @@ class SaveUbicacionArticuloUseCaseImplTest {
         assertThatThrownBy(() -> useCase.save(UbicacionArticulo.builder().ubicacionId(1).articuloId(0L).build()))
                 .isInstanceOf(UbicacionArticuloValidationException.class);
         verifyNoInteractions(ubicaciones, articulos, cuentas, repository);
+    }
+
+    @Test
+    void vinculoNuevo_registraAltaConLaClaveDelPar() {
+        var pedido = UbicacionArticulo.builder().ubicacionId(3).articuloId(5L).numeroCuenta(new BigDecimal("51010000")).build();
+        var guardada = UbicacionArticulo.builder().ubicacionArticuloId(77L).ubicacionId(3).articuloId(5L)
+                .numeroCuenta(new BigDecimal("51010000")).cuenta(Cuenta.builder().numeroCuenta(new BigDecimal("51010000")).build()).build();
+        when(repository.save(pedido)).thenReturn(new AsignacionGuardada(null, guardada));
+
+        assertThat(useCase.save(pedido)).isSameAs(guardada);
+
+        verify(historial).registrarAlta("ubicacion_articulo", "3:5", new UbicacionArticuloEstado(77L, 3, 5L, new BigDecimal("51010000")));
+    }
+
+    @Test
+    void vinculoExistenteConOtraCuenta_registraEdicion() {
+        var pedido = UbicacionArticulo.builder().ubicacionId(3).articuloId(5L).build();
+        var anterior = UbicacionArticulo.builder().ubicacionArticuloId(77L).ubicacionId(3).articuloId(5L).numeroCuenta(new BigDecimal("51010000")).build();
+        var guardada = UbicacionArticulo.builder().ubicacionArticuloId(77L).ubicacionId(3).articuloId(5L).build();
+        when(repository.save(pedido)).thenReturn(new AsignacionGuardada(anterior, guardada));
+
+        useCase.save(pedido);
+
+        verify(historial).registrarEdicion("ubicacion_articulo", "3:5",
+                new UbicacionArticuloEstado(77L, 3, 5L, new BigDecimal("51010000")), new UbicacionArticuloEstado(77L, 3, 5L, null));
+    }
+
+    @Test
+    void asignacionRepetidaSinCambios_noRegistra() {
+        var pedido = UbicacionArticulo.builder().ubicacionId(3).articuloId(5L).numeroCuenta(new BigDecimal("51010000")).build();
+        var igual = UbicacionArticulo.builder().ubicacionArticuloId(77L).ubicacionId(3).articuloId(5L).numeroCuenta(new BigDecimal("51010000")).build();
+        when(repository.save(pedido)).thenReturn(new AsignacionGuardada(igual, igual));
+
+        useCase.save(pedido);
+
+        verifyNoInteractions(historial);
+    }
+
+    @Test
+    void asignacionRechazada_noRegistra() {
+        when(ubicaciones.getUbicacionById(1051)).thenReturn(Optional.empty());
+
+        rechaza(UbicacionArticulo.builder().ubicacionId(1051).articuloId(2L).build(), "ubicacionId", "La ubicación indicada no existe.");
+        verifyNoInteractions(historial);
     }
 
     private void rechaza(UbicacionArticulo pedido, String campo, String mensaje) {

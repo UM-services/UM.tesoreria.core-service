@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.GetArticuloByIdUseCase;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.GetCuentaByNumeroCuentaUseCase;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.domain.ports.in.GetUbicacionByIdUseCase;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.in.RegistrarEscrituraHistorialUseCase;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloValidationException;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.AsignacionGuardada;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.in.SaveUbicacionArticuloUseCase;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.out.UbicacionArticuloRepository;
@@ -31,6 +33,8 @@ public class SaveUbicacionArticuloUseCaseImpl implements SaveUbicacionArticuloUs
     private final GetUbicacionByIdUseCase getUbicacionByIdUseCase;
     private final GetArticuloByIdUseCase getArticuloByIdUseCase;
     private final GetCuentaByNumeroCuentaUseCase getCuentaByNumeroCuentaUseCase;
+    // Excepción cross-slice autorizada: historial #404 en la misma transacción (RegistrarEscrituraHistorialUseCase es MANDATORY)
+    private final RegistrarEscrituraHistorialUseCase registrarEscrituraHistorialUseCase;
     @Override
     @Transactional
     public UbicacionArticulo save(UbicacionArticulo ubicacionArticulo) {
@@ -51,7 +55,22 @@ public class SaveUbicacionArticuloUseCaseImpl implements SaveUbicacionArticuloUs
             ubicacionArticulo.setNumeroCuenta(ubicacionArticulo.getNumeroCuenta().setScale(0, RoundingMode.UNNECESSARY));
         }
         validarReferencias(ubicacionArticulo);
-        return repository.save(ubicacionArticulo);
+        var resultado = repository.save(ubicacionArticulo);
+        registrarHistorial(resultado);
+        return resultado.guardada();
+    }
+
+    /** Alta o edición; una asignación repetida que no cambia nada no escribe la fila y no se registra. */
+    private void registrarHistorial(AsignacionGuardada resultado) {
+        var despues = UbicacionArticuloEstado.de(resultado.guardada());
+        if (resultado.anterior() == null) {
+            registrarEscrituraHistorialUseCase.registrarAlta(UbicacionArticuloEstado.ENTIDAD, despues.clave(), despues);
+            return;
+        }
+        var antes = UbicacionArticuloEstado.de(resultado.anterior());
+        if (!antes.equals(despues)) {
+            registrarEscrituraHistorialUseCase.registrarEdicion(UbicacionArticuloEstado.ENTIDAD, despues.clave(), antes, despues);
+        }
     }
 
     /**

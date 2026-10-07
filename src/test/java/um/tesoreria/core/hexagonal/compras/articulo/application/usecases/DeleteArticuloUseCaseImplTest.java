@@ -9,6 +9,7 @@ import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.ReferenciaArticulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ArticuloRepository;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ReferenciasArticuloRepository;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.in.RegistrarEscrituraHistorialUseCase;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloConflictException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.in.DeleteUbicacionArticulosByArticuloUseCase;
 
@@ -30,6 +31,7 @@ class DeleteArticuloUseCaseImplTest {
     private ArticuloRepository repository;
     private ReferenciasArticuloRepository referencias;
     private DeleteUbicacionArticulosByArticuloUseCase vinculos;
+    private RegistrarEscrituraHistorialUseCase historial;
     private DeleteArticuloUseCaseImpl useCase;
 
     @BeforeEach
@@ -37,7 +39,8 @@ class DeleteArticuloUseCaseImplTest {
         repository = mock(ArticuloRepository.class);
         referencias = mock(ReferenciasArticuloRepository.class);
         vinculos = mock(DeleteUbicacionArticulosByArticuloUseCase.class);
-        useCase = new DeleteArticuloUseCaseImpl(repository, referencias, vinculos);
+        historial = mock(RegistrarEscrituraHistorialUseCase.class);
+        useCase = new DeleteArticuloUseCaseImpl(repository, referencias, vinculos, historial);
         when(referencias.findReferencias(any())).thenReturn(List.of());
         when(vinculos.deleteByArticuloId(any())).thenReturn(List.of());
     }
@@ -48,11 +51,12 @@ class DeleteArticuloUseCaseImplTest {
 
         useCase.deleteArticulo(5L);
 
-        InOrder orden = inOrder(repository, referencias, vinculos);
+        InOrder orden = inOrder(repository, referencias, vinculos, historial);
         orden.verify(repository).findByIdForUpdate(5L);
         orden.verify(referencias).findReferencias(5L);
         orden.verify(vinculos).deleteByArticuloId(5L);
         orden.verify(repository).deleteById(5L);
+        orden.verify(historial).registrarBaja("articulo", "5", ArticuloEstado.de(Articulo.builder().articuloId(5L).build()));
     }
 
     @Test
@@ -66,7 +70,7 @@ class DeleteArticuloUseCaseImplTest {
                     assertThat(ex.getMotivo()).isEqualTo(ArticuloConflictException.Motivo.REFERENCIADO);
                     assertThat(ex.getReferencias()).isEqualTo(encontradas);
                 });
-        verifyNoInteractions(vinculos);
+        verifyNoInteractions(vinculos, historial);
         verify(repository, never()).deleteById(any());
     }
 
@@ -75,7 +79,7 @@ class DeleteArticuloUseCaseImplTest {
         when(repository.findByIdForUpdate(6L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> useCase.deleteArticulo(6L)).isInstanceOf(ArticuloException.class);
-        verifyNoInteractions(referencias, vinculos);
+        verifyNoInteractions(referencias, vinculos, historial);
         verify(repository, never()).deleteById(any());
     }
 

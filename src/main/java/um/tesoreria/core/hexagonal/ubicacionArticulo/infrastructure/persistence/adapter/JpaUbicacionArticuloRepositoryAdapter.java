@@ -7,6 +7,7 @@ import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.e
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.entity.UbicacionEntity;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloConflictException;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.AsignacionGuardada;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.out.UbicacionArticuloRepository;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.entity.UbicacionArticuloEntity;
@@ -32,10 +33,11 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
      * FOR UPDATE nativo: con PESSIMISTIC_WRITE, Hibernate 7 genera "FOR UPDATE OF", que MySQL 5.7 no acepta.
      */
     @Override
-    public UbicacionArticulo save(UbicacionArticulo domain) {
+    public AsignacionGuardada save(UbicacionArticulo domain) {
         try {
             var id = jpaUbicacionArticuloRepository.findIdByUbicacionIdAndArticuloId(domain.getUbicacionId(), domain.getArticuloId());
             UbicacionArticuloEntity entity;
+            UbicacionArticulo anterior = null;
             if (id.isPresent()) {
                 List<?> filas = entityManager.createNativeQuery(
                                 "SELECT * FROM ubicacion_articulo WHERE ubicacion_articulo_id = :id FOR UPDATE", UbicacionArticuloEntity.class)
@@ -46,6 +48,7 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
                             "el vínculo " + domain.getUbicacionId() + ":" + domain.getArticuloId() + " se borró mientras se asignaba");
                 }
                 entity = (UbicacionArticuloEntity) filas.getFirst();
+                anterior = escalares(entity);
                 entity.setNumeroCuenta(domain.getNumeroCuenta());
             } else {
                 entity = mapper.toEntity(domain);
@@ -58,12 +61,22 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
             entity.setUbicacion(entityManager.find(UbicacionEntity.class, entity.getUbicacionId()));
             entity.setArticulo(entityManager.find(ArticuloEntity.class, entity.getArticuloId()));
             entity.setCuenta(entity.getNumeroCuenta() == null ? null : entityManager.find(CuentaEntity.class, entity.getNumeroCuenta()));
-            return mapper.toDomainModel(entity);
+            return new AsignacionGuardada(anterior, mapper.toDomainModel(entity));
         } catch (RuntimeException ex) {
             throw UbicacionArticuloRestricciones.traducir(ex, domain.getUbicacionId(), domain.getArticuloId());
         }
     }
     
+    /** Copia de los campos de la fila, antes de modificar la entidad administrada. */
+    private static UbicacionArticulo escalares(UbicacionArticuloEntity entity) {
+        return UbicacionArticulo.builder()
+                .ubicacionArticuloId(entity.getUbicacionArticuloId())
+                .ubicacionId(entity.getUbicacionId())
+                .articuloId(entity.getArticuloId())
+                .numeroCuenta(entity.getNumeroCuenta())
+                .build();
+    }
+
     @Override
     public List<UbicacionArticulo> findAllByArticuloId(Long articuloId) {
         return jpaUbicacionArticuloRepository.findAllByArticuloId(articuloId).stream()

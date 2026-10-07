@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -30,6 +32,12 @@ import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.m
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.ReferenciaArticulo;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.usecases.GetCuentaByNumeroCuentaUseCaseImpl;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.mapper.UbicacionMapper;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.application.service.EscrituraHistorialService;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.model.EscrituraHistorial;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.in.RegistrarEscrituraHistorialUseCase;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.persistence.adapter.JpaEscrituraHistorialRepositoryAdapter;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.persistence.mapper.EscrituraHistorialMapper;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.serialization.JacksonEscrituraValorSerializer;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.DeleteUbicacionArticulosByArticuloUseCaseImpl;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.adapter.JpaUbicacionArticuloRepositoryAdapter;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.mapper.UbicacionArticuloMapper;
@@ -51,7 +59,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Escrituras de artículo (#405) contra la base de desarrollo (MySQL real) sin escrituras persistentes: la única
  * conexión crea al abrirse copias TEMPORARY vacías de {@code articulos} y {@code ubicacion_articulo} que ocultan las
- * reales solo en esa sesión. Las referencias ({@code entrega_detalle}, {@code movprov_detallefactura}) se leen reales.
+ * reales solo en esa sesión, igual que {@code gestion_escritura_historial} (historial #404). Las referencias ({@code entrega_detalle}, {@code movprov_detallefactura}) se leen reales.
  * {@link SoloTablasTemporales} hace fallar cualquier escritura de Hibernate sobre otra tabla.
  * Las copias TEMPORARY conservan la clave primaria pero no las FK: el 1062 es real; 1451/1452 no se reproducen acá.
  * Sin transacción de la prueba: cada caso de uso abre y confirma la suya (sobre la copia temporal).
@@ -64,11 +72,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         JpaArticuloRepositoryAdapter.class, ArticuloMapper.class, CuentaMapper.class, ArticuloDevDbIT.Auditoria.class,
         GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class,
         JpaReferenciasArticuloAdapter.class, DeleteUbicacionArticulosByArticuloUseCaseImpl.class,
-        JpaUbicacionArticuloRepositoryAdapter.class, UbicacionArticuloMapper.class, UbicacionMapper.class})
+        JpaUbicacionArticuloRepositoryAdapter.class, UbicacionArticuloMapper.class, UbicacionMapper.class,
+        EscrituraHistorialService.class, JpaEscrituraHistorialRepositoryAdapter.class, EscrituraHistorialMapper.class,
+        JacksonEscrituraValorSerializer.class, ArticuloDevDbIT.HistorialConFalla.class})
 @Slf4j
 class ArticuloDevDbIT {
 
-    static final Set<String> TABLAS_TEMPORALES = Set.of("articulos", "ubicacion_articulo");
+    static final Set<String> TABLAS_TEMPORALES = Set.of("articulos", "ubicacion_articulo", "gestion_escritura_historial");
     static final List<String> SQL = new CopyOnWriteArrayList<>();
 
     @TestConfiguration
@@ -89,7 +99,9 @@ class ArticuloDevDbIT {
                 "CREATE TEMPORARY TABLE IF NOT EXISTS it405_articulos LIKE articulos"
                         + "; CREATE TEMPORARY TABLE IF NOT EXISTS articulos LIKE it405_articulos"
                         + "; CREATE TEMPORARY TABLE IF NOT EXISTS it405_ubicacion_articulo LIKE ubicacion_articulo"
-                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS ubicacion_articulo LIKE it405_ubicacion_articulo");
+                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS ubicacion_articulo LIKE it405_ubicacion_articulo"
+                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS it405_historial LIKE gestion_escritura_historial"
+                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS gestion_escritura_historial LIKE it405_historial");
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
         registry.add("spring.jpa.properties.hibernate.session_factory.statement_inspector",
@@ -125,6 +137,7 @@ class ArticuloDevDbIT {
             assertThat(ddl).as(tabla + " debe ser la copia TEMPORARY").startsWith("CREATE TEMPORARY TABLE");
         }
         SQL.clear();
+        HistorialConFalla.normal();
     }
 
     @Test
@@ -297,6 +310,113 @@ class ArticuloDevDbIT {
 
         log.info("@@sql_mode de dev: {}", jdbc.queryForObject("SELECT @@sql_mode", String.class));
         log.info("versión de MySQL de dev: {}", jdbc.queryForObject("SELECT VERSION()", String.class));
+    }
+
+    @Test
+    void altaEdicionYBajaConVinculos_registranSuHistorial_sinAsociaciones() {
+        crear.createArticulo(gasto(900_010L, "HISTORIAL"));
+        editar.updateArticulo(900_010L, Articulo.builder().nombre("HISTORIAL 2").build());
+        editar.updateArticulo(900_010L, Articulo.builder().nombre("HISTORIAL 2").build());
+        var ubicacion = jdbc.queryForObject("SELECT MIN(ubicacion_id) FROM ubicacion", Integer.class);
+        jdbc.update("INSERT INTO ubicacion_articulo (ubicacion_id, articulo_id) VALUES (?, 900010)", ubicacion);
+
+        borrar.deleteArticulo(900_010L);
+
+        assertThat(operaciones("articulo", "900010")).as("la edición sin cambios no se registra").containsExactly("ALTA", "EDICION", "BAJA");
+        assertThat(operaciones("ubicacion_articulo", ubicacion + ":900010")).containsExactly("BAJA");
+        var bajaArticulo = jdbc.queryForObject("SELECT valor_anterior FROM gestion_escritura_historial"
+                + " WHERE entidad = 'articulo' AND entidad_clave = '900010' AND operacion = 'BAJA'", String.class);
+        assertThat(bajaArticulo).contains("\"nombre\":\"HISTORIAL 2\"").doesNotContain("\"cuenta\":");
+    }
+
+    @Test
+    void historialRealYDespuesUnFallo_revierteElAltaYSuHistorial() {
+        HistorialConFalla.fallar("articulo", HistorialConFalla.Momento.DESPUES);
+
+        assertThatThrownBy(() -> crear.createArticulo(gasto(900_011L, "REVIERTE")))
+                .isInstanceOf(IllegalStateException.class).hasMessageContaining("falla de prueba");
+
+        assertThat(SQL).as("el SQL de negocio y el del historial llegaron a ejecutarse")
+                .anyMatch(sql -> sql.startsWith("insert into articulos"))
+                .anyMatch(sql -> sql.startsWith("insert into gestion_escritura_historial"));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900011", Integer.class)).isZero();
+        assertThat(operaciones("articulo", "900011")).isEmpty();
+    }
+
+    @Test
+    void historialQueFallaEnLaBaja_revierteVinculosBorradosYSuHistorial() {
+        crear.createArticulo(gasto(900_012L, "BAJA REVIERTE"));
+        var ubicacion = jdbc.queryForObject("SELECT MIN(ubicacion_id) FROM ubicacion", Integer.class);
+        jdbc.update("INSERT INTO ubicacion_articulo (ubicacion_id, articulo_id) VALUES (?, 900012)", ubicacion);
+        HistorialConFalla.fallar("articulo", HistorialConFalla.Momento.ANTES);
+
+        SQL.clear();
+        assertThatThrownBy(() -> borrar.deleteArticulo(900_012L)).isInstanceOf(IllegalStateException.class);
+
+        assertThat(SQL).as("el vínculo y su historial llegaron a escribirse antes del fallo")
+                .anyMatch(sql -> sql.startsWith("delete from ubicacion_articulo"))
+                .anyMatch(sql -> sql.startsWith("insert into gestion_escritura_historial"));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900012", Integer.class)).isOne();
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = 900012", Integer.class)).isOne();
+        assertThat(operaciones("ubicacion_articulo", ubicacion + ":900012")).isEmpty();
+        assertThat(operaciones("articulo", "900012")).containsExactly("ALTA");
+    }
+
+    private List<String> operaciones(String entidad, String clave) {
+        return jdbc.queryForList("SELECT operacion FROM gestion_escritura_historial WHERE entidad = ? AND entidad_clave = ?"
+                + " ORDER BY escritura_historial_id", String.class, entidad, clave);
+    }
+
+    /**
+     * Envuelve el historial real (el bean con proxy, MANDATORY) y puede fallar antes o después de registrar en una
+     * entidad: así se prueba que el negocio y el historial se revierten juntos.
+     */
+    @TestConfiguration
+    static class HistorialConFalla {
+
+        enum Momento { ANTES, DESPUES }
+
+        private static volatile String entidad;
+        private static volatile Momento momento;
+
+        static void fallar(String entidadQueFalla, Momento cuando) {
+            entidad = entidadQueFalla;
+            momento = cuando;
+        }
+
+        static void normal() {
+            entidad = null;
+            momento = null;
+        }
+
+        @Bean
+        @Primary
+        RegistrarEscrituraHistorialUseCase historialConFalla(EscrituraHistorialService real) {
+            return new RegistrarEscrituraHistorialUseCase() {
+                @Override
+                public EscrituraHistorial registrarAlta(String e, String clave, Object nuevo) {
+                    return registrar(e, () -> real.registrarAlta(e, clave, nuevo));
+                }
+
+                @Override
+                public EscrituraHistorial registrarEdicion(String e, String clave, Object anterior, Object nuevo) {
+                    return registrar(e, () -> real.registrarEdicion(e, clave, anterior, nuevo));
+                }
+
+                @Override
+                public EscrituraHistorial registrarBaja(String e, String clave, Object anterior) {
+                    return registrar(e, () -> real.registrarBaja(e, clave, anterior));
+                }
+            };
+        }
+
+        private static EscrituraHistorial registrar(String e, java.util.function.Supplier<EscrituraHistorial> real) {
+            var falla = e.equals(entidad);
+            if (falla && momento == Momento.ANTES) throw new IllegalStateException("falla de prueba antes del historial");
+            var evento = real.get();
+            if (falla && momento == Momento.DESPUES) throw new IllegalStateException("falla de prueba después del historial");
+            return evento;
+        }
     }
 
     private static Articulo gasto(Long id, String nombre) {

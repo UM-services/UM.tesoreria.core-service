@@ -27,6 +27,10 @@ import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.re
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.application.usecases.GetUbicacionByIdUseCaseImpl;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.adapter.JpaUbicacionRepositoryAdapter;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.mapper.UbicacionMapper;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.application.service.EscrituraHistorialService;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.persistence.adapter.JpaEscrituraHistorialRepositoryAdapter;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.persistence.mapper.EscrituraHistorialMapper;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.serialization.JacksonEscrituraValorSerializer;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloConflictException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloValidationException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.service.UbicacionArticuloService;
@@ -55,7 +59,8 @@ import static org.assertj.core.api.Assertions.catchRuntimeException;
 /**
  * Asignación de ubicación y cuenta a un artículo (#405) contra la base de desarrollo (MySQL real) sin escrituras
  * persistentes: la única conexión crea al abrirse una copia TEMPORARY vacía de {@code ubicacion_articulo} que oculta
- * la real solo en esa sesión. Ubicación, artículo y cuentas se leen de las tablas reales.
+ * la real solo en esa sesión (igual {@code gestion_escritura_historial}). Ubicación, artículo y cuentas se leen de las
+ * tablas reales.
  * La copia conserva el índice único (ubicacion_id, articulo_id) pero no las FK: el 1062 es real; 1452 no se reproduce.
  * Sin transacción de la prueba: cada llamada abre y confirma la suya (sobre la copia temporal).
  */
@@ -69,11 +74,13 @@ import static org.assertj.core.api.Assertions.catchRuntimeException;
         ArticuloMapper.class, CuentaMapper.class, UbicacionArticuloDevDbIT.Auditoria.class,
         GetUbicacionByIdUseCaseImpl.class, JpaUbicacionRepositoryAdapter.class,
         GetArticuloByIdUseCaseImpl.class, JpaArticuloRepositoryAdapter.class,
-        GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class})
+        GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class,
+        EscrituraHistorialService.class, JpaEscrituraHistorialRepositoryAdapter.class, EscrituraHistorialMapper.class,
+        JacksonEscrituraValorSerializer.class})
 @Slf4j
 class UbicacionArticuloDevDbIT {
 
-    static final Set<String> TABLAS_TEMPORALES = Set.of("ubicacion_articulo");
+    static final Set<String> TABLAS_TEMPORALES = Set.of("ubicacion_articulo", "gestion_escritura_historial");
     static final List<String> SQL = new CopyOnWriteArrayList<>();
 
     @TestConfiguration
@@ -92,7 +99,9 @@ class UbicacionArticuloDevDbIT {
         registry.add("spring.datasource.hikari.maximum-pool-size", () -> "1");
         registry.add("spring.datasource.hikari.connection-init-sql", () ->
                 "CREATE TEMPORARY TABLE IF NOT EXISTS it405_ubicacion_articulo LIKE ubicacion_articulo"
-                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS ubicacion_articulo LIKE it405_ubicacion_articulo");
+                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS ubicacion_articulo LIKE it405_ubicacion_articulo"
+                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS it405_historial LIKE gestion_escritura_historial"
+                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS gestion_escritura_historial LIKE it405_historial");
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
         registry.add("spring.jpa.properties.hibernate.session_factory.statement_inspector",
@@ -219,6 +228,27 @@ class UbicacionArticuloDevDbIT {
     private void rechaza(UbicacionArticulo pedido, String campo) {
         assertThatThrownBy(() -> service.save(pedido))
                 .isInstanceOfSatisfying(UbicacionArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo(campo));
+    }
+
+    @Test
+    void asignacion_registraAltaEdicion_yLaRepeticionSinCambiosNoSeRegistra() {
+        var articuloId = articulos.get(2);
+        var clave = ubicacionId + ":" + articuloId;
+        // Copia temporal compartida con otras pruebas: se empieza sin el par
+        jdbc.update("DELETE FROM ubicacion_articulo WHERE ubicacion_id = ? AND articulo_id = ?", ubicacionId, articuloId);
+        var antes = operaciones(clave).size();
+
+        service.save(asignacion(articuloId, cuentas.get(0)));
+        service.save(asignacion(articuloId, cuentas.get(1)));
+        service.save(asignacion(articuloId, cuentas.get(1)));
+
+        var nuevas = operaciones(clave).subList(antes, operaciones(clave).size());
+        assertThat(nuevas).containsExactly("ALTA", "EDICION");
+    }
+
+    private List<String> operaciones(String clave) {
+        return jdbc.queryForList("SELECT operacion FROM gestion_escritura_historial WHERE entidad = 'ubicacion_articulo'"
+                + " AND entidad_clave = ? ORDER BY escritura_historial_id", String.class, clave);
     }
 
     @Test

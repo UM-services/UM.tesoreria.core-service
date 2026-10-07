@@ -9,6 +9,7 @@ import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ArticuloRepository;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.GetCuentaByNumeroCuentaUseCase;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.in.RegistrarEscrituraHistorialUseCase;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -26,13 +27,15 @@ class CreateArticuloUseCaseImplTest {
 
     private ArticuloRepository repository;
     private GetCuentaByNumeroCuentaUseCase cuentas;
+    private RegistrarEscrituraHistorialUseCase historial;
     private CreateArticuloUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
         repository = mock(ArticuloRepository.class);
         cuentas = mock(GetCuentaByNumeroCuentaUseCase.class);
-        useCase = new CreateArticuloUseCaseImpl(repository, cuentas);
+        historial = mock(RegistrarEscrituraHistorialUseCase.class);
+        useCase = new CreateArticuloUseCaseImpl(repository, cuentas, historial);
         when(repository.create(any())).thenAnswer(inv -> inv.getArgument(0));
         when(cuentas.getCuentaByNumeroCuenta(any())).thenAnswer(inv -> Optional.of(Cuenta.builder().numeroCuenta(inv.getArgument(0)).build()));
     }
@@ -190,6 +193,23 @@ class CreateArticuloUseCaseImplTest {
         rechaza(valido().tipo("servicio").numeroCuenta(new BigDecimal("51010000")).build(), "tipo");
 
         verifyNoInteractions(cuentas);
+    }
+
+    @Test
+    void alta_registraElEstadoCreadoSinLaCuenta() {
+        var articulo = valido().numeroCuenta(new BigDecimal("5.101E+7")).precio(new BigDecimal("1.5")).build();
+
+        useCase.createArticulo(articulo);
+
+        verify(historial).registrarAlta("articulo", "10", new ArticuloEstado(10L, "Gasto", "", "", new BigDecimal("1.50"),
+                null, null, new BigDecimal("51010000"), "gasto", (byte) 0, (byte) 1));
+    }
+
+    @Test
+    void altaRechazada_noRegistra() {
+        rechaza(valido().tipo("servicio").build(), "tipo");
+
+        verifyNoInteractions(historial);
     }
 
     private void rechaza(Articulo articulo, String campo) {

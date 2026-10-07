@@ -10,6 +10,7 @@ import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ArticuloRepository;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.GetCuentaByNumeroCuentaUseCase;
+import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.in.RegistrarEscrituraHistorialUseCase;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -28,13 +29,15 @@ class UpdateArticuloUseCaseImplTest {
 
     private ArticuloRepository repository;
     private GetCuentaByNumeroCuentaUseCase cuentas;
+    private RegistrarEscrituraHistorialUseCase historial;
     private UpdateArticuloUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
         repository = mock(ArticuloRepository.class);
         cuentas = mock(GetCuentaByNumeroCuentaUseCase.class);
-        useCase = new UpdateArticuloUseCaseImpl(repository, cuentas);
+        historial = mock(RegistrarEscrituraHistorialUseCase.class);
+        useCase = new UpdateArticuloUseCaseImpl(repository, cuentas, historial);
         when(cuentas.getCuentaByNumeroCuenta(any())).thenAnswer(inv -> Optional.of(Cuenta.builder().numeroCuenta(inv.getArgument(0)).build()));
         when(repository.update(any())).thenAnswer(inv -> inv.getArgument(0));
     }
@@ -134,6 +137,35 @@ class UpdateArticuloUseCaseImplTest {
         useCase.updateArticulo(7L, Articulo.builder().nombre("Nuevo").build());
 
         verifyNoInteractions(cuentas);
+    }
+
+    @Test
+    void edicion_registraAntesDeLaLecturaBloqueadaYDespues() {
+        when(repository.findByIdForUpdate(7L)).thenReturn(Optional.of(actual()));
+
+        useCase.updateArticulo(7L, Articulo.builder().nombre("Nuevo").habilitado((byte) 0).build());
+
+        var antes = ArticuloEstado.de(actual());
+        var despues = new ArticuloEstado(7L, "Nuevo", "D", "U", new BigDecimal("10.00"), (byte) 0, 0L,
+                new BigDecimal("51010101"), "gasto", (byte) 1, (byte) 0);
+        verify(historial).registrarEdicion("articulo", "7", antes, despues);
+    }
+
+    @Test
+    void edicionSinCambios_noRegistra() {
+        when(repository.findByIdForUpdate(7L)).thenReturn(Optional.of(actual()));
+
+        useCase.updateArticulo(7L, Articulo.builder().nombre("Viejo").precio(new BigDecimal("10.000")).build());
+
+        verifyNoInteractions(historial);
+    }
+
+    @Test
+    void edicionDeInexistente_noRegistra() {
+        when(repository.findByIdForUpdate(8L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> useCase.updateArticulo(8L, Articulo.builder().nombre("X").build())).isInstanceOf(ArticuloException.class);
+        verifyNoInteractions(historial);
     }
 
     private static Articulo actual() {

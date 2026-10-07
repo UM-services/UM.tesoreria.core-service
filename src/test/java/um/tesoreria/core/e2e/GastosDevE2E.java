@@ -142,6 +142,10 @@ class GastosDevE2E {
         assertThat(delete("/articulo/" + ID_ASIGNACION).statusCode()).isEqualTo(204);
         assertThat(numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = " + ID_ASIGNACION)).isZero();
         assertThat(numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = " + ID_ASIGNACION)).isZero();
+
+        // Historial #404 en la tabla real de dev (DevDbReservas lo barre al terminar)
+        assertThat(operaciones("articulo", String.valueOf(ID_ASIGNACION))).containsExactly("ALTA", "BAJA");
+        assertThat(operaciones("ubicacion_articulo", ubicacion + ":" + ID_ASIGNACION)).containsExactly("ALTA", "EDICION", "BAJA");
     }
 
     @Test
@@ -201,6 +205,19 @@ class GastosDevE2E {
     }
 
     // --- estado ---
+
+    static List<String> operaciones(String entidad, String clave) throws SQLException {
+        var r = new ArrayList<String>();
+        try (var st = dev.db.prepareStatement("SELECT operacion FROM gestion_escritura_historial WHERE entidad = ? AND entidad_clave = ?"
+                + " ORDER BY escritura_historial_id")) {
+            st.setString(1, entidad);
+            st.setString(2, clave);
+            try (var rs = st.executeQuery()) {
+                while (rs.next()) r.add(rs.getString(1));
+            }
+        }
+        return r;
+    }
 
     static long numero(String sql) throws SQLException {
         return dev.numero(sql);
