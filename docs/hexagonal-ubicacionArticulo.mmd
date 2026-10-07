@@ -1,59 +1,76 @@
 ---
-title: Arquitectura Hexagonal - Módulo UbicacionArticulo (v3.14.0)
+title: Arquitectura Hexagonal - Módulo UbicacionArticulo (v7.0.0)
 ---
 
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
-        UA[UbicacionArticulo<br/>Entidad de Dominio]
+        UA[UbicacionArticulo<br/>Modelo de Dominio]
+        AG[AsignacionGuardada<br/>anterior + guardada]
         UAR[UbicacionArticuloRepository<br/>Puerto de Salida]
+        DUA[DeleteUbicacionArticulosByArticuloUseCase<br/>Puerto de Entrada público]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
-        UAS[UbicacionArticuloService<br/>Servicio de Aplicación]
-        GA[GetAllUbicacionArticulosUseCaseImpl]
-        GG[GetUbicacionArticuloUseCaseImpl]
-        GB[GetUbicacionArticulosByArticuloUseCaseImpl]
-        SV[SaveUbicacionArticuloUseCaseImpl]
+        UAS[UbicacionArticuloService<br/>sin transacción: un reintento ante 1062/1213]
+        SV[SaveUbicacionArticuloUseCaseImpl<br/>valida y registra ALTA/EDICION]
+        DV[DeleteUbicacionArticulosByArticuloUseCaseImpl<br/>MANDATORY: dentro de la baja del artículo]
+        RD[GetAll / Get / GetByArticulo UseCaseImpl]
+        EST[UbicacionArticuloEstado<br/>foto para el historial]
+        EX[UbicacionArticuloException 404<br/>UbicacionArticuloValidationException 400<br/>UbicacionArticuloConflictException 409]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        UAC[UbicacionArticuloController<br/>Adaptador Web]
-        JPA[JpaUbicacionArticuloRepositoryAdapter<br/>Adaptador JPA]
-        ENT[UbicacionArticuloEntity<br/>Entidad JPA]
-        M[UbicacionArticuloMapper<br/>Mapper]
+        UAC[UbicacionArticuloController<br/>ProblemDetail con codigo/campo]
+        JPA[JpaUbicacionArticuloRepositoryAdapter<br/>upsert por par, bloqueo por clave primaria]
+        RES[UbicacionArticuloRestricciones<br/>traduce 1062/1452/1205/1213]
+        ENT[UbicacionArticuloEntity / Mapper]
     end
 
-    subgraph Externo ["Externo (External)"]
-        JPAR[JpaRepository<br/>Spring Data]
+    subgraph OtrosSlices ["Otros slices (puertos públicos)"]
+        UB[dependencias.ubicacion<br/>GetUbicacionByIdUseCase]
+        AR[compras.articulo<br/>GetArticuloByIdUseCase]
+        CTA[contable.cuenta<br/>GetCuentaByNumeroCuentaUseCase]
+        HIS[gestion.escrituraHistorial<br/>RegistrarEscrituraHistorialUseCase]
+        DEA[compras.articulo<br/>DeleteArticuloUseCaseImpl]
     end
 
-    %% Flujo de Dependencias
     UAC -->|usa| UAS
-    UAC -->|recibe/envía| UA
-
-    UAS -->|depende| GA
-    UAS -->|depende| GG
-    UAS -->|depende| GB
     UAS -->|depende| SV
-
-    GA -->|usa| UAR
-    GG -->|usa| UAR
-    GB -->|usa| UAR
-    SV -->|usa| UAR
+    UAS -->|depende| RD
+    SV -->|existe la ubicación| UB
+    SV -->|existe el artículo| AR
+    SV -->|existe la cuenta| CTA
+    SV -->|guarda| UAR
+    UAR -->|devuelve| AG
+    SV -->|ALTA / EDICION si cambió| HIS
+    DEA -->|borra los vínculos| DUA
+    DV -.->|implementa| DUA
+    DV -->|bloquea y borra| UAR
+    DV -->|BAJA por vínculo| HIS
+    SV & DV -->|foto| EST
+    RD -->|usa| UAR
 
     JPA -->|implementa| UAR
-    JPA -->|persiste| JPAR
+    JPA -->|traduce errores| RES
     JPA -->|gestiona| ENT
-    JPA -->|usa| M
+    RES -->|lanza| EX
 
     style UA fill:#e1f5fe
+    style AG fill:#e1f5fe
     style UAR fill:#f3e5f5
+    style DUA fill:#f3e5f5
     style UAS fill:#fff3e0
-    style GA fill:#fff3e0
-    style GG fill:#fff3e0
-    style GB fill:#fff3e0
     style SV fill:#fff3e0
+    style DV fill:#fff3e0
+    style RD fill:#fff3e0
+    style EST fill:#fff3e0
+    style EX fill:#fff3e0
     style UAC fill:#e8f5e8
     style JPA fill:#e8f5e8
+    style RES fill:#e8f5e8
     style ENT fill:#e8f5e8
-    style M fill:#e8f5e8
+    style UB fill:#fce4ec
+    style AR fill:#fce4ec
+    style CTA fill:#fce4ec
+    style HIS fill:#fce4ec
+    style DEA fill:#fce4ec

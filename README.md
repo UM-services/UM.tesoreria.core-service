@@ -4,7 +4,12 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 6.2.0**
+**Versión actual (SemVer): 7.0.0**
+
+## Novedades 7.0.0 (verificado en código)
+- **breaking(compras/articulo, ubicacionArticulo)**: Gastos: ubicación y baja segura (#405, sub-issue de #403). Las escrituras de artículo y de su asignación de ubicación y cuenta validan en Java y responden errores `ProblemDetail` con `codigo` y `campo`. El alta nunca sobrescribe (id existente → `409`), el `PUT` trata los campos nulos como "sin cambios", y `DELETE /articulo/{id}` responde `409` con `referencias [{tabla, cantidad}]` si alguna entrega o línea de factura usa el artículo (las facturas no tienen FK) o borra el artículo con sus vínculos si está libre. Cada escritura queda en el historial #404. **Requiere la tabla `gestion_escritura_historial`** (hoy solo en desarrollo). Migración para consumidores en `CHANGELOG.md`; guía en `docs/gestion-articulo-ubicacion.md`.
+- **feat(dependencias/ubicacion)**: Nuevo puerto público `GetUbicacionByIdUseCase`.
+- **test**: `ArticuloDevDbIT` y `UbicacionArticuloDevDbIT` contra la base de desarrollo con tablas `TEMPORARY`; E2E a pedido contra dev (`GastosDevE2E` por HTTP, `GastosConcurrenciaDevE2E` con dos conexiones reales).
 
 ## Novedades 6.2.0 (verificado en código)
 - **feat(gestion/escrituraHistorial)**: Historial transaccional de escrituras de Gestión (#404). `RegistrarEscrituraHistorialUseCase` registra alta, edición y baja (operación, entidad, clave, valores anterior/nuevo en JSON con formato fijo) en la misma transacción de la operación de negocio (`MANDATORY`); si una falla, no queda ninguna. Sin actor verificado ni consulta pública. Tabla `gestion_escritura_historial` (`docs/sql/V404__gestion_escritura_historial.sql`, aplicada en desarrollo); `fecha` la pone MySQL como el `Now()` de VB6. Contrato y guía: `docs/gestion-escritura-historial.md`.
@@ -1355,6 +1360,25 @@ tablas `TEMPORARY` de su sesión (la tabla del historial y una copia de `proveed
 Hibernate tiene prohibido escribir en cualquier otra tabla durante el test. Necesita que `IT_DB_USER` tenga el
 permiso `CREATE TEMPORARY TABLES`; lo más seguro es un usuario con solo `SELECT` y `CREATE TEMPORARY TABLES`, así
 ninguna escritura puede llegar a una tabla real. Sin `IT_DB_HOST` el test se saltea.
+
+`ArticuloDevDbIT` y `UbicacionArticuloDevDbIT` (#405) usan la misma técnica, con copias `TEMPORARY` de `articulos`,
+`ubicacion_articulo` y `gestion_escritura_historial`; leen de las tablas reales `plancta`, `ubicacion`,
+`entrega_detalle` y `movprov_detallefactura`.
+
+#### Pruebas E2E contra desarrollo (a pedido, escriben en tablas reales)
+
+`GastosDevE2E` (HTTP contra la app levantada) y `GastosConcurrenciaDevE2E` (dos conexiones reales) escriben en
+`articulos`, `ubicacion_articulo` y `gestion_escritura_historial` de la base de desarrollo, solo con ids reservados
+(999001 a 999404). Al terminar, `DevDbReservas` borra lo propio, restaura los AUTO_INCREMENT y exige que las tablas
+queden idénticas (CHECKSUM). No corren solas: hace falta `E2E_DEV_ESCRITURA=si`.
+
+```bash
+set -a; . ./.env; set +a
+E2E_DEV_ESCRITURA=si E2E_BASE_URL=http://localhost:18092 mvn -Pit -Dit.test='*IT,*E2E' verify
+```
+
+Si una corrida se interrumpe, revisar a mano los AUTO_INCREMENT de esas tres tablas: un contador cerca de 999xxx
+afectaría las altas de VB6.
 
 ## Uso
 

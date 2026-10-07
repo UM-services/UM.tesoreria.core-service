@@ -1,13 +1,13 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 6.2.0** (actualizada: 2026-10-05)
+**Versión actual del servicio: 7.0.0** (actualizada: 2026-10-07)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
 ## Diagramas de Arquitectura
 - `architecture.mmd`: Arquitectura general (controladores, servicios, repositorios, entidades).
 - `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado.
-- `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v3.36.0 (reubicado bajo `compras/`).
+- `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v7.0.0 (validación, baja segura con referencias, historial #404 y puertos de otros slices).
 - `hexagonal-comprobante.mmd`: Arquitectura hexagonal del módulo Comprobante (tipos de comprobantes AFIP) - v3.36.0 (nuevo módulo, 6 casos de uso).
 - `hexagonal-cuentaMovimiento.mmd`: Arquitectura hexagonal del módulo CuentaMovimiento (asientos contables) - v3.36.0 (nuevo módulo, 11 casos de uso).
 - `hexagonal-proveedorMovimiento.mmd`: Arquitectura hexagonal del módulo ProveedorMovimiento (movimientos de proveedores) - v3.36.0 (nuevo módulo, 13 casos de uso).
@@ -19,8 +19,8 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores) - v3.36.0 (reubicado bajo `compras/`).
 - `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta (gestión de cuentas contables) - v3.8.0.
 - `hexagonal-mercadopago-context-history.mmd`: Historial de contexto de MercadoPago.
-- `hexagonal-ubicacion.mmd`: Arquitectura hexagonal del módulo Ubicacion (gestión de ubicaciones) - v3.14.0.
-- `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v3.14.0.
+- `hexagonal-ubicacion.mmd`: Arquitectura hexagonal del módulo Ubicacion (gestión de ubicaciones) - v7.0.0 (nuevo puerto público `GetUbicacionByIdUseCase`).
+- `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v7.0.0 (asignación idempotente, borrado de vínculos en la baja del artículo, historial #404).
 - `hexagonal-dependencia.mmd`: Arquitectura hexagonal del módulo Dependencia (gestión de dependencias) - v3.17.0.
 - `hexagonal-facturaPendiente.mmd`: Arquitectura hexagonal del módulo FacturaPendiente (gestión de facturas pendientes) - v3.36.0 (reubicado bajo `compras/`).
 - `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.50.0 (caso de uso de responsable académica).
@@ -30,6 +30,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-estadoChequera.mmd`: Arquitectura hexagonal del módulo EstadoChequera bajo `chequera/` (estado de la chequera como JSON de solo lectura para el PDF "Estado de Chequera" de report-service: `GET /api/tesoreria/core/chequera/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` — sin `{debitoTipoId}` desde `6.0.0` —, puerto `GetEstadoChequeraUseCase` de 4 argumentos, records `EstadoChequera`/`ProductoEstado`/`CuotaEstado`/`DebitoEstado` con `tipoDebito` (débitos de todos los tipos VISA + Directo), sin persistencia propia y sin salida del `generateEstadoPdf` eliminado en `5.0.0`) - v5.0.0 (nuevo módulo; v6.0.0 retira `debitoTipoId` de la ruta y agrega `tipoDebito`).
 - `hexagonal-escrituraHistorial.mmd`: Arquitectura hexagonal del módulo EscrituraHistorial (historial transaccional de altas/ediciones/bajas de Gestión; contrato `RegistrarEscrituraHistorialUseCase` con propagación `MANDATORY`; sin consulta pública ni actor verificado; script `docs/sql/V404__gestion_escritura_historial.sql`) - v6.2.0 (nuevo módulo, issue #404).
 - `gestion-escritura-historial.md`: Contrato reutilizable y guía de integración del historial de escrituras (#404).
+- `gestion-articulo-ubicacion.md`: Guía para consumidores de las escrituras de artículo y ubicacionArticulo (#405): reglas, errores, recuperación de fallos parciales, baja segura e historial, con ejemplos ejecutados.
 - `hexagonal-baja.mmd`: Arquitectura hexagonal del módulo Baja (gestión de bajas de chequeras) - v3.36.0 (reubicado bajo `chequera/`).
 - `hexagonal-campanha.mmd`: Arquitectura hexagonal del módulo Campanha (gestión de campañas UM Hub) - v3.24.0.
 - `hexagonal-chequeraProducto.mmd`: Arquitectura hexagonal del módulo Producto (gestión de productos chequera) - v3.30.0 (nuevo módulo).

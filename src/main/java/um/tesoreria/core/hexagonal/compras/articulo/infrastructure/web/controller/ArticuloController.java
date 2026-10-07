@@ -1,5 +1,10 @@
 package um.tesoreria.core.hexagonal.compras.articulo.infrastructure.web.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +46,15 @@ public class ArticuloController {
     private final CuentaService cuentaService;
     
 
+    @Operation(summary = "Alta de artículo",
+            description = "El id lo elige el cliente (GET /articulo/new da un candidato) y nunca se sobrescribe un artículo"
+                    + " existente. tipo es obligatorio ('bien' o 'gasto'); numeroCuenta, si viene, tiene que existir en el plan"
+                    + " de cuentas. Los decimales de precio de más se redondean a 2. Registra el alta en el historial #404.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Creado"),
+            @ApiResponse(responseCode = "400", description = "CAMPO_INVALIDO (con campo) o CUERPO_INVALIDO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "ARTICULO_ID_DUPLICADO: el id ya existe; o CONFLICTO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "415", description = "TIPO_DE_CONTENIDO_NO_SOPORTADO: falta application/json", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @PostMapping("/")
     public ResponseEntity<ArticuloResponse> createArticulo(@RequestBody ArticuloRequest articuloRequest) {
         Articulo articulo = articuloDtoMapper.toDomain(articuloRequest);
@@ -115,12 +129,28 @@ public class ArticuloController {
         return ResponseEntity.ok(paginatedResponse);
     }
 
+    @Operation(summary = "Edición de artículo",
+            description = "Un campo nulo o ausente significa sin cambios (numeroCuenta no se puede vaciar por PUT); el id"
+                    + " del cuerpo se ignora. Gana la última escritura. Registra la edición en el historial #404 si algo cambió.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Artículo como quedó"),
+            @ApiResponse(responseCode = "400", description = "CAMPO_INVALIDO (con campo), CUERPO_INVALIDO o PARAMETRO_INVALIDO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "404", description = "ARTICULO_NO_ENCONTRADO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "CONFLICTO: otra operación tiene tomado el artículo", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @PutMapping("/{id}")
     public ResponseEntity<ArticuloResponse> updateArticulo(@PathVariable Long id, @RequestBody ArticuloRequest articuloRequest) {
         Articulo cambios = articuloDtoMapper.toDomain(articuloRequest);
         return ResponseEntity.ok(articuloDtoMapper.toResponse(articuloService.updateArticulo(id, cambios)));
     }
 
+    @Operation(summary = "Baja de artículo",
+            description = "Solo si ninguna entrega ni línea de factura lo usa; si no, 409 con referencias [{tabla, cantidad}]"
+                    + " y no se borra nada. Sus vínculos de ubicacionArticulo se borran con él. Registra cada baja en el"
+                    + " historial #404.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Borrado con sus vínculos"),
+            @ApiResponse(responseCode = "404", description = "ARTICULO_NO_ENCONTRADO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "ARTICULO_REFERENCIADO (con referencias) o CONFLICTO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArticulo(@PathVariable Long id) {
         articuloService.deleteArticulo(id);

@@ -1,5 +1,10 @@
 package um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.web.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +61,14 @@ public class UbicacionArticuloController {
         return ResponseEntity.ok(responses);
     }
 
+    @Operation(summary = "Asignar ubicación y cuenta a un artículo",
+            description = "Idempotente por par (ubicacionId, articuloId): si el vínculo existe se le reemplaza la cuenta"
+                    + " (nula la deja sin cuenta), si no se crea. Ubicación, artículo y cuenta (si viene) tienen que existir."
+                    + " Registra alta o edición en el historial #404.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Vínculo como quedó, con ubicación, artículo y cuenta"),
+            @ApiResponse(responseCode = "400", description = "CAMPO_INVALIDO (con campo) o CUERPO_INVALIDO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "409", description = "CONFLICTO: otra operación tiene tomado el vínculo", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @PostMapping("/")
     public ResponseEntity<UbicacionArticuloResponse> save(@RequestBody UbicacionArticuloRequest request) {
         UbicacionArticulo domain = mapper.toDomain(request);
