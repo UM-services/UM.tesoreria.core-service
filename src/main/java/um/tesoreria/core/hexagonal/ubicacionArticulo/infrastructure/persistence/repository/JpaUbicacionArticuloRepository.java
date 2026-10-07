@@ -15,4 +15,7 @@ public interface JpaUbicacionArticuloRepository extends JpaRepository<UbicacionA
     /** Solo el id: no carga la entidad, así la lectura con bloqueo posterior es la que trae su estado. */
     @Query("select u.ubicacionArticuloId from UbicacionArticuloEntity u where u.ubicacionId = :ubicacionId and u.articuloId = :articuloId")
     Optional<Long> findIdByUbicacionIdAndArticuloId(@Param("ubicacionId") Integer ubicacionId, @Param("articuloId") Long articuloId);
+
+    @Query("select u.ubicacionArticuloId from UbicacionArticuloEntity u where u.articuloId = :articuloId order by u.ubicacionArticuloId")
+    java.util.List<Long> findIdsByArticuloId(@Param("articuloId") Long articuloId);
 }

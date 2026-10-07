@@ -186,6 +186,20 @@ class ArticuloControllerTest {
     }
 
     @Test
+    void baja_referenciadaConCantidades_409ConCadaTablaYSuCantidad() {
+        doThrow(ArticuloConflictException.referenciado(15L, List.of(new ReferenciaArticulo("entrega_detalle", 3L),
+                new ReferenciaArticulo("movprov_detallefactura", 10L))))
+                .when(service).deleteArticulo(15L);
+
+        var respuesta = mockMvc.delete().uri("/articulo/15").exchange();
+
+        assertThat(respuesta).hasStatus(409);
+        assertThat(respuesta).bodyJson().extractingPath("$.referencias[0].cantidad").isEqualTo(3);
+        assertThat(respuesta).bodyJson().extractingPath("$.referencias[1].tabla").isEqualTo("movprov_detallefactura");
+        assertThat(respuesta).bodyJson().extractingPath("$.referencias[1].cantidad").isEqualTo(10);
+    }
+
+    @Test
     void idNoNumerico_400ParametroInvalido() {
         var respuesta = mockMvc.delete().uri("/articulo/abc").exchange();
 

@@ -31,6 +31,7 @@ import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.CreateArticuloUseCase;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.UpdateArticuloUseCase;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.adapter.JpaArticuloRepositoryAdapter;
+import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.adapter.JpaReferenciasArticuloAdapter;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.mapper.ArticuloMapper;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.usecases.GetCuentaByNumeroCuentaUseCaseImpl;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.mapper.CuentaMapper;
@@ -40,6 +41,7 @@ import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persist
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.mapper.UbicacionMapper;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloConflictException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.service.UbicacionArticuloService;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.DeleteUbicacionArticulosByArticuloUseCaseImpl;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.GetAllUbicacionArticulosUseCaseImpl;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.GetUbicacionArticuloUseCaseImpl;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.GetUbicacionArticulosByArticuloUseCaseImpl;
@@ -84,7 +86,8 @@ import static org.assertj.core.api.Assertions.fail;
         GetUbicacionArticulosByArticuloUseCaseImpl.class, JpaUbicacionArticuloRepositoryAdapter.class,
         UbicacionArticuloMapper.class, UbicacionMapper.class, GastosConcurrenciaDevE2E.Auditoria.class,
         GetUbicacionByIdUseCaseImpl.class, JpaUbicacionRepositoryAdapter.class,
-        GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class})
+        GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class,
+        JpaReferenciasArticuloAdapter.class, DeleteUbicacionArticulosByArticuloUseCaseImpl.class})
 class GastosConcurrenciaDevE2E {
 
     static final String MARCA = DevDbReservas.MARCA + " conc";
@@ -269,7 +272,7 @@ class GastosConcurrenciaDevE2E {
     }
 
     @Test
-    void interbloqueoRealEnLaBaja_terminaEn409SinBorrarNiError500() throws Exception {
+    void interbloqueoRealEnLaBaja_seReintentaYBorraConSusVinculos_sinError500() throws Exception {
         crear.createArticulo(gasto(ID_INTERBLOQUEO));
         asignaciones.save(asignacion(ID_INTERBLOQUEO, cuentaA));
 
@@ -280,7 +283,7 @@ class GastosConcurrenciaDevE2E {
             Connection c = otro.db;
             c.setAutoCommit(false);
             try {
-                // Otro toma el vínculo; la baja toma el artículo y espera el vínculo (chequeo de la FK);
+                // Otro toma el vínculo; la baja toma el artículo y espera el vínculo (lo bloquea para borrarlo);
                 // después otro pide el artículo: ciclo de esperas, MySQL elige una víctima
                 try (var st = c.createStatement()) {
                     st.executeUpdate("UPDATE ubicacion_articulo SET cuenta_contable = " + cuentaB + " WHERE articulo_id = " + ID_INTERBLOQUEO);
@@ -307,10 +310,10 @@ class GastosConcurrenciaDevE2E {
         }
         // InnoDB sacrifica la transacción más liviana: la baja todavía no modificó filas, el otro ya modificó una
         assertThat(victima).as("víctima del interbloqueo: así se ejerce el reintento de la baja").isEqualTo("la baja (se reintentó)");
-        assertThat(resultado).as("la baja termina en el 409 del vínculo, nunca en un 500")
-                .hasCauseInstanceOf(ArticuloConflictException.class)
-                .cause().satisfies(ex -> assertThat(((ArticuloConflictException) ex).getMotivo()).isEqualTo(ArticuloConflictException.Motivo.REFERENCIADO));
-        assertThat(dev.numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", ID_INTERBLOQUEO)).isEqualTo(1);
+        // El reintento ya no choca: el vínculo es del artículo y se borra con él (gana la última escritura)
+        assertThat(resultado).as("la baja reintentada termina bien, nunca en un 500").isNull();
+        assertThat(dev.numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", ID_INTERBLOQUEO)).isZero();
+        assertThat(dev.numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = ?", ID_INTERBLOQUEO)).isZero();
     }
 
     /**

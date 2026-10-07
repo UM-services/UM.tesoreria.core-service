@@ -9,4 +9,6 @@ public interface UbicacionArticuloRepository {
     List<UbicacionArticulo> findAll();
     Optional<UbicacionArticulo> findByUbicacionIdAndArticuloId(Integer ubicacionId, Long articuloId);
     List<UbicacionArticulo> findAllByArticuloId(Long articuloId);
+    /** Bloquea y borra los vínculos del artículo; devuelve su estado bloqueado (solo escalares). */
+    List<UbicacionArticulo> deleteAllByArticuloId(Long articuloId);
 }

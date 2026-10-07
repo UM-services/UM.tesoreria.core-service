@@ -27,7 +27,12 @@ import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.CreateArticu
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.DeleteArticuloUseCase;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.UpdateArticuloUseCase;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.mapper.ArticuloMapper;
+import um.tesoreria.core.hexagonal.compras.articulo.domain.model.ReferenciaArticulo;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.usecases.GetCuentaByNumeroCuentaUseCaseImpl;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.mapper.UbicacionMapper;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.DeleteUbicacionArticulosByArticuloUseCaseImpl;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.adapter.JpaUbicacionArticuloRepositoryAdapter;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.mapper.UbicacionArticuloMapper;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.mapper.CuentaMapper;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.repository.JpaCuentaRepositoryAdapter;
 import um.tesoreria.core.service.view.CuentaSearchService;
@@ -45,7 +50,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Escrituras de artículo (#405) contra la base de desarrollo (MySQL real) sin escrituras persistentes: la única
- * conexión crea al abrirse una copia TEMPORARY vacía de {@code articulos} que oculta la real solo en esa sesión.
+ * conexión crea al abrirse copias TEMPORARY vacías de {@code articulos} y {@code ubicacion_articulo} que ocultan las
+ * reales solo en esa sesión. Las referencias ({@code entrega_detalle}, {@code movprov_detallefactura}) se leen reales.
  * {@link SoloTablasTemporales} hace fallar cualquier escritura de Hibernate sobre otra tabla.
  * Las copias TEMPORARY conservan la clave primaria pero no las FK: el 1062 es real; 1451/1452 no se reproducen acá.
  * Sin transacción de la prueba: cada caso de uso abre y confirma la suya (sobre la copia temporal).
@@ -56,11 +62,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({CreateArticuloUseCaseImpl.class, UpdateArticuloUseCaseImpl.class, DeleteArticuloUseCaseImpl.class,
         JpaArticuloRepositoryAdapter.class, ArticuloMapper.class, CuentaMapper.class, ArticuloDevDbIT.Auditoria.class,
-        GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class})
+        GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class,
+        JpaReferenciasArticuloAdapter.class, DeleteUbicacionArticulosByArticuloUseCaseImpl.class,
+        JpaUbicacionArticuloRepositoryAdapter.class, UbicacionArticuloMapper.class, UbicacionMapper.class})
 @Slf4j
 class ArticuloDevDbIT {
 
-    static final Set<String> TABLAS_TEMPORALES = Set.of("articulos");
+    static final Set<String> TABLAS_TEMPORALES = Set.of("articulos", "ubicacion_articulo");
     static final List<String> SQL = new CopyOnWriteArrayList<>();
 
     @TestConfiguration
@@ -79,7 +87,9 @@ class ArticuloDevDbIT {
         registry.add("spring.datasource.hikari.maximum-pool-size", () -> "1");
         registry.add("spring.datasource.hikari.connection-init-sql", () ->
                 "CREATE TEMPORARY TABLE IF NOT EXISTS it405_articulos LIKE articulos"
-                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS articulos LIKE it405_articulos");
+                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS articulos LIKE it405_articulos"
+                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS it405_ubicacion_articulo LIKE ubicacion_articulo"
+                        + "; CREATE TEMPORARY TABLE IF NOT EXISTS ubicacion_articulo LIKE it405_ubicacion_articulo");
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
         registry.add("spring.jpa.properties.hibernate.session_factory.statement_inspector",
@@ -200,6 +210,71 @@ class ArticuloDevDbIT {
         assertThat(SQL).noneMatch(sql -> sql.contains("for update") || sql.startsWith("update"));
         assertThat(jdbc.queryForObject("SELECT Art_Cuenta FROM articulos WHERE Art_ID = 900006", BigDecimal.class))
                 .isEqualByComparingTo(real);
+    }
+
+    @Test
+    void bajaLibreConVinculos_borraVinculosYDespuesElArticulo_bloqueandoEnEseOrden() {
+        crear.createArticulo(gasto(900_007L, "CON VINCULOS"));
+        var ubicaciones = jdbc.queryForList("SELECT ubicacion_id FROM ubicacion ORDER BY ubicacion_id LIMIT 2", Integer.class);
+        for (var ubicacion : ubicaciones) {
+            jdbc.update("INSERT INTO ubicacion_articulo (ubicacion_id, articulo_id) VALUES (?, 900007)", ubicacion);
+        }
+
+        SQL.clear();
+        borrar.deleteArticulo(900_007L);
+
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = 900007", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900007", Integer.class)).isZero();
+        assertThat(primeroAntesQue("from articulos where art_id = ? for update", "from ubicacion_articulo where ubicacion_articulo_id in"))
+                .as(SQL.toString()).isTrue();
+        assertThat(primeroAntesQue("delete from ubicacion_articulo", "delete from articulos")).as(SQL.toString()).isTrue();
+    }
+
+    @Test
+    void bajaLibreSinVinculos_noBloqueaVinculos() {
+        crear.createArticulo(gasto(900_008L, "SIN VINCULOS"));
+
+        SQL.clear();
+        borrar.deleteArticulo(900_008L);
+
+        assertThat(SQL).as("sin bloqueo de brecha sobre ubicacion_articulo")
+                .noneMatch(sql -> sql.contains("ubicacion_articulo") && sql.contains("for update"));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900008", Integer.class)).isZero();
+    }
+
+    @Test
+    void bajaDeArticuloSoloEnFacturas_409ConLaCantidadReal_sinBorrar() {
+        // movprov_detallefactura no tiene FK: sin el chequeo explícito, la base dejaría borrar
+        var id = jdbc.queryForObject("""
+                SELECT MIN(f.FaD_Art_ID) FROM movprov_detallefactura f WHERE f.FaD_Art_ID > 0
+                  AND NOT EXISTS (SELECT 1 FROM entrega_detalle e WHERE e.NeD_Art_ID = f.FaD_Art_ID)""", Long.class);
+        var facturas = jdbc.queryForObject("SELECT COUNT(*) FROM movprov_detallefactura WHERE FaD_Art_ID = ?", Long.class, id);
+        crear.createArticulo(gasto(id, "SOLO FACTURAS"));
+        jdbc.update("INSERT INTO ubicacion_articulo (ubicacion_id, articulo_id) VALUES ((SELECT MIN(ubicacion_id) FROM ubicacion), ?)", id);
+
+        assertThatThrownBy(() -> borrar.deleteArticulo(id))
+                .isInstanceOfSatisfying(ArticuloConflictException.class, ex -> {
+                    assertThat(ex.getMotivo()).isEqualTo(ArticuloConflictException.Motivo.REFERENCIADO);
+                    assertThat(ex.getReferencias()).containsExactly(new ReferenciaArticulo("movprov_detallefactura", facturas));
+                });
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", Integer.class, id)).isOne();
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = ?", Integer.class, id))
+                .as("los vínculos tampoco se tocan").isOne();
+    }
+
+    @Test
+    void bajaDeArticuloConEntregasYFacturas_409ConAmbasTablas() {
+        var id = jdbc.queryForObject("""
+                SELECT MIN(e.NeD_Art_ID) FROM entrega_detalle e WHERE e.NeD_Art_ID > 0
+                  AND EXISTS (SELECT 1 FROM movprov_detallefactura f WHERE f.FaD_Art_ID = e.NeD_Art_ID)""", Long.class);
+        var entregas = jdbc.queryForObject("SELECT COUNT(*) FROM entrega_detalle WHERE NeD_Art_ID = ?", Long.class, id);
+        var facturas = jdbc.queryForObject("SELECT COUNT(*) FROM movprov_detallefactura WHERE FaD_Art_ID = ?", Long.class, id);
+        crear.createArticulo(gasto(id, "ENTREGAS Y FACTURAS"));
+
+        assertThatThrownBy(() -> borrar.deleteArticulo(id))
+                .isInstanceOfSatisfying(ArticuloConflictException.class, ex -> assertThat(ex.getReferencias()).containsExactly(
+                        new ReferenciaArticulo("entrega_detalle", entregas), new ReferenciaArticulo("movprov_detallefactura", facturas)));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", Integer.class, id)).isOne();
     }
 
     @Test

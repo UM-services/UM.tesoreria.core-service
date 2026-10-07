@@ -101,7 +101,7 @@ class GastosDevE2E {
         assertThat(put("/articulo/" + ID_ALTA, "{\"habilitado\":0}").statusCode()).isEqualTo(200);
         assertThat(fila(ID_ALTA)).containsEntry("habilitado", 0L);
 
-        // Cuenta inexistente: la FK real articulos_ibfk_1 lo rechaza; 400 con el campo y sin cambios
+        // Cuenta inexistente: la validación previa lo rechaza (la FK queda de respaldo); 400 con el campo y sin cambios
         var cuentaMala = put("/articulo/" + ID_ALTA, "{\"numeroCuenta\":" + cuentaInexistente + ",\"nombre\":\"" + MARCA + " no\"}");
         assertProblema(cuentaMala, 400, "CAMPO_INVALIDO");
         assertThat(campo(cuentaMala, "campo")).isEqualTo("numeroCuenta");
@@ -126,7 +126,7 @@ class GastosDevE2E {
                 .isEqualByComparingTo(cuentaB);
         assertThat(numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = " + ID_ASIGNACION)).isEqualTo(1);
 
-        // FK reales: nada se inserta
+        // Referencias inexistentes: la validación previa lo rechaza; nada se inserta
         var ubicacionMala = post("/ubicacionArticulo/", asignacion((int) numero("SELECT MAX(ubicacion_id) + 1000 FROM ubicacion"), ID_ASIGNACION, cuentaA));
         assertProblema(ubicacionMala, 400, "CAMPO_INVALIDO");
         assertThat(campo(ubicacionMala, "campo")).isEqualTo("ubicacionId");
@@ -138,11 +138,10 @@ class GastosDevE2E {
         assertThat(campo(cuentaMala, "campo")).isEqualTo("numeroCuenta");
         assertThat(numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id BETWEEN 999001 AND 999404")).isEqualTo(1);
 
-        // Baja de un artículo con vínculo: FK real ubicacion_articulo_ibfk_2 -> 409 y nada se borra (hasta el PR 2)
-        var baja = delete("/articulo/" + ID_ASIGNACION);
-        assertProblema(baja, 409, "ARTICULO_REFERENCIADO");
-        assertThat(json(baja).at("/referencias/0/tabla").asString()).isEqualTo("ubicacion_articulo");
-        assertThat(numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = " + ID_ASIGNACION)).isEqualTo(1);
+        // Baja de un gasto libre con vínculo: el vínculo es suyo y se borra con él en la misma transacción
+        assertThat(delete("/articulo/" + ID_ASIGNACION).statusCode()).isEqualTo(204);
+        assertThat(numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = " + ID_ASIGNACION)).isZero();
+        assertThat(numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = " + ID_ASIGNACION)).isZero();
     }
 
     @Test
@@ -160,9 +159,34 @@ class GastosDevE2E {
         }
 
         assertProblema(baja, 409, "ARTICULO_REFERENCIADO");
-        // MySQL informa la primera FK que falla; este artículo tiene entregas y vínculos
-        assertThat(json(baja).at("/referencias/0/tabla").asString()).isIn("entrega_detalle", "ubicacion_articulo");
+        assertThat(json(baja).at("/referencias/0/tabla").asString()).isEqualTo("entrega_detalle");
+        assertThat(json(baja).at("/referencias/0/cantidad").asLong())
+                .isEqualTo(numero("SELECT COUNT(*) FROM entrega_detalle WHERE NeD_Art_ID = " + real));
         assertThat(numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = " + real)).isEqualTo(antes).isEqualTo(1);
+    }
+
+    @Test
+    void bajaDeGastoRealSoloEnFacturas_409SinBorrar() throws Exception {
+        // movprov_detallefactura no tiene FK: antes de #405 este DELETE pasaba y dejaba las líneas huérfanas
+        long real = numero("SELECT MIN(f.FaD_Art_ID) FROM movprov_detallefactura f WHERE f.FaD_Art_ID > 0"
+                + " AND NOT EXISTS (SELECT 1 FROM entrega_detalle e WHERE e.NeD_Art_ID = f.FaD_Art_ID)"
+                + " AND EXISTS (SELECT 1 FROM articulos a WHERE a.Art_ID = f.FaD_Art_ID)");
+        var vinculos = numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = " + real);
+        var respaldo = dev.respaldar(real);
+
+        HttpResponse<String> baja;
+        try {
+            baja = delete("/articulo/" + real);
+        } finally {
+            assertThat(respaldo.restaurarSiFalta()).as("la baja de un gasto facturado no debe borrar nada").isFalse();
+        }
+
+        assertProblema(baja, 409, "ARTICULO_REFERENCIADO");
+        assertThat(json(baja).at("/referencias/0/tabla").asString()).isEqualTo("movprov_detallefactura");
+        assertThat(json(baja).at("/referencias/0/cantidad").asLong())
+                .isEqualTo(numero("SELECT COUNT(*) FROM movprov_detallefactura WHERE FaD_Art_ID = " + real));
+        assertThat(json(baja).at("/referencias/1").isMissingNode()).isTrue();
+        assertThat(numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = " + real)).isEqualTo(vinculos);
     }
 
     @Test

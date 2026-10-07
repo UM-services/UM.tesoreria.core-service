@@ -12,6 +12,7 @@ import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.out.UbicacionA
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.entity.UbicacionArticuloEntity;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.mapper.UbicacionArticuloMapper;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.repository.JpaUbicacionArticuloRepository;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -68,6 +69,40 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
         return jpaUbicacionArticuloRepository.findAllByArticuloId(articuloId).stream()
                 .map(mapper::toDomainModel)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Ids con una lectura común y bloqueo por clave primaria: un FOR UPDATE por {@code articulo_id} sin filas tomaría
+     * un bloqueo de brecha. El estado devuelto sale de la lectura con bloqueo y sin cargar entidades (las asociaciones
+     * se cargarían por nada). Un vínculo nuevo no puede aparecer mientras tanto: su FK espera al artículo bloqueado.
+     */
+    @Override
+    public List<UbicacionArticulo> deleteAllByArticuloId(Long articuloId) {
+        try {
+            var ids = jpaUbicacionArticuloRepository.findIdsByArticuloId(articuloId);
+            if (ids.isEmpty()) {
+                return List.of();
+            }
+            List<?> filas = entityManager.createNativeQuery(
+                            "SELECT ubicacion_articulo_id, ubicacion_id, articulo_id, cuenta_contable FROM ubicacion_articulo"
+                                    + " WHERE ubicacion_articulo_id IN (:ids) ORDER BY ubicacion_articulo_id FOR UPDATE")
+                    .setParameter("ids", ids)
+                    .getResultList();
+            var borrados = filas.stream().map(Object[].class::cast).map(f -> UbicacionArticulo.builder()
+                    .ubicacionArticuloId(((Number) f[0]).longValue())
+                    .ubicacionId(f[1] == null ? null : ((Number) f[1]).intValue())
+                    .articuloId(f[2] == null ? null : ((Number) f[2]).longValue())
+                    .numeroCuenta((BigDecimal) f[3])
+                    .build()).toList();
+            if (!borrados.isEmpty()) {
+                entityManager.createNativeQuery("DELETE FROM ubicacion_articulo WHERE ubicacion_articulo_id IN (:ids)")
+                        .setParameter("ids", borrados.stream().map(UbicacionArticulo::getUbicacionArticuloId).toList())
+                        .executeUpdate();
+            }
+            return borrados;
+        } catch (RuntimeException ex) {
+            throw UbicacionArticuloRestricciones.traducir(ex, null, articuloId);
+        }
     }
 
     @Override
