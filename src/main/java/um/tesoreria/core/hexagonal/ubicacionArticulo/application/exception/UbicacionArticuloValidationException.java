@@ -8,6 +8,11 @@ import lombok.Getter;
 @Getter
 public class UbicacionArticuloValidationException extends RuntimeException {
 
+    // Los usan la validación previa y la traducción de las FK, que la respaldan si otro borra el dato entre medio
+    public static final String UBICACION_INEXISTENTE = "La ubicación indicada no existe.";
+    public static final String ARTICULO_INEXISTENTE = "El artículo indicado no existe.";
+    public static final String CUENTA_INEXISTENTE = "La cuenta indicada no existe en el plan de cuentas.";
+
     private final String campo;
 
     public UbicacionArticuloValidationException(String campo, String mensaje) {

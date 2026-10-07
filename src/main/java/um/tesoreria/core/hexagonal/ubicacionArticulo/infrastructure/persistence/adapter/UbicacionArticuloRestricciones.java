@@ -29,9 +29,9 @@ final class UbicacionArticuloRestricciones {
             "ubicacion_articulo_ibfk_2", "articuloId",
             "ubicacion_articulo_ibfk_3", "numeroCuenta");
     static final Map<String, String> MENSAJE_POR_CAMPO = Map.of(
-            "ubicacionId", "La ubicación indicada no existe.",
-            "articuloId", "El artículo indicado no existe.",
-            "numeroCuenta", "La cuenta indicada no existe en el plan de cuentas.");
+            "ubicacionId", UbicacionArticuloValidationException.UBICACION_INEXISTENTE,
+            "articuloId", UbicacionArticuloValidationException.ARTICULO_INEXISTENTE,
+            "numeroCuenta", UbicacionArticuloValidationException.CUENTA_INEXISTENTE);
 
     private UbicacionArticuloRestricciones() {
     }

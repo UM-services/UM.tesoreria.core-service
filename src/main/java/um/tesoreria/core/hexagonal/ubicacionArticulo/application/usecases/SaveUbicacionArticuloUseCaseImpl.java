@@ -6,6 +6,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.GetArticuloByIdUseCase;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.GetCuentaByNumeroCuentaUseCase;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.domain.ports.in.GetUbicacionByIdUseCase;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloValidationException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.in.SaveUbicacionArticuloUseCase;
@@ -22,6 +25,12 @@ public class SaveUbicacionArticuloUseCaseImpl implements SaveUbicacionArticuloUs
     static final int CUENTA_DIGITOS = 11;
 
     private final UbicacionArticuloRepository repository;
+    // Excepción cross-slice autorizada: valida las referencias con los puertos públicos de
+    // dependencias.ubicacion, compras.articulo y contable.cuenta (patrón de CreateUsuarioChequeraFacultadUseCaseImpl;
+    // UbicacionArticulo ya ancla Ubicacion, Articulo y Cuenta en su dominio).
+    private final GetUbicacionByIdUseCase getUbicacionByIdUseCase;
+    private final GetArticuloByIdUseCase getArticuloByIdUseCase;
+    private final GetCuentaByNumeroCuentaUseCase getCuentaByNumeroCuentaUseCase;
     @Override
     @Transactional
     public UbicacionArticulo save(UbicacionArticulo ubicacionArticulo) {
@@ -41,7 +50,25 @@ public class SaveUbicacionArticuloUseCaseImpl implements SaveUbicacionArticuloUs
             // La escala de la columna: el driver escribe el valor con su escala original (ver cuentaEntraEnColumna)
             ubicacionArticulo.setNumeroCuenta(ubicacionArticulo.getNumeroCuenta().setScale(0, RoundingMode.UNNECESSARY));
         }
+        validarReferencias(ubicacionArticulo);
         return repository.save(ubicacionArticulo);
+    }
+
+    /**
+     * En el orden de los campos del pedido; se informa el primero que falta. Las FK de {@code ubicacion_articulo}
+     * siguen de respaldo si otro borra la referencia entre la consulta y la escritura.
+     */
+    private void validarReferencias(UbicacionArticulo ubicacionArticulo) {
+        if (getUbicacionByIdUseCase.getUbicacionById(ubicacionArticulo.getUbicacionId()).isEmpty()) {
+            throw new UbicacionArticuloValidationException("ubicacionId", UbicacionArticuloValidationException.UBICACION_INEXISTENTE);
+        }
+        if (getArticuloByIdUseCase.getArticuloById(ubicacionArticulo.getArticuloId()).isEmpty()) {
+            throw new UbicacionArticuloValidationException("articuloId", UbicacionArticuloValidationException.ARTICULO_INEXISTENTE);
+        }
+        var numeroCuenta = ubicacionArticulo.getNumeroCuenta();
+        if (numeroCuenta != null && getCuentaByNumeroCuentaUseCase.getCuentaByNumeroCuenta(numeroCuenta).isEmpty()) {
+            throw new UbicacionArticuloValidationException("numeroCuenta", UbicacionArticuloValidationException.CUENTA_INEXISTENTE);
+        }
     }
 
     /**

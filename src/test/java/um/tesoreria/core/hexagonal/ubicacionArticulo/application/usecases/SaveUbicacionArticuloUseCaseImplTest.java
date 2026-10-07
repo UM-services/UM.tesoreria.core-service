@@ -2,15 +2,28 @@ package um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
+import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
+import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.GetArticuloByIdUseCase;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.GetCuentaByNumeroCuentaUseCase;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.domain.model.Ubicacion;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.domain.ports.in.GetUbicacionByIdUseCase;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloValidationException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.out.UbicacionArticuloRepository;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -18,12 +31,21 @@ import static org.mockito.Mockito.when;
 class SaveUbicacionArticuloUseCaseImplTest {
 
     private UbicacionArticuloRepository repository;
+    private GetUbicacionByIdUseCase ubicaciones;
+    private GetArticuloByIdUseCase articulos;
+    private GetCuentaByNumeroCuentaUseCase cuentas;
     private SaveUbicacionArticuloUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
         repository = mock(UbicacionArticuloRepository.class);
-        useCase = new SaveUbicacionArticuloUseCaseImpl(repository);
+        ubicaciones = mock(GetUbicacionByIdUseCase.class);
+        articulos = mock(GetArticuloByIdUseCase.class);
+        cuentas = mock(GetCuentaByNumeroCuentaUseCase.class);
+        useCase = new SaveUbicacionArticuloUseCaseImpl(repository, ubicaciones, articulos, cuentas);
+        when(ubicaciones.getUbicacionById(anyInt())).thenAnswer(inv -> Optional.of(Ubicacion.builder().ubicacionId(inv.getArgument(0)).build()));
+        when(articulos.getArticuloById(anyLong())).thenAnswer(inv -> Optional.of(Articulo.builder().articuloId(inv.getArgument(0)).build()));
+        when(cuentas.getCuentaByNumeroCuenta(any())).thenAnswer(inv -> Optional.of(Cuenta.builder().numeroCuenta(inv.getArgument(0)).build()));
     }
 
     @Test
@@ -79,5 +101,75 @@ class SaveUbicacionArticuloUseCaseImplTest {
 
         assertThat(useCase.save(pedido)).isSameAs(pedido);
         verify(repository).save(pedido);
+    }
+
+    @Test
+    void ubicacionInexistente_400SinEscribir() {
+        when(ubicaciones.getUbicacionById(1051)).thenReturn(Optional.empty());
+
+        rechaza(UbicacionArticulo.builder().ubicacionId(1051).articuloId(2L).build(), "ubicacionId", "La ubicación indicada no existe.");
+    }
+
+    @Test
+    void articuloInexistente_400SinEscribir() {
+        when(articulos.getArticuloById(999404L)).thenReturn(Optional.empty());
+
+        rechaza(UbicacionArticulo.builder().ubicacionId(1).articuloId(999404L).build(), "articuloId", "El artículo indicado no existe.");
+    }
+
+    @Test
+    void cuentaInexistente_400SinEscribir() {
+        when(cuentas.getCuentaByNumeroCuenta(new BigDecimal("99999999999"))).thenReturn(Optional.empty());
+
+        rechaza(UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).numeroCuenta(new BigDecimal("99999999999")).build(),
+                "numeroCuenta", "La cuenta indicada no existe en el plan de cuentas.");
+    }
+
+    @Test
+    void variasReferenciasInexistentes_seInformaLaPrimeraDelPedido() {
+        when(ubicaciones.getUbicacionById(1051)).thenReturn(Optional.empty());
+        when(articulos.getArticuloById(999404L)).thenReturn(Optional.empty());
+
+        rechaza(UbicacionArticulo.builder().ubicacionId(1051).articuloId(999404L).build(), "ubicacionId", "La ubicación indicada no existe.");
+    }
+
+    @Test
+    void referenciasExistentes_seValidanAntesDeEscribir_conLaCuentaNormalizada() {
+        var pedido = UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).numeroCuenta(new BigDecimal("5.101E+7")).build();
+        when(repository.save(pedido)).thenReturn(pedido);
+
+        useCase.save(pedido);
+
+        InOrder orden = inOrder(ubicaciones, articulos, cuentas, repository);
+        orden.verify(ubicaciones).getUbicacionById(1);
+        orden.verify(articulos).getArticuloById(2L);
+        orden.verify(cuentas).getCuentaByNumeroCuenta(new BigDecimal("51010000"));
+        orden.verify(repository).save(pedido);
+    }
+
+    @Test
+    void cuentaNula_noSeConsulta() {
+        var pedido = UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).build();
+        when(repository.save(pedido)).thenReturn(pedido);
+
+        useCase.save(pedido);
+
+        verifyNoInteractions(cuentas);
+    }
+
+    @Test
+    void datoMalFormado_400SinConsultarReferencias() {
+        assertThatThrownBy(() -> useCase.save(UbicacionArticulo.builder().ubicacionId(1).articuloId(0L).build()))
+                .isInstanceOf(UbicacionArticuloValidationException.class);
+        verifyNoInteractions(ubicaciones, articulos, cuentas, repository);
+    }
+
+    private void rechaza(UbicacionArticulo pedido, String campo, String mensaje) {
+        assertThatThrownBy(() -> useCase.save(pedido))
+                .isInstanceOfSatisfying(UbicacionArticuloValidationException.class, ex -> {
+                    assertThat(ex.getCampo()).isEqualTo(campo);
+                    assertThat(ex.getMessage()).isEqualTo(mensaje);
+                });
+        verify(repository, never()).save(any());
     }
 }

@@ -7,8 +7,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloValidationException;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ArticuloRepository;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.GetCuentaByNumeroCuentaUseCase;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -16,18 +19,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class CreateArticuloUseCaseImplTest {
 
     private ArticuloRepository repository;
+    private GetCuentaByNumeroCuentaUseCase cuentas;
     private CreateArticuloUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
         repository = mock(ArticuloRepository.class);
-        useCase = new CreateArticuloUseCaseImpl(repository);
+        cuentas = mock(GetCuentaByNumeroCuentaUseCase.class);
+        useCase = new CreateArticuloUseCaseImpl(repository, cuentas);
         when(repository.create(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(cuentas.getCuentaByNumeroCuenta(any())).thenAnswer(inv -> Optional.of(Cuenta.builder().numeroCuenta(inv.getArgument(0)).build()));
     }
 
     @Test
@@ -149,6 +156,40 @@ class CreateArticuloUseCaseImplTest {
         rechaza(valido().inventariable((byte) 2).build(), "inventariable");
         rechaza(valido().stockMinimo(2147483648L).build(), "stockMinimo");
         rechaza(valido().stockMinimo(-2147483649L).build(), "stockMinimo");
+    }
+
+    @Test
+    void cuentaInexistente_400SinEscribir() {
+        when(cuentas.getCuentaByNumeroCuenta(new BigDecimal("99999999999"))).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> useCase.createArticulo(valido().numeroCuenta(new BigDecimal("99999999999")).build()))
+                .isInstanceOfSatisfying(ArticuloValidationException.class, ex -> {
+                    assertThat(ex.getCampo()).isEqualTo("numeroCuenta");
+                    assertThat(ex.getMessage()).isEqualTo("La cuenta indicada no existe en el plan de cuentas.");
+                });
+        verify(repository, never()).create(any());
+    }
+
+    @Test
+    void cuentaNula_noSeConsulta() {
+        useCase.createArticulo(valido().numeroCuenta(null).build());
+
+        verifyNoInteractions(cuentas);
+    }
+
+    @Test
+    void cuenta_seBuscaConLaEscalaDeLaColumna() {
+        useCase.createArticulo(valido().numeroCuenta(new BigDecimal("5.101E+7")).build());
+
+        // Con otra escala, el BigDecimal no sería igual al id de la cuenta
+        verify(cuentas).getCuentaByNumeroCuenta(new BigDecimal("51010000"));
+    }
+
+    @Test
+    void datoMalFormado_400SinConsultarLaCuenta() {
+        rechaza(valido().tipo("servicio").numeroCuenta(new BigDecimal("51010000")).build(), "tipo");
+
+        verifyNoInteractions(cuentas);
     }
 
     private void rechaza(Articulo articulo, String campo) {

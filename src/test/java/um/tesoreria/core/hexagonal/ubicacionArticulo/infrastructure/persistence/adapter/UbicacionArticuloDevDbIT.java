@@ -18,10 +18,17 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import um.tesoreria.core.hexagonal.compras.articulo.application.usecases.GetArticuloByIdUseCaseImpl;
+import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.adapter.JpaArticuloRepositoryAdapter;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.mapper.ArticuloMapper;
+import um.tesoreria.core.hexagonal.contable.cuenta.application.usecases.GetCuentaByNumeroCuentaUseCaseImpl;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.mapper.CuentaMapper;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.repository.JpaCuentaRepositoryAdapter;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.application.usecases.GetUbicacionByIdUseCaseImpl;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.adapter.JpaUbicacionRepositoryAdapter;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.mapper.UbicacionMapper;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloConflictException;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloValidationException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.service.UbicacionArticuloService;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.GetAllUbicacionArticulosUseCaseImpl;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.GetUbicacionArticuloUseCaseImpl;
@@ -31,6 +38,7 @@ import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArtic
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.entity.UbicacionArticuloEntity;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.mapper.UbicacionArticuloMapper;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.repository.JpaUbicacionArticuloRepository;
+import um.tesoreria.core.service.view.CuentaSearchService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -41,6 +49,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchRuntimeException;
 
 /**
@@ -57,7 +66,10 @@ import static org.assertj.core.api.Assertions.catchRuntimeException;
 @Import({UbicacionArticuloService.class, SaveUbicacionArticuloUseCaseImpl.class, GetAllUbicacionArticulosUseCaseImpl.class,
         GetUbicacionArticuloUseCaseImpl.class, GetUbicacionArticulosByArticuloUseCaseImpl.class,
         JpaUbicacionArticuloRepositoryAdapter.class, UbicacionArticuloMapper.class, UbicacionMapper.class,
-        ArticuloMapper.class, CuentaMapper.class, UbicacionArticuloDevDbIT.Auditoria.class})
+        ArticuloMapper.class, CuentaMapper.class, UbicacionArticuloDevDbIT.Auditoria.class,
+        GetUbicacionByIdUseCaseImpl.class, JpaUbicacionRepositoryAdapter.class,
+        GetArticuloByIdUseCaseImpl.class, JpaArticuloRepositoryAdapter.class,
+        GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class})
 @Slf4j
 class UbicacionArticuloDevDbIT {
 
@@ -183,6 +195,30 @@ class UbicacionArticuloDevDbIT {
         assertThat(UbicacionArticuloRestricciones.traducir(ex, ubicacionId, articuloId))
                 .isInstanceOfSatisfying(UbicacionArticuloConflictException.class, c -> assertThat(c.isReintentable()).isTrue());
         assertThat(filas(articuloId)).hasSize(1);
+    }
+
+    @Test
+    void referenciasInexistentesEnDev_400PorCampoSinEscribir() {
+        var ubicacionInexistente = jdbc.queryForObject("SELECT MAX(ubicacion_id) + 1 FROM ubicacion", Integer.class);
+        var articuloInexistente = 900_404L;
+        var cuentaInexistente = new BigDecimal("99999999998");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", Integer.class, articuloInexistente)).isZero();
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM plancta WHERE pla_cuenta = ?", Integer.class, cuentaInexistente)).isZero();
+        var articuloId = articulos.get(0);
+        var filasAntes = jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo", Integer.class);
+        SQL.clear();
+
+        rechaza(UbicacionArticulo.builder().ubicacionId(ubicacionInexistente).articuloId(articuloId).build(), "ubicacionId");
+        rechaza(UbicacionArticulo.builder().ubicacionId(ubicacionId).articuloId(articuloInexistente).build(), "articuloId");
+        rechaza(asignacion(articuloId, cuentaInexistente), "numeroCuenta");
+
+        assertThat(SQL).as("la validación frena antes de la base").noneMatch(sql -> sql.startsWith("insert") || sql.contains("for update"));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo", Integer.class)).isEqualTo(filasAntes);
+    }
+
+    private void rechaza(UbicacionArticulo pedido, String campo) {
+        assertThatThrownBy(() -> service.save(pedido))
+                .isInstanceOfSatisfying(UbicacionArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo(campo));
     }
 
     @Test

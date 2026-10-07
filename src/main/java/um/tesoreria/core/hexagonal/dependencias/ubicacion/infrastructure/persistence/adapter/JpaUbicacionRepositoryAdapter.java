@@ -7,6 +7,7 @@ import um.tesoreria.core.hexagonal.dependencias.ubicacion.domain.ports.out.Ubica
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.mapper.UbicacionMapper;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.repository.JpaUbicacionRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -28,5 +29,10 @@ public class JpaUbicacionRepositoryAdapter implements UbicacionRepository {
                 .filter(u -> u.getDependencia() != null && u.getDependencia().getGeograficaId().equals(geograficaId))
                 .map(mapper::toDomainModel)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<Ubicacion> findById(Integer ubicacionId) {
+        return jpaUbicacionRepository.findById(ubicacionId).map(mapper::toDomainModel);
     }
 }

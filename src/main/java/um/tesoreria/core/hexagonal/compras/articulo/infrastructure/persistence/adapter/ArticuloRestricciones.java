@@ -48,7 +48,7 @@ final class ArticuloRestricciones {
                     : desconocida(ArticuloConflictException.conflicto(articuloId), codigo, restriccion, articuloId, operacion);
             case FK_PADRE_INEXISTENTE -> restriccion != null && CAMPO_POR_FK.containsKey(restriccion)
                     ? conocida(new ArticuloValidationException(CAMPO_POR_FK.get(restriccion),
-                            "La cuenta indicada no existe en el plan de cuentas."), restriccion, articuloId, operacion)
+                            ArticuloValidationException.CUENTA_INEXISTENTE), restriccion, articuloId, operacion)
                     : desconocida(new ArticuloValidationException(null, "Algún dato referenciado no existe."),
                             codigo, restriccion, articuloId, operacion);
             default -> restriccion != null && TABLA_POR_FK.containsKey(restriccion)

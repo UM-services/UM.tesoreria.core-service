@@ -8,6 +8,8 @@ import um.tesoreria.core.hexagonal.compras.articulo.application.exception.Articu
 import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloValidationException;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ArticuloRepository;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.GetCuentaByNumeroCuentaUseCase;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -25,12 +27,15 @@ import static org.mockito.Mockito.when;
 class UpdateArticuloUseCaseImplTest {
 
     private ArticuloRepository repository;
+    private GetCuentaByNumeroCuentaUseCase cuentas;
     private UpdateArticuloUseCaseImpl useCase;
 
     @BeforeEach
     void setUp() {
         repository = mock(ArticuloRepository.class);
-        useCase = new UpdateArticuloUseCaseImpl(repository);
+        cuentas = mock(GetCuentaByNumeroCuentaUseCase.class);
+        useCase = new UpdateArticuloUseCaseImpl(repository, cuentas);
+        when(cuentas.getCuentaByNumeroCuenta(any())).thenAnswer(inv -> Optional.of(Cuenta.builder().numeroCuenta(inv.getArgument(0)).build()));
         when(repository.update(any())).thenAnswer(inv -> inv.getArgument(0));
     }
 
@@ -98,6 +103,37 @@ class UpdateArticuloUseCaseImplTest {
     void habilitadoFueraDeRango_400() {
         assertThatThrownBy(() -> useCase.updateArticulo(7L, Articulo.builder().habilitado((byte) 3).build()))
                 .isInstanceOfSatisfying(ArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo("habilitado"));
+    }
+
+    @Test
+    void cuentaInexistente_400SinBloquearNiEscribir() {
+        when(cuentas.getCuentaByNumeroCuenta(new BigDecimal("99999999999"))).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> useCase.updateArticulo(7L, Articulo.builder().numeroCuenta(new BigDecimal("99999999999")).build()))
+                .isInstanceOfSatisfying(ArticuloValidationException.class, ex -> {
+                    assertThat(ex.getCampo()).isEqualTo("numeroCuenta");
+                    assertThat(ex.getMessage()).isEqualTo("La cuenta indicada no existe en el plan de cuentas.");
+                });
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void cuentaExistente_seAplica() {
+        when(repository.findByIdForUpdate(7L)).thenReturn(Optional.of(actual()));
+
+        var guardado = useCase.updateArticulo(7L, Articulo.builder().numeroCuenta(new BigDecimal("5.101E+7")).build());
+
+        verify(cuentas).getCuentaByNumeroCuenta(new BigDecimal("51010000"));
+        assertThat(guardado.getNumeroCuenta()).isEqualTo(new BigDecimal("51010000"));
+    }
+
+    @Test
+    void sinCuentaEnLosCambios_noSeConsulta() {
+        when(repository.findByIdForUpdate(7L)).thenReturn(Optional.of(actual()));
+
+        useCase.updateArticulo(7L, Articulo.builder().nombre("Nuevo").build());
+
+        verifyNoInteractions(cuentas);
     }
 
     private static Articulo actual() {

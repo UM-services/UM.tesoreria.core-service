@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloConflictException;
 import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloException;
+import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloValidationException;
 import um.tesoreria.core.hexagonal.compras.articulo.application.usecases.CreateArticuloUseCaseImpl;
 import um.tesoreria.core.hexagonal.compras.articulo.application.usecases.DeleteArticuloUseCaseImpl;
 import um.tesoreria.core.hexagonal.compras.articulo.application.usecases.UpdateArticuloUseCaseImpl;
@@ -26,7 +27,10 @@ import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.CreateArticu
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.DeleteArticuloUseCase;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.UpdateArticuloUseCase;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.mapper.ArticuloMapper;
+import um.tesoreria.core.hexagonal.contable.cuenta.application.usecases.GetCuentaByNumeroCuentaUseCaseImpl;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.mapper.CuentaMapper;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.repository.JpaCuentaRepositoryAdapter;
+import um.tesoreria.core.service.view.CuentaSearchService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -51,7 +55,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @EnabledIfEnvironmentVariable(named = "IT_DB_HOST", matches = ".+")
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Import({CreateArticuloUseCaseImpl.class, UpdateArticuloUseCaseImpl.class, DeleteArticuloUseCaseImpl.class,
-        JpaArticuloRepositoryAdapter.class, ArticuloMapper.class, CuentaMapper.class, ArticuloDevDbIT.Auditoria.class})
+        JpaArticuloRepositoryAdapter.class, ArticuloMapper.class, CuentaMapper.class, ArticuloDevDbIT.Auditoria.class,
+        GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class})
 @Slf4j
 class ArticuloDevDbIT {
 
@@ -169,6 +174,32 @@ class ArticuloDevDbIT {
         borrar.deleteArticulo(900_005L);
 
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900005", Integer.class)).isZero();
+    }
+
+    @Test
+    void cuentaInexistenteEnPlancta_400SinEscribir_enAltaYEdicion() {
+        var inexistente = new BigDecimal("99999999998");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM plancta WHERE pla_cuenta = ?", Integer.class, inexistente))
+                .as("la cuenta de la prueba no debe existir en dev").isZero();
+        var alta = gasto(900_006L, "SIN CUENTA");
+        alta.setNumeroCuenta(inexistente);
+
+        SQL.clear();
+        assertThatThrownBy(() -> crear.createArticulo(alta))
+                .isInstanceOfSatisfying(ArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo("numeroCuenta"));
+        assertThat(SQL).as("la validación frena antes de la base").noneMatch(sql -> sql.startsWith("insert"));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900006", Integer.class)).isZero();
+
+        // Con una cuenta real el alta pasa; la edición a una inexistente se frena sin bloquear ni escribir
+        var real = jdbc.queryForObject("SELECT MIN(pla_cuenta) FROM plancta", BigDecimal.class);
+        alta.setNumeroCuenta(real);
+        crear.createArticulo(alta);
+        SQL.clear();
+        assertThatThrownBy(() -> editar.updateArticulo(900_006L, Articulo.builder().numeroCuenta(inexistente).build()))
+                .isInstanceOfSatisfying(ArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo("numeroCuenta"));
+        assertThat(SQL).noneMatch(sql -> sql.contains("for update") || sql.startsWith("update"));
+        assertThat(jdbc.queryForObject("SELECT Art_Cuenta FROM articulos WHERE Art_ID = 900006", BigDecimal.class))
+                .isEqualByComparingTo(real);
     }
 
     @Test

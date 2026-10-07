@@ -32,7 +32,11 @@ import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.CreateArticu
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.in.UpdateArticuloUseCase;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.adapter.JpaArticuloRepositoryAdapter;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.mapper.ArticuloMapper;
+import um.tesoreria.core.hexagonal.contable.cuenta.application.usecases.GetCuentaByNumeroCuentaUseCaseImpl;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.mapper.CuentaMapper;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.repository.JpaCuentaRepositoryAdapter;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.application.usecases.GetUbicacionByIdUseCaseImpl;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.adapter.JpaUbicacionRepositoryAdapter;
 import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.mapper.UbicacionMapper;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloConflictException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.service.UbicacionArticuloService;
@@ -43,6 +47,7 @@ import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.SaveUb
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.adapter.JpaUbicacionArticuloRepositoryAdapter;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.mapper.UbicacionArticuloMapper;
+import um.tesoreria.core.service.view.CuentaSearchService;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -77,7 +82,9 @@ import static org.assertj.core.api.Assertions.fail;
         ArticuloMapper.class, CuentaMapper.class, UbicacionArticuloService.class, SaveUbicacionArticuloUseCaseImpl.class,
         GetAllUbicacionArticulosUseCaseImpl.class, GetUbicacionArticuloUseCaseImpl.class,
         GetUbicacionArticulosByArticuloUseCaseImpl.class, JpaUbicacionArticuloRepositoryAdapter.class,
-        UbicacionArticuloMapper.class, UbicacionMapper.class, GastosConcurrenciaDevE2E.Auditoria.class})
+        UbicacionArticuloMapper.class, UbicacionMapper.class, GastosConcurrenciaDevE2E.Auditoria.class,
+        GetUbicacionByIdUseCaseImpl.class, JpaUbicacionRepositoryAdapter.class,
+        GetCuentaByNumeroCuentaUseCaseImpl.class, JpaCuentaRepositoryAdapter.class, CuentaSearchService.class})
 class GastosConcurrenciaDevE2E {
 
     static final String MARCA = DevDbReservas.MARCA + " conc";

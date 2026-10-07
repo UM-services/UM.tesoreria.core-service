@@ -8,6 +8,9 @@ import lombok.Getter;
 @Getter
 public class ArticuloValidationException extends RuntimeException {
 
+    /** Lo usan la validación previa y la traducción de la FK, que la respalda si otro borra la cuenta entre medio. */
+    public static final String CUENTA_INEXISTENTE = "La cuenta indicada no existe en el plan de cuentas.";
+
     private final String campo;
 
     public ArticuloValidationException(String campo, String mensaje) {

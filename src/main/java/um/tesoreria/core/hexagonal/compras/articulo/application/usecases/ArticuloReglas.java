@@ -2,6 +2,7 @@ package um.tesoreria.core.hexagonal.compras.articulo.application.usecases;
 
 import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloValidationException;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.GetCuentaByNumeroCuentaUseCase;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -116,6 +117,18 @@ final class ArticuloReglas {
             return BigDecimal.ZERO.setScale(PRECIO_DECIMALES);
         }
         return precio.setScale(PRECIO_DECIMALES, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Nula no se consulta (en el alta se acepta; en la edición es "sin cambios"). Va después de
+     * {@link #normalizarNumeros}: la cuenta se busca por id y un BigDecimal con otra escala no sería igual.
+     * La FK {@code articulos_ibfk_1} sigue de respaldo si otro borra la cuenta entre la consulta y la escritura.
+     */
+    static void validarCuentaExistente(Articulo articulo, GetCuentaByNumeroCuentaUseCase cuentas) {
+        var numeroCuenta = articulo.getNumeroCuenta();
+        if (numeroCuenta != null && cuentas.getCuentaByNumeroCuenta(numeroCuenta).isEmpty()) {
+            throw new ArticuloValidationException("numeroCuenta", ArticuloValidationException.CUENTA_INEXISTENTE);
+        }
     }
 
     private static void validarLargo(String campo, String valor, int maximo) {
