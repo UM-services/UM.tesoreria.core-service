@@ -51,6 +51,28 @@ class SaveUbicacionArticuloUseCaseImplTest {
     }
 
     @Test
+    void idsFueraDeRango_400SinEscribir() {
+        assertThatThrownBy(() -> useCase.save(UbicacionArticulo.builder().ubicacionId(0).articuloId(2L).build()))
+                .isInstanceOfSatisfying(UbicacionArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo("ubicacionId"));
+        for (long id : new long[]{0L, 2147483648L, Long.MAX_VALUE}) {
+            assertThatThrownBy(() -> useCase.save(UbicacionArticulo.builder().ubicacionId(1).articuloId(id).build()))
+                    .as("articuloId " + id)
+                    .isInstanceOfSatisfying(UbicacionArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo("articuloId"));
+        }
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void cuentaConExponenteExtremo_400_yCeroConEscalaEnorme_seNormaliza() {
+        assertThatThrownBy(() -> useCase.save(UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).numeroCuenta(new BigDecimal("100e2147483647")).build()))
+                .isInstanceOf(UbicacionArticuloValidationException.class);
+        var pedido = UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).numeroCuenta(new BigDecimal("0e-1000000000")).build();
+        when(repository.save(pedido)).thenReturn(pedido);
+
+        assertThat(useCase.save(pedido).getNumeroCuenta().scale()).isZero();
+    }
+
+    @Test
     void cuentaNula_seAcepta() {
         var pedido = UbicacionArticulo.builder().ubicacionId(1).articuloId(2L).build();
         when(repository.save(pedido)).thenReturn(pedido);

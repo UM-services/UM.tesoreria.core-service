@@ -16,6 +16,7 @@ public class UpdateArticuloUseCaseImpl implements UpdateArticuloUseCase {
     @Transactional
     public Articulo updateArticulo(Long id, Articulo cambios) {
         ArticuloReglas.validarCambios(cambios);
+        ArticuloReglas.normalizarNumeros(cambios);
         // Bloqueada antes de leer el estado actual: dos ediciones del core se serializan
         Articulo actual = repository.findByIdForUpdate(id).orElseThrow(() -> new ArticuloException(id));
         return repository.update(actual.conCambios(cambios));

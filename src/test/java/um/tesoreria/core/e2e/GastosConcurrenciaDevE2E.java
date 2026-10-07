@@ -57,7 +57,6 @@ import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Concurrencia real de dos escritores (#405) contra la base de desarrollo, en REPEATABLE READ como la de dev.
@@ -83,7 +82,7 @@ class GastosConcurrenciaDevE2E {
 
     static final String MARCA = DevDbReservas.MARCA + " conc";
     static final long ID_EDICION = 999_011L, ID_ASIGNACION = 999_012L, ID_PAR_NUEVO = 999_013L,
-            ID_ESPERA = 999_014L, ID_INTERBLOQUEO = 999_015L;
+            ID_ESPERA = 999_014L, ID_INTERBLOQUEO = 999_015L, ID_SIN_CAMBIO = 999_016L;
     /** Espera de bloqueo de las conexiones de la app en esta prueba (en dev es 50 s): fuerza un 1205 real rápido. */
     static final int ESPERA_SEGUNDOS = 5;
 
@@ -137,7 +136,9 @@ class GastosConcurrenciaDevE2E {
     @BeforeAll
     static void reservarYFotografiar() throws SQLException {
         dev = DevDbReservas.abrir();
-        assumeTrue(dev.rangoLibre(), "hay filas con ids reservados del E2E en dev: no se toca nada");
+        // Falla (no se saltea): un salteo silencioso parecería verde. Si quedaron restos de una corrida cortada,
+        // revisarlos y borrarlos a mano por su marca E2E-405-xxxxxxxx.
+        assertThat(dev.rangoLibre()).as("hay filas con ids reservados del E2E en dev (otra corrida o restos): no se toca nada").isTrue();
         dev.fotografiar();
     }
 
@@ -193,6 +194,21 @@ class GastosConcurrenciaDevE2E {
 
         assertThat(resultado.getNumeroCuenta()).isEqualByComparingTo(cuentaA);
         assertThat(cuentas(ID_ASIGNACION)).as("la base guarda lo que respondió el servicio").containsExactly(cuentaA);
+    }
+
+    @Test
+    void asignacionConcurrenteConLaMismaCuenta_respondeLaCuentaVigente() throws Exception {
+        crear.createArticulo(gasto(ID_SIN_CAMBIO));
+        asignaciones.save(asignacion(ID_SIN_CAMBIO, cuentaA));
+
+        // A cambia la cuenta a B y el caso de uso también pide B: no hay UPDATE propio que mostrar
+        var resultado = conOtroEscritorBloqueando(
+                "UPDATE ubicacion_articulo SET cuenta_contable = " + cuentaB + " WHERE articulo_id = " + ID_SIN_CAMBIO,
+                () -> asignaciones.save(asignacion(ID_SIN_CAMBIO, cuentaB)));
+
+        assertThat(resultado.getNumeroCuenta()).isEqualByComparingTo(cuentaB);
+        assertThat(resultado.getCuenta().getNumeroCuenta()).as("la cuenta cargada es la vigente, no la de la foto").isEqualByComparingTo(cuentaB);
+        assertThat(cuentas(ID_SIN_CAMBIO)).containsExactly(cuentaB);
     }
 
     @Test
@@ -280,9 +296,10 @@ class GastosConcurrenciaDevE2E {
                 if (!c.getAutoCommit()) c.rollback();
             }
         } finally {
-            executor.shutdownNow();
+            terminar(executor);
         }
-        System.out.println("Interbloqueo real: víctima = " + victima);
+        // InnoDB sacrifica la transacción más liviana: la baja todavía no modificó filas, el otro ya modificó una
+        assertThat(victima).as("víctima del interbloqueo: así se ejerce el reintento de la baja").isEqualTo("la baja (se reintentó)");
         assertThat(resultado).as("la baja termina en el 409 del vínculo, nunca en un 500")
                 .hasCauseInstanceOf(ArticuloConflictException.class)
                 .cause().satisfies(ex -> assertThat(((ArticuloConflictException) ex).getMotivo()).isEqualTo(ArticuloConflictException.Motivo.REFERENCIADO));
@@ -311,8 +328,15 @@ class GastosConcurrenciaDevE2E {
                 if (!c.getAutoCommit()) c.rollback(); // sin efecto si ya confirmó
             }
         } finally {
-            executor.shutdownNow();
+            terminar(executor);
         }
+    }
+
+    /** Ninguna escritura de la app puede llegar después del barrido: se espera al hilo y, si no termina, falla. */
+    private static void terminar(java.util.concurrent.ExecutorService executor) throws InterruptedException {
+        executor.shutdownNow();
+        assertThat(executor.awaitTermination(ESPERA_SEGUNDOS * 3L, TimeUnit.SECONDS))
+                .as("la operación de la app siguió corriendo después de la prueba").isTrue();
     }
 
     /** Espera a que alguna transacción quede bloqueada por la conexión {@code hiloBloqueante}. */

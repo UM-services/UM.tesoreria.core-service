@@ -63,6 +63,15 @@ class UpdateArticuloUseCaseImplTest {
     }
 
     @Test
+    void cambiosNumericos_seNormalizanAntesDeGuardar() {
+        when(repository.findByIdForUpdate(7L)).thenReturn(Optional.of(actual()));
+
+        var guardado = useCase.updateArticulo(7L, Articulo.builder().precio(new BigDecimal("0e-1000000000")).build());
+
+        assertThat(guardado.getPrecio().scale()).isEqualTo(2);
+    }
+
+    @Test
     void idDelCuerpo_noCambiaElDeLaRuta() {
         when(repository.findByIdForUpdate(7L)).thenReturn(Optional.of(actual()));
 

@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * E2E de gastos (#405): HTTP contra la app levantada ({@code E2E_BASE_URL}) conectada a la base de desarrollo real.
@@ -52,7 +51,9 @@ class GastosDevE2E {
     static void conectarYFotografiar() throws Exception {
         base = System.getenv("E2E_BASE_URL").replaceAll("/$", "");
         dev = DevDbReservas.abrir();
-        assumeTrue(dev.rangoLibre(), "hay filas con ids reservados del E2E en dev: no se toca nada");
+        // Falla (no se saltea): un salteo silencioso parecería verde. Si quedaron restos de una corrida cortada,
+        // revisarlos y borrarlos a mano por su marca E2E-405-xxxxxxxx.
+        assertThat(dev.rangoLibre()).as("hay filas con ids reservados del E2E en dev (otra corrida o restos): no se toca nada").isTrue();
         dev.fotografiar();
     }
 

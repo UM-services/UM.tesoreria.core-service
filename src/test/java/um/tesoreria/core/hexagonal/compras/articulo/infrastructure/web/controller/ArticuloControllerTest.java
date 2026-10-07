@@ -207,6 +207,18 @@ class ArticuloControllerTest {
     }
 
     @Test
+    void errorDeSpringConEstado5xx_detalleGenericoSinElMotivoInterno() {
+        when(service.createArticulo(any())).thenThrow(new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE, "pool agotado: select * from articulos"));
+
+        var respuesta = post("/articulo/", GASTO);
+
+        assertThat(respuesta).hasStatus(503);
+        assertThat(respuesta).bodyJson().extractingPath("$.codigo").isEqualTo("ERROR_INTERNO");
+        assertThat(respuesta).bodyText().doesNotContain("select").doesNotContain("pool");
+    }
+
+    @Test
     void metodoNoSoportado_loResuelveSpring() {
         assertThat(mockMvc.patch().uri("/articulo/1").exchange()).hasStatus(405);
     }

@@ -15,6 +15,7 @@ public class CreateArticuloUseCaseImpl implements CreateArticuloUseCase {
     @Transactional
     public Articulo createArticulo(Articulo articulo) {
         ArticuloReglas.validarAlta(articulo);
+        ArticuloReglas.normalizarNumeros(articulo);
         return repository.create(articulo);
     }
 }

@@ -18,7 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 final class DevDbReservas implements AutoCloseable {
 
-    static final String MARCA = "E2E-405";
+    /** Marca de esta corrida: el barrido solo toca lo propio aunque otra corrida use el mismo rango a la vez. */
+    static final String MARCA = "E2E-405-" + java.util.UUID.randomUUID().toString().substring(0, 8);
     static final long DESDE = 999_001L, HASTA = 999_404L;
     static final List<String> TABLAS = List.of("articulos", "ubicacion_articulo", "gestion_escritura_historial");
     static final List<String> CON_AUTO_INCREMENT = List.of("articulos", "ubicacion_articulo");
@@ -72,7 +73,17 @@ final class DevDbReservas implements AutoCloseable {
 
     /** Barre, vuelve los AUTO_INCREMENT a la foto y exige que las tablas estén idénticas a antes. */
     void restaurarYVerificar() throws SQLException {
-        barrer();
+        try {
+            barrer();
+        } finally {
+            restaurarAutoIncrements(); // aunque falle el barrido: un contador cerca de 999xxx afectaría a VB6 y a la app
+        }
+        assertThat(autoIncrements()).as("AUTO_INCREMENT como antes").isEqualTo(autoIncrementInicial);
+        assertThat(checksums()).as("tablas idénticas a antes de la prueba (si difiere, ver si otro usuario escribió en dev)")
+                .isEqualTo(estadoInicial);
+    }
+
+    private void restaurarAutoIncrements() throws SQLException {
         try (var st = db.createStatement()) {
             // Sin trabar a otros: si alguien tiene la tabla tomada, falla rápido en lugar de encolar
             st.execute("SET SESSION lock_wait_timeout = 5");
@@ -83,9 +94,6 @@ final class DevDbReservas implements AutoCloseable {
                 }
             }
         }
-        assertThat(autoIncrements()).as("AUTO_INCREMENT como antes").isEqualTo(autoIncrementInicial);
-        assertThat(checksums()).as("tablas idénticas a antes de la prueba (si difiere, ver si otro usuario escribió en dev)")
-                .isEqualTo(estadoInicial);
     }
 
     /**
@@ -108,20 +116,21 @@ final class DevDbReservas implements AutoCloseable {
             this.articuloId = articuloId;
         }
 
-        /** Repone las filas que falten, con sus ids originales; devuelve si tuvo que reponer algo. */
+        /**
+         * Si el artículo ya no está (la prueba lo borró), lo repone con sus vínculos y sus ids originales; devuelve si
+         * repuso algo. Con el artículo presente no toca nada: un vínculo faltante lo pudo borrar otro usuario.
+         */
         boolean restaurarSiFalta() throws SQLException {
-            boolean repuso = false;
-            if (numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", articuloId) == 0) {
-                for (var fila : articulo) insertar("articulos", fila);
-                repuso = true;
+            if (numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", articuloId) > 0) {
+                return false;
             }
+            for (var fila : articulo) insertar("articulos", fila);
             for (var fila : vinculos) {
                 if (numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE ubicacion_articulo_id = ?", fila.get("ubicacion_articulo_id")) == 0) {
                     insertar("ubicacion_articulo", fila);
-                    repuso = true;
                 }
             }
-            return repuso;
+            return true;
         }
     }
 

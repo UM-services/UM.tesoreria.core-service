@@ -100,11 +100,19 @@ class CreateArticuloUseCaseImplTest {
     }
 
     @Test
-    void precioFueraDeDecimal16_2_400() {
+    void precioConMasDeCatorceEnteros_400() {
         rechaza(valido().precio(new BigDecimal("1e999999999")).build(), "precio");
-        rechaza(valido().precio(new BigDecimal("1e-999999999")).build(), "precio");
         rechaza(valido().precio(new BigDecimal("100000000000000")).build(), "precio");
-        rechaza(valido().precio(new BigDecimal("1.234")).build(), "precio");
+        // Al redondear pasa a tener 15 dígitos enteros
+        rechaza(valido().precio(new BigDecimal("99999999999999.995")).build(), "precio");
+    }
+
+    @Test
+    void precioConDecimalesDeMas_seRedondeaComoMysql() {
+        assertThat(useCase.createArticulo(valido().precio(new BigDecimal("10.333")).build()).getPrecio()).isEqualTo(new BigDecimal("10.33"));
+        assertThat(useCase.createArticulo(valido().precio(new BigDecimal("1.235")).build()).getPrecio()).isEqualTo(new BigDecimal("1.24"));
+        assertThat(useCase.createArticulo(valido().precio(new BigDecimal("-1.235")).build()).getPrecio()).isEqualTo(new BigDecimal("-1.24"));
+        assertThat(useCase.createArticulo(valido().precio(new BigDecimal("1e-999999999")).build()).getPrecio()).isEqualTo(new BigDecimal("0.00"));
     }
 
     @Test
@@ -112,6 +120,28 @@ class CreateArticuloUseCaseImplTest {
         rechaza(valido().numeroCuenta(new BigDecimal("1e999999999")).build(), "numeroCuenta");
         rechaza(valido().numeroCuenta(new BigDecimal("100000000000")).build(), "numeroCuenta");
         rechaza(valido().numeroCuenta(new BigDecimal("51010101.5")).build(), "numeroCuenta");
+    }
+
+    @Test
+    void exponentesExtremos_400SinDesbordar() {
+        rechaza(valido().precio(new BigDecimal("100e2147483647")).build(), "precio");
+        rechaza(valido().numeroCuenta(new BigDecimal("100e2147483647")).build(), "numeroCuenta");
+    }
+
+    @Test
+    void ceroConEscalaEnorme_seGuardaConLaEscalaDeLaColumna() {
+        var guardado = useCase.createArticulo(valido().precio(new BigDecimal("0e-1000000000")).numeroCuenta(new BigDecimal("0e-1000000000")).build());
+
+        assertThat(guardado.getPrecio().scale()).isEqualTo(2);
+        assertThat(guardado.getNumeroCuenta().scale()).isZero();
+    }
+
+    @Test
+    void numerosValidos_seGuardanConLaEscalaDeLaColumna() {
+        var guardado = useCase.createArticulo(valido().precio(new BigDecimal("1.5")).numeroCuenta(new BigDecimal("5.101E+7")).build());
+
+        assertThat(guardado.getPrecio()).isEqualTo(new BigDecimal("1.50"));
+        assertThat(guardado.getNumeroCuenta()).isEqualTo(new BigDecimal("51010000"));
     }
 
     @Test

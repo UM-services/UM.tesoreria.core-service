@@ -194,8 +194,13 @@ public class ArticuloController {
             if (error.getStatusCode().value() == HttpStatus.UNSUPPORTED_MEDIA_TYPE.value()) {
                 problema.setDetail("El cuerpo tiene que enviarse como application/json.");
                 problema.setProperty("codigo", "TIPO_DE_CONTENIDO_NO_SOPORTADO");
+            } else if (error.getStatusCode().is5xxServerError()) {
+                log.error("{} {}: error no controlado", request.getMethod(), request.getRequestURI(), ex);
+                problema.setDetail("Error interno. El detalle quedó en el log del servicio.");
+                problema.setProperty("codigo", "ERROR_INTERNO");
+                return ResponseEntity.status(error.getStatusCode()).headers(error.getHeaders()).body(problema);
             } else {
-                problema.setProperty("codigo", error.getStatusCode().is5xxServerError() ? "ERROR_INTERNO" : "SOLICITUD_INVALIDA");
+                problema.setProperty("codigo", "SOLICITUD_INVALIDA");
             }
             log.info("{} {} -> {} {}: {}", request.getMethod(), request.getRequestURI(), error.getStatusCode().value(),
                     problema.getProperties().get("codigo"), problema.getDetail());

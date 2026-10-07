@@ -3,6 +3,9 @@ package um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.entity.ArticuloEntity;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
+import um.tesoreria.core.hexagonal.dependencias.ubicacion.infrastructure.persistence.entity.UbicacionEntity;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.exception.UbicacionArticuloConflictException;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.out.UbicacionArticuloRepository;
@@ -49,8 +52,11 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
                 entityManager.persist(entity);
             }
             entityManager.flush();
-            // Las asociaciones (ubicación, artículo, cuenta) se releen: si cambió la cuenta, la cargada es la vieja
-            entityManager.refresh(entity);
+            // Sin refresh: en REPEATABLE READ releería la foto vieja si no hubo UPDATE (otro ya había guardado
+            // la misma cuenta). Los datos del vínculo ya son los vigentes; solo se cargan sus asociaciones.
+            entity.setUbicacion(entityManager.find(UbicacionEntity.class, entity.getUbicacionId()));
+            entity.setArticulo(entityManager.find(ArticuloEntity.class, entity.getArticuloId()));
+            entity.setCuenta(entity.getNumeroCuenta() == null ? null : entityManager.find(CuentaEntity.class, entity.getNumeroCuenta()));
             return mapper.toDomainModel(entity);
         } catch (RuntimeException ex) {
             throw UbicacionArticuloRestricciones.traducir(ex, domain.getUbicacionId(), domain.getArticuloId());
