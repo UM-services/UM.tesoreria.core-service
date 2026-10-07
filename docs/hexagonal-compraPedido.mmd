@@ -1,0 +1,63 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraPedido (v6.3.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraPedido<br/>CompraPedidoEstado<br/>CompraPedidoCriteria<br/>EjercicioActual"]
+        IN["Create/Update/Enviar/Autorizar/Rechazar<br/>GetById/GetByNumero/List<br/>UseCase (Puertos de Entrada)"]
+        OUT["CompraPedidoRepository<br/>EjercicioActualPort<br/>(Puertos de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraPedidoService<br/>@Transactional (crear, actualizar, enviar)"]
+        UCs["*UseCaseImpl (8)"]
+        Exc["CompraPedidoException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraPedidoController<br/>/api/tesoreria/core/compraPedido"]
+        DTO["CompraPedidoRequest<br/>CompraPedidoResponse<br/>AutorizarCompraPedidoRequest"]
+        Map["CompraPedidoDtoMapper<br/>CompraPedidoMapper"]
+        Adp["JpaCompraPedidoRepositoryAdapter"]
+        Eje["EjercicioActualJdbcAdapter<br/>tabla ejercicios (SQL directo)"]
+        Ent["CompraPedidoEntity<br/>tabla compra_pedido"]
+        Jpa["JpaCompraPedidoRepository"]
+    end
+
+    subgraph CrossSlice ["Otros slices del subdominio"]
+        Item["CompraPedidoItemService<br/>(detalle)"]
+        Sec["CompraPedidoSecuenciaService<br/>(correlativo anual)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    Svc --> Item
+    Svc --> Sec
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Eje --> OUT
+    Jpa --> Ent
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Eje fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0
+    style Item fill:#fce4ec
+    style Sec fill:#fce4ec
