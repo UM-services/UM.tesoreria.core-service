@@ -14,6 +14,7 @@ public class UsuarioDtoMapper {
                 .login(request.getLogin())
                 .password(request.getPassword())
                 .nombre(request.getNombre())
+                .dependenciaId(request.getDependenciaId())
                 .geograficaId(request.getGeograficaId())
                 .googleMail(request.getGoogleMail());
 
@@ -33,6 +34,7 @@ public class UsuarioDtoMapper {
                 .userId(domain.getUserId())
                 .login(domain.getLogin())
                 .nombre(domain.getNombre())
+                .dependenciaId(domain.getDependenciaId())
                 .geograficaId(domain.getGeograficaId())
                 .imprimeChequera(domain.getImprimeChequera())
                 .numeroOpManual(domain.getNumeroOpManual())

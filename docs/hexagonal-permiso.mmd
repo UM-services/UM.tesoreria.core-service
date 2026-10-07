@@ -1,0 +1,51 @@
+---
+title: Arquitectura Hexagonal - Módulo Permiso (v6.3.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["Permiso<br/>clave, modulo, aplicacion, activo"]
+        IN["CreatePermisoUseCase<br/>GetPermisoByIdUseCase<br/>GetAllPermisosUseCase<br/>UpdatePermisoUseCase<br/>DeletePermisoUseCase"]
+        OUT["PermisoRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["PermisoService"]
+        UCs["Create/Get/GetAll/Update/Delete<br/>PermisoUseCaseImpl"]
+        Exc["PermisoException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["PermisoController<br/>/api/tesoreria/core/permiso"]
+        DTO["PermisoRequest<br/>PermisoResponse"]
+        Map["PermisoDtoMapper<br/>PermisoMapper"]
+        Adp["JpaPermisoRepositoryAdapter"]
+        Ent["PermisoEntity<br/>tabla permiso"]
+        Jpa["JpaPermisoRepository"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0

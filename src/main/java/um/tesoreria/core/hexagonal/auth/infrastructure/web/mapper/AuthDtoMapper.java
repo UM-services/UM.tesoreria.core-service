@@ -20,6 +20,7 @@ public class AuthDtoMapper {
                 .userId(domain.getUserId())
                 .login(domain.getLogin())
                 .nombre(domain.getNombre())
+                .dependenciaId(domain.getDependenciaId())
                 .geograficaId(domain.getGeograficaId())
                 .sede(geograficaService.findByGeograficaId(domain.getGeograficaId())
                         .map(Geografica::getNombre)
