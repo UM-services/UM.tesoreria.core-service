@@ -25,7 +25,7 @@ Distributed context — who it talks to:
 ## 2. Stack (verified in `pom.xml`, the source of truth)
 
 - Java **25**, Spring Boot **4.1.1**, Spring Cloud **2025.1.3** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.10** (legacy only, §4)
-- Artifact version = service version: **6.0.0** (SemVer; bumped on release, §7)
+- Artifact version = service version: **7.0.0** (SemVer; bumped on release, §7)
 - Data: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
 - Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.0** (Swagger UI)
 - Docs/exports: Apache POI + `openpdf` (reports), `modelmapper` (legacy only), Guava, Caffeine (`starter-cache`)
@@ -113,9 +113,11 @@ Real state to keep in mind:
 | `compras/` | `facturaPendiente` | — no REST; exposed by the legacy `FacturacionElectronicaController` (`/api/tesoreria/core/facturacionElectronica`) |
 | `compras/` | `proveedor` | `/proveedor` + alias |
 | `compras/` | `proveedorMovimiento` | `/proveedorMovimiento` (short only) |
-| `compras/pedidos/` | `compraPedido` | `/api/tesoreria/core/compraPedido` (long only) |
+| `compras/pedidos/` | `compraPedido` | `/api/tesoreria/core/compraPedido` (long only): `GET /` (`dependenciaIds`), `POST /search`, `GET /{id}`/`/numero/{numero}`, `POST`/`PUT`, `POST /{id}/enviar?usuarioId=`, `POST /{id}/aprobar` (7.0.0: renamed from `autorizar`), `POST /{id}/rechazar` (body `autorizanteId`+`motivo`), `POST /{id}/descartar` |
 | `compras/pedidos/` | `compraPedidoItem` | `/api/tesoreria/core/compraPedidoItem` (long only) |
 | `compras/pedidos/` | `compraPedidoSecuencia` | — no REST; internal port (correlativo anual) |
+| `compras/pedidos/` | `compraPedidoAutorizante` | `/api/tesoreria/core/compraPedidoAutorizante` (long only) |
+| `compras/pedidos/` | `compraPedidoHistorial` | `/api/tesoreria/core/compraPedidoHistorial` (long only) |
 | `contable/` | `asiento` | — no REST (empty web/controller) |
 | `contable/` | `cuenta` | `/cuenta` + alias |
 | `contable/` | `cuentaMovimiento` | `/cuentaMovimiento` + alias |
