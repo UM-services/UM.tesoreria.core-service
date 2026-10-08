@@ -99,4 +99,17 @@ class DeleteArticuloUseCaseImplTest {
                 .isInstanceOfSatisfying(ArticuloConflictException.class, ex -> assertThat(ex.isReintentable()).isFalse());
         verify(repository, never()).deleteById(any());
     }
+
+    @Test
+    void conflictoQueNoEsBloqueo_saleComoConflictoYNoComoBloqueo() {
+        when(repository.findByIdForUpdate(5L)).thenReturn(Optional.of(Articulo.builder().articuloId(5L).build()));
+        when(vinculos.deleteByArticuloId(5L)).thenThrow(new UbicacionArticuloConflictException(false, "otro choque"));
+
+        assertThatThrownBy(() -> useCase.deleteArticulo(5L))
+                .isInstanceOfSatisfying(ArticuloConflictException.class, ex -> {
+                    assertThat(ex.getMotivo()).isEqualTo(ArticuloConflictException.Motivo.CONFLICTO);
+                    assertThat(ex.isReintentable()).isFalse();
+                });
+        verify(repository, never()).deleteById(any());
+    }
 }

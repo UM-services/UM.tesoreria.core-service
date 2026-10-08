@@ -98,7 +98,8 @@ class GastosConcurrenciaDevE2E {
 
     static final String MARCA = DevDbReservas.MARCA + " conc";
     static final long ID_EDICION = 999_011L, ID_ASIGNACION = 999_012L, ID_PAR_NUEVO = 999_013L,
-            ID_ESPERA = 999_014L, ID_INTERBLOQUEO = 999_015L, ID_SIN_CAMBIO = 999_016L;
+            ID_ESPERA = 999_014L, ID_INTERBLOQUEO = 999_015L, ID_SIN_CAMBIO = 999_016L,
+            ID_VINCULO_NUEVO = 999_017L, ID_REASIGNA_A = 999_018L, ID_REASIGNA_B = 999_019L, ID_ESPERA_BAJA = 999_020L;
     /** Espera de bloqueo de las conexiones de la app en esta prueba (en dev es 50 s): fuerza un 1205 real rápido. */
     static final int ESPERA_SEGUNDOS = 5;
 
@@ -276,6 +277,107 @@ class GastosConcurrenciaDevE2E {
         assertThat(dev.numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = ? AND Art_Nombre = ? AND Art_Habilitado = 1", ID_ESPERA, MARCA + " A"))
                 .as("ni la app ni el otro dejaron cambios").isEqualTo(1);
         assertThat(cuentas(ID_ESPERA)).containsExactly(cuentaA);
+    }
+
+    @Test
+    void esperaVencidaAlBorrarVinculos_409BloqueadoSinReintento_ySinCambios() throws Exception {
+        crear.createArticulo(gasto(ID_ESPERA_BAJA));
+        asignaciones.save(asignacion(ID_ESPERA_BAJA, cuentaA));
+
+        try (var otro = DevDbReservas.abrir()) {
+            Connection c = otro.db;
+            c.setAutoCommit(false);
+            try {
+                // Otro tiene solo el vínculo tomado más que la espera de la app: la baja bloquea el artículo y vence
+                // esperando el vínculo
+                try (var st = c.createStatement()) {
+                    st.executeUpdate("UPDATE ubicacion_articulo SET cuenta_contable = " + cuentaB + " WHERE articulo_id = " + ID_ESPERA_BAJA);
+                }
+                var inicio = System.nanoTime();
+                var baja = org.assertj.core.api.Assertions.catchThrowable(() -> articulos.deleteArticulo(ID_ESPERA_BAJA));
+                var segundos = (System.nanoTime() - inicio) / 1e9;
+
+                assertThat(baja).isInstanceOfSatisfying(ArticuloConflictException.class, ex -> {
+                    assertThat(ex.getMotivo()).isEqualTo(ArticuloConflictException.Motivo.BLOQUEADO);
+                    assertThat(ex.isReintentable()).isFalse();
+                });
+                assertThat(segundos).as("una sola espera: no se reintentó").isLessThan(ESPERA_SEGUNDOS * 2);
+            } finally {
+                c.rollback();
+            }
+        }
+        assertThat(dev.numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", ID_ESPERA_BAJA)).isEqualTo(1);
+        assertThat(cuentas(ID_ESPERA_BAJA)).containsExactly(cuentaA);
+        assertThat(dev.numero("SELECT COUNT(*) FROM gestion_escritura_historial WHERE entidad = 'articulo' AND entidad_clave = ?"
+                + " AND operacion = 'BAJA'", String.valueOf(ID_ESPERA_BAJA))).isZero();
+    }
+
+    @Test
+    void vinculoConfirmadoMientrasLaBajaEspera_seBorraConElArticulo_sin409() throws Exception {
+        crear.createArticulo(gasto(ID_VINCULO_NUEVO));
+
+        // Otro inserta un vínculo sin confirmar (su FK toma el artículo compartido); la baja lee su foto, espera el
+        // bloqueo del artículo y recién entonces el otro confirma. El vínculo nuevo tiene que borrarse igual.
+        conOtroEscritorBloqueando(
+                "INSERT INTO ubicacion_articulo (ubicacion_id, articulo_id, cuenta_contable, created) VALUES ("
+                        + ubicacion + ", " + ID_VINCULO_NUEVO + ", " + cuentaA + ", NOW())",
+                () -> {
+                    articulos.deleteArticulo(ID_VINCULO_NUEVO);
+                    return null;
+                });
+
+        assertThat(dev.numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", ID_VINCULO_NUEVO)).isZero();
+        assertThat(dev.numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = ?", ID_VINCULO_NUEVO)).isZero();
+    }
+
+    @Test
+    void vinculoReasignadoMientrasLaAsignacionEspera_noPisaOtroArticulo_yReintentaElParPedido() throws Exception {
+        crear.createArticulo(gasto(ID_REASIGNA_A));
+        crear.createArticulo(gasto(ID_REASIGNA_B));
+        asignaciones.save(asignacion(ID_REASIGNA_A, cuentaA));
+        long vinculo = dev.numero("SELECT ubicacion_articulo_id FROM ubicacion_articulo WHERE articulo_id = ?", ID_REASIGNA_A);
+
+        var resultado = conOtroEscritorBloqueando(
+                "UPDATE ubicacion_articulo SET articulo_id = " + ID_REASIGNA_B + " WHERE ubicacion_articulo_id = " + vinculo,
+                () -> asignaciones.save(asignacion(ID_REASIGNA_A, cuentaB)));
+
+        assertThat(resultado.getUbicacionId()).isEqualTo(ubicacion);
+        assertThat(resultado.getArticuloId()).isEqualTo(ID_REASIGNA_A);
+        assertThat(resultado.getNumeroCuenta()).isEqualByComparingTo(cuentaB);
+        assertThat(resultado.getUbicacionArticuloId()).isNotEqualTo(vinculo);
+        assertThat(cuentas(ID_REASIGNA_A)).containsExactly(cuentaB);
+        assertThat(cuentas(ID_REASIGNA_B)).as("la cuenta del vínculo reasignado queda intacta").containsExactly(cuentaA);
+        assertThat(dev.numero("SELECT articulo_id FROM ubicacion_articulo WHERE ubicacion_articulo_id = ?", vinculo))
+                .isEqualTo(ID_REASIGNA_B);
+        assertThat(dev.numero("SELECT COUNT(*) FROM gestion_escritura_historial WHERE entidad = 'ubicacion_articulo'"
+                + " AND entidad_clave = ?", ubicacion + ":" + ID_REASIGNA_B))
+                .as("el pedido para A no registra una escritura para B").isZero();
+        assertThat(dev.numero("SELECT COUNT(*) FROM gestion_escritura_historial WHERE entidad = 'ubicacion_articulo'"
+                + " AND entidad_clave = ? AND operacion = 'ALTA'", ubicacion + ":" + ID_REASIGNA_A))
+                .as("el reintento crea un vínculo para el par pedido").isEqualTo(2);
+    }
+
+    @Test
+    void vinculoReasignadoAOtroArticuloMientrasLaBajaEspera_noSeBorra() throws Exception {
+        crear.createArticulo(gasto(ID_REASIGNA_A));
+        crear.createArticulo(gasto(ID_REASIGNA_B));
+        asignaciones.save(asignacion(ID_REASIGNA_A, cuentaA));
+        long vinculo = dev.numero("SELECT ubicacion_articulo_id FROM ubicacion_articulo WHERE articulo_id = ?", ID_REASIGNA_A);
+
+        // Otro (por ejemplo VB6) pasa el vínculo de A a B sin confirmar; la baja de A ya tomó su foto, en la que el
+        // vínculo todavía es de A, y espera esa fila. Al confirmar el otro, el vínculo es de B y no se toca.
+        conOtroEscritorBloqueando(
+                "UPDATE ubicacion_articulo SET articulo_id = " + ID_REASIGNA_B + " WHERE ubicacion_articulo_id = " + vinculo,
+                () -> {
+                    articulos.deleteArticulo(ID_REASIGNA_A);
+                    return null;
+                });
+
+        assertThat(dev.numero("SELECT COUNT(*) FROM articulos WHERE Art_ID = ?", ID_REASIGNA_A)).isZero();
+        assertThat(dev.numero("SELECT articulo_id FROM ubicacion_articulo WHERE ubicacion_articulo_id = ?", vinculo))
+                .as("el vínculo ahora es de B y sigue existiendo").isEqualTo(ID_REASIGNA_B);
+        assertThat(dev.numero("SELECT COUNT(*) FROM gestion_escritura_historial WHERE entidad = 'ubicacion_articulo'"
+                + " AND entidad_clave = ? AND operacion = 'BAJA'", ubicacion + ":" + ID_REASIGNA_B)).isZero();
     }
 
     @Test

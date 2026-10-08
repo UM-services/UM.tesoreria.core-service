@@ -41,8 +41,11 @@ public class DeleteArticuloUseCaseImpl implements DeleteArticuloUseCase {
             // Cada vínculo borrado registra su propia baja en el historial (lo hace su slice)
             deleteUbicacionArticulosByArticuloUseCase.deleteByArticuloId(id);
         } catch (UbicacionArticuloConflictException ex) {
-            // Solo un bloqueo puede frenar el borrado de vínculos; ArticuloService reintenta el interbloqueo
-            throw ArticuloConflictException.bloqueado(id, ex.isReintentable());
+            // Interbloqueo (ArticuloService lo reintenta) o espera vencida; cualquier otro choque sale como conflicto
+            if (ex.isReintentable() || ex.isBloqueado()) {
+                throw ArticuloConflictException.bloqueado(id, ex.isReintentable());
+            }
+            throw ArticuloConflictException.conflicto(id);
         }
         repository.deleteById(id);
         registrarEscrituraHistorialUseCase.registrarBaja(ArticuloEstado.ENTIDAD, antes.clave(), antes);

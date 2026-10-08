@@ -125,4 +125,23 @@ class ArticuloRestriccionesTest {
         var sql = new SQLException(mensaje, "23000", codigo);
         return new DataIntegrityViolationException(mensaje, new ConstraintViolationException(mensaje, sql, restriccion));
     }
+
+    @Test
+    void textoQueLaColumnaNoAdmite_400ConElCampoDeLaColumna() {
+        var sql = new SQLException("Incorrect string value: '\\xF0\\x9F\\x98\\x80' for column 'Art_Descripcion' at row 1", "HY000", 1366);
+        var original = new org.hibernate.exception.GenericJDBCException("could not execute statement", sql);
+
+        assertThat(ArticuloRestricciones.traducir(original, 5L, "edición")).isInstanceOfSatisfying(ArticuloValidationException.class, ex -> {
+            assertThat(ex.getCampo()).isEqualTo("descripcion");
+            assertThat(ex.getMessage()).doesNotContain("Art_").doesNotContain("Incorrect");
+        });
+    }
+
+    @Test
+    void textoNoAdmitidoEnColumnaDesconocida_400SinCampo() {
+        var sql = new SQLException("Incorrect string value: 'x' for column 'Otra' at row 1", "HY000", 1366);
+
+        assertThat(ArticuloRestricciones.traducir(new org.hibernate.exception.GenericJDBCException("x", sql), 5L, "alta"))
+                .isInstanceOfSatisfying(ArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isNull());
+    }
 }

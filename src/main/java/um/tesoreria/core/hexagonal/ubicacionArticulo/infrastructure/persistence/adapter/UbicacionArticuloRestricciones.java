@@ -36,6 +36,22 @@ final class UbicacionArticuloRestricciones {
     private UbicacionArticuloRestricciones() {
     }
 
+    /**
+     * Baja de los vínculos dentro de la baja del artículo: solo puede chocar por bloqueos (ninguna tabla referencia a
+     * {@code ubicacion_articulo}). El resto sigue sin traducir.
+     */
+    static RuntimeException traducirBaja(RuntimeException ex, Long articuloId) {
+        var codigo = codigoMysql(ex);
+        if (codigo == INTERBLOQUEO) {
+            return new UbicacionArticuloConflictException(true, "interbloqueo al borrar los vínculos del artículo " + articuloId);
+        }
+        if (codigo == ESPERA_DE_BLOQUEO_VENCIDA) {
+            log.warn("Baja de los vínculos del artículo {}: espera de bloqueo vencida", articuloId);
+            return UbicacionArticuloConflictException.bloqueado("espera de bloqueo vencida al borrar los vínculos del artículo " + articuloId);
+        }
+        return ex;
+    }
+
     static RuntimeException traducir(RuntimeException ex, Integer ubicacionId, Long articuloId) {
         var codigo = codigoMysql(ex);
         var clave = ubicacionId + ":" + articuloId;

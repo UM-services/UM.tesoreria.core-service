@@ -11,7 +11,7 @@ flowchart TD
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
-        UAS[UbicacionArticuloService<br/>sin transacción: un reintento ante 1062/1213]
+        UAS[UbicacionArticuloService<br/>sin transacción: un reintento ante conflicto reintentable]
         SV[SaveUbicacionArticuloUseCaseImpl<br/>valida y registra ALTA/EDICION]
         DV[DeleteUbicacionArticulosByArticuloUseCaseImpl<br/>MANDATORY: dentro de la baja del artículo]
         RD[GetAll / Get / GetByArticulo UseCaseImpl]
@@ -21,7 +21,7 @@ flowchart TD
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         UAC[UbicacionArticuloController<br/>ProblemDetail con codigo/campo]
-        JPA[JpaUbicacionArticuloRepositoryAdapter<br/>upsert por par, bloqueo por clave primaria]
+        JPA[JpaUbicacionArticuloRepositoryAdapter<br/>upsert por par, bloqueo por clave primaria<br/>revalida el par bajo bloqueo]
         RES[UbicacionArticuloRestricciones<br/>traduce 1062/1452/1205/1213]
         ENT[UbicacionArticuloEntity / Mapper]
     end

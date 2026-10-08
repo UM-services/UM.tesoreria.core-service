@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * La escritura del vínculo chocó con otra (409). {@code reintentable}: otra transacción insertó el mismo par
- * o hubo un interbloqueo; repetir la operación en una transacción nueva la resuelve.
+ * o borró/reasignó el vínculo durante la espera, o hubo un interbloqueo; se repite en una transacción nueva.
  */
 @Getter
 public class UbicacionArticuloConflictException extends RuntimeException {

@@ -24,7 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * E2E de gastos (#405): HTTP contra la app levantada ({@code E2E_BASE_URL}) conectada a la base de desarrollo real.
- * Escribe en tablas reales de dev, por eso solo corre a pedido: requiere {@code E2E_BASE_URL} además de {@code IT_DB_*}
+ * Escribe en tablas reales de dev, por eso solo corre a pedido: requiere {@code E2E_DEV_ESCRITURA=si} y {@code E2E_BASE_URL}
+ * además de {@code IT_DB_*}
  * y no lo levantan ni surefire ni failsafe por nombre ({@code -Dit.test=GastosDevE2E} lo ejecuta).
  * <p>
  * Aislamiento ({@link DevDbReservas}): solo ids reservados con la marca; si alguno existe, aborta sin escribir. Cada
@@ -32,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * La única baja sobre un artículo real (con entregas) lleva respaldo y se repone si una regresión la dejara pasar.
  * La base se usa solo para verificar estado y limpiar; el comportamiento se ejerce únicamente por HTTP.
  */
+@EnabledIfEnvironmentVariable(named = "E2E_DEV_ESCRITURA", matches = "si")
 @EnabledIfEnvironmentVariable(named = "E2E_BASE_URL", matches = ".+")
 @EnabledIfEnvironmentVariable(named = "IT_DB_HOST", matches = ".+")
 class GastosDevE2E {

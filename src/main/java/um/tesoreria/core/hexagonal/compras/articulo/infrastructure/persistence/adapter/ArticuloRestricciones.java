@@ -14,6 +14,7 @@ import java.util.Map;
  * Traduce las violaciones de restricción y los errores de bloqueo de MySQL al escribir {@code articulos}. Distingue por código de error
  * y nombre de restricción (leídos de {@code information_schema} de dev el 2026-10-05), nunca por el texto.
  * Un nombre desconocido recibe la respuesta genérica de su código; cualquier otro error sigue sin traducir (500).
+ * Excepción: el 1366 (texto que la columna latin1 no admite) no trae restricción y la columna sale de su mensaje.
  */
 @Slf4j
 final class ArticuloRestricciones {
@@ -23,6 +24,13 @@ final class ArticuloRestricciones {
     static final int INTERBLOQUEO = 1213;
     static final int FK_HIJO_EXISTENTE = 1451;
     static final int FK_PADRE_INEXISTENTE = 1452;
+    static final int TEXTO_NO_ADMITIDO = 1366;
+
+    static final Map<String, String> CAMPO_POR_COLUMNA = Map.of(
+            "Art_Nombre", "nombre",
+            "Art_Descripcion", "descripcion",
+            "Art_Unidad", "unidad");
+    private static final java.util.regex.Pattern COLUMNA = java.util.regex.Pattern.compile("for column '(\\w+)'");
 
     static final Map<String, String> CAMPO_POR_FK = Map.of("articulos_ibfk_1", "numeroCuenta");
     static final Map<String, String> TABLA_POR_FK = Map.of(
@@ -37,6 +45,12 @@ final class ArticuloRestricciones {
         if (codigo == INTERBLOQUEO || codigo == ESPERA_DE_BLOQUEO_VENCIDA) {
             log.warn("Artículo {} ({}): {}", articuloId, operacion, codigo == INTERBLOQUEO ? "interbloqueo" : "espera de bloqueo vencida");
             return ArticuloConflictException.bloqueado(articuloId, codigo == INTERBLOQUEO);
+        }
+        if (codigo == TEXTO_NO_ADMITIDO) {
+            var campo = campoDelTexto(ex);
+            log.warn("Artículo {} ({}): la base no admite el texto de {}", articuloId, operacion, campo);
+            return new ArticuloValidationException(campo, (campo != null ? campo : "Un texto")
+                    + " tiene caracteres que la base no admite (por ejemplo, emojis).");
         }
         if (codigo != CLAVE_DUPLICADA && codigo != FK_HIJO_EXISTENTE && codigo != FK_PADRE_INEXISTENTE) {
             return ex;
@@ -68,6 +82,17 @@ final class ArticuloRestricciones {
     private static RuntimeException desconocida(RuntimeException traducida, int codigo, String restriccion, Long articuloId, String operacion) {
         log.error("Artículo {} ({}): restricción desconocida {} (error {}); respuesta genérica", articuloId, operacion, restriccion, codigo);
         return traducida;
+    }
+
+    /** Campo JSON de la columna que nombra el mensaje del 1366; nulo si no se reconoce. */
+    static String campoDelTexto(Throwable ex) {
+        for (var t = ex; t != null; t = t.getCause()) {
+            if (t instanceof SQLException sql && sql.getMessage() != null) {
+                var m = COLUMNA.matcher(sql.getMessage());
+                return m.find() ? CAMPO_POR_COLUMNA.get(m.group(1)) : null;
+            }
+        }
+        return null;
     }
 
     /** Código de error de MySQL de la primera {@link SQLException} de la cadena; 0 si no hay. */

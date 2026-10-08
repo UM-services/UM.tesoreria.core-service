@@ -16,6 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloConflictException;
@@ -39,6 +40,7 @@ import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.per
 import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.persistence.mapper.EscrituraHistorialMapper;
 import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.infrastructure.serialization.JacksonEscrituraValorSerializer;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases.DeleteUbicacionArticulosByArticuloUseCaseImpl;
+import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.in.DeleteUbicacionArticulosByArticuloUseCase;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.adapter.JpaUbicacionArticuloRepositoryAdapter;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.mapper.UbicacionArticuloMapper;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.mapper.CuentaMapper;
@@ -128,6 +130,7 @@ class ArticuloDevDbIT {
     @Autowired CreateArticuloUseCase crear;
     @Autowired UpdateArticuloUseCase editar;
     @Autowired DeleteArticuloUseCase borrar;
+    @Autowired DeleteUbicacionArticulosByArticuloUseCase borrarVinculos;
     @Autowired JdbcTemplate jdbc;
 
     @BeforeEach
@@ -238,20 +241,24 @@ class ArticuloDevDbIT {
 
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = 900007", Integer.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900007", Integer.class)).isZero();
-        assertThat(primeroAntesQue("from articulos where art_id = ? for update", "from ubicacion_articulo where ubicacion_articulo_id in"))
-                .as(SQL.toString()).isTrue();
+        assertThat(primeroAntesQue("from articulos where art_id = ? for update", "from ubicacion_articulo where articulo_id = ?"))
+                .as("primero el artículo, después sus vínculos con lectura actual: " + SQL).isTrue();
         assertThat(primeroAntesQue("delete from ubicacion_articulo", "delete from articulos")).as(SQL.toString()).isTrue();
+        // n + 1 eventos: una baja por vínculo y la del artículo
+        for (var ubicacion : ubicaciones) {
+            assertThat(operaciones("ubicacion_articulo", ubicacion + ":900007")).containsExactly("BAJA");
+        }
+        assertThat(operaciones("articulo", "900007")).containsExactly("ALTA", "BAJA");
     }
 
     @Test
-    void bajaLibreSinVinculos_noBloqueaVinculos() {
+    void bajaLibreSinVinculos_noBorraVinculos() {
         crear.createArticulo(gasto(900_008L, "SIN VINCULOS"));
 
         SQL.clear();
         borrar.deleteArticulo(900_008L);
 
-        assertThat(SQL).as("sin bloqueo de brecha sobre ubicacion_articulo")
-                .noneMatch(sql -> sql.contains("ubicacion_articulo") && sql.contains("for update"));
+        assertThat(SQL).noneMatch(sql -> sql.startsWith("delete from ubicacion_articulo"));
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900008", Integer.class)).isZero();
     }
 
@@ -360,6 +367,31 @@ class ArticuloDevDbIT {
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = 900012", Integer.class)).isOne();
         assertThat(operaciones("ubicacion_articulo", ubicacion + ":900012")).isEmpty();
         assertThat(operaciones("articulo", "900012")).containsExactly("ALTA");
+    }
+
+    @Test
+    void textoFueraDeLatin1_400ConElCampo_sinEscribir() {
+        // articulos es latin1 en dev: un emoji no entra en la columna
+        assertThatThrownBy(() -> crear.createArticulo(gasto(900_013L, "Gasto 😀")))
+                .isInstanceOfSatisfying(ArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo("nombre"));
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900013", Integer.class)).isZero();
+        assertThat(operaciones("articulo", "900013")).isEmpty();
+
+        crear.createArticulo(gasto(900_013L, "Ñandú áéíóú €"));
+        assertThatThrownBy(() -> editar.updateArticulo(900_013L, Articulo.builder().descripcion("😀").build()))
+                .isInstanceOfSatisfying(ArticuloValidationException.class, ex -> assertThat(ex.getCampo()).isEqualTo("descripcion"));
+        assertThat(jdbc.queryForObject("SELECT Art_Nombre FROM articulos WHERE Art_ID = 900013", String.class))
+                .as("lo que sí entra en latin1 se guarda tal cual").isEqualTo("Ñandú áéíóú €");
+        assertThat(jdbc.queryForObject("SELECT Art_Descripcion FROM articulos WHERE Art_ID = 900013", String.class)).isEqualTo("DESC");
+    }
+
+    @Test
+    void borradoDeVinculos_sinLaTransaccionDeLaBaja_seRechaza() {
+        crear.createArticulo(gasto(900_014L, "SIN TX"));
+        jdbc.update("INSERT INTO ubicacion_articulo (ubicacion_id, articulo_id) VALUES ((SELECT MIN(ubicacion_id) FROM ubicacion), 900014)");
+
+        assertThatThrownBy(() -> borrarVinculos.deleteByArticuloId(900_014L)).isInstanceOf(IllegalTransactionStateException.class);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = 900014", Integer.class)).isOne();
     }
 
     private List<String> operaciones(String entidad, String clave) {

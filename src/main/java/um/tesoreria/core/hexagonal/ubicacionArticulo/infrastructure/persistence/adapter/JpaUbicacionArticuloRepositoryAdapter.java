@@ -16,6 +16,7 @@ import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -29,7 +30,7 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
      * Upsert por par. Si el vínculo existe, su estado sale de la lectura con bloqueo (en REPEATABLE READ es la única
      * que ve lo último confirmado); si no existe se inserta sin bloquear nada (un FOR UPDATE sobre un par ausente
      * tomaría un bloqueo de brecha). Un choque con otra inserción del mismo par, o un vínculo borrado entre la
-     * búsqueda y el bloqueo, sale como conflicto reintentable.
+     * búsqueda y el bloqueo (o reasignado a otro par), sale como conflicto reintentable.
      * FOR UPDATE nativo: con PESSIMISTIC_WRITE, Hibernate 7 genera "FOR UPDATE OF", que MySQL 5.7 no acepta.
      */
     @Override
@@ -48,6 +49,13 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
                             "el vínculo " + domain.getUbicacionId() + ":" + domain.getArticuloId() + " se borró mientras se asignaba");
                 }
                 entity = (UbicacionArticuloEntity) filas.getFirst();
+                // La búsqueda del id vio la foto de RR; el bloqueo puede devolver esa misma PK para otro par.
+                // No se modifica ni registra ese vínculo: el servicio repite el pedido en una transacción nueva.
+                if (!Objects.equals(entity.getUbicacionId(), domain.getUbicacionId())
+                        || !Objects.equals(entity.getArticuloId(), domain.getArticuloId())) {
+                    throw new UbicacionArticuloConflictException(true,
+                            "el vínculo " + domain.getUbicacionId() + ":" + domain.getArticuloId() + " se reasignó mientras se asignaba");
+                }
                 anterior = escalares(entity);
                 entity.setNumeroCuenta(domain.getNumeroCuenta());
             } else {
@@ -85,36 +93,36 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
     }
 
     /**
-     * Ids con una lectura común y bloqueo por clave primaria: un FOR UPDATE por {@code articulo_id} sin filas tomaría
-     * un bloqueo de brecha. El estado devuelto sale de la lectura con bloqueo y sin cargar entidades (las asociaciones
-     * se cargarían por nada). Un vínculo nuevo no puede aparecer mientras tanto: su FK espera al artículo bloqueado.
+     * Lectura con bloqueo por {@code articulo_id}, después de que la baja bloqueó el artículo: es una lectura actual,
+     * así que ve los vínculos que otro confirmó mientras la baja esperaba (la foto de REPEATABLE READ se tomó antes del
+     * bloqueo) y no trae uno que otro pasó a otro artículo. Usa el índice {@code articulo_id} (EXPLAIN en dev,
+     * 2026-10-08) y toma un bloqueo de brecha hasta el fin de la baja: mientras tanto también espera la inserción de un
+     * vínculo de un artículo vecino en ese índice, y un escritor externo con varias escrituras en la misma transacción
+     * puede chocar en un interbloqueo (la baja lo reintenta una vez). Sin cargar entidades.
      */
     @Override
     public List<UbicacionArticulo> deleteAllByArticuloId(Long articuloId) {
         try {
-            var ids = jpaUbicacionArticuloRepository.findIdsByArticuloId(articuloId);
-            if (ids.isEmpty()) {
-                return List.of();
-            }
             List<?> filas = entityManager.createNativeQuery(
                             "SELECT ubicacion_articulo_id, ubicacion_id, articulo_id, cuenta_contable FROM ubicacion_articulo"
-                                    + " WHERE ubicacion_articulo_id IN (:ids) ORDER BY ubicacion_articulo_id FOR UPDATE")
-                    .setParameter("ids", ids)
+                                    + " WHERE articulo_id = :articuloId ORDER BY ubicacion_articulo_id FOR UPDATE")
+                    .setParameter("articuloId", articuloId)
                     .getResultList();
             var borrados = filas.stream().map(Object[].class::cast).map(f -> UbicacionArticulo.builder()
                     .ubicacionArticuloId(((Number) f[0]).longValue())
                     .ubicacionId(f[1] == null ? null : ((Number) f[1]).intValue())
-                    .articuloId(f[2] == null ? null : ((Number) f[2]).longValue())
+                    .articuloId(((Number) f[2]).longValue())
                     .numeroCuenta((BigDecimal) f[3])
                     .build()).toList();
             if (!borrados.isEmpty()) {
-                entityManager.createNativeQuery("DELETE FROM ubicacion_articulo WHERE ubicacion_articulo_id IN (:ids)")
+                entityManager.createNativeQuery("DELETE FROM ubicacion_articulo WHERE ubicacion_articulo_id IN (:ids) AND articulo_id = :articuloId")
                         .setParameter("ids", borrados.stream().map(UbicacionArticulo::getUbicacionArticuloId).toList())
+                        .setParameter("articuloId", articuloId)
                         .executeUpdate();
             }
             return borrados;
         } catch (RuntimeException ex) {
-            throw UbicacionArticuloRestricciones.traducir(ex, null, articuloId);
+            throw UbicacionArticuloRestricciones.traducirBaja(ex, articuloId);
         }
     }
 

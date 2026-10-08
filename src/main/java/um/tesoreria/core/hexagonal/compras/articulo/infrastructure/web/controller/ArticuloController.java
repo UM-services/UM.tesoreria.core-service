@@ -54,7 +54,8 @@ public class ArticuloController {
             @ApiResponse(responseCode = "201", description = "Creado"),
             @ApiResponse(responseCode = "400", description = "CAMPO_INVALIDO (con campo) o CUERPO_INVALIDO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "409", description = "ARTICULO_ID_DUPLICADO: el id ya existe; o CONFLICTO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "415", description = "TIPO_DE_CONTENIDO_NO_SOPORTADO: falta application/json", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
+            @ApiResponse(responseCode = "415", description = "TIPO_DE_CONTENIDO_NO_SOPORTADO: falta application/json", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "ERROR_INTERNO (por ejemplo, falta la tabla gestion_escritura_historial)", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @PostMapping("/")
     public ResponseEntity<ArticuloResponse> createArticulo(@RequestBody ArticuloRequest articuloRequest) {
         Articulo articulo = articuloDtoMapper.toDomain(articuloRequest);
@@ -62,6 +63,9 @@ public class ArticuloController {
         return new ResponseEntity<>(articuloDtoMapper.toResponse(createdArticulo), HttpStatus.CREATED);
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Artículo con su cuenta"),
+            @ApiResponse(responseCode = "404", description = "ARTICULO_NO_ENCONTRADO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @GetMapping("/{id}")
     public ResponseEntity<ArticuloResponse> getArticuloById(@PathVariable Long id) {
         return articuloService.getArticuloById(id)
@@ -136,7 +140,9 @@ public class ArticuloController {
             @ApiResponse(responseCode = "200", description = "Artículo como quedó"),
             @ApiResponse(responseCode = "400", description = "CAMPO_INVALIDO (con campo), CUERPO_INVALIDO o PARAMETRO_INVALIDO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
             @ApiResponse(responseCode = "404", description = "ARTICULO_NO_ENCONTRADO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "409", description = "CONFLICTO: otra operación tiene tomado el artículo", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
+            @ApiResponse(responseCode = "409", description = "CONFLICTO: otra operación tiene tomado el artículo", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "415", description = "TIPO_DE_CONTENIDO_NO_SOPORTADO: falta application/json", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "ERROR_INTERNO (por ejemplo, falta la tabla gestion_escritura_historial)", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @PutMapping("/{id}")
     public ResponseEntity<ArticuloResponse> updateArticulo(@PathVariable Long id, @RequestBody ArticuloRequest articuloRequest) {
         Articulo cambios = articuloDtoMapper.toDomain(articuloRequest);
@@ -150,7 +156,8 @@ public class ArticuloController {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Borrado con sus vínculos"),
             @ApiResponse(responseCode = "404", description = "ARTICULO_NO_ENCONTRADO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "409", description = "ARTICULO_REFERENCIADO (con referencias) o CONFLICTO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
+            @ApiResponse(responseCode = "409", description = "ARTICULO_REFERENCIADO (con referencias) o CONFLICTO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "ERROR_INTERNO (por ejemplo, falta la tabla gestion_escritura_historial)", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArticulo(@PathVariable Long id) {
         articuloService.deleteArticulo(id);

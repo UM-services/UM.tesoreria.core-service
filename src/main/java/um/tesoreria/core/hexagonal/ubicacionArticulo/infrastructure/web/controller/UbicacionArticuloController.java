@@ -45,6 +45,9 @@ public class UbicacionArticuloController {
         return ResponseEntity.ok(responses);
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Vínculo del par"),
+            @ApiResponse(responseCode = "404", description = "UBICACION_ARTICULO_NO_ENCONTRADO: el artículo no está asignado a esa ubicación", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @GetMapping("/{ubicacionId}/{articuloId}")
     public ResponseEntity<UbicacionArticuloResponse> findByUbicacionAndArticulo(
             @PathVariable Integer ubicacionId, @PathVariable Long articuloId) {
@@ -68,7 +71,9 @@ public class UbicacionArticuloController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Vínculo como quedó, con ubicación, artículo y cuenta"),
             @ApiResponse(responseCode = "400", description = "CAMPO_INVALIDO (con campo) o CUERPO_INVALIDO", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "409", description = "CONFLICTO: otra operación tiene tomado el vínculo", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
+            @ApiResponse(responseCode = "409", description = "CONFLICTO: otra operación tiene tomado el vínculo", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "415", description = "TIPO_DE_CONTENIDO_NO_SOPORTADO: falta application/json", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "ERROR_INTERNO (por ejemplo, falta la tabla gestion_escritura_historial)", content = @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetail.class)))})
     @PostMapping("/")
     public ResponseEntity<UbicacionArticuloResponse> save(@RequestBody UbicacionArticuloRequest request) {
         UbicacionArticulo domain = mapper.toDomain(request);

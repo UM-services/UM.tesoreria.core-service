@@ -82,6 +82,25 @@ class UbicacionArticuloRestriccionesTest {
         assertThat(UbicacionArticuloRestricciones.traducir(original, 1, 2L)).isSameAs(original);
     }
 
+    @Test
+    void bajaDeVinculos_traduceSoloBloqueos_conMensajeDeBaja() {
+        var interbloqueo = new CannotAcquireLockException("x", new LockAcquisitionException("x",
+                new SQLException("Deadlock found when trying to get lock; try restarting transaction", "40001", 1213)));
+        var espera = new CannotAcquireLockException("x", new LockAcquisitionException("x",
+                new SQLException("Lock wait timeout exceeded; try restarting transaction", "HY000", 1205)));
+        var otro = violacion(1451, "otra_fk");
+
+        assertThat(UbicacionArticuloRestricciones.traducirBaja(interbloqueo, 5L)).isInstanceOfSatisfying(UbicacionArticuloConflictException.class, ex -> {
+            assertThat(ex.isReintentable()).isTrue();
+            assertThat(ex.getMessage()).contains("vínculos del artículo 5").doesNotContain("null").doesNotContain("asignar");
+        });
+        assertThat(UbicacionArticuloRestricciones.traducirBaja(espera, 5L)).isInstanceOfSatisfying(UbicacionArticuloConflictException.class, ex -> {
+            assertThat(ex.isBloqueado()).isTrue();
+            assertThat(ex.isReintentable()).isFalse();
+        });
+        assertThat(UbicacionArticuloRestricciones.traducirBaja(otro, 5L)).isSameAs(otro);
+    }
+
     private static RuntimeException violacion(int codigo, String restriccion) {
         var sql = new SQLException("simulada", "23000", codigo);
         return new DataIntegrityViolationException("simulada", new ConstraintViolationException("simulada", sql, restriccion));

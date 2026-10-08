@@ -39,11 +39,19 @@ final class DevDbReservas implements AutoCloseable {
                 System.getenv("IT_DB_USER"), System.getenv("IT_DB_PASSWORD")));
     }
 
-    /** Sin filas en el rango reservado: si hay alguna, la prueba no debe tocar nada. */
+    /**
+     * Sin filas en el rango reservado, tampoco eventos de historial con esas claves: si hay alguna, la prueba no debe
+     * tocar nada (el barrido del historial borra por clave y se llevaría eventos que no son de esta corrida).
+     */
     boolean rangoLibre() throws SQLException {
         return numero("SELECT COUNT(*) FROM articulos WHERE Art_ID BETWEEN ? AND ?", DESDE, HASTA) == 0
-                && numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id BETWEEN ? AND ?", DESDE, HASTA) == 0;
+                && numero("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id BETWEEN ? AND ?", DESDE, HASTA) == 0
+                && numero("SELECT COUNT(*) FROM gestion_escritura_historial WHERE " + HISTORIAL_RESERVADO, DESDE, HASTA, DESDE, HASTA) == 0;
     }
+
+    /** Eventos de historial de los ids reservados: artículo por su id, vínculo por el artículo de su clave. */
+    private static final String HISTORIAL_RESERVADO = "(entidad = 'articulo' AND CAST(entidad_clave AS UNSIGNED) BETWEEN ? AND ?)"
+            + " OR (entidad = 'ubicacion_articulo' AND CAST(SUBSTRING_INDEX(entidad_clave, ':', -1) AS UNSIGNED) BETWEEN ? AND ?)";
 
     void fotografiar() throws SQLException {
         estadoInicial = checksums();
@@ -59,9 +67,7 @@ final class DevDbReservas implements AutoCloseable {
      * #404 de los ids reservados se borra por clave: sus eventos no llevan la marca (la de un vínculo, por ejemplo).
      */
     void barrer() throws SQLException {
-        try (var st = db.prepareStatement("DELETE FROM gestion_escritura_historial WHERE"
-                + " (entidad = 'articulo' AND CAST(entidad_clave AS UNSIGNED) BETWEEN ? AND ?)"
-                + " OR (entidad = 'ubicacion_articulo' AND CAST(SUBSTRING_INDEX(entidad_clave, ':', -1) AS UNSIGNED) BETWEEN ? AND ?)")) {
+        try (var st = db.prepareStatement("DELETE FROM gestion_escritura_historial WHERE " + HISTORIAL_RESERVADO)) {
             st.setLong(1, DESDE);
             st.setLong(2, HASTA);
             st.setLong(3, DESDE);

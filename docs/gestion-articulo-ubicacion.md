@@ -9,8 +9,9 @@ Ambos controladores responden también bajo `/api/tesoreria/core/...`.
 
 ## Errores: un solo formato
 
-Todo error responde `application/problem+json` (`ProblemDetail`) con `detail` en español y un `codigo` estable para
-decidir en el cliente. Si el error es de un campo del cuerpo, viene también `campo` (nombre JSON del DTO).
+Todo error que responden estos dos controladores sale como `application/problem+json` (`ProblemDetail`) con `detail`
+en español y un `codigo` estable para decidir en el cliente. Lo que Spring resuelve antes de llegar al controlador
+(ruta inexistente, método no permitido `405`, `Accept` que no se puede cumplir `406`) mantiene el formato por defecto. Si el error es de un campo del cuerpo, viene también `campo` (nombre JSON del DTO).
 
 | HTTP | `codigo` | Cuándo |
 |---|---|---|
@@ -21,6 +22,7 @@ decidir en el cliente. Si el error es de un campo del cuerpo, viene también `ca
 | 409 | `ARTICULO_ID_DUPLICADO` | Alta con un id que ya existe |
 | 409 | `ARTICULO_REFERENCIADO` | Baja de un artículo en uso; trae `referencias` |
 | 409 | `CONFLICTO` | Otra operación tiene tomada la fila; reintentar en unos segundos |
+| 4xx | `SOLICITUD_INVALIDA` | Otro error de la solicitud que informa Spring (por ejemplo, un parámetro faltante) |
 | 415 | `TIPO_DE_CONTENIDO_NO_SOPORTADO` | Falta `Content-Type: application/json` |
 | 500 | `ERROR_INTERNO` | Sin SQL ni trazas en la respuesta; el detalle queda en el log del servicio |
 
@@ -53,6 +55,8 @@ Reglas (las columnas de `articulos` en dev mandan):
 - `articuloId` obligatorio, de 1 a 2147483647. `tipo` obligatorio: `bien` o `gasto`.
 - `directo`, `habilitado`, `inventariable`: 0 o 1.
 - Largos: `nombre` 150, `descripcion` 64, `unidad` 16. El nombre vacío se acepta (hay artículos así en dev).
+- Los textos se guardan en latin1: caracteres fuera de ese juego (por ejemplo, emojis) dan `400 CAMPO_INVALIDO` con
+  el campo. Acentos, ñ y € entran sin problema.
 - `precio`: hasta 14 dígitos enteros; los decimales de más se **redondean** a 2 como hacía MySQL (10.505 → 10.51).
 - `numeroCuenta`: entero de hasta 11 dígitos que exista en el plan de cuentas; nulo = artículo sin cuenta.
 - La respuesta del alta y de la edición trae `cuenta: null` aunque haya `numeroCuenta`; `GET /articulo/{id}` la completa.
@@ -80,7 +84,8 @@ HTTP 400
 ## Edición: `PUT /articulo/{id}`
 
 Un campo nulo o ausente significa **sin cambios**; `0` explícito se aplica. El id del cuerpo se ignora. `numeroCuenta`
-no se puede vaciar por PUT. Gana la última escritura (no hay control de versión).
+no se puede vaciar por PUT (antes de 7.0.0, `numeroCuenta: null` le quitaba la cuenta; hoy no hay forma de hacerlo por
+la API). Gana la última escritura (no hay control de versión).
 
 ```
 $ curl -s -H 'Content-Type: application/json' -X PUT /articulo/999001 -d '{"habilitado":0}'
@@ -189,9 +194,16 @@ la tabla existe en desarrollo y no en producción.
 
 ## Concurrencia y límites conocidos
 
-- Edición y baja bloquean la fila del artículo; la baja bloquea después sus vínculos. Ante un interbloqueo de MySQL
+- Edición y baja bloquean la fila del artículo; la baja bloquea después sus vínculos con una lectura actual, así que
+  también borra un vínculo que otro confirmó mientras esperaba y no toca uno que otro pasó a otro artículo. Esa
+  lectura toma un bloqueo de brecha en el índice de vínculos hasta que la baja termina: en ese lapso (milisegundos)
+  la asignación de un artículo con id vecino espera, y un escritor que haga varias escrituras en una misma
+  transacción puede recibir un interbloqueo de MySQL. Ante un interbloqueo de MySQL
   la operación se reintenta una vez; si otra operación tiene la fila tomada más que la espera de MySQL, responde 409
   `CONFLICTO` sin reintentar.
+- La asignación comprueba de nuevo el par ubicación/artículo después de bloquear el vínculo. Si otro escritor lo
+  borró o lo reasignó mientras esperaba, se reintenta una vez en una transacción nueva, sin cambiar la cuenta ni
+  registrar historial para el par ajeno. Si vuelve a chocar, responde `409 CONFLICTO`.
 - Mientras la baja tiene el artículo bloqueado, una entrega o un vínculo nuevos para ese artículo esperan y fallan
   (su FK lo lee). Una **línea de factura** nueva no espera (`movprov_detallefactura` no tiene FK): si VB6 la carga
   justo durante la baja, puede quedar huérfana. La baja no garantiza cero huérfanos frente a otros escritores.

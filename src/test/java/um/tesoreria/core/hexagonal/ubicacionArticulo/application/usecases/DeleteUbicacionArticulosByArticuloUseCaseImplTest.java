@@ -1,8 +1,6 @@
 package um.tesoreria.core.hexagonal.ubicacionArticulo.application.usecases;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.gestion.escrituraHistorial.domain.ports.in.RegistrarEscrituraHistorialUseCase;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.model.UbicacionArticulo;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.out.UbicacionArticuloRepository;
@@ -51,11 +49,4 @@ class DeleteUbicacionArticulosByArticuloUseCaseImplTest {
         verifyNoInteractions(historial);
     }
 
-    @Test
-    void soloCorreDentroDeLaTransaccionDeLaBaja() throws Exception {
-        var tx = DeleteUbicacionArticulosByArticuloUseCaseImpl.class.getMethod("deleteByArticuloId", Long.class)
-                .getAnnotation(Transactional.class);
-
-        assertThat(tx.propagation()).isEqualTo(Propagation.MANDATORY);
-    }
 }

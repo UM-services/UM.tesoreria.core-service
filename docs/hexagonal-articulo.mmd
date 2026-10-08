@@ -25,7 +25,7 @@ flowchart TD
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         AC[ArticuloController<br/>ProblemDetail con codigo/campo/referencias]
         JPA[JpaArticuloRepositoryAdapter<br/>persist + flush, SELECT ... FOR UPDATE nativo]
-        RES[ArticuloRestricciones<br/>traduce 1062/1451/1452/1205/1213]
+        RES[ArticuloRestricciones<br/>traduce 1062/1366/1451/1452/1205/1213]
         REF[JpaReferenciasArticuloAdapter<br/>COUNT entrega_detalle, movprov_detallefactura]
         ENT[ArticuloEntity / ArticuloMapper]
     end
