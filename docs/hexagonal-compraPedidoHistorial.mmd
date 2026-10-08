@@ -1,0 +1,54 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraPedidoHistorial (v7.0.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraPedidoHistorial<br/>compraPedidoId, estado (texto)<br/>usuarioId, observacion, fecha"]
+        IN["RegistrarCompraPedidoHistorialUseCase<br/>ListCompraPedidoHistorialUseCase<br/>(Puertos de Entrada)"]
+        OUT["CompraPedidoHistorialRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraPedidoHistorialService"]
+        UCs["*UseCaseImpl (2)"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraPedidoHistorialController<br/>/api/tesoreria/core/compraPedidoHistorial"]
+        DTO["CompraPedidoHistorialResponse"]
+        Map["CompraPedidoHistorialDtoMapper<br/>CompraPedidoHistorialMapper"]
+        Adp["JpaCompraPedidoHistorialRepositoryAdapter"]
+        Ent["CompraPedidoHistorialEntity<br/>tabla compra_pedido_historial"]
+        Jpa["JpaCompraPedidoHistorialRepository"]
+    end
+
+    subgraph Callers ["Registrado por el pedido"]
+        Ped["CompraPedidoService<br/>misma transacción (crear/enviar/aprobar/rechazar/descartar)"]
+    end
+
+    Ped --> Svc
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0
+    style Ped fill:#fce4ec
