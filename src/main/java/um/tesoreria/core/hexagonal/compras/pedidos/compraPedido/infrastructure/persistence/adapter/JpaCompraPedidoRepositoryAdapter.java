@@ -62,6 +62,9 @@ public class JpaCompraPedidoRepositoryAdapter implements CompraPedidoRepository 
             if (criteria.dependenciaId() != null) {
                 predicates.add(builder.equal(root.get("dependenciaId"), criteria.dependenciaId()));
             }
+            if (criteria.dependenciaIds() != null && !criteria.dependenciaIds().isEmpty()) {
+                predicates.add(root.get("dependenciaId").in(criteria.dependenciaIds()));
+            }
             if (criteria.ejercicioId() != null) {
                 predicates.add(builder.equal(root.get("ejercicioId"), criteria.ejercicioId()));
             }

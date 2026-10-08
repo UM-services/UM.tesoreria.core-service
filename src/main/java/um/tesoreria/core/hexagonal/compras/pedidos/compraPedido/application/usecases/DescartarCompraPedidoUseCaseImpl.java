@@ -4,20 +4,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.application.exception.CompraPedidoException;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedido;
-import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.ports.in.AutorizarCompraPedidoUseCase;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.ports.in.DescartarCompraPedidoUseCase;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.ports.out.CompraPedidoRepository;
 
 @Component
 @RequiredArgsConstructor
-public class AutorizarCompraPedidoUseCaseImpl implements AutorizarCompraPedidoUseCase {
+public class DescartarCompraPedidoUseCaseImpl implements DescartarCompraPedidoUseCase {
 
     private final CompraPedidoRepository compraPedidoRepository;
 
     @Override
-    public CompraPedido autorizar(Integer compraPedidoId, Integer autorizanteId) {
+    public CompraPedido descartar(Integer compraPedidoId, String motivo) {
         CompraPedido pedido = compraPedidoRepository.findById(compraPedidoId)
                 .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
-        pedido.autorizar(autorizanteId);
+        pedido.descartar(motivo);
         return compraPedidoRepository.update(pedido)
                 .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
     }

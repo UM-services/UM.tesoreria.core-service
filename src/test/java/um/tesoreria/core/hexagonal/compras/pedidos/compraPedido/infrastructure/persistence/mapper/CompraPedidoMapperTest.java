@@ -21,7 +21,7 @@ class CompraPedidoMapperTest {
                 .numero("PC-2026-000001")
                 .ejercicioId(7)
                 .fecha(LocalDateTime.of(2026, 10, 6, 9, 0))
-                .estado(CompraPedidoEstado.PENDIENTE_AUTORIZACION)
+                .estado(CompraPedidoEstado.PENDIENTE_ENVIO)
                 .autorizanteId(99)
                 .solicitanteId(10)
                 .dependenciaId(20)
@@ -31,13 +31,16 @@ class CompraPedidoMapperTest {
                 .urgente(true)
                 .montoConocido(true)
                 .montoEstimado(new BigDecimal("4500000.00"))
+                .fechaEnvio(LocalDateTime.of(2026, 10, 7, 12, 0))
+                .rechazoMotivo("motivo")
+                .descartadoMotivo("descarte")
                 .build();
 
         CompraPedidoEntity entity = mapper.toEntity(domain);
         CompraPedido back = mapper.toDomain(entity);
 
-        assertThat(entity.getEstado()).isEqualTo("PENDIENTE_AUTORIZACION");
-        assertThat(back.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_AUTORIZACION);
+        assertThat(entity.getEstado()).isEqualTo("PENDIENTE_ENVIO");
+        assertThat(back.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_ENVIO);
         assertThat(back.getNumero()).isEqualTo("PC-2026-000001");
         assertThat(back.getEjercicioId()).isEqualTo(7);
         assertThat(back.getAutorizanteId()).isEqualTo(99);
@@ -47,6 +50,9 @@ class CompraPedidoMapperTest {
         assertThat(back.getGeograficaId()).isEqualTo(40);
         assertThat(back.getUrgente()).isTrue();
         assertThat(back.getMontoEstimado()).isEqualByComparingTo("4500000.00");
+        assertThat(back.getFechaEnvio()).isEqualTo(LocalDateTime.of(2026, 10, 7, 12, 0));
+        assertThat(back.getRechazoMotivo()).isEqualTo("motivo");
+        assertThat(back.getDescartadoMotivo()).isEqualTo("descarte");
     }
 
     @Test

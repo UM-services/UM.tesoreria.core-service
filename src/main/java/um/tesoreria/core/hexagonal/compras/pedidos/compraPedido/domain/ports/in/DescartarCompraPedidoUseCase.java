@@ -2,8 +2,8 @@ package um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.ports.in
 
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedido;
 
-public interface AutorizarCompraPedidoUseCase {
+public interface DescartarCompraPedidoUseCase {
 
-    CompraPedido autorizar(Integer compraPedidoId, Integer autorizanteId);
+    CompraPedido descartar(Integer compraPedidoId, String motivo);
 
 }

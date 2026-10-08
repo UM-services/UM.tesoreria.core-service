@@ -14,10 +14,10 @@ public class RechazarCompraPedidoUseCaseImpl implements RechazarCompraPedidoUseC
     private final CompraPedidoRepository compraPedidoRepository;
 
     @Override
-    public CompraPedido rechazar(Integer compraPedidoId) {
+    public CompraPedido rechazar(Integer compraPedidoId, Integer autorizanteId, String motivo) {
         CompraPedido pedido = compraPedidoRepository.findById(compraPedidoId)
                 .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
-        pedido.rechazar();
+        pedido.rechazar(autorizanteId, motivo);
         return compraPedidoRepository.update(pedido)
                 .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
     }
