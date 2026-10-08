@@ -78,7 +78,7 @@ class CompraPedidoUseCasesTest {
         CompraPedido enviado = useCase.enviar(5, "PC-2026-000001");
 
         assertThat(enviado.getNumero()).isEqualTo("PC-2026-000001");
-        assertThat(enviado.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_AUTORIZACION);
+        assertThat(enviado.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_ENVIO);
     }
 
     @Test
@@ -91,11 +91,90 @@ class CompraPedidoUseCasesTest {
     }
 
     @Test
-    void autorizarUnPedidoInexistenteFalla() {
-        when(repository.findById(99)).thenReturn(Optional.empty());
-        AutorizarCompraPedidoUseCaseImpl useCase = new AutorizarCompraPedidoUseCaseImpl(repository);
+    void actualizarAplicaLosDatosDeNegocio() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.BORRADOR)
+                .build();
+        when(repository.findById(5)).thenReturn(Optional.of(pedido));
+        when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+        UpdateCompraPedidoUseCaseImpl useCase = new UpdateCompraPedidoUseCaseImpl(repository);
 
-        assertThatThrownBy(() -> useCase.autorizar(99, 1)).isInstanceOf(CompraPedidoException.class);
+        CompraPedido actualizado = useCase.actualizar(5,
+                CompraPedido.builder().necesidad("Notebooks").build());
+
+        assertThat(actualizado.getNecesidad()).isEqualTo("Notebooks");
+    }
+
+    @Test
+    void aprobarUnPedidoInexistenteFalla() {
+        when(repository.findById(99)).thenReturn(Optional.empty());
+        AprobarCompraPedidoUseCaseImpl useCase = new AprobarCompraPedidoUseCaseImpl(repository);
+
+        assertThatThrownBy(() -> useCase.aprobar(99, 1)).isInstanceOf(CompraPedidoException.class);
+    }
+
+    @Test
+    void aprobarUnPendienteLoDejaEnviado() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.PENDIENTE_ENVIO)
+                .build();
+        when(repository.findById(5)).thenReturn(Optional.of(pedido));
+        when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+        AprobarCompraPedidoUseCaseImpl useCase = new AprobarCompraPedidoUseCaseImpl(repository);
+
+        CompraPedido aprobado = useCase.aprobar(5, 9);
+
+        assertThat(aprobado.getEstado()).isEqualTo(CompraPedidoEstado.ENVIADO);
+        assertThat(aprobado.getAutorizanteId()).isEqualTo(9);
+    }
+
+    @Test
+    void rechazarUnPedidoInexistenteFalla() {
+        when(repository.findById(99)).thenReturn(Optional.empty());
+        RechazarCompraPedidoUseCaseImpl useCase = new RechazarCompraPedidoUseCaseImpl(repository);
+
+        assertThatThrownBy(() -> useCase.rechazar(99, 1, "motivo")).isInstanceOf(CompraPedidoException.class);
+    }
+
+    @Test
+    void rechazarUnPendienteLoDejaRechazado() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.PENDIENTE_ENVIO)
+                .build();
+        when(repository.findById(5)).thenReturn(Optional.of(pedido));
+        when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+        RechazarCompraPedidoUseCaseImpl useCase = new RechazarCompraPedidoUseCaseImpl(repository);
+
+        CompraPedido rechazado = useCase.rechazar(5, 9, "Falta cotización");
+
+        assertThat(rechazado.getEstado()).isEqualTo(CompraPedidoEstado.RECHAZADO);
+        assertThat(rechazado.getRechazoMotivo()).isEqualTo("Falta cotización");
+    }
+
+    @Test
+    void descartarUnPedidoInexistenteFalla() {
+        when(repository.findById(99)).thenReturn(Optional.empty());
+        DescartarCompraPedidoUseCaseImpl useCase = new DescartarCompraPedidoUseCaseImpl(repository);
+
+        assertThatThrownBy(() -> useCase.descartar(99, "motivo")).isInstanceOf(CompraPedidoException.class);
+    }
+
+    @Test
+    void descartarUnBorradorLoDejaDescartado() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.BORRADOR)
+                .build();
+        when(repository.findById(5)).thenReturn(Optional.of(pedido));
+        when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+        DescartarCompraPedidoUseCaseImpl useCase = new DescartarCompraPedidoUseCaseImpl(repository);
+
+        CompraPedido descartado = useCase.descartar(5, "No hace falta");
+
+        assertThat(descartado.getEstado()).isEqualTo(CompraPedidoEstado.DESCARTADO);
     }
 
 }

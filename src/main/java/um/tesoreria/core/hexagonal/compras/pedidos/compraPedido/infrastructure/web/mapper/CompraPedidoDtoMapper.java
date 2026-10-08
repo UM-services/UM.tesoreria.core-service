@@ -46,6 +46,9 @@ public class CompraPedidoDtoMapper {
                 .montoConocido(domain.getMontoConocido())
                 .montoEstimado(domain.getMontoEstimado())
                 .fuenteEstimacion(domain.getFuenteEstimacion())
+                .fechaEnvio(domain.getFechaEnvio())
+                .rechazoMotivo(domain.getRechazoMotivo())
+                .descartadoMotivo(domain.getDescartadoMotivo())
                 .build();
     }
 

@@ -11,9 +11,12 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.application.serv
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedido;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedidoCriteria;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedidoEstado;
-import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.AutorizarCompraPedidoRequest;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.AprobarCompraPedidoRequest;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.CompraPedidoCriteriaRequest;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.CompraPedidoRequest;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.CompraPedidoResponse;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.DescartarCompraPedidoRequest;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.RechazarCompraPedidoRequest;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.mapper.CompraPedidoDtoMapper;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.application.service.CompraPedidoItemService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.domain.model.CompraPedidoItem;
@@ -43,11 +46,12 @@ public class CompraPedidoController {
             @RequestParam(required = false) CompraPedidoEstado estado,
             @RequestParam(required = false) Integer solicitanteId,
             @RequestParam(required = false) Integer dependenciaId,
+            @RequestParam(required = false) List<Integer> dependenciaIds,
             @RequestParam(required = false) Integer ejercicioId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaDesde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaHasta) {
         CompraPedidoCriteria criteria = new CompraPedidoCriteria(estado, solicitanteId, dependenciaId,
-                ejercicioId, fechaDesde, fechaHasta);
+                ejercicioId, fechaDesde, fechaHasta, dependenciaIds);
         List<CompraPedidoResponse> responses = compraPedidoService.listar(criteria).stream()
                 .map(this::toResponse)
                 .toList();
@@ -59,6 +63,17 @@ public class CompraPedidoController {
         return compraPedidoService.getById(compraPedidoId)
                 .map(pedido -> ResponseEntity.ok(toResponse(pedido)))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido de compra no encontrado"));
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<List<CompraPedidoResponse>> search(@RequestBody CompraPedidoCriteriaRequest request) {
+        CompraPedidoCriteria criteria = new CompraPedidoCriteria(request.getEstado(), request.getSolicitanteId(),
+                request.getDependenciaId(), request.getEjercicioId(), request.getFechaDesde(),
+                request.getFechaHasta(), request.getDependenciaIds());
+        List<CompraPedidoResponse> responses = compraPedidoService.listar(criteria).stream()
+                .map(this::toResponse)
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/numero/{numero}")
@@ -94,9 +109,10 @@ public class CompraPedidoController {
     }
 
     @PostMapping("/{compraPedidoId}/enviar")
-    public ResponseEntity<CompraPedidoResponse> enviar(@PathVariable Integer compraPedidoId) {
+    public ResponseEntity<CompraPedidoResponse> enviar(@PathVariable Integer compraPedidoId,
+                                                       @RequestParam(required = false) Integer usuarioId) {
         try {
-            return ResponseEntity.ok(toResponse(compraPedidoService.enviar(compraPedidoId)));
+            return ResponseEntity.ok(toResponse(compraPedidoService.enviar(compraPedidoId, usuarioId)));
         } catch (CompraPedidoException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalStateException e) {
@@ -104,12 +120,12 @@ public class CompraPedidoController {
         }
     }
 
-    @PostMapping("/{compraPedidoId}/autorizar")
-    public ResponseEntity<CompraPedidoResponse> autorizar(@PathVariable Integer compraPedidoId,
-                                                          @RequestBody AutorizarCompraPedidoRequest request) {
+    @PostMapping("/{compraPedidoId}/aprobar")
+    public ResponseEntity<CompraPedidoResponse> aprobar(@PathVariable Integer compraPedidoId,
+                                                        @RequestBody AprobarCompraPedidoRequest request) {
         try {
             return ResponseEntity.ok(toResponse(
-                    compraPedidoService.autorizar(compraPedidoId, request.getAutorizanteId())));
+                    compraPedidoService.aprobar(compraPedidoId, request.getAutorizanteId())));
         } catch (CompraPedidoException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalStateException e) {
@@ -118,9 +134,24 @@ public class CompraPedidoController {
     }
 
     @PostMapping("/{compraPedidoId}/rechazar")
-    public ResponseEntity<CompraPedidoResponse> rechazar(@PathVariable Integer compraPedidoId) {
+    public ResponseEntity<CompraPedidoResponse> rechazar(@PathVariable Integer compraPedidoId,
+                                                         @RequestBody RechazarCompraPedidoRequest request) {
         try {
-            return ResponseEntity.ok(toResponse(compraPedidoService.rechazar(compraPedidoId)));
+            return ResponseEntity.ok(toResponse(compraPedidoService.rechazar(
+                    compraPedidoId, request.getAutorizanteId(), request.getMotivo())));
+        } catch (CompraPedidoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{compraPedidoId}/descartar")
+    public ResponseEntity<CompraPedidoResponse> descartar(@PathVariable Integer compraPedidoId,
+                                                          @RequestBody DescartarCompraPedidoRequest request) {
+        try {
+            return ResponseEntity.ok(toResponse(compraPedidoService.descartar(
+                    compraPedidoId, request.getUsuarioId(), request.getMotivo())));
         } catch (CompraPedidoException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalStateException e) {
