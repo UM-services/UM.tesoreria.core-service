@@ -25,7 +25,10 @@ public class CompraPedidoMapper {
                 .fechaRequerida(domain.getFechaRequerida())
                 .urgenciaMotivo(domain.getUrgenciaMotivo())
                 .montoEstimado(domain.getMontoEstimado())
-                .fuenteEstimacion(domain.getFuenteEstimacion());
+                .fuenteEstimacion(domain.getFuenteEstimacion())
+                .fechaEnvio(domain.getFechaEnvio())
+                .rechazoMotivo(domain.getRechazoMotivo())
+                .descartadoMotivo(domain.getDescartadoMotivo());
         if (domain.getUrgente() != null) builder.urgente(domain.getUrgente());
         if (domain.getMontoConocido() != null) builder.montoConocido(domain.getMontoConocido());
         return builder.build();
@@ -51,6 +54,9 @@ public class CompraPedidoMapper {
                 .montoConocido(entity.getMontoConocido())
                 .montoEstimado(entity.getMontoEstimado())
                 .fuenteEstimacion(entity.getFuenteEstimacion())
+                .fechaEnvio(entity.getFechaEnvio())
+                .rechazoMotivo(entity.getRechazoMotivo())
+                .descartadoMotivo(entity.getDescartadoMotivo())
                 .build();
     }
 
