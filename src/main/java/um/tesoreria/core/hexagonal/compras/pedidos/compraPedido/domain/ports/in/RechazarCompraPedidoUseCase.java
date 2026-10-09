@@ -4,6 +4,6 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.Com
 
 public interface RechazarCompraPedidoUseCase {
 
-    CompraPedido rechazar(Integer compraPedidoId);
+    CompraPedido rechazar(Integer compraPedidoId, Integer autorizanteId, String motivo);
 
 }

@@ -21,20 +21,26 @@ class CompraPedidoTest {
                 .build();
     }
 
+    private CompraPedido pendienteDeEnvio() {
+        CompraPedido pedido = borrador();
+        pedido.enviar("PC-2026-000001");
+        return pedido;
+    }
+
     @Test
     void unBorradorEsEditable() {
         assertThat(borrador().esEditable()).isTrue();
     }
 
     @Test
-    void enviarFijaElNumeroYPasaAAutorizacion() {
+    void enviarFijaElNumeroYPasaAPendienteDeEnvio() {
         CompraPedido pedido = borrador();
 
         pedido.enviar("PC-2026-000001");
 
         assertThat(pedido.getNumero()).isEqualTo("PC-2026-000001");
-        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_AUTORIZACION);
-        assertThat(pedido.esEditable()).isTrue();
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_ENVIO);
+        assertThat(pedido.esEditable()).isFalse();
     }
 
     @Test
@@ -49,47 +55,97 @@ class CompraPedidoTest {
 
     @Test
     void noSePuedeEnviarDosVeces() {
-        CompraPedido pedido = borrador();
-        pedido.enviar("PC-2026-000001");
+        CompraPedido pedido = pendienteDeEnvio();
 
         assertThatThrownBy(() -> pedido.enviar("PC-2026-000003"))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    void autorizarGuardaElAutorizanteYBloqueaLaEdicion() {
-        CompraPedido pedido = borrador();
-        pedido.enviar("PC-2026-000001");
+    void enviarRequiereNumero() {
+        assertThatThrownBy(() -> borrador().enviar(" ")).isInstanceOf(IllegalStateException.class);
+    }
 
-        pedido.autorizar(99);
+    @Test
+    void aprobarGuardaElAutorizanteYFechaYBloqueaLaEdicion() {
+        CompraPedido pedido = pendienteDeEnvio();
+
+        pedido.aprobar(99);
 
         assertThat(pedido.getAutorizanteId()).isEqualTo(99);
-        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.AUTORIZADA);
+        assertThat(pedido.getFechaEnvio()).isNotNull();
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.ENVIADO);
         assertThat(pedido.esEditable()).isFalse();
     }
 
     @Test
-    void noSePuedeAutorizarUnBorrador() {
-        assertThatThrownBy(() -> borrador().autorizar(99)).isInstanceOf(IllegalStateException.class);
+    void noSePuedeAprobarUnBorrador() {
+        assertThatThrownBy(() -> borrador().aprobar(99)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    void noSePuedeAutorizarSinAutorizante() {
-        CompraPedido pedido = borrador();
-        pedido.enviar("PC-2026-000001");
+    void noSePuedeAprobarSinAutorizante() {
+        CompraPedido pedido = pendienteDeEnvio();
 
-        assertThatThrownBy(() -> pedido.autorizar(null)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> pedido.aprobar(null)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
-    void rechazarUnPendienteLoDejaRechazado() {
-        CompraPedido pedido = borrador();
+    void rechazarUnPendienteLoDejaEditableYGuardaElMotivo() {
+        CompraPedido pedido = pendienteDeEnvio();
+
+        pedido.rechazar(99, "Falta la cotización");
+
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.RECHAZADO);
+        assertThat(pedido.getAutorizanteId()).isEqualTo(99);
+        assertThat(pedido.getRechazoMotivo()).isEqualTo("Falta la cotización");
+        assertThat(pedido.esEditable()).isTrue();
+    }
+
+    @Test
+    void rechazarRequiereMotivo() {
+        CompraPedido pedido = pendienteDeEnvio();
+
+        assertThatThrownBy(() -> pedido.rechazar(99, null)).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void unRechazadoPuedeVolverAPresentarseYLimpiaElMotivo() {
+        CompraPedido pedido = pendienteDeEnvio();
+        pedido.rechazar(99, "Falta la cotización");
+
         pedido.enviar("PC-2026-000001");
 
-        pedido.rechazar();
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_ENVIO);
+        assertThat(pedido.getRechazoMotivo()).isNull();
+    }
 
-        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.RECHAZADA);
+    @Test
+    void descartarUnBorradorLoDejaDescartado() {
+        CompraPedido pedido = borrador();
+
+        pedido.descartar("Ya no hace falta");
+
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.DESCARTADO);
+        assertThat(pedido.getDescartadoMotivo()).isEqualTo("Ya no hace falta");
         assertThat(pedido.esEditable()).isFalse();
+    }
+
+    @Test
+    void descartarUnRechazadoLoDejaDescartado() {
+        CompraPedido pedido = pendienteDeEnvio();
+        pedido.rechazar(99, "Fuera de alcance");
+
+        pedido.descartar("Se descarta");
+
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.DESCARTADO);
+    }
+
+    @Test
+    void noSePuedeDescartarUnPendienteDeEnvio() {
+        CompraPedido pedido = pendienteDeEnvio();
+
+        assertThatThrownBy(() -> pedido.descartar("motivo")).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -108,10 +164,9 @@ class CompraPedidoTest {
     }
 
     @Test
-    void noSePuedeEditarDespuesDeLaPrimeraAutorizacion() {
-        CompraPedido pedido = borrador();
-        pedido.enviar("PC-2026-000001");
-        pedido.autorizar(99);
+    void noSePuedeEditarDespuesDelEnvioACompras() {
+        CompraPedido pedido = pendienteDeEnvio();
+        pedido.aprobar(99);
 
         assertThatThrownBy(() -> pedido.actualizarDatos(
                 CompraPedido.builder().necesidad("otra").build()))

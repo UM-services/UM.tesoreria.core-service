@@ -1,13 +1,13 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 7.0.0** (actualizada: 2026-10-07)
+**Versión actual del servicio: 8.0.0** (actualizada: 2026-10-08)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
 ## Diagramas de Arquitectura
 - `architecture.mmd`: Arquitectura general (controladores, servicios, repositorios, entidades).
 - `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado.
-- `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v7.0.0 (validación, baja segura con referencias, historial #404 y puertos de otros slices).
+- `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v8.0.0 (validación, baja segura con referencias, historial #404 y puertos de otros slices).
 - `hexagonal-comprobante.mmd`: Arquitectura hexagonal del módulo Comprobante (tipos de comprobantes AFIP) - v3.36.0 (nuevo módulo, 6 casos de uso).
 - `hexagonal-cuentaMovimiento.mmd`: Arquitectura hexagonal del módulo CuentaMovimiento (asientos contables) - v3.36.0 (nuevo módulo, 11 casos de uso).
 - `hexagonal-proveedorMovimiento.mmd`: Arquitectura hexagonal del módulo ProveedorMovimiento (movimientos de proveedores) - v3.36.0 (nuevo módulo, 13 casos de uso).
@@ -19,8 +19,8 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores) - v3.36.0 (reubicado bajo `compras/`).
 - `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta (gestión de cuentas contables) - v3.8.0.
 - `hexagonal-mercadopago-context-history.mmd`: Historial de contexto de MercadoPago.
-- `hexagonal-ubicacion.mmd`: Arquitectura hexagonal del módulo Ubicacion (gestión de ubicaciones) - v7.0.0 (nuevo puerto público `GetUbicacionByIdUseCase`).
-- `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v7.0.0 (asignación idempotente, borrado de vínculos en la baja del artículo, historial #404).
+- `hexagonal-ubicacion.mmd`: Arquitectura hexagonal del módulo Ubicacion (gestión de ubicaciones) - v8.0.0 (nuevo puerto público `GetUbicacionByIdUseCase`).
+- `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v8.0.0 (asignación idempotente, borrado de vínculos en la baja del artículo, historial #404).
 - `hexagonal-dependencia.mmd`: Arquitectura hexagonal del módulo Dependencia (gestión de dependencias) - v3.17.0.
 - `hexagonal-facturaPendiente.mmd`: Arquitectura hexagonal del módulo FacturaPendiente (gestión de facturas pendientes) - v3.36.0 (reubicado bajo `compras/`).
 - `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.50.0 (caso de uso de responsable académica).
@@ -56,9 +56,11 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-usuarioRol.mmd`: Arquitectura hexagonal del módulo UsuarioRol (roles del usuario) - v6.3.0 (nuevo slice: `GET /user/{userId}`, `POST /` idempotente y `DELETE /user/{userId}/rol/{rolId}`).
 - `hexagonal-usuarioPermiso.mmd`: Arquitectura hexagonal del módulo UsuarioPermiso (override individual por usuario) - v6.3.0 (nuevo slice: `GET /user/{userId}`, `PUT /user/{userId}/permiso/{permisoId}` con `{ otorgado: 1|0 }` y `DELETE`).
 - `hexagonal-permisoEfectivo.mmd`: Arquitectura hexagonal del módulo PermisoEfectivo (bundle efectivo del usuario) - v6.3.0 (nuevo slice `GET /api/tesoreria/core/permisoEfectivo/usuario/{userId}`, composición de puertos de entrada de los slices de permisos + puente con los flags legacy de `usuario`).
-- `hexagonal-compraPedido.mmd`: Arquitectura hexagonal del módulo CompraPedido (pedido de compra: ciclo de vida y correlativo al enviar) - v6.3.0 (nuevo slice bajo `compras/pedidos/`, ruta `/api/tesoreria/core/compraPedido`).
+- `hexagonal-compraPedido.mmd`: Arquitectura hexagonal del módulo CompraPedido (pedido de compra: circuito de presentación/aprobación/rechazo/descarte, correlativo al presentar y línea de tiempo) - v7.0.0 (nuevo en `6.3.0`; en `7.0.0` renombra `autorizar`→`aprobar`, agrega `descartar`, `POST /search`/`dependenciaIds`, campos `fechaEnvio`/`rechazoMotivo`/`descartadoMotivo` y los estados `PENDIENTE_ENVIO`/`ENVIADO`/`RECHAZADO`/`DESCARTADO`).
 - `hexagonal-compraPedidoItem.mmd`: Arquitectura hexagonal del módulo CompraPedidoItem (detalle del pedido, alta/edición a través del pedido) - v6.3.0 (nuevo slice, `GET /api/tesoreria/core/compraPedidoItem/pedido/{compraPedidoId}`).
 - `hexagonal-compraPedidoSecuencia.mmd`: Arquitectura hexagonal del módulo CompraPedidoSecuencia (correlativo anual atómico con `LAST_INSERT_ID`) - v6.3.0 (nuevo slice interno, sin REST).
+- `hexagonal-compraPedidoAutorizante.mmd`: Arquitectura hexagonal del módulo CompraPedidoAutorizante (dependencias habilitadas por usuario autorizante de envío, tabla puente `compra_pedido_autorizante_dependencia` por SQL directo) - v7.0.0 (nuevo slice: `GET /dependencias/{autorizanteId}`, `POST` idempotente y `DELETE /{autorizanteId}/{dependenciaId}` en `/api/tesoreria/core/compraPedidoAutorizante`).
+- `hexagonal-compraPedidoHistorial.mmd`: Arquitectura hexagonal del módulo CompraPedidoHistorial (línea de tiempo de estados del pedido, estado como texto para no acoplar slices) - v7.0.0 (nuevo slice: `GET /api/tesoreria/core/compraPedidoHistorial/{compraPedidoId}`; el pedido registra el evento en la misma transacción).
 - `hexagonal-persona.mmd`: Arquitectura hexagonal del módulo Persona bajo `personas` - v6.1.0 (sugerencias de personas con chequeras por usuario, v4.6.0; nuevo puerto de entrada `GetPersonasByNumeroUseCase` y método `findAllByPersonaId` en `PersonaRepository`/`JpaPersonaRepositoryAdapter` para consultar todas las filas de un número de documento sin exigir el tipo).
 - `hexagonal-chequeraPago.mmd`: Arquitectura hexagonal del módulo ChequeraPago (gestión de pagos de chequeras con 12 casos de uso) - v3.40.0 (enriquecimiento con asociaciones TipoPago, Producto, ChequeraCuota).
 - `hexagonal-chequeraTotal.mmd`: Arquitectura hexagonal del módulo ChequeraTotal (totales de chequeras con 5 casos de uso) - v3.37.0 (nuevo módulo).

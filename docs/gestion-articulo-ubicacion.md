@@ -1,7 +1,7 @@
 # Gastos: artículo, ubicación y baja segura (#405)
 
 Guía para consumidores (web Angular, VB6 mientras conviva) de las escrituras de `articulo` y `ubicacionArticulo`
-desde la versión **7.0.0**. Sub-issue de la migración de Gestión VB6 (#403).
+desde la versión **8.0.0**. Sub-issue de la migración de Gestión VB6 (#403).
 
 Los ejemplos se ejecutaron contra la base de desarrollo el 2026-10-07 con el id reservado `999001` (los datos se
 borraron después). Las URLs canónicas llevan barra final en las altas: `POST /articulo/` y `POST /ubicacionArticulo/`.
@@ -84,7 +84,7 @@ HTTP 400
 ## Edición: `PUT /articulo/{id}`
 
 Un campo nulo o ausente significa **sin cambios**; `0` explícito se aplica. El id del cuerpo se ignora. `numeroCuenta`
-no se puede vaciar por PUT (antes de 7.0.0, `numeroCuenta: null` le quitaba la cuenta; hoy no hay forma de hacerlo por
+no se puede vaciar por PUT (antes de 8.0.0, `numeroCuenta: null` le quitaba la cuenta; hoy no hay forma de hacerlo por
 la API). Gana la última escritura (no hay control de versión).
 
 ```
@@ -145,7 +145,7 @@ HTTP 200
 ## Baja: `DELETE /articulo/{id}`
 
 Solo se borra un artículo que **ninguna entrega ni línea de factura usa**. Se cuentan `entrega_detalle` y
-`movprov_detallefactura` (esta última no tiene FK: antes de 7.0.0 la baja pasaba y dejaba líneas de factura
+`movprov_detallefactura` (esta última no tiene FK: antes de 8.0.0 la baja pasaba y dejaba líneas de factura
 huérfanas). Si está en uso responde 409 con cada tabla y su cantidad, y no borra nada:
 
 ```

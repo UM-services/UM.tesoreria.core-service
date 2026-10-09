@@ -127,6 +127,8 @@ const diagrams = [
   { id: 'hexagonal-compraPedido', file: 'hexagonal-compraPedido.mmd', title: 'Arquitectura Hexagonal - CompraPedido' },
   { id: 'hexagonal-compraPedidoItem', file: 'hexagonal-compraPedidoItem.mmd', title: 'Arquitectura Hexagonal - CompraPedidoItem' },
   { id: 'hexagonal-compraPedidoSecuencia', file: 'hexagonal-compraPedidoSecuencia.mmd', title: 'Arquitectura Hexagonal - CompraPedidoSecuencia' },
+  { id: 'hexagonal-compraPedidoAutorizante', file: 'hexagonal-compraPedidoAutorizante.mmd', title: 'Arquitectura Hexagonal - CompraPedidoAutorizante' },
+  { id: 'hexagonal-compraPedidoHistorial', file: 'hexagonal-compraPedidoHistorial.mmd', title: 'Arquitectura Hexagonal - CompraPedidoHistorial' },
   { id: 'hexagonal-setup', file: 'hexagonal-setup.mmd', title: 'Arquitectura Hexagonal - Setup' },
   { id: 'hexagonal-deudaExamen', file: 'hexagonal-deudaExamen.mmd', title: 'Arquitectura Hexagonal - DeudaExamen' },
   { id: 'hexagonal-chequeraPago', file: 'hexagonal-chequeraPago.mmd', title: 'Arquitectura Hexagonal - ChequeraPago' },

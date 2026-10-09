@@ -7,8 +7,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AutorizarCompraPedidoRequest {
+public class RechazarCompraPedidoRequest {
 
     private Integer autorizanteId;
+    private String motivo;
 
 }
