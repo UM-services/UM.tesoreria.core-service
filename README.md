@@ -4,7 +4,20 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 7.0.0**
+**Versión actual (SemVer): 9.0.0**
+
+## Novedades 9.0.0 (verificado en código)
+- **breaking(compras)**: Se eliminan los `@RequestParam` de los endpoints del proceso de compras: lo requerido pasa a `@PathVariable` y la paginación/opcionales a cuerpo de `POST`. `articulo` `GET /articulo/tipo/{tipo}/page?page&size` → `POST /articulo/tipo/{tipo}/page` (cuerpo `PageRequest`); `proveedor` `GET /proveedor/page?page&size` → `POST /proveedor/page`; `compraPedido` `GET /compraPedido?<filtros>` → `GET /compraPedido` sin parámetros (los filtros viven en `POST /compraPedido/search`) y `POST /{id}/enviar?usuarioId=` → cuerpo `EnviarCompraPedidoRequest`. Además `aprobar` deja el pedido en `EN_REVISION_COMPRAS` (antes `ENVIADO`, conservado como deprecado para leer datos previos). Cambios incompatibles de API pública.
+- **feat(compras/pedidos)**: Autorización previa por monto. Nuevos slices `compraReferencia` (`GET`/`PUT /api/tesoreria/core/compraReferencia/{ejercicioId}`), `compraAutoridadPerfil` (CRUD en `/api/tesoreria/core/compraAutoridadPerfil`, `multiplico` nulo = ilimitado) y `compraAutoridadUsuario` (`/api/tesoreria/core/compraAutoridadUsuario`, con `GET /limite/{usuarioId}/{ejercicioId}` que resuelve `MAX(multiplico) × referencia`). Nuevas operaciones de `compraPedido`: `POST /{id}/estimar`, `POST /{id}/autorizarPresupuesto` y `POST /{id}/rechazarPresupuesto`, con los estados `EN_REVISION_COMPRAS`/`PENDIENTE_AUTORIZACION_PRESUPUESTO`/`AUTORIZADO_PRESUPUESTO`. El límite por monto **no** se valida en `core`: lo resuelve la fachada `tesoreria-compras` (fail-closed) contra el perfil de autoridad.
+- **feat(usuarios/usuario, auth)**: Administración de usuarios: `GET /usuario/searchTodos[/{texto}]` (padrón con inactivos), `GET /usuario/usuario/id/{userId}`, `PUT /usuario/usuario/{userId}/configuracion` (datos y flags sin tocar login ni clave), `PUT /usuario/usuario/{userId}/activo/{valor}` (habilitar/deshabilitar) y `PUT /usuario/usuario/{userId}/password` (reset de clave de administración). Cambio de clave forzado con la columna `debe_cambiar_clave`: el reset la marca en 1, `UsuarioResponse`/`LoginResponse` la exponen y `change-password` la limpia.
+- **docs**: Scripts `docs/sql/V406__compras_gastos_proveedores.sql` (claves de permisos de Gastos/Proveedores), `V407__compras_presupuesto.sql` (DDL de las tres tablas + seed de `compras.estimar`/`compras.presupuesto.autorizar` + migración `ENVIADO → EN_REVISION_COMPRAS` + ensanche de `estado`) y `V408__usuario_debe_cambiar_clave.sql`; nuevos diagramas `hexagonal-compraReferencia`, `hexagonal-compraAutoridadPerfil` y `hexagonal-compraAutoridadUsuario`, y `hexagonal-compraPedido`/`hexagonal-usuario` a v9.0.0.
+
+> Basado en `git diff --cached` (133 archivos, +4247/−35) y el código real de `ArticuloController`, `ProveedorController`, `CompraPedidoController`/`CompraPedidoService`/`CompraPedidoEstado`, los slices `compraReferencia`/`compraAutoridadPerfil`/`compraAutoridadUsuario` y los cambios de `debeCambiarClave`. El cambio de método/URL/parámetros y el nuevo estado de `aprobar` son incompatibles con la API pública: incremento **major** (`8.0.0` → `9.0.0`, `pom.xml`). Sin dependencias nuevas. **Requiere** aplicar `V406`/`V407`/`V408` (tablas `compra_referencia`/`compra_autoridad_perfil`/`compra_autoridad_usuario`, columna `usuario.debe_cambiar_clave` y ensanche de `estado` a `varchar(100)`) antes de desplegar. Verificación sin compilación por indicación del usuario.
+
+## Novedades 8.0.0 (verificado en código)
+- **breaking(compras/articulo, ubicacionArticulo)**: Gastos: ubicación y baja segura (#405, sub-issue de #403). Las escrituras de artículo y de su asignación de ubicación y cuenta validan en Java y responden errores `ProblemDetail` con `codigo` y `campo`. El alta nunca sobrescribe (id existente → `409`), el `PUT` trata los campos nulos como "sin cambios", y `DELETE /articulo/{id}` responde `409` con `referencias [{tabla, cantidad}]` si alguna entrega o línea de factura usa el artículo (las facturas no tienen FK) o borra el artículo con sus vínculos si está libre. Cada escritura queda en el historial #404. **Requiere la tabla `gestion_escritura_historial`** (hoy solo en desarrollo). Migración para consumidores en `CHANGELOG.md`; guía en `docs/gestion-articulo-ubicacion.md`.
+- **feat(dependencias/ubicacion)**: Nuevo puerto público `GetUbicacionByIdUseCase`.
+- **test**: `ArticuloDevDbIT` y `UbicacionArticuloDevDbIT` contra la base de desarrollo con tablas `TEMPORARY`; E2E a pedido contra dev (`GastosDevE2E` por HTTP, `GastosConcurrenciaDevE2E` con dos conexiones reales).
 
 ## Novedades 7.0.0 (verificado en código)
 - **breaking(compras/pedidos/compraPedido)**: El pedido de compra cambia de contrato público. `POST /{id}/autorizar` pasa a `POST /{id}/aprobar` (la URL vieja responde **404**), `POST /{id}/rechazar` deja de ser un `POST` sin cuerpo y exige `{ autorizanteId, motivo }`, y los estados `PENDIENTE_AUTORIZACION`/`AUTORIZADA`/`RECHAZADA`/`ANULADA` pasan a `PENDIENTE_ENVIO`/`ENVIADO`/`RECHAZADO`/`DESCARTADO`. Nuevo `POST /{id}/descartar` (`{ usuarioId, motivo }`).
@@ -1376,6 +1389,25 @@ tablas `TEMPORARY` de su sesión (la tabla del historial y una copia de `proveed
 Hibernate tiene prohibido escribir en cualquier otra tabla durante el test. Necesita que `IT_DB_USER` tenga el
 permiso `CREATE TEMPORARY TABLES`; lo más seguro es un usuario con solo `SELECT` y `CREATE TEMPORARY TABLES`, así
 ninguna escritura puede llegar a una tabla real. Sin `IT_DB_HOST` el test se saltea.
+
+`ArticuloDevDbIT` y `UbicacionArticuloDevDbIT` (#405) usan la misma técnica, con copias `TEMPORARY` de `articulos`,
+`ubicacion_articulo` y `gestion_escritura_historial`; leen de las tablas reales `plancta`, `ubicacion`,
+`entrega_detalle` y `movprov_detallefactura`.
+
+#### Pruebas E2E contra desarrollo (a pedido, escriben en tablas reales)
+
+`GastosDevE2E` (HTTP contra la app levantada) y `GastosConcurrenciaDevE2E` (dos conexiones reales) escriben en
+`articulos`, `ubicacion_articulo` y `gestion_escritura_historial` de la base de desarrollo, solo con ids reservados
+(999001 a 999404). Al terminar, `DevDbReservas` borra lo propio, restaura los AUTO_INCREMENT y exige que las tablas
+queden idénticas (CHECKSUM). No corren solas: hace falta `E2E_DEV_ESCRITURA=si`.
+
+```bash
+set -a; . ./.env; set +a
+E2E_DEV_ESCRITURA=si E2E_BASE_URL=http://localhost:18092 mvn -Pit -Dit.test='*IT,*E2E' verify
+```
+
+Si una corrida se interrumpe, revisar a mano los AUTO_INCREMENT de esas tres tablas: un contador cerca de 999xxx
+afectaría las altas de VB6.
 
 ## Uso
 

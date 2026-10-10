@@ -26,6 +26,7 @@ public class UsuarioAuthMapper {
                 .activo(entity.getActivo())
                 .administrador(entity.getAdministrador())
                 .usuarioExterno(entity.getUsuarioExterno())
+                .debeCambiarClave(entity.getDebeCambiarClave())
                 .build();
     }
 }

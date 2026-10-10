@@ -92,8 +92,8 @@ public class CompraPedido {
     }
 
     /**
-     * Aprueba el envío a compras: fija el autorizante, la fecha de envío y pasa a
-     * {@link CompraPedidoEstado#ENVIADO}.
+     * Aprueba el envío: fija el autorizante, la fecha de envío y deja el pedido a cargo del
+     * dpto. de compras para su revisión ({@link CompraPedidoEstado#EN_REVISION_COMPRAS}).
      */
     public void aprobar(Integer autorizanteId) {
         if (estado != CompraPedidoEstado.PENDIENTE_ENVIO) {
@@ -104,7 +104,7 @@ public class CompraPedido {
         }
         this.autorizanteId = autorizanteId;
         this.fechaEnvio = LocalDateTime.now();
-        this.estado = CompraPedidoEstado.ENVIADO;
+        this.estado = CompraPedidoEstado.EN_REVISION_COMPRAS;
     }
 
     /**
@@ -133,6 +133,53 @@ public class CompraPedido {
         }
         this.descartadoMotivo = motivo;
         this.estado = CompraPedidoEstado.DESCARTADO;
+    }
+
+    /**
+     * Revisión del dpto. de compras: carga/confirma el valor estimado y habilita la autorización
+     * del proceso de pedido de presupuesto ({@code -> PENDIENTE_AUTORIZACION_PRESUPUESTO}).
+     */
+    public void estimar(BigDecimal monto, String fuente) {
+        if (estado != CompraPedidoEstado.EN_REVISION_COMPRAS) {
+            throw new IllegalStateException("El pedido no está en revisión de compras (estado actual: " + estado + ")");
+        }
+        if (monto == null || monto.signum() <= 0) {
+            throw new IllegalStateException("El valor estimado debe ser mayor a cero");
+        }
+        this.montoEstimado = monto;
+        if (fuente != null) {
+            this.fuenteEstimacion = fuente;
+        }
+        this.montoConocido = Boolean.TRUE;
+        this.estado = CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO;
+    }
+
+    /**
+     * Autoriza el inicio del proceso de pedido de presupuesto. El límite por monto no se valida
+     * acá: lo resuelve la fachada contra el perfil de autoridad del usuario.
+     */
+    public void autorizarPresupuesto() {
+        if (estado != CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO) {
+            throw new IllegalStateException(
+                    "El pedido no está pendiente de autorización de presupuesto (estado actual: " + estado + ")");
+        }
+        this.estado = CompraPedidoEstado.AUTORIZADO_PRESUPUESTO;
+    }
+
+    /**
+     * Rechaza la autorización de presupuesto: el pedido vuelve al solicitante. El motivo es
+     * obligatorio.
+     */
+    public void rechazarPresupuesto(String motivo) {
+        if (estado != CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO) {
+            throw new IllegalStateException(
+                    "El pedido no está pendiente de autorización de presupuesto (estado actual: " + estado + ")");
+        }
+        if (motivo == null || motivo.isBlank()) {
+            throw new IllegalStateException("El rechazo requiere un motivo");
+        }
+        this.rechazoMotivo = motivo;
+        this.estado = CompraPedidoEstado.RECHAZADO;
     }
 
 }

@@ -1,17 +1,19 @@
 ---
-title: Arquitectura Hexagonal - Módulo Ubicacion (v3.14.0)
+title: Arquitectura Hexagonal - Módulo Ubicacion (v8.0.0)
 ---
 
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
         U[Ubicacion<br/>Entidad de Dominio]
         UR[UbicacionRepository<br/>Puerto de Salida]
+        GI[GetUbicacionByIdUseCase<br/>Puerto de Entrada público]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
         US[UbicacionService<br/>Servicio de Aplicación]
         GA[GetAllUbicacionesUseCaseImpl]
         GS[GetUbicacionesBySedeUseCaseImpl]
+        GBI[GetUbicacionByIdUseCaseImpl]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
@@ -19,6 +21,10 @@ flowchart TD
         JPA[JpaUbicacionRepositoryAdapter<br/>Adaptador JPA]
         ENT[UbicacionEntity<br/>Entidad JPA]
         M[UbicacionMapper<br/>Mapper]
+    end
+
+    subgraph OtrosSlices ["Otros slices"]
+        SUA[ubicacionArticulo<br/>SaveUbicacionArticuloUseCaseImpl]
     end
 
     subgraph Externo ["Externo (External)"]
@@ -33,6 +39,9 @@ flowchart TD
     US -->|depende| GS
     GA -->|usa| UR
     GS -->|usa| UR
+    GBI -.->|implementa| GI
+    GBI -->|findById| UR
+    SUA -->|valida que exista| GI
 
     JPA -->|implementa| UR
     JPA -->|persiste| JPAR
@@ -44,6 +53,9 @@ flowchart TD
     style US fill:#fff3e0
     style GA fill:#fff3e0
     style GS fill:#fff3e0
+    style GBI fill:#fff3e0
+    style GI fill:#f3e5f5
+    style SUA fill:#fce4ec
     style UC fill:#e8f5e8
     style JPA fill:#e8f5e8
     style ENT fill:#e8f5e8

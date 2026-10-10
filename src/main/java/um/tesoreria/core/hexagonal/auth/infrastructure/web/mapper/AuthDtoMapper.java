@@ -32,6 +32,7 @@ public class AuthDtoMapper {
                 .modificaChequera(domain.getModificaChequera())
                 .administrador(domain.getAdministrador())
                 .usuarioExterno(domain.getUsuarioExterno())
+                .debeCambiarClave(domain.getDebeCambiarClave())
                 .build();
     }
 }

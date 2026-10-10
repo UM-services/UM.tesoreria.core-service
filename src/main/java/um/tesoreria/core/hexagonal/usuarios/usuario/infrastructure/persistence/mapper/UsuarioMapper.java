@@ -26,6 +26,7 @@ public class UsuarioMapper {
                 .activo(entity.getActivo())
                 .administrador(entity.getAdministrador())
                 .usuarioExterno(entity.getUsuarioExterno())
+                .debeCambiarClave(entity.getDebeCambiarClave())
                 .build();
     }
 
@@ -49,6 +50,7 @@ public class UsuarioMapper {
         if (domain.getActivo() != null) builder.activo(domain.getActivo());
         if (domain.getAdministrador() != null) builder.administrador(domain.getAdministrador());
         if (domain.getUsuarioExterno() != null) builder.usuarioExterno(domain.getUsuarioExterno());
+        if (domain.getDebeCambiarClave() != null) builder.debeCambiarClave(domain.getDebeCambiarClave());
 
         return builder.build();
     }
@@ -76,5 +78,6 @@ public class UsuarioMapper {
         if (domain.getActivo() != null) entity.setActivo(domain.getActivo());
         if (domain.getAdministrador() != null) entity.setAdministrador(domain.getAdministrador());
         if (domain.getUsuarioExterno() != null) entity.setUsuarioExterno(domain.getUsuarioExterno());
+        if (domain.getDebeCambiarClave() != null) entity.setDebeCambiarClave(domain.getDebeCambiarClave());
     }
 }

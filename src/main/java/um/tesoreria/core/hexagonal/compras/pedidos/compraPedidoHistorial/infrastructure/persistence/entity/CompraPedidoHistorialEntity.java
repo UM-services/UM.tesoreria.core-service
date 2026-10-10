@@ -22,7 +22,7 @@ public class CompraPedidoHistorialEntity {
     @Column(name = "compra_pedido_id", nullable = false)
     private Integer compraPedidoId;
 
-    @Column(name = "estado", nullable = false, length = 30)
+    @Column(name = "estado", nullable = false, length = 100)
     private String estado;
 
     @Column(name = "usuario_id")

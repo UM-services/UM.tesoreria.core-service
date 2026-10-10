@@ -34,4 +34,6 @@ public class Usuario {
     private Byte administrador = 0;
     @Builder.Default
     private Byte usuarioExterno = 0;
+    @Builder.Default
+    private Byte debeCambiarClave = 0;
 }
