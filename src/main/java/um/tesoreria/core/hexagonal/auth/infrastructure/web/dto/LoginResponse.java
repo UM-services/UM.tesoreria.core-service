@@ -23,5 +23,6 @@ public class LoginResponse {
     private Byte modificaChequera;
     private Byte administrador;
     private Byte usuarioExterno;
+    private Byte debeCambiarClave;
 
 }

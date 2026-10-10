@@ -1,26 +1,26 @@
 ---
-title: Arquitectura Hexagonal - Módulo CompraPedido (v7.0.0)
+title: Arquitectura Hexagonal - Módulo CompraPedido (v9.0.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
-        M["CompraPedido<br/>CompraPedidoEstado (BORRADOR/PENDIENTE_ENVIO/ENVIADO/RECHAZADO/DESCARTADO)<br/>CompraPedidoCriteria"]
-        IN["Create/Update/Enviar/Aprobar/Rechazar/Descartar<br/>GetById/GetByNumero/List<br/>UseCase (Puertos de Entrada)"]
+        M["CompraPedido<br/>CompraPedidoEstado (BORRADOR/PENDIENTE_ENVIO/EN_REVISION_COMPRAS/<br/>PENDIENTE_AUTORIZACION_PRESUPUESTO/AUTORIZADO_PRESUPUESTO/RECHAZADO/DESCARTADO;<br/>ENVIADO deprecado)<br/>CompraPedidoCriteria"]
+        IN["Create/Update/Enviar/Aprobar/Rechazar/Descartar<br/>Estimar/AutorizarPresupuesto/RechazarPresupuesto<br/>GetById/GetByNumero/List<br/>UseCase (Puertos de Entrada)"]
         OUT["CompraPedidoRepository<br/>EjercicioActualPort<br/>(Puertos de Salida)"]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
-        Svc["CompraPedidoService<br/>@Transactional (crear, actualizar, enviar, aprobar, rechazar, descartar)"]
-        UCs["*UseCaseImpl (9)"]
+        Svc["CompraPedidoService<br/>@Transactional (crear, actualizar, enviar, aprobar, rechazar,<br/>descartar, estimar, autorizarPresupuesto, rechazarPresupuesto)"]
+        UCs["*UseCaseImpl (12)"]
         Exc["CompraPedidoException"]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         Ctrl["CompraPedidoController<br/>/api/tesoreria/core/compraPedido"]
-        DTO["CompraPedidoRequest/Response<br/>CompraPedidoCriteriaRequest (POST /search)<br/>Aprobar/Rechazar/DescartarCompraPedidoRequest"]
+        DTO["CompraPedidoRequest/Response<br/>CompraPedidoCriteriaRequest (POST /search)<br/>Aprobar/Rechazar/Descartar/EnviarCompraPedidoRequest<br/>Estimar/AutorizarPresupuesto/RechazarPresupuestoRequest"]
         Map["CompraPedidoDtoMapper<br/>CompraPedidoMapper"]
         Adp["JpaCompraPedidoRepositoryAdapter"]
         Eje["EjercicioActualJdbcAdapter<br/>tabla ejercicios (SQL directo)"]
-        Ent["CompraPedidoEntity<br/>tabla compra_pedido<br/>(fecha_envio, rechazo_motivo, descartado_motivo)"]
+        Ent["CompraPedidoEntity<br/>tabla compra_pedido<br/>(estado varchar(100), fecha_envio, rechazo_motivo, descartado_motivo)"]
         Jpa["JpaCompraPedidoRepository"]
     end
 
@@ -28,6 +28,7 @@ flowchart TD
         Item["CompraPedidoItemService<br/>(detalle)"]
         Sec["CompraPedidoSecuenciaService<br/>(correlativo anual)"]
         His["CompraPedidoHistorialService<br/>(línea de tiempo)"]
+        Aut["compraAutoridadUsuario / compraReferencia<br/>(límite por monto: lo valida la fachada<br/>tesoreria-compras en fail-closed, no core)"]
     end
 
     Ctrl --> Svc
@@ -64,3 +65,4 @@ flowchart TD
     style Item fill:#fce4ec
     style Sec fill:#fce4ec
     style His fill:#fce4ec
+    style Aut fill:#fce4ec

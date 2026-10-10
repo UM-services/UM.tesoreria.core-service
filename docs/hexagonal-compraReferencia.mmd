@@ -1,0 +1,57 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraReferencia (v9.0.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraReferencia<br/>ejercicioId, importe"]
+        IN["GetReferenciaByEjercicioUseCase<br/>UpsertReferenciaUseCase<br/>(Puertos de Entrada)"]
+        OUT["CompraReferenciaRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraReferenciaService"]
+        UCs["*UseCaseImpl (2)"]
+        Exc["CompraReferenciaException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraReferenciaController<br/>/api/tesoreria/core/compraReferencia<br/>GET/PUT /{ejercicioId}"]
+        DTO["CompraReferenciaRequest<br/>CompraReferenciaResponse"]
+        Map["CompraReferenciaDtoMapper<br/>CompraReferenciaMapper"]
+        Adp["JpaCompraReferenciaRepositoryAdapter"]
+        Ent["CompraReferenciaEntity<br/>tabla compra_referencia"]
+        Jpa["JpaCompraReferenciaRepository"]
+    end
+
+    subgraph CrossSlice ["Consumido por"]
+        Aut["CompraAutoridadUsuarioService<br/>(referencia del ejercicio para el límite)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+    Svc --> M
+    Aut --> Svc
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0
+    style Aut fill:#fce4ec

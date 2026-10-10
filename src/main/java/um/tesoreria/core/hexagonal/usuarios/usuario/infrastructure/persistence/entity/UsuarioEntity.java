@@ -56,4 +56,7 @@ public class UsuarioEntity extends Auditable {
     @Builder.Default
     private Byte usuarioExterno = 0;
 
+    @Builder.Default
+    private Byte debeCambiarClave = 0;
+
 }

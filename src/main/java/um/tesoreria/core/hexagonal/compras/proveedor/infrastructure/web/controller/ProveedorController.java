@@ -18,6 +18,7 @@ import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.web.mapper.P
 
 import java.util.List;
 import java.util.stream.Collectors;
+import um.tesoreria.core.model.PageRequest;
 import um.tesoreria.core.model.PaginatedResponse;
 
 @RestController
@@ -30,10 +31,11 @@ public class ProveedorController {
     
     
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     public ResponseEntity<PaginatedResponse<ProveedorResponse>> findPaginated(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
+            @RequestBody(required = false) PageRequest pageRequest) {
+        int page = pageRequest == null || pageRequest.page() == null ? 0 : pageRequest.page();
+        int size = pageRequest == null || pageRequest.size() == null ? 50 : pageRequest.size();
         PaginatedResponse<Proveedor> result = proveedorService.getPaginated(page, size);
         List<ProveedorResponse> responses = result.getData().stream()
                 .map(proveedorDtoMapper::toResponse)

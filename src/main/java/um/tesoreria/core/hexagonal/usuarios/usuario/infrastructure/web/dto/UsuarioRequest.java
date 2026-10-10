@@ -27,4 +27,6 @@ public class UsuarioRequest {
     private String googleMail;
     @NotNull
     private Byte activo;
+    private Byte administrador;
+    private Byte usuarioExterno;
 }

@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import um.tesoreria.core.model.PageRequest;
 import um.tesoreria.core.model.PaginatedResponse;
 
 
@@ -103,11 +104,12 @@ public class ArticuloController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/tipo/{tipo}/page")
+    @PostMapping("/tipo/{tipo}/page")
     public ResponseEntity<PaginatedResponse<ArticuloResponse>> getPaginatedByTipo(
             @PathVariable String tipo,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestBody(required = false) PageRequest pageRequest) {
+        int page = pageRequest == null || pageRequest.page() == null ? 0 : pageRequest.page();
+        int size = pageRequest == null || pageRequest.size() == null ? 20 : pageRequest.size();
             
         PaginatedResponse<Articulo> domainPage = articuloService.getPaginatedArticulosByTipo(tipo, page, size);
         

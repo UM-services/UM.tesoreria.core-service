@@ -2,6 +2,7 @@ package um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model;
 
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,7 +75,7 @@ class CompraPedidoTest {
 
         assertThat(pedido.getAutorizanteId()).isEqualTo(99);
         assertThat(pedido.getFechaEnvio()).isNotNull();
-        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.ENVIADO);
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.EN_REVISION_COMPRAS);
         assertThat(pedido.esEditable()).isFalse();
     }
 
@@ -171,6 +172,69 @@ class CompraPedidoTest {
         assertThatThrownBy(() -> pedido.actualizarDatos(
                 CompraPedido.builder().necesidad("otra").build()))
                 .isInstanceOf(IllegalStateException.class);
+    }
+
+    private CompraPedido enRevisionDeCompras() {
+        CompraPedido pedido = pendienteDeEnvio();
+        pedido.aprobar(99);
+        return pedido;
+    }
+
+    @Test
+    void estimarDesdeRevisionDeComprasCargaElMontoYHabilitaLaAutorizacion() {
+        CompraPedido pedido = enRevisionDeCompras();
+
+        pedido.estimar(new BigDecimal("4500000.00"), "Estimación de compras");
+
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO);
+        assertThat(pedido.getMontoEstimado()).isEqualByComparingTo("4500000.00");
+        assertThat(pedido.getFuenteEstimacion()).isEqualTo("Estimación de compras");
+        assertThat(pedido.getMontoConocido()).isTrue();
+    }
+
+    @Test
+    void estimarRequiereMontoPositivo() {
+        CompraPedido pedido = enRevisionDeCompras();
+
+        assertThatThrownBy(() -> pedido.estimar(null, "x")).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> pedido.estimar(BigDecimal.ZERO, "x")).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void estimarSoloDesdeRevisionDeCompras() {
+        assertThatThrownBy(() -> pendienteDeEnvio().estimar(new BigDecimal("1"), null))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void autorizarPresupuestoLoDejaAutorizado() {
+        CompraPedido pedido = enRevisionDeCompras();
+        pedido.estimar(new BigDecimal("100"), null);
+
+        pedido.autorizarPresupuesto();
+
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.AUTORIZADO_PRESUPUESTO);
+        assertThat(pedido.esEditable()).isFalse();
+    }
+
+    @Test
+    void autorizarPresupuestoRequiereEstadoPendiente() {
+        assertThatThrownBy(() -> pendienteDeEnvio().autorizarPresupuesto())
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void rechazarPresupuestoVuelveAlSolicitanteYRequiereMotivo() {
+        CompraPedido pedido = enRevisionDeCompras();
+        pedido.estimar(new BigDecimal("100"), null);
+
+        assertThatThrownBy(() -> pedido.rechazarPresupuesto(null)).isInstanceOf(IllegalStateException.class);
+
+        pedido.rechazarPresupuesto("Monto fuera de política");
+
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.RECHAZADO);
+        assertThat(pedido.getRechazoMotivo()).isEqualTo("Monto fuera de política");
+        assertThat(pedido.esEditable()).isTrue();
     }
 
 }
