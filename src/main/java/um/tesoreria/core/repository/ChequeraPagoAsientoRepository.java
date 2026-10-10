@@ -22,4 +22,7 @@ public interface ChequeraPagoAsientoRepository extends JpaRepository<ChequeraPag
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 
+	@Modifying
+	void deleteAllByChequeraPagoId(Long chequeraPagoId);
+
 }

@@ -119,6 +119,12 @@ public class JpaChequeraPagoRepositoryAdapter implements ChequeraPagoRepository 
         jpaChequeraPagoRepository.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
     }
 
+    /// //NUEVOOO///
+    @Override
+    public void deleteByChequeraPagoId(Long chequeraPagoId) {
+        jpaChequeraPagoRepository.deleteById(chequeraPagoId);
+    }
+
     @Override
     public ChequeraPago save(ChequeraPago chequeraPago) {
         ChequeraPagoEntity entity = chequeraPagoMapper.toEntity(chequeraPago);

@@ -31,6 +31,9 @@ public interface ChequeraPagoRepository {
 
     void deleteAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId);
 
+    /// NUEVOO///
+    void deleteByChequeraPagoId(Long chequeraPagoId);
+
     ChequeraPago save(ChequeraPago chequeraPago);
 
     List<ChequeraPago> saveAll(List<ChequeraPago> chequeraPagos);

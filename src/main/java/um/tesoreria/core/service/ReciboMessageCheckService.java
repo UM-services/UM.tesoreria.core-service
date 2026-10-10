@@ -8,6 +8,7 @@ import um.tesoreria.core.exception.ReciboMessageCheckException;
 import um.tesoreria.core.kotlin.repository.ReciboMessageCheckRepository;
 import um.tesoreria.core.model.ReciboMessageCheck;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -29,8 +30,22 @@ public class ReciboMessageCheckService {
         return reciboMessageCheck;
     }
 
+    /// //NUEVOOOO////
+    public List<ReciboMessageCheck> findAllByChequeraPagoId(Long chequeraPagoId) {
+        log.debug("Processing ReciboMessageCheckService.findAllByChequeraPagoId");
+        return repository.findAllByChequeraPagoId(chequeraPagoId);
+    }
+
     public ReciboMessageCheck add(ReciboMessageCheck reciboMessageCheck) {
         log.debug("Processing ReciboMessageCheckService.add");
+        reciboMessageCheck = repository.save(reciboMessageCheck);
+        logReciboMessageCheck(reciboMessageCheck);
+        return reciboMessageCheck;
+    }
+
+    /// //NUEVOOOO////
+    public ReciboMessageCheck update(ReciboMessageCheck reciboMessageCheck) {
+        log.debug("Processing ReciboMessageCheckService.update");
         reciboMessageCheck = repository.save(reciboMessageCheck);
         logReciboMessageCheck(reciboMessageCheck);
         return reciboMessageCheck;
