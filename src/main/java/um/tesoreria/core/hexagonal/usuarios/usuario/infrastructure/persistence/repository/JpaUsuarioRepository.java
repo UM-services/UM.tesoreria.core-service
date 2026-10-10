@@ -30,6 +30,11 @@ public interface JpaUsuarioRepository extends JpaRepository<UsuarioEntity, Long>
 			+ "OR LOWER(u.nombre) LIKE LOWER(CONCAT('%', :texto, '%')))")
 	List<UsuarioEntity> findUsuariosBySearch(@Param("texto") String texto);
 
+	@Query("SELECT u FROM UsuarioEntity u WHERE (:texto IS NULL "
+			+ "OR LOWER(u.login) LIKE LOWER(CONCAT('%', :texto, '%')) "
+			+ "OR LOWER(u.nombre) LIKE LOWER(CONCAT('%', :texto, '%')))")
+	List<UsuarioEntity> findAllBySearch(@Param("texto") String texto);
+
     	Optional<UsuarioEntity> findByGoogleMailAndActivo(String googleMail, Byte activo);
     
         @org.springframework.data.jpa.repository.Modifying

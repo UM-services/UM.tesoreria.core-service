@@ -36,6 +36,7 @@ class ChangePasswordUseCaseImplTest {
         usuario.setPassword(DigestUtils.sha256Hex("claveVieja123"));
         usuario.setNombre("Operador Uno");
         usuario.setActivo((byte) 1);
+        usuario.setDebeCambiarClave((byte) 1);
     }
 
     @Test
@@ -98,6 +99,8 @@ class ChangePasswordUseCaseImplTest {
         assertThat(result).isNotNull();
         assertThat(result.getPassword()).isEqualTo(newHash);
         assertThat(result.getNombre()).isEqualTo("Operador Renombrado");
+        // al cambiar su propia clave, se limpia el cambio forzado
+        assertThat(result.getDebeCambiarClave()).isEqualTo((byte) 0);
         verify(usuarioAuthRepository).updateCredentials(10L, newHash, "Operador Renombrado");
     }
 

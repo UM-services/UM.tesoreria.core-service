@@ -49,6 +49,8 @@ public class JpaUsuarioAuthRepositoryAdapter implements UsuarioAuthRepository {
         if (nombre != null) {
             managed.setNombre(nombre);
         }
+        // El usuario ya eligio su clave: se limpia el cambio forzado.
+        managed.setDebeCambiarClave((byte) 0);
         // dirty checking: el UPDATE toca solo password (y nombre si vino). El resto de las
         // columnas queda intacto por definicion, incluso cuando se agreguen nuevas.
     }

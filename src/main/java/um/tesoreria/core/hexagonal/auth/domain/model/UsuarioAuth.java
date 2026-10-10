@@ -27,6 +27,7 @@ public class UsuarioAuth {
     private Byte activo;
     private Byte administrador;
     private Byte usuarioExterno;
+    private Byte debeCambiarClave;
 
     public boolean isActivo() {
         return this.activo != null && this.activo == 1;
