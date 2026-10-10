@@ -22,6 +22,7 @@ public class GuaraniBeneficioEntity extends Auditable {
     private Integer requisito;
 
     @Builder.Default
+    @Column(precision = 5, scale = 2, nullable = false)
     private BigDecimal porcentajeBeneficio = BigDecimal.ZERO;
 
 }

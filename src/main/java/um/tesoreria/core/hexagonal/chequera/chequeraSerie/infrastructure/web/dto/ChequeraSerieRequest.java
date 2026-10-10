@@ -1,5 +1,8 @@
 package um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -31,6 +34,10 @@ public class ChequeraSerieRequest {
     private Byte retenida;
     private Long version;
     private Byte hpum;
+
+    @DecimalMin(value = "0", inclusive = true)
+    @DecimalMax(value = "1", inclusive = true)
+    @Digits(integer = 1, fraction = 2)
     private BigDecimal becaPorcentaje;
     private String becaResolucion;
     private OffsetDateTime becaFecha;
