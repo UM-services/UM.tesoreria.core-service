@@ -2,6 +2,36 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [9.0.0] - 2026-10-10
+
+### Added
+
+- feat(usuarios/usuario): Administración de usuarios para el módulo administrador del frontend. Endpoints nuevos: `GET /usuario/searchTodos` y `GET /usuario/searchTodos/{texto}` (padrón que incluye inactivos), `GET /usuario/usuario/id/{userId}`, `PUT /usuario/usuario/{userId}/configuracion` (datos y flags sin tocar login ni clave), `PUT /usuario/usuario/{userId}/activo/{valor}` (habilitar/deshabilitar) y `PUT /usuario/usuario/{userId}/password` (reset de clave de administración). Nuevos puertos/casos de uso `FindTodosUsuariosBySearchUseCase`, `UpdateUsuarioConfiguracionUseCase`, `UpdateUsuarioEstadoUseCase` y `ResetUsuarioPasswordUseCase`; método `findAllBySearch` en `UsuarioRepository`; DTOs `UsuarioConfiguracionRequest` y `UsuarioPasswordRequest`; `UsuarioRequest` acepta `administrador`/`usuarioExterno` opcionales. Aditivo; el flujo de cambio de clave forzado agrega la columna `debe_cambiar_clave` (DDL `docs/sql/V408__usuario_debe_cambiar_clave.sql`), que el reset de administración marca en 1, que devuelven `UsuarioResponse`/`LoginResponse` y que `change-password` limpia al cambiarla el propio usuario; no se toca el PUT legacy.
+
+- docs: Script `docs/sql/V406__compras_gastos_proveedores.sql` que siembra en el catálogo `permiso` las diez claves de las opciones "Gastos" y "Proveedores" del módulo de compras (`compras.gastos`; `compras.gastos.crear|editar|eliminar|imputar`; `compras.proveedores`; `compras.proveedores.crear|editar|eliminar|descargar`), idempotente con `ON DUPLICATE KEY UPDATE`. Las consume el frontend (`tesoreria-frontend`, app compras) en el menú (`ShellMenuItem.permiso`), la ruta (`permisoGuard`) y los botones (`*uiPermiso`). No hay cambios en `pom.xml` ni de contrato REST; la asignación a roles/usuarios es administración de datos y no se versiona.
+
+- feat(compras/pedidos): Autorización previa por monto (etapa de autorización del proceso de pedido de presupuesto). Nuevos slices en el subdominio `compras/pedidos`:
+  - `compraReferencia`: valor de referencia por ejercicio (`GET`/`PUT /api/tesoreria/core/compraReferencia/{ejercicioId}`).
+  - `compraAutoridadPerfil`: perfiles de autoridad con `multiplico` (nulo = ilimitado) (`/api/tesoreria/core/compraAutoridadPerfil`).
+  - `compraAutoridadUsuario`: asignación usuario ↔ perfil y **resolución del límite efectivo** `MAX(multiplico) × referencia` para un ejercicio (`/api/tesoreria/core/compraAutoridadUsuario`; `GET /limite/{usuarioId}/{ejercicioId}`).
+- feat(compras/pedidos): Estados nuevos del circuito de presupuesto (`EN_REVISION_COMPRAS`, `PENDIENTE_AUTORIZACION_PRESUPUESTO`, `AUTORIZADO_PRESUPUESTO`) y transiciones en `compraPedido`: `aprobar` deja el pedido en `EN_REVISION_COMPRAS` (antes `ENVIADO`, conservado como deprecado para leer datos previos sin migrar); nuevas operaciones `POST /{id}/estimar`, `POST /{id}/autorizarPresupuesto` y `POST /{id}/rechazarPresupuesto`. El límite por monto **no** se valida en `core`: lo resuelve la fachada `tesoreria-compras` (fail-closed) contra el perfil de autoridad.
+- docs: `docs/sql/V407__compras_presupuesto.sql` con el DDL de las tres tablas, el seed de las claves `compras.estimar` y `compras.presupuesto.autorizar`, la migración `ENVIADO → EN_REVISION_COMPRAS` y el ensanche de las columnas `estado`.
+- docs: Nuevos diagramas `docs/hexagonal-compraReferencia.mmd`, `docs/hexagonal-compraAutoridadPerfil.mmd` y `docs/hexagonal-compraAutoridadUsuario.mmd` (registrados en `docs/script.js`, `docs/index.html` y `docs/README.md`); `hexagonal-compraPedido.mmd` actualizado a v9.0.0 (estados `EN_REVISION_COMPRAS`/`PENDIENTE_AUTORIZACION_PRESUPUESTO`/`AUTORIZADO_PRESUPUESTO`, `ENVIADO` deprecado y las operaciones `estimar`/`autorizarPresupuesto`/`rechazarPresupuesto`) y `hexagonal-usuario.mmd` actualizado a v9.0.0.
+
+### Changed
+
+- breaking(compras): Se eliminan los `@RequestParam` de los endpoints del proceso de compras: lo requerido pasa a `@PathVariable` y lo opcional/paginación a cuerpo de `POST` (criterio del repo), en coordinación con `tesoreria-compras` (feign) y `tesoreria-frontend`.
+  - `articulo`: `GET /articulo/tipo/{tipo}/page?page&size` → `POST /articulo/tipo/{tipo}/page` con cuerpo `PageRequest{page,size}`.
+  - `proveedor`: `GET /proveedor/page?page&size` → `POST /proveedor/page` con cuerpo `PageRequest`.
+  - `compraPedido`: `GET /compraPedido?<filtros>` → `GET /compraPedido` sin parámetros (los filtros ya viven en `POST /compraPedido/search`); `POST /compraPedido/{id}/enviar?usuarioId=` → `POST /compraPedido/{id}/enviar` con cuerpo opcional `EnviarCompraPedidoRequest{usuarioId}`.
+  - Nuevos `um.tesoreria.core.model.PageRequest` y `...compraPedido.infrastructure.web.dto.EnviarCompraPedidoRequest`. Sin cambios de esquema.
+
+### Fixed
+
+- fix(compras/pedidos): El estado `PENDIENTE_AUTORIZACION_PRESUPUESTO` (34 caracteres) excedía `varchar(30)` de `compra_pedido.estado` y `compra_pedido_historial.estado`, y `estimar`/`autorizarPresupuesto` fallaban con `Data truncation` (500). Se ensanchan ambas columnas a `varchar(100)` (`ALTER TABLE` en `V407`) y el `length` de las entidades `CompraPedidoEntity` y `CompraPedidoHistorialEntity`.
+
+> Basado en `git diff --cached` (133 archivos, +4247/−35) y el código real de `ArticuloController`, `ProveedorController`, `CompraPedidoController`/`CompraPedidoService`/`CompraPedido`/`CompraPedidoEstado`, los slices nuevos `compraReferencia`/`compraAutoridadPerfil`/`compraAutoridadUsuario` (`CompraAutoridadUsuarioService` compone `CompraAutoridadPerfilService` + `CompraReferenciaService`, adaptador `JdbcCompraAutoridadUsuarioAdapter`), los cambios de `debeCambiarClave` en `auth`/`usuarios.usuario` y los scripts `docs/sql/V406`/`V407`/`V408`. Los cambios de método/URL/parámetros (`GET → POST` en `articulo`/`proveedor`, `GET /compraPedido` sin filtros y `enviar` por cuerpo) y el nuevo estado devuelto por `aprobar` (`EN_REVISION_COMPRAS` en lugar de `ENVIADO`) son **incompatibles con la API pública**: incremento **major** de SemVer (`8.0.0` → `9.0.0`, `pom.xml`), criterio del repo (`5.0.0`/`6.0.0`/`7.0.0`/`8.0.0`). Sin dependencias nuevas. Cambios de esquema (`ddl-auto: none`, esquema externo): tablas `compra_referencia`, `compra_autoridad_perfil`, `compra_autoridad_usuario` (`V407`), columna `usuario.debe_cambiar_clave` (`V408`) y ensanche de `compra_pedido.estado`/`compra_pedido_historial.estado` a `varchar(100)` (`V407`). Verificación **sin compilación por indicación del usuario** (no se ejecutó `mvn`). Fecha de release tomada del día en curso del entorno de trabajo (2026-10-10).
+
 ## [8.0.0] - 2026-10-08
 ### Changed
 - breaking(compras/articulo): `POST /articulo/` nunca sobrescribe: un id existente responde `409 ARTICULO_ID_DUPLICADO` y la fila queda intacta (antes `save` hacía merge, pisaba el artículo y respondía `201`). El alta usa `persist` + `flush` y traduce el error de MySQL.
