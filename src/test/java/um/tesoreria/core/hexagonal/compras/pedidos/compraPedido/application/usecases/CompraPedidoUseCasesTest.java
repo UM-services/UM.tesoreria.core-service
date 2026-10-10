@@ -11,6 +11,7 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.Eje
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.ports.out.CompraPedidoRepository;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.ports.out.EjercicioActualPort;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -126,7 +127,7 @@ class CompraPedidoUseCasesTest {
 
         CompraPedido aprobado = useCase.aprobar(5, 9);
 
-        assertThat(aprobado.getEstado()).isEqualTo(CompraPedidoEstado.ENVIADO);
+        assertThat(aprobado.getEstado()).isEqualTo(CompraPedidoEstado.EN_REVISION_COMPRAS);
         assertThat(aprobado.getAutorizanteId()).isEqualTo(9);
     }
 
@@ -175,6 +176,61 @@ class CompraPedidoUseCasesTest {
         CompraPedido descartado = useCase.descartar(5, "No hace falta");
 
         assertThat(descartado.getEstado()).isEqualTo(CompraPedidoEstado.DESCARTADO);
+    }
+
+    @Test
+    void estimarUnPedidoInexistenteFalla() {
+        when(repository.findById(99)).thenReturn(Optional.empty());
+        EstimarCompraPedidoUseCaseImpl useCase = new EstimarCompraPedidoUseCaseImpl(repository);
+
+        assertThatThrownBy(() -> useCase.estimar(99, new BigDecimal("1"), null))
+                .isInstanceOf(CompraPedidoException.class);
+    }
+
+    @Test
+    void estimarUnPedidoEnRevisionLoDejaPendienteDeAutorizacion() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.EN_REVISION_COMPRAS)
+                .build();
+        when(repository.findById(5)).thenReturn(Optional.of(pedido));
+        when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+        EstimarCompraPedidoUseCaseImpl useCase = new EstimarCompraPedidoUseCaseImpl(repository);
+
+        CompraPedido estimado = useCase.estimar(5, new BigDecimal("100"), "fuente");
+
+        assertThat(estimado.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO);
+    }
+
+    @Test
+    void autorizarPresupuestoDeUnPendienteLoDejaAutorizado() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO)
+                .build();
+        when(repository.findById(5)).thenReturn(Optional.of(pedido));
+        when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+        AutorizarPresupuestoCompraPedidoUseCaseImpl useCase = new AutorizarPresupuestoCompraPedidoUseCaseImpl(repository);
+
+        CompraPedido autorizado = useCase.autorizar(5);
+
+        assertThat(autorizado.getEstado()).isEqualTo(CompraPedidoEstado.AUTORIZADO_PRESUPUESTO);
+    }
+
+    @Test
+    void rechazarPresupuestoDeUnPendienteLoDejaRechazado() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO)
+                .build();
+        when(repository.findById(5)).thenReturn(Optional.of(pedido));
+        when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+        RechazarPresupuestoCompraPedidoUseCaseImpl useCase = new RechazarPresupuestoCompraPedidoUseCaseImpl(repository);
+
+        CompraPedido rechazado = useCase.rechazar(5, "fuera de política");
+
+        assertThat(rechazado.getEstado()).isEqualTo(CompraPedidoEstado.RECHAZADO);
+        assertThat(rechazado.getRechazoMotivo()).isEqualTo("fuera de política");
     }
 
 }

@@ -30,7 +30,7 @@ public class CompraPedidoEntity extends Auditable {
     @Column(name = "fecha")
     private LocalDateTime fecha;
 
-    @Column(name = "estado", nullable = false, length = 30)
+    @Column(name = "estado", nullable = false, length = 100)
     private String estado;
 
     @Column(name = "autorizante_id")

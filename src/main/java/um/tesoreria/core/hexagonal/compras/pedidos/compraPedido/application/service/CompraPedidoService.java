@@ -12,6 +12,7 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.application.
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.domain.model.CompraPedidoItem;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoSecuencia.application.service.CompraPedidoSecuenciaService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,9 @@ public class CompraPedidoService {
     private final AprobarCompraPedidoUseCase aprobarCompraPedidoUseCase;
     private final RechazarCompraPedidoUseCase rechazarCompraPedidoUseCase;
     private final DescartarCompraPedidoUseCase descartarCompraPedidoUseCase;
+    private final EstimarCompraPedidoUseCase estimarCompraPedidoUseCase;
+    private final AutorizarPresupuestoCompraPedidoUseCase autorizarPresupuestoCompraPedidoUseCase;
+    private final RechazarPresupuestoCompraPedidoUseCase rechazarPresupuestoCompraPedidoUseCase;
     private final GetCompraPedidoByIdUseCase getCompraPedidoByIdUseCase;
     private final GetCompraPedidoByNumeroUseCase getCompraPedidoByNumeroUseCase;
     private final ListCompraPedidosUseCase listCompraPedidosUseCase;
@@ -97,6 +101,35 @@ public class CompraPedidoService {
         CompraPedido descartado = descartarCompraPedidoUseCase.descartar(compraPedidoId, motivo);
         registrarHistorial(descartado, usuarioId, motivo);
         return descartado;
+    }
+
+    /**
+     * Revisión del dpto. de compras: carga/confirma el valor estimado y habilita la autorización
+     * del proceso de pedido de presupuesto.
+     */
+    @Transactional
+    public CompraPedido estimar(Integer compraPedidoId, BigDecimal monto, String fuente, Integer usuarioId) {
+        CompraPedido estimado = estimarCompraPedidoUseCase.estimar(compraPedidoId, monto, fuente);
+        registrarHistorial(estimado, usuarioId, null);
+        return estimado;
+    }
+
+    /**
+     * Autoriza el inicio del proceso de pedido de presupuesto. El límite por monto del autorizante
+     * lo valida la fachada; acá sólo se registra la transición y el actor.
+     */
+    @Transactional
+    public CompraPedido autorizarPresupuesto(Integer compraPedidoId, Integer usuarioId) {
+        CompraPedido autorizado = autorizarPresupuestoCompraPedidoUseCase.autorizar(compraPedidoId);
+        registrarHistorial(autorizado, usuarioId, null);
+        return autorizado;
+    }
+
+    @Transactional
+    public CompraPedido rechazarPresupuesto(Integer compraPedidoId, Integer usuarioId, String motivo) {
+        CompraPedido rechazado = rechazarPresupuestoCompraPedidoUseCase.rechazar(compraPedidoId, motivo);
+        registrarHistorial(rechazado, usuarioId, motivo);
+        return rechazado;
     }
 
     public Optional<CompraPedido> getById(Integer compraPedidoId) {

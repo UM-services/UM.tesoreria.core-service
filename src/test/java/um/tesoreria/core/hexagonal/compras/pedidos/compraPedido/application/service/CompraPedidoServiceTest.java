@@ -13,6 +13,7 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.application.
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.domain.model.CompraPedidoItem;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoSecuencia.application.service.CompraPedidoSecuenciaService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,9 @@ class CompraPedidoServiceTest {
     @Mock private AprobarCompraPedidoUseCase aprobarCompraPedidoUseCase;
     @Mock private RechazarCompraPedidoUseCase rechazarCompraPedidoUseCase;
     @Mock private DescartarCompraPedidoUseCase descartarCompraPedidoUseCase;
+    @Mock private EstimarCompraPedidoUseCase estimarCompraPedidoUseCase;
+    @Mock private AutorizarPresupuestoCompraPedidoUseCase autorizarPresupuestoCompraPedidoUseCase;
+    @Mock private RechazarPresupuestoCompraPedidoUseCase rechazarPresupuestoCompraPedidoUseCase;
     @Mock private GetCompraPedidoByIdUseCase getCompraPedidoByIdUseCase;
     @Mock private GetCompraPedidoByNumeroUseCase getCompraPedidoByNumeroUseCase;
     @Mock private ListCompraPedidosUseCase listCompraPedidosUseCase;
@@ -44,7 +48,9 @@ class CompraPedidoServiceTest {
     void setUp() {
         service = new CompraPedidoService(createCompraPedidoUseCase, updateCompraPedidoUseCase,
                 enviarCompraPedidoUseCase, aprobarCompraPedidoUseCase, rechazarCompraPedidoUseCase,
-                descartarCompraPedidoUseCase, getCompraPedidoByIdUseCase, getCompraPedidoByNumeroUseCase,
+                descartarCompraPedidoUseCase, estimarCompraPedidoUseCase,
+                autorizarPresupuestoCompraPedidoUseCase, rechazarPresupuestoCompraPedidoUseCase,
+                getCompraPedidoByIdUseCase, getCompraPedidoByNumeroUseCase,
                 listCompraPedidosUseCase, compraPedidoItemService, compraPedidoSecuenciaService,
                 compraPedidoHistorialService);
     }
@@ -130,12 +136,12 @@ class CompraPedidoServiceTest {
     void aprobarDelegaYRegistraElHistorial() {
         CompraPedido enviado = CompraPedido.builder()
                 .compraPedidoId(5)
-                .estado(CompraPedidoEstado.ENVIADO)
+                .estado(CompraPedidoEstado.EN_REVISION_COMPRAS)
                 .build();
         when(aprobarCompraPedidoUseCase.aprobar(5, 9)).thenReturn(enviado);
 
         assertThat(service.aprobar(5, 9)).isEqualTo(enviado);
-        verify(compraPedidoHistorialService).registrar(5, "ENVIADO", 9, null);
+        verify(compraPedidoHistorialService).registrar(5, "EN_REVISION_COMPRAS", 9, null);
     }
 
     @Test
@@ -170,6 +176,42 @@ class CompraPedidoServiceTest {
 
         assertThat(service.getById(5)).contains(pedido);
         assertThat(service.getByNumero("PC-2026-000001")).contains(pedido);
+    }
+
+    @Test
+    void estimarDelegaYRegistraElHistorial() {
+        CompraPedido estimado = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO)
+                .build();
+        when(estimarCompraPedidoUseCase.estimar(5, new BigDecimal("100"), "fuente")).thenReturn(estimado);
+
+        assertThat(service.estimar(5, new BigDecimal("100"), "fuente", 1)).isEqualTo(estimado);
+        verify(compraPedidoHistorialService).registrar(5, "PENDIENTE_AUTORIZACION_PRESUPUESTO", 1, null);
+    }
+
+    @Test
+    void autorizarPresupuestoDelegaYRegistraElHistorial() {
+        CompraPedido autorizado = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.AUTORIZADO_PRESUPUESTO)
+                .build();
+        when(autorizarPresupuestoCompraPedidoUseCase.autorizar(5)).thenReturn(autorizado);
+
+        assertThat(service.autorizarPresupuesto(5, 9)).isEqualTo(autorizado);
+        verify(compraPedidoHistorialService).registrar(5, "AUTORIZADO_PRESUPUESTO", 9, null);
+    }
+
+    @Test
+    void rechazarPresupuestoDelegaYRegistraElMotivo() {
+        CompraPedido rechazado = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.RECHAZADO)
+                .build();
+        when(rechazarPresupuestoCompraPedidoUseCase.rechazar(5, "fuera de política")).thenReturn(rechazado);
+
+        assertThat(service.rechazarPresupuesto(5, 9, "fuera de política")).isEqualTo(rechazado);
+        verify(compraPedidoHistorialService).registrar(5, "RECHAZADO", 9, "fuera de política");
     }
 
 }
