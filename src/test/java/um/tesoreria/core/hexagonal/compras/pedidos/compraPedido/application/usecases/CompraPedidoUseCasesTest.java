@@ -183,7 +183,7 @@ class CompraPedidoUseCasesTest {
         when(repository.findById(99)).thenReturn(Optional.empty());
         EstimarCompraPedidoUseCaseImpl useCase = new EstimarCompraPedidoUseCaseImpl(repository);
 
-        assertThatThrownBy(() -> useCase.estimar(99, new BigDecimal("1"), null))
+        assertThatThrownBy(() -> useCase.estimar(99, new BigDecimal("1"), null, null))
                 .isInstanceOf(CompraPedidoException.class);
     }
 
@@ -197,9 +197,41 @@ class CompraPedidoUseCasesTest {
         when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
         EstimarCompraPedidoUseCaseImpl useCase = new EstimarCompraPedidoUseCaseImpl(repository);
 
-        CompraPedido estimado = useCase.estimar(5, new BigDecimal("100"), "fuente");
+        CompraPedido estimado = useCase.estimar(5, new BigDecimal("100"), "fuente", 2);
 
         assertThat(estimado.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO);
+        assertThat(estimado.getCantidadCotizacionesMinima()).isEqualTo(2);
+    }
+
+    @Test
+    void marcarEnCotizacionDeUnAutorizado() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.AUTORIZADO_PRESUPUESTO)
+                .build();
+        when(repository.findById(5)).thenReturn(Optional.of(pedido));
+        when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+        MarcarEnCotizacionCompraPedidoUseCaseImpl useCase = new MarcarEnCotizacionCompraPedidoUseCaseImpl(repository);
+
+        CompraPedido marcado = useCase.marcar(5);
+
+        assertThat(marcado.getEstado()).isEqualTo(CompraPedidoEstado.EN_COTIZACION);
+    }
+
+    @Test
+    void marcarPendienteAdjudicacionDeUnEnCotizacion() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.EN_COTIZACION)
+                .build();
+        when(repository.findById(5)).thenReturn(Optional.of(pedido));
+        when(repository.update(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
+        MarcarPendienteAdjudicacionCompraPedidoUseCaseImpl useCase =
+                new MarcarPendienteAdjudicacionCompraPedidoUseCaseImpl(repository);
+
+        CompraPedido marcado = useCase.marcar(5);
+
+        assertThat(marcado.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_ADJUDICACION);
     }
 
     @Test
