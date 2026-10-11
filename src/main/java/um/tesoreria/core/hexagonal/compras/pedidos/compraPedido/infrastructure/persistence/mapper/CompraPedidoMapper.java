@@ -26,6 +26,7 @@ public class CompraPedidoMapper {
                 .urgenciaMotivo(domain.getUrgenciaMotivo())
                 .montoEstimado(domain.getMontoEstimado())
                 .fuenteEstimacion(domain.getFuenteEstimacion())
+                .cantidadCotizacionesMinima(domain.getCantidadCotizacionesMinima())
                 .fechaEnvio(domain.getFechaEnvio())
                 .rechazoMotivo(domain.getRechazoMotivo())
                 .descartadoMotivo(domain.getDescartadoMotivo());
@@ -54,6 +55,7 @@ public class CompraPedidoMapper {
                 .montoConocido(entity.getMontoConocido())
                 .montoEstimado(entity.getMontoEstimado())
                 .fuenteEstimacion(entity.getFuenteEstimacion())
+                .cantidadCotizacionesMinima(entity.getCantidadCotizacionesMinima())
                 .fechaEnvio(entity.getFechaEnvio())
                 .rechazoMotivo(entity.getRechazoMotivo())
                 .descartadoMotivo(entity.getDescartadoMotivo())

@@ -36,6 +36,8 @@ public class CompraPedido {
     private Boolean montoConocido;
     private BigDecimal montoEstimado;
     private String fuenteEstimacion;
+    /** Snapshot del mínimo de cotizaciones resuelto al estimar (etapa posterior). */
+    private Integer cantidadCotizacionesMinima;
     private LocalDateTime fechaEnvio;
     private String rechazoMotivo;
     private String descartadoMotivo;
@@ -136,10 +138,14 @@ public class CompraPedido {
     }
 
     /**
-     * Revisión del dpto. de compras: carga/confirma el valor estimado y habilita la autorización
-     * del proceso de pedido de presupuesto ({@code -> PENDIENTE_AUTORIZACION_PRESUPUESTO}).
+     * Revisión del dpto. de compras: carga/confirma el valor estimado, deja el snapshot del mínimo
+     * de cotizaciones requerido y habilita la autorización del proceso de pedido de presupuesto
+     * ({@code -> PENDIENTE_AUTORIZACION_PRESUPUESTO}).
+     *
+     * <p>El mínimo lo resuelve la fachada (tramos × referencia); puede venir {@code null} cuando
+     * la configuración no permite resolverlo (el gate estricto se aplica al armar el proceso).</p>
      */
-    public void estimar(BigDecimal monto, String fuente) {
+    public void estimar(BigDecimal monto, String fuente, Integer cantidadMinima) {
         if (estado != CompraPedidoEstado.EN_REVISION_COMPRAS) {
             throw new IllegalStateException("El pedido no está en revisión de compras (estado actual: " + estado + ")");
         }
@@ -150,6 +156,7 @@ public class CompraPedido {
         if (fuente != null) {
             this.fuenteEstimacion = fuente;
         }
+        this.cantidadCotizacionesMinima = cantidadMinima;
         this.montoConocido = Boolean.TRUE;
         this.estado = CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO;
     }
@@ -164,6 +171,42 @@ public class CompraPedido {
                     "El pedido no está pendiente de autorización de presupuesto (estado actual: " + estado + ")");
         }
         this.estado = CompraPedidoEstado.AUTORIZADO_PRESUPUESTO;
+    }
+
+    /**
+     * Marca el pedido como en cotización: todos sus ítems ya integran algún proceso de cotización
+     * enviado. Se invoca desde el subdominio de cotizaciones.
+     */
+    public void marcarEnCotizacion() {
+        if (estado != CompraPedidoEstado.AUTORIZADO_PRESUPUESTO) {
+            throw new IllegalStateException(
+                    "El pedido no está autorizado en presupuesto (estado actual: " + estado + ")");
+        }
+        this.estado = CompraPedidoEstado.EN_COTIZACION;
+    }
+
+    /**
+     * Marca el pedido como pendiente de adjudicación: los procesos que cubren sus ítems fueron
+     * recomendados. Se invoca desde el subdominio de cotizaciones.
+     */
+    public void marcarPendienteAdjudicacion() {
+        if (estado != CompraPedidoEstado.EN_COTIZACION) {
+            throw new IllegalStateException(
+                    "El pedido no está en cotización (estado actual: " + estado + ")");
+        }
+        this.estado = CompraPedidoEstado.PENDIENTE_ADJUDICACION;
+    }
+
+    /**
+     * Marca el pedido como {@code ADJUDICADO}: la autoridad competente adjudicó la cotización
+     * recomendada de los procesos que lo cubren. Se invoca desde el subdominio de cotizaciones.
+     */
+    public void marcarAdjudicado() {
+        if (estado != CompraPedidoEstado.PENDIENTE_ADJUDICACION) {
+            throw new IllegalStateException(
+                    "El pedido no está pendiente de adjudicación (estado actual: " + estado + ")");
+        }
+        this.estado = CompraPedidoEstado.ADJUDICADO;
     }
 
     /**

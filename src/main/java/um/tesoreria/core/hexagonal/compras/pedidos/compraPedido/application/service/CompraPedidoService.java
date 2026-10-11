@@ -6,7 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.application.exception.CompraPedidoException;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedido;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedidoCriteria;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedidoEstado;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.ports.in.*;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacionTramo.application.service.CompraCotizacionTramoService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoHistorial.application.service.CompraPedidoHistorialService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.application.service.CompraPedidoItemService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.domain.model.CompraPedidoItem;
@@ -38,6 +40,9 @@ public class CompraPedidoService {
     private final EstimarCompraPedidoUseCase estimarCompraPedidoUseCase;
     private final AutorizarPresupuestoCompraPedidoUseCase autorizarPresupuestoCompraPedidoUseCase;
     private final RechazarPresupuestoCompraPedidoUseCase rechazarPresupuestoCompraPedidoUseCase;
+    private final MarcarEnCotizacionCompraPedidoUseCase marcarEnCotizacionCompraPedidoUseCase;
+    private final MarcarPendienteAdjudicacionCompraPedidoUseCase marcarPendienteAdjudicacionCompraPedidoUseCase;
+    private final MarcarAdjudicadoCompraPedidoUseCase marcarAdjudicadoCompraPedidoUseCase;
     private final GetCompraPedidoByIdUseCase getCompraPedidoByIdUseCase;
     private final GetCompraPedidoByNumeroUseCase getCompraPedidoByNumeroUseCase;
     private final ListCompraPedidosUseCase listCompraPedidosUseCase;
@@ -46,6 +51,7 @@ public class CompraPedidoService {
     private final CompraPedidoItemService compraPedidoItemService;
     private final CompraPedidoSecuenciaService compraPedidoSecuenciaService;
     private final CompraPedidoHistorialService compraPedidoHistorialService;
+    private final CompraCotizacionTramoService compraCotizacionTramoService;
 
     @Transactional
     public CompraPedido crear(CompraPedido pedido, List<CompraPedidoItem> items) {
@@ -104,14 +110,41 @@ public class CompraPedidoService {
     }
 
     /**
-     * Revisión del dpto. de compras: carga/confirma el valor estimado y habilita la autorización
-     * del proceso de pedido de presupuesto.
+     * Revisión del dpto. de compras: carga/confirma el valor estimado, resuelve el mínimo de
+     * cotizaciones (tramos × referencia del ejercicio) y lo deja como snapshot en el pedido; luego
+     * habilita la autorización del proceso de pedido de presupuesto.
+     *
+     * <p>La resolución es <b>best-effort</b>: si la configuración no permite resolver el mínimo, se
+     * guarda {@code null} y el pedido igual se estima; el gate estricto se aplica al armar el
+     * proceso de cotización.</p>
      */
     @Transactional
     public CompraPedido estimar(Integer compraPedidoId, BigDecimal monto, String fuente, Integer usuarioId) {
-        CompraPedido estimado = estimarCompraPedidoUseCase.estimar(compraPedidoId, monto, fuente);
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        Integer cantidadMinima = compraCotizacionTramoService
+                .resolverMinimo(pedido.getEjercicioId(), monto)
+                .orElse(null);
+        CompraPedido estimado = estimarCompraPedidoUseCase.estimar(compraPedidoId, monto, fuente, cantidadMinima);
         registrarHistorial(estimado, usuarioId, null);
         return estimado;
+    }
+
+    /**
+     * Mínimo de cotizaciones del pedido: el snapshot si ya fue estimado, o el cálculo con la
+     * configuración vigente. {@code null} cuando no se puede resolver.
+     */
+    public Integer cotizacionesMinimas(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getCantidadCotizacionesMinima() != null) {
+            return pedido.getCantidadCotizacionesMinima();
+        }
+        if (pedido.getMontoEstimado() == null) {
+            return null;
+        }
+        return compraCotizacionTramoService.resolverMinimo(pedido.getEjercicioId(), pedido.getMontoEstimado())
+                .orElse(null);
     }
 
     /**
@@ -130,6 +163,61 @@ public class CompraPedidoService {
         CompraPedido rechazado = rechazarPresupuestoCompraPedidoUseCase.rechazar(compraPedidoId, motivo);
         registrarHistorial(rechazado, usuarioId, motivo);
         return rechazado;
+    }
+
+    /**
+     * Pasa el pedido a {@code EN_COTIZACION} (todos sus ítems ya integran un proceso enviado).
+     * Idempotente: si ya está en ese estado no hace nada.
+     */
+    @Transactional
+    public CompraPedido marcarEnCotizacion(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.EN_COTIZACION) {
+            return pedido;
+        }
+        CompraPedido marcado = marcarEnCotizacionCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Incluido en un proceso de cotización");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code PENDIENTE_ADJUDICACION} (procesos recomendados). Idempotente.
+     */
+    @Transactional
+    public CompraPedido marcarPendienteAdjudicacion(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.PENDIENTE_ADJUDICACION) {
+            return pedido;
+        }
+        if (pedido.getEstado() != CompraPedidoEstado.EN_COTIZACION) {
+            // El proceso recomendado no cubre todo el pedido: no se avanza.
+            return pedido;
+        }
+        CompraPedido marcado = marcarPendienteAdjudicacionCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Proceso de cotización recomendado");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code ADJUDICADO} (la autoridad adjudicó la cotización recomendada).
+     * Idempotente; sólo avanza desde {@code PENDIENTE_ADJUDICACION}.
+     */
+    @Transactional
+    public CompraPedido marcarAdjudicado(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.ADJUDICADO) {
+            return pedido;
+        }
+        if (pedido.getEstado() != CompraPedidoEstado.PENDIENTE_ADJUDICACION) {
+            // Otros procesos del pedido aún no están adjudicados: no se avanza.
+            return pedido;
+        }
+        CompraPedido marcado = marcarAdjudicadoCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Cotización adjudicada");
+        return marcado;
     }
 
     public Optional<CompraPedido> getById(Integer compraPedidoId) {

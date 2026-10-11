@@ -31,6 +31,7 @@ public class CompraPedidoResponse {
     private Boolean montoConocido;
     private BigDecimal montoEstimado;
     private String fuenteEstimacion;
+    private Integer cantidadCotizacionesMinima;
     private LocalDateTime fechaEnvio;
     private String rechazoMotivo;
     private String descartadoMotivo;
