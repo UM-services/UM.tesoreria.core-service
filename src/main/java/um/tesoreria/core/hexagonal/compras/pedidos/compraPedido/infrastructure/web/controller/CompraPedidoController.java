@@ -12,6 +12,7 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.Com
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.AprobarCompraPedidoRequest;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.AutorizarPresupuestoCompraPedidoRequest;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.CompraPedidoCriteriaRequest;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.CompraPedidoCotizacionesMinimasResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.CompraPedidoRequest;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.CompraPedidoResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.web.dto.DescartarCompraPedidoRequest;
@@ -192,6 +193,17 @@ public class CompraPedidoController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{compraPedidoId}/cotizaciones-minimas")
+    public ResponseEntity<CompraPedidoCotizacionesMinimasResponse> cotizacionesMinimas(
+            @PathVariable Integer compraPedidoId) {
+        try {
+            return ResponseEntity.ok(new CompraPedidoCotizacionesMinimasResponse(
+                    compraPedidoId, compraPedidoService.cotizacionesMinimas(compraPedidoId)));
+        } catch (CompraPedidoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 

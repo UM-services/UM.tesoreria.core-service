@@ -184,11 +184,12 @@ class CompraPedidoTest {
     void estimarDesdeRevisionDeComprasCargaElMontoYHabilitaLaAutorizacion() {
         CompraPedido pedido = enRevisionDeCompras();
 
-        pedido.estimar(new BigDecimal("4500000.00"), "Estimación de compras");
+        pedido.estimar(new BigDecimal("4500000.00"), "Estimación de compras", 2);
 
         assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO);
         assertThat(pedido.getMontoEstimado()).isEqualByComparingTo("4500000.00");
         assertThat(pedido.getFuenteEstimacion()).isEqualTo("Estimación de compras");
+        assertThat(pedido.getCantidadCotizacionesMinima()).isEqualTo(2);
         assertThat(pedido.getMontoConocido()).isTrue();
     }
 
@@ -196,20 +197,20 @@ class CompraPedidoTest {
     void estimarRequiereMontoPositivo() {
         CompraPedido pedido = enRevisionDeCompras();
 
-        assertThatThrownBy(() -> pedido.estimar(null, "x")).isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> pedido.estimar(BigDecimal.ZERO, "x")).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> pedido.estimar(null, "x", null)).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> pedido.estimar(BigDecimal.ZERO, "x", null)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void estimarSoloDesdeRevisionDeCompras() {
-        assertThatThrownBy(() -> pendienteDeEnvio().estimar(new BigDecimal("1"), null))
+        assertThatThrownBy(() -> pendienteDeEnvio().estimar(new BigDecimal("1"), null, null))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void autorizarPresupuestoLoDejaAutorizado() {
         CompraPedido pedido = enRevisionDeCompras();
-        pedido.estimar(new BigDecimal("100"), null);
+        pedido.estimar(new BigDecimal("100"), null, null);
 
         pedido.autorizarPresupuesto();
 
@@ -224,9 +225,45 @@ class CompraPedidoTest {
     }
 
     @Test
+    void marcarEnCotizacionDesdeAutorizado() {
+        CompraPedido pedido = enRevisionDeCompras();
+        pedido.estimar(new BigDecimal("100"), null, null);
+        pedido.autorizarPresupuesto();
+
+        pedido.marcarEnCotizacion();
+
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.EN_COTIZACION);
+        assertThat(pedido.esEditable()).isFalse();
+    }
+
+    @Test
+    void marcarEnCotizacionRequiereAutorizado() {
+        assertThatThrownBy(() -> enRevisionDeCompras().marcarEnCotizacion())
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void marcarPendienteAdjudicacionDesdeCotizacion() {
+        CompraPedido pedido = enRevisionDeCompras();
+        pedido.estimar(new BigDecimal("100"), null, null);
+        pedido.autorizarPresupuesto();
+        pedido.marcarEnCotizacion();
+
+        pedido.marcarPendienteAdjudicacion();
+
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_ADJUDICACION);
+    }
+
+    @Test
+    void marcarPendienteAdjudicacionRequiereEnCotizacion() {
+        assertThatThrownBy(() -> enRevisionDeCompras().marcarPendienteAdjudicacion())
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void rechazarPresupuestoVuelveAlSolicitanteYRequiereMotivo() {
         CompraPedido pedido = enRevisionDeCompras();
-        pedido.estimar(new BigDecimal("100"), null);
+        pedido.estimar(new BigDecimal("100"), null, null);
 
         assertThatThrownBy(() -> pedido.rechazarPresupuesto(null)).isInstanceOf(IllegalStateException.class);
 

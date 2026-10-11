@@ -6,6 +6,6 @@ import java.math.BigDecimal;
 
 public interface EstimarCompraPedidoUseCase {
 
-    CompraPedido estimar(Integer compraPedidoId, BigDecimal monto, String fuente);
+    CompraPedido estimar(Integer compraPedidoId, BigDecimal monto, String fuente, Integer cantidadMinima);
 
 }

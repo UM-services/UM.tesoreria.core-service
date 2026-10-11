@@ -16,10 +16,10 @@ public class EstimarCompraPedidoUseCaseImpl implements EstimarCompraPedidoUseCas
     private final CompraPedidoRepository compraPedidoRepository;
 
     @Override
-    public CompraPedido estimar(Integer compraPedidoId, BigDecimal monto, String fuente) {
+    public CompraPedido estimar(Integer compraPedidoId, BigDecimal monto, String fuente, Integer cantidadMinima) {
         CompraPedido pedido = compraPedidoRepository.findById(compraPedidoId)
                 .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
-        pedido.estimar(monto, fuente);
+        pedido.estimar(monto, fuente, cantidadMinima);
         return compraPedidoRepository.update(pedido)
                 .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
     }

@@ -1,0 +1,66 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraCotizacion (v9.1.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraCotizacion<br/>CompraCotizacionEstado (BORRADOR/ENVIADA/<br/>RECOMENDADA/ADJUDICADA/DEVUELTA_A_COMPRAS/<br/>NO_ADJUDICADA/CERRADA/ANULADA)<br/>CompraAdjudicacion<br/>CompraAdjudicacionDecision"]
+        M2["CompraCotizacionItem<br/>CompraCotizacionProveedor<br/>CompraCotizacionProveedorEstado<br/>CompraCotizacionProveedorItem"]
+        M3["CompraCotizacionCriteria<br/>CompraCotizacionPendiente<br/>CompraCotizacionProveedorPendiente"]
+        IN["Create/Update/GetById/List/Enviar/Anular/<br/>ListPedidoItemsPendientes/RegistrarRespuesta/<br/>MarcarNoCotiza/Recomendar/Cerrar/Adjudicar<br/>UseCase (Puertos de Entrada)"]
+        OUT["CompraCotizacionRepository<br/>CompraAdjudicacionRepository<br/>CompraCotizacionSecuenciaPort<br/>PedidoItemsPendientesPort<br/>(Puertos de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraCotizacionService<br/>@Transactional (enviar, recomendar, adjudicar)"]
+        UCs["*UseCaseImpl (12)"]
+        Exc["CompraCotizacionException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraCotizacionController<br/>/api/tesoreria/core/compraCotizacion"]
+        DTO["CompraCotizacionRequest/Response<br/>CompraCotizacionCriteriaRequest<br/>CompraCotizacionRespuestaRequest<br/>Recomendar/AdjudicarCompraCotizacionRequest<br/>CompraAdjudicacionResponse<br/>CompraCotizacionPendiente/ProveedorPendienteResponse"]
+        Map["CompraCotizacionDtoMapper<br/>CompraCotizacionMapper<br/>CompraAdjudicacionMapper"]
+        Adp["JpaCompraCotizacionRepositoryAdapter<br/>JpaCompraAdjudicacionRepositoryAdapter<br/>CompraCotizacionSecuenciaJdbcAdapter<br/>PedidoItemsPendientesJdbcAdapter"]
+        Ent["CompraCotizacionEntity (compra_cotizacion)<br/>CompraCotizacionItemEntity<br/>CompraCotizacionProveedorEntity<br/>CompraCotizacionProveedorItemEntity<br/>CompraAdjudicacionEntity (compra_adjudicacion)"]
+        Jpa["JpaCompraCotizacionRepository<br/>JpaCompraCotizacionItemRepository<br/>JpaCompraCotizacionProveedorRepository<br/>JpaCompraCotizacionProveedorItemRepository<br/>JpaCompraAdjudicacionRepository"]
+    end
+
+    subgraph CrossSlice ["Composición con otros slices"]
+        Tramo["CompraCotizacionTramoService<br/>(mínimo de cotizaciones:<br/>tramos × referencia)"]
+        Ped["CompraPedidoService<br/>(marcarEnCotizacion,<br/>marcarPendienteAdjudicacion,<br/>marcarAdjudicado)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    Svc --> Tramo
+    Svc --> Ped
+    Svc --> M
+    Svc --> M2
+    Svc --> M3
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+
+    style M fill:#e1f5fe
+    style M2 fill:#e1f5fe
+    style M3 fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0
+    style Tramo fill:#fce4ec
+    style Ped fill:#fce4ec

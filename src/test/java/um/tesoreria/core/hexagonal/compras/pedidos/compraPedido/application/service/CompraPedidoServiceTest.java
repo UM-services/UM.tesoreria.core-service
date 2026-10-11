@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedido;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedidoEstado;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.ports.in.*;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacionTramo.application.service.CompraCotizacionTramoService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoHistorial.application.service.CompraPedidoHistorialService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.application.service.CompraPedidoItemService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.domain.model.CompraPedidoItem;
@@ -35,12 +36,16 @@ class CompraPedidoServiceTest {
     @Mock private EstimarCompraPedidoUseCase estimarCompraPedidoUseCase;
     @Mock private AutorizarPresupuestoCompraPedidoUseCase autorizarPresupuestoCompraPedidoUseCase;
     @Mock private RechazarPresupuestoCompraPedidoUseCase rechazarPresupuestoCompraPedidoUseCase;
+    @Mock private MarcarEnCotizacionCompraPedidoUseCase marcarEnCotizacionCompraPedidoUseCase;
+    @Mock private MarcarPendienteAdjudicacionCompraPedidoUseCase marcarPendienteAdjudicacionCompraPedidoUseCase;
+    @Mock private MarcarAdjudicadoCompraPedidoUseCase marcarAdjudicadoCompraPedidoUseCase;
     @Mock private GetCompraPedidoByIdUseCase getCompraPedidoByIdUseCase;
     @Mock private GetCompraPedidoByNumeroUseCase getCompraPedidoByNumeroUseCase;
     @Mock private ListCompraPedidosUseCase listCompraPedidosUseCase;
     @Mock private CompraPedidoItemService compraPedidoItemService;
     @Mock private CompraPedidoSecuenciaService compraPedidoSecuenciaService;
     @Mock private CompraPedidoHistorialService compraPedidoHistorialService;
+    @Mock private CompraCotizacionTramoService compraCotizacionTramoService;
 
     private CompraPedidoService service;
 
@@ -50,9 +55,12 @@ class CompraPedidoServiceTest {
                 enviarCompraPedidoUseCase, aprobarCompraPedidoUseCase, rechazarCompraPedidoUseCase,
                 descartarCompraPedidoUseCase, estimarCompraPedidoUseCase,
                 autorizarPresupuestoCompraPedidoUseCase, rechazarPresupuestoCompraPedidoUseCase,
+                marcarEnCotizacionCompraPedidoUseCase,
+                marcarPendienteAdjudicacionCompraPedidoUseCase,
+                marcarAdjudicadoCompraPedidoUseCase,
                 getCompraPedidoByIdUseCase, getCompraPedidoByNumeroUseCase,
                 listCompraPedidosUseCase, compraPedidoItemService, compraPedidoSecuenciaService,
-                compraPedidoHistorialService);
+                compraPedidoHistorialService, compraCotizacionTramoService);
     }
 
     @Test
@@ -180,14 +188,125 @@ class CompraPedidoServiceTest {
 
     @Test
     void estimarDelegaYRegistraElHistorial() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .ejercicioId(15)
+                .estado(CompraPedidoEstado.EN_REVISION_COMPRAS)
+                .build();
         CompraPedido estimado = CompraPedido.builder()
                 .compraPedidoId(5)
                 .estado(CompraPedidoEstado.PENDIENTE_AUTORIZACION_PRESUPUESTO)
                 .build();
-        when(estimarCompraPedidoUseCase.estimar(5, new BigDecimal("100"), "fuente")).thenReturn(estimado);
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(pedido));
+        when(compraCotizacionTramoService.resolverMinimo(15, new BigDecimal("100"))).thenReturn(Optional.of(2));
+        when(estimarCompraPedidoUseCase.estimar(5, new BigDecimal("100"), "fuente", 2)).thenReturn(estimado);
 
         assertThat(service.estimar(5, new BigDecimal("100"), "fuente", 1)).isEqualTo(estimado);
         verify(compraPedidoHistorialService).registrar(5, "PENDIENTE_AUTORIZACION_PRESUPUESTO", 1, null);
+    }
+
+    @Test
+    void cotizacionesMinimasUsaElSnapshot() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .ejercicioId(15)
+                .montoEstimado(new BigDecimal("100"))
+                .cantidadCotizacionesMinima(3)
+                .build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(pedido));
+
+        assertThat(service.cotizacionesMinimas(5)).isEqualTo(3);
+    }
+
+    @Test
+    void cotizacionesMinimasCalculaSiNoHaySnapshot() {
+        CompraPedido pedido = CompraPedido.builder()
+                .compraPedidoId(5)
+                .ejercicioId(15)
+                .montoEstimado(new BigDecimal("100"))
+                .build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(pedido));
+        when(compraCotizacionTramoService.resolverMinimo(15, new BigDecimal("100"))).thenReturn(Optional.of(2));
+
+        assertThat(service.cotizacionesMinimas(5)).isEqualTo(2);
+    }
+
+    @Test
+    void marcarEnCotizacionDelegaYRegistraHistorial() {
+        CompraPedido autorizado = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.AUTORIZADO_PRESUPUESTO)
+                .build();
+        CompraPedido marcado = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.EN_COTIZACION)
+                .build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(autorizado));
+        when(marcarEnCotizacionCompraPedidoUseCase.marcar(5)).thenReturn(marcado);
+
+        assertThat(service.marcarEnCotizacion(5).getEstado()).isEqualTo(CompraPedidoEstado.EN_COTIZACION);
+        verify(compraPedidoHistorialService).registrar(5, "EN_COTIZACION", null,
+                "Incluido en un proceso de cotización");
+    }
+
+    @Test
+    void marcarEnCotizacionEsIdempotente() {
+        CompraPedido yaEnCotizacion = CompraPedido.builder()
+                .compraPedidoId(5)
+                .estado(CompraPedidoEstado.EN_COTIZACION)
+                .build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(yaEnCotizacion));
+
+        assertThat(service.marcarEnCotizacion(5)).isSameAs(yaEnCotizacion);
+        verify(marcarEnCotizacionCompraPedidoUseCase, never()).marcar(any());
+    }
+
+    @Test
+    void marcarPendienteAdjudicacionDelegaYRegistraHistorial() {
+        CompraPedido enCotizacion = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.EN_COTIZACION).build();
+        CompraPedido marcado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.PENDIENTE_ADJUDICACION).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(enCotizacion));
+        when(marcarPendienteAdjudicacionCompraPedidoUseCase.marcar(5)).thenReturn(marcado);
+
+        assertThat(service.marcarPendienteAdjudicacion(5).getEstado())
+                .isEqualTo(CompraPedidoEstado.PENDIENTE_ADJUDICACION);
+        verify(compraPedidoHistorialService).registrar(5, "PENDIENTE_ADJUDICACION", null,
+                "Proceso de cotización recomendado");
+    }
+
+    @Test
+    void marcarPendienteAdjudicacionNoAvanzaSiNoEstaEnCotizacion() {
+        CompraPedido autorizado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.AUTORIZADO_PRESUPUESTO).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(autorizado));
+
+        assertThat(service.marcarPendienteAdjudicacion(5)).isSameAs(autorizado);
+        verify(marcarPendienteAdjudicacionCompraPedidoUseCase, never()).marcar(any());
+    }
+
+    @Test
+    void marcarAdjudicadoDelegaYRegistraHistorial() {
+        CompraPedido pendiente = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.PENDIENTE_ADJUDICACION).build();
+        CompraPedido marcado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.ADJUDICADO).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(pendiente));
+        when(marcarAdjudicadoCompraPedidoUseCase.marcar(5)).thenReturn(marcado);
+
+        assertThat(service.marcarAdjudicado(5).getEstado()).isEqualTo(CompraPedidoEstado.ADJUDICADO);
+        verify(compraPedidoHistorialService).registrar(5, "ADJUDICADO", null, "Cotización adjudicada");
+    }
+
+    @Test
+    void marcarAdjudicadoEsIdempotente() {
+        CompraPedido yaAdjudicado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.ADJUDICADO).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(yaAdjudicado));
+
+        assertThat(service.marcarAdjudicado(5)).isSameAs(yaAdjudicado);
+        verify(marcarAdjudicadoCompraPedidoUseCase, never()).marcar(any());
     }
 
     @Test

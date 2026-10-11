@@ -71,6 +71,9 @@ public class CompraPedidoEntity extends Auditable {
     @Column(name = "fuente_estimacion", length = 255)
     private String fuenteEstimacion;
 
+    @Column(name = "cantidad_cotizaciones_minima")
+    private Integer cantidadCotizacionesMinima;
+
     @Column(name = "fecha_envio")
     private LocalDateTime fechaEnvio;
 
