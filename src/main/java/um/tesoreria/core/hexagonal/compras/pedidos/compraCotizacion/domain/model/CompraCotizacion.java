@@ -153,4 +153,16 @@ public class CompraCotizacion {
         }
         this.estado = estadoAdjudicacion;
     }
+
+    /**
+     * Marca el proceso como formalizado (etapa 8): el proceso adjudicado ya emitió su Orden de
+     * Compra. Sólo se permite desde {@code ADJUDICADA}.
+     */
+    public void formalizar() {
+        if (estado != CompraCotizacionEstado.ADJUDICADA) {
+            throw new IllegalStateException(
+                    "Sólo un proceso adjudicado puede formalizarse (estado actual: " + estado + ")");
+        }
+        this.estado = CompraCotizacionEstado.FORMALIZADA;
+    }
 }

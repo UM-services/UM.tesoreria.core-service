@@ -136,4 +136,22 @@ class CompraCotizacionTest {
         assertThatThrownBy(() -> borrador(1, 1, null).recomendar(5L, "x", 1))
                 .isInstanceOf(IllegalStateException.class);
     }
+
+    @Test
+    void formalizarSoloDesdeAdjudicada() {
+        CompraCotizacion proceso = borrador(1, 1, null);
+        proceso.setEstado(CompraCotizacionEstado.ADJUDICADA);
+
+        proceso.formalizar();
+
+        assertThat(proceso.getEstado()).isEqualTo(CompraCotizacionEstado.FORMALIZADA);
+    }
+
+    @Test
+    void formalizarFallaSiNoEstaAdjudicada() {
+        CompraCotizacion proceso = borrador(1, 1, null);
+        proceso.setEstado(CompraCotizacionEstado.RECOMENDADA);
+
+        assertThatThrownBy(proceso::formalizar).isInstanceOf(IllegalStateException.class);
+    }
 }

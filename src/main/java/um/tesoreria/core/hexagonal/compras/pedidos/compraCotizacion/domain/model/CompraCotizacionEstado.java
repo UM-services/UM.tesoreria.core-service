@@ -15,6 +15,8 @@ public enum CompraCotizacionEstado {
     ADJUDICADA,
     DEVUELTA_A_COMPRAS,
     NO_ADJUDICADA,
+    /** Adjudicado y con la Orden de Compra emitida (etapa 8). */
+    FORMALIZADA,
     CERRADA,
     ANULADA;
 
