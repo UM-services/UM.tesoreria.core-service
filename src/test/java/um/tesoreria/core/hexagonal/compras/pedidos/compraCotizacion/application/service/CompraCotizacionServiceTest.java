@@ -51,6 +51,7 @@ class CompraCotizacionServiceTest {
     @Mock private RecomendarCompraCotizacionUseCase recomendarCompraCotizacionUseCase;
     @Mock private CerrarCompraCotizacionUseCase cerrarCompraCotizacionUseCase;
     @Mock private AdjudicarCompraCotizacionUseCase adjudicarCompraCotizacionUseCase;
+    @Mock private FormalizarCompraCotizacionUseCase formalizarCompraCotizacionUseCase;
     @Mock private CompraAdjudicacionRepository compraAdjudicacionRepository;
 
     private CompraCotizacionService service;
@@ -63,7 +64,7 @@ class CompraCotizacionServiceTest {
                 compraCotizacionRepository, compraPedidoService, compraCotizacionTramoService,
                 registrarRespuestaCompraCotizacionUseCase, marcarNoCotizaCompraCotizacionUseCase,
                 recomendarCompraCotizacionUseCase, cerrarCompraCotizacionUseCase,
-                adjudicarCompraCotizacionUseCase, compraAdjudicacionRepository);
+                adjudicarCompraCotizacionUseCase, formalizarCompraCotizacionUseCase, compraAdjudicacionRepository);
     }
 
     private CompraCotizacion borrador(Long id, String numero) {
@@ -234,5 +235,23 @@ class CompraCotizacionServiceTest {
         when(compraAdjudicacionRepository.findByCompraCotizacionId(1L))
                 .thenReturn(Optional.of(CompraAdjudicacion.builder().build()));
         assertThat(service.adjudicacion(1L)).isPresent();
+    }
+
+    @Test
+    void formalizarTransicionaLosPedidosCubiertos() {
+        CompraCotizacion formalizado = borrador(1L, "SC-1");
+        formalizado.setEstado(CompraCotizacionEstado.FORMALIZADA);
+        when(formalizarCompraCotizacionUseCase.formalizar(1L)).thenReturn(formalizado);
+        when(compraCotizacionRepository.findPedidoIdsByProceso(1L)).thenReturn(List.of(2, 3));
+
+        assertThat(service.formalizar(1L).getEstado()).isEqualTo(CompraCotizacionEstado.FORMALIZADA);
+        verify(compraPedidoService).marcarFormalizado(2);
+        verify(compraPedidoService).marcarFormalizado(3);
+    }
+
+    @Test
+    void pedidoIdsByProcesoDelega() {
+        when(compraCotizacionRepository.findPedidoIdsByProceso(1L)).thenReturn(List.of(2));
+        assertThat(service.pedidoIdsByProceso(1L)).containsExactly(2);
     }
 }

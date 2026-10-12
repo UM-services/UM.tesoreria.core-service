@@ -1,9 +1,9 @@
 ---
-title: Arquitectura Hexagonal - Módulo CompraCotizacion (v9.1.0)
+title: Arquitectura Hexagonal - Módulo CompraCotizacion (v9.2.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
-        M["CompraCotizacion<br/>CompraCotizacionEstado (BORRADOR/ENVIADA/<br/>RECOMENDADA/ADJUDICADA/DEVUELTA_A_COMPRAS/<br/>NO_ADJUDICADA/CERRADA/ANULADA)<br/>CompraAdjudicacion<br/>CompraAdjudicacionDecision"]
+        M["CompraCotizacion<br/>CompraCotizacionEstado (BORRADOR/ENVIADA/<br/>RECOMENDADA/ADJUDICADA/DEVUELTA_A_COMPRAS/<br/>NO_ADJUDICADA/FORMALIZADA/CERRADA/ANULADA)<br/>CompraAdjudicacion<br/>CompraAdjudicacionDecision"]
         M2["CompraCotizacionItem<br/>CompraCotizacionProveedor<br/>CompraCotizacionProveedorEstado<br/>CompraCotizacionProveedorItem"]
         M3["CompraCotizacionCriteria<br/>CompraCotizacionPendiente<br/>CompraCotizacionProveedorPendiente"]
         IN["Create/Update/GetById/List/Enviar/Anular/<br/>ListPedidoItemsPendientes/RegistrarRespuesta/<br/>MarcarNoCotiza/Recomendar/Cerrar/Adjudicar<br/>UseCase (Puertos de Entrada)"]

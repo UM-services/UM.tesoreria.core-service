@@ -43,6 +43,7 @@ public class CompraPedidoService {
     private final MarcarEnCotizacionCompraPedidoUseCase marcarEnCotizacionCompraPedidoUseCase;
     private final MarcarPendienteAdjudicacionCompraPedidoUseCase marcarPendienteAdjudicacionCompraPedidoUseCase;
     private final MarcarAdjudicadoCompraPedidoUseCase marcarAdjudicadoCompraPedidoUseCase;
+    private final MarcarFormalizadoCompraPedidoUseCase marcarFormalizadoCompraPedidoUseCase;
     private final GetCompraPedidoByIdUseCase getCompraPedidoByIdUseCase;
     private final GetCompraPedidoByNumeroUseCase getCompraPedidoByNumeroUseCase;
     private final ListCompraPedidosUseCase listCompraPedidosUseCase;
@@ -217,6 +218,26 @@ public class CompraPedidoService {
         }
         CompraPedido marcado = marcarAdjudicadoCompraPedidoUseCase.marcar(compraPedidoId);
         registrarHistorial(marcado, null, "Cotización adjudicada");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code FORMALIZADO} (se emitió la Orden de Compra). Idempotente; sólo avanza
+     * desde {@code ADJUDICADO}.
+     */
+    @Transactional
+    public CompraPedido marcarFormalizado(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.FORMALIZADO) {
+            return pedido;
+        }
+        if (pedido.getEstado() != CompraPedidoEstado.ADJUDICADO) {
+            // Otros procesos del pedido aún no se formalizaron: no se avanza.
+            return pedido;
+        }
+        CompraPedido marcado = marcarFormalizadoCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Orden de Compra emitida");
         return marcado;
     }
 
