@@ -34,6 +34,8 @@ public enum CompraPedidoEstado {
     EN_COTIZACION,
     PENDIENTE_ADJUDICACION,
     ADJUDICADO,
+    /** Adjudicado y con la Orden de Compra emitida (etapa 8); gate de la recepción. */
+    FORMALIZADO,
     RECHAZADO,
     DESCARTADO;
 

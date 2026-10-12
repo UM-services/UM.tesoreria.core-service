@@ -4,7 +4,14 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.1.0**
+**Versión actual (SemVer): 9.2.0**
+
+## Novedades 9.2.0 (verificado en código)
+- **feat(compras/pedidos)**: **Formalización (etapa 8) — Orden de Compra**. Nuevo slice `compraFormalizacion` bajo `compras/pedidos` en `/api/tesoreria/core/compraFormalizacion`: `GET`, `POST /search`, `GET /{id}`, `GET /pendientes` (adjudicaciones sin OC) y `GET /por-cotizacion/{compraCotizacionId}`; el alta `POST` **formaliza** la adjudicación (una sola OC por adjudicación, `UNIQUE compra_adjudicacion_id`, idempotente), snapshoteando proveedor, moneda, monto y condiciones (pago/entrega/garantía) de la oferta adjudicada —editables al formalizar— más su **detalle de ítems** (`compra_formalizacion_item`, con trazabilidad al proceso/ítem del pedido y precio/marca de la oferta). Numeración propia `OC-AAAA-NNNNNN` (`LAST_INSERT_ID`) y `numeroExterno` opcional.
+- **feat(compras/pedidos)**: Estados nuevos `CompraCotizacionEstado.FORMALIZADA` y `CompraPedidoEstado.FORMALIZADO` con sus transiciones (`CompraCotizacion.formalizar`, `CompraPedido.marcarFormalizado`) y casos de uso (`FormalizarCompraCotizacionUseCase`, `MarcarFormalizadoCompraPedidoUseCase`). Al formalizar, el proceso pasa a `FORMALIZADA` y los pedidos cubiertos a `FORMALIZADO` (gate de la recepción), con registro en el historial del pedido; `marcarFormalizado` es idempotente y sólo avanza desde `ADJUDICADO`.
+- **docs**: `docs/sql/V412__compras_formalizacion.sql` (idempotente) con el DDL de `compra_formalizacion_secuencia`/`compra_formalizacion`/`compra_formalizacion_item` y el seed de la clave `compras.formalizar`; nuevo diagrama `hexagonal-compraFormalizacion.mmd` y `hexagonal-compraCotizacion`/`hexagonal-compraPedido` a v9.2.0.
+
+> Basado en `git diff HEAD` (57 archivos, +2484/−5) y el código real del slice `compraFormalizacion` y de los cambios de `compraCotizacion`/`compraPedido`. Todo es **aditivo** (slice, endpoints, estados, tablas y clave de permiso nuevos; ningún contrato REST, URL ni campo existente modificado: los enums se persisten como texto): incremento **minor** (`9.1.0` → `9.2.0`, `pom.xml`). Sin dependencias nuevas. **Requiere** aplicar `V412` (tablas `compra_formalizacion_secuencia`, `compra_formalizacion` y `compra_formalizacion_item`) antes de desplegar. Verificación sin compilación por indicación del usuario.
 
 ## Novedades 9.1.0 (verificado en código)
 - **feat(compras/pedidos)**: **Circuito de cotizaciones** (etapas 6 y 7). Dos slices nuevos bajo `compras/pedidos`:

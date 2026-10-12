@@ -39,6 +39,7 @@ class CompraPedidoServiceTest {
     @Mock private MarcarEnCotizacionCompraPedidoUseCase marcarEnCotizacionCompraPedidoUseCase;
     @Mock private MarcarPendienteAdjudicacionCompraPedidoUseCase marcarPendienteAdjudicacionCompraPedidoUseCase;
     @Mock private MarcarAdjudicadoCompraPedidoUseCase marcarAdjudicadoCompraPedidoUseCase;
+    @Mock private MarcarFormalizadoCompraPedidoUseCase marcarFormalizadoCompraPedidoUseCase;
     @Mock private GetCompraPedidoByIdUseCase getCompraPedidoByIdUseCase;
     @Mock private GetCompraPedidoByNumeroUseCase getCompraPedidoByNumeroUseCase;
     @Mock private ListCompraPedidosUseCase listCompraPedidosUseCase;
@@ -58,6 +59,7 @@ class CompraPedidoServiceTest {
                 marcarEnCotizacionCompraPedidoUseCase,
                 marcarPendienteAdjudicacionCompraPedidoUseCase,
                 marcarAdjudicadoCompraPedidoUseCase,
+                marcarFormalizadoCompraPedidoUseCase,
                 getCompraPedidoByIdUseCase, getCompraPedidoByNumeroUseCase,
                 listCompraPedidosUseCase, compraPedidoItemService, compraPedidoSecuenciaService,
                 compraPedidoHistorialService, compraCotizacionTramoService);
@@ -307,6 +309,39 @@ class CompraPedidoServiceTest {
 
         assertThat(service.marcarAdjudicado(5)).isSameAs(yaAdjudicado);
         verify(marcarAdjudicadoCompraPedidoUseCase, never()).marcar(any());
+    }
+
+    @Test
+    void marcarFormalizadoDelegaYRegistraHistorial() {
+        CompraPedido adjudicado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.ADJUDICADO).build();
+        CompraPedido marcado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.FORMALIZADO).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(adjudicado));
+        when(marcarFormalizadoCompraPedidoUseCase.marcar(5)).thenReturn(marcado);
+
+        assertThat(service.marcarFormalizado(5).getEstado()).isEqualTo(CompraPedidoEstado.FORMALIZADO);
+        verify(compraPedidoHistorialService).registrar(5, "FORMALIZADO", null, "Orden de Compra emitida");
+    }
+
+    @Test
+    void marcarFormalizadoEsIdempotente() {
+        CompraPedido yaFormalizado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.FORMALIZADO).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(yaFormalizado));
+
+        assertThat(service.marcarFormalizado(5)).isSameAs(yaFormalizado);
+        verify(marcarFormalizadoCompraPedidoUseCase, never()).marcar(any());
+    }
+
+    @Test
+    void marcarFormalizadoNoAvanzaSiNoEstaAdjudicado() {
+        CompraPedido pendiente = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.PENDIENTE_ADJUDICACION).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(pendiente));
+
+        assertThat(service.marcarFormalizado(5)).isSameAs(pendiente);
+        verify(marcarFormalizadoCompraPedidoUseCase, never()).marcar(any());
     }
 
     @Test

@@ -210,6 +210,18 @@ public class CompraPedido {
     }
 
     /**
+     * Marca el pedido como {@code FORMALIZADO}: se emitió la Orden de Compra de los procesos que lo
+     * cubren (etapa 8). Se invoca desde el subdominio de cotizaciones/formalización.
+     */
+    public void marcarFormalizado() {
+        if (estado != CompraPedidoEstado.ADJUDICADO) {
+            throw new IllegalStateException(
+                    "El pedido no está adjudicado (estado actual: " + estado + ")");
+        }
+        this.estado = CompraPedidoEstado.FORMALIZADO;
+    }
+
+    /**
      * Rechaza la autorización de presupuesto: el pedido vuelve al solicitante. El motivo es
      * obligatorio.
      */

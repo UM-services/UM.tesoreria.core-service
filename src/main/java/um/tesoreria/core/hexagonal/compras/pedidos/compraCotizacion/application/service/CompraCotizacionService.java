@@ -51,6 +51,7 @@ public class CompraCotizacionService {
     private final RecomendarCompraCotizacionUseCase recomendarCompraCotizacionUseCase;
     private final CerrarCompraCotizacionUseCase cerrarCompraCotizacionUseCase;
     private final AdjudicarCompraCotizacionUseCase adjudicarCompraCotizacionUseCase;
+    private final FormalizarCompraCotizacionUseCase formalizarCompraCotizacionUseCase;
     private final CompraAdjudicacionRepository compraAdjudicacionRepository;
 
     public CompraCotizacion crear(CompraCotizacion proceso) {
@@ -197,5 +198,25 @@ public class CompraCotizacionService {
 
     public Optional<CompraAdjudicacion> adjudicacion(Long compraCotizacionId) {
         return compraAdjudicacionRepository.findByCompraCotizacionId(compraCotizacionId);
+    }
+
+    // ---- Etapa 8: formalización (Orden de Compra) ----
+
+    /**
+     * Marca el proceso adjudicado como {@code FORMALIZADA} y avanza a {@code FORMALIZADO} los
+     * pedidos cubiertos por sus ítems (gate de la recepción).
+     */
+    @Transactional
+    public CompraCotizacion formalizar(Long compraCotizacionId) {
+        CompraCotizacion formalizado = formalizarCompraCotizacionUseCase.formalizar(compraCotizacionId);
+        for (Integer pedidoId : compraCotizacionRepository.findPedidoIdsByProceso(compraCotizacionId)) {
+            compraPedidoService.marcarFormalizado(pedidoId);
+        }
+        return formalizado;
+    }
+
+    /** Ids de pedido alcanzados por los ítems del proceso (trazabilidad de la formalización). */
+    public List<Integer> pedidoIdsByProceso(Long compraCotizacionId) {
+        return compraCotizacionRepository.findPedidoIdsByProceso(compraCotizacionId);
     }
 }

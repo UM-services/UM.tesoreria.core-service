@@ -1,9 +1,9 @@
 ---
-title: Arquitectura Hexagonal - Módulo CompraPedido (v9.1.0)
+title: Arquitectura Hexagonal - Módulo CompraPedido (v9.2.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
-        M["CompraPedido<br/>CompraPedidoEstado (BORRADOR/PENDIENTE_ENVIO/EN_REVISION_COMPRAS/<br/>PENDIENTE_AUTORIZACION_PRESUPUESTO/AUTORIZADO_PRESUPUESTO/<br/>EN_COTIZACION/PENDIENTE_ADJUDICACION/ADJUDICADO/RECHAZADO/DESCARTADO;<br/>ENVIADO deprecado)<br/>cantidadCotizacionesMinima<br/>CompraPedidoCriteria"]
+        M["CompraPedido<br/>CompraPedidoEstado (BORRADOR/PENDIENTE_ENVIO/EN_REVISION_COMPRAS/<br/>PENDIENTE_AUTORIZACION_PRESUPUESTO/AUTORIZADO_PRESUPUESTO/<br/>EN_COTIZACION/PENDIENTE_ADJUDICACION/ADJUDICADO/FORMALIZADO/RECHAZADO/DESCARTADO;<br/>ENVIADO deprecado)<br/>cantidadCotizacionesMinima<br/>CompraPedidoCriteria"]
         IN["Create/Update/Enviar/Aprobar/Rechazar/Descartar<br/>Estimar/AutorizarPresupuesto/RechazarPresupuesto<br/>MarcarEnCotizacion/MarcarPendienteAdjudicacion/MarcarAdjudicado<br/>GetById/GetByNumero/List<br/>UseCase (Puertos de Entrada)"]
         OUT["CompraPedidoRepository<br/>EjercicioActualPort<br/>(Puertos de Salida)"]
     end
@@ -30,7 +30,7 @@ flowchart TD
         His["CompraPedidoHistorialService<br/>(línea de tiempo)"]
         Aut["compraAutoridadUsuario / compraReferencia<br/>(límite por monto: lo valida la fachada<br/>tesoreria-compras en fail-closed, no core)"]
         Cot["CompraCotizacionTramoService<br/>(mínimo de cotizaciones al estimar)"]
-        Proc["CompraCotizacionService<br/>(marca EN_COTIZACION/PENDIENTE_ADJUDICACION/<br/>ADJUDICADO desde el proceso de cotización)"]
+        Proc["CompraCotizacionService<br/>(marca EN_COTIZACION/PENDIENTE_ADJUDICACION/<br/>ADJUDICADO/FORMALIZADO desde el proceso de cotización)"]
     end
 
     Ctrl --> Svc
