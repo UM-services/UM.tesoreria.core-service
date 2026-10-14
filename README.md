@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.2.0**
+**Versión actual (SemVer): 9.2.1**
+
+## Novedades 9.2.1 (verificado en código)
+- **refactor(compras/articulo, ubicacionArticulo)**: acceso a datos en JPA estándar, sin SQL nativo ni `@Query`. Bloqueos con `@Lock(PESSIMISTIC_WRITE)` en métodos derivados; conteos de referencias con entidades de solo lectura del slice; baja de vínculos con `deleteAllByIdInBatch` e id del vínculo por proyección. La traducción de errores usa las excepciones de Spring y el nombre de restricción en lugar de códigos de MySQL (salvo el texto que la columna latin1 no admite, aislado).
+- **config**: dialecto `MySQL57Dialect` (subclase de `MySQLDialect`) en `bootstrap.yml`: genera `FOR UPDATE` en lugar de `FOR UPDATE OF <alias>`, que MySQL 5.7 rechaza.
+
+> Basado en `git diff origin/develop` y el código real de los adaptadores de ambos slices y de `MySQL57Dialect`. Sin cambios de API (mismas rutas, campos, códigos y cuerpos de error): incremento **patch** (`9.2.0` → `9.2.1`, `pom.xml`). Sin dependencias nuevas ni cambios de esquema. Verificado con `mvn test` y con IT/E2E corridas a mano contra la base de desarrollo.
 
 ## Novedades 9.2.0 (verificado en código)
 - **feat(compras/pedidos)**: **Formalización (etapa 8) — Orden de Compra**. Nuevo slice `compraFormalizacion` bajo `compras/pedidos` en `/api/tesoreria/core/compraFormalizacion`: `GET`, `POST /search`, `GET /{id}`, `GET /pendientes` (adjudicaciones sin OC) y `GET /por-cotizacion/{compraCotizacionId}`; el alta `POST` **formaliza** la adjudicación (una sola OC por adjudicación, `UNIQUE compra_adjudicacion_id`, idempotente), snapshoteando proveedor, moneda, monto y condiciones (pago/entrega/garantía) de la oferta adjudicada —editables al formalizar— más su **detalle de ítems** (`compra_formalizacion_item`, con trazabilidad al proceso/ítem del pedido y precio/marca de la oferta). Numeración propia `OC-AAAA-NNNNNN` (`LAST_INSERT_ID`) y `numeroExterno` opcional.

@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Artículo (v8.0.0)
+title: Arquitectura Hexagonal - Módulo Artículo (v9.2.1)
 ---
 
 flowchart TD
@@ -24,9 +24,9 @@ flowchart TD
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         AC[ArticuloController<br/>ProblemDetail con codigo/campo/referencias]
-        JPA[JpaArticuloRepositoryAdapter<br/>persist + flush, SELECT ... FOR UPDATE nativo]
-        RES[ArticuloRestricciones<br/>traduce 1062/1366/1451/1452/1205/1213]
-        REF[JpaReferenciasArticuloAdapter<br/>COUNT entrega_detalle, movprov_detallefactura]
+        JPA[JpaArticuloRepositoryAdapter<br/>persist + flush, lectura con bloqueo @Lock PESSIMISTIC_WRITE]
+        RES[ArticuloRestricciones<br/>traduce por excepción de Spring + restricción<br/>texto no admitido: específico de MySQL]
+        REF[JpaReferenciasArticuloAdapter<br/>countByArticuloId sobre entrega_detalle y movprov_detallefactura<br/>entidades de solo lectura del slice]
         ENT[ArticuloEntity / ArticuloMapper]
     end
 
