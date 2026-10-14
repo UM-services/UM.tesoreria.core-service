@@ -80,7 +80,7 @@ class EscrituraHistorialDevDbIT {
         registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
         registry.add("spring.datasource.hikari.maximum-pool-size", () -> "1");
         registry.add("spring.datasource.hikari.connection-init-sql", () -> initSql);
-        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
+        registry.add("spring.jpa.database-platform", () -> "um.tesoreria.core.configuration.MySQL57Dialect");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
         registry.add("spring.jpa.properties.hibernate.session_factory.statement_inspector",
                 SoloTablasTemporales.class::getName);
@@ -90,7 +90,7 @@ class EscrituraHistorialDevDbIT {
     public static class SoloTablasTemporales implements StatementInspector {
 
         private static final Pattern ESCRITURA = Pattern.compile(
-                "^\\s*(?:insert\\s+into|update|delete\\s+from)\\s+`?(\\w+)`?", Pattern.CASE_INSENSITIVE);
+                "^\\s*(?:insert\\s+into|update|delete(?:\\s+\\w+)?\\s+from)\\s+`?(\\w+)`?", Pattern.CASE_INSENSITIVE);
 
         @Override
         public String inspect(String sql) {

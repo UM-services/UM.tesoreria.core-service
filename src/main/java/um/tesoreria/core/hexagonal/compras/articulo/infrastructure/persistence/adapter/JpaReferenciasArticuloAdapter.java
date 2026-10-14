@@ -1,15 +1,14 @@
 package um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.adapter;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.ReferenciaArticulo;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.ports.out.ReferenciasArticuloRepository;
+import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.repository.JpaEntregaDetalleReferenciaRepository;
+import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.repository.JpaFacturaDetalleReferenciaRepository;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Conteos sobre las columnas indexadas que guardan el id del artículo (inventario de dev, 2026-10-05):
@@ -20,29 +19,21 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JpaReferenciasArticuloAdapter implements ReferenciasArticuloRepository {
 
-    /** Tabla → columna con el id del artículo, en el orden en que se informan. */
-    static final Map<String, String> COLUMNA_POR_TABLA = new LinkedHashMap<>();
+    private final JpaEntregaDetalleReferenciaRepository entregas;
+    private final JpaFacturaDetalleReferenciaRepository facturas;
 
-    static {
-        COLUMNA_POR_TABLA.put("entrega_detalle", "NeD_Art_ID");
-        COLUMNA_POR_TABLA.put("movprov_detallefactura", "FaD_Art_ID");
-    }
-
-    private final EntityManager entityManager;
-
+    /** Se informan en este orden: entregas, facturas. */
     @Override
     public List<ReferenciaArticulo> findReferencias(Long articuloId) {
         var referencias = new ArrayList<ReferenciaArticulo>();
-        for (var tablaYColumna : COLUMNA_POR_TABLA.entrySet()) {
-            var tabla = tablaYColumna.getKey();
-            var cantidad = ((Number) entityManager
-                    .createNativeQuery("SELECT COUNT(*) FROM " + tabla + " WHERE " + tablaYColumna.getValue() + " = :id")
-                    .setParameter("id", articuloId)
-                    .getSingleResult()).longValue();
-            if (cantidad > 0) {
-                referencias.add(new ReferenciaArticulo(tabla, cantidad));
-            }
-        }
+        agregar(referencias, "entrega_detalle", entregas.countByArticuloId(articuloId));
+        agregar(referencias, "movprov_detallefactura", facturas.countByArticuloId(articuloId));
         return referencias;
+    }
+
+    private static void agregar(List<ReferenciaArticulo> referencias, String tabla, long cantidad) {
+        if (cantidad > 0) {
+            referencias.add(new ReferenciaArticulo(tabla, cantidad));
+        }
     }
 }
