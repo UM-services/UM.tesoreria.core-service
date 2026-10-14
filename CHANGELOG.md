@@ -2,6 +2,19 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [9.2.1] - 2026-10-13
+
+### Changed
+
+- refactor(compras/articulo, ubicacionArticulo): el acceso a datos de los dos slices queda en JPA estándar, sin SQL nativo ni `@Query`, y sin cambios de API (mismas rutas, campos, códigos y cuerpos de error).
+  - Lecturas con bloqueo: `@Lock(PESSIMISTIC_WRITE)` en métodos derivados (`JpaArticuloRepository.findWithLockByArticuloId`, `JpaUbicacionArticuloRepository.findWithLockByUbicacionArticuloId` y `findWithLockByArticuloIdOrderByUbicacionArticuloId`, este último con proyección de escalares). Se mantienen el orden artículo → vínculos, la lectura actual de los vínculos por `articulo_id` en la baja y la revalidación del par bajo bloqueo en la asignación.
+  - Nuevo dialecto `um.tesoreria.core.configuration.MySQL57Dialect` (subclase de `MySQLDialect`, configurado en `bootstrap.yml` y `application-it.yml`): con MySQL 5.7, `PESSIMISTIC_WRITE` de Hibernate 7 generaba `FOR UPDATE OF <alias>`, que esa versión rechaza; el dialecto genera `FOR UPDATE`. Marcado como específico de MySQL.
+  - Baja de vínculos con `deleteAllByIdInBatch` sobre las filas ya bloqueadas; id del vínculo con proyección derivada (`findIdByUbicacionIdAndArticuloId`, solo la columna id).
+  - Referencias del artículo con `countByArticuloId` sobre entidades de solo lectura del slice (`EntregaDetalleReferenciaEntity`, `FacturaDetalleReferenciaEntity`).
+  - `ArticuloRestricciones` y `UbicacionArticuloRestricciones` traducen por la excepción de Spring que corresponde al error del motor (`DuplicateKeyException`, `DataIntegrityViolationException`, `CannotAcquireLockException`, interbloqueo) más el tipo y nombre de restricción que extrae Hibernate, en lugar de los códigos de error de MySQL. El texto que la columna latin1 no admite (error 1366) no tiene equivalente portable: queda aislado y marcado como específico de MySQL.
+
+> Basado en `git diff origin/develop` (21 archivos de código y pruebas, 5 de ellos nuevos, +466/−220, más documentación) y el código real de `JpaArticuloRepositoryAdapter`, `JpaReferenciasArticuloAdapter`, `JpaUbicacionArticuloRepositoryAdapter`, `ArticuloRestricciones`, `UbicacionArticuloRestricciones`, `JpaArticuloRepository`, `JpaUbicacionArticuloRepository`, las entidades nuevas de referencia y `MySQL57Dialect`. Refactor interno sin cambios de contrato REST, URL ni campos: incremento **patch** (`9.2.0` → `9.2.1`, `pom.xml`). Sin dependencias nuevas ni cambios de esquema. Verificación: `mvn test` (807 pruebas) y, a mano contra la base de desarrollo, `mvn -Pit verify` con IT y E2E (49 pruebas, incluida `GastosConcurrenciaDevE2E` con sus 10 casos sin cambios de expectativa); las pruebas que comparaban texto de SQL se adaptaron al SQL que genera Hibernate. Estado de `articulos`, `ubicacion_articulo` y `gestion_escritura_historial` (CHECKSUM, filas, AUTO_INCREMENT) igual antes y después. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-13).
+
 ## [9.2.0] - 2026-10-12
 
 ### Added

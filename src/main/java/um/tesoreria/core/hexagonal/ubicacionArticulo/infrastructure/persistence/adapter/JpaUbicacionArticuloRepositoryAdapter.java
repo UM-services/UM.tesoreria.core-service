@@ -1,7 +1,9 @@
 package um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.adapter;
 
 import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.entity.ArticuloEntity;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
@@ -13,25 +15,44 @@ import um.tesoreria.core.hexagonal.ubicacionArticulo.domain.ports.out.UbicacionA
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.entity.UbicacionArticuloEntity;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.mapper.UbicacionArticuloMapper;
 import um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.repository.JpaUbicacionArticuloRepository;
-import java.math.BigDecimal;
+import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloRepository {
     private final JpaUbicacionArticuloRepository jpaUbicacionArticuloRepository;
     private final UbicacionArticuloMapper mapper;
     private final EntityManager entityManager;
+    private final SQLExceptionTranslator sqlExceptionTranslator;
+
+    /**
+     * El traductor de errores es propio del adaptador y no un bean: Spring Boot usa cualquier bean
+     * {@link SQLExceptionTranslator} para traducir las excepciones de todos los repositorios JPA.
+     */
+    @Autowired
+    public JpaUbicacionArticuloRepositoryAdapter(JpaUbicacionArticuloRepository jpaUbicacionArticuloRepository,
+                                                 UbicacionArticuloMapper mapper, EntityManager entityManager,
+                                                 DataSource dataSource) {
+        this(jpaUbicacionArticuloRepository, mapper, entityManager, new SQLErrorCodeSQLExceptionTranslator(dataSource));
+    }
+
+    JpaUbicacionArticuloRepositoryAdapter(JpaUbicacionArticuloRepository jpaUbicacionArticuloRepository,
+                                          UbicacionArticuloMapper mapper, EntityManager entityManager,
+                                          SQLExceptionTranslator sqlExceptionTranslator) {
+        this.jpaUbicacionArticuloRepository = jpaUbicacionArticuloRepository;
+        this.mapper = mapper;
+        this.entityManager = entityManager;
+        this.sqlExceptionTranslator = sqlExceptionTranslator;
+    }
 
     /**
      * Upsert por par. Si el vínculo existe, su estado sale de la lectura con bloqueo (en REPEATABLE READ es la única
      * que ve lo último confirmado); si no existe se inserta sin bloquear nada (un FOR UPDATE sobre un par ausente
      * tomaría un bloqueo de brecha). Un choque con otra inserción del mismo par, o un vínculo borrado entre la
      * búsqueda y el bloqueo (o reasignado a otro par), sale como conflicto reintentable.
-     * FOR UPDATE nativo: con PESSIMISTIC_WRITE, Hibernate 7 genera "FOR UPDATE OF", que MySQL 5.7 no acepta.
      */
     @Override
     public AsignacionGuardada save(UbicacionArticulo domain) {
@@ -40,15 +61,9 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
             UbicacionArticuloEntity entity;
             UbicacionArticulo anterior = null;
             if (id.isPresent()) {
-                List<?> filas = entityManager.createNativeQuery(
-                                "SELECT * FROM ubicacion_articulo WHERE ubicacion_articulo_id = :id FOR UPDATE", UbicacionArticuloEntity.class)
-                        .setParameter("id", id.get())
-                        .getResultList();
-                if (filas.isEmpty()) {
-                    throw new UbicacionArticuloConflictException(true,
-                            "el vínculo " + domain.getUbicacionId() + ":" + domain.getArticuloId() + " se borró mientras se asignaba");
-                }
-                entity = (UbicacionArticuloEntity) filas.getFirst();
+                entity = jpaUbicacionArticuloRepository.findWithLockByUbicacionArticuloId(id.get().getUbicacionArticuloId())
+                        .orElseThrow(() -> new UbicacionArticuloConflictException(true,
+                                "el vínculo " + domain.getUbicacionId() + ":" + domain.getArticuloId() + " se borró mientras se asignaba"));
                 // La búsqueda del id vio la foto de RR; el bloqueo puede devolver esa misma PK para otro par.
                 // No se modifica ni registra ese vínculo: el servicio repite el pedido en una transacción nueva.
                 if (!Objects.equals(entity.getUbicacionId(), domain.getUbicacionId())
@@ -71,7 +86,7 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
             entity.setCuenta(entity.getNumeroCuenta() == null ? null : entityManager.find(CuentaEntity.class, entity.getNumeroCuenta()));
             return new AsignacionGuardada(anterior, mapper.toDomainModel(entity));
         } catch (RuntimeException ex) {
-            throw UbicacionArticuloRestricciones.traducir(ex, domain.getUbicacionId(), domain.getArticuloId());
+            throw UbicacionArticuloRestricciones.traducir(sqlExceptionTranslator, ex, domain.getUbicacionId(), domain.getArticuloId());
         }
     }
     
@@ -98,31 +113,26 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
      * bloqueo) y no trae uno que otro pasó a otro artículo. Usa el índice {@code articulo_id} (EXPLAIN en dev,
      * 2026-10-08) y toma un bloqueo de brecha hasta el fin de la baja: mientras tanto también espera la inserción de un
      * vínculo de un artículo vecino en ese índice, y un escritor externo con varias escrituras en la misma transacción
-     * puede chocar en un interbloqueo (la baja lo reintenta una vez). Sin cargar entidades.
+     * puede chocar en un interbloqueo (la baja lo reintenta una vez). Sin cargar entidades. Las filas leídas quedan
+     * bloqueadas por esta transacción, así que se borran por id.
      */
     @Override
     public List<UbicacionArticulo> deleteAllByArticuloId(Long articuloId) {
         try {
-            List<?> filas = entityManager.createNativeQuery(
-                            "SELECT ubicacion_articulo_id, ubicacion_id, articulo_id, cuenta_contable FROM ubicacion_articulo"
-                                    + " WHERE articulo_id = :articuloId ORDER BY ubicacion_articulo_id FOR UPDATE")
-                    .setParameter("articuloId", articuloId)
-                    .getResultList();
-            var borrados = filas.stream().map(Object[].class::cast).map(f -> UbicacionArticulo.builder()
-                    .ubicacionArticuloId(((Number) f[0]).longValue())
-                    .ubicacionId(f[1] == null ? null : ((Number) f[1]).intValue())
-                    .articuloId(((Number) f[2]).longValue())
-                    .numeroCuenta((BigDecimal) f[3])
-                    .build()).toList();
+            var borrados = jpaUbicacionArticuloRepository.findWithLockByArticuloIdOrderByUbicacionArticuloId(articuloId).stream()
+                    .map(f -> UbicacionArticulo.builder()
+                            .ubicacionArticuloId(f.getUbicacionArticuloId())
+                            .ubicacionId(f.getUbicacionId())
+                            .articuloId(f.getArticuloId())
+                            .numeroCuenta(f.getNumeroCuenta())
+                            .build())
+                    .toList();
             if (!borrados.isEmpty()) {
-                entityManager.createNativeQuery("DELETE FROM ubicacion_articulo WHERE ubicacion_articulo_id IN (:ids) AND articulo_id = :articuloId")
-                        .setParameter("ids", borrados.stream().map(UbicacionArticulo::getUbicacionArticuloId).toList())
-                        .setParameter("articuloId", articuloId)
-                        .executeUpdate();
+                jpaUbicacionArticuloRepository.deleteAllByIdInBatch(borrados.stream().map(UbicacionArticulo::getUbicacionArticuloId).toList());
             }
             return borrados;
         } catch (RuntimeException ex) {
-            throw UbicacionArticuloRestricciones.traducirBaja(ex, articuloId);
+            throw UbicacionArticuloRestricciones.traducirBaja(sqlExceptionTranslator, ex, articuloId);
         }
     }
 

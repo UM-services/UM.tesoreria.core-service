@@ -82,6 +82,11 @@ class ArticuloDevDbIT {
 
     static final Set<String> TABLAS_TEMPORALES = Set.of("articulos", "ubicacion_articulo", "gestion_escritura_historial");
     static final List<String> SQL = new CopyOnWriteArrayList<>();
+    /** SQL que genera Hibernate (en minúsculas, con alias) para cada paso de la baja. */
+    static final String BLOQUEO_ARTICULO = "from articulos \\w+ where \\w+\\.art_id=\\? for update$";
+    static final String BLOQUEO_VINCULOS = "from ubicacion_articulo \\w+ where \\w+\\.articulo_id=\\? order by .* for update$";
+    static final String BORRADO_VINCULOS = "^delete (\\w+ )?from ubicacion_articulo ";
+    static final String BORRADO_ARTICULO = "^delete (\\w+ )?from articulos ";
 
     @TestConfiguration
     @EnableJpaAuditing
@@ -104,7 +109,7 @@ class ArticuloDevDbIT {
                         + "; CREATE TEMPORARY TABLE IF NOT EXISTS ubicacion_articulo LIKE it405_ubicacion_articulo"
                         + "; CREATE TEMPORARY TABLE IF NOT EXISTS it405_historial LIKE gestion_escritura_historial"
                         + "; CREATE TEMPORARY TABLE IF NOT EXISTS gestion_escritura_historial LIKE it405_historial");
-        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
+        registry.add("spring.jpa.database-platform", () -> "um.tesoreria.core.configuration.MySQL57Dialect");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
         registry.add("spring.jpa.properties.hibernate.session_factory.statement_inspector",
                 SoloTablasTemporales.class::getName);
@@ -114,7 +119,7 @@ class ArticuloDevDbIT {
     public static class SoloTablasTemporales implements StatementInspector {
 
         private static final Pattern ESCRITURA = Pattern.compile(
-                "^\\s*(?:insert\\s+into|update|delete\\s+from)\\s+`?(\\w+)`?", Pattern.CASE_INSENSITIVE);
+                "^\\s*(?:insert\\s+into|update|delete(?:\\s+\\w+)?\\s+from)\\s+`?(\\w+)`?", Pattern.CASE_INSENSITIVE);
 
         @Override
         public String inspect(String sql) {
@@ -177,11 +182,11 @@ class ArticuloDevDbIT {
 
         SQL.clear();
         editar.updateArticulo(900_003L, Articulo.builder().nombre("BLOQUEO 2").build());
-        assertThat(primeroAntesQue("for update", "update articulos")).as(SQL.toString()).isTrue();
+        assertThat(primeroAntesQue(BLOQUEO_ARTICULO, "^update articulos ")).as(SQL.toString()).isTrue();
 
         SQL.clear();
         borrar.deleteArticulo(900_003L);
-        assertThat(primeroAntesQue("for update", "delete from articulos")).as(SQL.toString()).isTrue();
+        assertThat(primeroAntesQue(BLOQUEO_ARTICULO, BORRADO_ARTICULO)).as(SQL.toString()).isTrue();
     }
 
     @Test
@@ -241,9 +246,9 @@ class ArticuloDevDbIT {
 
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = 900007", Integer.class)).isZero();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900007", Integer.class)).isZero();
-        assertThat(primeroAntesQue("from articulos where art_id = ? for update", "from ubicacion_articulo where articulo_id = ?"))
+        assertThat(primeroAntesQue(BLOQUEO_ARTICULO, BLOQUEO_VINCULOS))
                 .as("primero el artículo, después sus vínculos con lectura actual: " + SQL).isTrue();
-        assertThat(primeroAntesQue("delete from ubicacion_articulo", "delete from articulos")).as(SQL.toString()).isTrue();
+        assertThat(primeroAntesQue(BORRADO_VINCULOS, BORRADO_ARTICULO)).as(SQL.toString()).isTrue();
         // n + 1 eventos: una baja por vínculo y la del artículo
         for (var ubicacion : ubicaciones) {
             assertThat(operaciones("ubicacion_articulo", ubicacion + ":900007")).containsExactly("BAJA");
@@ -258,7 +263,7 @@ class ArticuloDevDbIT {
         SQL.clear();
         borrar.deleteArticulo(900_008L);
 
-        assertThat(SQL).noneMatch(sql -> sql.startsWith("delete from ubicacion_articulo"));
+        assertThat(SQL).noneMatch(sql -> Pattern.compile(BORRADO_VINCULOS).matcher(sql).find());
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900008", Integer.class)).isZero();
     }
 
@@ -361,7 +366,7 @@ class ArticuloDevDbIT {
         assertThatThrownBy(() -> borrar.deleteArticulo(900_012L)).isInstanceOf(IllegalStateException.class);
 
         assertThat(SQL).as("el vínculo y su historial llegaron a escribirse antes del fallo")
-                .anyMatch(sql -> sql.startsWith("delete from ubicacion_articulo"))
+                .anyMatch(sql -> Pattern.compile(BORRADO_VINCULOS).matcher(sql).find())
                 .anyMatch(sql -> sql.startsWith("insert into gestion_escritura_historial"));
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM articulos WHERE Art_ID = 900012", Integer.class)).isOne();
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM ubicacion_articulo WHERE articulo_id = 900012", Integer.class)).isOne();
@@ -462,12 +467,14 @@ class ArticuloDevDbIT {
                 ((Number) r.get("Art_Habilitado")).intValue(), r.get("Art_Descripcion"), r.get("Art_Unidad"));
     }
 
-    /** El primer SQL que contiene {@code primero} aparece antes que el primero que contiene {@code despues}. */
+    /** El primer SQL en el que aparece la expresión {@code primero} está antes que el primero con {@code despues}. */
     private static boolean primeroAntesQue(String primero, String despues) {
+        var p = Pattern.compile(primero);
+        var d = Pattern.compile(despues);
         int i = -1, j = -1;
         for (int k = 0; k < SQL.size(); k++) {
-            if (i < 0 && SQL.get(k).contains(primero)) i = k;
-            if (j < 0 && SQL.get(k).contains(despues)) j = k;
+            if (i < 0 && p.matcher(SQL.get(k)).find()) i = k;
+            if (j < 0 && d.matcher(SQL.get(k)).find()) j = k;
         }
         return i >= 0 && j >= 0 && i < j;
     }

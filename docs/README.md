@@ -1,13 +1,13 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 9.2.0** (actualizada: 2026-10-12)
+**Versión actual del servicio: 9.2.1** (actualizada: 2026-10-13)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
 ## Diagramas de Arquitectura
 - `architecture.mmd`: Arquitectura general (controladores, servicios, repositorios, entidades).
 - `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado.
-- `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v8.0.0 (validación, baja segura con referencias, historial #404 y puertos de otros slices).
+- `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v9.2.1 (validación, baja segura con referencias, historial #404 y puertos de otros slices; bloqueo con `@Lock`, conteos con entidades de solo lectura y errores por excepción de Spring, sin SQL nativo).
 - `hexagonal-comprobante.mmd`: Arquitectura hexagonal del módulo Comprobante (tipos de comprobantes AFIP) - v3.36.0 (nuevo módulo, 6 casos de uso).
 - `hexagonal-cuentaMovimiento.mmd`: Arquitectura hexagonal del módulo CuentaMovimiento (asientos contables) - v3.36.0 (nuevo módulo, 11 casos de uso).
 - `hexagonal-proveedorMovimiento.mmd`: Arquitectura hexagonal del módulo ProveedorMovimiento (movimientos de proveedores) - v3.36.0 (nuevo módulo, 13 casos de uso).
@@ -20,7 +20,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta (gestión de cuentas contables) - v3.8.0.
 - `hexagonal-mercadopago-context-history.mmd`: Historial de contexto de MercadoPago.
 - `hexagonal-ubicacion.mmd`: Arquitectura hexagonal del módulo Ubicacion (gestión de ubicaciones) - v8.0.0 (nuevo puerto público `GetUbicacionByIdUseCase`).
-- `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v8.0.0 (asignación idempotente, borrado de vínculos en la baja del artículo, historial #404).
+- `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v9.2.1 (asignación idempotente, borrado de vínculos en la baja del artículo, historial #404; bloqueos con `@Lock` y baja con `deleteAllByIdInBatch`, sin SQL nativo).
 - `hexagonal-dependencia.mmd`: Arquitectura hexagonal del módulo Dependencia (gestión de dependencias) - v3.17.0.
 - `hexagonal-facturaPendiente.mmd`: Arquitectura hexagonal del módulo FacturaPendiente (gestión de facturas pendientes) - v3.36.0 (reubicado bajo `compras/`).
 - `hexagonal-facultad.mmd`: Arquitectura hexagonal del módulo Facultad (gestión de facultades) - v3.50.0 (caso de uso de responsable académica).

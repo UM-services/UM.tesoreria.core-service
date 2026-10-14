@@ -1,7 +1,8 @@
 package um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.adapter;
 
 import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.compras.articulo.application.exception.ArticuloException;
 import um.tesoreria.core.hexagonal.compras.articulo.domain.model.Articulo;
@@ -10,6 +11,7 @@ import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.e
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.mapper.ArticuloMapper;
 import um.tesoreria.core.hexagonal.compras.articulo.infrastructure.persistence.repository.JpaArticuloRepository;
 
+import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,13 +24,27 @@ import um.tesoreria.core.model.PaginatedResponse;
 
 
 @Component
-@RequiredArgsConstructor
 public class JpaArticuloRepositoryAdapter implements ArticuloRepository {
 
     private final JpaArticuloRepository jpaArticuloRepository;
     private final ArticuloMapper articuloMapper;
     private final ArticuloKeyRepository articuloKeyRepository;
     private final EntityManager entityManager;
+    private final SQLExceptionTranslator sqlExceptionTranslator;
+
+    /**
+     * El traductor de errores es propio del adaptador y no un bean: Spring Boot usa cualquier bean
+     * {@link SQLExceptionTranslator} para traducir las excepciones de todos los repositorios JPA.
+     */
+    public JpaArticuloRepositoryAdapter(JpaArticuloRepository jpaArticuloRepository, ArticuloMapper articuloMapper,
+                                        ArticuloKeyRepository articuloKeyRepository, EntityManager entityManager,
+                                        DataSource dataSource) {
+        this.jpaArticuloRepository = jpaArticuloRepository;
+        this.articuloMapper = articuloMapper;
+        this.articuloKeyRepository = articuloKeyRepository;
+        this.entityManager = entityManager;
+        this.sqlExceptionTranslator = new SQLErrorCodeSQLExceptionTranslator(dataSource);
+    }
 
     @Override
     public Articulo create(Articulo articulo) {
@@ -38,7 +54,7 @@ public class JpaArticuloRepositoryAdapter implements ArticuloRepository {
             entityManager.persist(entity);
             entityManager.flush();
         } catch (RuntimeException ex) {
-            throw ArticuloRestricciones.traducir(ex, articulo.getArticuloId(), "alta");
+            throw ArticuloRestricciones.traducir(sqlExceptionTranslator, ex, articulo.getArticuloId(), "alta");
         }
         return articuloMapper.toDomainModel(entity);
     }
@@ -56,18 +72,13 @@ public class JpaArticuloRepositoryAdapter implements ArticuloRepository {
         }
         // El estado sale de la lectura con bloqueo: en REPEATABLE READ es la única que ve lo último confirmado
         // (una lectura común, como un refresh, devuelve la foto del primer SELECT de la transacción).
-        // Nativo porque con PESSIMISTIC_WRITE Hibernate 7 genera "FOR UPDATE OF", que MySQL 5.7 no acepta.
         // Debe ser la primera carga del artículo en la transacción: si ya estuviera en el contexto, Hibernate
         // devolvería la instancia cargada y no la fila leída.
-        List<?> filas;
         try {
-            filas = entityManager.createNativeQuery("SELECT * FROM articulos WHERE Art_ID = :id FOR UPDATE", ArticuloEntity.class)
-                    .setParameter("id", id)
-                    .getResultList();
+            return jpaArticuloRepository.findWithLockByArticuloId(id).map(articuloMapper::toDomainModel);
         } catch (RuntimeException ex) {
-            throw ArticuloRestricciones.traducir(ex, id, "bloqueo");
+            throw ArticuloRestricciones.traducir(sqlExceptionTranslator, ex, id, "bloqueo");
         }
-        return filas.stream().map(ArticuloEntity.class::cast).findFirst().map(articuloMapper::toDomainModel);
     }
 
     @Override
@@ -102,7 +113,7 @@ public class JpaArticuloRepositoryAdapter implements ArticuloRepository {
         try {
             entityManager.flush();
         } catch (RuntimeException ex) {
-            throw ArticuloRestricciones.traducir(ex, id, "edición");
+            throw ArticuloRestricciones.traducir(sqlExceptionTranslator, ex, id, "edición");
         }
         return articuloMapper.toDomainModel(entity);
     }
@@ -114,7 +125,7 @@ public class JpaArticuloRepositoryAdapter implements ArticuloRepository {
             entityManager.remove(entity);
             entityManager.flush();
         } catch (RuntimeException ex) {
-            throw ArticuloRestricciones.traducir(ex, id, "baja");
+            throw ArticuloRestricciones.traducir(sqlExceptionTranslator, ex, id, ArticuloRestricciones.BAJA);
         }
     }
 
