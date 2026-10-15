@@ -6,15 +6,19 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.exception.ChequeraCuotaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.exception.LectivoCuotaException;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.domain.model.LectivoCuota;
 import um.tesoreria.core.hexagonal.chequera.politicaArancelaria.domain.ports.in.RecalculateCuotaByUniqueIndexUseCase;
+import um.tesoreria.core.hexagonal.chequera.politicaArancelaria.domain.ports.in.SanitizeChequeraCuotaArancelUseCase;
 import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.util.Tool;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -24,6 +28,8 @@ public class RecalculateCuotaByUniqueIndexUseCaseImpl implements RecalculateCuot
     private final ChequeraCuotaService chequeraCuotaService;
     private final LectivoCuotaService lectivoCuotaService;
     private final LectivoService lectivoService;
+    private final ChequeraSerieService chequeraSerieService;
+    private final SanitizeChequeraCuotaArancelUseCase sanitizeChequeraCuotaArancelUseCase;
 
     @Override
     public ChequeraCuota recalculateCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, Integer plazo) {
@@ -36,13 +42,49 @@ public class RecalculateCuotaByUniqueIndexUseCaseImpl implements RecalculateCuot
         log.debug("Recalculate - Cuota En Revisión -> {}", cuotaEnRevision.jsonify());
         var cuotaReferencia = resolveCuotaReferencia(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId, ahora);
         log.debug("Recalculate - Cuota Referencia -> {}", cuotaReferencia.jsonify());
+
+        // Saneamiento: normaliza los importes (importeN = importeNOriginal * porcentaje / 100) antes de recalcular.
+        // Debe alcanzar a la cuota de referencia porque resolveImporteReferencia usa referencia.importe1.
+        var chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        persistirSiCorregida(cuotaEnRevision, sanitize(cuotaEnRevision, chequeraSerie));
+        persistirSiCorregida(cuotaReferencia, sanitize(cuotaReferencia, chequeraSerie));
+        log.debug("Recalculate - Cuota En Revisión saneada -> {}", cuotaEnRevision.jsonify());
+        log.debug("Recalculate - Cuota Referencia saneada -> {}", cuotaReferencia.jsonify());
+
         var importeReferencia = resolveImporteReferencia(cuotaEnRevision, cuotaReferencia);
         log.debug("\n\nImporte Referencia -> {}\n\n", importeReferencia);
         var fechaReferencia = Tool.firstTime(ahora).plusDays(plazo);
         cuotaEnRevision.setImporte3(importeReferencia);
         cuotaEnRevision.setVencimiento3(fechaReferencia);
         log.debug("Cuota nueva: {}", cuotaEnRevision.jsonify());
+
+        // El resultado del recálculo (importe3/vencimiento3) NO se persiste acá: lo guarda el cliente/otro proceso.
         return cuotaEnRevision;
+    }
+
+    private boolean sanitize(ChequeraCuota chequeraCuota, ChequeraSerie chequeraSerie) {
+        return sanitizeChequeraCuotaArancelUseCase.sanitize(chequeraCuota, chequeraSerie.getArancelTipoId(),
+                chequeraSerie.getLectivoId());
+    }
+
+    private void persistirSiCorregida(ChequeraCuota chequeraCuota, boolean corregida) {
+        if (!corregida || !esPersistible(chequeraCuota)) {
+            return;
+        }
+        chequeraCuotaService.saveAll(List.of(chequeraCuota));
+    }
+
+    private boolean esPersistible(ChequeraCuota chequeraCuota) {
+        // Sólo filas reales y no históricas (no pagadas, bajas, compensadas ni manuales).
+        return chequeraCuota.getChequeraCuotaId() != null
+                && !activo(chequeraCuota.getPagado())
+                && !activo(chequeraCuota.getBaja())
+                && !activo(chequeraCuota.getCompensada())
+                && !activo(chequeraCuota.getManual());
+    }
+
+    private boolean activo(Byte flag) {
+        return flag != null && flag != 0;
     }
 
     private ChequeraCuota findCuotaEnRevision(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, OffsetDateTime ahora) {

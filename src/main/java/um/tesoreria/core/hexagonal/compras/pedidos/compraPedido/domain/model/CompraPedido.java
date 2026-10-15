@@ -222,6 +222,30 @@ public class CompraPedido {
     }
 
     /**
+     * Marca el pedido como {@code RECEPCION_PARCIAL}: se registró una entrega de la Orden de Compra
+     * y todavía queda saldo por recibir (etapa 9). Se invoca desde el subdominio de recepción.
+     */
+    public void marcarRecepcionParcial() {
+        if (estado != CompraPedidoEstado.FORMALIZADO) {
+            throw new IllegalStateException(
+                    "El pedido no está formalizado (estado actual: " + estado + ")");
+        }
+        this.estado = CompraPedidoEstado.RECEPCION_PARCIAL;
+    }
+
+    /**
+     * Marca el pedido como {@code RECEPCIONADO}: el contratado quedó cubierto por las entregas (o
+     * la recepción se cerró con motivo). Se invoca desde el subdominio de recepción.
+     */
+    public void marcarRecepcionado() {
+        if (estado != CompraPedidoEstado.FORMALIZADO && estado != CompraPedidoEstado.RECEPCION_PARCIAL) {
+            throw new IllegalStateException(
+                    "El pedido no está en recepción (estado actual: " + estado + ")");
+        }
+        this.estado = CompraPedidoEstado.RECEPCIONADO;
+    }
+
+    /**
      * Rechaza la autorización de presupuesto: el pedido vuelve al solicitante. El motivo es
      * obligatorio.
      */

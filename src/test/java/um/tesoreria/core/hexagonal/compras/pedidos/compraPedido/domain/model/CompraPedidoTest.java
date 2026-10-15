@@ -274,4 +274,29 @@ class CompraPedidoTest {
         assertThat(pedido.esEditable()).isTrue();
     }
 
+    @Test
+    void marcarRecepcionParcialSoloDesdeFormalizado() {
+        CompraPedido pedido = CompraPedido.builder().estado(CompraPedidoEstado.FORMALIZADO).build();
+
+        pedido.marcarRecepcionParcial();
+
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.RECEPCION_PARCIAL);
+        assertThatThrownBy(() -> CompraPedido.builder().estado(CompraPedidoEstado.ADJUDICADO).build()
+                .marcarRecepcionParcial()).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void marcarRecepcionadoDesdeFormalizadoOParcial() {
+        CompraPedido formalizado = CompraPedido.builder().estado(CompraPedidoEstado.FORMALIZADO).build();
+        CompraPedido parcial = CompraPedido.builder().estado(CompraPedidoEstado.RECEPCION_PARCIAL).build();
+
+        formalizado.marcarRecepcionado();
+        parcial.marcarRecepcionado();
+
+        assertThat(formalizado.getEstado()).isEqualTo(CompraPedidoEstado.RECEPCIONADO);
+        assertThat(parcial.getEstado()).isEqualTo(CompraPedidoEstado.RECEPCIONADO);
+        assertThatThrownBy(() -> CompraPedido.builder().estado(CompraPedidoEstado.ADJUDICADO).build()
+                .marcarRecepcionado()).isInstanceOf(IllegalStateException.class);
+    }
+
 }

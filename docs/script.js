@@ -135,6 +135,7 @@ const diagrams = [
   { id: 'hexagonal-compraCotizacion', file: 'hexagonal-compraCotizacion.mmd', title: 'Arquitectura Hexagonal - CompraCotizacion' },
   { id: 'hexagonal-compraCotizacionTramo', file: 'hexagonal-compraCotizacionTramo.mmd', title: 'Arquitectura Hexagonal - CompraCotizacionTramo' },
   { id: 'hexagonal-compraFormalizacion', file: 'hexagonal-compraFormalizacion.mmd', title: 'Arquitectura Hexagonal - CompraFormalizacion' },
+  { id: 'hexagonal-compraRecepcion', file: 'hexagonal-compraRecepcion.mmd', title: 'Arquitectura Hexagonal - CompraRecepcion' },
   { id: 'hexagonal-setup', file: 'hexagonal-setup.mmd', title: 'Arquitectura Hexagonal - Setup' },
   { id: 'hexagonal-deudaExamen', file: 'hexagonal-deudaExamen.mmd', title: 'Arquitectura Hexagonal - DeudaExamen' },
   { id: 'hexagonal-chequeraPago', file: 'hexagonal-chequeraPago.mmd', title: 'Arquitectura Hexagonal - ChequeraPago' },
