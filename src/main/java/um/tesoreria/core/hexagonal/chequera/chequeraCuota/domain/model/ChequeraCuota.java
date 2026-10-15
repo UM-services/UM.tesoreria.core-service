@@ -9,6 +9,7 @@ import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoCheque
 import um.tesoreria.core.util.Jsonifyable;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -61,6 +62,30 @@ public class ChequeraCuota implements Jsonifyable {
     public String cuotaKey() {
         return this.facultadId + "." + this.tipoChequeraId + "." + this.chequeraSerieId + "." + this.productoId + "."
                 + this.alternativaId + "." + this.cuotaId;
+    }
+
+    /**
+     * Sanea los importes aplicando el porcentaje de arancel sobre el importe original:
+     * {@code importeN = importe{N}Original * porcentaje / 100} (escala 4, HALF_UP).
+     * No modifica {@code importe{N}Original} ni los vencimientos.
+     */
+    public void aplicarPorcentajeArancel(BigDecimal porcentaje) {
+        if (porcentaje == null) {
+            return;
+        }
+        if (importe1Original != null) {
+            this.importe1 = calcularImporteArancel(importe1Original, porcentaje);
+        }
+        if (importe2Original != null) {
+            this.importe2 = calcularImporteArancel(importe2Original, porcentaje);
+        }
+        if (importe3Original != null) {
+            this.importe3 = calcularImporteArancel(importe3Original, porcentaje);
+        }
+    }
+
+    private static BigDecimal calcularImporteArancel(BigDecimal importeOriginal, BigDecimal porcentaje) {
+        return importeOriginal.multiply(porcentaje).divide(BigDecimal.valueOf(100), 4, RoundingMode.HALF_UP);
     }
 
 }

@@ -1,0 +1,77 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraPedido (v9.3.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraPedido<br/>CompraPedidoEstado (BORRADOR/PENDIENTE_ENVIO/EN_REVISION_COMPRAS/<br/>PENDIENTE_AUTORIZACION_PRESUPUESTO/AUTORIZADO_PRESUPUESTO/<br/>EN_COTIZACION/PENDIENTE_ADJUDICACION/ADJUDICADO/FORMALIZADO/<br/>RECEPCION_PARCIAL/RECEPCIONADO/RECHAZADO/DESCARTADO;<br/>ENVIADO deprecado)<br/>cantidadCotizacionesMinima<br/>CompraPedidoCriteria"]
+        IN["Create/Update/Enviar/Aprobar/Rechazar/Descartar<br/>Estimar/AutorizarPresupuesto/RechazarPresupuesto<br/>MarcarEnCotizacion/MarcarPendienteAdjudicacion/MarcarAdjudicado<br/>MarcarRecepcionParcial/MarcarRecepcionado<br/>GetById/GetByNumero/List<br/>UseCase (Puertos de Entrada)"]
+        OUT["CompraPedidoRepository<br/>EjercicioActualPort<br/>(Puertos de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraPedidoService<br/>@Transactional (crear, actualizar, enviar, aprobar, rechazar,<br/>descartar, estimar, autorizarPresupuesto, rechazarPresupuesto,<br/>marcarEnCotizacion, marcarPendienteAdjudicacion, marcarAdjudicado,<br/>marcarRecepcionParcial, marcarRecepcionado)<br/>cotizacionesMinimas (snapshot o cálculo vigente)"]
+        UCs["*UseCaseImpl (18)"]
+        Exc["CompraPedidoException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraPedidoController<br/>/api/tesoreria/core/compraPedido"]
+        DTO["CompraPedidoRequest/Response<br/>CompraPedidoCriteriaRequest (POST /search)<br/>Aprobar/Rechazar/Descartar/EnviarCompraPedidoRequest<br/>Estimar/AutorizarPresupuesto/RechazarPresupuestoRequest<br/>CompraPedidoCotizacionesMinimasResponse"]
+        Map["CompraPedidoDtoMapper<br/>CompraPedidoMapper"]
+        Adp["JpaCompraPedidoRepositoryAdapter"]
+        Eje["EjercicioActualJdbcAdapter<br/>tabla ejercicios (SQL directo)"]
+        Ent["CompraPedidoEntity<br/>tabla compra_pedido<br/>(estado varchar(100), fecha_envio, rechazo_motivo,<br/>descartado_motivo, cantidad_cotizaciones_minima)"]
+        Jpa["JpaCompraPedidoRepository"]
+    end
+
+    subgraph CrossSlice ["Otros slices del subdominio"]
+        Item["CompraPedidoItemService<br/>(detalle)"]
+        Sec["CompraPedidoSecuenciaService<br/>(correlativo anual)"]
+        His["CompraPedidoHistorialService<br/>(línea de tiempo)"]
+        Aut["compraAutoridadUsuario / compraReferencia<br/>(límite por monto: lo valida la fachada<br/>tesoreria-compras en fail-closed, no core)"]
+        Cot["CompraCotizacionTramoService<br/>(mínimo de cotizaciones al estimar)"]
+        Proc["CompraCotizacionService<br/>(marca EN_COTIZACION/PENDIENTE_ADJUDICACION/<br/>ADJUDICADO/FORMALIZADO desde el proceso de cotización)"]
+        Rec["CompraRecepcionService<br/>(marca RECEPCION_PARCIAL/RECEPCIONADO<br/>desde la recepción, etapa 9)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    Svc --> Item
+    Svc --> Sec
+    Svc --> His
+    Svc --> Cot
+    Proc --> Svc
+    Rec --> Svc
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Eje --> OUT
+    Jpa --> Ent
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Eje fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0
+    style Item fill:#fce4ec
+    style Sec fill:#fce4ec
+    style His fill:#fce4ec
+    style Aut fill:#fce4ec
+    style Cot fill:#fce4ec
+    style Proc fill:#fce4ec
+    style Rec fill:#fce4ec

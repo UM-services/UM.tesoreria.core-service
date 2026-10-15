@@ -53,6 +53,20 @@ public class ArticuloMapper {
         return builder.build();
     }
 
+    /** Copia los campos de negocio sobre una entidad existente; no toca id ni auditoría. */
+    public void copyBusinessFields(Articulo domain, ArticuloEntity entity) {
+        entity.setNombre(domain.getNombre());
+        entity.setDescripcion(domain.getDescripcion());
+        entity.setUnidad(domain.getUnidad());
+        entity.setPrecio(domain.getPrecio());
+        entity.setInventariable(domain.getInventariable());
+        entity.setStockMinimo(domain.getStockMinimo());
+        entity.setNumeroCuenta(domain.getNumeroCuenta());
+        entity.setTipo(domain.getTipo());
+        entity.setDirecto(domain.getDirecto());
+        entity.setHabilitado(domain.getHabilitado());
+    }
+
     public ArticuloSearch toSearchDomain(ArticuloKey entity) {
         if (entity == null) return null;
         return ArticuloSearch.builder()

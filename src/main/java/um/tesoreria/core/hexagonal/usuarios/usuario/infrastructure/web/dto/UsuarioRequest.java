@@ -11,6 +11,7 @@ public class UsuarioRequest {
     private String password;
     @NotNull
     private String nombre;
+    private Integer dependenciaId;
     @NotNull
     private Integer geograficaId;
     @NotNull
@@ -26,4 +27,6 @@ public class UsuarioRequest {
     private String googleMail;
     @NotNull
     private Byte activo;
+    private Byte administrador;
+    private Byte usuarioExterno;
 }

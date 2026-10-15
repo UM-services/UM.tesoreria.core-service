@@ -14,6 +14,7 @@ public class UsuarioMapper {
                 .login(entity.getLogin())
                 .password(entity.getPassword())
                 .nombre(entity.getNombre())
+                .dependenciaId(entity.getDependenciaId())
                 .geograficaId(entity.getGeograficaId())
                 .imprimeChequera(entity.getImprimeChequera())
                 .numeroOpManual(entity.getNumeroOpManual())
@@ -25,6 +26,7 @@ public class UsuarioMapper {
                 .activo(entity.getActivo())
                 .administrador(entity.getAdministrador())
                 .usuarioExterno(entity.getUsuarioExterno())
+                .debeCambiarClave(entity.getDebeCambiarClave())
                 .build();
     }
 
@@ -35,6 +37,7 @@ public class UsuarioMapper {
                 .login(domain.getLogin())
                 .password(domain.getPassword())
                 .nombre(domain.getNombre())
+                .dependenciaId(domain.getDependenciaId())
                 .geograficaId(domain.getGeograficaId())
                 .lastLog(domain.getLastLog())
                 .googleMail(domain.getGoogleMail());
@@ -47,6 +50,7 @@ public class UsuarioMapper {
         if (domain.getActivo() != null) builder.activo(domain.getActivo());
         if (domain.getAdministrador() != null) builder.administrador(domain.getAdministrador());
         if (domain.getUsuarioExterno() != null) builder.usuarioExterno(domain.getUsuarioExterno());
+        if (domain.getDebeCambiarClave() != null) builder.debeCambiarClave(domain.getDebeCambiarClave());
 
         return builder.build();
     }
@@ -63,6 +67,7 @@ public class UsuarioMapper {
         entity.setPassword(domain.getPassword());
         entity.setNombre(domain.getNombre());
         entity.setGeograficaId(domain.getGeograficaId());
+        if (domain.getDependenciaId() != null) entity.setDependenciaId(domain.getDependenciaId());
         entity.setLastLog(domain.getLastLog());
         entity.setGoogleMail(domain.getGoogleMail());
         if (domain.getImprimeChequera() != null) entity.setImprimeChequera(domain.getImprimeChequera());
@@ -73,5 +78,6 @@ public class UsuarioMapper {
         if (domain.getActivo() != null) entity.setActivo(domain.getActivo());
         if (domain.getAdministrador() != null) entity.setAdministrador(domain.getAdministrador());
         if (domain.getUsuarioExterno() != null) entity.setUsuarioExterno(domain.getUsuarioExterno());
+        if (domain.getDebeCambiarClave() != null) entity.setDebeCambiarClave(domain.getDebeCambiarClave());
     }
 }

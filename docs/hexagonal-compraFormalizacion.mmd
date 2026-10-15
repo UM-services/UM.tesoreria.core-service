@@ -1,0 +1,66 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraFormalizacion (v9.2.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraFormalizacion<br/>(OC-AAAA-NNNNNN, snapshot de proveedor,<br/>monto, condiciones y objeto)"]
+        M2["CompraFormalizacionItem<br/>(snapshot de ítems: cantidad, descripción,<br/>precio, marca, trazabilidad)"]
+        M3["CompraFormalizacionCriteria<br/>CompraFormalizacionPendiente"]
+        IN["Create/GetById/List<br/>UseCase (Puertos de Entrada)"]
+        OUT["CompraFormalizacionRepository<br/>CompraFormalizacionSecuenciaPort<br/>(Puertos de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraFormalizacionService<br/>@Transactional (formalizar: snapshot +<br/>transiciones de proceso y pedidos)"]
+        UCs["*UseCaseImpl (3)"]
+        Exc["CompraFormalizacionException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraFormalizacionController<br/>/api/tesoreria/core/compraFormalizacion"]
+        DTO["CompraFormalizacionRequest/Response<br/>CompraFormalizacionCriteriaRequest<br/>CompraFormalizacionPendienteResponse<br/>CompraFormalizacionItemResponse"]
+        Map["CompraFormalizacionDtoMapper<br/>CompraFormalizacionMapper"]
+        Adp["JpaCompraFormalizacionRepositoryAdapter<br/>CompraFormalizacionSecuenciaJdbcAdapter"]
+        Ent["CompraFormalizacionEntity (compra_formalizacion)<br/>CompraFormalizacionItemEntity<br/>(compra_formalizacion_item)"]
+        Jpa["JpaCompraFormalizacionRepository<br/>JpaCompraFormalizacionItemRepository"]
+    end
+
+    subgraph CrossSlice ["Composición con otros slices"]
+        Cot["CompraCotizacionService<br/>(adjudicación, proceso, ítems,<br/>formalizar: FORMALIZADA + pedidos FORMALIZADO)"]
+        Item["CompraPedidoItemService<br/>(descripción/unidad del ítem del pedido)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    Svc --> Cot
+    Svc --> Item
+    Svc --> M
+    Svc --> M2
+    Svc --> M3
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+
+    style M fill:#e1f5fe
+    style M2 fill:#e1f5fe
+    style M3 fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0
+    style Cot fill:#fce4ec
+    style Item fill:#fce4ec

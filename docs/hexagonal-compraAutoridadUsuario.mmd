@@ -1,0 +1,56 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraAutoridadUsuario (v9.0.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraAutoridadUsuario<br/>usuarioId, autoridadPerfilId<br/>LimiteAutorizacion (multiplico, referencia,<br/>limite, ilimitado, tieneAutoridad)"]
+        IN["AsignarAutoridadUsuarioUseCase<br/>GetPerfilIdsByUsuarioUseCase<br/>QuitarAutoridadUsuarioUseCase<br/>(Puertos de Entrada)"]
+        OUT["CompraAutoridadUsuarioRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraAutoridadUsuarioService<br/>getLimite = MAX(multiplico) × referencia<br/>fail-closed si no tiene autoridad"]
+        UCs["*UseCaseImpl (3)"]
+        Exc["CompraAutoridadUsuarioException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraAutoridadUsuarioController<br/>/api/tesoreria/core/compraAutoridadUsuario<br/>GET /{usuarioId}, GET /limite/{usuarioId}/{ejercicioId}<br/>POST, DELETE /{usuarioId}/{autoridadPerfilId}"]
+        DTO["CompraAutoridadUsuarioRequest/Response<br/>LimiteAutorizacionResponse"]
+        Map["CompraAutoridadUsuarioDtoMapper"]
+        Adp["JdbcCompraAutoridadUsuarioAdapter<br/>JdbcTemplate (SQL directo)"]
+        Tabla["tabla compra_autoridad_usuario<br/>unique (usuario_id, autoridad_perfil_id)"]
+    end
+
+    subgraph CrossSlice ["Composición en aplicación"]
+        Per["CompraAutoridadPerfilService<br/>(perfiles y activo)"]
+        Ref["CompraReferenciaService<br/>(importe del ejercicio)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    Svc --> Per
+    Svc --> Ref
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Tabla
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Tabla fill:#fff3e0
+    style Per fill:#fce4ec
+    style Ref fill:#fce4ec

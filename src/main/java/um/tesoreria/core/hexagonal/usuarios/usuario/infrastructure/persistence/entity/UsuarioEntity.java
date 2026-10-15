@@ -23,9 +23,8 @@ public class UsuarioEntity extends Auditable {
     private String login;
 
     private String password;
-
     private String nombre;
-
+    private Integer dependenciaId;
     private Integer geograficaId;
 
     @Builder.Default
@@ -56,5 +55,8 @@ public class UsuarioEntity extends Auditable {
 
     @Builder.Default
     private Byte usuarioExterno = 0;
+
+    @Builder.Default
+    private Byte debeCambiarClave = 0;
 
 }

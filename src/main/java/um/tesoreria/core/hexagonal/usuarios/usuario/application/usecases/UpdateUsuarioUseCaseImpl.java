@@ -22,6 +22,7 @@ public class UpdateUsuarioUseCaseImpl implements UpdateUsuarioUseCase {
             usuario.setLogin(newUsuario.getLogin());
             usuario.setPassword(DigestUtils.sha256Hex(newUsuario.getPassword()));
             usuario.setNombre(newUsuario.getNombre());
+            if (newUsuario.getDependenciaId() != null) usuario.setDependenciaId(newUsuario.getDependenciaId());
             usuario.setGeograficaId(newUsuario.getGeograficaId());
             usuario.setImprimeChequera(newUsuario.getImprimeChequera());
             usuario.setNumeroOpManual(newUsuario.getNumeroOpManual());

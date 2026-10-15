@@ -1,0 +1,69 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraCotizacionTramo (v9.1.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraCotizacionTramo<br/>cotizacionTramoId, nombre,<br/>topeMultiplico (nulo = sin tope),<br/>cantidadMinima, activo"]
+        IN["Create/Update/Delete/GetAll/GetById<br/>CotizacionTramoUseCase<br/>(Puertos de Entrada)"]
+        OUT["CompraCotizacionTramoRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraCotizacionTramoService<br/>resolverMinimo(ejercicioId, monto)"]
+        UCs["*UseCaseImpl (5)"]
+        Val["CompraCotizacionTramoValidator<br/>cantidad 1-10, topes únicos,<br/>a lo sumo un tramo abierto"]
+        Res["ResolutorMinimoCotizaciones<br/>primer tramo (por tope ascendente)<br/>que cubre el monto"]
+        Exc["CompraCotizacionTramoException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraCotizacionTramoController<br/>/api/tesoreria/core/compraCotizacionTramo<br/>GET, GET /{id}, GET /minimo,<br/>POST, PUT /{id}, DELETE /{id}"]
+        DTO["CompraCotizacionTramoRequest/Response<br/>CompraCotizacionMinimoResponse"]
+        Map["CompraCotizacionTramoDtoMapper<br/>CompraCotizacionTramoMapper"]
+        Adp["JpaCompraCotizacionTramoRepositoryAdapter"]
+        Ent["CompraCotizacionTramoEntity<br/>tabla compra_cotizacion_tramo"]
+        Jpa["JpaCompraCotizacionTramoRepository"]
+    end
+
+    subgraph CrossSlice ["Composición con otros slices"]
+        Ref["CompraReferenciaService<br/>(referencia del ejercicio)"]
+        Ped["CompraPedidoService<br/>(snapshot al estimar)"]
+        Cot["CompraCotizacionService<br/>(mínimo del proceso)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Res
+    Svc --> Exc
+    Svc --> Ref
+    UCs --> IN
+    UCs --> Val
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+    Svc --> M
+    Ped --> Svc
+    Cot --> Svc
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Val fill:#e8f5e8
+    style Res fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0
+    style Ref fill:#fce4ec
+    style Ped fill:#fce4ec
+    style Cot fill:#fce4ec

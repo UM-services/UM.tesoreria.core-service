@@ -1,0 +1,306 @@
+package um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.application.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.application.exception.CompraPedidoException;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedido;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedidoCriteria;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model.CompraPedidoEstado;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.ports.in.*;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacionTramo.application.service.CompraCotizacionTramoService;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoHistorial.application.service.CompraPedidoHistorialService;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.application.service.CompraPedidoItemService;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.domain.model.CompraPedidoItem;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoSecuencia.application.service.CompraPedidoSecuenciaService;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Fachada del pedido de compra.
+ *
+ * <p>Composición cross-slice en la capa de aplicación (mismo patrón que
+ * {@code ChequeraSerieService} que inyecta {@code ChequeraCuotaService}): el pedido compone
+ * el detalle, el correlativo anual y la línea de tiempo de estados, que viven en slices
+ * propios. Los dominios de cada slice permanecen puros.</p>
+ */
+@Service
+@RequiredArgsConstructor
+public class CompraPedidoService {
+
+    private final CreateCompraPedidoUseCase createCompraPedidoUseCase;
+    private final UpdateCompraPedidoUseCase updateCompraPedidoUseCase;
+    private final EnviarCompraPedidoUseCase enviarCompraPedidoUseCase;
+    private final AprobarCompraPedidoUseCase aprobarCompraPedidoUseCase;
+    private final RechazarCompraPedidoUseCase rechazarCompraPedidoUseCase;
+    private final DescartarCompraPedidoUseCase descartarCompraPedidoUseCase;
+    private final EstimarCompraPedidoUseCase estimarCompraPedidoUseCase;
+    private final AutorizarPresupuestoCompraPedidoUseCase autorizarPresupuestoCompraPedidoUseCase;
+    private final RechazarPresupuestoCompraPedidoUseCase rechazarPresupuestoCompraPedidoUseCase;
+    private final MarcarEnCotizacionCompraPedidoUseCase marcarEnCotizacionCompraPedidoUseCase;
+    private final MarcarPendienteAdjudicacionCompraPedidoUseCase marcarPendienteAdjudicacionCompraPedidoUseCase;
+    private final MarcarAdjudicadoCompraPedidoUseCase marcarAdjudicadoCompraPedidoUseCase;
+    private final MarcarFormalizadoCompraPedidoUseCase marcarFormalizadoCompraPedidoUseCase;
+    private final MarcarRecepcionParcialCompraPedidoUseCase marcarRecepcionParcialCompraPedidoUseCase;
+    private final MarcarRecepcionadoCompraPedidoUseCase marcarRecepcionadoCompraPedidoUseCase;
+    private final GetCompraPedidoByIdUseCase getCompraPedidoByIdUseCase;
+    private final GetCompraPedidoByNumeroUseCase getCompraPedidoByNumeroUseCase;
+    private final ListCompraPedidosUseCase listCompraPedidosUseCase;
+
+    // Excepción cross-slice autorizada: composición de slices del subdominio "pedidos".
+    private final CompraPedidoItemService compraPedidoItemService;
+    private final CompraPedidoSecuenciaService compraPedidoSecuenciaService;
+    private final CompraPedidoHistorialService compraPedidoHistorialService;
+    private final CompraCotizacionTramoService compraCotizacionTramoService;
+
+    @Transactional
+    public CompraPedido crear(CompraPedido pedido, List<CompraPedidoItem> items) {
+        CompraPedido creado = createCompraPedidoUseCase.crear(pedido);
+        compraPedidoItemService.reemplazarItems(creado.getCompraPedidoId(), items);
+        registrarHistorial(creado, creado.getSolicitanteId(), null);
+        return creado;
+    }
+
+    @Transactional
+    public CompraPedido actualizar(Integer compraPedidoId, CompraPedido datos, List<CompraPedidoItem> items) {
+        CompraPedido actualizado = updateCompraPedidoUseCase.actualizar(compraPedidoId, datos);
+        compraPedidoItemService.reemplazarItems(compraPedidoId, items);
+        return actualizado;
+    }
+
+    /**
+     * Presenta el pedido a la bandeja del autorizante: reserva el correlativo anual (sólo la
+     * primera vez) y lo fija en el número público {@code PC-AAAA-NNNNNN}. La reserva y la
+     * transición de estado ocurren en la misma transacción.
+     */
+    @Transactional
+    public CompraPedido enviar(Integer compraPedidoId, Integer usuarioId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        String numero = pedido.getNumero();
+        if (numero == null) {
+            int anio = (pedido.getFecha() != null ? pedido.getFecha() : LocalDateTime.now()).getYear();
+            int correlativo = compraPedidoSecuenciaService.reservarNumero(pedido.getEjercicioId(), anio);
+            numero = formatearNumero(anio, correlativo);
+        }
+        CompraPedido enviado = enviarCompraPedidoUseCase.enviar(compraPedidoId, numero);
+        registrarHistorial(enviado, usuarioId, null);
+        return enviado;
+    }
+
+    @Transactional
+    public CompraPedido aprobar(Integer compraPedidoId, Integer autorizanteId) {
+        CompraPedido aprobado = aprobarCompraPedidoUseCase.aprobar(compraPedidoId, autorizanteId);
+        registrarHistorial(aprobado, autorizanteId, null);
+        return aprobado;
+    }
+
+    @Transactional
+    public CompraPedido rechazar(Integer compraPedidoId, Integer autorizanteId, String motivo) {
+        CompraPedido rechazado = rechazarCompraPedidoUseCase.rechazar(compraPedidoId, autorizanteId, motivo);
+        registrarHistorial(rechazado, autorizanteId, motivo);
+        return rechazado;
+    }
+
+    @Transactional
+    public CompraPedido descartar(Integer compraPedidoId, Integer usuarioId, String motivo) {
+        CompraPedido descartado = descartarCompraPedidoUseCase.descartar(compraPedidoId, motivo);
+        registrarHistorial(descartado, usuarioId, motivo);
+        return descartado;
+    }
+
+    /**
+     * Revisión del dpto. de compras: carga/confirma el valor estimado, resuelve el mínimo de
+     * cotizaciones (tramos × referencia del ejercicio) y lo deja como snapshot en el pedido; luego
+     * habilita la autorización del proceso de pedido de presupuesto.
+     *
+     * <p>La resolución es <b>best-effort</b>: si la configuración no permite resolver el mínimo, se
+     * guarda {@code null} y el pedido igual se estima; el gate estricto se aplica al armar el
+     * proceso de cotización.</p>
+     */
+    @Transactional
+    public CompraPedido estimar(Integer compraPedidoId, BigDecimal monto, String fuente, Integer usuarioId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        Integer cantidadMinima = compraCotizacionTramoService
+                .resolverMinimo(pedido.getEjercicioId(), monto)
+                .orElse(null);
+        CompraPedido estimado = estimarCompraPedidoUseCase.estimar(compraPedidoId, monto, fuente, cantidadMinima);
+        registrarHistorial(estimado, usuarioId, null);
+        return estimado;
+    }
+
+    /**
+     * Mínimo de cotizaciones del pedido: el snapshot si ya fue estimado, o el cálculo con la
+     * configuración vigente. {@code null} cuando no se puede resolver.
+     */
+    public Integer cotizacionesMinimas(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getCantidadCotizacionesMinima() != null) {
+            return pedido.getCantidadCotizacionesMinima();
+        }
+        if (pedido.getMontoEstimado() == null) {
+            return null;
+        }
+        return compraCotizacionTramoService.resolverMinimo(pedido.getEjercicioId(), pedido.getMontoEstimado())
+                .orElse(null);
+    }
+
+    /**
+     * Autoriza el inicio del proceso de pedido de presupuesto. El límite por monto del autorizante
+     * lo valida la fachada; acá sólo se registra la transición y el actor.
+     */
+    @Transactional
+    public CompraPedido autorizarPresupuesto(Integer compraPedidoId, Integer usuarioId) {
+        CompraPedido autorizado = autorizarPresupuestoCompraPedidoUseCase.autorizar(compraPedidoId);
+        registrarHistorial(autorizado, usuarioId, null);
+        return autorizado;
+    }
+
+    @Transactional
+    public CompraPedido rechazarPresupuesto(Integer compraPedidoId, Integer usuarioId, String motivo) {
+        CompraPedido rechazado = rechazarPresupuestoCompraPedidoUseCase.rechazar(compraPedidoId, motivo);
+        registrarHistorial(rechazado, usuarioId, motivo);
+        return rechazado;
+    }
+
+    /**
+     * Pasa el pedido a {@code EN_COTIZACION} (todos sus ítems ya integran un proceso enviado).
+     * Idempotente: si ya está en ese estado no hace nada.
+     */
+    @Transactional
+    public CompraPedido marcarEnCotizacion(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.EN_COTIZACION) {
+            return pedido;
+        }
+        CompraPedido marcado = marcarEnCotizacionCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Incluido en un proceso de cotización");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code PENDIENTE_ADJUDICACION} (procesos recomendados). Idempotente.
+     */
+    @Transactional
+    public CompraPedido marcarPendienteAdjudicacion(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.PENDIENTE_ADJUDICACION) {
+            return pedido;
+        }
+        if (pedido.getEstado() != CompraPedidoEstado.EN_COTIZACION) {
+            // El proceso recomendado no cubre todo el pedido: no se avanza.
+            return pedido;
+        }
+        CompraPedido marcado = marcarPendienteAdjudicacionCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Proceso de cotización recomendado");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code ADJUDICADO} (la autoridad adjudicó la cotización recomendada).
+     * Idempotente; sólo avanza desde {@code PENDIENTE_ADJUDICACION}.
+     */
+    @Transactional
+    public CompraPedido marcarAdjudicado(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.ADJUDICADO) {
+            return pedido;
+        }
+        if (pedido.getEstado() != CompraPedidoEstado.PENDIENTE_ADJUDICACION) {
+            // Otros procesos del pedido aún no están adjudicados: no se avanza.
+            return pedido;
+        }
+        CompraPedido marcado = marcarAdjudicadoCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Cotización adjudicada");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code FORMALIZADO} (se emitió la Orden de Compra). Idempotente; sólo avanza
+     * desde {@code ADJUDICADO}.
+     */
+    @Transactional
+    public CompraPedido marcarFormalizado(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.FORMALIZADO) {
+            return pedido;
+        }
+        if (pedido.getEstado() != CompraPedidoEstado.ADJUDICADO) {
+            // Otros procesos del pedido aún no se formalizaron: no se avanza.
+            return pedido;
+        }
+        CompraPedido marcado = marcarFormalizadoCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Orden de Compra emitida");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code RECEPCION_PARCIAL} (se registró una entrega y queda saldo). Idempotente;
+     * sólo avanza desde {@code FORMALIZADO} (nunca retrocede un pedido ya recepcionado).
+     */
+    @Transactional
+    public CompraPedido marcarRecepcionParcial(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() != CompraPedidoEstado.FORMALIZADO) {
+            return pedido;
+        }
+        CompraPedido marcado = marcarRecepcionParcialCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Recepción parcial registrada");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code RECEPCIONADO} (contratado cubierto o cierre manual con motivo).
+     * Idempotente; sólo avanza desde {@code FORMALIZADO} o {@code RECEPCION_PARCIAL}.
+     */
+    @Transactional
+    public CompraPedido marcarRecepcionado(Integer compraPedidoId, Integer usuarioId, String observacion) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.RECEPCIONADO) {
+            return pedido;
+        }
+        if (pedido.getEstado() != CompraPedidoEstado.FORMALIZADO
+                && pedido.getEstado() != CompraPedidoEstado.RECEPCION_PARCIAL) {
+            return pedido;
+        }
+        CompraPedido marcado = marcarRecepcionadoCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, usuarioId, observacion);
+        return marcado;
+    }
+
+    public Optional<CompraPedido> getById(Integer compraPedidoId) {
+        return getCompraPedidoByIdUseCase.getById(compraPedidoId);
+    }
+
+    public Optional<CompraPedido> getByNumero(String numero) {
+        return getCompraPedidoByNumeroUseCase.getByNumero(numero);
+    }
+
+    public List<CompraPedido> listar(CompraPedidoCriteria criteria) {
+        return listCompraPedidosUseCase.listar(criteria);
+    }
+
+    private void registrarHistorial(CompraPedido pedido, Integer usuarioId, String observacion) {
+        if (pedido.getEstado() == null) {
+            return;
+        }
+        compraPedidoHistorialService.registrar(pedido.getCompraPedidoId(), pedido.getEstado().name(),
+                usuarioId, observacion);
+    }
+
+    private String formatearNumero(int anio, int correlativo) {
+        return String.format("PC-%d-%06d", anio, correlativo);
+    }
+
+}

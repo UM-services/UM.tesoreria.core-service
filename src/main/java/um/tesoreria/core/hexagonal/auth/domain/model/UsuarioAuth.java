@@ -15,6 +15,7 @@ public class UsuarioAuth {
     private String login;
     private String password;
     private String nombre;
+    private Integer dependenciaId;
     private Integer geograficaId;
     private Byte imprimeChequera;
     private Byte numeroOpManual;
@@ -26,6 +27,7 @@ public class UsuarioAuth {
     private Byte activo;
     private Byte administrador;
     private Byte usuarioExterno;
+    private Byte debeCambiarClave;
 
     public boolean isActivo() {
         return this.activo != null && this.activo == 1;

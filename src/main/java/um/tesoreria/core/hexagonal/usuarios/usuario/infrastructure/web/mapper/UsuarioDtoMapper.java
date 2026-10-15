@@ -2,6 +2,7 @@ package um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.mapper;
 
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.usuarios.usuario.domain.model.Usuario;
+import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioConfiguracionRequest;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioRequest;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioResponse;
 
@@ -14,6 +15,7 @@ public class UsuarioDtoMapper {
                 .login(request.getLogin())
                 .password(request.getPassword())
                 .nombre(request.getNombre())
+                .dependenciaId(request.getDependenciaId())
                 .geograficaId(request.getGeograficaId())
                 .googleMail(request.getGoogleMail());
 
@@ -23,8 +25,28 @@ public class UsuarioDtoMapper {
         if (request.getEliminaChequera() != null) builder.eliminaChequera(request.getEliminaChequera());
         if (request.getModificaChequera() != null) builder.modificaChequera(request.getModificaChequera());
         if (request.getActivo() != null) builder.activo(request.getActivo());
+        if (request.getAdministrador() != null) builder.administrador(request.getAdministrador());
+        if (request.getUsuarioExterno() != null) builder.usuarioExterno(request.getUsuarioExterno());
 
         return builder.build();
+    }
+
+    public Usuario toDomainConfiguracion(UsuarioConfiguracionRequest request) {
+        if (request == null) return null;
+        return Usuario.builder()
+                .nombre(request.getNombre())
+                .dependenciaId(request.getDependenciaId())
+                .geograficaId(request.getGeograficaId())
+                .googleMail(request.getGoogleMail())
+                .imprimeChequera(request.getImprimeChequera())
+                .numeroOpManual(request.getNumeroOpManual())
+                .habilitaOpEliminacion(request.getHabilitaOpEliminacion())
+                .eliminaChequera(request.getEliminaChequera())
+                .modificaChequera(request.getModificaChequera())
+                .activo(request.getActivo())
+                .administrador(request.getAdministrador())
+                .usuarioExterno(request.getUsuarioExterno())
+                .build();
     }
 
     public UsuarioResponse toResponse(Usuario domain) {
@@ -33,6 +55,7 @@ public class UsuarioDtoMapper {
                 .userId(domain.getUserId())
                 .login(domain.getLogin())
                 .nombre(domain.getNombre())
+                .dependenciaId(domain.getDependenciaId())
                 .geograficaId(domain.getGeograficaId())
                 .imprimeChequera(domain.getImprimeChequera())
                 .numeroOpManual(domain.getNumeroOpManual())
@@ -44,6 +67,7 @@ public class UsuarioDtoMapper {
                 .activo(domain.getActivo())
                 .administrador(domain.getAdministrador())
                 .usuarioExterno(domain.getUsuarioExterno())
+                .debeCambiarClave(domain.getDebeCambiarClave())
                 .build();
     }
 }

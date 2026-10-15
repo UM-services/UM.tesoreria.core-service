@@ -1,0 +1,45 @@
+---
+title: Arquitectura Hexagonal - EscrituraHistorial (Gestión #404)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["EscrituraHistorial<br/>EscrituraOperacion"]
+        IN["RegistrarEscrituraHistorialUseCase<br/>(Puerto de Entrada)"]
+        OUT["EscrituraHistorialRepository<br/>EscrituraValorSerializer<br/>(Puertos de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["EscrituraHistorialService<br/>@Transactional MANDATORY"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Adp["JpaEscrituraHistorialRepositoryAdapter"]
+        Ent["EscrituraHistorialEntity<br/>tabla gestion_escritura_historial"]
+        Map["EscrituraHistorialMapper"]
+        Ser["JacksonEscrituraValorSerializer"]
+        Jpa["JpaEscrituraHistorialRepository"]
+    end
+
+    subgraph Callers ["Escrituras de Parámetros/Gestión"]
+        W["Servicios de alta/edición/baja<br/>(#405–#409 y migraciones)"]
+    end
+
+    W -->|misma TX| IN
+    Svc --> IN
+    Svc --> OUT
+    Adp --> OUT
+    Ser --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Map fill:#fff3e0
+    style Ser fill:#fff3e0
+    style Jpa fill:#fff3e0

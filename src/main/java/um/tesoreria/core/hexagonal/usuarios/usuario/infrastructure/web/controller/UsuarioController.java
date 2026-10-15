@@ -9,6 +9,8 @@ import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.hexagonal.usuarios.usuario.application.exception.UsuarioException;
 import um.tesoreria.core.hexagonal.usuarios.usuario.application.service.UsuarioService;
 import um.tesoreria.core.hexagonal.usuarios.usuario.domain.model.Usuario;
+import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioConfiguracionRequest;
+import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioPasswordRequest;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioRequest;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioResponse;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.mapper.UsuarioDtoMapper;
@@ -31,6 +33,67 @@ public class UsuarioController {
                 .map(dtoMapper::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
+    }
+
+    /** Padrón completo de usuarios (activos e inactivos). */
+    @GetMapping("/searchTodos")
+    public ResponseEntity<List<UsuarioResponse>> searchTodos() {
+        return searchTodos(null);
+    }
+
+    /** Búsqueda por login o nombre incluyendo inactivos. */
+    @GetMapping("/searchTodos/{texto}")
+    public ResponseEntity<List<UsuarioResponse>> searchTodos(@PathVariable String texto) {
+        List<UsuarioResponse> responses = service.searchTodos(texto).stream()
+                .map(dtoMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/usuario/id/{userId}")
+    public ResponseEntity<UsuarioResponse> findByUserId(@PathVariable Long userId) {
+        Usuario usuario = service.findByUserId(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        return ResponseEntity.ok(dtoMapper.toResponse(usuario));
+    }
+
+    /** Edita la configuración (datos y flags) sin tocar login ni clave. */
+    @PutMapping("/usuario/{userId}/configuracion")
+    public ResponseEntity<UsuarioResponse> updateConfiguracion(@Valid @RequestBody UsuarioConfiguracionRequest request,
+                                                               @PathVariable Long userId) {
+        try {
+            Usuario cambios = dtoMapper.toDomainConfiguracion(request);
+            return ResponseEntity.ok(dtoMapper.toResponse(service.updateConfiguracion(cambios, userId)));
+        } catch (UsuarioException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    /** Habilita (1) o deshabilita (0) un usuario. */
+    @PutMapping("/usuario/{userId}/activo/{valor}")
+    public ResponseEntity<UsuarioResponse> updateEstado(@PathVariable Long userId, @PathVariable Integer valor) {
+        if (valor != 0 && valor != 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El valor de activo debe ser 0 o 1");
+        }
+        try {
+            return ResponseEntity.ok(dtoMapper.toResponse(service.updateEstado(userId, valor.byteValue())));
+        } catch (UsuarioException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    /** Resetea la clave del usuario sin exigir la anterior (administración). */
+    @PutMapping("/usuario/{userId}/password")
+    public ResponseEntity<UsuarioResponse> resetPassword(@Valid @RequestBody UsuarioPasswordRequest request,
+                                                         @PathVariable Long userId) {
+        if (request.getReClave() != null && !request.getReClave().trim().equals(request.getPassword().trim())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Las claves no coinciden");
+        }
+        try {
+            return ResponseEntity.ok(dtoMapper.toResponse(service.resetPassword(userId, request.getPassword().trim())));
+        } catch (UsuarioException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     @GetMapping("/usuario/{login}")

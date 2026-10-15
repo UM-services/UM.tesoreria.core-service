@@ -27,7 +27,7 @@ import um.tesoreria.core.service.ContratoFacturaService;
  *
  */
 @RestController
-@RequestMapping("/contratofactura")
+@RequestMapping({"/contratofactura", "/api/tesoreria/core/contratofactura"})
 @RequiredArgsConstructor
 public class ContratoFacturaController {
 

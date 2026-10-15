@@ -18,7 +18,7 @@ import um.tesoreria.core.service.PostalService;
  *
  */
 @RestController
-@RequestMapping("/postal")
+@RequestMapping({"/postal", "/api/tesoreria/core/postal"})
 @RequiredArgsConstructor
 public class PostalController {
 	private final PostalService service;

@@ -1,0 +1,47 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraPedidoAutorizante (v7.0.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraPedidoAutorizante<br/>autorizanteId, dependenciaId"]
+        IN["GetDependenciasAutorizadasUseCase<br/>AsignarDependenciaAutorizanteUseCase<br/>QuitarDependenciaAutorizanteUseCase<br/>(Puertos de Entrada)"]
+        OUT["CompraPedidoAutorizanteRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraPedidoAutorizanteService"]
+        UCs["*UseCaseImpl (3)"]
+        Exc["CompraPedidoAutorizanteException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraPedidoAutorizanteController<br/>/api/tesoreria/core/compraPedidoAutorizante"]
+        DTO["CompraPedidoAutorizanteRequest<br/>CompraPedidoAutorizanteResponse"]
+        Map["CompraPedidoAutorizanteDtoMapper"]
+        Adp["JdbcCompraPedidoAutorizanteAdapter<br/>JdbcTemplate (SQL directo)"]
+        Tabla["tabla compra_pedido_autorizante_dependencia<br/>clave compuesta / ON DUPLICATE KEY UPDATE"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Tabla
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Tabla fill:#fff3e0

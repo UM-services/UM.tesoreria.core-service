@@ -20,6 +20,7 @@ public class AuthDtoMapper {
                 .userId(domain.getUserId())
                 .login(domain.getLogin())
                 .nombre(domain.getNombre())
+                .dependenciaId(domain.getDependenciaId())
                 .geograficaId(domain.getGeograficaId())
                 .sede(geograficaService.findByGeograficaId(domain.getGeograficaId())
                         .map(Geografica::getNombre)
@@ -31,6 +32,7 @@ public class AuthDtoMapper {
                 .modificaChequera(domain.getModificaChequera())
                 .administrador(domain.getAdministrador())
                 .usuarioExterno(domain.getUsuarioExterno())
+                .debeCambiarClave(domain.getDebeCambiarClave())
                 .build();
     }
 }

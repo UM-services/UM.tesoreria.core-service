@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo PoliticaArancelaria (v3.42.0)
+title: Arquitectura Hexagonal - Módulo PoliticaArancelaria (v9.4.0)
 ---
 
 classDiagram
@@ -17,17 +17,38 @@ classDiagram
                 -ChequeraCuotaService chequeraCuotaService
                 -LectivoCuotaService lectivoCuotaService
                 -LectivoService lectivoService
+                -ChequeraSerieService chequeraSerieService
+                -SanitizeChequeraCuotaArancelUseCase sanitizeChequeraCuotaArancelUseCase
                 +recalculateCuota(Integer, Integer, Long, Integer, Integer, Integer, Integer) ChequeraCuota
+                -sanitize(ChequeraCuota, ChequeraSerie) boolean
+                -persistirSiCorregida(ChequeraCuota, boolean) void
+                -esPersistible(ChequeraCuota) boolean
+                -activo(Byte) boolean
                 -findCuotaEnRevision(Integer, Integer, Long, Integer, Integer, Integer, OffsetDateTime) ChequeraCuota
                 -findCuotaEnRevisionFromLectivo(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) ChequeraCuota
                 -resolveCuotaReferencia(Integer, Integer, Long, Integer, Integer, Integer, OffsetDateTime) ChequeraCuota
                 -resolveImporteReferencia(ChequeraCuota, ChequeraCuota) BigDecimal
                 -buildChequeraCuotaFromLectivo(Integer, Integer, Integer, Integer, Integer, LectivoCuota) ChequeraCuota
             }
+
+            class SanitizeChequeraCuotaArancelUseCaseImpl {
+                -ArancelPorcentajeService arancelPorcentajeService
+                -LectivoCuotaService lectivoCuotaService
+                +sanitize(ChequeraCuota, Integer, Integer) boolean
+                -resolvePorcentaje(Integer, Integer) BigDecimal
+                -diagnosticar(ChequeraCuota, Integer) void
+                -compararBase(ChequeraCuota, int, BigDecimal, BigDecimal) void
+                -cambio(BigDecimal, BigDecimal) boolean
+            }
     }
     namespace application {
 
         class RecalculateCuotaByUniqueIndexUseCase { << interface >> }
+
+        class SanitizeChequeraCuotaArancelUseCase {
+            << interface >>
+            +sanitize(ChequeraCuota, Integer, Integer) boolean
+        }
     }
 
     namespace infrastructure_web {
@@ -75,10 +96,17 @@ classDiagram
     PoliticaArancelariaService --> RecalculateCuotaByUniqueIndexUseCase : uses
 
     RecalculateCuotaByUniqueIndexUseCaseImpl ..|> RecalculateCuotaByUniqueIndexUseCase : implements
+    SanitizeChequeraCuotaArancelUseCaseImpl ..|> SanitizeChequeraCuotaArancelUseCase : implements
 
+    RecalculateCuotaByUniqueIndexUseCaseImpl --> SanitizeChequeraCuotaArancelUseCase : uses
     RecalculateCuotaByUniqueIndexUseCaseImpl --> ChequeraCuotaService : uses
     RecalculateCuotaByUniqueIndexUseCaseImpl --> LectivoCuotaService : uses
     RecalculateCuotaByUniqueIndexUseCaseImpl --> LectivoService : uses
+    RecalculateCuotaByUniqueIndexUseCaseImpl --> ChequeraSerieService : uses
+
+    SanitizeChequeraCuotaArancelUseCaseImpl --> ArancelPorcentajeService : uses
+    SanitizeChequeraCuotaArancelUseCaseImpl --> LectivoCuotaService : uses
+    SanitizeChequeraCuotaArancelUseCaseImpl --> ChequeraCuota : uses
 
     PoliticaArancelariaController --> PoliticaArancelariaService : calls
     PoliticaArancelariaController --> PoliticaArancelariaDtoMapper : uses
@@ -88,14 +116,38 @@ classDiagram
         << external >>
         +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
         +getCuotaActual(Integer, Integer, Long, Integer, Integer, OffsetDateTime) ChequeraCuota
+        +saveAll(List~ChequeraCuota~) List~ChequeraCuota~
     }
 
     class ChequeraCuota {
         << external >>
+        +aplicarPorcentajeArancel(BigDecimal) void
+    }
+
+    class ChequeraSerieService {
+        << external >>
+        +findByUnique(Integer, Integer, Long) ChequeraSerie
+    }
+
+    class ChequeraSerie {
+        << external >>
+        +getArancelTipoId() Integer
+        +getLectivoId() Integer
+    }
+
+    class ArancelPorcentajeService {
+        << external >>
+        +findByUnique(Integer, Integer) ArancelPorcentaje
+    }
+
+    class ArancelPorcentaje {
+        << external >>
+        +getPorcentaje() BigDecimal
     }
 
     class LectivoCuotaService {
         << external >>
+        +findByUniqueKey(Integer, Integer, Integer, Integer, Integer, Integer) LectivoCuota
         +findCuotaByFecha(Integer, Integer, Integer, Integer, Integer, OffsetDateTime) LectivoCuota
         +findAllByTipo(Integer, Integer, Integer, Integer) List~LectivoCuota~
         +findAllByFacultadLectivoTipo(Integer, Integer, Integer) List~LectivoCuota~

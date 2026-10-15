@@ -14,6 +14,7 @@ public class Usuario {
     private String login;
     private String password;
     private String nombre;
+    private Integer dependenciaId;
     private Integer geograficaId;
     @Builder.Default
     private Byte imprimeChequera = 0;
@@ -33,4 +34,6 @@ public class Usuario {
     private Byte administrador = 0;
     @Builder.Default
     private Byte usuarioExterno = 0;
+    @Builder.Default
+    private Byte debeCambiarClave = 0;
 }

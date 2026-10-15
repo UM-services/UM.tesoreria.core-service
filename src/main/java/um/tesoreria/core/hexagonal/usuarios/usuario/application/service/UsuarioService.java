@@ -21,6 +21,10 @@ public class UsuarioService {
     private final FindUsuarioByGoogleMailUseCase findUsuarioByGoogleMailUseCase;
     private final GetUsuarioByIdUseCase getUsuarioByIdUseCase;
     private final FindUsuariosBySearchUseCase findUsuariosBySearchUseCase;
+    private final FindTodosUsuariosBySearchUseCase findTodosUsuariosBySearchUseCase;
+    private final UpdateUsuarioConfiguracionUseCase updateUsuarioConfiguracionUseCase;
+    private final UpdateUsuarioEstadoUseCase updateUsuarioEstadoUseCase;
+    private final ResetUsuarioPasswordUseCase resetUsuarioPasswordUseCase;
 
     public Usuario findByLogin(String login) {
         return findUsuarioByLoginUseCase.findUsuarioByLogin(login)
@@ -33,6 +37,10 @@ public class UsuarioService {
 
     public List<Usuario> search(String texto) {
         return findUsuariosBySearchUseCase.findUsuariosBySearch(texto);
+    }
+
+    public List<Usuario> searchTodos(String texto) {
+        return findTodosUsuariosBySearchUseCase.findTodosUsuariosBySearch(texto);
     }
 
     public Usuario findByPassword(String password) {
@@ -50,6 +58,21 @@ public class UsuarioService {
             throw new UsuarioException(userId);
         }
         return updated;
+    }
+
+    public Usuario updateConfiguracion(Usuario cambios, Long userId) {
+        return updateUsuarioConfiguracionUseCase.updateConfiguracion(cambios, userId)
+                .orElseThrow(() -> new UsuarioException(userId));
+    }
+
+    public Usuario updateEstado(Long userId, Byte activo) {
+        return updateUsuarioEstadoUseCase.updateEstado(userId, activo)
+                .orElseThrow(() -> new UsuarioException(userId));
+    }
+
+    public Usuario resetPassword(Long userId, String newPassword) {
+        return resetUsuarioPasswordUseCase.resetPassword(userId, newPassword)
+                .orElseThrow(() -> new UsuarioException(userId));
     }
 
     public Usuario updateLastLog(Long userId) {

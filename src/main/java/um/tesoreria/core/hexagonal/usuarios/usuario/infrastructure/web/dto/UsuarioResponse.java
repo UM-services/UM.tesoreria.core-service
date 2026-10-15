@@ -16,6 +16,7 @@ public class UsuarioResponse {
     private Long userId;
     private String login;
     private String nombre;
+    private Integer dependenciaId;
     private Integer geograficaId;
     @Builder.Default
     private Byte imprimeChequera = 0;
@@ -36,4 +37,6 @@ public class UsuarioResponse {
     private Byte administrador = 0;
     @Builder.Default
     private Byte usuarioExterno = 0;
+    @Builder.Default
+    private Byte debeCambiarClave = 0;
 }

@@ -65,6 +65,8 @@ public class ChangePasswordUseCaseImpl implements ChangePasswordUseCase {
         if (newNombre != null) {
             usuario.setNombre(newNombre);
         }
+        // La clave ya la eligio el propio usuario: se limpia el cambio forzado.
+        usuario.setDebeCambiarClave((byte) 0);
 
         log.info("Cambio de clave exitoso para usuario: {}", usuario.getLogin());
         usuarioAuthRepository.updateCredentials(usuario.getUserId(), newHashed, newNombre);

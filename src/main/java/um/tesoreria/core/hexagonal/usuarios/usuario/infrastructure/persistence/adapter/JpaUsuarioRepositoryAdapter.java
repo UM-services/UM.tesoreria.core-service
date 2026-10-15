@@ -35,6 +35,13 @@ public class JpaUsuarioRepositoryAdapter implements UsuarioRepository {
     }
 
     @Override
+    public List<Usuario> findAllBySearch(String texto) {
+        return jpaUsuarioRepository.findAllBySearch(texto).stream()
+                .map(usuarioMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<Usuario> findByPassword(String password) {
         return jpaUsuarioRepository.findByPassword(password).map(usuarioMapper::toDomainModel);
     }

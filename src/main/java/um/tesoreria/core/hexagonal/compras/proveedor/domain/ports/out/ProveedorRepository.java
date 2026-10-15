@@ -10,6 +10,11 @@ public interface ProveedorRepository {
     Proveedor create(Proveedor proveedor);
     Optional<Proveedor> findByProveedorId(Integer idproveedorId);
     Optional<Proveedor> findByCuit(String cuit);
+    /**
+     * @param excluirProveedorId proveedor a ignorar (el que se está editando); {@code null} en un alta
+     * @return {@code true} si otro proveedor ya tiene exactamente ese CUIT
+     */
+    boolean existsOtroConCuit(String cuit, Integer excluirProveedorId);
     Optional<Proveedor> findLast();
     List<Proveedor> findAll();
     um.tesoreria.core.model.PaginatedResponse<Proveedor> findAllPaginated(int page, int size);

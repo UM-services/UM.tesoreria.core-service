@@ -1,0 +1,41 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraPedidoSecuencia (v6.3.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        IN["ReservarNumeroCompraPedidoUseCase<br/>(Puerto de Entrada)"]
+        OUT["CompraPedidoSecuenciaRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraPedidoSecuenciaService<br/>(sin REST, puerto interno)"]
+        UC["ReservarNumeroCompraPedidoUseCaseImpl<br/>requiere ejercicioId"]
+        Exc["CompraPedidoSecuenciaException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Adp["CompraPedidoSecuenciaRepositoryAdapter<br/>JdbcTemplate"]
+        Tabla["tabla compra_pedido_secuencia<br/>INSERT ... LAST_INSERT_ID"]
+    end
+
+    subgraph Callers ["Consumidor"]
+        Ped["CompraPedidoService.enviar<br/>misma transacción"]
+    end
+
+    Ped --> Svc
+    Svc --> IN
+    Svc --> UC
+    Svc --> Exc
+    UC --> IN
+    UC --> OUT
+    Adp --> OUT
+    Adp --> Tabla
+
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UC fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Adp fill:#fff3e0
+    style Tabla fill:#fff3e0
+    style Ped fill:#fce4ec

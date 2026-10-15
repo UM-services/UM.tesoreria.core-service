@@ -11,6 +11,8 @@ public interface UsuarioRepository {
 
     /** Usuarios activos cuyo login o nombre contiene el texto; con texto nulo, todos los activos. */
     List<Usuario> findUsuariosBySearch(String texto);
+    /** Usuarios (activos e inactivos) cuyo login o nombre contiene el texto; con texto nulo, todos. */
+    List<Usuario> findAllBySearch(String texto);
     Optional<Usuario> findByPassword(String password);
     Optional<Usuario> findByUserId(Long userId);
     Optional<Usuario> findByGoogleMailAndActivo(String googleMail, Byte activo);

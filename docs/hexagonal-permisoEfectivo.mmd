@@ -1,0 +1,66 @@
+---
+title: Arquitectura Hexagonal - Módulo PermisoEfectivo (v6.3.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["PermisoEfectivo<br/>userId, permisos"]
+        IN["GetPermisosEfectivosUseCase<br/>(Puerto de Entrada)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["PermisoEfectivoService"]
+        UC["GetPermisosEfectivosUseCaseImpl<br/>roles + overrides + puente legacy"]
+        Exc["PermisoEfectivoException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["PermisoEfectivoController<br/>/api/tesoreria/core/permisoEfectivo"]
+        DTO["PermisoEfectivoResponse"]
+        Map["PermisoEfectivoDtoMapper"]
+    end
+
+    subgraph CrossSlice ["Puertos de entrada de otros slices"]
+        UR["GetUsuarioRolesByUserIdUseCase"]
+        RP["GetRolPermisosByRolIdUseCase"]
+        UP["GetUsuarioPermisosByUserIdUseCase"]
+        U["GetUsuarioByIdUseCase"]
+        Legacy["Flags legacy de Usuario<br/>administrador, chequeras.*"]
+    end
+
+    subgraph PEP ["Gating (opt-in)"]
+        Int["RequierePermisoInterceptor<br/>+ @RequierePermiso"]
+        Cfg["PermissionWebConfig<br/>app.permissions.enforce"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UC
+    Svc --> Exc
+    UC --> IN
+    UC --> UR
+    UC --> RP
+    UC --> UP
+    UC --> U
+    UC --> Legacy
+    UC --> M
+    Cfg --> Int
+    Int --> IN
+    Int -->|403 sin clave| Ctrl
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UC fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style UR fill:#fce4ec
+    style RP fill:#fce4ec
+    style UP fill:#fce4ec
+    style U fill:#fce4ec
+    style Legacy fill:#fce4ec
+    style Int fill:#ede7f6
+    style Cfg fill:#ede7f6

@@ -1,0 +1,60 @@
+---
+title: Arquitectura Hexagonal - Módulo RolPermiso (v6.3.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["RolPermiso<br/>rolId, permisoId, rol, permiso"]
+        IN["CreateRolPermisoUseCase<br/>GetRolPermisosByRolIdUseCase<br/>DeleteRolPermisoUseCase"]
+        OUT["RolPermisoRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["RolPermisoService"]
+        UCs["*UseCaseImpl<br/>alta idempotente"]
+        Exc["RolPermisoException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["RolPermisoController<br/>/api/tesoreria/core/rolPermiso"]
+        DTO["RolPermisoRequest<br/>RolPermisoResponse"]
+        Map["RolPermisoDtoMapper<br/>RolPermisoMapper"]
+        Adp["JpaRolPermisoRepositoryAdapter"]
+        Ent["RolPermisoEntity<br/>tabla rol_permiso"]
+        Jpa["JpaRolPermisoRepository"]
+    end
+
+    subgraph CrossSlice ["Puertos de entrada de otros slices"]
+        Rol["GetRolByIdUseCase<br/>(usuarios/rol)"]
+        Per["GetPermisoByIdUseCase<br/>(usuarios/permiso)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    UCs --> IN
+    UCs --> OUT
+    UCs --> Rol
+    UCs --> Per
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+    Svc --> M
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0
+    style Rol fill:#fce4ec
+    style Per fill:#fce4ec
