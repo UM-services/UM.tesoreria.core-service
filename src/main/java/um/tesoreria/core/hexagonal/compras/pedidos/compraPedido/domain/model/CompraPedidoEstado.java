@@ -36,6 +36,10 @@ public enum CompraPedidoEstado {
     ADJUDICADO,
     /** Adjudicado y con la Orden de Compra emitida (etapa 8); gate de la recepción. */
     FORMALIZADO,
+    /** Recepción (etapa 9): se registró al menos una entrega y todavía queda saldo por recibir. */
+    RECEPCION_PARCIAL,
+    /** Recepción (etapa 9): el contratado quedó cubierto (o la recepción se cerró con motivo). */
+    RECEPCIONADO,
     RECHAZADO,
     DESCARTADO;
 

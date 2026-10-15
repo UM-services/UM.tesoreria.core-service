@@ -1,0 +1,72 @@
+---
+title: Arquitectura Hexagonal - Módulo CompraRecepcion (v9.3.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["CompraRecepcion<br/>(entrega contra la OC, RC-AAAA-NNNNNN,<br/>remito, resultado, patrimonio)"]
+        M2["CompraRecepcionItem<br/>(cantidad recibida y resultado<br/>por ítem contratado)"]
+        M3["CompraRecepcionResultado<br/>CompraRecepcionPatrimonio"]
+        M4["CompraRecepcionCriteria<br/>CompraRecepcionPendiente<br/>CompraRecepcionPendienteItem"]
+        IN["Create/GetById/List<br/>UseCase (Puertos de Entrada)"]
+        OUT["CompraRecepcionRepository<br/>CompraRecepcionSecuenciaPort<br/>CompraRecepcionPedidoPort<br/>(Puertos de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["CompraRecepcionService<br/>@Transactional (registrar: saldo +<br/>avance del pedido; cerrar manual)"]
+        Calc["CalculadoraSaldosRecepcion<br/>(saldo derivado, NO_CONFORME no cubre)"]
+        UCs["*UseCaseImpl (3)"]
+        Exc["CompraRecepcionException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["CompraRecepcionController<br/>/api/tesoreria/core/compraRecepcion"]
+        DTO["CompraRecepcionRequest/Response<br/>CompraRecepcionItemRequest/Response<br/>CompraRecepcionCriteriaRequest<br/>CompraRecepcionPendienteResponse<br/>CompraRecepcionPendienteItemResponse"]
+        Map["CompraRecepcionDtoMapper<br/>CompraRecepcionMapper"]
+        Adp["JpaCompraRecepcionRepositoryAdapter<br/>CompraRecepcionSecuenciaJdbcAdapter<br/>CompraRecepcionPedidoJdbcAdapter"]
+        Ent["CompraRecepcionEntity (compra_recepcion)<br/>CompraRecepcionItemEntity<br/>(compra_recepcion_item)"]
+        Jpa["JpaCompraRecepcionRepository<br/>JpaCompraRecepcionItemRepository"]
+    end
+
+    subgraph CrossSlice ["Composición con otros slices"]
+        Form["CompraFormalizacionService<br/>(detalle contratado de la OC)"]
+        Ped["CompraPedidoService<br/>(RECEPCION_PARCIAL / RECEPCIONADO)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    Svc --> Calc
+    Svc --> Form
+    Svc --> Ped
+    Svc --> M
+    Svc --> M2
+    Svc --> M3
+    Svc --> M4
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Map
+    Adp --> Jpa
+    Jpa --> Ent
+
+    style M fill:#e1f5fe
+    style M2 fill:#e1f5fe
+    style M3 fill:#e1f5fe
+    style M4 fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style Calc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Jpa fill:#fff3e0
+    style Form fill:#fce4ec
+    style Ped fill:#fce4ec
