@@ -40,6 +40,8 @@ class CompraPedidoServiceTest {
     @Mock private MarcarPendienteAdjudicacionCompraPedidoUseCase marcarPendienteAdjudicacionCompraPedidoUseCase;
     @Mock private MarcarAdjudicadoCompraPedidoUseCase marcarAdjudicadoCompraPedidoUseCase;
     @Mock private MarcarFormalizadoCompraPedidoUseCase marcarFormalizadoCompraPedidoUseCase;
+    @Mock private MarcarRecepcionParcialCompraPedidoUseCase marcarRecepcionParcialCompraPedidoUseCase;
+    @Mock private MarcarRecepcionadoCompraPedidoUseCase marcarRecepcionadoCompraPedidoUseCase;
     @Mock private GetCompraPedidoByIdUseCase getCompraPedidoByIdUseCase;
     @Mock private GetCompraPedidoByNumeroUseCase getCompraPedidoByNumeroUseCase;
     @Mock private ListCompraPedidosUseCase listCompraPedidosUseCase;
@@ -60,6 +62,7 @@ class CompraPedidoServiceTest {
                 marcarPendienteAdjudicacionCompraPedidoUseCase,
                 marcarAdjudicadoCompraPedidoUseCase,
                 marcarFormalizadoCompraPedidoUseCase,
+                marcarRecepcionParcialCompraPedidoUseCase, marcarRecepcionadoCompraPedidoUseCase,
                 getCompraPedidoByIdUseCase, getCompraPedidoByNumeroUseCase,
                 listCompraPedidosUseCase, compraPedidoItemService, compraPedidoSecuenciaService,
                 compraPedidoHistorialService, compraCotizacionTramoService);
@@ -342,6 +345,64 @@ class CompraPedidoServiceTest {
 
         assertThat(service.marcarFormalizado(5)).isSameAs(pendiente);
         verify(marcarFormalizadoCompraPedidoUseCase, never()).marcar(any());
+    }
+
+    @Test
+    void marcarRecepcionParcialDelegaYRegistraElHistorial() {
+        CompraPedido formalizado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.FORMALIZADO).build();
+        CompraPedido marcado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.RECEPCION_PARCIAL).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(formalizado));
+        when(marcarRecepcionParcialCompraPedidoUseCase.marcar(5)).thenReturn(marcado);
+
+        assertThat(service.marcarRecepcionParcial(5).getEstado()).isEqualTo(CompraPedidoEstado.RECEPCION_PARCIAL);
+        verify(compraPedidoHistorialService).registrar(5, "RECEPCION_PARCIAL", null,
+                "Recepción parcial registrada");
+    }
+
+    @Test
+    void marcarRecepcionParcialNoRetrocedeUnPedidoRecepcionado() {
+        CompraPedido recepcionado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.RECEPCIONADO).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(recepcionado));
+
+        assertThat(service.marcarRecepcionParcial(5)).isSameAs(recepcionado);
+        verify(marcarRecepcionParcialCompraPedidoUseCase, never()).marcar(any());
+    }
+
+    @Test
+    void marcarRecepcionadoDelegaYRegistraElMotivo() {
+        CompraPedido parcial = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.RECEPCION_PARCIAL).build();
+        CompraPedido marcado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.RECEPCIONADO).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(parcial));
+        when(marcarRecepcionadoCompraPedidoUseCase.marcar(5)).thenReturn(marcado);
+
+        assertThat(service.marcarRecepcionado(5, 38, "Cierre manual").getEstado())
+                .isEqualTo(CompraPedidoEstado.RECEPCIONADO);
+        verify(compraPedidoHistorialService).registrar(5, "RECEPCIONADO", 38, "Cierre manual");
+    }
+
+    @Test
+    void marcarRecepcionadoEsIdempotente() {
+        CompraPedido recepcionado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.RECEPCIONADO).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(recepcionado));
+
+        assertThat(service.marcarRecepcionado(5, 38, null)).isSameAs(recepcionado);
+        verify(marcarRecepcionadoCompraPedidoUseCase, never()).marcar(any());
+    }
+
+    @Test
+    void marcarRecepcionadoNoAvanzaSiNoEstaEnRecepcion() {
+        CompraPedido adjudicado = CompraPedido.builder()
+                .compraPedidoId(5).estado(CompraPedidoEstado.ADJUDICADO).build();
+        when(getCompraPedidoByIdUseCase.getById(5)).thenReturn(Optional.of(adjudicado));
+
+        assertThat(service.marcarRecepcionado(5, 38, null)).isSameAs(adjudicado);
+        verify(marcarRecepcionadoCompraPedidoUseCase, never()).marcar(any());
     }
 
     @Test

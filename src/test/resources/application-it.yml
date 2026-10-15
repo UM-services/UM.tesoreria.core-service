@@ -8,7 +8,7 @@ spring:
       read-only: true
       connection-timeout: 10000
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: um.tesoreria.core.configuration.MySQL57Dialect
     hibernate:
       ddl-auto: none
     open-in-view: false

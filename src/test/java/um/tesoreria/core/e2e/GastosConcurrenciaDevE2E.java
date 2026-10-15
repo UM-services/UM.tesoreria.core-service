@@ -118,7 +118,7 @@ class GastosConcurrenciaDevE2E {
         registry.add("spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver");
         registry.add("spring.datasource.hikari.maximum-pool-size", () -> "3");
         registry.add("spring.datasource.hikari.connection-init-sql", () -> "SET SESSION innodb_lock_wait_timeout = " + ESPERA_SEGUNDOS);
-        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
+        registry.add("spring.jpa.database-platform", () -> "um.tesoreria.core.configuration.MySQL57Dialect");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
         registry.add("spring.jpa.properties.hibernate.session_factory.statement_inspector", SoloTablasDelFlujo.class::getName);
     }
@@ -129,7 +129,7 @@ class GastosConcurrenciaDevE2E {
         // El historial #404 de los ids reservados lo barre DevDbReservas
         private static final Set<String> PERMITIDAS = Set.of("articulos", "ubicacion_articulo", "gestion_escritura_historial");
         private static final Pattern ESCRITURA = Pattern.compile(
-                "^\\s*(?:insert\\s+into|update|delete\\s+from)\\s+`?(\\w+)`?", Pattern.CASE_INSENSITIVE);
+                "^\\s*(?:insert\\s+into|update|delete(?:\\s+\\w+)?\\s+from)\\s+`?(\\w+)`?", Pattern.CASE_INSENSITIVE);
 
         @Override
         public String inspect(String sql) {

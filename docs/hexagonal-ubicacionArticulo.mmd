@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo UbicacionArticulo (v8.0.0)
+title: Arquitectura Hexagonal - Módulo UbicacionArticulo (v9.2.1)
 ---
 
 flowchart TD
@@ -21,8 +21,8 @@ flowchart TD
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         UAC[UbicacionArticuloController<br/>ProblemDetail con codigo/campo]
-        JPA[JpaUbicacionArticuloRepositoryAdapter<br/>upsert por par, bloqueo por clave primaria<br/>revalida el par bajo bloqueo]
-        RES[UbicacionArticuloRestricciones<br/>traduce 1062/1452/1205/1213]
+        JPA[JpaUbicacionArticuloRepositoryAdapter<br/>upsert por par, @Lock por clave primaria<br/>revalida el par bajo bloqueo<br/>baja: @Lock por articulo_id + deleteAllByIdInBatch]
+        RES[UbicacionArticuloRestricciones<br/>traduce por excepción de Spring + restricción]
         ENT[UbicacionArticuloEntity / Mapper]
     end
 

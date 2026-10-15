@@ -1,5 +1,8 @@
 package um.tesoreria.core.hexagonal.ubicacionArticulo.infrastructure.persistence.adapter;
 
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.resource.jdbc.spi.StatementInspector;
 import org.junit.jupiter.api.BeforeEach;
@@ -102,7 +105,7 @@ class UbicacionArticuloDevDbIT {
                         + "; CREATE TEMPORARY TABLE IF NOT EXISTS ubicacion_articulo LIKE it405_ubicacion_articulo"
                         + "; CREATE TEMPORARY TABLE IF NOT EXISTS it405_historial LIKE gestion_escritura_historial"
                         + "; CREATE TEMPORARY TABLE IF NOT EXISTS gestion_escritura_historial LIKE it405_historial");
-        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
+        registry.add("spring.jpa.database-platform", () -> "um.tesoreria.core.configuration.MySQL57Dialect");
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
         registry.add("spring.jpa.properties.hibernate.session_factory.statement_inspector",
                 SoloTablasTemporales.class::getName);
@@ -112,7 +115,7 @@ class UbicacionArticuloDevDbIT {
     public static class SoloTablasTemporales implements StatementInspector {
 
         private static final Pattern ESCRITURA = Pattern.compile(
-                "^\\s*(?:insert\\s+into|update|delete\\s+from)\\s+`?(\\w+)`?", Pattern.CASE_INSENSITIVE);
+                "^\\s*(?:insert\\s+into|update|delete(?:\\s+\\w+)?\\s+from)\\s+`?(\\w+)`?", Pattern.CASE_INSENSITIVE);
 
         @Override
         public String inspect(String sql) {
@@ -128,6 +131,7 @@ class UbicacionArticuloDevDbIT {
     @Autowired UbicacionArticuloService service;
     @Autowired JpaUbicacionArticuloRepository jpaRepository;
     @Autowired JdbcTemplate jdbc;
+    @Autowired DataSource dataSource;
     @Autowired PlatformTransactionManager txManager;
 
     Integer ubicacionId;
@@ -199,9 +203,9 @@ class UbicacionArticuloDevDbIT {
             jpaRepository.saveAndFlush(duplicado);
         }));
 
-        assertThat(UbicacionArticuloRestricciones.codigoMysql(ex)).isEqualTo(UbicacionArticuloRestricciones.CLAVE_DUPLICADA);
+        assertThat(UbicacionArticuloRestricciones.comoSpring(new SQLErrorCodeSQLExceptionTranslator(dataSource), ex)).isInstanceOf(DuplicateKeyException.class);
         assertThat(UbicacionArticuloRestricciones.nombreRestriccion(ex)).isEqualTo(UbicacionArticuloRestricciones.UNICO_PAR);
-        assertThat(UbicacionArticuloRestricciones.traducir(ex, ubicacionId, articuloId))
+        assertThat(UbicacionArticuloRestricciones.traducir(new SQLErrorCodeSQLExceptionTranslator(dataSource), ex, ubicacionId, articuloId))
                 .isInstanceOfSatisfying(UbicacionArticuloConflictException.class, c -> assertThat(c.isReintentable()).isTrue());
         assertThat(filas(articuloId)).hasSize(1);
     }

@@ -44,6 +44,8 @@ public class CompraPedidoService {
     private final MarcarPendienteAdjudicacionCompraPedidoUseCase marcarPendienteAdjudicacionCompraPedidoUseCase;
     private final MarcarAdjudicadoCompraPedidoUseCase marcarAdjudicadoCompraPedidoUseCase;
     private final MarcarFormalizadoCompraPedidoUseCase marcarFormalizadoCompraPedidoUseCase;
+    private final MarcarRecepcionParcialCompraPedidoUseCase marcarRecepcionParcialCompraPedidoUseCase;
+    private final MarcarRecepcionadoCompraPedidoUseCase marcarRecepcionadoCompraPedidoUseCase;
     private final GetCompraPedidoByIdUseCase getCompraPedidoByIdUseCase;
     private final GetCompraPedidoByNumeroUseCase getCompraPedidoByNumeroUseCase;
     private final ListCompraPedidosUseCase listCompraPedidosUseCase;
@@ -238,6 +240,42 @@ public class CompraPedidoService {
         }
         CompraPedido marcado = marcarFormalizadoCompraPedidoUseCase.marcar(compraPedidoId);
         registrarHistorial(marcado, null, "Orden de Compra emitida");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code RECEPCION_PARCIAL} (se registró una entrega y queda saldo). Idempotente;
+     * sólo avanza desde {@code FORMALIZADO} (nunca retrocede un pedido ya recepcionado).
+     */
+    @Transactional
+    public CompraPedido marcarRecepcionParcial(Integer compraPedidoId) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() != CompraPedidoEstado.FORMALIZADO) {
+            return pedido;
+        }
+        CompraPedido marcado = marcarRecepcionParcialCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, null, "Recepción parcial registrada");
+        return marcado;
+    }
+
+    /**
+     * Pasa el pedido a {@code RECEPCIONADO} (contratado cubierto o cierre manual con motivo).
+     * Idempotente; sólo avanza desde {@code FORMALIZADO} o {@code RECEPCION_PARCIAL}.
+     */
+    @Transactional
+    public CompraPedido marcarRecepcionado(Integer compraPedidoId, Integer usuarioId, String observacion) {
+        CompraPedido pedido = getCompraPedidoByIdUseCase.getById(compraPedidoId)
+                .orElseThrow(() -> new CompraPedidoException(compraPedidoId));
+        if (pedido.getEstado() == CompraPedidoEstado.RECEPCIONADO) {
+            return pedido;
+        }
+        if (pedido.getEstado() != CompraPedidoEstado.FORMALIZADO
+                && pedido.getEstado() != CompraPedidoEstado.RECEPCION_PARCIAL) {
+            return pedido;
+        }
+        CompraPedido marcado = marcarRecepcionadoCompraPedidoUseCase.marcar(compraPedidoId);
+        registrarHistorial(marcado, usuarioId, observacion);
         return marcado;
     }
 

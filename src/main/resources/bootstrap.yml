@@ -41,7 +41,7 @@ spring:
       max-lifetime: 1800000       # 30 minutos
       leak-detection-threshold: 60000  # Detectar fugas
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: um.tesoreria.core.configuration.MySQL57Dialect
     hibernate:
       ddl-auto: none
     open-in-view: false
