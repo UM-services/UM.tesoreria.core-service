@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionOperations;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
-import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorInvalidoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorCuit;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.in.CreateProveedorUseCase;
@@ -12,8 +11,7 @@ import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorH
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorRepository;
 
 /**
- * Alta de proveedor. Reglas (equivalentes a {@code frmProveedores}): cuenta contable obligatoria y CUIT no
- * repetido. El CUIT sin dato ({@code 00-00000000-0}) se permite repetido. El control, el insert y el
+ * Alta de proveedor. Regla (equivalente a {@code frmProveedores}): CUIT no repetido. El CUIT sin dato ({@code 00-00000000-0}) se permite repetido. El control, el insert y el
  * evento de historial van en la misma transacción.
  *
  * <p>Sin índice único en la base el control es "consultar y luego insertar": dos altas simultáneas con el
@@ -29,10 +27,6 @@ public class CreateProveedorUseCaseImpl implements CreateProveedorUseCase {
 
     @Override
     public Proveedor createProveedor(Proveedor proveedor) {
-        // VB6 (frmProveedores) solo bloquea la cuenta nula; 0 no cuenta como faltante.
-        if (proveedor.getNumeroCuenta() == null) {
-            throw new ProveedorInvalidoException("Falta la cuenta contable del proveedor.");
-        }
         if (proveedor.getEmailInterno() == null) {
             proveedor.setEmailInterno("");
         }

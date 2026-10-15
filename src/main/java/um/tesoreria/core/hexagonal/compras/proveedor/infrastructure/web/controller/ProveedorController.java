@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
-import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorInvalidoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.service.ProveedorService;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.web.dto.ProveedorErrorResponse;
@@ -89,8 +88,6 @@ public class ProveedorController {
             Proveedor proveedor = proveedorDtoMapper.toDomain(proveedorRequest);
             Proveedor createdProveedor = proveedorService.create(proveedor);
             return ResponseEntity.ok(proveedorDtoMapper.toResponse(createdProveedor));
-        } catch (ProveedorInvalidoException e) {
-            return error(HttpStatus.BAD_REQUEST, e);
         } catch (ProveedorConflictoException e) {
             return error(HttpStatus.CONFLICT, e);
         }
@@ -103,8 +100,6 @@ public class ProveedorController {
             return proveedorService.update(proveedorId, proveedor)
                     .<ResponseEntity<?>>map(updated -> ResponseEntity.ok(proveedorDtoMapper.toResponse(updated)))
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se pudo actualizar"));
-        } catch (ProveedorInvalidoException e) {
-            return error(HttpStatus.BAD_REQUEST, e);
         } catch (ProveedorConflictoException e) {
             return error(HttpStatus.CONFLICT, e);
         }

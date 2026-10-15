@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.support.TransactionOperations;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
-import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorInvalidoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorHistorialPort;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorRepository;
@@ -139,14 +138,15 @@ class UpdateProveedorUseCaseImplTest {
     }
 
     @Test
-    void rechazaSiElResultadoNoTieneCuenta() {
+    void unProveedorGuardadoSinCuentaSePuedeSeguirEditando() {
         when(repository.findByProveedorId(5)).thenAnswer(inv -> Optional.of(
                 Proveedor.builder().proveedorId(5).cuit("30-12345678-1").numeroCuenta(null).build()));
+        when(repository.update(eq(5), any())).thenAnswer(inv -> Optional.of(inv.getArgument(1)));
 
-        assertThatThrownBy(() -> useCase().updateProveedor(5, Proveedor.builder().razonSocial("X").build()))
-                .isInstanceOf(ProveedorInvalidoException.class);
+        Optional<Proveedor> resultado = useCase().updateProveedor(5, Proveedor.builder().razonSocial("X").build());
 
-        verify(repository, never()).update(any(), any());
+        assertThat(resultado).isPresent();
+        assertThat(resultado.get().getNumeroCuenta()).isNull();
     }
 
     @Test

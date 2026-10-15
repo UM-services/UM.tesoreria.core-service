@@ -9,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
-import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorInvalidoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.service.ProveedorService;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.web.mapper.ProveedorDtoMapper;
 
@@ -58,17 +57,6 @@ class ProveedorControllerTest {
                 .assertThat().hasStatus(HttpStatus.CONFLICT);
 
         response.bodyJson().extractingPath("$.status").isEqualTo(409);
-    }
-
-    @Test
-    void elAltaSinCuentaResponde400ConElMotivo() {
-        when(service.create(any())).thenThrow(new ProveedorInvalidoException("Falta la cuenta contable del proveedor."));
-
-        var response = mockMvc.post().uri("/proveedor/").contentType(MediaType.APPLICATION_JSON)
-                .content("{\"cuit\":\"30-12345678-1\"}")
-                .assertThat().hasStatus(HttpStatus.BAD_REQUEST);
-
-        response.bodyJson().extractingPath("$.message").isEqualTo("Falta la cuenta contable del proveedor.");
     }
 
     @Test

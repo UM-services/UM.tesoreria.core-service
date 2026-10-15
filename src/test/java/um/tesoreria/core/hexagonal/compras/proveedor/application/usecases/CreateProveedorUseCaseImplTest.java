@@ -6,7 +6,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.support.TransactionOperations;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
-import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorInvalidoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorHistorialPort;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorRepository;
@@ -39,11 +38,14 @@ class CreateProveedorUseCaseImplTest {
     }
 
     @Test
-    void rechazaLaCuentaFaltanteSinTocarNada() {
-        assertThatThrownBy(() -> useCase().createProveedor(proveedor().numeroCuenta(null).build()))
-                .isInstanceOf(ProveedorInvalidoException.class);
+    void unaCuentaNulaSeAceptaComoAntes() {
+        when(repository.existsOtroConCuit("30-12345678-1", null)).thenReturn(false);
+        when(repository.create(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        verifyNoInteractions(repository, historial);
+        Proveedor creado = useCase().createProveedor(proveedor().numeroCuenta(null).build());
+
+        assertThat(creado.getNumeroCuenta()).isNull();
+        verify(historial).registrarAlta(creado);
     }
 
     @Test

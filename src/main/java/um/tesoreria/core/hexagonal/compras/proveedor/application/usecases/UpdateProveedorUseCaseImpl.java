@@ -4,19 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionOperations;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
-import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorInvalidoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorCuit;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.in.UpdateProveedorUseCase;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorHistorialPort;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorRepository;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 /**
- * Edición de proveedor. Un campo ausente conserva el valor guardado y {@code ""} lo borra. La cuenta
- * contable es obligatoria sobre el resultado. El CUIT repetido solo se controla si el CUIT cambia, así un
+ * Edición de proveedor. Un campo ausente conserva el valor guardado y {@code ""} lo borra. El CUIT repetido solo se controla si el CUIT cambia, así un
  * proveedor con CUIT histórico duplicado se puede seguir editando. Todo va en una transacción, junto con el
  * evento de historial.
  *
@@ -41,7 +38,6 @@ public class UpdateProveedorUseCaseImpl implements UpdateProveedorUseCase {
                 return Optional.empty();
             }
             Proveedor fusionado = fusionar(anterior.get(), pedido);
-            exigirCuenta(fusionado.getNumeroCuenta());
 
             if (cuitControlable(anterior.get(), fusionado)
                     && repository.existsOtroConCuit(ProveedorCuit.clave(fusionado.getCuit()), proveedorId)) {
@@ -59,13 +55,6 @@ public class UpdateProveedorUseCaseImpl implements UpdateProveedorUseCase {
     private static boolean cuitControlable(Proveedor guardado, Proveedor nuevo) {
         String cuitNuevo = ProveedorCuit.clave(nuevo.getCuit());
         return !cuitNuevo.equals(ProveedorCuit.clave(guardado.getCuit())) && !ProveedorCuit.sinDato(cuitNuevo);
-    }
-
-    /** VB6 ({@code frmProveedores}) solo bloquea la cuenta nula; {@code 0} no cuenta como faltante. */
-    private static void exigirCuenta(BigDecimal numeroCuenta) {
-        if (numeroCuenta == null) {
-            throw new ProveedorInvalidoException("Falta la cuenta contable del proveedor.");
-        }
     }
 
     /**
