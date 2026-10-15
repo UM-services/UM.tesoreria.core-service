@@ -2,6 +2,7 @@ package um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorSearch;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorRepository;
@@ -13,6 +14,7 @@ import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -42,8 +44,16 @@ public class JpaProveedorRepositoryAdapter implements ProveedorRepository {
 
     @Override
     public Optional<Proveedor> findByCuit(String cuit) {
-        return jpaProveedorRepository.findTopByCuit(cuit)
+        return jpaProveedorRepository.findFirstByCuitOrderByProveedorIdAsc(cuit)
                 .map(proveedorMapper::toDomainModel);
+    }
+
+    @Override
+    public boolean existsOtroConCuit(String cuit, Integer excluirProveedorId) {
+        if (excluirProveedorId == null) {
+            return jpaProveedorRepository.existsByCuit(cuit);
+        }
+        return jpaProveedorRepository.existsByCuitAndProveedorIdNot(cuit, excluirProveedorId);
     }
 
     @Override
@@ -88,10 +98,18 @@ public class JpaProveedorRepositoryAdapter implements ProveedorRepository {
 
     @Override
     public boolean deleteById(Integer proveedorId) {
-        if (jpaProveedorRepository.existsById(proveedorId)) {
-            jpaProveedorRepository.deleteById(proveedorId);
-            return true;
+        if (!jpaProveedorRepository.existsById(proveedorId)) {
+            return false;
         }
-        return false;
+        try {
+            jpaProveedorRepository.deleteById(proveedorId);
+            // Fuerza el DELETE dentro de la transacción para capturar acá la FK RESTRICT si un
+            // registro nuevo referenció al proveedor después de la consulta previa (carrera).
+            jpaProveedorRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new ProveedorConflictoException(
+                    "No se puede eliminar el proveedor: tiene registros asociados.");
+        }
+        return true;
     }
 }

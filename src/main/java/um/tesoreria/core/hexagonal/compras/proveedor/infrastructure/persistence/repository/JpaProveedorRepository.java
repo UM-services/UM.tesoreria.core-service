@@ -8,6 +8,10 @@ import java.util.Optional;
 @Repository
 public interface JpaProveedorRepository extends JpaRepository<ProveedorEntity, Integer> {
     Optional<ProveedorEntity> findByProveedorId(Integer proveedorId);
-    Optional<ProveedorEntity> findTopByCuit(String cuit);
+    Optional<ProveedorEntity> findFirstByCuitOrderByProveedorIdAsc(String cuit);
+
+    boolean existsByCuitAndProveedorIdNot(String cuit, Integer proveedorId);
+
+    boolean existsByCuit(String cuit);
     Optional<ProveedorEntity> findTopByOrderByProveedorIdDesc();
 }
