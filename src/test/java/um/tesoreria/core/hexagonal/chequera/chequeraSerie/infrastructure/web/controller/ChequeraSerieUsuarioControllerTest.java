@@ -43,6 +43,7 @@ class ChequeraSerieUsuarioControllerTest {
                 .facultadId(2)
                 .lectivoId(2026)
                 .becaPorcentaje(new BigDecimal("0.5"))
+                .hpum((byte) 1)
                 .importeDeuda(new BigDecimal("120.50"))
                 .cuotasDeuda(2)
                 .build();
@@ -55,6 +56,7 @@ class ChequeraSerieUsuarioControllerTest {
                 .hasStatusOk();
         response.bodyJson().extractingPath("$.content[0].estadoDeuda").isEqualTo("CON_DEUDA_VENCIDA");
         response.bodyJson().extractingPath("$.content[0].becaPorcentaje").isEqualTo(0.5);
+        response.bodyJson().extractingPath("$.content[0].hpum").isEqualTo(true);
         response.bodyJson().extractingPath("$.totalElements").isEqualTo(1);
         response.bodyJson().extractingPath("$.number").isEqualTo(0);
         response.bodyJson().extractingPath("$.size").isEqualTo(20);
@@ -90,6 +92,7 @@ class ChequeraSerieUsuarioControllerTest {
                 .assertThat()
                 .hasStatusOk();
         response.bodyJson().extractingPath("$.content[0].estadoDeuda").isEqualTo("SIN_DEUDA_VENCIDA");
+        response.bodyJson().extractingPath("$.content[0].hpum").isEqualTo(false);
         response.bodyJson().extractingPath("$.totalElements").isEqualTo(1);
     }
 

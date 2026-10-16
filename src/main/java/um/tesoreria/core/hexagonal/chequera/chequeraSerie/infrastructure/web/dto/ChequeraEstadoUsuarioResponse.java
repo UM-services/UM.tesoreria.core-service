@@ -20,6 +20,8 @@ public record ChequeraEstadoUsuarioResponse(
         Integer alternativaId,
         @Schema(description = "Porcentaje de beca expresado como fracción: 0.5 equivale a 50 %", example = "0.5")
         BigDecimal becaPorcentaje,
+        @Schema(description = "Marca HPUM de la chequera: true cuando chequera_serie.hpum es distinto de 0")
+        boolean hpum,
         BigDecimal importeDeuda,
         int cuotasDeuda,
         String estadoDeuda,
@@ -43,6 +45,7 @@ public record ChequeraEstadoUsuarioResponse(
                 chequera.getGeograficaId(),
                 chequera.getAlternativaId(),
                 chequera.getBecaPorcentaje(),
+                chequera.getHpum() != null && chequera.getHpum() != 0,
                 importeDeuda,
                 chequera.getCuotasDeuda(),
                 importeDeuda.signum() > 0 ? "CON_DEUDA_VENCIDA" : "SIN_DEUDA_VENCIDA",
