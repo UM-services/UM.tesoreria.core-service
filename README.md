@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.4.0**
+**Versión actual (SemVer): 9.5.0**
+
+## Novedades 9.5.0 (verificado en código)
+- **feat(chequera/chequeraSerie)**: El contrato `ChequeraEstadoUsuarioResponse` —respuesta de las chequeras por usuario (`GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}` y `.../lectivo/{lectivoId}/asignaciones`, alias `/api/tesoreria/core/chequeraSerie/...`)— incorpora el campo aditivo `hpum` (`boolean`): `true` cuando `chequera_serie.hpum` no es nulo ni 0. Se deriva en `ChequeraEstadoUsuarioResponse.from(ChequeraSerie)` con el mismo criterio que el `hpum` de `EstadoChequeraResponse` (`getHpum() != null && getHpum() != 0`). Aditivo: no cambia ninguna URL ni campo existente.
+- **chore(repo)**: integración de `graphify` (grafo de conocimiento del repositorio para agentes): `.opencode/plugins/graphify.js`, `.gitattributes` (`graphify-out/graph.json merge=graphify`), `/graphify-out/` en `.gitignore` y sección "graphify" en `AGENTS.md`. Sin impacto en el servicio.
+
+> Basado en `git diff HEAD` (6 archivos, +84/−0 líneas) y el código real de `ChequeraEstadoUsuarioResponse` (`hpum` con `@Schema` y su derivación en `from`), `ChequeraSerieController.findAllByUsuario`/`findAllByUsuarioAsignaciones` y `ChequeraSerieUsuarioControllerTest`. Un campo aditivo en la respuesta de endpoints existentes (sin cambio de URL ni de campo previo) ⇒ incremento **minor** de SemVer (`9.4.0` → `9.5.0`, `pom.xml`). Sin dependencias nuevas ni cambios de esquema. Verificación sin compilación por indicación del usuario; `docs/hexagonal-chequeraSerie.mmd` validado con `mmdc`.
 
 ## Novedades 9.4.0 (verificado en código)
 - **feat(chequera/politicaArancelaria)**: **Sanitización de importes por arancel parcial** en el recálculo de cuota. Nuevo puerto de entrada `SanitizeChequeraCuotaArancelUseCase` (`SanitizeChequeraCuotaArancelUseCaseImpl`): resuelve el `arancelTipoId` (de la cuota o de la serie) y el porcentaje de `arancel_porcentaje` por `(arancelTipoId, productoId)` (sin fila ⇒ factor 100%), sanea `importe1/2/3 = importeN_original × porcentaje / 100` (escala 4, `HALF_UP`) y diagnostica la base contra `lectivo_cuota`. El método de dominio puro `ChequeraCuota.aplicarPorcentajeArancel(BigDecimal)` es idempotente y no toca `importeN_original` ni los vencimientos.
