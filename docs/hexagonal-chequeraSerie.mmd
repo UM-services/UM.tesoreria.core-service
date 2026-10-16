@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraSerie (v4.8.0)
+title: Arquitectura Hexagonal - Módulo ChequeraSerie (v9.5.0)
 ---
 
 classDiagram
@@ -174,7 +174,9 @@ classDiagram
 
             class ChequeraSerieRequest
             class ChequeraSerieResponse
-            class ChequeraEstadoUsuarioResponse
+            class ChequeraEstadoUsuarioResponse {
+                +boolean hpum
+            }
             class ChequeraEstadoUsuarioPageResponse
             class ChequeraSerieDtoMapper {
                 +toDomain(ChequeraSerieRequest) ChequeraSerie

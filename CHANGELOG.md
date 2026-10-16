@@ -2,6 +2,19 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [9.5.0] - 2026-10-16
+
+### Added
+
+- feat(chequera/chequeraSerie): El contrato `ChequeraEstadoUsuarioResponse` — respuesta de los endpoints paginados `GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}` y `GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}/asignaciones` (alias `/api/tesoreria/core/chequeraSerie/...`) — incorpora el campo aditivo `hpum` (`boolean`, documentado con `@Schema`): `true` cuando `chequera_serie.hpum` no es nulo ni 0. Se deriva en `ChequeraEstadoUsuarioResponse.from(ChequeraSerie)` con la misma expresión que usa `GetEstadoChequeraUseCaseImpl` para el `hpum` de `EstadoChequeraResponse` (`getHpum() != null && getHpum() != 0`). Sin cambios de URL ni de campos existentes: un consumidor que ignore el campo no se ve afectado.
+- test(chequera/chequeraSerie): `ChequeraSerieUsuarioControllerTest` cubre el campo nuevo en los dos endpoints: `$.content[0].hpum` `true` con la serie marcada (`hpum = 1`) y `false` sin marca HPUM.
+
+### Changed
+
+- chore(repo): integración de `graphify` (grafo de conocimiento del repositorio para agentes): plugin `.opencode/plugins/graphify.js`, atributo de merge `graphify-out/graph.json merge=graphify` en `.gitattributes`, `/graphify-out/` en `.gitignore` y sección "graphify" en `AGENTS.md`. Herramienta de desarrollo: sin cambios en el servicio, en sus dependencias Maven ni en el esquema.
+
+> Basado en `git diff HEAD` (6 archivos, +84/−0 líneas: 2 en `ChequeraEstadoUsuarioResponse`, 3 en su prueba, 62 en el plugin `graphify.js`, 14 en `AGENTS.md` y 2 de configuración de repositorio) y el código real de `ChequeraEstadoUsuarioResponse` (componente `boolean hpum` con `@Schema` y `chequera.getHpum() != null && chequera.getHpum() != 0` en `from`), `ChequeraSerie.hpum` (`Byte`), `ChequeraSerieController.findAllByUsuario`/`findAllByUsuarioAsignaciones` (únicos consumidores, vía `ChequeraEstadoUsuarioPageResponse`) y `ChequeraSerieUsuarioControllerTest` (`hpum = 1` ⇒ `true`; sin marca ⇒ `false`). Un campo aditivo en la respuesta de endpoints existentes, sin cambio de URL ni de campo previo, es una capacidad pública backward-compatible: incremento **minor** de SemVer (`9.4.0` → `9.5.0`, `pom.xml`), con el mismo criterio que el `login` aditivo de `LoginResponse` en `4.6.0`. Sin dependencias nuevas ni cambios de esquema (`ddl-auto: none`: sólo se lee la columna existente `chequera_serie.hpum`). `docs/hexagonal-chequeraSerie.mmd` sincronizado (título a v9.5.0 y `+boolean hpum` en `ChequeraEstadoUsuarioResponse`) y línea de `docs/README.md` actualizada. Verificación **sin compilación por indicación del usuario** (no se ejecutó `mvn`); `docs/hexagonal-chequeraSerie.mmd` validado con `mmdc` (renderiza el nodo con `hpum`). Fecha de release tomada del día en curso del entorno de trabajo (2026-10-16).
+
 ## [9.4.0] - 2026-10-15
 
 ### Added
