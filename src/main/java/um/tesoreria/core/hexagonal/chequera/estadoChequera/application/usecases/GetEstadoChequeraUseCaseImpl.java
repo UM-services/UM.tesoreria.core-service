@@ -1,7 +1,7 @@
 package um.tesoreria.core.hexagonal.chequera.estadoChequera.application.usecases;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.exception.FacultadException;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.exception.ArancelTipoException;
@@ -32,7 +32,6 @@ import um.tesoreria.core.model.Debito;
 import um.tesoreria.core.model.TipoImpresion;
 import um.tesoreria.core.model.dto.ChequeraCuotaPagosDto;
 import um.tesoreria.core.model.dto.ChequeraPagoDto;
-import um.tesoreria.core.util.Tool;
 import um.tesoreria.core.service.ChequeraAlternativaService;
 import um.tesoreria.core.service.DebitoService;
 import um.tesoreria.core.service.DebitoTipoService;
@@ -40,8 +39,10 @@ import um.tesoreria.core.service.TipoImpresionService;
 import um.tesoreria.core.service.facade.ChequeraService;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,9 +73,10 @@ import java.util.TreeMap;
  * </ul>
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
+
+    private static final ZoneId ZONA_ARGENTINA = ZoneId.of("America/Argentina/Buenos_Aires");
 
     private final ChequeraSerieService chequeraSerieService;
     private final FacultadService facultadService;
@@ -88,6 +90,43 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
     private final ChequeraAlternativaService chequeraAlternativaService;
     private final DebitoService debitoService;
     private final DebitoTipoService debitoTipoService;
+    private final Clock clock;
+
+    @Autowired
+    public GetEstadoChequeraUseCaseImpl(ChequeraSerieService chequeraSerieService, FacultadService facultadService,
+                                        TipoChequeraService tipoChequeraService, PersonaService personaService,
+                                        LectivoService lectivoService, ArancelTipoService arancelTipoService,
+                                        TipoImpresionService tipoImpresionService, ChequeraService chequeraService,
+                                        ChequeraTotalService chequeraTotalService,
+                                        ChequeraAlternativaService chequeraAlternativaService,
+                                        DebitoService debitoService, DebitoTipoService debitoTipoService) {
+        this(chequeraSerieService, facultadService, tipoChequeraService, personaService, lectivoService,
+                arancelTipoService, tipoImpresionService, chequeraService, chequeraTotalService,
+                chequeraAlternativaService, debitoService, debitoTipoService, Clock.systemUTC());
+    }
+
+    /** Permite fijar el reloj para probar el borde del día calendario argentino. */
+    GetEstadoChequeraUseCaseImpl(ChequeraSerieService chequeraSerieService, FacultadService facultadService,
+                                 TipoChequeraService tipoChequeraService, PersonaService personaService,
+                                 LectivoService lectivoService, ArancelTipoService arancelTipoService,
+                                 TipoImpresionService tipoImpresionService, ChequeraService chequeraService,
+                                 ChequeraTotalService chequeraTotalService,
+                                 ChequeraAlternativaService chequeraAlternativaService,
+                                 DebitoService debitoService, DebitoTipoService debitoTipoService, Clock clock) {
+        this.chequeraSerieService = chequeraSerieService;
+        this.facultadService = facultadService;
+        this.tipoChequeraService = tipoChequeraService;
+        this.personaService = personaService;
+        this.lectivoService = lectivoService;
+        this.arancelTipoService = arancelTipoService;
+        this.tipoImpresionService = tipoImpresionService;
+        this.chequeraService = chequeraService;
+        this.chequeraTotalService = chequeraTotalService;
+        this.chequeraAlternativaService = chequeraAlternativaService;
+        this.debitoService = debitoService;
+        this.debitoTipoService = debitoTipoService;
+        this.clock = clock;
+    }
 
     @Override
     public EstadoChequera getEstadoChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
@@ -230,8 +269,8 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
         if (esUno(cuota.getCompensada())) return EstadoCuota.COMPENSADA;
         if (esUno(cuota.getPagado())) return EstadoCuota.PAGADA;
         if (cuota.getImporte1() == null || cuota.getImporte1().signum() == 0) return EstadoCuota.A_DEFINIR;
-        // Mismo "hoy" que el cálculo de deuda; se compara por día calendario, sin convertir el huso horario.
-        LocalDate hoy = Tool.hourAbsoluteArgentina().toLocalDate();
+        // "Hoy" es el día calendario argentino (no UTC); el vencimiento conserva su día, sin convertir el huso horario.
+        LocalDate hoy = LocalDate.now(clock.withZone(ZONA_ARGENTINA));
         if (primerVencimiento != null && primerVencimiento.isBefore(hoy)) return EstadoCuota.VENCIDA;
         return EstadoCuota.PENDIENTE;
     }

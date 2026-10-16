@@ -40,6 +40,8 @@ import um.tesoreria.core.service.TipoImpresionService;
 import um.tesoreria.core.service.facade.ChequeraService;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -75,10 +77,14 @@ class GetEstadoChequeraUseCaseImplTest {
     private final DebitoService debitoService = mock(DebitoService.class);
     private final DebitoTipoService debitoTipoService = mock(DebitoTipoService.class);
 
-    private final GetEstadoChequeraUseCaseImpl useCase = new GetEstadoChequeraUseCaseImpl(chequeraSerieService,
-            facultadService, tipoChequeraService, personaService, lectivoService, arancelTipoService,
-            tipoImpresionService, chequeraService, chequeraTotalService, chequeraAlternativaService, debitoService,
-            debitoTipoService);
+    private final GetEstadoChequeraUseCaseImpl useCase = useCaseAt(Instant.now());
+
+    private GetEstadoChequeraUseCaseImpl useCaseAt(Instant ahora) {
+        return new GetEstadoChequeraUseCaseImpl(chequeraSerieService,
+                facultadService, tipoChequeraService, personaService, lectivoService, arancelTipoService,
+                tipoImpresionService, chequeraService, chequeraTotalService, chequeraAlternativaService, debitoService,
+                debitoTipoService, Clock.fixed(ahora, ZoneOffset.UTC));
+    }
 
     private ChequeraSerie.ChequeraSerieBuilder serieBuilder() {
         return ChequeraSerie.builder()
@@ -268,6 +274,25 @@ class GetEstadoChequeraUseCaseImplTest {
 
         assertThat(cuotas).extracting(CuotaEstado::estado).containsExactly(EstadoCuota.BAJA, EstadoCuota.COMPENSADA,
                 EstadoCuota.PAGADA, EstadoCuota.A_DEFINIR, EstadoCuota.PENDIENTE);
+    }
+
+    @Test
+    void hoyIsTheArgentinianCalendarDayEvenWhenUtcIsAlreadyTomorrow() {
+        // 2026-06-10 22:00 en Buenos Aires = 2026-06-11 01:00 UTC: en Argentina todavía es el 10.
+        Instant ahora = OffsetDateTime.of(2026, 6, 10, 22, 0, 0, 0, MENDOZA).toInstant();
+        ChequeraCuotaPagosDto venceHoy = cuota(ARANCEL_ID, 1, "100", null);
+        venceHoy.setVencimiento1(OffsetDateTime.of(2026, 6, 10, 0, 0, 0, 0, MENDOZA));
+        ChequeraCuotaPagosDto venceAyer = cuota(ARANCEL_ID, 2, "100", null);
+        venceAyer.setVencimiento1(OffsetDateTime.of(2026, 6, 9, 0, 0, 0, 0, MENDOZA));
+        when(chequeraService.findAllCuotaPagosByChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, ALTERNATIVA_ID))
+                .thenReturn(List.of(venceHoy, venceAyer));
+
+        List<CuotaEstado> cuotas = useCaseAt(ahora)
+                .getEstadoChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, ALTERNATIVA_ID)
+                .productos().get(0).cuotas();
+
+        // Con "hoy" en UTC (día 11) la cuota que vence el 10 figuraría VENCIDA unas horas antes de tiempo.
+        assertThat(cuotas).extracting(CuotaEstado::estado).containsExactly(EstadoCuota.PENDIENTE, EstadoCuota.VENCIDA);
     }
 
     @Test
