@@ -14,6 +14,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraT
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoChequera;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.CuotaEstado;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.DebitoEstado;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoCuota;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.ProductoEstado;
 import um.tesoreria.core.hexagonal.chequera.producto.domain.model.Producto;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
@@ -216,6 +217,72 @@ class GetEstadoChequeraUseCaseImplTest {
 
         assertThat(mapeada.primerVencimiento()).isEqualTo(LocalDate.of(2026, 6, 10));
         assertThat(mapeada.fechaPago()).isEqualTo(LocalDate.of(2026, 6, 20));
+    }
+
+    @Test
+    void resolvesEachEstadoCuota() {
+        ChequeraCuotaPagosDto baja = cuota(ARANCEL_ID, 1, "100", null);
+        baja.setBaja((byte) 1);
+        ChequeraCuotaPagosDto compensada = cuota(ARANCEL_ID, 2, "100", null);
+        compensada.setCompensada((byte) 1);
+        ChequeraCuotaPagosDto pagada = cuota(ARANCEL_ID, 3, "100", null);
+        pagada.setPagado((byte) 1);
+        ChequeraCuotaPagosDto aDefinirNulo = cuota(ARANCEL_ID, 4, "100", null);
+        aDefinirNulo.setImporte1(null);
+        ChequeraCuotaPagosDto aDefinirCero = cuota(ARANCEL_ID, 5, "0", null);
+        ChequeraCuotaPagosDto vencida = cuota(ARANCEL_ID, 6, "100", null);
+        vencida.setVencimiento1(OffsetDateTime.of(2000, 1, 10, 0, 0, 0, 0, MENDOZA));
+        ChequeraCuotaPagosDto pendiente = cuota(ARANCEL_ID, 7, "100", null);
+        pendiente.setVencimiento1(OffsetDateTime.of(2999, 1, 10, 0, 0, 0, 0, MENDOZA));
+        when(chequeraService.findAllCuotaPagosByChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, ALTERNATIVA_ID))
+                .thenReturn(List.of(baja, compensada, pagada, aDefinirNulo, aDefinirCero, vencida, pendiente));
+
+        List<CuotaEstado> cuotas = estado().productos().get(0).cuotas();
+
+        assertThat(cuotas).extracting(CuotaEstado::estado).containsExactly(EstadoCuota.BAJA, EstadoCuota.COMPENSADA,
+                EstadoCuota.PAGADA, EstadoCuota.A_DEFINIR, EstadoCuota.A_DEFINIR, EstadoCuota.VENCIDA,
+                EstadoCuota.PENDIENTE);
+    }
+
+    @Test
+    void estadoCuotaFollowsThePriorityOrder() {
+        ChequeraCuotaPagosDto bajaYPagada = cuota(ARANCEL_ID, 1, "100", null);
+        bajaYPagada.setBaja((byte) 1);
+        bajaYPagada.setPagado((byte) 1);
+        ChequeraCuotaPagosDto compensadaYPagada = cuota(ARANCEL_ID, 2, "100", null);
+        compensadaYPagada.setCompensada((byte) 1);
+        compensadaYPagada.setPagado((byte) 1);
+        ChequeraCuotaPagosDto pagadaSinImporte = cuota(ARANCEL_ID, 3, "0", null);
+        pagadaSinImporte.setPagado((byte) 1);
+        ChequeraCuotaPagosDto sinImporteYVencida = cuota(ARANCEL_ID, 4, "0", null);
+        sinImporteYVencida.setVencimiento1(OffsetDateTime.of(2000, 1, 10, 0, 0, 0, 0, MENDOZA));
+        ChequeraCuotaPagosDto flagsEnCero = cuota(ARANCEL_ID, 5, "100", null);
+        flagsEnCero.setBaja((byte) 0);
+        flagsEnCero.setCompensada((byte) 0);
+        flagsEnCero.setPagado((byte) 0);
+        flagsEnCero.setVencimiento1(OffsetDateTime.of(2999, 1, 10, 0, 0, 0, 0, MENDOZA));
+        when(chequeraService.findAllCuotaPagosByChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, ALTERNATIVA_ID))
+                .thenReturn(List.of(bajaYPagada, compensadaYPagada, pagadaSinImporte, sinImporteYVencida, flagsEnCero));
+
+        List<CuotaEstado> cuotas = estado().productos().get(0).cuotas();
+
+        assertThat(cuotas).extracting(CuotaEstado::estado).containsExactly(EstadoCuota.BAJA, EstadoCuota.COMPENSADA,
+                EstadoCuota.PAGADA, EstadoCuota.A_DEFINIR, EstadoCuota.PENDIENTE);
+    }
+
+    @Test
+    void deudaIsTotalMinusPagadoAndZeroWithoutChequeraTotal() {
+        when(chequeraService.findAllCuotaPagosByChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID, ALTERNATIVA_ID))
+                .thenReturn(List.of(cuota(MATRICULA_ID, 1, "182000", null), cuota(ARANCEL_ID, 1, "331000", null)));
+        when(chequeraTotalService.findAllByChequera(FACULTAD_ID, TIPO_CHEQUERA_ID, CHEQUERA_SERIE_ID))
+                .thenReturn(List.of(ChequeraTotal.builder().productoId(ARANCEL_ID)
+                        .total(new BigDecimal("3243000.00")).pagado(new BigDecimal("2471000.00")).build()));
+
+        List<ProductoEstado> productos = estado().productos();
+
+        // Matrícula no tiene chequera_total: total, pagado y deuda quedan en cero.
+        assertThat(productos.get(0).deuda()).isEqualByComparingTo("0");
+        assertThat(productos.get(1).deuda()).isEqualByComparingTo("772000.00");
     }
 
     @Test

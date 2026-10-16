@@ -39,6 +39,7 @@ classDiagram
             +Integer totalCuotas
             +BigDecimal total
             +BigDecimal pagado
+            +BigDecimal deuda
             +List~CuotaEstado~ cuotas
         }
 
@@ -52,6 +53,7 @@ classDiagram
             +LocalDate fechaPago
             +BigDecimal importePagado
             +String referenciaPago
+            +EstadoCuota estado
         }
 
         class DebitoEstado {
@@ -193,6 +195,7 @@ classDiagram
             +Integer totalCuotas
             +BigDecimal total
             +BigDecimal pagado
+            +BigDecimal deuda
             +List~CuotaEstadoResponse~ cuotas
         }
 
@@ -206,6 +209,7 @@ classDiagram
             +LocalDate fechaPago
             +BigDecimal importePagado
             +String referenciaPago
+            +EstadoCuota estado
         }
 
         class DebitoEstadoResponse {
