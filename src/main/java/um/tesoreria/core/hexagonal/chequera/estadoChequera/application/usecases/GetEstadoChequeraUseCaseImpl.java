@@ -14,6 +14,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraT
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoChequera;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.CuotaEstado;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.DebitoEstado;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoCuota;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.ProductoEstado;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.ports.in.GetEstadoChequeraUseCase;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
@@ -38,6 +39,7 @@ import um.tesoreria.core.service.TipoImpresionService;
 import um.tesoreria.core.service.facade.ChequeraService;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -49,7 +51,7 @@ import java.util.Objects;
 import java.util.TreeMap;
 
 /**
- * Arma el {@link EstadoChequera} que consume {@code report-service} para el PDF "Estado de Chequera".
+ * Arma el {@link EstadoChequera} que consumen {@code report-service} (PDF "Estado de Chequera") y el frontend.
  * <p>
  * Es el armado de datos que antes hacía {@code FormulariosToPdfService.generateEstadoChequeraPdf}
  * en este servicio (el dibujo del PDF pasó a {@code report-service}), con las mismas reglas:
@@ -63,6 +65,8 @@ import java.util.TreeMap;
  *       opcionales: si falta alguno queda en {@code null}. La chequera y su tipo son obligatorios.</li>
  *   <li>Se traen los débitos de TODOS los tipos de la chequera (VISA + Directo), no uno solo; cada uno
  *       lleva su {@code tipoDebito} (nombre de {@code debito_tipo}) para distinguirlos.</li>
+ *   <li>Cada cuota lleva su {@link EstadoCuota} y cada producto su {@code deuda} ({@code total - pagado}):
+ *       los cálculos se hacen acá para que el PDF y la pantalla muestren lo mismo.</li>
  *   <li>El importe de cada débito se toma de la cuota correspondiente ({@code productoId}, {@code alternativaId},
  *       {@code cuotaId}); {@code Debito} no tiene un importe propio mapeado.</li>
  * </ul>
@@ -84,6 +88,7 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
     private final ChequeraAlternativaService chequeraAlternativaService;
     private final DebitoService debitoService;
     private final DebitoTipoService debitoTipoService;
+    private final Clock clock;
 
     @Override
     public EstadoChequera getEstadoChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
@@ -192,7 +197,7 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
         BigDecimal pagado = chequeraTotal != null && chequeraTotal.getPagado() != null
                 ? chequeraTotal.getPagado() : BigDecimal.ZERO;
 
-        return new ProductoEstado(productoId, nombre, tituloCuota, totalCuotas, total, pagado,
+        return new ProductoEstado(productoId, nombre, tituloCuota, totalCuotas, total, pagado, total.subtract(pagado),
                 cuotas.stream().map(this::toCuota).toList());
     }
 
@@ -217,7 +222,23 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
                 pago != null ? pago.getOrden() : null,
                 fechaPago,
                 pago != null ? pago.getImporte() : null,
-                pago != null ? pago.getArchivo() : null);
+                pago != null ? pago.getArchivo() : null,
+                estadoCuota(cuota, primerVencimiento));
+    }
+
+    private EstadoCuota estadoCuota(ChequeraCuotaPagosDto cuota, LocalDate primerVencimiento) {
+        if (esUno(cuota.getBaja())) return EstadoCuota.BAJA;
+        if (esUno(cuota.getCompensada())) return EstadoCuota.COMPENSADA;
+        if (esUno(cuota.getPagado())) return EstadoCuota.PAGADA;
+        if (cuota.getImporte1() == null || cuota.getImporte1().signum() == 0) return EstadoCuota.A_DEFINIR;
+        // "Hoy" es el día calendario argentino (no UTC); el vencimiento conserva su día, sin convertir el huso horario.
+        LocalDate hoy = LocalDate.now(clock);
+        if (primerVencimiento != null && primerVencimiento.isBefore(hoy)) return EstadoCuota.VENCIDA;
+        return EstadoCuota.PENDIENTE;
+    }
+
+    private static boolean esUno(Byte flag) {
+        return flag != null && flag == 1;
     }
 
     private DebitoEstado toDebito(Debito debito, List<ChequeraCuotaPagosDto> cuotaPagos) {

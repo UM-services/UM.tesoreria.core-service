@@ -2,6 +2,18 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [9.6.0] - 2026-10-17
+
+### Added
+
+- feat(chequera/estadoChequera): **`estado` por cuota y `deuda` por producto** en `GET /api/tesoreria/core/chequera/estado/...`. Enum nuevo `EstadoCuota` (`BAJA`, `COMPENSADA`, `PAGADA`, `A_DEFINIR`, `VENCIDA`, `PENDIENTE`, evaluado en ese orden) en `CuotaEstado`/`CuotaEstadoResponse`, y `deuda = total - pagado` en `ProductoEstado`/`ProductoEstadoResponse`. "Hoy" es el día calendario argentino (`America/Argentina/Buenos_Aires`), con un bean `Clock` inyectado para probar el borde de las 21 a 24 h.
+
+### Changed
+
+- changed(chequera/estadoChequera): el endpoint lo consumen `report-service` y el frontend; Javadoc, `@Operation` y `docs/hexagonal-estadoChequera.mmd` actualizados. Cambio aditivo: ningún campo existente cambia.
+
+> Basado en el diff de la rama contra `origin/develop` y el código real de `GetEstadoChequeraUseCaseImpl` (`estadoCuota`), `EstadoCuota`, `CuotaEstado`, `ProductoEstado` y sus Response/mapper. Todo es **aditivo** (campos nuevos al final de los records; ningún contrato existente cambia): incremento **minor** de SemVer (`9.5.1` → `9.6.0`, `pom.xml`). Sin dependencias ni cambios de esquema. Verificación: `mvn -B test` verde y prueba en vivo contra la base de desarrollo en dos chequeras reales (28 cuotas): `estado` coincide con un cálculo independiente sobre las filas de `chequera_cuota` y `deuda = total - pagado` en todos los productos. Sin probar aún contra `report-service` ni el frontend.
+
 ## [9.5.1] - 2026-10-17
 
 ### Fixed

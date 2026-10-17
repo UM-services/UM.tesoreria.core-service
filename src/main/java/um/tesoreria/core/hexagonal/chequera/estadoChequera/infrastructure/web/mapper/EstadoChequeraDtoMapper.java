@@ -42,6 +42,7 @@ public class EstadoChequeraDtoMapper {
                 producto.totalCuotas(),
                 producto.total(),
                 producto.pagado(),
+                producto.deuda(),
                 producto.cuotas().stream().map(this::toResponse).toList());
     }
 
@@ -55,7 +56,8 @@ public class EstadoChequeraDtoMapper {
                 cuota.ordenPago(),
                 cuota.fechaPago(),
                 cuota.importePagado(),
-                cuota.referenciaPago());
+                cuota.referenciaPago(),
+                cuota.estado());
     }
 
     private DebitoEstadoResponse toResponse(DebitoEstado debito) {

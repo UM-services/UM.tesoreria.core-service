@@ -1,5 +1,7 @@
 package um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto;
 
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoCuota;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -12,5 +14,6 @@ public record CuotaEstadoResponse(
         Integer ordenPago,
         LocalDate fechaPago,
         BigDecimal importePagado,
-        String referenciaPago) {
+        String referenciaPago,
+        EstadoCuota estado) {
 }

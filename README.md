@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.5.1**
+**Versión actual (SemVer): 9.6.0**
+
+## Novedades 9.6.0 (verificado en código)
+- **feat(chequera/estadoChequera)**: `GET /api/tesoreria/core/chequera/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` suma dos campos **aditivos**: `estado` en cada cuota (enum serializado como string: `BAJA`, `COMPENSADA`, `PAGADA`, `A_DEFINIR`, `VENCIDA`, `PENDIENTE`) y `deuda` en cada producto (`total - pagado`, con el mismo criterio null -> 0 de `chequera_total`). El `estado` se evalúa en ese orden y gana la primera regla que se cumple; "hoy" es el día calendario de `America/Argentina/Buenos_Aires` (no UTC) y se compara contra el día de `primerVencimiento`. Así `report-service` (PDF) y el frontend muestran lo mismo: los cálculos viven en el backend.
+- **changed(chequera/estadoChequera)**: el endpoint lo consumen ahora `report-service` **y** el frontend. Ningún campo existente cambia de orden ni de significado; los consumidores que no conocen los campos nuevos los ignoran. No se tocan `chequera/cuotas/pagos` ni `chequeraCuota/deuda` (los usa el sistema legacy).
+- **feat(configuration)**: Bean `Clock` (zona `America/Argentina/Buenos_Aires`) en `TesoreriaConfiguration`, inyectado por constructor en `GetEstadoChequeraUseCaseImpl` para probar el borde de las 21 a 24 h.
+- **docs**: `docs/hexagonal-estadoChequera.mmd` con `EstadoCuota`, `CuotaEstado.estado` y `ProductoEstado.deuda`.
+
+> Basado en el diff de la rama contra `origin/develop` y el código real de `GetEstadoChequeraUseCaseImpl` (`estadoCuota`), `EstadoCuota`, `CuotaEstado`, `ProductoEstado` y sus Response/mapper. Todo es **aditivo** (campos nuevos al final de los records; ningún contrato existente cambia): incremento **minor** de SemVer (`9.5.1` → `9.6.0`, `pom.xml`). Sin dependencias ni cambios de esquema. Verificación: `mvn -B test` verde y prueba en vivo contra la base de desarrollo en dos chequeras reales (28 cuotas): `estado` coincide con un cálculo independiente sobre las filas de `chequera_cuota` y `deuda = total - pagado` en todos los productos. Sin probar aún contra `report-service` ni el frontend.
 
 ## Novedades 9.5.1 (verificado en código)
 - **fix(chequera/chequeraSerie)**: `ChequeraSerieMapper.toEstadoUsuarioDomain` **propaga `hpum`** de la entidad al dominio (`null ⇒ (byte) 0`). Ese mapper —sólo usado por `GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}` y `GET .../lectivo/{lectivoId}/asignaciones`, alias `/api/tesoreria/core/chequeraSerie/...`— no mapeaba `hpum`, así que la insignia `hpum` de `ChequeraEstadoUsuarioResponse` quedaba en `false` aunque `chequera_serie.hpum` fuera 1 (el campo se agregó a la respuesta en `9.5.0` y el otro mapper del slice, `toDomainModel`, ya lo mapeaba). Sin cambios de URL, contrato ni campos.

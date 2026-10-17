@@ -12,6 +12,7 @@ import um.tesoreria.core.hexagonal.chequera.estadoChequera.application.service.E
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoChequera;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.CuotaEstado;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.DebitoEstado;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoCuota;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.ProductoEstado;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.mapper.EstadoChequeraDtoMapper;
 
@@ -36,9 +37,9 @@ class EstadoChequeraControllerTest {
     @Test
     void exposesTheEstadoChequeraWithTheContractReportServiceExpects() {
         CuotaEstado cuota = new CuotaEstado(1, 6, 2026, LocalDate.of(2026, 6, 10), new BigDecimal("182000.00"),
-                0, LocalDate.of(2026, 6, 19), new BigDecimal("182000.00"), "D2026062301_30000000000");
+                0, LocalDate.of(2026, 6, 19), new BigDecimal("182000.00"), "D2026062301_30000000000", EstadoCuota.PAGADA);
         ProductoEstado producto = new ProductoEstado(1, "Matrícula", "Matrícula", 2,
-                new BigDecimal("375000.00"), new BigDecimal("182000.00"), List.of(cuota));
+                new BigDecimal("375000.00"), new BigDecimal("182000.00"), new BigDecimal("193000.00"), List.of(cuota));
         DebitoEstado debito = new DebitoEstado(5, new BigDecimal("364000.00"), LocalDate.of(2026, 7, 22),
                 "1234567890123456789012", "Débito Directo", LocalDateTime.of(2026, 7, 3, 13, 30), true, "0011000100");
         when(service.getEstadoChequera(1, 2, 12345L, 1)).thenReturn(new EstadoChequera(1, "Facultad de Ingeniería", 2,
@@ -61,6 +62,8 @@ class EstadoChequeraControllerTest {
         response.bodyJson().extractingPath("$.productos[0].tituloCuota").isEqualTo("Matrícula");
         response.bodyJson().extractingPath("$.productos[0].totalCuotas").isEqualTo(2);
         response.bodyJson().extractingPath("$.productos[0].total").isEqualTo(375000.0);
+        response.bodyJson().extractingPath("$.productos[0].deuda").isEqualTo(193000.0);
+        response.bodyJson().extractingPath("$.productos[0].cuotas[0].estado").isEqualTo("PAGADA");
         response.bodyJson().extractingPath("$.productos[0].cuotas[0].primerVencimiento").isEqualTo("2026-06-10");
         response.bodyJson().extractingPath("$.productos[0].cuotas[0].fechaPago").isEqualTo("2026-06-19");
         response.bodyJson().extractingPath("$.productos[0].cuotas[0].referenciaPago").isEqualTo("D2026062301_30000000000");
