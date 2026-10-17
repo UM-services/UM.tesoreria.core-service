@@ -22,7 +22,7 @@ public class EstadoChequeraController {
     private final EstadoChequeraService service;
     private final EstadoChequeraDtoMapper dtoMapper;
 
-    @Operation(summary = "Estado de una chequera: datos del titular, cuotas por producto con sus subtotales y adhesión al débito automático. Lo consume report-service para generar el PDF \"Estado de Chequera\".")
+    @Operation(summary = "Estado de una chequera: datos del titular, cuotas por producto con sus subtotales y adhesión al débito automático. Cada cuota trae su estado (BAJA, COMPENSADA, PAGADA, A_DEFINIR, VENCIDA, PENDIENTE) y cada producto su deuda (total - pagado), calculados en el servidor. Lo consumen report-service (PDF \"Estado de Chequera\") y el frontend.")
     @GetMapping("/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")
     public ResponseEntity<EstadoChequeraResponse> getEstadoChequera(@PathVariable Integer facultadId,
                                                                     @PathVariable Integer tipoChequeraId,

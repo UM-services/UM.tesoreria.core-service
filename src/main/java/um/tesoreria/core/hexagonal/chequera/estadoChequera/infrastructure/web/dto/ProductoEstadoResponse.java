@@ -10,5 +10,6 @@ public record ProductoEstadoResponse(
         Integer totalCuotas,
         BigDecimal total,
         BigDecimal pagado,
+        BigDecimal deuda,
         List<CuotaEstadoResponse> cuotas) {
 }

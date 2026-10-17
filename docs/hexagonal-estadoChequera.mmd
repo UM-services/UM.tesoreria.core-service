@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo EstadoChequera (v6.0.0)
+title: Arquitectura Hexagonal - Módulo EstadoChequera (v9.6.0)
 ---
 
 classDiagram
@@ -39,6 +39,7 @@ classDiagram
             +Integer totalCuotas
             +BigDecimal total
             +BigDecimal pagado
+            +BigDecimal deuda
             +List~CuotaEstado~ cuotas
         }
 
@@ -52,6 +53,17 @@ classDiagram
             +LocalDate fechaPago
             +BigDecimal importePagado
             +String referenciaPago
+            +EstadoCuota estado
+        }
+
+        class EstadoCuota {
+            <<enumeration>>
+            BAJA
+            COMPENSADA
+            PAGADA
+            A_DEFINIR
+            VENCIDA
+            PENDIENTE
         }
 
         class DebitoEstado {
@@ -193,6 +205,7 @@ classDiagram
             +Integer totalCuotas
             +BigDecimal total
             +BigDecimal pagado
+            +BigDecimal deuda
             +List~CuotaEstadoResponse~ cuotas
         }
 
@@ -206,6 +219,7 @@ classDiagram
             +LocalDate fechaPago
             +BigDecimal importePagado
             +String referenciaPago
+            +EstadoCuota estado
         }
 
         class DebitoEstadoResponse {
