@@ -45,6 +45,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 
@@ -83,7 +84,7 @@ class GetEstadoChequeraUseCaseImplTest {
         return new GetEstadoChequeraUseCaseImpl(chequeraSerieService,
                 facultadService, tipoChequeraService, personaService, lectivoService, arancelTipoService,
                 tipoImpresionService, chequeraService, chequeraTotalService, chequeraAlternativaService, debitoService,
-                debitoTipoService, Clock.fixed(ahora, ZoneOffset.UTC));
+                debitoTipoService, Clock.fixed(ahora, ZoneId.of("America/Argentina/Buenos_Aires")));
     }
 
     private ChequeraSerie.ChequeraSerieBuilder serieBuilder() {
