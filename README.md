@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.5.0**
+**Versión actual (SemVer): 9.5.1**
+
+## Novedades 9.5.1 (verificado en código)
+- **fix(chequera/chequeraSerie)**: `ChequeraSerieMapper.toEstadoUsuarioDomain` **propaga `hpum`** de la entidad al dominio (`null ⇒ (byte) 0`). Ese mapper —sólo usado por `GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}` y `GET .../lectivo/{lectivoId}/asignaciones`, alias `/api/tesoreria/core/chequeraSerie/...`— no mapeaba `hpum`, así que la insignia `hpum` de `ChequeraEstadoUsuarioResponse` quedaba en `false` aunque `chequera_serie.hpum` fuera 1 (el campo se agregó a la respuesta en `9.5.0` y el otro mapper del slice, `toDomainModel`, ya lo mapeaba). Sin cambios de URL, contrato ni campos.
+- **test(chequera/chequeraSerie)**: Nueva `ChequeraSerieMapperTest`: `hpum = 1` ⇒ `1`, `hpum = 0` ⇒ `0`, `hpum` nulo ⇒ `0` y entidad nula ⇒ `null`.
+
+> Basado en `git diff HEAD` (2 archivos, +79/−0 líneas: 1 en `ChequeraSerieMapper`, 78 en `ChequeraSerieMapperTest`) y el código real de `ChequeraSerieMapper.toEstadoUsuarioDomain` (línea `hpum` agregada), `JpaChequeraSerieRepositoryAdapter` (los cuatro usos del mapper y su consumidor `ChequerasPorUsuarioService`/`ChequerasPorUsuarioAsignadasService`) y `ChequeraEstadoUsuarioResponse.from` (`getHpum() != null && getHpum() != 0`). Fix correctivo sobre endpoints existentes, sin cambio de URL, contrato, campos ni esquema ⇒ incremento **patch** de SemVer (`9.5.0` → `9.5.1`, `pom.xml`). Sin dependencias nuevas. Verificación sin compilación por indicación del usuario; `docs/hexagonal-chequeraSerie.mmd` validado con `mmdc`.
 
 ## Novedades 9.5.0 (verificado en código)
 - **feat(chequera/chequeraSerie)**: El contrato `ChequeraEstadoUsuarioResponse` —respuesta de las chequeras por usuario (`GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}` y `.../lectivo/{lectivoId}/asignaciones`, alias `/api/tesoreria/core/chequeraSerie/...`)— incorpora el campo aditivo `hpum` (`boolean`): `true` cuando `chequera_serie.hpum` no es nulo ni 0. Se deriva en `ChequeraEstadoUsuarioResponse.from(ChequeraSerie)` con el mismo criterio que el `hpum` de `EstadoChequeraResponse` (`getHpum() != null && getHpum() != 0`). Aditivo: no cambia ninguna URL ni campo existente.
