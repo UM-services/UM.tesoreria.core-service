@@ -2,6 +2,40 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [9.6.0] - 2026-10-17
+
+### Added
+
+- feat(chequera/estadoChequera): **`estado` por cuota y `deuda` por producto** en `GET /api/tesoreria/core/chequera/estado/...`. Enum nuevo `EstadoCuota` (`BAJA`, `COMPENSADA`, `PAGADA`, `A_DEFINIR`, `VENCIDA`, `PENDIENTE`, evaluado en ese orden) en `CuotaEstado`/`CuotaEstadoResponse`, y `deuda = total - pagado` en `ProductoEstado`/`ProductoEstadoResponse`. "Hoy" es el día calendario argentino (`America/Argentina/Buenos_Aires`), con un bean `Clock` inyectado para probar el borde de las 21 a 24 h.
+
+### Changed
+
+- changed(chequera/estadoChequera): el endpoint lo consumen `report-service` y el frontend; Javadoc, `@Operation` y `docs/hexagonal-estadoChequera.mmd` actualizados. Cambio aditivo: ningún campo existente cambia.
+
+> Basado en el diff de la rama contra `origin/develop` y el código real de `GetEstadoChequeraUseCaseImpl` (`estadoCuota`), `EstadoCuota`, `CuotaEstado`, `ProductoEstado` y sus Response/mapper. Todo es **aditivo** (campos nuevos al final de los records; ningún contrato existente cambia): incremento **minor** de SemVer (`9.5.1` → `9.6.0`, `pom.xml`). Sin dependencias ni cambios de esquema. Verificación: `mvn -B test` verde y prueba en vivo contra la base de desarrollo en dos chequeras reales (28 cuotas): `estado` coincide con un cálculo independiente sobre las filas de `chequera_cuota` y `deuda = total - pagado` en todos los productos. Sin probar aún contra `report-service` ni el frontend.
+
+## [9.5.1] - 2026-10-17
+
+### Fixed
+
+- fix(chequera/chequeraSerie): `ChequeraSerieMapper.toEstadoUsuarioDomain` propaga `hpum` de la entidad al dominio (`entity.getHpum() != null ? entity.getHpum() : (byte) 0`). Ese mapper —usado sólo por `ChequeraSerieController.findAllByUsuario` (`GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}`) y `findAllByUsuarioAsignaciones` (`GET .../asignaciones`), alias `/api/tesoreria/core/chequeraSerie/...`, vía `JpaChequeraSerieRepositoryAdapter`) no mapeaba `hpum`, así que `ChequeraEstadoUsuarioResponse.from(ChequeraSerie)` (`getHpum() != null && getHpum() != 0`) devolvía siempre `false` aunque `chequera_serie.hpum` fuera 1. El campo se agregó a la respuesta en `9.5.0` y el otro mapper del slice (`toDomainModel`) ya lo mapeaba. El default `(byte) 0` replica el patrón de `enviado`/`retenida`/`flagPayperTic` del mismo mapper. Sin cambios de URL, contrato, campos ni esquema.
+- test(chequera/chequeraSerie): Nueva `ChequeraSerieMapperTest` sobre `toEstadoUsuarioDomain`: `hpum = 1` ⇒ `1`, `hpum = 0` ⇒ `0`, `hpum` nulo ⇒ `0` y entidad nula ⇒ `null`. La prueba del controlador (`ChequeraSerieUsuarioControllerTest`) no cubría el mapper porque construye el dominio directamente.
+
+> Basado en `git diff HEAD` (2 archivos, +79/−0 líneas: 1 en `ChequeraSerieMapper` y 78 en `ChequeraSerieMapperTest`) y el código real de `ChequeraSerieMapper.toEstadoUsuarioDomain` (línea `hpum` agregada, default `(byte) 0`) frente a `toDomainModel` (que ya mapeaba `hpum`), `JpaChequeraSerieRepositoryAdapter` (los cuatro únicos usos de `toEstadoUsuarioDomain`: `findAllByLectivoIdAndFacultadIdIn`, `...AndPersonaIdAndDocumentoId`, `...AndGeograficaIdInAndTipoChequeraIdIn` y `...AndGeograficaIdInAndTipoChequeraIdInAndPersonaIdAndDocumentoId`), `ChequerasPorUsuarioService`/`ChequerasPorUsuarioAsignadasService` (cada uno usa el par con/sin `personaId`) y `ChequeraEstadoUsuarioResponse.from` (`getHpum() != null && getHpum() != 0`, idéntico al `hpum` de `EstadoChequeraResponse`). Fix correctivo de un endpoint público existente (el flag `hpum` de la respuesta pasa a reflejar la columna), sin cambio de URL, contrato, campos ni esquema (`ddl-auto: none`: sólo se lee la columna existente `chequera_serie.hpum`): incremento **patch** de SemVer (`9.5.0` → `9.5.1`, `pom.xml`), mismo criterio que el parche de `deudaExamen` en `5.0.1`. Sin dependencias nuevas. `docs/hexagonal-chequeraSerie.mmd` sincronizado (título a v9.5.1; la estructura no cambia: la clase `ChequeraSerieMapper` y el método `toEstadoUsuarioDomain` ya estaban en el diagrama y el nodo `ChequeraEstadoUsuarioResponse` ya mostraba `+boolean hpum` desde `9.5.0`) y línea de `docs/README.md` actualizada. Verificación **sin compilación por indicación del usuario** (no se ejecutó `mvn`); `docs/hexagonal-chequeraSerie.mmd` validado con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-17).
+
+## [9.5.0] - 2026-10-16
+
+### Added
+
+- feat(chequera/chequeraSerie): El contrato `ChequeraEstadoUsuarioResponse` — respuesta de los endpoints paginados `GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}` y `GET /chequeraserie/usuario/{userId}/lectivo/{lectivoId}/asignaciones` (alias `/api/tesoreria/core/chequeraSerie/...`) — incorpora el campo aditivo `hpum` (`boolean`, documentado con `@Schema`): `true` cuando `chequera_serie.hpum` no es nulo ni 0. Se deriva en `ChequeraEstadoUsuarioResponse.from(ChequeraSerie)` con la misma expresión que usa `GetEstadoChequeraUseCaseImpl` para el `hpum` de `EstadoChequeraResponse` (`getHpum() != null && getHpum() != 0`). Sin cambios de URL ni de campos existentes: un consumidor que ignore el campo no se ve afectado.
+- test(chequera/chequeraSerie): `ChequeraSerieUsuarioControllerTest` cubre el campo nuevo en los dos endpoints: `$.content[0].hpum` `true` con la serie marcada (`hpum = 1`) y `false` sin marca HPUM.
+
+### Changed
+
+- chore(repo): integración de `graphify` (grafo de conocimiento del repositorio para agentes): plugin `.opencode/plugins/graphify.js`, atributo de merge `graphify-out/graph.json merge=graphify` en `.gitattributes`, `/graphify-out/` en `.gitignore` y sección "graphify" en `AGENTS.md`. Herramienta de desarrollo: sin cambios en el servicio, en sus dependencias Maven ni en el esquema.
+
+> Basado en `git diff HEAD` (6 archivos, +84/−0 líneas: 2 en `ChequeraEstadoUsuarioResponse`, 3 en su prueba, 62 en el plugin `graphify.js`, 14 en `AGENTS.md` y 2 de configuración de repositorio) y el código real de `ChequeraEstadoUsuarioResponse` (componente `boolean hpum` con `@Schema` y `chequera.getHpum() != null && chequera.getHpum() != 0` en `from`), `ChequeraSerie.hpum` (`Byte`), `ChequeraSerieController.findAllByUsuario`/`findAllByUsuarioAsignaciones` (únicos consumidores, vía `ChequeraEstadoUsuarioPageResponse`) y `ChequeraSerieUsuarioControllerTest` (`hpum = 1` ⇒ `true`; sin marca ⇒ `false`). Un campo aditivo en la respuesta de endpoints existentes, sin cambio de URL ni de campo previo, es una capacidad pública backward-compatible: incremento **minor** de SemVer (`9.4.0` → `9.5.0`, `pom.xml`), con el mismo criterio que el `login` aditivo de `LoginResponse` en `4.6.0`. Sin dependencias nuevas ni cambios de esquema (`ddl-auto: none`: sólo se lee la columna existente `chequera_serie.hpum`). `docs/hexagonal-chequeraSerie.mmd` sincronizado (título a v9.5.0 y `+boolean hpum` en `ChequeraEstadoUsuarioResponse`) y línea de `docs/README.md` actualizada. Verificación **sin compilación por indicación del usuario** (no se ejecutó `mvn`); `docs/hexagonal-chequeraSerie.mmd` validado con `mmdc` (renderiza el nodo con `hpum`). Fecha de release tomada del día en curso del entorno de trabajo (2026-10-16).
+
 ## [9.4.0] - 2026-10-15
 
 ### Added

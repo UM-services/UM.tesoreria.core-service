@@ -84,6 +84,7 @@ public class ChequeraSerieMapper {
                 .geograficaId(entity.getGeograficaId())
                 .alternativaId(entity.getAlternativaId())
                 .becaPorcentaje(entity.getBecaPorcentaje() != null ? entity.getBecaPorcentaje() : BigDecimal.ZERO)
+                .hpum(entity.getHpum() != null ? entity.getHpum() : (byte) 0)
                 .asentado(entity.getAsentado())
                 .enviado(entity.getEnviado())
                 .retenida(entity.getRetenida())

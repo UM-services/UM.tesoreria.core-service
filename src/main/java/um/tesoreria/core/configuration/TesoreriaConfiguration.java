@@ -12,6 +12,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.Clock;
+import java.time.ZoneId;
+
 /**
  * @author daniel
  *
@@ -26,6 +29,11 @@ public class TesoreriaConfiguration {
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
+	}
+
+	@Bean
+	public Clock clock() {
+		return Clock.system(ZoneId.of("America/Argentina/Buenos_Aires"));
 	}
 
 	@Bean
