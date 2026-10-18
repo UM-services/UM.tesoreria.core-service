@@ -2,6 +2,15 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [9.6.1] - 2026-10-18
+
+### Changed
+
+- chore(ci): El job `deploy` de `.github/workflows/deploy-staging.yml` **despliega a dos ambientes** desde el mismo push a `staging`, con una matriz de ambientes (`environment: [staging, staging-new]`, `fail-fast: false`): cada leg corre en el runner self-hosted etiquetado con ese ambiente (`runs-on: [self-hosted, linux, "${{ matrix.environment }}"]`), publica en el environment de GitHub homónimo (`environment.name: ${{ matrix.environment }}`) y se presenta en la UI con el ambiente en el nombre (`Deploy staging service (${{ matrix.environment }})`). Un fallo en un ambiente no cancela el otro. Se mantiene el gate de rama del job (`github.event_name == 'push' && github.ref == 'refs/heads/staging'`).
+- chore(ci): Sin cambios en el resto del workflow: `verify` (`mvn -B verify`), `build-image` (una sola imagen publicada con el tag `${{ github.sha }}` y la caché `staging` de GHA) y el paso de despliegue, que en los dos ambientes sigue invocando `/data/docker/env-staging/deploy-tesoreria-core-staging.sh "${GITHUB_SHA}"`.
+
+> Basado en `git diff HEAD` (1 archivo, `.github/workflows/deploy-staging.yml`, +7/−3 líneas) y el workflow completo leído en el repositorio: el job `deploy` (matriz de ambientes, `runs-on` y `environment` por leg, `name` con `${{ matrix.environment }}`) frente a `verify`/`build-image` y al paso `Deploy tesoreria core service`, que no cambian. Cambio interno de CI/CD que no modifica contratos, rutas, campos ni comportamiento de la API: incremento **patch** de SemVer (`9.6.0` → `9.6.1`, `pom.xml`), con el mismo criterio que el `4.1.1` del repo (cambios internos de CI/CD ⇒ patch) y sin dependencias nuevas ni cambios de esquema. `docs/deployment.mmd` no se modifica: describe el despliegue genérico (Cliente → LB → App → MySQL/Kafka/externos) y no enumera ambientes ni runners; ningún slice cambia de estructura, así que no hay diagrama hexagonal que sincronizar; `docs/README.md` sólo actualiza el encabezado de versión. Verificación **sin compilación por indicación del usuario** (no se ejecutó `mvn`: el cambio no toca código Java). Fecha de release tomada del día en curso del entorno de trabajo (2026-10-18).
+
 ## [9.6.0] - 2026-10-17
 
 ### Added
