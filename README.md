@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.6.0**
+**Versión actual (SemVer): 9.6.1**
+
+## Novedades 9.6.1 (verificado en código)
+- **chore(ci)**: El job `deploy` de `.github/workflows/deploy-staging.yml` **despliega a dos ambientes** con el mismo push a `staging`, mediante una matriz (`environment: [staging, staging-new]`, `fail-fast: false`): cada leg corre en el runner self-hosted etiquetado con ese ambiente (`runs-on: [self-hosted, linux, "${{ matrix.environment }}"]`) y usa el environment de GitHub homónimo (`environment.name: ${{ matrix.environment }}`), con el ambiente en el nombre del job (`Deploy staging service (${{ matrix.environment }})`). Un fallo en un ambiente no cancela el otro; `verify`, la publicación de la imagen y el script de despliegue no cambian.
+- **docs**: `docs/README.md` sólo actualiza el encabezado de versión; `docs/deployment.mmd` no cambia porque no enumera ambientes ni runners.
+
+> Basado en `git diff HEAD` (1 archivo, `.github/workflows/deploy-staging.yml`, +7/−3 líneas) y el workflow completo. Los cambios son internos de CI/CD y no modifican contratos, rutas, campos ni comportamiento de la API: incremento **patch** de SemVer (`9.6.0` → `9.6.1`, `pom.xml`), mismo criterio que `4.1.1`. Sin dependencias nuevas ni cambios de esquema. Verificación sin compilación por indicación del usuario (el cambio no toca código Java).
 
 ## Novedades 9.6.0 (verificado en código)
 - **feat(chequera/estadoChequera)**: `GET /api/tesoreria/core/chequera/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` suma dos campos **aditivos**: `estado` en cada cuota (enum serializado como string: `BAJA`, `COMPENSADA`, `PAGADA`, `A_DEFINIR`, `VENCIDA`, `PENDIENTE`) y `deuda` en cada producto (`total - pagado`, con el mismo criterio null -> 0 de `chequera_total`). El `estado` se evalúa en ese orden y gana la primera regla que se cumple; "hoy" es el día calendario de `America/Argentina/Buenos_Aires` (no UTC) y se compara contra el día de `primerVencimiento`. Así `report-service` (PDF) y el frontend muestran lo mismo: los cálculos viven en el backend.
