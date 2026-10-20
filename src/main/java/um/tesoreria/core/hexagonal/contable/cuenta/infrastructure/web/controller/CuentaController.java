@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
+import um.tesoreria.core.hexagonal.contable.cuenta.application.exception.CuentaConflictoException;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaErrorResponse;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaRequest;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaResponse;
@@ -24,6 +26,19 @@ public class CuentaController {
 
     private final CuentaService service;
     private final CuentaDtoMapper mapper;
+
+    @ExceptionHandler(CuentaConflictoException.class)
+    public ResponseEntity<CuentaErrorResponse> conflicto(CuentaConflictoException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new CuentaErrorResponse(409, "Conflict", ex.getMessage()));
+    }
+
+    @GetMapping("/sede/{geograficaId}/grado/{grado}")
+    public ResponseEntity<List<CuentaResponse>> findBySedeYGrado(@PathVariable Integer geograficaId,
+                                                               @PathVariable Integer grado) {
+        return ResponseEntity.ok(service.findAllByGeograficaIdAndGrado(geograficaId, grado)
+                .stream().map(mapper::toResponse).toList());
+    }
 
     @GetMapping("/")
     public ResponseEntity<List<CuentaResponse>> findAll() {

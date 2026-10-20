@@ -11,6 +11,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Entity
+@org.hibernate.annotations.DynamicUpdate
 @Table(name = "plancta")
 @NoArgsConstructor
 @AllArgsConstructor

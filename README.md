@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.6.3**
+**Versión actual (SemVer): 9.7.0**
+
+## Novedades 9.7.0 (verificado en código)
+- **feat(contable/cuenta)**: Plan de Cuentas (#407): jerarquía de once dígitos validada en servidor; alta, integradoras e historial #404 en una transacción. Edición parcial con `null` = conservar y sede `0` = sin sede (`NULL`). Baja rechazada si hay hijas, movimientos en el rango o referencias protegidas por FK, con `409` y cuerpo JSON para VB6.
+- **feat(contable/cuenta)**: Consulta aditiva `GET /cuenta/sede/{geograficaId}/grado/{grado}` y alias largo `/api/tesoreria/core/cuenta/...`, con coincidencia exacta de sede y grado y orden por número.
+- **fix(contable/cuenta)**: Recálculo sobre entidades gestionadas, sin `saveAll`/merge: no vuelve a insertar cuentas borradas durante el balance. La limpieza de nombres con `\r\n` se conserva mediante una actualización de entidades gestionadas.
+- Compatibilidad y datos detectados en dev: [guía del Plan de Cuentas](docs/gestion-plan-cuentas.md). Sin DDL nuevo; requiere el historial #404 existente.
 
 ## Novedades 9.6.3 (verificado en código)
 - **fix(compras/pedidos)**: `compra_pedido_item.referencia_web` pasa de `varchar(500)` a **`TEXT`** (`CompraPedidoItemEntity` con `@Column(length = 65535)`, igual que `especificaciones` en la misma entidad y `necesidad` en `CompraPedidoEntity`). Las URLs de referencia de marketplaces/buscadores con parámetros de seguimiento superan con facilidad los 500 caracteres, así que el valor quedaba limitado en la base (y con `sql_mode` estricto se rechaza con `Data too long for column 'referencia_web'`). Sin cambios de URL, DTOs ni contrato (`String referenciaWeb` en `CompraPedidoItemRequest`/`CompraPedidoItemResponse`).

@@ -31,6 +31,14 @@ public class CuentaService {
         return getAllCuentasUseCase.getAllCuentas();
     }
 
+    public List<Cuenta> findAllByGeograficaIdAndGrado(Integer geograficaId, Integer grado) {
+        return repositoryPort.findAllByGeograficaIdAndGrado(geograficaId, grado);
+    }
+
+    public void limpiarNombres() {
+        repositoryPort.limpiarNombres();
+    }
+
     public List<Cuenta> findAllByNumeroCuentaIn(List<BigDecimal> cuentas) {
         return repositoryPort.findAllByNumeroCuentaIn(cuentas);
     }
