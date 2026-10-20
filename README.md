@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.6.2**
+**Versión actual (SemVer): 9.6.3**
+
+## Novedades 9.6.3 (verificado en código)
+- **fix(compras/pedidos)**: `compra_pedido_item.referencia_web` pasa de `varchar(500)` a **`TEXT`** (`CompraPedidoItemEntity` con `@Column(length = 65535)`, igual que `especificaciones` en la misma entidad y `necesidad` en `CompraPedidoEntity`). Las URLs de referencia de marketplaces/buscadores con parámetros de seguimiento superan con facilidad los 500 caracteres, así que el valor quedaba limitado en la base (y con `sql_mode` estricto se rechaza con `Data too long for column 'referencia_web'`). Sin cambios de URL, DTOs ni contrato (`String referenciaWeb` en `CompraPedidoItemRequest`/`CompraPedidoItemResponse`).
+- **docs**: `docs/sql/V414__compras_referencia_web_text.sql` (idempotente, `ddl-auto: none`): agrega la columna como `TEXT` si no existe o la migra desde `varchar`, vía `information_schema.COLUMNS` + `PREPARE`/`EXECUTE`. **Aplicarlo antes de desplegar**: sin el DDL la base mantiene el tope de 500.
+
+> Basado en `git diff HEAD` (2 archivos: `CompraPedidoItemEntity.java` +1/−1 y `docs/sql/V414__compras_referencia_web_text.sql` nuevo, +23 líneas) y el código real del slice (`CompraPedidoItemEntity`, `CompraPedidoItemEntity.especificaciones` con `length = 65535`, `CompraPedidoEntity.necesidad`, DTOs sin `@Size`, mappers y `PedidoItemsPendientesJdbcAdapter`). Fix de capacidad de una columna existente, sin cambios de API pública ⇒ incremento **patch** de SemVer (`9.6.2` → `9.6.3`, `pom.xml`). Sin dependencias nuevas. Cambio de esquema (`V414`) que requiere aplicarse antes de desplegar. Ningún diagrama cambia (la estructura del slice es la misma). Verificación sin compilación ni tests por indicación del usuario; el DDL no se ejecutó contra la base.
 
 ## Novedades 9.6.2 (verificado en código)
 - **fix(configuration)**: El consumidor de `payment-processed` deserializa por **tipo target** y ya no depende del header `__TypeId__`: `KafkaConsumerConfig` usa `new JacksonJsonDeserializer<>(PaymentProcessedEvent.class, objectMapper, false)`. Se elimina el `DefaultJacksonJavaTypeMapper` con el mapping fijo del FQN `um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent`, que hacía fallar el consumo cuando el productor publicaba otro nombre de clase (p. ej. el paquete nuevo `um.tesoreria.mercadopago.domain.event`): el valor llegaba nulo y el pago no se imputaba (`PaymentEventListener` sólo lo logueaba; los dos reintentos del `DefaultErrorHandler` no aplican a un valor ya nulo). De paso, al ignorar headers de tipo desaparece la deserialización arbitraria por `__TypeId__`.

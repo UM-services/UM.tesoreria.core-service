@@ -2,6 +2,18 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [9.6.3] - 2026-10-20
+
+### Fixed
+
+- fix(compras/pedidos): `compra_pedido_item.referencia_web` pasa de `varchar(500)` a **`TEXT`**. `CompraPedidoItemEntity` declara la columna con `@Column(name = "referencia_web", length = 65535)` (antes `length = 500`), el mismo criterio que la propia entidad ya usa para `especificaciones` y que `CompraPedidoEntity` usa para `necesidad`. Motivo: las URLs de referencia de productos (marketplaces, buscadores) llevan parámetros de seguimiento y superan con facilidad los 500 caracteres, de modo que el valor quedaba limitado en la base (y con `sql_mode` estricto se rechaza con `Data too long for column 'referencia_web'`). Sin cambios de URL, DTOs ni contrato: `CompraPedidoItemRequest`/`CompraPedidoItemResponse`, el modelo de dominio `CompraPedidoItem` y `CompraPedidoItemMapper`/`CompraPedidoItemDtoMapper` siguen exponiendo `String referenciaWeb`; la lectura por JDBC de cotizaciones (`PedidoItemsPendientesJdbcAdapter` → `CompraCotizacionPendiente`/`CompraCotizacionPendienteResponse`) no se toca.
+
+### Added
+
+- docs: `docs/sql/V414__compras_referencia_web_text.sql` (idempotente, `ddl-auto: none`, base `tesium`): consulta `information_schema.COLUMNS` y, con `PREPARE`/`EXECUTE`, **agrega** `referencia_web TEXT NULL` si la columna no existe (bases creadas antes del slice de ítems) o la **modifica** a `TEXT` si ya existe como `varchar`. Requiere aplicarse antes de desplegar: sin el DDL, el límite de 500 caracteres sigue vigente en la base aunque la entidad ya espere `TEXT`.
+
+> Basado en `git diff HEAD` (2 archivos: `CompraPedidoItemEntity.java` +1/−1 y `docs/sql/V414__compras_referencia_web_text.sql` nuevo, +23 líneas) y el código real del slice: `CompraPedidoItemEntity` (`@Column(name = "especificaciones", length = 65535)` como precedente en la misma tabla, `necesidad` con `length = 65535` en `CompraPedidoEntity`), `CompraPedidoItem`/`CompraPedidoItemRequest`/`CompraPedidoItemResponse` (el campo es `String`, sin `@Size` ni tope en el DTO), los dos mappers del slice y el consumidor de lectura `PedidoItemsPendientesJdbcAdapter` (`rs.getString("referencia_web")`). Es un fix de capacidad de una columna existente —sin rutas, DTOs, campos ni contratos REST nuevos o modificados— ⇒ incremento **patch** de SemVer (`9.6.2` → `9.6.3`, `pom.xml`). Sin dependencias nuevas. Cambio de esquema (`ddl-auto: none`, esquema externo): `compra_pedido_item.referencia_web` a `TEXT` (`V414`) — **requiere aplicarlo** antes de desplegar. Ningún diagrama cambia: `docs/hexagonal-compraPedidoItem.mmd` no modela tipos de columna y la estructura del slice sigue igual; `docs/README.md` actualiza el encabezado de versión y la línea del slice. Verificación **sin compilación ni tests por indicación del usuario** (no se ejecutó `mvn`) y **sin ejecutar el DDL** (no hay acceso a la base desde esta sesión; el script se revisó por lectura). Fecha de release tomada del día en curso del entorno de trabajo (2026-10-20).
+
 ## [9.6.2] - 2026-10-20
 
 ### Fixed
