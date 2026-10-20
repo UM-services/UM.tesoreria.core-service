@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 9.6.2** (actualizada: 2026-10-20)
+**Versión actual del servicio: 9.7.0** (actualizada: 2026-10-20)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -17,7 +17,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-auth.mmd`: Arquitectura hexagonal del módulo Auth (autenticación de usuarios) - v4.7.0 (puerto `ChangePasswordUseCase`, endpoints `change-password`/`me/{userId}` y updates dirigidos `updateLastLog`/`updateCredentials` en `UsuarioAuthRepository`).
 - `hexagonal-geografica.mmd`: Arquitectura hexagonal del módulo Geografica (entidades geográficas).
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores) - v3.36.0 (reubicado bajo `compras/`).
-- `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta (gestión de cuentas contables) - v3.8.0.
+- `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta - v9.7.0 (#407: jerarquía, escrituras transaccionales con historial, baja segura, consulta por sede/grado y recálculo gestionado). Guía: [Plan de Cuentas](gestion-plan-cuentas.md).
 - `hexagonal-mercadopago-context-history.mmd`: Historial de contexto de MercadoPago.
 - `hexagonal-ubicacion.mmd`: Arquitectura hexagonal del módulo Ubicacion (gestión de ubicaciones) - v8.0.0 (nuevo puerto público `GetUbicacionByIdUseCase`).
 - `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v9.2.1 (asignación idempotente, borrado de vínculos en la baja del artículo, historial #404; bloqueos con `@Lock` y baja con `deleteAllByIdInBatch`, sin SQL nativo).

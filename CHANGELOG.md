@@ -2,6 +2,26 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [9.7.0] - 2026-10-20
+
+### Added
+
+- Plan de Cuentas (#407): `CuentaJerarquia` valida once dígitos enteros en grupos 1-2-2-2-4 sin huecos y calcula padre, ancestros, grados y rango por grado. `11010100000` termina en `11010109999`; no incluye cuentas hermanas.
+- `GET /cuenta/sede/{geograficaId}/grado/{grado}` y alias `/api/tesoreria/core/cuenta/...`, con filtros exactos y orden por número de cuenta.
+- Historial #404 del alta, las ediciones de integradoras, la edición y la baja dentro de sus transacciones; pruebas de dominio, casos de uso, adaptadores, persistencia y contrato HTTP; IT con copias `TEMPORARY` y E2E de concurrencia opt-in.
+
+### Changed
+
+- Alta: bloqueo de ancestros de raíz a padre antes de consultar movimientos; ancestro ausente, número inválido/duplicado o ancestro con movimientos → `409`. Insert estricto con `persist`, nunca merge; grados calculados e integradoras actualizadas atómicamente.
+- Edición: fila bloqueada; `null` conserva, nombre vacío rechaza, sede `0` se guarda `NULL`; identidad conservada y grados recalculados; con hijas, `integradora` queda en 1. Se permite editar cuentas con movimientos.
+- Baja: fila bloqueada, rechazo si tiene hijas o movimientos propios/en su rango, `delete` + `flush` y traducción de FK a `409`. Cuenta inexistente conserva `204` sin cuerpo. Todo rechazo de regla devuelve `{status,error,message}` para que VB6 reconozca el error.
+
+### Fixed
+
+- Recálculo de grados con entidades gestionadas y `@DynamicUpdate`: actualiza solo filas modificadas, sin reconstruir ni reinsertar cuentas borradas. `ContabilidadService` delega en Cuenta y conserva la limpieza de nombres sin merge y con bloqueo de escritura para no sobrescribir ediciones concurrentes.
+
+> Based on git diff contra `origin/develop` (`26bc8c5e`) y los archivos nuevos de #407: `CuentaJerarquia`, casos de uso Create/Update/Delete/RecalculaGrados, `JpaCuentaRepositoryAdapter`, repositorios derivados, `CuentaHistorialAdapter`, `CuentaController` y `ContabilidadService`. Propuesta **minor** (`9.6.2` → `9.7.0`) según el plan revisado: consulta aditiva y restricciones de negocio con nuevos `409`, conservando URL y campos existentes. Sin dependencias nuevas ni DDL nuevo; requiere `gestion_escritura_historial` (#404). Verificación: `mvn test` (1007 pruebas), MySQL dev vía relay con copias `TEMPORARY` (10 ejecutadas, 2 omitidas por corresponder a escenarios H2 de dos conexiones) y Mermaid validado. 8 E2E de concurrencia aprobados en dev vía relay, que fuerzan cada cruce y verifican el `LOCK WAIT` en `information_schema`; cada uno falla ante la regresión que protege (baja o alta sin bloqueo, recálculo sin `@DynamicUpdate` o con merge). La base quedó idéntica antes y después. Detalles en `docs/gestion-plan-cuentas.md`.
+
 ## [9.6.2] - 2026-10-20
 
 ### Fixed

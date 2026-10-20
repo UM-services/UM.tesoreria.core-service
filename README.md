@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.6.2**
+**Versión actual (SemVer): 9.7.0**
+
+## Novedades 9.7.0 (verificado en código)
+- **feat(contable/cuenta)**: Plan de Cuentas (#407): jerarquía de once dígitos validada en servidor; alta, integradoras e historial #404 en una transacción. Edición parcial con `null` = conservar y sede `0` = sin sede (`NULL`). Baja rechazada si hay hijas, movimientos en el rango o referencias protegidas por FK, con `409` y cuerpo JSON para VB6.
+- **feat(contable/cuenta)**: Consulta aditiva `GET /cuenta/sede/{geograficaId}/grado/{grado}` y alias largo `/api/tesoreria/core/cuenta/...`, con coincidencia exacta de sede y grado y orden por número.
+- **fix(contable/cuenta)**: Recálculo sobre entidades gestionadas, sin `saveAll`/merge: no vuelve a insertar cuentas borradas durante el balance. La limpieza de nombres con `\r\n` se conserva mediante una actualización de entidades gestionadas.
+- Compatibilidad y datos detectados en dev: [guía del Plan de Cuentas](docs/gestion-plan-cuentas.md). Sin DDL nuevo; requiere el historial #404 existente.
 
 ## Novedades 9.6.2 (verificado en código)
 - **fix(configuration)**: El consumidor de `payment-processed` deserializa por **tipo target** y ya no depende del header `__TypeId__`: `KafkaConsumerConfig` usa `new JacksonJsonDeserializer<>(PaymentProcessedEvent.class, objectMapper, false)`. Se elimina el `DefaultJacksonJavaTypeMapper` con el mapping fijo del FQN `um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent`, que hacía fallar el consumo cuando el productor publicaba otro nombre de clase (p. ej. el paquete nuevo `um.tesoreria.mercadopago.domain.event`): el valor llegaba nulo y el pago no se imputaba (`PaymentEventListener` sólo lo logueaba; los dos reintentos del `DefaultErrorHandler` no aplican a un valor ya nulo). De paso, al ignorar headers de tipo desaparece la deserialización arbitraria por `__TypeId__`.
