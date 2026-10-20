@@ -11,7 +11,6 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.kafka.support.mapping.DefaultJacksonJavaTypeMapper;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
@@ -34,7 +33,7 @@ public class KafkaConsumerConfig {
     private String groupId;
 
     @Bean
-    public ConsumerFactory<String, Object> consumerFactory() {
+    public ConsumerFactory<String, PaymentProcessedEvent> consumerFactory() {
         log.info("Initializing Kafka Consumer Factory with bootstrapServers: {} and groupId: {}", bootstrapServers, groupId);
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -47,24 +46,21 @@ public class KafkaConsumerConfig {
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
 
-        JacksonJsonDeserializer<Object> jsonDeserializer = (JacksonJsonDeserializer<Object>) (Object) new JacksonJsonDeserializer<>(PaymentProcessedEvent.class, objectMapper);
-        jsonDeserializer.addTrustedPackages("*");
-        jsonDeserializer.setUseTypeMapperForKey(true);
-        
-        DefaultJacksonJavaTypeMapper typeMapper = new DefaultJacksonJavaTypeMapper();
-        Map<String, Class<?>> mappings = new HashMap<>();
-        mappings.put("um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent", PaymentProcessedEvent.class);
-        typeMapper.setIdClassMapping(mappings);
-        jsonDeserializer.setTypeMapper(typeMapper);
-
-        ErrorHandlingDeserializer<Object> errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
+        /*
+         * El contrato del topic es el JSON del evento, no el nombre de clase Java del productor.
+         * useHeadersIfPresent=false evita resolver tipos desde __TypeId__ (y elimina el riesgo
+         * de deserializacion arbitraria); el tipo target es la unica fuente de verdad.
+         */
+        var jsonDeserializer = new JacksonJsonDeserializer<PaymentProcessedEvent>(
+                PaymentProcessedEvent.class, objectMapper, false);
+        var errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorHandlingDeserializer);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, PaymentProcessedEvent> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, PaymentProcessedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.setCommonErrorHandler(new DefaultErrorHandler(new FixedBackOff(1000L, 2)));
         return factory;
