@@ -1,42 +1,50 @@
 ---
-title: Arquitectura Hexagonal - Módulo Cuenta (v3.8.0)
+title: Arquitectura Hexagonal - Módulo Cuenta (v9.3.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
-        C[Cuenta<br/>Entidad de Dominio]
-        CR[CuentaRepository<br/>Puerto de Salida]
+        C["Cuenta"]
+        CJ["CuentaJerarquia<br/>Validación, padre, ancestros, grados y rango"]
+        CR["CuentaRepository<br/>Puerto de salida"]
+        CH["CuentaHistorialPort<br/>Puerto de salida"]
+        IP["Puertos de entrada<br/>Alta, edición, baja, consulta y recálculo"]
     end
-
     subgraph Aplicacion ["Aplicación (Application)"]
-        CS[CuentaService<br/>Servicio de Aplicación]
+        CS["CuentaService"]
+        UC["Casos de uso<br/>TransactionOperations para escrituras"]
+        EX["CuentaConflictoException"]
     end
-
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        CC[CuentaController<br/>Adaptador Web]
-        JPA[JpaCuentaRepositoryAdapter<br/>Adaptador JPA]
-        ENT[CuentaEntity<br/>Entidad JPA]
-        CSS[CuentaSearchService<br/>Servicio Externo]
+        CC["CuentaController<br/>Alias corto y largo; 409 con JSON"]
+        DTO["CuentaRequest / CuentaResponse<br/>CuentaErrorResponse"]
+        JPA["JpaCuentaRepositoryAdapter<br/>persist para alta; entidades gestionadas para cambios"]
+        ENT["CuentaEntity<br/>DynamicUpdate"]
+        JR["JpaCuentaRepository<br/>Métodos derivados y PESSIMISTIC_WRITE"]
+        MOV["CuentaMovimientoReferenciaEntity<br/>movcon, solo lectura"]
+        MR["CuentaMovimientoReferenciaRepository<br/>existsByNumeroCuentaBetween"]
+        HA["CuentaHistorialAdapter<br/>Copias planas del estado"]
+        CSS["CuentaSearchService<br/>Dependencia legacy preexistente"]
     end
-
     subgraph Externo ["Externo (External)"]
-        JPAR[JpaRepository<br/>Spring Data]
+        HIST["RegistrarEscrituraHistorialUseCase<br/>Puerto público de historial 404"]
+        LEG["ContabilidadService<br/>Balance: delega recálculo y limpieza de nombres"]
     end
-
-    %% Flujo de Dependencias
-    CC -->|usa| CS
-    CC -->|recibe/envía| ENT
-
-    CS -->|depende| CR
-    CS -->|usa| CSS
-
-    JPA -->|implementa| CR
-    JPA -->|persiste| JPAR
-    JPA -->|gestiona| ENT
-
-    style C fill:#e1f5fe
-    style CR fill:#f3e5f5
-    style CS fill:#fff3e0
-    style CC fill:#e8f5e8
-    style JPA fill:#e8f5e8
-    style ENT fill:#e8f5e8
-    style CSS fill:#fff8e1
+    CC --> DTO
+    CC --> CS
+    CS --> IP
+    UC -. implementa .-> IP
+    UC --> CJ
+    UC --> C
+    UC --> CR
+    UC --> CH
+    UC --> EX
+    JPA -. implementa .-> CR
+    JPA --> JR
+    JR --> ENT
+    JPA --> CJ
+    JPA --> MR
+    MR --> MOV
+    JPA --> CSS
+    HA -. implementa .-> CH
+    HA --> HIST
+    LEG --> CS
