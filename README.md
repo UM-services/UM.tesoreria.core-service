@@ -4,7 +4,14 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.6.1**
+**Versión actual (SemVer): 9.6.2**
+
+## Novedades 9.6.2 (verificado en código)
+- **fix(configuration)**: El consumidor de `payment-processed` deserializa por **tipo target** y ya no depende del header `__TypeId__`: `KafkaConsumerConfig` usa `new JacksonJsonDeserializer<>(PaymentProcessedEvent.class, objectMapper, false)`. Se elimina el `DefaultJacksonJavaTypeMapper` con el mapping fijo del FQN `um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent`, que hacía fallar el consumo cuando el productor publicaba otro nombre de clase (p. ej. el paquete nuevo `um.tesoreria.mercadopago.domain.event`): el valor llegaba nulo y el pago no se imputaba (`PaymentEventListener` sólo lo logueaba; los dos reintentos del `DefaultErrorHandler` no aplican a un valor ya nulo). De paso, al ignorar headers de tipo desaparece la deserialización arbitraria por `__TypeId__`.
+- **changed(configuration)**: `consumerFactory()` y `kafkaListenerContainerFactory()` se tipan con `PaymentProcessedEvent` (antes `Object`). Sin cambios de topic, grupo, reintentos, rutas, contratos REST ni esquema; `KafkaProducerConfig` no se toca.
+- **test(configuration)**: `KafkaConsumerConfigTest` cubre JSON sin headers, `__TypeId__` del productor actual y de un paquete inexistente (ignorados), campos nuevos tolerados y la construcción del container factory.
+
+> Basado en `git diff HEAD` (2 archivos, +120/−15 líneas: `KafkaConsumerConfig.java` y `KafkaConsumerConfigTest.java` nuevo) y el código real de `KafkaConsumerConfig`, `PaymentEventListener` (`@KafkaListener` sobre `payment-processed`) y `PaymentProcessedEvent`. Fix interno sin cambio de API pública ⇒ incremento **patch** de SemVer (`9.6.1` → `9.6.2`, `pom.xml`). Sin dependencias nuevas. Verificación sin compilación por indicación del usuario; la firma del constructor de `JacksonJsonDeserializer` se comprobó con `javap` sobre `spring-kafka-4.1.1.jar`.
 
 ## Novedades 9.6.1 (verificado en código)
 - **chore(ci)**: El job `deploy` de `.github/workflows/deploy-staging.yml` **despliega a dos ambientes** con el mismo push a `staging`, mediante una matriz (`environment: [staging, staging-new]`, `fail-fast: false`): cada leg corre en el runner self-hosted etiquetado con ese ambiente (`runs-on: [self-hosted, linux, "${{ matrix.environment }}"]`) y usa el environment de GitHub homónimo (`environment.name: ${{ matrix.environment }}`), con el ambiente en el nombre del job (`Deploy staging service (${{ matrix.environment }})`). Un fallo en un ambiente no cancela el otro; `verify`, la publicación de la imagen y el script de despliegue no cambian.
