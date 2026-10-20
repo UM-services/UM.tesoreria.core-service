@@ -41,7 +41,7 @@ public class CompraPedidoItemEntity extends Auditable {
     @Column(name = "especificaciones", length = 65535)
     private String especificaciones;
 
-    @Column(name = "referencia_web", length = 500)
+    @Column(name = "referencia_web", length = 65535)
     private String referenciaWeb;
 
 }
