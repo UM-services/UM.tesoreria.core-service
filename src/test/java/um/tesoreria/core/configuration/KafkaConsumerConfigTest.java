@@ -1,10 +1,12 @@
 package um.tesoreria.core.configuration;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import um.tesoreria.core.event.PaymentProcessedEvent;
 
@@ -14,9 +16,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
- * Verifica que el consumidor deserialice por tipo target y no dependa de __TypeId__.
+ * Verifica que el consumidor deserialice por tipo target y no dependa de __TypeId__, y que los
+ * errores de procesamiento tengan reintentos con backoff y derivación al topic DLT.
  */
 class KafkaConsumerConfigTest {
 
@@ -45,6 +49,8 @@ class KafkaConsumerConfigTest {
         assertThat(event.getStatusDetail()).isEqualTo("accredited");
         assertThat(event.getDateApproved()).isEqualTo(OffsetDateTime.of(2026, 10, 20, 12, 0, 0, 0, ZoneOffset.UTC));
         assertThat(event.getDateCreated()).isEqualTo(OffsetDateTime.of(2026, 10, 20, 11, 0, 0, 0, ZoneOffset.UTC));
+        assertThat(event.getDateLastUpdated()).isEqualTo(OffsetDateTime.of(2026, 10, 20, 12, 30, 0, 0, ZoneOffset.UTC));
+        assertThat(event.getSource()).isEqualTo("WEBHOOK_V1");
         assertThat(event.getTransactionAmount()).isEqualByComparingTo("1234.50");
         assertThat(event.getPaymentJson()).isEqualTo("{\"id\":12345}");
     }
@@ -83,12 +89,36 @@ class KafkaConsumerConfigTest {
     }
 
     @Test
-    void mantieneElErrorHandlerConDosReintentos() {
-        var listenerFactory = new KafkaConsumerConfig();
-        ReflectionTestUtils.setField(listenerFactory, "bootstrapServers", "kafka:9092");
-        ReflectionTestUtils.setField(listenerFactory, "groupId", "tesoreria-core-group");
+    void usaBackoffExponencialConCincoReintentos() {
+        var backOff = KafkaConsumerConfig.backOffPagoProcesado();
 
-        assertThat(listenerFactory.kafkaListenerContainerFactory().getContainerProperties()).isNotNull();
+        assertThat(backOff.getInitialInterval()).isEqualTo(1000L);
+        assertThat(backOff.getMultiplier()).isEqualTo(2.0);
+        assertThat(backOff.getMaxAttempts()).isEqualTo(5L);
+    }
+
+    @Test
+    void losErroresSeDerivanAlTopicDltDeLaMismaParticion() {
+        var record = new ConsumerRecord<>(TOPIC, 2, 42L, "12345", (PaymentProcessedEvent) null);
+
+        var destino = KafkaConsumerConfig.destinoDlt(record, new IllegalStateException("base caida"));
+
+        assertThat(destino.topic()).isEqualTo("payment-processed.DLT");
+        assertThat(destino.partition()).isEqualTo(2);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void elContenedorSeArmaConElManejadorDeErroresYLosDosTemplatesDelDlt() {
+        var config = new KafkaConsumerConfig();
+        ReflectionTestUtils.setField(config, "bootstrapServers", "kafka:9092");
+        ReflectionTestUtils.setField(config, "groupId", "tesoreria-core-group");
+
+        var listenerFactory = config.kafkaListenerContainerFactory(
+                mock(KafkaTemplate.class), mock(KafkaTemplate.class));
+
+        assertThat(listenerFactory.getContainerProperties()).isNotNull();
+        assertThat(listenerFactory.getContainerProperties().getTopics()).isNull();
     }
 
     private PaymentProcessedEvent deserialize(Headers headers, String payload) {
@@ -102,6 +132,7 @@ class KafkaConsumerConfigTest {
                  "reservaVacanteId":"550e8400-e29b-41d4-a716-446655440000",
                  "paymentId":"12345","status":"approved","statusDetail":"accredited",
                  "dateApproved":"2026-10-20T12:00:00Z","dateCreated":"2026-10-20T11:00:00Z",
+                 "dateLastUpdated":"2026-10-20T12:30:00Z","source":"WEBHOOK_V1",
                  "transactionAmount":1234.50,"paymentJson":"{\\"id\\":12345}"}
                 """;
     }

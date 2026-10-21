@@ -57,6 +57,12 @@ public class MercadoPagoContextEntity extends Auditable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime fechaAcreditacion;
 
+    /**
+     * {@code date_last_updated} del pago en Mercado Pago. Ordena los eventos del mismo pago y
+     * permite descartar entregas fuera de orden (columna agregada con {@code V417}).
+     */
+    private OffsetDateTime dateLastUpdated;
+
     @Builder.Default
     private BigDecimal importePagado = BigDecimal.ZERO;
 

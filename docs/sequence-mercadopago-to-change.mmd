@@ -1,14 +1,22 @@
 ---
-title: Cuotas activas a cambiar (MercadoPago)
+title: Cuotas activas a cambiar (MercadoPago) - flujo legado
 ---
 sequenceDiagram
     participant C as Cliente
     participant Ctrl as MercadoPagoContextController
     participant S as MercadoPagoContextService
+    participant U as FindAllActiveToChangeUseCaseImpl
     participant R as MercadoPagoContextRepository
+
+    Note over Ctrl,S: Deprecado en 10.0.0.
+    Note over Ctrl,S: Lo reemplaza POST /api/tesoreria/core/mercadopago/renovaciones: filtra cuotas pagadas, calcula el vencimiento destino y pagina por keyset.
+
     C->>Ctrl: GET /api/tesoreria/core/mercadoPagoContext/all/active/to/change
     Ctrl->>S: findAllActiveToChange()
-    S->>R: findAllByActivoAndFechaVencimientoBetween(1, hoy-90d, hoy)
-    R-->>S: List~MercadoPagoContext~
-    S-->>Ctrl: List~Long~ (chequeraCuotaId)
+    S->>U: findAllActiveToChange()
+    U->>R: findAllByActivoAndFechaVencimientoBetween(1, hoy-90d, hoy)
+    R-->>U: List~MercadoPagoContext~
+    U->>U: descarta chequeraCuotaId nulos y duplicados
+    U-->>S: List~Long~ (chequeraCuotaId)
+    S-->>Ctrl: List~Long~
     Ctrl-->>C: 200 OK (JSON)

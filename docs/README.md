@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 9.7.0** (actualizada: 2026-10-20)
+**Versión actual del servicio: 10.0.0** (actualizada: 2026-10-21)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -13,7 +13,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-proveedorMovimiento.mmd`: Arquitectura hexagonal del módulo ProveedorMovimiento (movimientos de proveedores) - v3.36.0 (nuevo módulo, 13 casos de uso).
 - `hexagonal-track.mmd`: Arquitectura hexagonal del módulo Track (seguimiento) - v3.36.0 (nuevo módulo, 4 casos de uso).
 - `hexagonal-chequeraCuota.mmd`: Arquitectura hexagonal del módulo ChequeraCuota (21 casos de uso individuales) - v3.38.0 (nuevo caso de uso GetCuotaActualUseCase + endpoint cuotaActual).
-- `hexagonal-mercadoPagoContext.mmd`: Arquitectura hexagonal del módulo MercadoPagoContext (contexto de pagos MP) - v3.26.0.
+- `hexagonal-mercadoPagoContext.mmd`: Arquitectura hexagonal del módulo MercadoPagoContext (contexto de pagos MP) - v10.0.0 (barrido de renovaciones con Criteria API + keyset, `PATCH .../updateContext/{id}/preferencia`, `POST .../sanitize/activeContexts`, `VencimientoMercadoPagoResolver`, sanitización online en `FindActiveByChequeraCuotaIdUseCaseImpl`, guarda de orden `dateLastUpdated` y retiro de `/all/active/cuota/id`).
 - `hexagonal-auth.mmd`: Arquitectura hexagonal del módulo Auth (autenticación de usuarios) - v4.7.0 (puerto `ChangePasswordUseCase`, endpoints `change-password`/`me/{userId}` y updates dirigidos `updateLastLog`/`updateCredentials` en `UsuarioAuthRepository`).
 - `hexagonal-geografica.mmd`: Arquitectura hexagonal del módulo Geografica (entidades geográficas).
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores) - v3.36.0 (reubicado bajo `compras/`).
@@ -38,7 +38,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-guaraniPropuestaTipoChequera.mmd`: Arquitectura hexagonal del módulo GuaraniPropuestaTipoChequera (asignación de tipo de chequera a propuesta y lectivo, con tipo de chequera enriquecido) - v3.49.0.
 - `hexagonal-claseChequera.mmd`: Arquitectura hexagonal del módulo ClaseChequera (clasificación de chequeras) - v4.7.0 (puerto de entrada `GetClaseChequeraByIdUseCase`, `ClaseChequeraService.findById`, alias `/api/tesoreria/core/clasechequera` y firmas reales del puerto de salida sincronizadas).
 - `hexagonal-lectivo.mmd`: Arquitectura hexagonal del módulo Lectivo (gestión de lectivos con 8 casos de uso) - v3.30.0 (nuevo módulo).
-- `hexagonal-reservaVacante.mmd`: Arquitectura hexagonal del módulo ReservaVacante (gestión de reservas de vacantes UM Hub) - v3.32.0 (nuevo UpdateReservaVacanteUseCase con integración de pago MercadoPago).
+- `hexagonal-reservaVacante.mmd`: Arquitectura hexagonal del módulo ReservaVacante (gestión de reservas de vacantes UM Hub) - v10.0.0 (claim de la notificación de pago con `SELECT ... FOR UPDATE`: puerto `ReclamarNotificacionPagoUseCase`, endpoints `/{id}/notificacion/claim|release` y columna `notificacion_pago`; sigue el `UpdateReservaVacanteUseCase` con integración de pago MercadoPago de v3.32.0).
 - `hexagonal-consulta.mmd`: Arquitectura hexagonal del módulo Consulta (UM Hub): datos personales + domicilio/contacto y deuda agregada por **número de documento sin tipo** (`GET /api/tesoreria/core/umhub/consulta/persona/{numeroDocumento}` y `.../deuda[?extended=]`), DTOs filtrados sin `password`/`cbu`/`cuit`/`emailPagador`, fusión de todos los tipos del mismo titular (caso LE/LC=DNI) y regla anti-colisión de identidad - v6.1.0.
 - `hexagonal-domicilio.mmd`: Arquitectura hexagonal del módulo Domicilio (gestión de domicilios) - v4.2.1 (`Domicilio`/`DomicilioEntity` implementan `Jsonifyable`, captura defensiva de correos).
 - `hexagonal-alumnoGuarani.mmd`: Arquitectura hexagonal del módulo AlumnoGuarani (integración con sistema Guaraní y creación de datos personales) - v3.50.0.
@@ -93,7 +93,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `sequence-comprobante.mmd`: Comprobante.
 - `sequence-consulta-articulos.mmd`: Consulta de artículos.
 - `sequence-liquidacion-sueldos.mmd`: Liquidación de sueldos.
-- `sequence-mercadopago-to-change.mmd`: MercadoPago to change.
+- `sequence-mercadopago-to-change.mmd`: MercadoPago to change (flujo **legado y `@Deprecated`** desde v10.0.0: conserva la ventana de 90 días, ahora descarta cuotas nulas y duplicados; lo reemplaza `POST /api/tesoreria/core/mercadopago/renovaciones`).
 - `sequence-movimientos-cuenta.mmd`: Movimientos de cuenta.
 - `sequence-pago-chequera.mmd`: Pago de chequera.
 - `sequence-reemplazo-chequera.mmd`: Reemplazo de chequera.

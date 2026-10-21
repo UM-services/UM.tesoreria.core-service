@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface JpaMercadoPagoContextRepository extends JpaRepository<MercadoPagoContextEntity, Long> {
+public interface JpaMercadoPagoContextRepository extends JpaRepository<MercadoPagoContextEntity, Long>,
+        JpaMercadoPagoContextRepositoryCustom {
 
     List<MercadoPagoContextEntity> findAllByChequeraCuotaIdAndActivo(Long chequeraCuotaId, Byte activo);
 
@@ -19,8 +20,6 @@ public interface JpaMercadoPagoContextRepository extends JpaRepository<MercadoPa
     Optional<MercadoPagoContextEntity> findByReservaVacanteId(UUID reservaVacanteId);
 
     Optional<MercadoPagoContextEntity> findByMercadoPagoContextId(Long mercadoPagoContextId);
-
-    List<MercadoPagoContextEntity> findAllByActivoOrderByMercadoPagoContextIdDesc(Byte activo);
 
     List<MercadoPagoContextEntity> findAllByActivoAndFechaVencimientoBetween(Byte activo, OffsetDateTime desde, OffsetDateTime hasta);
 

@@ -46,6 +46,13 @@ public class MercadoPagoContext {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime fechaAcreditacion;
 
+    /**
+     * {@code date_last_updated} del pago en Mercado Pago (columna {@code date_last_updated}, V417).
+     * Permite descartar eventos entregados fuera de orden: un webhook viejo no pisa el estado de un
+     * pago más nuevo del mismo contexto.
+     */
+    private OffsetDateTime dateLastUpdated;
+
     @Builder.Default
     private BigDecimal importePagado = BigDecimal.ZERO;
 
