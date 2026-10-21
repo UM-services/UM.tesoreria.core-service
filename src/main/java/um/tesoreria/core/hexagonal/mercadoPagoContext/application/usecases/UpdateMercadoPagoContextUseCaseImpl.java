@@ -38,6 +38,7 @@ public class UpdateMercadoPagoContextUseCaseImpl implements UpdateMercadoPagoCon
                     existing.setStatus(newMercadoPagoContext.getStatus());
                     existing.setFechaPago(newMercadoPagoContext.getFechaPago());
                     existing.setFechaAcreditacion(newMercadoPagoContext.getFechaAcreditacion());
+                    existing.setDateLastUpdated(newMercadoPagoContext.getDateLastUpdated());
                     existing.setImportePagado(newMercadoPagoContext.getImportePagado());
                     existing.setPayment(newMercadoPagoContext.getPayment());
                     return repository.save(existing);

@@ -44,11 +44,12 @@ public class MercadoPagoContextController {
         }
     }
 
-    @GetMapping("/all/active/cuota/id")
-    public ResponseEntity<List<Long>> findAllActiveChequeraCuota() {
-        return ResponseEntity.ok(service.findAllActiveChequeraCuota());
-    }
-
+    /**
+     * @deprecated Flujo legado de barrido (90 días). Lo reemplaza
+     * {@code POST /api/tesoreria/core/mercadopago/renovaciones}, que filtra cuotas pagadas,
+     * calcula el vencimiento destino y pagina. Se mantiene solo por compatibilidad.
+     */
+    @Deprecated
     @GetMapping("/all/active/to/change")
     public ResponseEntity<List<Long>> findAllActiveToChange() {
         return ResponseEntity.ok(service.findAllActiveToChange());
