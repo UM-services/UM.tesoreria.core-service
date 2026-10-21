@@ -8,11 +8,16 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.exception.
 import um.tesoreria.core.exception.MercadoPagoContextException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.PreferenciaPatch;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
 import um.tesoreria.core.model.dto.UMPreferenceMPDto;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.VencimientoMercadoPagoResolver;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.RenovacionMercadoPago;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.SanitizacionContexto;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.VencimientoMercadoPago;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,7 +25,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -29,8 +33,36 @@ public class MercadoPagoCoreService {
 
     private final ChequeraCuotaService chequeraCuotaService;
     private final MercadoPagoContextService mercadoPagoContextService;
+    private final VencimientoMercadoPagoResolver vencimientoMercadoPagoResolver;
 
-    private record VencimientoMP(OffsetDateTime fechaVencimiento, BigDecimal importe) {
+    @Transactional
+    public List<UMPreferenceMPDto> findRenovaciones(OffsetDateTime hoy, int lookbackDias, boolean reintentos,
+                                                   OffsetDateTime afterFecha, Long afterId, int size) {
+        List<RenovacionMercadoPago> renovaciones = mercadoPagoContextService
+                .findRenovaciones(hoy, lookbackDias, reintentos, afterFecha, afterId, size);
+        return renovaciones.stream()
+                .map(this::buildRenovacionResponse)
+                .toList();
+    }
+
+    public List<SanitizacionContexto> sanitizeActiveContexts(boolean dryRun) {
+        return mercadoPagoContextService.sanitizeActiveContexts(dryRun);
+    }
+
+    public MercadoPagoContext updatePreferencia(PreferenciaPatch datos, Long mercadoPagoContextId) {
+        return mercadoPagoContextService.updatePreferencia(datos, mercadoPagoContextId);
+    }
+
+    private UMPreferenceMPDto buildRenovacionResponse(RenovacionMercadoPago renovacion) {
+        var contexto = renovacion.contexto();
+        // El JSON de la preferencia pesa ~6 KB y no es necesario para renovar: se omite en la respuesta.
+        contexto.setPreference(null);
+        return UMPreferenceMPDto.builder()
+                .mercadoPagoContext(contexto)
+                .chequeraCuota(renovacion.chequeraCuota())
+                .fechaVencimientoDestino(renovacion.fechaVencimientoDestino())
+                .importeDestino(renovacion.importeDestino())
+                .build();
     }
 
     @Transactional
@@ -112,7 +144,7 @@ public class MercadoPagoCoreService {
         }
     }
 
-    private MercadoPagoContext createOrUpdateContext(MercadoPagoContext mercadoPagoContext, Long chequeraCuotaId, VencimientoMP vencimiento) {
+    private MercadoPagoContext createOrUpdateContext(MercadoPagoContext mercadoPagoContext, Long chequeraCuotaId, VencimientoMercadoPago vencimiento) {
         log.debug("\n\nProcessing MercadoPagoCoreService.createOrUpdateContext\n\n");
         if (mercadoPagoContext == null) {
             mercadoPagoContext = mercadoPagoContextService.add(MercadoPagoContext.builder()
@@ -167,15 +199,9 @@ public class MercadoPagoCoreService {
         mercadoPagoContextService.saveAll(contexts);
     }
 
-    private VencimientoMP determineVencimientoMP(ChequeraCuota cuota, OffsetDateTime today) {
+    private VencimientoMercadoPago determineVencimientoMP(ChequeraCuota cuota, OffsetDateTime today) {
         log.debug("\n\nProcessing MercadoPagoCoreService.determineVencimientoMP\n\n");
-        if (today.isEqual(Objects.requireNonNull(cuota.getVencimiento1())) || today.isBefore(cuota.getVencimiento1())) {
-            return new VencimientoMP(cuota.getVencimiento1(), cuota.getImporte1());
-        }
-        if (today.isEqual(Objects.requireNonNull(cuota.getVencimiento2())) || today.isBefore(cuota.getVencimiento2())) {
-            return new VencimientoMP(cuota.getVencimiento2(), cuota.getImporte2());
-        }
-        return new VencimientoMP(cuota.getVencimiento3(), cuota.getImporte3());
+        return vencimientoMercadoPagoResolver.seleccionar(cuota, today);
     }
 
     public MercadoPagoContext updateContext(MercadoPagoContext mercadoPagoContext, Long mercadoPagoContextId) {

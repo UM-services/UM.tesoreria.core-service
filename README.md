@@ -4,7 +4,24 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.6.3**
+**Versión actual (SemVer): 10.0.0**
+
+## Novedades 10.0.0 (verificado en código)
+- **breaking(mercadoPagoContext)**: se retira `GET /api/tesoreria/core/mercadoPagoContext/all/active/cuota/id` (`FindAllActiveChequeraCuotaUseCase` y `findAllByActivoOrderByMercadoPagoContextIdDesc`), sin consumidores conocidos (no hay referencias en este repo; el relevamiento de servicios y frontends es del autor del cambio). Es el único cambio incompatible y el que fija el **major**. `GET /api/tesoreria/core/mercadoPagoContext/all/active/to/change` sigue vivo pero queda `@Deprecated` y ahora descarta `chequeraCuotaId` nulos y duplicados (los contextos de reserva de vacante abortaban el barrido).
+- **feat(mercadoPagoContext)**: `POST /api/tesoreria/core/mercadopago/renovaciones` (body opcional `RenovacionesCandidatosRequest`: `hoy`, `lookbackDias`, `reintentos`, `afterFecha`, `afterId`, `size` 1-500) devuelve contexto + cuota + `fechaVencimientoDestino`/`importeDestino`, sin el JSON de preferencia. Selección con Criteria API en `JpaMercadoPagoContextRepositoryCustomImpl`: contexto activo, cuota pendiente, un vencimiento posterior vigente, una fila por cuota (el contexto activo más reciente) y keyset por `(fechaVencimiento, mercadoPagoContextId)`. `VencimientoMercadoPagoResolver` centraliza la regla de qué vencimiento publicar.
+- **feat(mercadoPagoContext)**: `PATCH /api/tesoreria/core/mercadopago/updateContext/{id}/preferencia` escribe **sólo** `fechaVencimiento`, `importe`, `initPoint`, `preferenceId`, `preference`, `changed` y `lastVencimientoUpdated` (evita el *lost update* del `PUT` completo sobre `status`/`importePagado`), y `POST /api/tesoreria/core/mercadopago/sanitize/activeContexts` desactiva duplicados por cuota conservando el de mayor id, con `dryRun` por defecto. La misma sanitización corre **online** en `FindActiveByChequeraCuotaIdUseCaseImpl` (no borra filas: un pago tardío se sigue registrando porque el webhook resuelve el contexto por id).
+- **fix(configuration, listener)**: `PaymentEventListener` ya no se traga las excepciones (antes el offset se commiteaba y el evento se perdía). `KafkaConsumerConfig` reintenta con backoff exponencial (1 s × 2, 5 intentos) y deriva a `payment-processed.DLT`; un JSON inválido va directo al DLT; `KafkaProducerConfig` agrega `dltKafkaTemplate` (`byte[]`) para republicar el record crudo sin base64.
+- **fix(service/facade)**: `PagoService.registraPagoMP` refuerza la idempotencia por `idMercadoPago` (antes un pre-check con `try/catch`): `@Transactional`, validación de `idMercadoPago` presente, búsqueda del pago existente y respaldo con el índice único `uk_chequera_pago_id_mp`; un pago **distinto** sobre una cuota ya pagada se registra igual con `WARN` (doble pago real → reversa). `ProcessPaymentEventUseCaseImpl` extrae `aplicarDatosDelPago`, descarta eventos desordenados con `dateLastUpdated` anterior al aplicado y deja explícito que la idempotencia vive en los efectos, no en el `paymentId` (un refund/chargeback se sigue persistiendo).
+- **feat(umhub/reservaVacante)**: claim de la notificación de pago con `SELECT ... FOR UPDATE` y `POST /api/tesoreria/core/umhub/reservaVacante/{id}/notificacion/claim|release`; `updateNotificacionPago` persiste sólo el flag.
+- **docs**: `docs/sql/V415__uk_chequera_pago_id_mp.sql`, `docs/sql/V416__reserva_vacante_notificacion_pago.sql` y `docs/sql/V417__mercado_pago_context_date_last_updated.sql` (idempotentes, con detección previa y rollback). **Aplicarlos antes de desplegar**: con `ddl-auto: none` la aplicación no crea esas columnas/índices. El índice `idx_activo_fecha_vencimiento` (barrido de 50 s a 0,14 s) se aplicó a mano en desarrollo y no tiene script en el repo.
+
+> Basado en `git diff HEAD` (HEAD `bcaba9a0`; 62 archivos de código, tests y SQL, +2093/−111) y el código real de los slices `mercadoPagoContext`, `umhub/reservaVacante`, `chequera/chequeraPago`, `configuration/`, `listener/PaymentEventListener`, `service/facade/PagoService` y `service/facade/MercadoPagoCoreService`. Retiro de una URL expuesta ⇒ incremento **major** de SemVer (`9.7.0` → `10.0.0`, `pom.xml`), criterio del repo para breaking (igual que `5.0.0`/`6.0.0`); el resto es aditivo. Sin dependencias nuevas. Verificación sin compilación ni tests por indicación del usuario; los `.mmd` de `mercadoPagoContext`, `reservaVacante` y `sequence-mercadopago-to-change` se actualizaron y validaron con Mermaid CLI.
+
+## Novedades 9.7.0 (verificado en código)
+- **feat(contable/cuenta)**: Plan de Cuentas (#407): jerarquía de once dígitos validada en servidor; alta, integradoras e historial #404 en una transacción. Edición parcial con `null` = conservar y sede `0` = sin sede (`NULL`). Baja rechazada si hay hijas, movimientos en el rango o referencias protegidas por FK, con `409` y cuerpo JSON para VB6.
+- **feat(contable/cuenta)**: Consulta aditiva `GET /cuenta/sede/{geograficaId}/grado/{grado}` y alias largo `/api/tesoreria/core/cuenta/...`, con coincidencia exacta de sede y grado y orden por número.
+- **fix(contable/cuenta)**: Recálculo sobre entidades gestionadas, sin `saveAll`/merge: no vuelve a insertar cuentas borradas durante el balance. La limpieza de nombres con `\r\n` se conserva mediante una actualización de entidades gestionadas.
+- Compatibilidad y datos detectados en dev: [guía del Plan de Cuentas](docs/gestion-plan-cuentas.md). Sin DDL nuevo; requiere el historial #404 existente.
 
 ## Novedades 9.6.3 (verificado en código)
 - **fix(compras/pedidos)**: `compra_pedido_item.referencia_web` pasa de `varchar(500)` a **`TEXT`** (`CompraPedidoItemEntity` con `@Column(length = 65535)`, igual que `especificaciones` en la misma entidad y `necesidad` en `CompraPedidoEntity`). Las URLs de referencia de marketplaces/buscadores con parámetros de seguimiento superan con facilidad los 500 caracteres, así que el valor quedaba limitado en la base (y con `sql_mode` estricto se rechaza con `Data too long for column 'referencia_web'`). Sin cambios de URL, DTOs ni contrato (`String referenciaWeb` en `CompraPedidoItemRequest`/`CompraPedidoItemResponse`).
@@ -1395,8 +1412,8 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1
 - Spring Boot: 4.1.1
 - Spring Cloud: 2025.1.3
 - Kotlin: 2.4.10
-- MySQL Connector: 9.7.0
-- SpringDoc OpenAPI: 3.0.3
+- MySQL Connector: 26.7.0
+- SpringDoc OpenAPI: 3.1.0
 - Apache POI: 5.5.1
 - OpenPDF: 3.0.5
 - ModelMapper: 3.2.6
