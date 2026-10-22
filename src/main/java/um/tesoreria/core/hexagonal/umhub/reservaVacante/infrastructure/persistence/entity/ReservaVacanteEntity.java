@@ -36,6 +36,14 @@ public class ReservaVacanteEntity extends Auditable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime vencimiento;
 
+    /**
+     * Claim de la notificación de pago (idempotencia de `payment-processed` en umhub). Columna
+     * agregada con {@code docs/sql/V416__reserva_vacante_notificacion_pago.sql}.
+     */
+    @Builder.Default
+    @Column(name = "notificacion_pago", nullable = false)
+    private Boolean notificacionPago = false;
+
     @OneToOne(optional = true)
     @JoinColumn(name = "personaUniqueId", referencedColumnName = "clave", insertable = false, updatable = false)
     private PersonaEntity persona;

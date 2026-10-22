@@ -26,6 +26,11 @@ public class ReservaVacante {
     private BigDecimal importe;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
     private OffsetDateTime vencimiento;
+    /**
+     * Marca de idempotencia de la notificación de pago a n8n: el primero que la reclama (claim
+     * atómico con lock pesimista) es el único que notifica. Se libera si el envío falla.
+     */
+    private Boolean notificacionPago;
     private Campanha campanha;
     private Persona persona;
     private Domicilio domicilio;
