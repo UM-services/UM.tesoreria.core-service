@@ -19,6 +19,7 @@ import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.util.backoff.ExponentialBackOff;
+import um.tesoreria.core.event.NotificacionResultadoEvent;
 import um.tesoreria.core.event.PaymentProcessedEvent;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -84,6 +85,34 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
+    @Bean
+    public ConsumerFactory<String, NotificacionResultadoEvent> notificacionResultadoConsumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+
+        JsonMapper objectMapper = JsonMapper.builder()
+                .findAndAddModules()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
+        var jsonDeserializer = new JacksonJsonDeserializer<NotificacionResultadoEvent>(
+                NotificacionResultadoEvent.class, objectMapper, false);
+        var errorHandlingDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), errorHandlingDeserializer);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, NotificacionResultadoEvent> notificacionResultadoKafkaListenerContainerFactory(
+            KafkaTemplate<String, Object> kafkaTemplate,
+            KafkaTemplate<String, byte[]> dltKafkaTemplate) {
+        var factory = new ConcurrentKafkaListenerContainerFactory<String, NotificacionResultadoEvent>();
+        factory.setConsumerFactory(notificacionResultadoConsumerFactory());
+        factory.setCommonErrorHandler(defaultErrorHandler(kafkaTemplate, dltKafkaTemplate));
+        return factory;
+    }
+
     /**
      * Reintentos con backoff exponencial y derivación a {@code payment-processed.DLT} cuando se
      * agotan. Se elige el template según el valor a publicar: un evento ya deserializado viaja como
@@ -93,6 +122,7 @@ public class KafkaConsumerConfig {
                                             KafkaTemplate<String, byte[]> dltKafkaTemplate) {
         Map<Class<?>, KafkaOperations<?, ?>> templates = new HashMap<>();
         templates.put(PaymentProcessedEvent.class, kafkaTemplate);
+        templates.put(NotificacionResultadoEvent.class, kafkaTemplate);
         templates.put(byte[].class, dltKafkaTemplate);
 
         var recoverer = new DeadLetterPublishingRecoverer(templates, KafkaConsumerConfig::destinoDlt);

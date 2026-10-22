@@ -2,7 +2,6 @@ package um.tesoreria.core.service.facade;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.MessageFormat;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -11,17 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
+import um.tesoreria.core.event.CorreoPayload;
+import um.tesoreria.core.event.Remitente;
 import um.tesoreria.core.event.SendChequeraEvent;
 import um.tesoreria.core.exception.CarreraChequeraException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
@@ -41,22 +34,20 @@ import um.tesoreria.core.hexagonal.personas.persona.domain.model.Persona;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieDto;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.SpoterDataResponse;
-import um.tesoreria.core.model.MailSender;
 import um.tesoreria.core.service.*;
 import um.tesoreria.core.service.transactional.spoter.SpoterService;
 import um.tesoreria.core.util.Tool;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class MailChequeraService {
 
-    @Value("${app.testing}")
-    private Boolean testing;
+    static final String MENSAJE_ENVIO = "Solicitud de envío en proceso";
+    static final String MENSAJE_SIN_CORREOS = "ERROR: Sin correos para ENVIAR";
+    private static final String REPLY_TO = "no-reply@um.edu.ar";
 
-    private final JavaMailSender javaMailSender;
     private final ChequeraSerieService chequeraSerieService;
     private final DomicilioService domicilioService;
     private final FacultadService facultadService;
@@ -66,11 +57,9 @@ public class MailChequeraService {
     private final CarreraChequeraService carreraChequeraService;
     private final CursoService cursoService;
     private final SpoterDataService spoterDataService;
-    private final MailSenderService mailSenderService;
     private final ChequeraService chequeraService;
     private final SpoterService spoterService;
-
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final CorreoEventPublisher correoEventPublisher;
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
             Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
@@ -85,28 +74,19 @@ public class MailChequeraService {
                 .codigoBarras(codigoBarras)
                 .build();
         log.debug("Publishing SendChequeraEvent: {}", event);
-        kafkaTemplate.send("send-chequera", event);
-        return "Solicitud de envío en proceso";
+        correoEventPublisher.publicarChequera(event);
+        return MENSAJE_ENVIO;
     }
 
     public String sendCuota(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
             Integer productoId, Integer cuotaId,
             Boolean copiaInformes, Boolean incluyeMatricula) {
-        MailSender javaMailSender = mailSenderService.findSender();
-        log.debug("mail_chequera_service.send_chequera.javaMailSender={}", javaMailSender);
-        String url = MessageFormat.format("http://{0}:{1}", javaMailSender.getIpAddress(),
-                javaMailSender.getPort().toString());
-        log.debug("mail_chequera_service.send_chequera.url={}", url);
-        WebClient webClient = WebClient.builder().baseUrl(url + "/chequera").build();
-        String uri = MessageFormat.format("/sendCuota/{0}/{1}/{2}/{3}/{4}/{5}/{6}/{7}", facultadId.toString(),
-                tipoChequeraId.toString(), chequeraSerieId.toString(), alternativaId.toString(), productoId.toString(),
-                cuotaId.toString(),
-                copiaInformes ? "true" : "false", incluyeMatricula ? "true" : "false");
-        log.debug("mail_chequera_service.send_cuota.uri={}", uri);
-        Mono<String> mono = webClient.get()
-                .uri(uri)
-                .retrieve().bodyToMono(String.class);
-        return mono.block();
+        log.debug("mail_chequera_service.send_cuota");
+        Long chequeraCuotaId = chequeraCuotaService
+                .findByUnique(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId)
+                .getChequeraCuotaId();
+        correoEventPublisher.publicarCuota(chequeraCuotaId);
+        return MENSAJE_ENVIO;
     }
 
     public SpoterDataResponse sendChequeraPreSpoter(SpoterData spoterData, Boolean updateMailPersonal,
@@ -190,7 +170,7 @@ public class MailChequeraService {
         log.debug("MailChequeraService.sendChequeraPreSpoter - message -> {}", message);
         // Registrar SpoterData
         spoterData.setLectivoId(lectivoId);
-        spoterData.setStatus(message.equals("Envío de Chequera Ok!!!") ? (byte) 1 : (byte) 0);
+        spoterData.setStatus(MENSAJE_ENVIO.equals(message) ? (byte) 1 : (byte) 0);
         spoterData.setMessage(message);
         spoterData.setTipoChequeraId(chequeraSerie.getTipoChequeraId());
         spoterData.setChequeraSerieId(chequeraSerie.getChequeraSerieId());
@@ -205,7 +185,7 @@ public class MailChequeraService {
                 chequeraSerieDTO);
     }
 
-    public String notificaDeudor(BigDecimal personaId, Integer documentoId) throws MessagingException {
+    public String notificaDeudor(BigDecimal personaId, Integer documentoId) {
         String data;
 
         Domicilio domicilio;
@@ -232,36 +212,22 @@ public class MailChequeraService {
                 + (char) 10;
 
         // Envia correo
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        List<String> addresses = new ArrayList<>();
-
-        if (!testing) {
-            if (!domicilio.getEmailPersonal().isEmpty())
-                addresses.add(domicilio.getEmailPersonal());
-            if (!domicilio.getEmailInstitucional().isEmpty())
-                addresses.add(domicilio.getEmailInstitucional());
-        } else {
-            log.debug("Testing -> daniel.quinterospinto@gmail.com");
-            addresses.add("daniel.quinterospinto@gmail.com");
+        List<String> addresses = destinatarios(domicilio);
+        if (addresses.isEmpty()) {
+            return MENSAJE_SIN_CORREOS;
         }
+        correoEventPublisher.publicar(CorreoPayload.builder()
+                .remitente(Remitente.NOTIFICACION)
+                .para(addresses)
+                .replyTo(REPLY_TO)
+                .asunto("Notificación por Deuda")
+                .cuerpo(data)
+                .build());
 
-        try {
-            helper.setTo(addresses.toArray(new String[0]));
-            helper.setText(data);
-            helper.setReplyTo("no-reply@um.edu.ar");
-            helper.setSubject("Notificación por Deuda");
-        } catch (MessagingException e) {
-            log.error("ERROR: No pudo ENVIARSE -> {}", e.getMessage());
-            return "ERROR: No pudo ENVIARSE";
-        }
-        javaMailSender.send(message);
-
-        return "Envío de Correo Ok!!";
+        return MENSAJE_ENVIO;
     }
 
-    public String notificaDeudorChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId)
-            throws MessagingException {
+    public String notificaDeudorChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         String data;
 
         ChequeraSerie serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
@@ -270,38 +236,25 @@ public class MailChequeraService {
         try {
             domicilio = domicilioService.findByUnique(serie.getPersonaId(), serie.getDocumentoId());
         } catch (DomicilioException e) {
-            return "ERROR: Sin correos para ENVIAR";
+            return MENSAJE_SIN_CORREOS;
         }
 
         data = notaDeudorChequera(facultadId, tipoChequeraId, chequeraSerieId);
 
         // Envia correo
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        List<String> addresses = new ArrayList<>();
-
-        if (!testing) {
-            if (!domicilio.getEmailPersonal().isEmpty())
-                addresses.add(domicilio.getEmailPersonal());
-            if (!domicilio.getEmailInstitucional().isEmpty())
-                addresses.add(domicilio.getEmailInstitucional());
-        } else {
-            log.debug("Testing -> daniel.quinterospinto@gmail.com");
-            addresses.add("daniel.quinterospinto@gmail.com");
+        List<String> addresses = destinatarios(domicilio);
+        if (addresses.isEmpty()) {
+            return MENSAJE_SIN_CORREOS;
         }
+        correoEventPublisher.publicar(CorreoPayload.builder()
+                .remitente(Remitente.NOTIFICACION)
+                .para(addresses)
+                .replyTo(REPLY_TO)
+                .asunto("Notificación por Deuda")
+                .cuerpo(data)
+                .build());
 
-        try {
-            helper.setTo(addresses.toArray(new String[0]));
-            helper.setText(data);
-            helper.setReplyTo("no-reply@um.edu.ar");
-            helper.setSubject("Notificación por Deuda");
-        } catch (MessagingException e) {
-            log.error("ERROR: No pudo ENVIARSE -> {}", e.getMessage());
-            return "ERROR: No pudo ENVIARSE";
-        }
-        javaMailSender.send(message);
-
-        return "Envio de Correo Ok!";
+        return MENSAJE_ENVIO;
     }
 
     public String notaDeudorChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
@@ -350,6 +303,17 @@ public class MailChequeraService {
         data.append("Por favor no responda este mail, fue generado automáticamente. Su respuesta no será leída." + (char) 10);
 
         return data.toString();
+    }
+
+    private List<String> destinatarios(Domicilio domicilio) {
+        List<String> direcciones = new ArrayList<>();
+        if (domicilio.getEmailPersonal() != null && !domicilio.getEmailPersonal().isEmpty()) {
+            direcciones.add(domicilio.getEmailPersonal());
+        }
+        if (domicilio.getEmailInstitucional() != null && !domicilio.getEmailInstitucional().isEmpty()) {
+            direcciones.add(domicilio.getEmailInstitucional());
+        }
+        return direcciones;
     }
 
 }

@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 10.1.0** (actualizada: 2026-10-22)
+**Versión actual del servicio: 11.1.0** (actualizada: 2026-10-22)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -18,7 +18,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-geografica.mmd`: Arquitectura hexagonal del módulo Geografica (entidades geográficas).
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores) - v3.36.0 (reubicado bajo `compras/`).
 - `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta - v9.7.0 (#407: jerarquía, escrituras transaccionales con historial, baja segura, consulta por sede/grado y recálculo gestionado). Guía: [Plan de Cuentas](gestion-plan-cuentas.md).
-- `hexagonal-ejercicio.mmd`: Arquitectura hexagonal del módulo Ejercicio bajo `contable/` - v10.1.0 (#408: alta del ejercicio siguiente, baja del último futuro y bloqueo/órdenes contables con `409` y código, historial #404, `@Lock` y consultas de uso en `movcon` y `asiento`; las lecturas siguen en el legacy). Guía: [Ejercicios](gestion-ejercicios.md).
+- `hexagonal-ejercicio.mmd`: Arquitectura hexagonal del módulo Ejercicio bajo `contable/` - v11.1.0 (#408: alta del ejercicio siguiente, baja del último futuro y bloqueo/órdenes contables con `409` y código, historial #404, `@Lock` y consultas de uso en `movcon` y `asiento`; las lecturas siguen en el legacy). Guía: [Ejercicios](gestion-ejercicios.md).
 - `hexagonal-mercadopago-context-history.mmd`: Historial de contexto de MercadoPago.
 - `hexagonal-ubicacion.mmd`: Arquitectura hexagonal del módulo Ubicacion (gestión de ubicaciones) - v8.0.0 (nuevo puerto público `GetUbicacionByIdUseCase`).
 - `hexagonal-ubicacionArticulo.mmd`: Arquitectura hexagonal del módulo UbicacionArticulo (gestión de ubicaciones de artículos) - v9.2.1 (asignación idempotente, borrado de vínculos en la baja del artículo, historial #404; bloqueos con `@Lock` y baja con `deleteAllByIdInBatch`, sin SQL nativo).
@@ -96,6 +96,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `sequence-liquidacion-sueldos.mmd`: Liquidación de sueldos.
 - `sequence-mercadopago-to-change.mmd`: MercadoPago to change (flujo **legado y `@Deprecated`** desde v10.0.0: conserva la ventana de 90 días, ahora descarta cuotas nulas y duplicados; lo reemplaza `POST /api/tesoreria/core/mercadopago/renovaciones`).
 - `sequence-movimientos-cuenta.mmd`: Movimientos de cuenta.
+- `sequence-notificacion-correo.mmd`: Notificación de correo (v11.0.0): core publica `send-correo`/`send-cuota`/`send-chequera` y responde `202 Accepted`; `tesoreria-sender-service` envía por SMTP y devuelve el resultado por `notificacion-resultado`, que es lo que habilita `persona_suspendido.notificado = 1`.
 - `sequence-pago-chequera.mmd`: Pago de chequera.
 - `sequence-reemplazo-chequera.mmd`: Reemplazo de chequera.
 

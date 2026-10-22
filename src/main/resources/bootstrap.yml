@@ -9,9 +9,6 @@ app:
   consul:
     host: consul-service
     port: 8500
-  mail:
-    username: uid
-    password: pwd
 
 server:
   port: ${app.port}
@@ -54,26 +51,6 @@ spring:
       group-id: tesoreria-core-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "*"
-        spring.json.type.mapping: "um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent:um.tesoreria.core.event.PaymentProcessedEvent"
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${app.mail.username}
-    password: ${app.mail.password}
-    properties:
-      mail:
-        smtp:
-          starttls:
-            enable: true
-            required: true
-          auth: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-
 logging:
   level:
     um.tesoreria.core: ${app.logging}
@@ -106,8 +83,6 @@ management:
   health:
     db:
       enabled: true  # Habilita la comprobación de salud de la base de datos
-    mail:
-      enabled: false
   metrics:
     enable:
       jdbc: true

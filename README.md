@@ -4,13 +4,23 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 10.1.0**
+**Versión actual (SemVer): 11.1.0**
 
-## Novedades 10.1.0 (verificado en código)
+## Novedades 11.1.0 (verificado en código)
 - **feat(contable/ejercicio)**: Ejercicios (#408): alta del ejercicio siguiente (1 de marzo a último día de febrero, id `último + 1`, límite relativo al año actual con `Clock`), baja solo del último ejercicio de año futuro y sin movimientos, asientos ni referencias, y cambio de `bloqueado` y órdenes contables conservando el resto. Historial #404 en la misma transacción; `@Lock` sobre el último ejercicio o la fila editada.
 - **changed(controller)**: `EjercicioController` es fachada de POST, PUT y DELETE del nuevo slice, con rechazos `409`/`404`/`400` en JSON (`codigo`). El PUT ya no reemplaza la entidad completa: nombre o fechas distintos responden `409`. `DELETE` inexistente responde `404`; POST y PUT ya no devuelven `created`/`updated`. Las lecturas no cambian.
 - **fix**: `AsientoInflacionService` ya no puede reabrir un ejercicio bloqueado; `EjercicioBloqueadoException` ya se puede construir (el `{}` de `MessageFormat` lanzaba `IllegalArgumentException`).
 - Reglas, errores y diferencias frente a VB6: [guía de Ejercicios](docs/gestion-ejercicios.md). Sin DDL nuevo; requiere el historial #404 existente.
+
+## Novedades 11.0.0 (verificado en código)
+- **breaking(mail, notificacion)**: los seis endpoints de envío (`GET /chequera/sendChequera/...`, `GET /chequera/sendCuota/...`, `GET /chequera/notificaDeudor/{personaId}/{documentoId}`, `GET /notificacion/notifyDeudorChequera/...`, `POST /notificacion/deudorSuspendido` y `GET /notificacion/pagoProveedor/{proveedorMovimientoId}`) responden **`202 Accepted`** con `Solicitud de envío en proceso` en lugar de `200 OK` con `Envío de Correo Ok!!`: el envío pasó a ser asíncrono. URLs y cuerpo `String` no cambian; `GET /notificacion/notaDeudorChequera/...` sigue en `200` porque es vista previa síncrona. Los clientes que comparan `status == 200` o el texto exacto deben aceptar cualquier `2xx`. Es el motivo del **major**.
+- **breaking(configuration)**: el topic `send-chequera` deja de llevar el header `__TypeId__` (`KafkaProducerConfig` con `JacksonJsonSerializer` y `setAddTypeInfo(false)`). El contrato del topic es el JSON del evento y el consumidor resuelve por tipo target, no por el FQCN `um.tesoreria.core.event.SendChequeraEvent`.
+- **feat(mail)**: `CorreoEventPublisher` es el único punto de publicación: core deja de hablar SMTP. Topics nuevos `send-correo` (envelope `CorreoEvent` con `eventType=CORREO`, `version`, `eventId`, `occurredAt` y `CorreoPayload`: `remitente` lógico `CHEQUERA`/`RECIBO`/`NOTIFICACION`, `para`, `replyTo`, `asunto`, `cuerpo`, `html`, `referencia`) y `send-cuota` (`SendCuotaEvent` con sólo el `chequeraCuotaId`; el sender resuelve los datos y arma la plantilla). `sendChequera`, `sendCuota`, `notificaDeudor`, `notificaDeudorChequera`, `notifyDeudorSuspendido` y `notifyPagoProveedor` publican y devuelven `Solicitud de envío en proceso`, o `ERROR: Sin correos para ENVIAR` cuando no hay direcciones.
+- **feat(notificacion)**: el resultado del envío vuelve por `notificacion-resultado` (`NotificacionResultadoEvent` + `NotificacionResultadoListener`, consumidor propio en `KafkaConsumerConfig` con backoff exponencial y `notificacion-resultado.DLT`) y **sólo entonces** se marca `persona_suspendido.notificado = 1`, con la referencia `PERSONA_SUSPENDIDO`. Antes la marca era optimista: un fallo de SMTP dejaba al alumno como notificado sin haber recibido nada.
+- **changed(configuration)**: `spring-boot-starter-mail` se reemplaza por `jakarta.mail-api` (sólo lo usa `ToolService.mailValidate`) y se eliminan `spring.mail`, `app.mail` y el health indicator de mail de `bootstrap.yml` y de los yml de test. `app.testing` queda sin lectores (la redirección a una casilla fija desaparece; el destino lo arma el sender).
+- **removed(legacy)**: `MailSender`, `MailSenderService`, `MailSenderRepository`, `MailSenderException` y `ChequeraClient` (Feign al sender): la tabla `mail_sender` y ese cliente quedan sin uso. También se versiona el `.mmd` nuevo del flujo y se corrige `AGENTS.md` (el sender ya no se llama por Feign).
+
+> Basado en `git diff HEAD` de código (HEAD `6bdc31da`; 28 archivos, +715/−431: 20 bajo `src/main` —7 modificados, 8 nuevos, 5 eliminados, incluido `bootstrap.yml`—, 7 bajo `src/test` —4 tests nuevos, `KafkaConsumerConfigTest` ampliado y los dos `application*.yml` de test— y `pom.xml`) y el código real de `KafkaProducerConfig`/`KafkaConsumerConfig`, `CorreoEventPublisher`, los `event/`, `NotificacionResultadoListener`, `MailChequeraService`/`NotificacionService` y los controladores `facade/ChequeraController`/`facade/NotificacionController`. Cambio de contrato público (status `200` → `202`, mensaje de éxito) y del wire de un topic existente ⇒ incremento **major** de SemVer (`10.0.0` → `11.0.0`, `pom.xml`), criterio del repo para breaking (igual que `5.0.0`/`6.0.0`/`10.0.0`). Sin DDL (`persona_suspendido.notificado` ya existe) y sin dependencias nuevas. **Requiere desplegar el consumidor** de `send-correo`/`send-cuota`/`send-chequera` que publique `notificacion-resultado`: sin él los correos quedan publicados y no se envían. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/sequence-notificacion-correo.mmd` y `docs/dependencies.mmd` validados con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-22).
 
 ## Novedades 10.0.0 (verificado en código)
 - **breaking(mercadoPagoContext)**: se retira `GET /api/tesoreria/core/mercadoPagoContext/all/active/cuota/id` (`FindAllActiveChequeraCuotaUseCase` y `findAllByActivoOrderByMercadoPagoContextIdDesc`), sin consumidores conocidos (no hay referencias en este repo; el relevamiento de servicios y frontends es del autor del cambio). Es el único cambio incompatible y el que fija el **major**. `GET /api/tesoreria/core/mercadoPagoContext/all/active/to/change` sigue vivo pero queda `@Deprecated` y ahora descarta `chequeraCuotaId` nulos y duplicados (los contextos de reserva de vacante abortaban el barrido).
@@ -1417,7 +1427,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
 - Spring Boot: 4.1.1
 - Spring Cloud: 2025.1.3
-- Kotlin: 2.4.10
+- Kotlin: 2.4.21
 - MySQL Connector: 26.7.0
 - SpringDoc OpenAPI: 3.1.0
 - Apache POI: 5.5.1
@@ -1748,9 +1758,9 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.3-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-purple.svg)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-4.3.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.0.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)

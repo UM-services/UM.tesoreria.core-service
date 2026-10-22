@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
+import um.tesoreria.core.event.NotificacionResultadoEvent;
 import um.tesoreria.core.event.PaymentProcessedEvent;
 
 import java.math.BigDecimal;
@@ -119,6 +120,32 @@ class KafkaConsumerConfigTest {
 
         assertThat(listenerFactory.getContainerProperties()).isNotNull();
         assertThat(listenerFactory.getContainerProperties().getTopics()).isNull();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void deserializaElResultadoDeNotificacionSinHeadersDeTipo() {
+        var config = new KafkaConsumerConfig();
+        ReflectionTestUtils.setField(config, "bootstrapServers", "kafka:9092");
+        ReflectionTestUtils.setField(config, "groupId", "tesoreria-core-group");
+        var factoryResultado = (DefaultKafkaConsumerFactory<String, NotificacionResultadoEvent>)
+                config.notificacionResultadoConsumerFactory();
+
+        Headers headers = new RecordHeaders();
+        headers.add("__TypeId__", "um.tesoreria.sender.hexagonal.procesos.notificacion.infrastructure.kafka.event.ResultadoNotificacionEvent"
+                .getBytes(StandardCharsets.UTF_8));
+        String payload = """
+                {"eventId":"evt-1","occurredAt":"2026-10-22T12:00:00Z","enviado":true,
+                 "referencia":{"tipo":"PERSONA_SUSPENDIDO","id":"7"}}
+                """;
+
+        NotificacionResultadoEvent event = factoryResultado.getValueDeserializer()
+                .deserialize("notificacion-resultado", headers, payload.getBytes(StandardCharsets.UTF_8));
+
+        assertThat(event.getEventId()).isEqualTo("evt-1");
+        assertThat(event.isEnviado()).isTrue();
+        assertThat(event.getReferencia().getTipo()).isEqualTo("PERSONA_SUSPENDIDO");
+        assertThat(event.getReferencia().getId()).isEqualTo("7");
     }
 
     private PaymentProcessedEvent deserialize(Headers headers, String payload) {
