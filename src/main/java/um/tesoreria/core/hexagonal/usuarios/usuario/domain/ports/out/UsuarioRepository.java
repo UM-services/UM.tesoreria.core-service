@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface UsuarioRepository {
     Optional<Usuario> findByLogin(String login);
+    /** Indica si el login ya está tomado, comparando sin distinguir mayúsculas. */
+    boolean existsByLoginIgnoreCase(String login);
 
     /** Usuarios activos cuyo login o nombre contiene el texto; con texto nulo, todos los activos. */
     List<Usuario> findUsuariosBySearch(String texto);
