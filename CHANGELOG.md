@@ -2,6 +2,33 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [9.8.0] - 2026-10-21
+
+### Added
+
+- Ejercicios (#408): slice `contable/ejercicio` con casos de uso de alta, edición y baja, `EjercicioEntity` propia con columnas explícitas e historial #404 (entidad `ejercicio`, clave `eje_id`) en la misma transacción. `EjercicioController` queda como fachada de POST, PUT y DELETE; las lecturas no cambian.
+- Alta del ejercicio siguiente: id `último + 1`, del 1 de marzo al último día de febrero y nombre `Ejercicio Económico <año>`; lo omitido se deriva y lo enviado tiene que coincidir. Límite `Year(último.fechaInicio) > Year(hoy) + 1` con el `Clock` inyectable. Insert estricto con `persist` + `flush`.
+- Baja del último ejercicio de año futuro, con rechazo si hay movimientos (`movcon`) o asientos (`asiento`) en el período o una FK que lo referencia. Nuevos puertos públicos `ExistsByFechaContableBetweenUseCase` (`contable/cuentaMovimiento`) y `ExistsAsientoByFechaBetweenUseCase` (`contable/asiento`), con métodos derivados y sin SQL nativo.
+- Guía [Ejercicios](docs/gestion-ejercicios.md) y diagrama `docs/hexagonal-ejercicio.mmd`.
+
+### Changed
+
+- `PUT /ejercicio/{id}` solo cambia `bloqueado` (0 o 1) y las órdenes contables; `null` conserva lo guardado. Nombre o fechas distintos de lo guardado responden `409` (`CAMPO_INMUTABLE`); antes el PUT reemplazaba toda la entidad y rellenaba con la fecha actual lo omitido. Sin cambio real no deja historial.
+- Los rechazos de regla responden `409` con `{status, error, codigo, message}` (`SALTO`, `DUPLICADO`, `LIMITE_ALTA`, `NO_ES_ULTIMO`, `NO_FUTURO`, `EN_USO`, `CAMPO_INMUTABLE`); id inexistente `404` y cuerpo mal formado o `bloqueado` fuera de {0,1} `400`, siempre con JSON. `DELETE` de un id inexistente pasa de `204` a `404`.
+- `POST` ya no es un upsert: antes `save` hacía merge sobre cualquier id; ahora el alta es un `INSERT` estricto y responde con el ejercicio derivado (id, fechas y nombre calculados). `PUT` de un id inexistente pasa de un error sin cuerpo (`EjercicioException`) a `404` con JSON; los errores se responden desde `EjercicioExceptionAdvice`, que cubre `EjercicioController` y `AsientoInflacionController`.
+- Las respuestas de POST y PUT ya no incluyen `created` ni `updated`.
+- Alta, baja y edición leen con `@Lock(PESSIMISTIC_WRITE)` (último ejercicio o fila editada); el alta, la edición y la baja reintentan (hasta 3 veces, con espera aleatoria) solo si MySQL revierte la transacción por deadlock (error 1213; el SQLState 40001 no distingue el lock wait timeout 1205); un lock wait timeout u otro fallo de bloqueo responde `409` con `codigo` `CONCURRENCIA`.
+- Validaciones nuevas: órdenes contables entre 0 y 32767 (columna `smallint`), `bloqueado` entre 0 y 1 y `nombre` de hasta 128 caracteres → `400`; el alta exige continuidad con el período del último ejercicio (`409 SALTO`) y, con la tabla vacía, un primer período regular (1 de marzo al último día de febrero). Un `nombre` en blanco o un `ejercicioId` menor o igual a cero se toman como omitidos.
+- `AsientoInflacionService` pasa a depender del caso de uso: sus endpoints pueden responder `409`/`404`/`400` con JSON del slice (antes un error sin cuerpo) y, como las demás escrituras, requieren `gestion_escritura_historial`.
+- Se retiran `add`, `update` y `delete` de `EjercicioService` (legacy), sin usuarios desde que la escritura pasó al slice.
+- `AsientoInflacionService` actualiza el ejercicio con `UpdateEjercicioUseCase` mandando solo la orden contable que cambia: ya no puede revertir un bloqueo y deja historial.
+
+### Fixed
+
+- `EjercicioBloqueadoException` usaba `{}` en `MessageFormat` y su constructor lanzaba `IllegalArgumentException`; ahora `ContabilidadService.saveAsiento` lanza la excepción esperada.
+
+> Based on git diff contra `origin/develop` (`bcaba9a0`) y los archivos nuevos de #408: casos de uso Create/Update/Delete, `EjercicioSiguiente`, `JpaEjercicioRepositoryAdapter`, `EjercicioHistorialAdapter`, `EjercicioUsoAdapter`, `EjercicioController`, `AsientoInflacionService` y los puertos nuevos de movimientos y asientos. Propuesta **minor** (`9.7.0` → `9.8.0`): rutas y campos de entrada sin cambios y reglas de negocio nuevas con `409`; el PUT más estricto, el `404` del DELETE y la ausencia de `created`/`updated` en las respuestas de escritura pueden afectar a clientes que dependan del comportamiento anterior, a confirmar en la revisión. Sin dependencias nuevas ni DDL nuevo; requiere `gestion_escritura_historial` (#404). Verificación: `mvn test` (1090 pruebas, con colaboradores simulados en los tres consumidores del flag); `EjercicioDevDbIT` (9 pruebas, dev vía relay con copias `TEMPORARY`); `EjercicioDevE2E` (14 pruebas contra dev vía relay, con reloj simulado en 2026-10-21; la base quedó idéntica y los `AUTO_INCREMENT` restaurados). Sin probar con el ejecutable VB6 ni con `CompraService.anulateValor` y `AsientoInflacionService` de punta a punta (solo unitarias). Diagrama Mermaid pendiente de validar en CI. Detalles en `docs/gestion-ejercicios.md`.
+
 ## [9.7.0] - 2026-10-20
 
 ### Added

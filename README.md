@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 9.7.0**
+**Versión actual (SemVer): 9.8.0**
+
+## Novedades 9.8.0 (verificado en código)
+- **feat(contable/ejercicio)**: Ejercicios (#408): alta del ejercicio siguiente (1 de marzo a último día de febrero, id `último + 1`, límite relativo al año actual con `Clock`), baja solo del último ejercicio de año futuro y sin movimientos, asientos ni referencias, y cambio de `bloqueado` y órdenes contables conservando el resto. Historial #404 en la misma transacción; `@Lock` sobre el último ejercicio o la fila editada.
+- **changed(controller)**: `EjercicioController` es fachada de POST, PUT y DELETE del nuevo slice, con rechazos `409`/`404`/`400` en JSON (`codigo`). El PUT ya no reemplaza la entidad completa: nombre o fechas distintos responden `409`. `DELETE` inexistente responde `404`; POST y PUT ya no devuelven `created`/`updated`. Las lecturas no cambian.
+- **fix**: `AsientoInflacionService` ya no puede reabrir un ejercicio bloqueado; `EjercicioBloqueadoException` ya se puede construir (el `{}` de `MessageFormat` lanzaba `IllegalArgumentException`).
+- Reglas, errores y diferencias frente a VB6: [guía de Ejercicios](docs/gestion-ejercicios.md). Sin DDL nuevo; requiere el historial #404 existente.
 
 ## Novedades 9.7.0 (verificado en código)
 - **feat(contable/cuenta)**: Plan de Cuentas (#407): jerarquía de once dígitos validada en servidor; alta, integradoras e historial #404 en una transacción. Edición parcial con `null` = conservar y sede `0` = sin sede (`NULL`). Baja rechazada si hay hijas, movimientos en el rango o referencias protegidas por FK, con `409` y cuerpo JSON para VB6.

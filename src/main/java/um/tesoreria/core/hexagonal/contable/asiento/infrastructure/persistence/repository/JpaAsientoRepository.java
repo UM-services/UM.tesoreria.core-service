@@ -21,6 +21,8 @@ public interface JpaAsientoRepository extends JpaRepository<AsientoEntity, Long>
 
 	Optional<AsientoEntity> findByFechaAndOrden(OffsetDateTime fecha, Integer orden);
 
+	boolean existsByFechaBetween(OffsetDateTime desde, OffsetDateTime hasta);
+
 	Optional<AsientoEntity> findByAsientoId(Long asientoId);
 
 	@Modifying
