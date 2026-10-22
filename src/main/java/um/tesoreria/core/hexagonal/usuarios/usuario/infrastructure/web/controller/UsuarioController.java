@@ -6,9 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.hexagonal.usuarios.usuario.application.exception.LoginNoDisponibleException;
 import um.tesoreria.core.hexagonal.usuarios.usuario.application.exception.UsuarioException;
 import um.tesoreria.core.hexagonal.usuarios.usuario.application.service.UsuarioService;
 import um.tesoreria.core.hexagonal.usuarios.usuario.domain.model.Usuario;
+import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.LoginSugeridoResponse;
+import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioAltaRequest;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioConfiguracionRequest;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioPasswordRequest;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto.UsuarioRequest;
@@ -106,11 +109,37 @@ public class UsuarioController {
         }
     }
 
+    /** Sugiere el login que se generaría para un nombre y apellido (sin crear nada). */
+    @GetMapping("/login-sugerido/{nombre}/{apellido}")
+    public ResponseEntity<LoginSugeridoResponse> sugerirLogin(@PathVariable String nombre,
+                                                              @PathVariable String apellido) {
+        try {
+            return ResponseEntity.ok(LoginSugeridoResponse.builder()
+                    .login(service.sugerirLogin(nombre, apellido))
+                    .build());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (LoginNoDisponibleException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
     @PostMapping("/usuario")
-    public ResponseEntity<UsuarioResponse> add(@RequestBody UsuarioRequest request) {
-        Usuario domain = dtoMapper.toDomain(request);
-        Usuario created = service.add(domain);
-        return ResponseEntity.ok(dtoMapper.toResponse(created));
+    public ResponseEntity<UsuarioResponse> add(@Valid @RequestBody UsuarioAltaRequest request) {
+        if ((request.getLogin() == null || request.getLogin().isBlank())
+                && (request.getApellido() == null || request.getApellido().isBlank())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "El apellido es obligatorio para generar el login");
+        }
+        try {
+            Usuario domain = dtoMapper.toDomain(request);
+            Usuario created = service.add(domain);
+            return ResponseEntity.ok(dtoMapper.toResponse(created));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (LoginNoDisponibleException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
     }
 
     @PutMapping("/usuario/{userId}")
