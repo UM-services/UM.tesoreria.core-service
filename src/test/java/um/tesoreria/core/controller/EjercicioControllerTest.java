@@ -118,6 +118,15 @@ class EjercicioControllerTest {
     }
 
     @Test
+    void unNumeroConDecimalesNoSeTruncaYEsSolicitudInvalidaSinEscribir() {
+        for (String cuerpo : new String[]{"{\"bloqueado\":0.9}", "{\"ordenContableResultado\":-0.5}", "{\"ordenContableBienesUso\":32767.9}"}) {
+            mvc.put().uri("/ejercicio/15").contentType(MediaType.APPLICATION_JSON).content(cuerpo)
+                    .assertThat().hasStatus(HttpStatus.BAD_REQUEST).bodyJson().extractingPath("$.codigo").isEqualTo("SOLICITUD_INVALIDA");
+        }
+        org.mockito.Mockito.verifyNoInteractions(update);
+    }
+
+    @Test
     void bajaExitosaDevuelve204Vacio() {
         mvc.delete().uri("/ejercicio/16").assertThat().hasStatus(HttpStatus.NO_CONTENT).body().isEmpty();
         verify(delete).deleteEjercicio(16);
