@@ -1,0 +1,38 @@
+---
+title: Notificación de correo (core → sender → resultado)
+---
+sequenceDiagram
+    autonumber
+    participant Cliente as Cliente VB6 o frontend
+    participant Core as um.tesoreria.core-service
+    participant Kafka as Apache Kafka
+    participant Sender as tesoreria-sender-service
+    participant SMTP as Servidor SMTP
+    participant DB as MySQL tesium
+
+    Cliente->>Core: GET /chequera/sendChequera, /chequera/sendCuota, /notificacion/deudorSuspendido ...
+    Core->>Core: resuelve el negocio: chequera, cuota, domicilio, proveedor
+    alt chequera completa
+        Core->>Kafka: publica SendChequeraEvent en send-chequera
+    else cuota puntual
+        Core->>Kafka: resuelve chequeraCuotaId y publica SendCuotaEvent en send-cuota
+    else correo de texto
+        Core->>Kafka: publica CorreoEvent en send-correo
+    end
+    Core-->>Cliente: 202 Accepted con "Solicitud de envío en proceso"
+
+    Kafka->>Sender: consume send-chequera, send-cuota o send-correo
+    Sender->>Sender: resuelve remitente, destinatarios y plantilla
+    Sender->>SMTP: envía el correo
+    SMTP-->>Sender: resultado del envío
+    Sender->>Kafka: publica NotificacionResultadoEvent en notificacion-resultado
+
+    Kafka->>Core: consume notificacion-resultado
+    alt enviado = true con referencia PERSONA_SUSPENDIDO
+        Core->>DB: UPDATE persona_suspendido SET notificado = 1
+    else enviado = false, sin referencia o id inválido
+        Core->>Core: registra WARN y no marca nada
+    end
+
+    Note over Core,Kafka: Core reintenta con backoff exponencial y deriva a topic.DLT al agotar los intentos
+    Note over Core: El core ya no abre SMTP: spring-boot-starter-mail se reemplaza por jakarta.mail-api
