@@ -21,9 +21,6 @@ spring:
     bootstrap-servers: localhost:1
     listener:
       auto-startup: false
-  mail:
-    host: localhost
-    port: 1
 logging:
   level:
     root: error
