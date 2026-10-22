@@ -1,6 +1,6 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 10.0.0** (actualizada: 2026-10-21)
+**Versión actual del servicio: 11.0.0** (actualizada: 2026-10-22)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
@@ -95,6 +95,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `sequence-liquidacion-sueldos.mmd`: Liquidación de sueldos.
 - `sequence-mercadopago-to-change.mmd`: MercadoPago to change (flujo **legado y `@Deprecated`** desde v10.0.0: conserva la ventana de 90 días, ahora descarta cuotas nulas y duplicados; lo reemplaza `POST /api/tesoreria/core/mercadopago/renovaciones`).
 - `sequence-movimientos-cuenta.mmd`: Movimientos de cuenta.
+- `sequence-notificacion-correo.mmd`: Notificación de correo (v11.0.0): core publica `send-correo`/`send-cuota`/`send-chequera` y responde `202 Accepted`; `tesoreria-sender-service` envía por SMTP y devuelve el resultado por `notificacion-resultado`, que es lo que habilita `persona_suspendido.notificado = 1`.
 - `sequence-pago-chequera.mmd`: Pago de chequera.
 - `sequence-reemplazo-chequera.mmd`: Reemplazo de chequera.
 
