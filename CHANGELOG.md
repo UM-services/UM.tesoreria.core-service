@@ -2,6 +2,26 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.1.0] - 2026-10-22
+
+### Added
+
+- `GET /api/tesoreria/core/usuario/login-sugerido/{nombre}/{apellido}` (alias corto `/usuario/login-sugerido/...`): devuelve `LoginSugeridoResponse` con el primer login disponible para ese nombre y apellido **sin crear nada**. `400` si el nombre o el apellido no aportan caracteres utilizables; `409` si todos los candidatos están tomados. Los valores viajan por path (el cliente URL-encodea espacios y tildes).
+- `LoginGenerator` (dominio puro, sólo `java.*`): normaliza el texto (quita diacríticos —tildes y ñ—, pasa a minúsculas y descarta todo lo que no sea `[a-z0-9]`), arma la base como **primera letra del nombre + apellido completo** (`Juan Pérez` → `jperez`) y resuelve colisiones agregando letras del nombre una por una (`juperez`, `juaperez`, `juanperez`) y, agotado el nombre, sufijos numéricos `2..99` (`juanperez2`). `MAX_LENGTH = 15`, declarado como el largo de `usuario.login` en el esquema histórico (`varchar(15)`, según el javadoc de la clase; no verificado contra la base).
+- `SugerirLoginUseCase` / `SugerirLoginUseCaseImpl` y `UsuarioRepository.existsByLoginIgnoreCase(String)` (derived query `existsByLoginIgnoreCase` en `JpaUsuarioRepository`, sin `@Query`), implementado en `JpaUsuarioRepositoryAdapter`.
+- `UsuarioAltaRequest` y `LoginSugeridoResponse` en `infrastructure/web/dto`, con `UsuarioDtoMapper.toDomain(UsuarioAltaRequest)` que omite del builder los flags nulos (no fuerza `0`/`1`).
+- `LoginNoDisponibleException` (`application/exception`) para el alta sin login posible; el controlador la traduce a `409 Conflict`.
+- Tests: `LoginGeneratorTest` (normalización, base, escalado de letras, nombres compuestos, tope de 15 sin duplicados), `SugerirLoginUseCaseImplTest`, `CreateUsuarioUseCaseImplTest` (generación, salto de logins tomados, reintento ante colisión en el insert, login explícito respetado y duplicado, falta de apellido, candidatos agotados) y seis casos nuevos en `UsuarioControllerTest` (200/400/409 del endpoint de sugerencia y del alta).
+
+### Changed
+
+- `POST /api/tesoreria/core/usuario/usuario` pasa a recibir `UsuarioAltaRequest`: `login` deja de ser obligatorio (se genera a partir de `nombre` + nuevo campo `apellido`) y se mantiene la compatibilidad con los clientes previos, que siguen enviando `login` explícito y sin `apellido`. `password` y `nombre` son los únicos campos `@NotBlank`; el resto de los flags pasan a ser opcionales (antes `UsuarioRequest` los exigía con `@NotNull`) y se persisten sólo si vienen.
+- Alta de usuario (`CreateUsuarioUseCaseImpl`): cuando el payload no trae `login` se generan candidatos con `LoginGenerator` y se guarda el primero libre; si trae `login` explícito se respeta tal cual y **no** se consulta la existencia. Un login explícito duplicado ahora responde `409` con mensaje claro en lugar de propagar `DataIntegrityViolationException`, y una colisión entre la verificación y el insert se reintenta con el candidato siguiente limpiando `userId` (el `IDENTITY` deja el id asignado en memoria y el `save` siguiente sería un `UPDATE`).
+- Alta de usuario: si viene `apellido`, se persiste `usuario.nombre` como `"<nombre> <apellido>"` (en la base el nombre completo sigue viviendo en `nombre`). Sin `apellido` el comportamiento es el de antes. `Usuario` gana el campo `apellido`, que **no** es columna: sólo existe para generar el login y componer el nombre.
+- `docs/hexagonal-usuario.mmd` a v11.1.0: `LoginGenerator`, `SugerirLoginUseCase`/`SugerirLoginUseCaseImpl`, `existsByLoginIgnoreCase` en los tres niveles de repositorio, `Usuario.apellido`, `UsuarioAltaRequest`, `LoginSugeridoResponse` y el endpoint `sugerirLogin`.
+
+> Based on `git diff HEAD` (staged; HEAD `753e3fa8`; 19 archivos, +654/−7: 14 bajo `src/main` —6 nuevos y 8 modificados—, 4 bajo `src/test` —3 nuevos y `UsuarioControllerTest` ampliado— y `docs/hexagonal-usuario.mmd`) y el código real del slice `hexagonal/usuarios/usuario` (`LoginGenerator`, `CreateUsuarioUseCaseImpl`, `SugerirLoginUseCaseImpl`, `UsuarioController`, `UsuarioAltaRequest`, `UsuarioDtoMapper`, `JpaUsuarioRepositoryAdapter`/`JpaUsuarioRepository`). Todo es **aditivo**: el endpoint de sugerencia es nuevo y el alta conserva la URL, acepta los payloads previos y sigue respetando el `login` explícito; sólo se relajan validaciones y se agrega `apellido` ⇒ incremento **minor** de SemVer (`11.0.0` → `11.1.0`, `pom.xml`). Sin DDL (`apellido` no se persiste y el tope de 15 sólo replica el largo que el javadoc de `LoginGenerator` declara para `usuario.login`, `varchar(15)` del esquema histórico — no se verificó contra la base), sin dependencias nuevas y sin cambios en los consumidores legacy (`CreateUsuarioUseCase` sólo lo usa `UsuarioService.add`; `UsuarioLdapController` va por `UsuarioLdapService`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/hexagonal-usuario.mmd` validado con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-22).
+
 ## [11.0.0] - 2026-10-22
 
 ### Added
