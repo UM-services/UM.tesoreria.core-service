@@ -11,6 +11,9 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.service.ProveedorService;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.web.mapper.ProveedorDtoMapper;
+import um.tesoreria.core.model.PaginatedResponse;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -66,5 +69,21 @@ class ProveedorControllerTest {
         mockMvc.put().uri("/proveedor/5").contentType(MediaType.APPLICATION_JSON)
                 .content("{\"cuit\":\"30-99999999-9\"}")
                 .assertThat().hasStatus(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    void elListadoPaginadoSeConsultaPorPostConElCuerpoPageRequest() {
+        when(service.getPaginated(1, 10)).thenReturn(new PaginatedResponse<>(List.of(), 0L, 0, 1, 10));
+
+        mockMvc.post().uri("/proveedor/page").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"page\":1,\"size\":10}")
+                .assertThat().hasStatus(HttpStatus.OK);
+    }
+
+    @Test
+    void elListadoPaginadoSinCuerpoUsaPagina0Y50() {
+        when(service.getPaginated(0, 50)).thenReturn(new PaginatedResponse<>(List.of(), 0L, 0, 0, 50));
+
+        mockMvc.post().uri("/proveedor/page").assertThat().hasStatus(HttpStatus.OK);
     }
 }
