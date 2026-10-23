@@ -2,6 +2,15 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.2.1] - 2026-10-23
+
+### Changed
+
+- Actualización de dependencias (`pom.xml`): Spring Boot `4.1.1` → `4.1.2`, Spring Cloud `2025.1.3` → `2025.1.4`, Lombok `1.18.38` → `1.18.48`, MySQL Connector/J `26.7.0` → `26.10.0`, Guava `33.6.0-jre` → `33.7.2-jre`, Apache POI y POI-OOXML `5.5.1` → `6.0.0`, springdoc-openapi `3.1.0` → `3.1.1`, ModelMapper `3.2.6` → `3.2.8` y el plugin JaCoCo `0.8.13` → `0.8.15`. Kotlin `2.4.21`, OpenPDF `3.0.5` y json-path `3.0.0` no cambian.
+- Consul (`bootstrap.yml`): `spring.cloud.consul.discovery.query-passing: true`, para que el descubrimiento (Feign/LoadBalancer) resuelva sólo instancias con los checks en `passing`. Se agrega junto al `health-check-path` de readiness y la poda por `health-check-critical-timeout`.
+
+> Based on `git diff HEAD` (staged; HEAD `d1f9584b`; 2 archivos, +12/−10: `pom.xml` con diez versiones actualizadas —incluida la propiedad `lombok.version` y el plugin `jacoco-maven-plugin`— y `src/main/resources/bootstrap.yml` con `query-passing: true` bajo `spring.cloud.consul.discovery`) y el `pom.xml` real. Todo es interno/operativo: ninguna URL, contrato REST, DTO, respuesta ni esquema cambia, no hay dependencias nuevas (sólo versiones) y `spring.cloud.consul.discovery.query-passing` es configuración opcional con default `false`, así que el comportamiento previo se mantiene si no se despliega el archivo ⇒ incremento **patch** de SemVer (`11.2.0` → `11.2.1`, `pom.xml`). Sin DDL. El uso de POI en el código se limita a la API estable `ss.usermodel`/`XSSFWorkbook` (`BalanceService`, `SheetService`, `PayPerTicFileService`), revisado para el salto `5.5.1` → `6.0.0`; no se compiló. Actualizados `README.md` (§versión, Spring Boot, tabla de dependencias y badges) y `docs/dependencies.mmd`. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/dependencies.mmd` validado con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-23).
+
 ## [11.2.0] - 2026-10-22
 
 ### Added
