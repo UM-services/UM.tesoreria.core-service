@@ -34,6 +34,8 @@ public interface JpaCuentaMovimientoRepository extends JpaRepository<CuentaMovim
 
 	Optional<CuentaMovimientoEntity> findTopByFechaContableOrderByOrdenContableDesc(OffsetDateTime fechaContable);
 
+	boolean existsByFechaContableBetween(OffsetDateTime desde, OffsetDateTime hasta);
+
 	Optional<CuentaMovimientoEntity> findByCuentaMovimientoId(Long cuentaMovimientoId);
 
 	@Modifying

@@ -1,0 +1,53 @@
+---
+title: Arquitectura Hexagonal - Módulo Ejercicio (v11.2.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        E["Ejercicio<br/>Fechas como LocalDate (día en UTC)"]
+        ES["EjercicioSiguiente<br/>1-mar a fin de febrero, nombre y límite de alta"]
+        EF["EjercicioFechas<br/>OffsetDateTime UTC a día y viceversa"]
+        ER["EjercicioRepository<br/>Puerto de salida"]
+        EH["EjercicioHistorialPort<br/>Puerto de salida"]
+        EU["EjercicioUsoPort<br/>Hay movimientos o asientos en el período"]
+        IP["Puertos de entrada<br/>Create, Update y Delete"]
+    end
+    subgraph Aplicacion ["Aplicación (Application)"]
+        UC["Casos de uso<br/>TransactionOperations y Clock"]
+        EX["EjercicioConflictoException(codigo)<br/>NoEncontrado y SolicitudInvalida"]
+    end
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        CC["EjercicioController (legacy)<br/>Fachada de POST, PUT y DELETE; GET sin cambios"]
+        DTO["EjercicioRequest / EjercicioResponse<br/>EjercicioErrorResponse"]
+        JPA["JpaEjercicioRepositoryAdapter<br/>persist+flush en el alta, delete+flush, locks"]
+        ENT["EjercicioEntity<br/>DynamicUpdate, columnas explícitas"]
+        JR["JpaEjercicioRepository<br/>Métodos derivados y PESSIMISTIC_WRITE"]
+        HA["EjercicioHistorialAdapter<br/>Entidad ejercicio, clave eje_id"]
+        UA["EjercicioUsoAdapter<br/>Consulta movimientos y asientos por fecha"]
+    end
+    subgraph Externo ["Externo (External)"]
+        HIST["RegistrarEscrituraHistorialUseCase<br/>Puerto público de historial 404"]
+        MOV["ExistsByFechaContableBetweenUseCase<br/>Slice contable/cuentaMovimiento"]
+        ASI["ExistsAsientoByFechaBetweenUseCase<br/>Slice contable/asiento"]
+        INF["AsientoInflacionService<br/>Cambia solo la orden contable"]
+        LEG["EjercicioService (legacy)<br/>Lecturas y consumidores del flag bloqueado"]
+    end
+    CC --> DTO
+    CC --> IP
+    UC -. implementa .-> IP
+    UC --> ES
+    UC --> ER
+    UC --> EH
+    UC --> EU
+    UC --> EX
+    ES --> E
+    JPA -. implementa .-> ER
+    JPA --> JR
+    JR --> ENT
+    JPA --> EF
+    HA -. implementa .-> EH
+    HA --> HIST
+    UA -. implementa .-> EU
+    UA --> MOV
+    UA --> ASI
+    INF --> IP
+    CC --> LEG

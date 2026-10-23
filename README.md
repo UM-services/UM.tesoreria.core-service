@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 11.1.0**
+**Versión actual (SemVer): 11.2.0**
+
+## Novedades 11.2.0 (verificado en código)
+- **feat(contable/ejercicio)**: Ejercicios (#408): alta del ejercicio siguiente (1 de marzo a último día de febrero, id `último + 1`, límite relativo al año actual con `Clock`), baja solo del último ejercicio de año futuro y sin movimientos, asientos ni referencias, y cambio de `bloqueado` y órdenes contables conservando el resto. Historial #404 en la misma transacción; `@Lock` sobre el último ejercicio o la fila editada.
+- **changed(controller)**: `EjercicioController` es fachada de POST, PUT y DELETE del nuevo slice, con rechazos `409`/`404`/`400` en JSON (`codigo`). El PUT ya no reemplaza la entidad completa: nombre o fechas distintos responden `409`. `DELETE` inexistente responde `404`; POST y PUT ya no devuelven `created`/`updated`. Las lecturas no cambian.
+- **fix**: `AsientoInflacionService` ya no puede reabrir un ejercicio bloqueado; `EjercicioBloqueadoException` ya se puede construir (el `{}` de `MessageFormat` lanzaba `IllegalArgumentException`).
+- Reglas, errores y diferencias frente a VB6: [guía de Ejercicios](docs/gestion-ejercicios.md). Sin DDL nuevo; requiere el historial #404 existente.
 
 ## Novedades 11.1.0 (verificado en código)
 - **feat(usuarios/usuario)**: login automático en el alta. `POST /usuario/usuario` (alias `/api/tesoreria/core/usuario/usuario`) acepta `UsuarioAltaRequest`: `login` deja de ser obligatorio y se genera como **primera letra del nombre + apellido** normalizados (`Juan Pérez` → `jperez`); ante colisión agrega letras del nombre (`juperez`, `juaperez`, `juanperez`) y después sufijos numéricos (`juanperez2`…), con tope de 15 caracteres (el largo de `usuario.login`). Si el payload trae `login` explícito **se respeta tal cual** (clientes previos sin `apellido` siguen funcionando) y el duplicado responde `409` en vez de `500`. Con `apellido` presente, `usuario.nombre` se persiste como `"<nombre> <apellido>"`; `apellido` no es columna.
