@@ -18,6 +18,22 @@
 **Priority:** P2
 **Depends on:** #407 mergeado; acuerdo en la revisión sobre asientos existentes y VB6.
 
+### Migrar las lecturas de Bancaria al slice y retirar `Bancaria.kt`
+
+**What:** Pasar `GET /bancaria/` y las lecturas de `BancariaService` (`CompraService`) y de `ValorMovimiento.bancaria` al slice `contable/bancaria`, y borrar `Bancaria.kt`, `BancariaRepository` y `BancariaService`.
+
+**Why:** #409 mueve las escrituras al slice con `BancariaEntity` propia; el listado, el pago de compras y el JSON de valores siguen leyendo con la entidad Kotlin, y quedan dos clases (más dos de lectura mínima para `valores` y `libro_banco`) sobre las mismas tablas.
+
+**Pros:** Un solo camino de acceso y una sola entidad por tabla.
+
+**Cons:** Toca `CompraService`, que tiene poca cobertura de tests, y el JSON anidado que lee VB6.
+
+**Context:** Decidido en la revisión de #409 (2026-10-23). Empezar por las pruebas de regresión de #409 (`BancariaControllerTest`, `CompraServiceAddValoresBancariaTest`, `BancariaPersistenceTest`).
+
+**Effort:** L
+**Priority:** P2
+**Depends on:** #409 mergeado; desglose de Compras y Libro Banco de #403.
+
 ### Migrar las lecturas de Ejercicio al slice y retirar `Ejercicio.kt`
 
 **What:** Pasar `GET /ejercicio`, `/{id}`, `/last` y `/fecha/{fecha}` al slice `contable/ejercicio`, migrar los consumidores de `EjercicioService` (`ContabilidadService`, `CompraService`, `SheetService`, `CostoService`) y borrar `EjercicioService`, `EjercicioRepository` y `kotlin/model/Ejercicio.kt`.

@@ -4,7 +4,11 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
 
-**Versión actual (SemVer): 11.2.0**
+**Versión actual (SemVer): 11.3.0**
+
+## Novedades 11.3.0 (verificado en código)
+- **feat(contable/bancaria)**: Cuentas bancarias (#409): alta, edición por presencia de campos (ausente conserva, `null` vacía) y baja bloqueada si hay valores o movimientos de libro banco (`409 EN_USO` con conteos). Rutas nuevas `GET /bancaria/{id}` y `GET /bancaria/{id}/uso`; `GET /bancaria/` no cambia. Validación de CUIT, CBU, textos latin1 y enteros exactos; precondición opcional `updated` (`409 CAMBIO_CONCURRENTE`); historial #404 en la misma transacción y `@Lock` en PUT y DELETE.
+- **changed**: la cuenta contable es obligatoria en la API (`CompraService` la necesita al pagar). Errores en JSON con `status` y `codigo`. Reglas y límites: [guía de Cuentas bancarias](docs/gestion-cuentas-bancarias.md). Sin DDL nuevo.
 
 ## Novedades 11.2.0 (verificado en código)
 - **feat(contable/ejercicio)**: Ejercicios (#408): alta del ejercicio siguiente (1 de marzo a último día de febrero, id `último + 1`, límite relativo al año actual con `Clock`), baja solo del último ejercicio de año futuro y sin movimientos, asientos ni referencias, y cambio de `bloqueado` y órdenes contables conservando el resto. Historial #404 en la misma transacción; `@Lock` sobre el último ejercicio o la fila editada.
