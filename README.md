@@ -2,9 +2,15 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.2.0**
+**Versión actual (SemVer): 11.2.1**
+
+## Novedades 11.2.1 (verificado en código)
+- **chore(deps)**: actualización de dependencias: Spring Boot 4.1.2, Spring Cloud 2025.1.4, Lombok 1.18.48, MySQL Connector/J 26.10.0, Guava 33.7.2-jre, Apache POI 6.0.0 (`poi` y `poi-ooxml`), springdoc-openapi 3.1.1, ModelMapper 3.2.8 y JaCoCo 0.8.15. Sin dependencias nuevas ni cambios de API: Kotlin, OpenPDF y json-path no cambian.
+- **changed(configuration)**: `spring.cloud.consul.discovery.query-passing: true` en `bootstrap.yml`: el descubrimiento por Consul (Feign/LoadBalancer) resuelve sólo instancias con los checks en `passing`. Es opcional (default `false`), así que no obliga a redeploys coordinados.
+
+> Basado en `git diff HEAD` (staged; HEAD `d1f9584b`; 2 archivos, +12/−10: `pom.xml` con diez versiones actualizadas y `bootstrap.yml` con `query-passing`) y el `pom.xml` real. Sin cambios de URL, contrato, DTO ni esquema ⇒ incremento **patch** de SemVer (`11.2.0` → `11.2.1`). Sin DDL y sin dependencias nuevas. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/dependencies.mmd` validado con `mmdc`.
 
 ## Novedades 11.2.0 (verificado en código)
 - **feat(contable/ejercicio)**: Ejercicios (#408): alta del ejercicio siguiente (1 de marzo a último día de febrero, id `último + 1`, límite relativo al año actual con `Clock`), baja solo del último ejercicio de año futuro y sin movimientos, asientos ni referencias, y cambio de `bloqueado` y órdenes contables conservando el resto. Historial #404 en la misma transacción; `@Lock` sobre el último ejercicio o la fila editada.
@@ -1431,15 +1437,15 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.1.1
-- Spring Cloud: 2025.1.3
+- Spring Boot: 4.1.2
+- Spring Cloud: 2025.1.4
 - Kotlin: 2.4.21
-- MySQL Connector: 26.7.0
-- SpringDoc OpenAPI: 3.1.0
-- Apache POI: 5.5.1
+- MySQL Connector: 26.10.0
+- SpringDoc OpenAPI: 3.1.1
+- Apache POI: 6.0.0
 - OpenPDF: 3.0.5
-- ModelMapper: 3.2.6
-- Guava: 33.6.0-jre
+- ModelMapper: 3.2.8
+- Guava: 33.7.2-jre
 - json-path: 3.0.0
 
 ## Optimizaciones de Rendimiento (verificado en código)
@@ -1762,11 +1768,11 @@ Daniel Quinteros - daniel.quinterospinto@gmail.com
 Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](https://github.com/UM-services/um.tesoreria.core-service)
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.3-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-11.0.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.2.1-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
