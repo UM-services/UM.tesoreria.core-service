@@ -4,11 +4,9 @@ import java.util.Optional;
 
 /**
  * CUIT con dígito verificador (módulo 11). Se acepta con o sin guiones y se guarda con guiones. El vacío y el
- * «sin dato» (00-00000000-0) son válidos: la tabla los usa para las cuentas sin CUIT.
+ * «sin dato» (00-00000000-0, que cumple el módulo 11) son válidos: la tabla los usa para las cuentas sin CUIT.
  */
 public final class Cuit {
-
-    public static final String SIN_DATO = "00-00000000-0";
 
     private static final int[] PESOS = {5, 4, 3, 2, 7, 6, 5, 4, 3, 2};
 

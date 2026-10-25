@@ -32,7 +32,7 @@ class CuitTest {
 
     @Test
     void elSinDatoEsValido() {
-        assertThat(Cuit.normalizar(Cuit.SIN_DATO)).contains(Cuit.SIN_DATO);
+        assertThat(Cuit.normalizar("00-00000000-0")).contains("00-00000000-0");
     }
 
     @ParameterizedTest

@@ -12,10 +12,8 @@ import um.tesoreria.core.hexagonal.contable.bancaria.infrastructure.web.dto.Banc
 import um.tesoreria.core.hexagonal.contable.bancaria.infrastructure.web.dto.BancariaUsoResponse;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.function.Function;
 
 @Component
@@ -62,15 +60,14 @@ public class BancariaDtoMapper {
     }
 
     private static BigDecimal numeroCuenta(BigDecimal valor) {
-        try {
-            BigInteger entero = valor.toBigIntegerExact();
-            if (entero.signum() <= 0 || entero.toString().length() > DIGITOS_CUENTA) {
-                throw new ArithmeticException();
-            }
-            return new BigDecimal(entero);
-        } catch (ArithmeticException ex) {
+        // Se acota antes de convertir: toBigIntegerExact de 1e99999999 (o de 1e-99999999) materializa un entero gigante.
+        // stripTrailingZeros es proporcional a los dígitos, no al exponente: 1.0 pasa a 1 y 1e-9 queda con escala positiva.
+        BigDecimal sinCeros = valor.stripTrailingZeros();
+        // long: con escala -2147483647 la resta en int desborda y la magnitud pasaría el chequeo.
+        if (valor.signum() <= 0 || sinCeros.scale() > 0 || (long) sinCeros.precision() - sinCeros.scale() > DIGITOS_CUENTA) {
             throw numeroInvalido("numeroCuenta tiene que ser un entero positivo de hasta " + DIGITOS_CUENTA + " dígitos");
         }
+        return new BigDecimal(sinCeros.toBigIntegerExact());
     }
 
     /** Un entero exacto dentro del rango de la columna; un decimal o un desborde es una solicitud inválida, nunca se trunca. */
@@ -86,7 +83,10 @@ public class BancariaDtoMapper {
         }
     }
 
-    /** La fecha updated como la devuelve el servicio (sin zona); se acepta también con zona. */
+    /**
+     * updated tal como lo devuelve el servicio: hora local de la base, sin zona (el MySQL de dev corre en -03 y el valor
+     * no es UTC). Un valor con zona no se puede comparar sin conocer la zona de la base, así que se rechaza.
+     */
     private static LocalDateTime fecha(String texto) {
         if (texto == null) {
             return null;
@@ -94,12 +94,8 @@ public class BancariaDtoMapper {
         try {
             return LocalDateTime.parse(texto);
         } catch (DateTimeException ex) {
-            try {
-                return OffsetDateTime.parse(texto).toLocalDateTime();
-            } catch (DateTimeException otra) {
-                throw new BancariaSolicitudInvalidaException(Codigo.SOLICITUD_INVALIDA,
-                        "updated tiene que ser una fecha y hora ISO-8601, como la que devuelve el servicio");
-            }
+            throw new BancariaSolicitudInvalidaException(Codigo.SOLICITUD_INVALIDA,
+                    "updated tiene que ser la fecha y hora sin zona que devuelve el servicio, por ejemplo 2026-10-01T09:30:15");
         }
     }
 

@@ -122,7 +122,6 @@ class BancariaDevE2E {
     static final List<String> ESCRIBIBLES = List.of("bancaria", "gestion_escritura_historial");
 
     static volatile boolean propietario;
-    static long primerIdPropio;
     static Map<String, Long> fotoInicial;
     static Map<String, Long> autoIncrementInicial;
     static String cuentaReal;
@@ -220,7 +219,6 @@ class BancariaDevE2E {
             proveedorReal = texto(db, "SELECT Prv_ID FROM proveedores ORDER BY Prv_ID LIMIT 1");
             assertThat(cuentaReal).as("hay al menos una cuenta bancaria con cuenta contable").isNotNull();
             assertThat(proveedorReal).as("hay al menos un proveedor").isNotNull();
-            primerIdPropio = contar(db, "SELECT COALESCE(MAX(CuB_ID), 0) + 1 FROM bancaria");
             fotoInicial = checksums(db);
             autoIncrementInicial = autoIncrements(db);
             if (habiaResiduos) {
@@ -278,26 +276,18 @@ class BancariaDevE2E {
         return DriverManager.getConnection(url(), System.getenv("IT_DB_USER"), System.getenv("IT_DB_PASSWORD"));
     }
 
-    /** Todo lo propio lleva la marca en el banco (cuentas), el titular (valores) o el concepto (libro banco). */
+    /**
+     * Todo lo propio lleva la marca: en el banco (cuentas), el titular (valores), el concepto (libro banco) y, en el
+     * historial, dentro del estado guardado (todo evento de una cuenta propia lleva su banco marcado, también el de
+     * una cuenta que la prueba ya borró). Nunca se borra por rango de id: dev es compartida.
+     */
     static void limpiarPropio(Connection db) throws SQLException {
-        // Los ids se leen aparte: entidad_clave es utf8mb4 y un CAST en la misma sentencia mezclaría collations.
-        List<String> ids = new java.util.ArrayList<>();
-        try (var st = db.createStatement(); var rs = st.executeQuery("SELECT CuB_ID FROM bancaria WHERE CuB_Banco LIKE '" + PREFIJO + "%'")) {
-            while (rs.next()) ids.add("'" + rs.getLong(1) + "'");
-        }
-        List<String> sentencias = new java.util.ArrayList<>(List.of(
+        for (String sql : List.of(
                 "DELETE FROM libro_banco WHERE LiB_Concepto LIKE '" + PREFIJO + "%'",
-                "DELETE FROM valores WHERE Val_NombreTitular LIKE '" + PREFIJO + "%'"));
-        // Las cuentas que la prueba borra dejan eventos huérfanos: se barren por rango (ids desde el primer AUTO_INCREMENT).
-        if (primerIdPropio > 0) {
-            sentencias.add("DELETE FROM gestion_escritura_historial WHERE entidad = 'bancaria' AND CAST(entidad_clave AS UNSIGNED) >= "
-                    + primerIdPropio);
-        } else if (!ids.isEmpty()) {
-            sentencias.add("DELETE FROM gestion_escritura_historial WHERE entidad = 'bancaria' AND entidad_clave IN ("
-                    + String.join(", ", ids) + ")");
-        }
-        sentencias.add("DELETE FROM bancaria WHERE CuB_Banco LIKE '" + PREFIJO + "%'");
-        for (String sql : sentencias) {
+                "DELETE FROM valores WHERE Val_NombreTitular LIKE '" + PREFIJO + "%'",
+                "DELETE FROM gestion_escritura_historial WHERE entidad = 'bancaria' AND (valor_nuevo LIKE '%\"" + "banco\":\"" + PREFIJO
+                        + "%' OR valor_anterior LIKE '%\"" + "banco\":\"" + PREFIJO + "%')",
+                "DELETE FROM bancaria WHERE CuB_Banco LIKE '" + PREFIJO + "%'")) {
             try (var st = db.createStatement()) {
                 st.executeUpdate(sql);
             }

@@ -185,11 +185,10 @@ class BancariaControllerTest {
     }
 
     @Test
-    void putAceptaUpdatedConZona() {
-        when(update.updateBancaria(eq(8L), any())).thenReturn(cuenta());
+    void putRechazaUpdatedConZonaPorqueLaBaseGuardaHoraLocalSinZona() {
         mvc.put().uri("/bancaria/8").contentType(JSON).content("{\"updated\":\"2026-10-01T09:30:15Z\"}")
-                .assertThat().hasStatus(HttpStatus.OK);
-        assertThat(capturarPut(8L).getUpdated()).isEqualTo(LocalDateTime.parse("2026-10-01T09:30:15"));
+                .assertThat().hasStatus(HttpStatus.BAD_REQUEST).bodyJson().extractingPath("$.codigo").isEqualTo("SOLICITUD_INVALIDA");
+        verifyNoInteractions(update);
     }
 
     @Test
