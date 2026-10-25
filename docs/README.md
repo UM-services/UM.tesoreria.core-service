@@ -1,12 +1,12 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 11.3.0** (actualizada: 2026-10-23)
+**Versión actual del servicio: 11.4.0** (actualizada: 2026-10-25)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
 ## Diagramas de Arquitectura
 - `architecture.mmd`: Arquitectura general (controladores, servicios, repositorios, entidades).
-- `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado.
+- `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado - v11.3.0 (nuevo `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` en el controlador del slice, sobre el `findAllByPeriodo` existente; la estructura de capas no cambia, por eso el diagrama sigue igual).
 - `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v9.2.1 (validación, baja segura con referencias, historial #404 y puertos de otros slices; bloqueo con `@Lock`, conteos con entidades de solo lectura y errores por excepción de Spring, sin SQL nativo).
 - `hexagonal-comprobante.mmd`: Arquitectura hexagonal del módulo Comprobante (tipos de comprobantes AFIP) - v3.36.0 (nuevo módulo, 6 casos de uso).
 - `hexagonal-cuentaMovimiento.mmd`: Arquitectura hexagonal del módulo CuentaMovimiento (asientos contables) - v3.36.0 (nuevo módulo, 11 casos de uso).
@@ -18,7 +18,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-geografica.mmd`: Arquitectura hexagonal del módulo Geografica (entidades geográficas).
 - `hexagonal-proveedor.mmd`: Arquitectura hexagonal del módulo Proveedor (gestión de proveedores) - v3.36.0 (reubicado bajo `compras/`).
 - `hexagonal-cuenta.mmd`: Arquitectura hexagonal del módulo Cuenta - v9.7.0 (#407: jerarquía, escrituras transaccionales con historial, baja segura, consulta por sede/grado y recálculo gestionado). Guía: [Plan de Cuentas](gestion-plan-cuentas.md).
-- `hexagonal-bancaria.mmd`: Arquitectura hexagonal del módulo Bancaria bajo `contable/` - v11.3.0 (#409: alta, edición por presencia y baja de cuentas bancarias, `GET /bancaria/{id}` y `/{id}/uso`, errores `400`/`404`/`409` con `codigo`, historial #404, lock de fila y chequeo de uso en `valores` y `libro_banco`; el listado `GET /bancaria/` sigue en el legacy). Guía: [Cuentas bancarias](gestion-cuentas-bancarias.md).
+- `hexagonal-bancaria.mmd`: Arquitectura hexagonal del módulo Bancaria bajo `contable/` - v11.4.0 (#409: alta, edición por presencia y baja de cuentas bancarias, `GET /bancaria/{id}` y `/{id}/uso`, errores `400`/`404`/`409` con `codigo`, historial #404, lock de fila y chequeo de uso en `valores` y `libro_banco`; el listado `GET /bancaria/` sigue en el legacy). Guía: [Cuentas bancarias](gestion-cuentas-bancarias.md).
 - `hexagonal-ejercicio.mmd`: Arquitectura hexagonal del módulo Ejercicio bajo `contable/` - v11.2.0 (#408: alta del ejercicio siguiente, baja del último futuro y bloqueo/órdenes contables con `409` y código, historial #404, `@Lock` y consultas de uso en `movcon` y `asiento`; las lecturas siguen en el legacy). Guía: [Ejercicios](gestion-ejercicios.md).
 - `hexagonal-mercadopago-context-history.mmd`: Historial de contexto de MercadoPago.
 - `hexagonal-ubicacion.mmd`: Arquitectura hexagonal del módulo Ubicacion (gestión de ubicaciones) - v8.0.0 (nuevo puerto público `GetUbicacionByIdUseCase`).

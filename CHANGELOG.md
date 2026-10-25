@@ -2,7 +2,7 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
-## [11.3.0] - 2026-10-23
+## [11.4.0] - 2026-10-25
 
 ### Added
 
@@ -17,7 +17,25 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
 - La cuenta contable de una cuenta bancaria pasa a ser obligatoria en la API: `CompraService` la usa al pagar y fallaba con `NullPointerException` si faltaba. Las 16 cuentas de dev ya la tienen.
 - Los errores de las rutas nuevas llevan cuerpo `{status, error, codigo, message}` (VB6 lo toma como rechazo); las respuestas de éxito no llevan `status`.
 
-> Based on git diff contra `origin/develop` (`f8907387`): slice `hexagonal/contable/bancaria`, `BancariaController` y `BancariaExceptionAdvice`. Propuesta **minor** (`11.2.0` → `11.3.0`): rutas nuevas, ninguna existente cambia. Sin DDL ni dependencias nuevas; requiere `gestion_escritura_historial` (#404). Verificación: `mvn test` (1261 pruebas, H2 y colaboradores simulados); `BancariaDevDbIT` (6 pruebas, dev con copias `TEMPORARY`); `BancariaDevE2E` (12 pruebas contra las tablas reales de dev vía relay: alta/edición/baja, FK real de MySQL, latin1, precondición `updated`, locks con espera en `INNODB_LOCK_WAITS` y mutantes sin lock; la base quedó idéntica y los `AUTO_INCREMENT` restaurados). Sin probar con el ejecutable VB6 ni con un pago real de `CompraService` (solo unitaria con Mockito). Diagrama Mermaid pendiente de validar en CI.
+> Based on git diff contra `origin/develop` (`feb7267f`): slice `hexagonal/contable/bancaria`, `BancariaController` y `BancariaExceptionAdvice`. Propuesta **minor** (`11.2.0` → `11.4.0`): rutas nuevas, ninguna existente cambia. Sin DDL ni dependencias nuevas; requiere `gestion_escritura_historial` (#404). Verificación: `mvn test` (1272 pruebas, H2 y colaboradores simulados); `BancariaDevDbIT` (6 pruebas, dev con copias `TEMPORARY`); `BancariaDevE2E` (12 pruebas contra las tablas reales de dev vía relay: alta/edición/baja, FK real de MySQL, latin1, precondición `updated`, locks con espera en `INNODB_LOCK_WAITS` y mutantes sin lock; la base quedó idéntica y los `AUTO_INCREMENT` restaurados). Sin probar con el ejecutable VB6 ni con un pago real de `CompraService` (solo unitaria con Mockito). Diagrama Mermaid pendiente de validar en CI.
+
+## [11.3.0] - 2026-10-25
+
+### Added
+
+- `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` (también publicado como `/cursocargocontratado/periodo/{anho}/{mes}`): devuelve todos los cursos-cargo contratados del período en una sola llamada. Reutiliza `CursoCargoContratadoService.findAllByPeriodo` y el derivado `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes` que ya existían (sin `@Query`). Cambio aditivo: ninguna ruta existente cambia.
+- Test `CursoCargoContratadoControllerTest` (`MockMvc` standalone sobre el controlador real con `service` simulado) que caracteriza la respuesta del endpoint de período: `200` y los campos `cursoCargoContratadoId`, `cursoId`, `cargoTipoId` y `horasSemanales`.
+
+> Based on `git diff HEAD` (staged; HEAD `29dc554e`; el cambio funcional son 3 archivos, +86/−0: `CursoCargoContratadoController` con el nuevo `@GetMapping("/periodo/{anho}/{mes}")` de dos `@PathVariable`, el test nuevo en `src/test/java/um/tesoreria/core/controller/CursoCargoContratadoControllerTest.java` y este `CHANGELOG.md`; más la preparación de release en `pom.xml`, `README.md` y `docs/README.md`) y el código real de `CursoCargoContratadoController`, `CursoCargoContratadoService.findAllByPeriodo` y `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes`. Sólo agrega un endpoint de lectura ⇒ incremento **minor** de SemVer (`11.2.1` → `11.3.0`, `pom.xml`). Sin DDL, sin dependencias nuevas y sin cambios en rutas, DTO ni respuesta de los endpoints existentes; el endpoint devuelve `CursoCargoContratadoEntity`, igual que las lecturas vigentes `findAllByPersona` y `findAllByCurso` del mismo slice. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`). Fecha de release tomada del día en curso del entorno de trabajo (2026-10-25).
+
+## [11.2.1] - 2026-10-23
+
+### Changed
+
+- Actualización de dependencias (`pom.xml`): Spring Boot `4.1.1` → `4.1.2`, Spring Cloud `2025.1.3` → `2025.1.4`, Lombok `1.18.38` → `1.18.48`, MySQL Connector/J `26.7.0` → `26.10.0`, Guava `33.6.0-jre` → `33.7.2-jre`, Apache POI y POI-OOXML `5.5.1` → `6.0.0`, springdoc-openapi `3.1.0` → `3.1.1`, ModelMapper `3.2.6` → `3.2.8` y el plugin JaCoCo `0.8.13` → `0.8.15`. Kotlin `2.4.21`, OpenPDF `3.0.5` y json-path `3.0.0` no cambian.
+- Consul (`bootstrap.yml`): `spring.cloud.consul.discovery.query-passing: true`, para que el descubrimiento (Feign/LoadBalancer) resuelva sólo instancias con los checks en `passing`. Se agrega junto al `health-check-path` de readiness y la poda por `health-check-critical-timeout`.
+
+> Based on `git diff HEAD` (staged; HEAD `d1f9584b`; 2 archivos, +12/−10: `pom.xml` con diez versiones actualizadas —incluida la propiedad `lombok.version` y el plugin `jacoco-maven-plugin`— y `src/main/resources/bootstrap.yml` con `query-passing: true` bajo `spring.cloud.consul.discovery`) y el `pom.xml` real. Todo es interno/operativo: ninguna URL, contrato REST, DTO, respuesta ni esquema cambia, no hay dependencias nuevas (sólo versiones) y `spring.cloud.consul.discovery.query-passing` es configuración opcional con default `false`, así que el comportamiento previo se mantiene si no se despliega el archivo ⇒ incremento **patch** de SemVer (`11.2.0` → `11.2.1`, `pom.xml`). Sin DDL. El uso de POI en el código se limita a la API estable `ss.usermodel`/`XSSFWorkbook` (`BalanceService`, `SheetService`, `PayPerTicFileService`), revisado para el salto `5.5.1` → `6.0.0`; no se compiló. Actualizados `README.md` (§versión, Spring Boot, tabla de dependencias y badges) y `docs/dependencies.mmd`. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/dependencies.mmd` validado con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-23).
 
 ## [11.2.0] - 2026-10-22
 

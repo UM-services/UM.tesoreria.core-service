@@ -24,10 +24,10 @@ Distributed context — who it talks to:
 
 ## 2. Stack (verified in `pom.xml`, the source of truth)
 
-- Java **25**, Spring Boot **4.1.1**, Spring Cloud **2025.1.3** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.21** (legacy only, §4)
-- Artifact version = service version: **11.1.0** (SemVer; bumped on release, §7)
+- Java **25**, Spring Boot **4.1.2**, Spring Cloud **2025.1.4** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.21** (legacy only, §4)
+- Artifact version = service version: **11.3.0** (SemVer; bumped on release, §7)
 - Data: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
-- Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.0** (Swagger UI)
+- Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.1** (Swagger UI)
 - Docs/exports: Apache POI + `openpdf` (reports), `modelmapper` (legacy only), Guava, Caffeine (`starter-cache`)
 - `spring-kafka`, `starter-mail`, `starter-actuator` + `micrometer-registry-prometheus`, `json-path`, `jackson-datatype-jsr310`
 - Quality: JaCoCo (report at `target/site/jacoco/jacoco.xml`) → **SonarCloud** (org `um-services`, projectKey `UM-services_UM.tesoreria.core-service`)
@@ -158,7 +158,7 @@ The ~67 legacy controllers still serve areas without an equivalent slice: `chequ
 
 ## 8. Runtime and config (`src/main/resources/bootstrap.yml`)
 
-- Port `${APP_PORT:8092}`; app `tesoreria-core-service` registered in Consul `consul-service:8500` (tags `tesoreria,core`).
+- Port `${APP_PORT:8092}`; app `tesoreria-core-service` registered in Consul `consul-service:8500` (tags `tesoreria,core`) con `spring.cloud.consul.discovery.query-passing: true` (Feign/LoadBalancer sólo ven instancias con los checks en `passing`; 11.2.1).
 - Datasource: `jdbc:mysql://${app.server}/${app.database}` — hardcoded development defaults (`10.147.20.20:3306`, `tesium`, `root/root`): override with `APP_SERVER`, `APP_DATABASE`, `APP_USER`, `APP_PASSWORD`. Hikari: pool 100, leak-detection 60s.
 - JPA: `ddl-auto: none`, `open-in-view: false`, MySQLDialect. Kafka: `kafka:9092` (overrides with `SPRING_KAFKA_*`). Both consumers (`payment-processed` and `notificacion-resultado`) build their own `ConsumerFactory` in `KafkaConsumerConfig` and deserialize to the target type with `useHeadersIfPresent = false` (they ignore `__TypeId__`, so the producer's Java class name is irrelevant); the generic `spring.kafka.consumer.value-deserializer`/`spring.json.*` keys no longer exist in `bootstrap.yml` (11.0.0). Mail: the core does **not** open SMTP any more (11.0.0): it publishes `send-correo`/`send-chequera`/`send-cuota` through `CorreoEventPublisher`, `spring.mail`/`app.mail` were removed and `jakarta.mail-api` is only there for `ToolService.mailValidate`; the old `app.testing` redirect has no readers. Logging: level `${app.logging}` (debug by default → in prod it is set via env).
 - Unit tests (`src/test/resources/application.yml`): in-memory H2 `tesium_test` + `ddl-auto: create-drop` + `allow-circular-references: true` (there are legacy cycles: **do not** add more), Kafka listener `auto-startup: false`. `it` profile: `application-it.yml` with `IT_DB_*`.

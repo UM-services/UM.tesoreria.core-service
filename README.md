@@ -2,13 +2,25 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.3.0**
+**Versión actual (SemVer): 11.4.0**
 
-## Novedades 11.3.0 (verificado en código)
+## Novedades 11.4.0 (verificado en código)
 - **feat(contable/bancaria)**: Cuentas bancarias (#409): alta, edición por presencia de campos (ausente conserva, `null` vacía) y baja bloqueada si hay valores o movimientos de libro banco (`409 EN_USO` con conteos). Rutas nuevas `GET /bancaria/{id}` y `GET /bancaria/{id}/uso`; `GET /bancaria/` no cambia. Validación de CUIT, CBU, textos latin1 y enteros exactos; precondición opcional `updated` (`409 CAMBIO_CONCURRENTE`); historial #404 en la misma transacción y `@Lock` en PUT y DELETE.
 - **changed**: la cuenta contable es obligatoria en la API (`CompraService` la necesita al pagar). Errores en JSON con `status` y `codigo`. Reglas y límites: [guía de Cuentas bancarias](docs/gestion-cuentas-bancarias.md). Sin DDL nuevo.
+
+## Novedades 11.3.0 (verificado en código)
+- **feat(contratos/cursoCargoContratado)**: `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` (alias `/cursocargocontratado/periodo/{anho}/{mes}`) devuelve en una sola llamada todos los cursos-cargo contratados del período. Reutiliza `CursoCargoContratadoService.findAllByPeriodo` y el derivado `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes` (sin `@Query`); ninguna ruta existente cambia. Sin DDL ni dependencias nuevas.
+- **test**: `CursoCargoContratadoControllerTest` caracteriza el endpoint (`200` y los campos `cursoCargoContratadoId`, `cursoId`, `cargoTipoId` y `horasSemanales`) con `MockMvc` standalone y el `service` simulado.
+
+> Basado en `git diff HEAD` (staged; HEAD `29dc554e`; el cambio funcional son 3 archivos, +86/−0: el controlador del slice `contratos/cursoCargoContratado` con el endpoint de período, el test nuevo y `CHANGELOG.md`; más la preparación de release en `pom.xml`, este `README.md` y `docs/README.md`) y el `pom.xml` real. Todo es aditivo: se suma un `GET` de lectura y no cambia ninguna URL, DTO ni respuesta existente ⇒ incremento **minor** de SemVer (`11.2.1` → `11.3.0`). El endpoint devuelve `CursoCargoContratadoEntity`, como las lecturas vigentes del mismo controlador. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`).
+
+## Novedades 11.2.1 (verificado en código)
+- **chore(deps)**: actualización de dependencias: Spring Boot 4.1.2, Spring Cloud 2025.1.4, Lombok 1.18.48, MySQL Connector/J 26.10.0, Guava 33.7.2-jre, Apache POI 6.0.0 (`poi` y `poi-ooxml`), springdoc-openapi 3.1.1, ModelMapper 3.2.8 y JaCoCo 0.8.15. Sin dependencias nuevas ni cambios de API: Kotlin, OpenPDF y json-path no cambian.
+- **changed(configuration)**: `spring.cloud.consul.discovery.query-passing: true` en `bootstrap.yml`: el descubrimiento por Consul (Feign/LoadBalancer) resuelve sólo instancias con los checks en `passing`. Es opcional (default `false`), así que no obliga a redeploys coordinados.
+
+> Basado en `git diff HEAD` (staged; HEAD `d1f9584b`; 2 archivos, +12/−10: `pom.xml` con diez versiones actualizadas y `bootstrap.yml` con `query-passing`) y el `pom.xml` real. Sin cambios de URL, contrato, DTO ni esquema ⇒ incremento **patch** de SemVer (`11.2.0` → `11.2.1`). Sin DDL y sin dependencias nuevas. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/dependencies.mmd` validado con `mmdc`.
 
 ## Novedades 11.2.0 (verificado en código)
 - **feat(contable/ejercicio)**: Ejercicios (#408): alta del ejercicio siguiente (1 de marzo a último día de febrero, id `último + 1`, límite relativo al año actual con `Clock`), baja solo del último ejercicio de año futuro y sin movimientos, asientos ni referencias, y cambio de `bloqueado` y órdenes contables conservando el resto. Historial #404 en la misma transacción; `@Lock` sobre el último ejercicio o la fila editada.
@@ -1435,15 +1447,15 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.1.1
-- Spring Cloud: 2025.1.3
+- Spring Boot: 4.1.2
+- Spring Cloud: 2025.1.4
 - Kotlin: 2.4.21
-- MySQL Connector: 26.7.0
-- SpringDoc OpenAPI: 3.1.0
-- Apache POI: 5.5.1
+- MySQL Connector: 26.10.0
+- SpringDoc OpenAPI: 3.1.1
+- Apache POI: 6.0.0
 - OpenPDF: 3.0.5
-- ModelMapper: 3.2.6
-- Guava: 33.6.0-jre
+- ModelMapper: 3.2.8
+- Guava: 33.7.2-jre
 - json-path: 3.0.0
 
 ## Optimizaciones de Rendimiento (verificado en código)
@@ -1766,11 +1778,11 @@ Daniel Quinteros - daniel.quinterospinto@gmail.com
 Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](https://github.com/UM-services/um.tesoreria.core-service)
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.3-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-11.0.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.4.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
