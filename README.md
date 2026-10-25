@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.2.1**
+**Versión actual (SemVer): 11.3.0**
+
+## Novedades 11.3.0 (verificado en código)
+- **feat(contratos/cursoCargoContratado)**: `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` (alias `/cursocargocontratado/periodo/{anho}/{mes}`) devuelve en una sola llamada todos los cursos-cargo contratados del período. Reutiliza `CursoCargoContratadoService.findAllByPeriodo` y el derivado `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes` (sin `@Query`); ninguna ruta existente cambia. Sin DDL ni dependencias nuevas.
+- **test**: `CursoCargoContratadoControllerTest` caracteriza el endpoint (`200` y los campos `cursoCargoContratadoId`, `cursoId`, `cargoTipoId` y `horasSemanales`) con `MockMvc` standalone y el `service` simulado.
+
+> Basado en `git diff HEAD` (staged; HEAD `29dc554e`; el cambio funcional son 3 archivos, +86/−0: el controlador del slice `contratos/cursoCargoContratado` con el endpoint de período, el test nuevo y `CHANGELOG.md`; más la preparación de release en `pom.xml`, este `README.md` y `docs/README.md`) y el `pom.xml` real. Todo es aditivo: se suma un `GET` de lectura y no cambia ninguna URL, DTO ni respuesta existente ⇒ incremento **minor** de SemVer (`11.2.1` → `11.3.0`). El endpoint devuelve `CursoCargoContratadoEntity`, como las lecturas vigentes del mismo controlador. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`).
 
 ## Novedades 11.2.1 (verificado en código)
 - **chore(deps)**: actualización de dependencias: Spring Boot 4.1.2, Spring Cloud 2025.1.4, Lombok 1.18.48, MySQL Connector/J 26.10.0, Guava 33.7.2-jre, Apache POI 6.0.0 (`poi` y `poi-ooxml`), springdoc-openapi 3.1.1, ModelMapper 3.2.8 y JaCoCo 0.8.15. Sin dependencias nuevas ni cambios de API: Kotlin, OpenPDF y json-path no cambian.
@@ -1772,7 +1778,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-11.2.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.3.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
