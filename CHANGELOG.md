@@ -2,6 +2,23 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.4.0] - 2026-10-25
+
+### Added
+
+- Cuentas bancarias (#409): slice `contable/bancaria` con casos de uso de alta, edición y baja, `BancariaEntity` propia con columnas explícitas e historial #404 (entidad `bancaria`, clave `cub_id`) en la misma transacción. `BancariaController` suma `POST`, `PUT /{id}`, `DELETE /{id}`, `GET /{id}` y `GET /{id}/uso` (`{valores, libroBanco, eliminable}`); `GET /bancaria/` no cambia.
+- Edición por presencia de campos: ausente conserva, `null` vacía (texto `''`, `proveedorId` en `NULL`); `numeroCuenta` en `null` es `400 CUENTA_REQUERIDA`. Precondición opcional `updated`: si no coincide con lo guardado, `409 CAMBIO_CONCURRENTE`.
+- Validaciones: CUIT (módulo 11, se guarda con guiones) y CBU (22 dígitos con verificadores); textos de hasta 64 caracteres representables en latin1/cp1252; enteros exactos para `proveedorId` (1–32767), `numeroCuenta` (hasta 11 dígitos) y `bancariaId`; existencia de cuenta contable y proveedor por los puertos públicos de sus slices.
+- Baja con `@Lock(PESSIMISTIC_WRITE)` y rechazo `409 EN_USO` con conteos si hay valores (`valores.val_cuentaorigen`) o movimientos de libro banco (`libro_banco.lib_cub_id`), con entidades de lectura mínimas y métodos derivados (sin SQL nativo). Solo una violación de FK se traduce a `409`.
+- Guía [Cuentas bancarias](docs/gestion-cuentas-bancarias.md) y diagrama `docs/hexagonal-bancaria.mmd`; entrada en `TODOS.md` para migrar las lecturas y retirar `Bancaria.kt`.
+
+### Changed
+
+- La cuenta contable de una cuenta bancaria pasa a ser obligatoria en la API: `CompraService` la usa al pagar y fallaba con `NullPointerException` si faltaba. Las 16 cuentas de dev ya la tienen.
+- Los errores de las rutas nuevas llevan cuerpo `{status, error, codigo, message}` (VB6 lo toma como rechazo); las respuestas de éxito no llevan `status`.
+
+> Based on git diff contra `origin/develop` (`feb7267f`): slice `hexagonal/contable/bancaria`, `BancariaController` y `BancariaExceptionAdvice`. Propuesta **minor** (`11.2.0` → `11.4.0`): rutas nuevas, ninguna existente cambia. Sin DDL ni dependencias nuevas; requiere `gestion_escritura_historial` (#404). Verificación: `mvn test` (1272 pruebas, H2 y colaboradores simulados); `BancariaDevDbIT` (6 pruebas, dev con copias `TEMPORARY`); `BancariaDevE2E` (12 pruebas contra las tablas reales de dev vía relay: alta/edición/baja, FK real de MySQL, latin1, precondición `updated`, locks con espera en `INNODB_LOCK_WAITS` y mutantes sin lock; la base quedó idéntica y los `AUTO_INCREMENT` restaurados). Sin probar con el ejecutable VB6 ni con un pago real de `CompraService` (solo unitaria con Mockito). Diagrama Mermaid pendiente de validar en CI.
+
 ## [11.3.0] - 2026-10-25
 
 ### Added

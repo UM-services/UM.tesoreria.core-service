@@ -4,7 +4,11 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.3.0**
+**Versión actual (SemVer): 11.4.0**
+
+## Novedades 11.4.0 (verificado en código)
+- **feat(contable/bancaria)**: Cuentas bancarias (#409): alta, edición por presencia de campos (ausente conserva, `null` vacía) y baja bloqueada si hay valores o movimientos de libro banco (`409 EN_USO` con conteos). Rutas nuevas `GET /bancaria/{id}` y `GET /bancaria/{id}/uso`; `GET /bancaria/` no cambia. Validación de CUIT, CBU, textos latin1 y enteros exactos; precondición opcional `updated` (`409 CAMBIO_CONCURRENTE`); historial #404 en la misma transacción y `@Lock` en PUT y DELETE.
+- **changed**: la cuenta contable es obligatoria en la API (`CompraService` la necesita al pagar). Errores en JSON con `status` y `codigo`. Reglas y límites: [guía de Cuentas bancarias](docs/gestion-cuentas-bancarias.md). Sin DDL nuevo.
 
 ## Novedades 11.3.0 (verificado en código)
 - **feat(contratos/cursoCargoContratado)**: `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` (alias `/cursocargocontratado/periodo/{anho}/{mes}`) devuelve en una sola llamada todos los cursos-cargo contratados del período. Reutiliza `CursoCargoContratadoService.findAllByPeriodo` y el derivado `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes` (sin `@Query`); ninguna ruta existente cambia. Sin DDL ni dependencias nuevas.
@@ -1778,7 +1782,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-11.3.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.4.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
