@@ -2,6 +2,15 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.3.0] - 2026-10-25
+
+### Added
+
+- `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` (también publicado como `/cursocargocontratado/periodo/{anho}/{mes}`): devuelve todos los cursos-cargo contratados del período en una sola llamada. Reutiliza `CursoCargoContratadoService.findAllByPeriodo` y el derivado `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes` que ya existían (sin `@Query`). Cambio aditivo: ninguna ruta existente cambia.
+- Test `CursoCargoContratadoControllerTest` (`MockMvc` standalone sobre el controlador real con `service` simulado) que caracteriza la respuesta del endpoint de período: `200` y los campos `cursoCargoContratadoId`, `cursoId`, `cargoTipoId` y `horasSemanales`.
+
+> Based on `git diff HEAD` (staged; HEAD `29dc554e`; el cambio funcional son 3 archivos, +86/−0: `CursoCargoContratadoController` con el nuevo `@GetMapping("/periodo/{anho}/{mes}")` de dos `@PathVariable`, el test nuevo en `src/test/java/um/tesoreria/core/controller/CursoCargoContratadoControllerTest.java` y este `CHANGELOG.md`; más la preparación de release en `pom.xml`, `README.md` y `docs/README.md`) y el código real de `CursoCargoContratadoController`, `CursoCargoContratadoService.findAllByPeriodo` y `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes`. Sólo agrega un endpoint de lectura ⇒ incremento **minor** de SemVer (`11.2.1` → `11.3.0`, `pom.xml`). Sin DDL, sin dependencias nuevas y sin cambios en rutas, DTO ni respuesta de los endpoints existentes; el endpoint devuelve `CursoCargoContratadoEntity`, igual que las lecturas vigentes `findAllByPersona` y `findAllByCurso` del mismo slice. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`). Fecha de release tomada del día en curso del entorno de trabajo (2026-10-25).
+
 ## [11.2.1] - 2026-10-23
 
 ### Changed

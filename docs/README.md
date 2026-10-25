@@ -1,12 +1,12 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 11.2.1** (actualizada: 2026-10-23)
+**Versión actual del servicio: 11.3.0** (actualizada: 2026-10-25)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
 ## Diagramas de Arquitectura
 - `architecture.mmd`: Arquitectura general (controladores, servicios, repositorios, entidades).
-- `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado.
+- `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado - v11.3.0 (nuevo `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` en el controlador del slice, sobre el `findAllByPeriodo` existente; la estructura de capas no cambia, por eso el diagrama sigue igual).
 - `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v9.2.1 (validación, baja segura con referencias, historial #404 y puertos de otros slices; bloqueo con `@Lock`, conteos con entidades de solo lectura y errores por excepción de Spring, sin SQL nativo).
 - `hexagonal-comprobante.mmd`: Arquitectura hexagonal del módulo Comprobante (tipos de comprobantes AFIP) - v3.36.0 (nuevo módulo, 6 casos de uso).
 - `hexagonal-cuentaMovimiento.mmd`: Arquitectura hexagonal del módulo CuentaMovimiento (asientos contables) - v3.36.0 (nuevo módulo, 11 casos de uso).
