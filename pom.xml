@@ -297,6 +297,34 @@
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>beneficio-coverage-check</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <rule>
+                                    <element>CLASS</element>
+                                    <includes>
+                                        <include>um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.policy.*</include>
+                                        <include>um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.factory.*</include>
+                                        <include>um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.usecases.FindAllInconsistenciasUseCaseImpl</include>
+                                        <include>um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.PreuniversitarioChequeraDetailsCreator</include>
+                                        <include>um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.PreuniversitarioChequeraService</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                            </rules>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
