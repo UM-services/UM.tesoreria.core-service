@@ -4,10 +4,18 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoChequera;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.CuotaEstado;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.DebitoEstado;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.CursoMaterias;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.MateriaInscripta;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.MateriasEstado;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.PeriodoMaterias;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.ProductoEstado;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto.EstadoChequeraResponse;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto.CuotaEstadoResponse;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto.DebitoEstadoResponse;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto.CursoMateriasResponse;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto.MateriaInscriptaResponse;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto.MateriasEstadoResponse;
+import um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto.PeriodoMateriasResponse;
 import um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto.ProductoEstadoResponse;
 
 @Component
@@ -31,7 +39,8 @@ public class EstadoChequeraDtoMapper {
                 estado.alternativaId(),
                 estado.hpum(),
                 estado.productos().stream().map(this::toResponse).toList(),
-                estado.debitos().stream().map(this::toResponse).toList());
+                estado.debitos().stream().map(this::toResponse).toList(),
+                estado.materias().stream().map(this::toResponse).toList());
     }
 
     private ProductoEstadoResponse toResponse(ProductoEstado producto) {
@@ -70,5 +79,32 @@ public class EstadoChequeraDtoMapper {
                 debito.fechaEnvio(),
                 debito.rechazado(),
                 debito.motivoRechazo());
+    }
+
+    private MateriasEstadoResponse toResponse(MateriasEstado materias) {
+        return new MateriasEstadoResponse(
+                materias.fuente(),
+                materias.estado(),
+                materias.cursoInscripcion(),
+                materias.plan(),
+                materias.carrera(),
+                materias.observaciones(),
+                materias.cursos().stream().map(this::toResponse).toList());
+    }
+
+    private CursoMateriasResponse toResponse(CursoMaterias curso) {
+        return new CursoMateriasResponse(
+                curso.curso(),
+                curso.periodos().stream().map(this::toResponse).toList());
+    }
+
+    private PeriodoMateriasResponse toResponse(PeriodoMaterias periodo) {
+        return new PeriodoMateriasResponse(
+                periodo.periodo(),
+                periodo.materias().stream().map(this::toResponse).toList());
+    }
+
+    private MateriaInscriptaResponse toResponse(MateriaInscripta materia) {
+        return new MateriaInscriptaResponse(materia.materiaId(), materia.nombre());
     }
 }
