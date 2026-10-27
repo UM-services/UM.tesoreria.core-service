@@ -4,7 +4,12 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.4.0**
+**Versión actual (SemVer): 11.5.0**
+
+## Novedades 11.5.0 (verificado en código)
+- **feat(audit)**: Auditoría transversal en el paquete `core/audit`: eventos `REQUEST` (filtro HTTP con correlación y actor) y `CHANGE` (listeners de Hibernate con `beforeData`/`afterData`, enmascarado por campo y truncado), escritos en el outbox transaccional `audit_outbox` junto con el cambio de negocio y enviados por lotes al servicio de auditoría con reclamo por token, backoff y limpieza diaria. Modos `OFF`/`LOG`/`SEND` (`TESORERIA_AUDIT_MODE`) y resumen `SUMMARY` para la generación masiva de cuotas. Requiere el script `sql/001_audit_outbox.sql`. Guía: [Auditoría transversal](docs/auditoria.md).
+- **feat(kafka)**: `KafkaTopicsConfiguration` declara `send-chequera`, `send-cuota`, `send-correo` y `payment-processed.DLT` (retención 14 días); particiones y réplicas por entorno (`APP_KAFKA_TOPIC_PARTITIONS`/`APP_KAFKA_TOPIC_REPLICAS`, default `1`).
+- **changed**: `compraAutoridadUsuario` y `compraPedidoAutorizante` pasan de `JdbcTemplate` a JPA para que asignar o quitar quede auditado (rutas y respuestas iguales); la normalización de `fecha_pago` de facturas pendientes deja de ser un `UPDATE` nativo y la hace `ProveedorPagoSincronizacionService` (JPA + Criteria) antes de generar el reporte; se quitan `@Modifying` innecesarios y los dos `@Query` de borrado masivo de artículos de proveedor. `AuditCoverageGuard` (test) impide que vuelvan las escrituras fuera de JPA. Sin cambios de API: el único efecto visible es que la consulta de facturas pendientes ya no escribe por sí sola (lo hace la generación del reporte).
 
 ## Novedades 11.4.0 (verificado en código)
 - **feat(contable/bancaria)**: Cuentas bancarias (#409): alta, edición por presencia de campos (ausente conserva, `null` vacía) y baja bloqueada si hay valores o movimientos de libro banco (`409 EN_USO` con conteos). Rutas nuevas `GET /bancaria/{id}` y `GET /bancaria/{id}/uso`; `GET /bancaria/` no cambia. Validación de CUIT, CBU, textos latin1 y enteros exactos; precondición opcional `updated` (`409 CAMBIO_CONCURRENTE`); historial #404 en la misma transacción y `@Lock` en PUT y DELETE.
@@ -1741,6 +1746,7 @@ src/
 │   │       │   ├── umhub/reservaVacante/     # Módulo ReservaVacante (v3.24.0)
 │   │       │   ├── umhub/consulta/           # Módulo Consulta persona/deuda por número (v6.1.0)
 │   │       │   └── matriculacionContext/
+│   │       ├── audit/                  # Auditoría transversal: listeners JPA, outbox y sender (v11.5.0)
 │   │       ├── model/                 # Modelos legacy
 │   │       ├── service/               # Servicios legacy
 │   │       ├── controller/             # Controladores legacy
@@ -1782,7 +1788,7 @@ Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](ht
 [![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-11.4.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.5.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -1815,6 +1821,13 @@ SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/tesoreria
 SPRING_DATASOURCE_USERNAME=root
 SPRING_DATASOURCE_PASSWORD=root
 MERCADO_PAGO_ACCESS_TOKEN=your_access_token
+```
+
+Auditoría transversal (11.5.0): requiere `sql/001_audit_outbox.sql` en la base; sin esa tabla usar `TESORERIA_AUDIT_MODE=LOG` (o `OFF`). Lista completa: [guía de auditoría](docs/auditoria.md).
+```properties
+TESORERIA_AUDIT_MODE=SEND
+TESORERIA_AUDIT_URL=http://auditoria:8211
+TESORERIA_AUDIT_API_KEY=your_api_key
 ```
 
 ## Desarrollo

@@ -21,7 +21,7 @@ flowchart TD
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         UAC[UbicacionArticuloController<br/>ProblemDetail con codigo/campo]
-        JPA[JpaUbicacionArticuloRepositoryAdapter<br/>upsert por par, @Lock por clave primaria<br/>revalida el par bajo bloqueo<br/>baja: @Lock por articulo_id + deleteAllByIdInBatch]
+        JPA[JpaUbicacionArticuloRepositoryAdapter<br/>upsert por par, @Lock por clave primaria<br/>revalida el par bajo bloqueo<br/>baja: @Lock por articulo_id + deleteAllById]
         RES[UbicacionArticuloRestricciones<br/>traduce por excepción de Spring + restricción]
         ENT[UbicacionArticuloEntity / Mapper]
     end

@@ -1,7 +1,5 @@
 package um.tesoreria.core.hexagonal.compras.facturaPendiente.infrastructure.persistence.repository;
 
-import jakarta.transaction.Transactional;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import um.tesoreria.core.hexagonal.compras.facturaPendiente.infrastructure.persistence.entity.FacturaPendienteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,18 +9,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface JpaFacturaPendienteRepository extends JpaRepository<FacturaPendienteEntity, Long> {
-
-    @Modifying
-    @Transactional
-    @Query(
-        value = """
-        UPDATE movprov_detallecomprobantes d
-        JOIN movprov_detallevalores v ON v.OpV_OrP_ID = d.OpC_OrP_ID
-        JOIN valores p ON v.OpV_Val_ID = p.val_id
-        SET d.fecha_pago = p.Val_FechaEmision
-        """, nativeQuery = true
-    )
-    void updateFechaPagoInProveedorPago();
 
     @Query(
         value = """

@@ -1,0 +1,11 @@
+# Escrituras fuera de JPA exceptuadas con motivo.
+# Formato: archivo|patrón|motivo. Si el patrón es Jdbc*, el archivo debe llamar a
+# AuditManualChange y emitir el CHANGE en la misma transacción.
+#
+# Única excepción admitida: los correlativos anuales de compras se reservan con
+# LAST_INSERT_ID en una sola sentencia (atómica ante alta concurrente); pasarlos a JPA
+# perdería esa garantía. Emiten su evento con AuditManualChange.sequence(...).
+um/tesoreria/core/hexagonal/compras/pedidos/compraCotizacion/infrastructure/persistence/adapter/CompraCotizacionSecuenciaJdbcAdapter.java|JdbcTemplate|Correlativo atómico con LAST_INSERT_ID; emite CHANGE manual
+um/tesoreria/core/hexagonal/compras/pedidos/compraFormalizacion/infrastructure/persistence/adapter/CompraFormalizacionSecuenciaJdbcAdapter.java|JdbcTemplate|Correlativo atómico con LAST_INSERT_ID; emite CHANGE manual
+um/tesoreria/core/hexagonal/compras/pedidos/compraPedidoSecuencia/infrastructure/persistence/adapter/CompraPedidoSecuenciaRepositoryAdapter.java|JdbcTemplate|Correlativo atómico con LAST_INSERT_ID; emite CHANGE manual
+um/tesoreria/core/hexagonal/compras/pedidos/compraRecepcion/infrastructure/persistence/adapter/CompraRecepcionSecuenciaJdbcAdapter.java|JdbcTemplate|Correlativo atómico con LAST_INSERT_ID; emite CHANGE manual

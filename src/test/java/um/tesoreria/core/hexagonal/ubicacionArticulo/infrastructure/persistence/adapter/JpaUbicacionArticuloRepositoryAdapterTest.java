@@ -97,7 +97,7 @@ class JpaUbicacionArticuloRepositoryAdapterTest {
         assertThat(borrados).extracting(UbicacionArticulo::getUbicacionArticuloId, UbicacionArticulo::getUbicacionId,
                         UbicacionArticulo::getArticuloId, UbicacionArticulo::getNumeroCuenta)
                 .containsExactly(tuple(9L, 1, 2L, new BigDecimal("100")), tuple(11L, 3, 2L, null));
-        verify(repository).deleteAllByIdInBatch(List.of(9L, 11L));
+        verify(repository).deleteAllById(List.of(9L, 11L));
     }
 
     @Test
@@ -105,7 +105,7 @@ class JpaUbicacionArticuloRepositoryAdapterTest {
         when(repository.findWithLockByArticuloIdOrderByUbicacionArticuloId(2L)).thenReturn(List.of());
 
         assertThat(adapter.deleteAllByArticuloId(2L)).isEmpty();
-        verify(repository, never()).deleteAllByIdInBatch(any());
+        verify(repository, never()).deleteAllById(any());
     }
 
     @Test
@@ -119,7 +119,7 @@ class JpaUbicacionArticuloRepositoryAdapterTest {
                     assertThat(ex.isReintentable()).isTrue();
                     assertThat(ex.isBloqueado()).isFalse();
                 });
-        verify(repository, never()).deleteAllByIdInBatch(any());
+        verify(repository, never()).deleteAllById(any());
     }
 
     private static JpaUbicacionArticuloRepository.Escalares escalares(Long id, Integer ubicacionId, Long articuloId, String cuenta) {

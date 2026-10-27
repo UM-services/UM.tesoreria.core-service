@@ -25,3 +25,9 @@ logging:
     org:
       hibernate:
         SQL: debug
+
+tesoreria:
+  audit:
+    # Los tests corren sobre H2 y no tienen la tabla audit_outbox:
+    # con SEND el flush intentaría escribir y fallaría.
+    mode: OFF
