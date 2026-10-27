@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import um.tesoreria.core.kotlin.model.EntregaDetalle;
 
@@ -30,7 +29,6 @@ public interface EntregaDetalleRepository extends JpaRepository<EntregaDetalle, 
 
     Optional<EntregaDetalle> findByEntregaDetalleId(Long entregaDetalleId);
 
-    @Modifying
     void deleteByEntregaDetalleId(Long entregaDetalleId);
 
 }

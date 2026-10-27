@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import um.tesoreria.core.kotlin.model.ProveedorArticulo;
 
@@ -32,11 +30,8 @@ public interface ProveedorArticuloRepository extends JpaRepository<ProveedorArti
 
 	Optional<ProveedorArticulo> findByProveedorArticuloId(Long proveedorArticuloId);
 
-	@Modifying
     void deleteByProveedorArticuloId(Long proveedorArticuloId);
 
-	@Modifying
-	@Query("DELETE FROM ProveedorArticulo a WHERE a.proveedorArticuloId IN :ids")
 	void deleteAllByProveedorArticuloIdIn(List<Long> ids);
 
 }

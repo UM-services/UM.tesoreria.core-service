@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persistence.entity.ChequeraCuotaEntity;
@@ -70,7 +69,6 @@ public interface JpaChequeraCuotaRepository extends JpaRepository<ChequeraCuotaE
 
 	Optional<ChequeraCuotaEntity> findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaIdAndCuotaIdOrderByProductoIdDesc(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer cuotaId);
 
-	@Modifying
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 
