@@ -43,7 +43,7 @@ public class PendienteInfoFacultadMapper {
             return Optional.empty();
         }
         var inscripcion = response.inscripcion();
-        List<Detalle> detalles = response.detalles();
+        List<Detalle> detalles = orEmpty(response.detalles());
 
         Map<Clave, String> nombres = new HashMap<>();
         for (Materia materia : orEmpty(response.materias())) {
@@ -71,14 +71,18 @@ public class PendienteInfoFacultadMapper {
             }
         });
 
+        // Sin carrera en la inscripción no hay con qué cruzar: curso y período quedan null.
+        Integer carreraId = inscripcion.carreraId();
         Set<Clave> enCarrera = new HashSet<>();
-        orEmpty(response.materiascarrera()).stream()
-                .filter(m -> Objects.equals(m.carreraId(), inscripcion.carreraId()))
-                .forEach(m -> enCarrera.add(clave(m.facultadId(), m.planId(), m.materiaId())));
         Map<Clave, MateriaCurso> cursadas = new HashMap<>();
-        orEmpty(response.materiascurso()).stream()
-                .filter(m -> Objects.equals(m.carreraId(), inscripcion.carreraId()))
-                .forEach(m -> cursadas.putIfAbsent(clave(m.facultadId(), m.planId(), m.materiaId()), m));
+        if (carreraId != null) {
+            orEmpty(response.materiascarrera()).stream()
+                    .filter(m -> carreraId.equals(m.carreraId()))
+                    .forEach(m -> enCarrera.add(clave(m.facultadId(), m.planId(), m.materiaId())));
+            orEmpty(response.materiascurso()).stream()
+                    .filter(m -> carreraId.equals(m.carreraId()))
+                    .forEach(m -> cursadas.putIfAbsent(clave(m.facultadId(), m.planId(), m.materiaId()), m));
+        }
 
         List<MateriaCursada> materias = detalles.stream().map(detalle -> {
             var clave = clave(detalle.facultadId(), detalle.planId(), detalle.materiaId());
@@ -106,6 +110,6 @@ public class PendienteInfoFacultadMapper {
     }
 
     private static <T> List<T> orEmpty(List<T> lista) {
-        return lista == null ? List.of() : lista;
+        return lista == null ? List.of() : lista.stream().filter(Objects::nonNull).toList();
     }
 }

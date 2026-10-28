@@ -14,6 +14,7 @@ import um.tesoreria.core.hexagonal.extern.facultad.pendienteInfo.infrastructure.
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -211,6 +212,51 @@ class PendienteInfoFacultadMapperTest {
                         tuple("A", "N-A"),
                         tuple("Z", null),
                         tuple("C", null));
+    }
+
+    // protects=una fila de materiascarrera de otra carrera no habilita el curso de la materia, aunque materiascurso
+    //   tenga una fila con la carrera de la inscripción;
+    // fails_when=el mapper filtra materiascarrera sin mirar carreraId, o cruza por carrera de otra tabla;
+    // no_claim=que la facultad mande filas de otra carrera en la práctica.
+    @Test
+    void materiasCarreraRowOfAnotherCarreraDoesNotGiveCursoNorPeriodo() {
+        var response = response(5, 1, 2, "obs", List.of(detalle(1, 9, "A001")),
+                List.of(materia(1, 9, "A001", "UNO")),
+                List.of(new MateriaCarrera(1, 9, 7, "A001")),
+                List.of(new MateriaCurso(1, 9, 2, "A001", 3, 1)));
+
+        assertThat(mapper.toDomain(response, SIN_BUSQUEDA).orElseThrow().materias())
+                .extracting(MateriaCursada::curso, MateriaCursada::periodo).containsExactly(tuple(null, null));
+    }
+
+    // protects=una inscripción sin carreraId no cruza filas sin carreraId: curso y período quedan null;
+    // fails_when=null coincide con null y el mapper asigna curso y período sin carrera conocida;
+    // no_claim=que la facultad mande una inscripción sin carrera en la práctica.
+    @Test
+    void enrollmentWithoutCarreraIdDoesNotMatchRowsWithoutCarreraId() {
+        var response = response(5, 1, null, "obs", List.of(detalle(1, 9, "A001")),
+                List.of(materia(1, 9, "A001", "UNO")),
+                List.of(new MateriaCarrera(1, 9, null, "A001")),
+                List.of(new MateriaCurso(1, 9, null, "A001", 3, 1)));
+
+        assertThat(mapper.toDomain(response, SIN_BUSQUEDA).orElseThrow().materias())
+                .extracting(MateriaCursada::curso, MateriaCursada::periodo).containsExactly(tuple(null, null));
+    }
+
+    // protects=un elemento null en las listas no borra las materias válidas de la inscripción;
+    // fails_when=el mapper lanza NullPointerException con un elemento null en detalles o en las tablas auxiliares;
+    // no_claim=que la facultad mande elementos null en la práctica.
+    @Test
+    void nullElementsInTheListsAreIgnored() {
+        var response = response(5, 1, 2, "obs",
+                Arrays.asList(null, detalle(1, 9, "A001")),
+                Arrays.asList(null, materia(1, 9, "A001", "UNO")),
+                Arrays.asList(null, new MateriaCarrera(1, 9, 2, "A001")),
+                Arrays.asList(null, new MateriaCurso(1, 9, 2, "A001", 3, 1)));
+
+        assertThat(mapper.toDomain(response, SIN_BUSQUEDA).orElseThrow().materias())
+                .extracting(MateriaCursada::materiaId, MateriaCursada::nombre, MateriaCursada::curso, MateriaCursada::periodo)
+                .containsExactly(tuple("A001", "UNO", 3, 1));
     }
 
     private PendienteInfoFacultadResponse read(String path) throws IOException {

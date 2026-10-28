@@ -14,7 +14,9 @@ import java.time.Instant;
  * Una instancia sirve a una sola consulta. Tiene tres topes:
  * <ol>
  *   <li>Como máximo {@value #MAX_LLAMADAS} llamadas.</li>
- *   <li>Deja de llamar cuando pasan {@code PRESUPUESTO} desde su creación, medidos con el {@link Clock} del core.</li>
+ *   <li>Deja de llamar cuando pasan {@code PRESUPUESTO} desde su creación, medidos con el {@link Clock} del core.
+ *   El tope decide si empieza una llamada. No acota la duración de una llamada en curso: eso lo hace el
+ *   timeout del {@link RestClient} global.</li>
  *   <li>Deja de llamar después de la primera falla.</li>
  * </ol>
  * Una falla no se propaga: deja el nombre en {@code null}. El log lleva la clave de la materia y la clase de la

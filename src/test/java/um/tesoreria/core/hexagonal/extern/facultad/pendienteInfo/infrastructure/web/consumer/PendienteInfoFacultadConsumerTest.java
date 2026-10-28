@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withException;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -260,6 +261,40 @@ class PendienteInfoFacultadConsumerTest {
         var materias = consumer.findByAlumno(1, 37, 1, new BigDecimal("30123456"), 2).orElseThrow().materias();
 
         assertThat(materias).extracting(MateriaCursada::nombre).containsOnlyNulls();
+    }
+
+    // protects=un error de transporte o un cuerpo ilegible en /materia/unique deja el nombre en null, no se propaga
+    //   y corta las búsquedas siguientes;
+    // fails_when=el consumer atrapa solo errores HTTP, o sigue llamando después de la falla;
+    // no_claim=el timeout real del RestClient: el servidor es simulado.
+    @Test
+    void transportAndParseFailuresOnMateriaUniqueStopTheSearchesWithoutThrowing() throws IOException {
+        when(urlResolver.getBaseUrl(1)).thenReturn(BASE);
+        server.expect(requestTo(INFO_URL)).andRespond(withSuccess(respuesta(detalles(4, "A", "B")), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(BASE + "/materia/unique/1/4/A")).andRespond(withException(new IOException("timeout")));
+        server.expect(requestTo(INFO_URL)).andRespond(withSuccess(respuesta(detalles(4, "A", "B")), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(BASE + "/materia/unique/1/4/A")).andRespond(withSuccess("{\"nombre\": [", MediaType.APPLICATION_JSON));
+
+        for (int i = 0; i < 2; i++) {
+            var materias = consumer.findByAlumno(1, 37, 1, new BigDecimal("30123456"), 2).orElseThrow().materias();
+            assertThat(materias).extracting(MateriaCursada::nombre).containsOnlyNulls().hasSize(2);
+        }
+        server.verify();
+    }
+
+    // protects=una respuesta 200 vacía de /materia/unique deja el nombre en null y no rompe la consulta;
+    // fails_when=el consumer lanza NullPointerException con cuerpo vacío;
+    // no_claim=que la facultad responda así.
+    @Test
+    void emptyBodyFromMateriaUniqueLeavesTheNameNull() {
+        when(urlResolver.getBaseUrl(1)).thenReturn(BASE);
+        server.expect(requestTo(INFO_URL)).andRespond(withSuccess(respuesta(detalles(4, "A")), MediaType.APPLICATION_JSON));
+        server.expect(requestTo(BASE + "/materia/unique/1/4/A")).andRespond(withSuccess("", MediaType.APPLICATION_JSON));
+
+        var materias = consumer.findByAlumno(1, 37, 1, new BigDecimal("30123456"), 2).orElseThrow().materias();
+
+        assertThat(materias).extracting(MateriaCursada::nombre).containsOnlyNulls();
+        server.verify();
     }
 
     private ResponseCreator avanzando(Duration paso, String cuerpo) {
