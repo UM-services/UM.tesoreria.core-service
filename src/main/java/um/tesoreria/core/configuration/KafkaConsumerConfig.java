@@ -49,14 +49,25 @@ public class KafkaConsumerConfig {
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
+    /**
+     * Debe viajar en las props del factory: los consumers se arman a mano (no usan el
+     * auto-configurado), así que la propiedad del yml no llega sola al cliente. Sin esto el
+     * cliente cae en el default de Kafka ({@code latest}) y un grupo nuevo se saltea los pagos
+     * que ya estaban en el topic.
+     */
+    @Value("${spring.kafka.consumer.auto-offset-reset:earliest}")
+    private String autoOffsetReset = "earliest";
+
     @Bean
     public ConsumerFactory<String, PaymentProcessedEvent> consumerFactory() {
         log.info("Initializing Kafka Consumer Factory with bootstrapServers: {} and groupId: {}", bootstrapServers, groupId);
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
+        // Las clases de deserializador no van en las props: el factory recibe las instancias
+        // explícitas (abajo). Dejarlas acá era una trampa: un ErrorHandlingDeserializer
+        // instanciado por Kafka, sin delegate configurado, falla al deserializar.
 
         JsonMapper objectMapper = JsonMapper.builder()
                 .findAndAddModules()
@@ -90,8 +101,9 @@ public class KafkaConsumerConfig {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
+        // Igual que en el consumer de pagos: las instancias se pasan al factory, no se declaran
+        // clases en las props.
 
         JsonMapper objectMapper = JsonMapper.builder()
                 .findAndAddModules()

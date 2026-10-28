@@ -4,7 +4,15 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.6.0**
+**Versión actual (SemVer): 11.6.1**
+
+## Novedades 11.6.1 (verificado en código)
+- **fix(configuration)**: `pom.xml` usa `spring-boot-starter-kafka` en lugar de `spring-kafka`. En Spring Boot 4 la auto-configuración vive en `spring-boot-kafka`: sin ella no había `KafkaAdmin` y los `NewTopic` de `KafkaTopicsConfiguration` no se aplicaban (los topics existían sólo por `auto.create.topics.enable`, sin retención). `KafkaAutoconfiguracionTest` lo vigila.
+- **fix(configuration)**: los dos consumers propagan `spring.kafka.consumer.auto-offset-reset` (default `earliest`); antes el yml lo declaraba pero las factories armadas a mano no lo leían y el cliente caía en `latest`, salteando pagos en un grupo nuevo. También se quitan las clases `KEY/VALUE_SERIALIZER|DESERIALIZER_CLASS` de las props: las instancias ya se pasan al factory.
+- **feat(kafka)**: `notificacion-resultado.DLT` se declara con retención de 14 días (antes dependía del auto-create del broker).
+- **changed(configuration)**: `SPRING_KAFKA_BOOTSTRAP_SERVERS` permite fijar el broker (default `kafka:9092`) y `spring.kafka.admin.fail-fast`/`modify-topic-configs` quedan en `true`: si el broker no responde o faltan permisos de topics, el servicio **no arranca**. Ver la nota de despliegue en el `CHANGELOG`.
+
+> Basado en `git diff HEAD` (staged; HEAD `9f48ae07`; 10 archivos, +102/−10: `pom.xml`, tres clases de `configuration/`, `bootstrap.yml`, tres tests y los dos yml de test) y el código real de `KafkaTopicsConfiguration`, `KafkaConsumerConfig`, `KafkaProducerConfig` y `bootstrap.yml`. Sin cambios de URL, contrato, DTO ni esquema ⇒ incremento **patch** de SemVer (`11.6.0` → `11.6.1`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/sequence-notificacion-correo.mmd` validado con `mmdc`.
 
 ## Novedades 11.6.0 (verificado en código)
 - **feat(chequera/materiasInscriptas)**: `GET /api/tesoreria/core/materiasInscriptas/{facultadId}/{tipoChequeraId}/{chequeraSerieId}` devuelve las materias de grado inscriptas según SIUM, agrupadas por curso y período, en lugar de la lista vacía. Chequera inexistente: `400`. Chequera que no es de grado: `200` con `[]` y sin llamar a la facultad. Facultad sin servidor o con falla: `200` con `SIUM/NO_DISPONIBLE`. Sin inscripción: `SIUM/SIN_INSCRIPCION`.

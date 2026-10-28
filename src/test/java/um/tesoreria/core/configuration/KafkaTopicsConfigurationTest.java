@@ -25,6 +25,14 @@ class KafkaTopicsConfigurationTest {
     }
 
     @Test
+    void declaraLaDltDeNotificacionResultadoConRetencionExtendida() {
+        NewTopic topic = configuration.notificacionResultadoDltTopic(1, 1);
+
+        assertTopic(topic, "notificacion-resultado.DLT", 1, 1);
+        assertThat(topic.configs()).containsEntry("retention.ms", "1209600000");
+    }
+
+    @Test
     void ajustaMinInsyncReplicasAlReplicationFactor() {
         assertThat(configuration.sendChequeraTopic(1, 1).configs())
                 .containsEntry("min.insync.replicas", "1");

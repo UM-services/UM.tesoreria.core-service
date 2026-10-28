@@ -55,11 +55,17 @@ spring:
       ddl-auto: none
     open-in-view: false
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    admin:
+      # Si el broker no está (o no se pueden crear los topics) el servicio no arranca:
+      # antes seguía vivo sin topics y los DLT aparecían por auto-create, sin retención.
+      fail-fast: true
+      # Aplica a los topics existentes la config declarada en los NewTopic (retención, min.isr).
+      modify-topic-configs: true
     consumer:
       group-id: tesoreria-core-group
+      # Lo leen las factories de KafkaConsumerConfig; sin esto el cliente cae en `latest`.
       auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 logging:
   level:
     um.tesoreria.core: ${app.logging}

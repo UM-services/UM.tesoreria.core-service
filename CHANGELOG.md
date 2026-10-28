@@ -2,6 +2,29 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.6.1] - 2026-10-28
+
+### Added
+
+- `KafkaTopicsConfiguration.notificacionResultadoDltTopic` declara `notificacion-resultado.DLT` con retención de 14 días y `min.insync.replicas = min(2, replicas)`, igual que `payment-processed.DLT`. El listener ya derivaba a ese topic, pero no estaba declarado: sólo existía si el broker tenía `auto.create.topics.enable=true`, con la retención por defecto.
+- `KafkaAutoconfiguracionTest` falla si `org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration` o `KafkaProperties` no están en el classpath: sin el módulo `spring-boot-kafka` no hay bean `KafkaAdmin` y los `NewTopic` quedan inertes.
+
+### Changed
+
+- `spring.kafka.bootstrap-servers` pasa a `${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}` (antes `kafka:9092` fijo): el broker se puede fijar por entorno.
+- `spring.kafka.admin.fail-fast: true` y `spring.kafka.admin.modify-topic-configs: true`: el servicio ya no arranca si el broker no responde o no se pueden crear los topics, y a los topics existentes se les aplica la configuración declarada en los `NewTopic` (retención, `min.insync.replicas`). Antes seguía vivo sin topics y los DLT aparecían por auto-create, sin retención.
+- Se quita `spring.kafka.consumer.key-deserializer` de `bootstrap.yml`: no tenía lectores, porque las dos factories de `KafkaConsumerConfig` reciben la instancia de `StringDeserializer`.
+- `src/test/resources/application.yml` y `application-it.yml` excluyen `org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration`: sin broker, los tests y los IT de lectura no intentan crear topics ni esperan el timeout de `KafkaAdmin`.
+
+### Fixed
+
+- `pom.xml` pasa de `org.springframework.kafka:spring-kafka` a `org.springframework.boot:spring-boot-starter-kafka` (4.1.2). En Spring Boot 4 la auto-configuración de Kafka vive en el módulo `spring-boot-kafka`; declarando sólo `spring-kafka` el proyecto compilaba, pero no había `KafkaAdmin` y los `NewTopic` de `KafkaTopicsConfiguration` no se aplicaban.
+- `KafkaConsumerConfig` propaga `spring.kafka.consumer.auto-offset-reset` (default `earliest`) a las props de `consumerFactory` y `notificacionResultadoConsumerFactory`. El yml lo declaraba, pero las factories se arman a mano y no lo leían: el cliente caía en el default de Kafka (`latest`) y un grupo nuevo se salteaba los pagos ya publicados en `payment-processed`. Test: `propagaAutoOffsetResetAlClienteKafka`.
+- `KafkaConsumerConfig` ya no pone `KEY_DESERIALIZER_CLASS_CONFIG`/`VALUE_DESERIALIZER_CLASS_CONFIG` en las props: las instancias se pasan al factory, y la clase declarada hacía que Kafka instanciara un `ErrorHandlingDeserializer` sin delegate, que falla al deserializar.
+- `KafkaProducerConfig.producerFactory` ya no pone `KEY_SERIALIZER_CLASS_CONFIG`/`VALUE_SERIALIZER_CLASS_CONFIG`: se pasan las instancias (`StringSerializer` y `JacksonJsonSerializer`). Declarar la clase no tenía efecto y, si se quitaba la instancia, Kafka creaba el serializer con `addTypeInfo=true` y volvía a escribir `__TypeId__`.
+
+> Based on `git diff HEAD` (staged; HEAD `9f48ae07`, merge del PR #493; 10 archivos, +102/−10: `pom.xml`, `configuration/KafkaConsumerConfig`, `KafkaProducerConfig`, `KafkaTopicsConfiguration`, `src/main/resources/bootstrap.yml`, los tests `KafkaAutoconfiguracionTest` (nuevo)/`KafkaConsumerConfigTest`/`KafkaTopicsConfigurationTest` y los dos `src/test/resources/*.yml`) y el código real de `KafkaTopicsConfiguration`, `KafkaConsumerConfig`, `KafkaProducerConfig` y `bootstrap.yml`. No hay cambios de URL, contrato REST, DTO ni esquema (sin DDL); no se agrega ni se retira ningún endpoint ⇒ incremento **patch** de SemVer (`11.6.0` → `11.6.1`, `pom.xml`), criterio de fixes del repo. La dependencia `spring-boot-starter-kafka` ya existe en la versión del parent (`spring-boot-kafka-4.1.2.jar` en el repositorio local contiene `org/springframework/boot/kafka/autoconfigure/KafkaAutoConfiguration` y su metadata declara `spring.kafka.admin.fail-fast` y `spring.kafka.admin.modify-topic-configs`). **Nota de despliegue**: con `fail-fast: true` el arranque falla si el broker no es alcanzable o si faltan permisos para crear topics; `modify-topic-configs: true` requiere permiso para alterar la configuración de los topics existentes. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `mmdc` validó los `.mmd` tocados. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-28).
+
 ## [11.6.0] - 2026-10-28
 
 ### Added

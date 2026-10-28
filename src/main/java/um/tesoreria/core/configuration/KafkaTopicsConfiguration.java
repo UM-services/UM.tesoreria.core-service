@@ -54,6 +54,17 @@ public class KafkaTopicsConfiguration {
         return newTopic("payment-processed.DLT", partitions, replicas, DLT_RETENTION_MS);
     }
 
+    /**
+     * DLT de {@code notificacion-resultado}: lo deriva el listener de este servicio cuando no
+     * puede confirmar la notificación. Antes no estaba declarado y sólo existía si el broker
+     * tenía {@code auto.create.topics.enable=true}, con retención default.
+     */
+    @Bean
+    NewTopic notificacionResultadoDltTopic(@Value("${app.kafka.topics.partitions:1}") int partitions,
+                                           @Value("${app.kafka.topics.replicas:1}") int replicas) {
+        return newTopic("notificacion-resultado.DLT", partitions, replicas, DLT_RETENTION_MS);
+    }
+
     private NewTopic newTopic(String name, int partitions, int replicas, String retentionMs) {
         var builder = TopicBuilder.name(name)
                 .partitions(partitions)

@@ -34,5 +34,5 @@ sequenceDiagram
         Core->>Core: registra WARN y no marca nada
     end
 
-    Note over Core,Kafka: Core reintenta con backoff exponencial y deriva a topic.DLT al agotar los intentos
+    Note over Core,Kafka: Core reintenta con backoff exponencial y deriva a payment-processed.DLT o notificacion-resultado.DLT (ambos declarados con 14 días de retención)
     Note over Core: El core ya no abre SMTP: spring-boot-starter-mail se reemplaza por jakarta.mail-api
