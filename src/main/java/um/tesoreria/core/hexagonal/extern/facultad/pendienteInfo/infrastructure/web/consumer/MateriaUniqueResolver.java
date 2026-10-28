@@ -26,6 +26,7 @@ import java.time.Instant;
 class MateriaUniqueResolver implements NombreMateriaResolver {
 
     static final int MAX_LLAMADAS = 10;
+    private static final int MAX_ID_EN_LOG = 40;
     static final Duration PRESUPUESTO = Duration.ofSeconds(3);
 
     private final RestClient restClient;
@@ -58,8 +59,17 @@ class MateriaUniqueResolver implements NombreMateriaResolver {
         } catch (RuntimeException e) {
             fallo = true;
             log.warn("No se pudo buscar el nombre de la materia {}/{}/{}: {}",
-                    facultadId, planId, materiaId, e.getClass().getSimpleName());
+                    facultadId, planId, paraLog(materiaId), e.getClass().getSimpleName());
             return null;
         }
+    }
+
+    /** El id viene de la facultad: se quitan los caracteres de control y se acota el largo antes de loguearlo. */
+    static String paraLog(String materiaId) {
+        if (materiaId == null) {
+            return null;
+        }
+        String limpio = materiaId.replaceAll("\\p{Cntrl}", "?");
+        return limpio.length() > MAX_ID_EN_LOG ? limpio.substring(0, MAX_ID_EN_LOG) + "..." : limpio;
     }
 }

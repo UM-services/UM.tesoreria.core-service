@@ -60,7 +60,9 @@ public class PendienteInfoFacultadMapper {
         Set<Clave> faltantes = new HashSet<>();
         for (Detalle detalle : detalles) {
             var clave = clave(detalle.facultadId(), detalle.planId(), detalle.materiaId());
-            if (!nombres.containsKey(clave)) {
+            // Una clave incompleta no se puede buscar: la llamada iría con un tramo vacío y cortaría las demás.
+            boolean completa = clave.facultadId() != null && clave.planId() != null && hasText(clave.materiaId());
+            if (completa && !nombres.containsKey(clave)) {
                 faltantes.add(clave);
             }
         }

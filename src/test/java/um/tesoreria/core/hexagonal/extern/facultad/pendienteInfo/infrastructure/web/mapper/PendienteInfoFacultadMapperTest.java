@@ -259,6 +259,26 @@ class PendienteInfoFacultadMapperTest {
                 .containsExactly(tuple("A001", "UNO", 3, 1));
     }
 
+    // protects=un detalle con clave incompleta no llega al resolvedor y no impide buscar los demás nombres;
+    // fails_when=el mapper pide una materia con planId o materiaId null o en blanco;
+    // no_claim=que la facultad mande claves null en la práctica: son columnas de clave primaria.
+    @Test
+    void incompleteKeysAreNotSearched() {
+        var response = response(5, 1, 2, "obs",
+                List.of(new Detalle(1, null, "A", null), new Detalle(1, 4, null, null),
+                        new Detalle(1, 4, "  ", null), new Detalle(null, 4, "B", null), detalle(1, 4, "C")),
+                List.of(), List.of(), List.of());
+        List<String> pedidos = new ArrayList<>();
+
+        var materias = mapper.toDomain(response, (fac, plan, materia) -> {
+            pedidos.add(plan + "/" + materia);
+            return "N-" + materia;
+        }).orElseThrow().materias();
+
+        assertThat(pedidos).containsExactly("4/C");
+        assertThat(materias).extracting(MateriaCursada::nombre).containsExactly(null, null, null, null, "N-C");
+    }
+
     private PendienteInfoFacultadResponse read(String path) throws IOException {
         try (InputStream in = getClass().getResourceAsStream(path)) {
             assertThat(in).as("fixture %s", path).isNotNull();

@@ -297,6 +297,17 @@ class PendienteInfoFacultadConsumerTest {
         server.verify();
     }
 
+    // protects=el id de materia que viene de la facultad se limpia y se acota antes de entrar al log;
+    // fails_when=un salto de línea, un tabulador o un id muy largo llegan al log tal cual;
+    // no_claim=el formato de la línea de log ni que el id sea un código válido.
+    @Test
+    void materiaIdIsCleanedBeforeItGoesToTheLog() {
+        assertThat(MateriaUniqueResolver.paraLog("A\nERROR forjado\t\r")).isEqualTo("A?ERROR forjado??");
+        assertThat(MateriaUniqueResolver.paraLog("X".repeat(100))).isEqualTo("X".repeat(40) + "...");
+        assertThat(MateriaUniqueResolver.paraLog("0004")).isEqualTo("0004");
+        assertThat(MateriaUniqueResolver.paraLog(null)).isNull();
+    }
+
     private ResponseCreator avanzando(Duration paso, String cuerpo) {
         return request -> {
             reloj.avanzar(paso);
