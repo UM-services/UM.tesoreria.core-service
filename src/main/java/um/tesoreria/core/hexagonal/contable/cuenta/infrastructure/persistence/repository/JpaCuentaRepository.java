@@ -9,7 +9,6 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Lock;
 import jakarta.persistence.LockModeType;
 import org.springframework.stereotype.Repository;
@@ -42,7 +41,6 @@ public interface JpaCuentaRepository extends JpaRepository<CuentaEntity, BigDeci
 
 	Optional<CuentaEntity> findByCuentaContableId(Long cuentaContableId);
 
-	@Modifying
 	void deleteByNumeroCuenta(BigDecimal numeroCuenta);
 
 }

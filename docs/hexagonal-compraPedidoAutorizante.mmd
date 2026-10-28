@@ -18,8 +18,10 @@ flowchart TD
         Ctrl["CompraPedidoAutorizanteController<br/>/api/tesoreria/core/compraPedidoAutorizante"]
         DTO["CompraPedidoAutorizanteRequest<br/>CompraPedidoAutorizanteResponse"]
         Map["CompraPedidoAutorizanteDtoMapper"]
-        Adp["JdbcCompraPedidoAutorizanteAdapter<br/>JdbcTemplate (SQL directo)"]
-        Tabla["tabla compra_pedido_autorizante_dependencia<br/>clave compuesta / ON DUPLICATE KEY UPDATE"]
+        Adp["JpaCompraPedidoAutorizanteAdapter<br/>save / delete (auditado por Hibernate)"]
+        Repo["JpaCompraPedidoAutorizanteDependenciaRepository<br/>derived queries"]
+        Ent["CompraPedidoAutorizanteDependenciaEntity<br/>@IdClass + Auditable"]
+        Tabla["tabla compra_pedido_autorizante_dependencia<br/>PK (autorizante_id, dependencia_id)"]
     end
 
     Ctrl --> Svc
@@ -31,7 +33,9 @@ flowchart TD
     UCs --> IN
     UCs --> OUT
     Adp --> OUT
-    Adp --> Tabla
+    Adp --> Repo
+    Repo --> Ent
+    Ent --> Tabla
     Svc --> M
 
     style M fill:#e1f5fe
@@ -44,4 +48,6 @@ flowchart TD
     style DTO fill:#fff3e0
     style Map fill:#fff3e0
     style Adp fill:#fff3e0
+    style Repo fill:#fff3e0
+    style Ent fill:#fff3e0
     style Tabla fill:#fff3e0

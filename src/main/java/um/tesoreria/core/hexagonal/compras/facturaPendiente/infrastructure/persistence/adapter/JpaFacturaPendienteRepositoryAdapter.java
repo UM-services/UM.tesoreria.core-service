@@ -15,11 +15,6 @@ public class JpaFacturaPendienteRepositoryAdapter implements FacturaPendienteRep
     private final JpaFacturaPendienteRepository repository;
 
     @Override
-    public void updateFechaPagoInProveedorPago() {
-        repository.updateFechaPagoInProveedorPago();
-    }
-
-    @Override
     public List<FacturaPendiente> findFacturasPendientes(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta) {
         return repository.findFacturasPendientes(fechaDesde, fechaHasta).stream()
                 .map(entity -> FacturaPendiente.builder()

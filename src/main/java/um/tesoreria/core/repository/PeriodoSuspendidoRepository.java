@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import um.tesoreria.core.model.PersonaSuspendido;
@@ -26,7 +25,6 @@ public interface PeriodoSuspendidoRepository extends JpaRepository<PersonaSuspen
 
 	public Optional<PersonaSuspendido> findByPersonaSuspendidoId(Long personaSuspendidoId);
 
-	@Modifying
 	public void deleteByPersonaSuspendidoId(Long personaSuspendidoId);
 
 }

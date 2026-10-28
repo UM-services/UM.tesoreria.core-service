@@ -11,9 +11,7 @@ interface BancoMovimientoRepository : JpaRepository<BancoMovimiento, Long> {
     fun findByBancoMovimientoId(bancoMovimientoId: Long?): Optional<BancoMovimiento?>?
     fun findByValorMovimientoId(valorMovimientoId: Long?): Optional<BancoMovimiento?>?
     fun findFirstByBancariaIdAndFechaOrderByOrdenDesc(bancariaId: Long?, fecha: OffsetDateTime?): Optional<BancoMovimiento?>?
-    @Modifying
     fun deleteByBancoMovimientoId(bancoMovimientoId: Long?)
-    @Modifying
     fun deleteAllByBancoMovimientoIdIn(bancoMovimientoIds: List<Long?>?)
 
 }

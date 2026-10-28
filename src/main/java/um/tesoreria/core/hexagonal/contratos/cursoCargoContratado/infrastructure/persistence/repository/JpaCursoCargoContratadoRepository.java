@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import um.tesoreria.core.hexagonal.contratos.cursoCargoContratado.infrastructure.persistence.entity.CursoCargoContratadoEntity;
 
@@ -39,13 +38,10 @@ public interface JpaCursoCargoContratadoRepository extends JpaRepository<CursoCa
     Optional<CursoCargoContratadoEntity> findByCursoIdAndAnhoAndMesAndContratoId(Long cursoId, Integer anho,
                                                                                  Integer mes, Long contratoId);
 
-    @Modifying
     void deleteByCursoCargoContratadoId(Long cursoCargoContratadoId);
 
-    @Modifying
     void deleteAllByCursoIdAndContratoId(Long cursoId, Long contratoId);
 
-    @Modifying
     void deleteAllByContratoIdAndAnhoAndMes(Long contratoId, Integer anho, Integer mes);
 
 }
