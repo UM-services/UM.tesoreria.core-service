@@ -82,4 +82,22 @@
 **Priority:** P3
 **Depends on:** #408 mergeado.
 
+## Privacidad
+
+### Quitar datos personales de los logs existentes
+
+**What:** Revisar los `log.*` que escriben `personaId` o `documentoId` y dejar solo identificadores que no revelen a la persona.
+
+**Why:** Hay unos 10 logs con esos datos (slices `personas/domicilio`, `umhub/consulta` y `chequera/chequeraSerie`). El repositorio es público y los logs pueden llegar a sistemas compartidos. Los logs nuevos de materias inscriptas (#487) no los escriben.
+
+**Pros:** Menos exposición de datos personales en logs y en capturas de soporte.
+
+**Cons:** Algunos logs sirven hoy para diagnóstico; hay que decidir qué identificador los reemplaza.
+
+**Context:** Surgió en la revisión de #487 (D14). #487 no limpia estos logs. Empezar con `grep -rn "log\." src/main | grep -i persona`.
+
+**Effort:** S
+**Priority:** P3
+**Depends on:** acuerdo con Daniel sobre el identificador de reemplazo.
+
 ## Completed

@@ -4,7 +4,12 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.5.0**
+**Versión actual (SemVer): 11.6.0**
+
+## Novedades 11.6.0 (verificado en código)
+- **feat(chequera/materiasInscriptas)**: `GET /api/tesoreria/core/materiasInscriptas/{facultadId}/{tipoChequeraId}/{chequeraSerieId}` devuelve las materias de grado inscriptas según SIUM, agrupadas por curso y período, en lugar de la lista vacía. Chequera inexistente: `400`. Chequera que no es de grado: `200` con `[]` y sin llamar a la facultad. Facultad sin servidor o con falla: `200` con `SIUM/NO_DISPONIBLE`. Sin inscripción: `SIUM/SIN_INSCRIPCION`.
+- **feat(extern/facultad/pendienteInfo)**: consulta de la inscripción en la facultad (`/pendienteinfo`) con nombres de materia por `/materia/unique` (tope de 10 llamadas y 3 s).
+- **changed**: `GET chequera/estado` no cambia ni llama a la facultad. Diagramas nuevos [`hexagonal-materiasInscriptas.mmd`](docs/hexagonal-materiasInscriptas.mmd) y [`hexagonal-pendienteInfo.mmd`](docs/hexagonal-pendienteInfo.mmd).
 
 ## Novedades 11.5.0 (verificado en código)
 - **feat(audit)**: Auditoría transversal en el paquete `core/audit`: eventos `REQUEST` (filtro HTTP con correlación y actor) y `CHANGE` (listeners de Hibernate con `beforeData`/`afterData`, enmascarado por campo y truncado), escritos en el outbox transaccional `audit_outbox` junto con el cambio de negocio y enviados por lotes al servicio de auditoría con reclamo por token, backoff y limpieza diaria. Modos `OFF`/`LOG`/`SEND` (`TESORERIA_AUDIT_MODE`) y resumen `SUMMARY` para la generación masiva de cuotas. Requiere el script `sql/001_audit_outbox.sql`. Guía: [Auditoría transversal](docs/auditoria.md).

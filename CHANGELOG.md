@@ -2,6 +2,24 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.6.0] - 2026-10-28
+
+### Added
+
+- `GET /api/tesoreria/core/materiasInscriptas/{facultadId}/{tipoChequeraId}/{chequeraSerieId}` devuelve las materias de grado inscriptas según SIUM. `GetMateriasInscriptasUseCaseImpl` carga la chequera (`ChequeraSerieService`) y su tipo (`TipoChequeraService`), consulta a la facultad con lectivo, geográfica, persona y documento de la chequera (`PendienteInfoFacultadService`), traduce el período con `PeriodoCursada.desde` y agrupa con `AgrupadorMaterias`.
+- Resultados por caso: con inscripción `SIUM/OK` con cursos, períodos y materias; sin inscripción `SIUM/SIN_INSCRIPCION`; chequera sin clase o con `grado != 1` lista vacía sin llamar a la facultad; cualquier `RuntimeException` de la llamada, la conversión o el agrupado `SIUM/NO_DISPONIBLE` con HTTP 200 y cursos vacíos.
+- El `warn` de `NO_DISPONIBLE` lleva facultad, chequera, clase de la excepción y status HTTP (`null` si no hubo respuesta). No lleva mensaje, cuerpo, URL ni stack trace; un test lo verifica.
+- Chequera inexistente: `MateriasInscriptasController` responde `400` con `ChequeraSerieException`, igual que `GET chequera/estado`.
+- Tests: 14 del use case, 1 web nuevo (`400`) y `MateriasInscriptasEnsambladoTest` (consumer real de `pendienteInfo`, use case, agrupador y mapper contra `materias-control.json`; y un servidor del JDK que responde a los 2 s con lectura de 500 ms, que exige que el servidor reciba el pedido, que la falla sea un `ResourceAccessException` y que la espera sea de al menos 450 ms).
+- Diagramas `docs/hexagonal-materiasInscriptas.mmd` y `docs/hexagonal-pendienteInfo.mmd`; sección "Privacidad" en `TODOS.md` (logs existentes con datos personales).
+
+### Changed
+
+- `GetMateriasInscriptasUseCaseImpl` deja de devolver siempre `[]`: pasa de un constructor sin dependencias a tres services inyectados.
+- `GET chequera/estado` no cambia y no llama a la facultad (`estadoChequera` sin diferencias en este release).
+
+> Based on `git diff HEAD` (staged; HEAD `07075a84`, merge del PR #492; 13 archivos, +737/−14) y el código real de `chequera/materiasInscriptas/application/usecases/GetMateriasInscriptasUseCaseImpl`, `infrastructure/web/controller/MateriasInscriptasController` y de `extern/facultad/pendienteInfo`. La ruta, los DTO de respuesta y el agrupador no cambian respecto de #482 y #486; solo el 400 es un comportamiento nuevo, sin versión publicada previa (el stub de #482 no salió en un release) ⇒ incremento **minor**.
+
 ## [11.5.0] - 2026-10-27
 
 ### Added

@@ -4,9 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.ChequeraSerieException;
 import um.tesoreria.core.hexagonal.chequera.materiasInscriptas.application.service.MateriasInscriptasService;
 import um.tesoreria.core.hexagonal.chequera.materiasInscriptas.infrastructure.web.mapper.MateriasInscriptasDtoMapper;
 
@@ -38,5 +40,18 @@ class MateriasInscriptasControllerTest {
                 .hasStatusOk();
 
         response.bodyJson().extractingPath("$").asArray().isEmpty();
+    }
+
+    // protects=una chequera inexistente responde HTTP 400, igual que chequera/estado;
+    // fails_when=el controller deja subir la excepción (500) o responde 200 con una lista vacía;
+    // no_claim=que el use case lance la excepción con una base real (lo prueba GetMateriasInscriptasUseCaseImplTest).
+    @Test
+    void missingChequeraRespondsBadRequest() {
+        when(service.getMateriasInscriptas(1, 2, 12345L)).thenThrow(new ChequeraSerieException(1, 2, 12345L));
+
+        mockMvc.get().uri(URL)
+                .accept(MediaType.APPLICATION_JSON)
+                .assertThat()
+                .hasStatus(HttpStatus.BAD_REQUEST);
     }
 }
