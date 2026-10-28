@@ -1,4 +1,4 @@
-package um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto;
+package um.tesoreria.core.hexagonal.chequera.materiasInscriptas.infrastructure.web.dto;
 
 import org.junit.jupiter.api.Test;
 import tools.jackson.core.type.TypeReference;
@@ -13,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MateriasEstadoResponseRoundTripTest {
 
-    private static final String FIXTURE = "/estadoChequera/materias-control.json";
+    private static final String FIXTURE = "/materiasInscriptas/materias-control.json";
 
     private final JsonMapper mapper = JsonMapper.builder().build();
 
     // protects=los DTOs de materias representan sin pérdida el contrato publicado (nombres, enums y anidado);
     // fails_when=un campo, un enum o un nivel del contrato no existe en los DTOs, o cambia de nombre al serializar;
-    // no_claim=que el core arme este contenido (en #482 materias siempre es []), ni el formato del texto: se compara como árbol JSON.
+    // no_claim=que el core arme este contenido (en #482 la lista siempre es vacía), ni el formato del texto: se compara como árbol JSON.
     @Test
     void materiasControlFixtureSurvivesTheRoundTripThroughTheDtos() throws IOException {
         JsonNode original;

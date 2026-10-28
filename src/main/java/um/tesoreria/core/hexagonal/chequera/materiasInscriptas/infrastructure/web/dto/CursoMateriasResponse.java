@@ -1,4 +1,4 @@
-package um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto;
+package um.tesoreria.core.hexagonal.chequera.materiasInscriptas.infrastructure.web.dto;
 
 import java.util.List;
 

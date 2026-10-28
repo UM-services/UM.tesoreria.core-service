@@ -1,4 +1,4 @@
-package um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model;
+package um.tesoreria.core.hexagonal.chequera.materiasInscriptas.domain.model;
 
 /**
  * Entrada del agrupado por curso y período. El período llega ya traducido por cada fuente;
