@@ -5,7 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
-import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.PeriodoCursada;
+import um.tesoreria.core.hexagonal.chequera.materiasInscriptas.domain.model.PeriodoCursada;
 import um.tesoreria.core.hexagonal.extern.facultad.pendienteInfo.domain.model.InscripcionMaterias;
 import um.tesoreria.core.hexagonal.extern.facultad.pendienteInfo.domain.model.MateriaCursada;
 import um.tesoreria.core.hexagonal.extern.facultad.pendienteInfo.infrastructure.web.dto.PendienteInfoFacultadResponse;
@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.tuple;
 class PendienteInfoFacultadMapperTest {
 
     private static final String CONTROL = "/pendienteinfo/control.json";
-    private static final String CONTRATO = "/estadoChequera/materias-control.json";
+    private static final String CONTRATO = "/materiasInscriptas/materias-control.json";
 
     private final JsonMapper json = JsonMapper.builder().build();
     private final PendienteInfoFacultadMapper mapper = new PendienteInfoFacultadMapper();
