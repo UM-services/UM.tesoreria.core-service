@@ -18,6 +18,9 @@ spring:
     bootstrap-servers: localhost:9092
     listener:
       auto-startup: false
+  # En tests no hay broker: sin KafkaAdmin no se intenta crear topics ni se espera el timeout.
+  autoconfigure:
+    exclude: org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 logging:
   level:
     um.tesoreria.core: debug

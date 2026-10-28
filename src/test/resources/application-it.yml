@@ -21,6 +21,9 @@ spring:
     bootstrap-servers: localhost:1
     listener:
       auto-startup: false
+  # Broker inalcanzable a propósito: los IT de lectura no deben esperar el timeout de KafkaAdmin.
+  autoconfigure:
+    exclude: org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 logging:
   level:
     root: error

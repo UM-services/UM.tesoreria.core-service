@@ -148,6 +148,24 @@ class KafkaConsumerConfigTest {
         assertThat(event.getReferencia().getId()).isEqualTo("7");
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void propagaAutoOffsetResetAlClienteKafka() {
+        // El yml declara `earliest`, pero el factory se arma a mano: si la propiedad no viaja en
+        // las props, el cliente cae en el default de Kafka (`latest`) y saltea pagos existentes.
+        assertThat(factory.getConfigurationProperties())
+                .containsEntry("auto.offset.reset", "earliest");
+
+        var config = new KafkaConsumerConfig();
+        ReflectionTestUtils.setField(config, "bootstrapServers", "kafka:9092");
+        ReflectionTestUtils.setField(config, "groupId", "tesoreria-core-group");
+        ReflectionTestUtils.setField(config, "autoOffsetReset", "latest");
+        var conLatest = (DefaultKafkaConsumerFactory<String, PaymentProcessedEvent>) config.consumerFactory();
+
+        assertThat(conLatest.getConfigurationProperties())
+                .containsEntry("auto.offset.reset", "latest");
+    }
+
     private PaymentProcessedEvent deserialize(Headers headers, String payload) {
         return factory.getValueDeserializer()
                 .deserialize(TOPIC, headers, payload.getBytes(StandardCharsets.UTF_8));
