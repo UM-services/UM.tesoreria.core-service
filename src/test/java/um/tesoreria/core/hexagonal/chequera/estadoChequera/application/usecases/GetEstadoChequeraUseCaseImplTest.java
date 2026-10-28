@@ -120,6 +120,14 @@ class GetEstadoChequeraUseCaseImplTest {
         when(tipoImpresionService.findByTipoImpresionId(1)).thenReturn(rapipago);
     }
 
+    // protects=el use case devuelve materias como lista vacía y no nula (#482: aún sin fuentes conectadas);
+    // fails_when=materias llega null o con elementos antes de que #487 conecte las fuentes;
+    // no_claim=la regla 1 de #481 (clase de chequera) ni la consulta a la facultad: eso lo prueba #487.
+    @Test
+    void returnsAnEmptyMateriasListUntilTheSourcesAreWired() {
+        assertThat(estado().materias()).isNotNull().isEmpty();
+    }
+
     @Test
     void mapsTheHeaderFromTheChequeraSerieAndItsLookups() {
         EstadoChequera estado = estado();
