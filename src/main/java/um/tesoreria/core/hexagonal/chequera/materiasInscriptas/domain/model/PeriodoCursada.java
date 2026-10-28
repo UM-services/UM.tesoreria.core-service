@@ -1,4 +1,4 @@
-package um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model;
+package um.tesoreria.core.hexagonal.chequera.materiasInscriptas.domain.model;
 
 /**
  * Período de cursada de una materia. El orden de las constantes es el orden de presentación:

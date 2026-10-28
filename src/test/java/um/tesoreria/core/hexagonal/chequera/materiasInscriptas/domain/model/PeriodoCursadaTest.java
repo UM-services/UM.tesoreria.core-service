@@ -1,4 +1,4 @@
-package um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model;
+package um.tesoreria.core.hexagonal.chequera.materiasInscriptas.domain.model;
 
 import org.junit.jupiter.api.Test;
 

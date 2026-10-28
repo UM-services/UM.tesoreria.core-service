@@ -170,8 +170,7 @@ public class GetEstadoChequeraUseCaseImpl implements GetEstadoChequeraUseCase {
                 alternativaId,
                 serie.getHpum() != null && serie.getHpum() != 0,
                 productos,
-                debitos,
-                List.of());
+                debitos);
     }
 
     private ProductoEstado toProducto(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,

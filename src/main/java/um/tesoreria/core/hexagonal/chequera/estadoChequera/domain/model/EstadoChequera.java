@@ -12,9 +12,6 @@ import java.util.List;
  * <p>
  * Las fechas llegan ya resueltas: {@code primerVencimiento} conserva su día calendario (sin
  * convertir el huso horario) y las fechas de pago, de vencimiento del débito y de envío están en UTC.
- * <p>
- * {@code materias} nunca es {@code null}: trae un elemento por fuente consultada y es vacía si la
- * chequera no es de grado.
  */
 public record EstadoChequera(
         Integer facultadId,
@@ -32,6 +29,5 @@ public record EstadoChequera(
         Integer alternativaId,
         boolean hpum,
         List<ProductoEstado> productos,
-        List<DebitoEstado> debitos,
-        List<MateriasEstado> materias) {
+        List<DebitoEstado> debitos) {
 }

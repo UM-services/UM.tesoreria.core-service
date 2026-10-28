@@ -1,7 +1,7 @@
-package um.tesoreria.core.hexagonal.chequera.estadoChequera.infrastructure.web.dto;
+package um.tesoreria.core.hexagonal.chequera.materiasInscriptas.infrastructure.web.dto;
 
-import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.EstadoMaterias;
-import um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model.FuenteMaterias;
+import um.tesoreria.core.hexagonal.chequera.materiasInscriptas.domain.model.EstadoMaterias;
+import um.tesoreria.core.hexagonal.chequera.materiasInscriptas.domain.model.FuenteMaterias;
 
 import java.util.List;
 

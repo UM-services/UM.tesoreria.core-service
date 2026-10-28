@@ -1,4 +1,4 @@
-package um.tesoreria.core.hexagonal.chequera.estadoChequera.domain.model;
+package um.tesoreria.core.hexagonal.chequera.materiasInscriptas.domain.model;
 
 /**
  * Resultado de consultar las materias en una fuente. {@code OK} trae el detalle por curso;
