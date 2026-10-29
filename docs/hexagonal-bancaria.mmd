@@ -1,0 +1,59 @@
+---
+title: Arquitectura Hexagonal - Módulo Bancaria (v11.4.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        B["Bancaria<br/>Textos nunca null, cuenta contable obligatoria"]
+        BC["BancariaCambios + Campo<br/>Distingue ausente de null"]
+        CU["Cuit / Cbu<br/>Dígitos verificadores, vacío y sin dato válidos"]
+        BU["BancariaUso<br/>Valores y movimientos de libro banco"]
+        BR["BancariaRepository<br/>Puerto de salida"]
+        BP["BancariaUsoPort / BancariaReferenciasPort<br/>Puertos de salida"]
+        BH["BancariaHistorialPort<br/>Puerto de salida"]
+        IP["Puertos de entrada<br/>Create, Update, Delete, GetById y GetUso"]
+    end
+    subgraph Aplicacion ["Aplicación (Application)"]
+        UC["Casos de uso @Transactional<br/>El historial exige la transacción"]
+        VA["BancariaValidaciones<br/>Largo 64, cp1252, CUIT, CBU, cuenta"]
+        EX["BancariaSolicitudInvalida (400), BancariaConflicto (409)<br/>BancariaNoEncontrada (404), todas con codigo"]
+    end
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        CC["BancariaController (legacy)<br/>Fachada de POST, PUT, DELETE, GET /{id} y /{id}/uso; GET / sin cambios"]
+        AD["BancariaExceptionAdvice<br/>Errores con clave status"]
+        DTO["BancariaRequest (por presencia) / BancariaResponse<br/>BancariaUsoResponse y BancariaErrorResponse"]
+        JPA["JpaBancariaRepositoryAdapter<br/>saveAndFlush, delete+flush, solo FK a 409"]
+        ENT["BancariaEntity + ValorReferenciaEntity + LibroBancoReferenciaEntity<br/>Mismos nombres lógicos que las entidades Kotlin"]
+        JR["JpaBancariaRepository<br/>Método derivado y PESSIMISTIC_WRITE"]
+        UA["BancariaUsoAdapter<br/>existsBy y countBy sobre valores y libro_banco"]
+        RA["BancariaReferenciasAdapter<br/>Cuenta contable y proveedor"]
+        HA["BancariaHistorialAdapter<br/>Entidad bancaria, clave cub_id"]
+    end
+    subgraph Externo ["Externo (External)"]
+        HIST["RegistrarEscrituraHistorialUseCase<br/>Puerto público de historial 404"]
+        CTA["GetCuentaByNumeroCuentaUseCase<br/>Slice contable/cuenta"]
+        PRV["GetProveedorByIdUseCase<br/>Slice compras/proveedor"]
+        LEG["BancariaService + Bancaria.kt (legacy)<br/>GET /bancaria/, CompraService y ValorMovimiento"]
+    end
+    CC --> DTO
+    CC --> IP
+    CC --> LEG
+    AD -. responde errores de .-> CC
+    UC -. implementa .-> IP
+    UC --> VA
+    UC --> BC
+    UC --> BR
+    UC --> BP
+    UC --> BH
+    UC --> EX
+    VA --> CU
+    BC --> B
+    JPA -. implementa .-> BR
+    JPA --> JR
+    JR --> ENT
+    UA -. implementa .-> BP
+    UA --> ENT
+    RA -. implementa .-> BP
+    RA --> CTA
+    RA --> PRV
+    HA -. implementa .-> BH
+    HA --> HIST

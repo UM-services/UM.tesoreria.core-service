@@ -6,6 +6,13 @@ app:
   password: root
   logging: debug
   testing: false
+  # Topics de los que este servicio es dueño (KafkaTopicsConfiguration). El réplication factor es
+  # ambiental: 1 con el broker único actual, 3 en la fase de cluster. KafkaAdmin nunca reasigna el
+  # RF de un topic existente.
+  kafka:
+    topics:
+      replicas: ${APP_KAFKA_TOPIC_REPLICAS:1}
+      partitions: ${APP_KAFKA_TOPIC_PARTITIONS:1}
   consul:
     host: consul-service
     port: 8500
@@ -25,6 +32,8 @@ spring:
       port: ${app.consul.port}
       discovery:
         prefer-ip-address: true
+        # Solo resolver instancias con los checks en passing (Feign/LoadBalancer).
+        query-passing: true
         # Consul: readiness (sin dependencias) + poda si queda critico.
         health-check-path: /actuator/health/readiness
         health-check-critical-timeout: 5m
@@ -46,11 +55,17 @@ spring:
       ddl-auto: none
     open-in-view: false
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    admin:
+      # Si el broker no está (o no se pueden crear los topics) el servicio no arranca:
+      # antes seguía vivo sin topics y los DLT aparecían por auto-create, sin retención.
+      fail-fast: true
+      # Aplica a los topics existentes la config declarada en los NewTopic (retención, min.isr).
+      modify-topic-configs: true
     consumer:
       group-id: tesoreria-core-group
+      # Lo leen las factories de KafkaConsumerConfig; sin esto el cliente cae en `latest`.
       auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 logging:
   level:
     um.tesoreria.core: ${app.logging}
@@ -68,6 +83,30 @@ logging:
         orm:
           jpa: ${app.logging}
         kafka: DEBUG
+
+tesoreria:
+  audit:
+    # OFF = no captura | LOG = captura y mide sin enviar | SEND = outbox + HTTP
+    # Default SEND: la auditoría se registra desde el primer request.
+    mode: ${TESORERIA_AUDIT_MODE:SEND}
+    request-events: ${TESORERIA_AUDIT_REQUEST_EVENTS:true}
+    change-events: ${TESORERIA_AUDIT_CHANGE_EVENTS:true}
+    url: ${TESORERIA_AUDIT_URL:http://localhost:8211}
+    api-key: ${TESORERIA_AUDIT_API_KEY:}
+    batch-size: ${TESORERIA_AUDIT_BATCH_SIZE:200}
+    sender-delay-ms: ${TESORERIA_AUDIT_SENDER_DELAY_MS:2000}
+    sender-initial-delay-ms: ${TESORERIA_AUDIT_SENDER_INITIAL_DELAY_MS:5000}
+    max-attempts: ${TESORERIA_AUDIT_MAX_ATTEMPTS:10}
+    max-payload-chars: ${TESORERIA_AUDIT_MAX_PAYLOAD_CHARS:32768}
+    # Enmascarado: "campo" aplica a toda entidad; "Entidad.campo" sólo a esa entidad
+    # (nombre simple, sin sufijo Entity). `clave` y `cuenta` no van globales: son la clave
+    # del permiso y el número de cuenta contable, respectivamente.
+    mask-fields: ${TESORERIA_AUDIT_MASK_FIELDS:password,token,cbu,documento,tarjeta}
+    # RESUMEN de operaciones masivas (generación de cuotas). false = auditar fila por fila.
+    bulk-enabled: ${TESORERIA_AUDIT_BULK_ENABLED:true}
+    # Desde esta cantidad de filas una generación se resume (SUMMARY). Debajo, fila por fila.
+    bulk-min-rows: ${TESORERIA_AUDIT_BULK_MIN_ROWS:20}
+    summary-entities: ${TESORERIA_AUDIT_SUMMARY_ENTITIES:ChequeraCuotaEntity,ChequeraSerieEntity,ChequeraTotalEntity}
 
 management:
   endpoints:

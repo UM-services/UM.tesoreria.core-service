@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.entity.CuentaMovimientoEntity;
 
 /**
@@ -34,15 +33,14 @@ public interface JpaCuentaMovimientoRepository extends JpaRepository<CuentaMovim
 
 	Optional<CuentaMovimientoEntity> findTopByFechaContableOrderByOrdenContableDesc(OffsetDateTime fechaContable);
 
+	boolean existsByFechaContableBetween(OffsetDateTime desde, OffsetDateTime hasta);
+
 	Optional<CuentaMovimientoEntity> findByCuentaMovimientoId(Long cuentaMovimientoId);
 
-	@Modifying
 	void deleteAllByFechaContableAndOrdenContable(OffsetDateTime fechaContable, Integer ordenContable);
 
-	@Modifying
 	void deleteByCuentaMovimientoId(Long cuentaMovimientoId);
 
-	@Modifying
     void deleteAllByCuentaMovimientoIdIn(List<Long> cuentaMovimientoIds);
 
 }

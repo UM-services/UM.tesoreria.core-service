@@ -2,9 +2,49 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.1.0**
+**Versión actual (SemVer): 11.6.1**
+
+## Novedades 11.6.1 (verificado en código)
+- **fix(configuration)**: `pom.xml` usa `spring-boot-starter-kafka` en lugar de `spring-kafka`. En Spring Boot 4 la auto-configuración vive en `spring-boot-kafka`: sin ella no había `KafkaAdmin` y los `NewTopic` de `KafkaTopicsConfiguration` no se aplicaban (los topics existían sólo por `auto.create.topics.enable`, sin retención). `KafkaAutoconfiguracionTest` lo vigila.
+- **fix(configuration)**: los dos consumers propagan `spring.kafka.consumer.auto-offset-reset` (default `earliest`); antes el yml lo declaraba pero las factories armadas a mano no lo leían y el cliente caía en `latest`, salteando pagos en un grupo nuevo. También se quitan las clases `KEY/VALUE_SERIALIZER|DESERIALIZER_CLASS` de las props: las instancias ya se pasan al factory.
+- **feat(kafka)**: `notificacion-resultado.DLT` se declara con retención de 14 días (antes dependía del auto-create del broker).
+- **changed(configuration)**: `SPRING_KAFKA_BOOTSTRAP_SERVERS` permite fijar el broker (default `kafka:9092`) y `spring.kafka.admin.fail-fast`/`modify-topic-configs` quedan en `true`: si el broker no responde o faltan permisos de topics, el servicio **no arranca**. Ver la nota de despliegue en el `CHANGELOG`.
+
+> Basado en `git diff HEAD` (staged; HEAD `9f48ae07`; 10 archivos, +102/−10: `pom.xml`, tres clases de `configuration/`, `bootstrap.yml`, tres tests y los dos yml de test) y el código real de `KafkaTopicsConfiguration`, `KafkaConsumerConfig`, `KafkaProducerConfig` y `bootstrap.yml`. Sin cambios de URL, contrato, DTO ni esquema ⇒ incremento **patch** de SemVer (`11.6.0` → `11.6.1`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/sequence-notificacion-correo.mmd` validado con `mmdc`.
+
+## Novedades 11.6.0 (verificado en código)
+- **feat(chequera/materiasInscriptas)**: `GET /api/tesoreria/core/materiasInscriptas/{facultadId}/{tipoChequeraId}/{chequeraSerieId}` devuelve las materias de grado inscriptas según SIUM, agrupadas por curso y período, en lugar de la lista vacía. Chequera inexistente: `400`. Chequera que no es de grado: `200` con `[]` y sin llamar a la facultad. Facultad sin servidor o con falla: `200` con `SIUM/NO_DISPONIBLE`. Sin inscripción: `SIUM/SIN_INSCRIPCION`.
+- **feat(extern/facultad/pendienteInfo)**: consulta de la inscripción en la facultad (`/pendienteinfo`) con nombres de materia por `/materia/unique` (tope de 10 llamadas y 3 s).
+- **changed**: `GET chequera/estado` no cambia ni llama a la facultad. Diagramas nuevos [`hexagonal-materiasInscriptas.mmd`](docs/hexagonal-materiasInscriptas.mmd) y [`hexagonal-pendienteInfo.mmd`](docs/hexagonal-pendienteInfo.mmd).
+
+## Novedades 11.5.0 (verificado en código)
+- **feat(audit)**: Auditoría transversal en el paquete `core/audit`: eventos `REQUEST` (filtro HTTP con correlación y actor) y `CHANGE` (listeners de Hibernate con `beforeData`/`afterData`, enmascarado por campo y truncado), escritos en el outbox transaccional `audit_outbox` junto con el cambio de negocio y enviados por lotes al servicio de auditoría con reclamo por token, backoff y limpieza diaria. Modos `OFF`/`LOG`/`SEND` (`TESORERIA_AUDIT_MODE`) y resumen `SUMMARY` para la generación masiva de cuotas. Requiere el script `sql/001_audit_outbox.sql`. Guía: [Auditoría transversal](docs/auditoria.md).
+- **feat(kafka)**: `KafkaTopicsConfiguration` declara `send-chequera`, `send-cuota`, `send-correo` y `payment-processed.DLT` (retención 14 días); particiones y réplicas por entorno (`APP_KAFKA_TOPIC_PARTITIONS`/`APP_KAFKA_TOPIC_REPLICAS`, default `1`).
+- **changed**: `compraAutoridadUsuario` y `compraPedidoAutorizante` pasan de `JdbcTemplate` a JPA para que asignar o quitar quede auditado (rutas y respuestas iguales); la normalización de `fecha_pago` de facturas pendientes deja de ser un `UPDATE` nativo y la hace `ProveedorPagoSincronizacionService` (JPA + Criteria) antes de generar el reporte; se quitan `@Modifying` innecesarios y los dos `@Query` de borrado masivo de artículos de proveedor. `AuditCoverageGuard` (test) impide que vuelvan las escrituras fuera de JPA. Sin cambios de API: el único efecto visible es que la consulta de facturas pendientes ya no escribe por sí sola (lo hace la generación del reporte).
+
+## Novedades 11.4.0 (verificado en código)
+- **feat(contable/bancaria)**: Cuentas bancarias (#409): alta, edición por presencia de campos (ausente conserva, `null` vacía) y baja bloqueada si hay valores o movimientos de libro banco (`409 EN_USO` con conteos). Rutas nuevas `GET /bancaria/{id}` y `GET /bancaria/{id}/uso`; `GET /bancaria/` no cambia. Validación de CUIT, CBU, textos latin1 y enteros exactos; precondición opcional `updated` (`409 CAMBIO_CONCURRENTE`); historial #404 en la misma transacción y `@Lock` en PUT y DELETE.
+- **changed**: la cuenta contable es obligatoria en la API (`CompraService` la necesita al pagar). Errores en JSON con `status` y `codigo`. Reglas y límites: [guía de Cuentas bancarias](docs/gestion-cuentas-bancarias.md). Sin DDL nuevo.
+
+## Novedades 11.3.0 (verificado en código)
+- **feat(contratos/cursoCargoContratado)**: `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` (alias `/cursocargocontratado/periodo/{anho}/{mes}`) devuelve en una sola llamada todos los cursos-cargo contratados del período. Reutiliza `CursoCargoContratadoService.findAllByPeriodo` y el derivado `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes` (sin `@Query`); ninguna ruta existente cambia. Sin DDL ni dependencias nuevas.
+- **test**: `CursoCargoContratadoControllerTest` caracteriza el endpoint (`200` y los campos `cursoCargoContratadoId`, `cursoId`, `cargoTipoId` y `horasSemanales`) con `MockMvc` standalone y el `service` simulado.
+
+> Basado en `git diff HEAD` (staged; HEAD `29dc554e`; el cambio funcional son 3 archivos, +86/−0: el controlador del slice `contratos/cursoCargoContratado` con el endpoint de período, el test nuevo y `CHANGELOG.md`; más la preparación de release en `pom.xml`, este `README.md` y `docs/README.md`) y el `pom.xml` real. Todo es aditivo: se suma un `GET` de lectura y no cambia ninguna URL, DTO ni respuesta existente ⇒ incremento **minor** de SemVer (`11.2.1` → `11.3.0`). El endpoint devuelve `CursoCargoContratadoEntity`, como las lecturas vigentes del mismo controlador. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`).
+
+## Novedades 11.2.1 (verificado en código)
+- **chore(deps)**: actualización de dependencias: Spring Boot 4.1.2, Spring Cloud 2025.1.4, Lombok 1.18.48, MySQL Connector/J 26.10.0, Guava 33.7.2-jre, Apache POI 6.0.0 (`poi` y `poi-ooxml`), springdoc-openapi 3.1.1, ModelMapper 3.2.8 y JaCoCo 0.8.15. Sin dependencias nuevas ni cambios de API: Kotlin, OpenPDF y json-path no cambian.
+- **changed(configuration)**: `spring.cloud.consul.discovery.query-passing: true` en `bootstrap.yml`: el descubrimiento por Consul (Feign/LoadBalancer) resuelve sólo instancias con los checks en `passing`. Es opcional (default `false`), así que no obliga a redeploys coordinados.
+
+> Basado en `git diff HEAD` (staged; HEAD `d1f9584b`; 2 archivos, +12/−10: `pom.xml` con diez versiones actualizadas y `bootstrap.yml` con `query-passing`) y el `pom.xml` real. Sin cambios de URL, contrato, DTO ni esquema ⇒ incremento **patch** de SemVer (`11.2.0` → `11.2.1`). Sin DDL y sin dependencias nuevas. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/dependencies.mmd` validado con `mmdc`.
+
+## Novedades 11.2.0 (verificado en código)
+- **feat(contable/ejercicio)**: Ejercicios (#408): alta del ejercicio siguiente (1 de marzo a último día de febrero, id `último + 1`, límite relativo al año actual con `Clock`), baja solo del último ejercicio de año futuro y sin movimientos, asientos ni referencias, y cambio de `bloqueado` y órdenes contables conservando el resto. Historial #404 en la misma transacción; `@Lock` sobre el último ejercicio o la fila editada.
+- **changed(controller)**: `EjercicioController` es fachada de POST, PUT y DELETE del nuevo slice, con rechazos `409`/`404`/`400` en JSON (`codigo`). El PUT ya no reemplaza la entidad completa: nombre o fechas distintos responden `409`. `DELETE` inexistente responde `404`; POST y PUT ya no devuelven `created`/`updated`. Las lecturas no cambian.
+- **fix**: `AsientoInflacionService` ya no puede reabrir un ejercicio bloqueado; `EjercicioBloqueadoException` ya se puede construir (el `{}` de `MessageFormat` lanzaba `IllegalArgumentException`).
+- Reglas, errores y diferencias frente a VB6: [guía de Ejercicios](docs/gestion-ejercicios.md). Sin DDL nuevo; requiere el historial #404 existente.
 
 ## Novedades 11.1.0 (verificado en código)
 - **feat(usuarios/usuario)**: login automático en el alta. `POST /usuario/usuario` (alias `/api/tesoreria/core/usuario/usuario`) acepta `UsuarioAltaRequest`: `login` deja de ser obligatorio y se genera como **primera letra del nombre + apellido** normalizados (`Juan Pérez` → `jperez`); ante colisión agrega letras del nombre (`juperez`, `juaperez`, `juanperez`) y después sufijos numéricos (`juanperez2`…), con tope de 15 caracteres (el largo de `usuario.login`). Si el payload trae `login` explícito **se respeta tal cual** (clientes previos sin `apellido` siguen funcionando) y el duplicado responde `409` en vez de `500`. Con `apellido` presente, `usuario.nombre` se persiste como `"<nombre> <apellido>"`; `apellido` no es columna.
@@ -1425,15 +1465,15 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.1.1
-- Spring Cloud: 2025.1.3
+- Spring Boot: 4.1.2
+- Spring Cloud: 2025.1.4
 - Kotlin: 2.4.21
-- MySQL Connector: 26.7.0
-- SpringDoc OpenAPI: 3.1.0
-- Apache POI: 5.5.1
+- MySQL Connector: 26.10.0
+- SpringDoc OpenAPI: 3.1.1
+- Apache POI: 6.0.0
 - OpenPDF: 3.0.5
-- ModelMapper: 3.2.6
-- Guava: 33.6.0-jre
+- ModelMapper: 3.2.8
+- Guava: 33.7.2-jre
 - json-path: 3.0.0
 
 ## Optimizaciones de Rendimiento (verificado en código)
@@ -1719,6 +1759,7 @@ src/
 │   │       │   ├── umhub/reservaVacante/     # Módulo ReservaVacante (v3.24.0)
 │   │       │   ├── umhub/consulta/           # Módulo Consulta persona/deuda por número (v6.1.0)
 │   │       │   └── matriculacionContext/
+│   │       ├── audit/                  # Auditoría transversal: listeners JPA, outbox y sender (v11.5.0)
 │   │       ├── model/                 # Modelos legacy
 │   │       ├── service/               # Servicios legacy
 │   │       ├── controller/             # Controladores legacy
@@ -1756,11 +1797,11 @@ Daniel Quinteros - daniel.quinterospinto@gmail.com
 Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](https://github.com/UM-services/um.tesoreria.core-service)
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.3-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-brightgreen.svg)](https://spring.io/projects/spring-cloud)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-11.0.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.5.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -1793,6 +1834,13 @@ SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/tesoreria
 SPRING_DATASOURCE_USERNAME=root
 SPRING_DATASOURCE_PASSWORD=root
 MERCADO_PAGO_ACCESS_TOKEN=your_access_token
+```
+
+Auditoría transversal (11.5.0): requiere `sql/001_audit_outbox.sql` en la base; sin esa tabla usar `TESORERIA_AUDIT_MODE=LOG` (o `OFF`). Lista completa: [guía de auditoría](docs/auditoria.md).
+```properties
+TESORERIA_AUDIT_MODE=SEND
+TESORERIA_AUDIT_URL=http://auditoria:8211
+TESORERIA_AUDIT_API_KEY=your_api_key
 ```
 
 ## Desarrollo

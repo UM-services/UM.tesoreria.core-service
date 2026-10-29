@@ -2,6 +2,133 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.6.1] - 2026-10-28
+
+### Added
+
+- `KafkaTopicsConfiguration.notificacionResultadoDltTopic` declara `notificacion-resultado.DLT` con retención de 14 días y `min.insync.replicas = min(2, replicas)`, igual que `payment-processed.DLT`. El listener ya derivaba a ese topic, pero no estaba declarado: sólo existía si el broker tenía `auto.create.topics.enable=true`, con la retención por defecto.
+- `KafkaAutoconfiguracionTest` falla si `org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration` o `KafkaProperties` no están en el classpath: sin el módulo `spring-boot-kafka` no hay bean `KafkaAdmin` y los `NewTopic` quedan inertes.
+
+### Changed
+
+- `spring.kafka.bootstrap-servers` pasa a `${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}` (antes `kafka:9092` fijo): el broker se puede fijar por entorno.
+- `spring.kafka.admin.fail-fast: true` y `spring.kafka.admin.modify-topic-configs: true`: el servicio ya no arranca si el broker no responde o no se pueden crear los topics, y a los topics existentes se les aplica la configuración declarada en los `NewTopic` (retención, `min.insync.replicas`). Antes seguía vivo sin topics y los DLT aparecían por auto-create, sin retención.
+- Se quita `spring.kafka.consumer.key-deserializer` de `bootstrap.yml`: no tenía lectores, porque las dos factories de `KafkaConsumerConfig` reciben la instancia de `StringDeserializer`.
+- `src/test/resources/application.yml` y `application-it.yml` excluyen `org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration`: sin broker, los tests y los IT de lectura no intentan crear topics ni esperan el timeout de `KafkaAdmin`.
+
+### Fixed
+
+- `pom.xml` pasa de `org.springframework.kafka:spring-kafka` a `org.springframework.boot:spring-boot-starter-kafka` (4.1.2). En Spring Boot 4 la auto-configuración de Kafka vive en el módulo `spring-boot-kafka`; declarando sólo `spring-kafka` el proyecto compilaba, pero no había `KafkaAdmin` y los `NewTopic` de `KafkaTopicsConfiguration` no se aplicaban.
+- `KafkaConsumerConfig` propaga `spring.kafka.consumer.auto-offset-reset` (default `earliest`) a las props de `consumerFactory` y `notificacionResultadoConsumerFactory`. El yml lo declaraba, pero las factories se arman a mano y no lo leían: el cliente caía en el default de Kafka (`latest`) y un grupo nuevo se salteaba los pagos ya publicados en `payment-processed`. Test: `propagaAutoOffsetResetAlClienteKafka`.
+- `KafkaConsumerConfig` ya no pone `KEY_DESERIALIZER_CLASS_CONFIG`/`VALUE_DESERIALIZER_CLASS_CONFIG` en las props: las instancias se pasan al factory, y la clase declarada hacía que Kafka instanciara un `ErrorHandlingDeserializer` sin delegate, que falla al deserializar.
+- `KafkaProducerConfig.producerFactory` ya no pone `KEY_SERIALIZER_CLASS_CONFIG`/`VALUE_SERIALIZER_CLASS_CONFIG`: se pasan las instancias (`StringSerializer` y `JacksonJsonSerializer`). Declarar la clase no tenía efecto y, si se quitaba la instancia, Kafka creaba el serializer con `addTypeInfo=true` y volvía a escribir `__TypeId__`.
+
+> Based on `git diff HEAD` (staged; HEAD `9f48ae07`, merge del PR #493; 10 archivos, +102/−10: `pom.xml`, `configuration/KafkaConsumerConfig`, `KafkaProducerConfig`, `KafkaTopicsConfiguration`, `src/main/resources/bootstrap.yml`, los tests `KafkaAutoconfiguracionTest` (nuevo)/`KafkaConsumerConfigTest`/`KafkaTopicsConfigurationTest` y los dos `src/test/resources/*.yml`) y el código real de `KafkaTopicsConfiguration`, `KafkaConsumerConfig`, `KafkaProducerConfig` y `bootstrap.yml`. No hay cambios de URL, contrato REST, DTO ni esquema (sin DDL); no se agrega ni se retira ningún endpoint ⇒ incremento **patch** de SemVer (`11.6.0` → `11.6.1`, `pom.xml`), criterio de fixes del repo. La dependencia `spring-boot-starter-kafka` ya existe en la versión del parent (`spring-boot-kafka-4.1.2.jar` en el repositorio local contiene `org/springframework/boot/kafka/autoconfigure/KafkaAutoConfiguration` y su metadata declara `spring.kafka.admin.fail-fast` y `spring.kafka.admin.modify-topic-configs`). **Nota de despliegue**: con `fail-fast: true` el arranque falla si el broker no es alcanzable o si faltan permisos para crear topics; `modify-topic-configs: true` requiere permiso para alterar la configuración de los topics existentes. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `mmdc` validó los `.mmd` tocados. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-28).
+
+## [11.6.0] - 2026-10-28
+
+### Added
+
+- `GET /api/tesoreria/core/materiasInscriptas/{facultadId}/{tipoChequeraId}/{chequeraSerieId}` devuelve las materias de grado inscriptas según SIUM. `GetMateriasInscriptasUseCaseImpl` carga la chequera (`ChequeraSerieService`) y su tipo (`TipoChequeraService`), consulta a la facultad con lectivo, geográfica, persona y documento de la chequera (`PendienteInfoFacultadService`), traduce el período con `PeriodoCursada.desde` y agrupa con `AgrupadorMaterias`.
+- Resultados por caso: con inscripción `SIUM/OK` con cursos, períodos y materias; sin inscripción `SIUM/SIN_INSCRIPCION`; chequera sin clase o con `grado != 1` lista vacía sin llamar a la facultad; cualquier `RuntimeException` de la llamada, la conversión o el agrupado `SIUM/NO_DISPONIBLE` con HTTP 200 y cursos vacíos.
+- El `warn` de `NO_DISPONIBLE` lleva facultad, chequera, clase de la excepción y status HTTP (`null` si no hubo respuesta). No lleva mensaje, cuerpo, URL ni stack trace; un test lo verifica.
+- Chequera inexistente: `MateriasInscriptasController` responde `400` con `ChequeraSerieException`, igual que `GET chequera/estado`.
+- Tests: 14 del use case, 1 web nuevo (`400`) y `MateriasInscriptasEnsambladoTest` (consumer real de `pendienteInfo`, use case, agrupador y mapper contra `materias-control.json`; y un servidor del JDK que responde a los 2 s con lectura de 500 ms, que exige que el servidor reciba el pedido, que la falla sea un `ResourceAccessException` y que la espera sea de al menos 450 ms).
+- Diagramas `docs/hexagonal-materiasInscriptas.mmd` y `docs/hexagonal-pendienteInfo.mmd`; sección "Privacidad" en `TODOS.md` (logs existentes con datos personales).
+
+### Changed
+
+- `GetMateriasInscriptasUseCaseImpl` deja de devolver siempre `[]`: pasa de un constructor sin dependencias a tres services inyectados.
+- `GET chequera/estado` no cambia y no llama a la facultad (`estadoChequera` sin diferencias en este release).
+
+> Based on `git diff HEAD` (staged; HEAD `07075a84`, merge del PR #492; 13 archivos, +737/−14) y el código real de `chequera/materiasInscriptas/application/usecases/GetMateriasInscriptasUseCaseImpl`, `infrastructure/web/controller/MateriasInscriptasController` y de `extern/facultad/pendienteInfo`. La ruta, los DTO de respuesta y el agrupador no cambian respecto de #482 y #486; solo el 400 es un comportamiento nuevo, sin versión publicada previa (el stub de #482 no salió en un release) ⇒ incremento **minor**.
+
+## [11.5.0] - 2026-10-27
+
+### Added
+
+- Auditoría transversal (paquete nuevo `um.tesoreria.core.audit`, 18 clases): captura eventos `REQUEST` desde `AuditRequestFilter` (correlación por `X-Request-Id`, actor por `X-User-Id` o `X-Usuario-Id`, login por `X-Usuario-Login`, IP por `X-Forwarded-For`) y eventos `CHANGE` desde `AuditEntityListener`, registrado en `AuditEventListenerRegistrar` sobre `POST_INSERT`/`POST_UPDATE`/`POST_DELETE` más un `FLUSH`. `AuditDiffBuilder` arma el diff de propiedades escalares (ignora asociaciones, colecciones y `created`/`updated`) con `beforeData`/`afterData` y lo trunca en `max-payload-chars`.
+- Outbox transaccional `audit_outbox` con script `sql/001_audit_outbox.sql` (la aplicación no crea ni migra esquema): `AuditOutboxWriter` inserta con la conexión de la transacción de negocio, de modo que se confirman juntos el cambio y su evento; el evento `REQUEST` se escribe en una transacción nueva (`REQUIRES_NEW`) porque se emite después del negocio, incluso si hubo rollback.
+- Envío al servicio de auditoría (`AuditOutboxSender`): lote configurable, reclamo por `claim_token` con lease de 60 s (sin `SKIP LOCKED`), backoff exponencial hasta `max-attempts`, `FAILED` para `400`/`401`/`403`/`422` y para los rechazos parciales que devuelve el lote, y limpieza diaria (03:30) de las filas `SENT` con más de 7 días. `POST {url}/api/tesoreria/auditoria/evento/lote` con `X-API-Key`.
+- Modos `OFF`/`LOG`/`SEND` (`tesoreria.audit.mode`, default `SEND`) con interruptores `request-events`/`change-events` y `excluded-entities`; en tests la captura queda en `OFF`.
+- Resumen de operaciones masivas: `AuditBulkService`, `AuditBulkScope` y `BulkContext` agrupan la generación de cuotas en un evento `SUMMARY` por entidad y operación. Umbral `bulk-min-rows` (default 20) y entidades `summary-entities` (`ChequeraCuotaEntity`, `ChequeraSerieEntity`, `ChequeraTotalEntity`); cableado en `JpaChequeraCuotaRepositoryAdapter.saveAll` como `alta-cuotas`. Las bajas nunca se resumen.
+- `AuditManualChange` (`change(...)` y `sequence(...)`) para las escrituras que no pasan por JPA, usado por los cuatro correlativos anuales de compras (`CompraPedidoSecuencia`, `CompraCotizacionSecuencia`, `CompraFormalizacionSecuencia`, `CompraRecepcionSecuencia`), que siguen reservando con `LAST_INSERT_ID` y ahora emiten su `CHANGE` en la misma transacción.
+- Guard estático `AuditCoverageGuard` y su test: recorren `src/main/java` y fallan si aparece una escritura que saltee el ciclo de vida de JPA sin declararse en `src/test/resources/audit-coverage-exceptions.txt`; una excepción sobrante también rompe el test. La allowlist vigente tiene sólo los cuatro correlativos, con motivo.
+- `KafkaTopicsConfiguration`: declara los topics de los que el servicio es dueño (`send-chequera`, `send-cuota`, `send-correo` y `payment-processed.DLT` con retención de 14 días) con `app.kafka.topics.partitions`/`replicas` (`APP_KAFKA_TOPIC_PARTITIONS`/`APP_KAFKA_TOPIC_REPLICAS`) y `min.insync.replicas = min(2, replicas)`.
+- `ProveedorPagoSincronizacionService` con `ProveedorPagoSincronizacionRepositoryCustom(Impl)` (Criteria API): resuelve los comprobantes con `fecha_pago` desincronizada y los guarda como entidades, así cada fila corregida emite su `CHANGE` con `beforeData`/`afterData`.
+- Guía [Auditoría transversal](docs/auditoria.md) y diagrama `docs/auditoria.mmd`.
+
+### Changed
+
+- `compras/pedidos/compraAutoridadUsuario` y `compras/pedidos/compraPedidoAutorizante`: los adaptadores pasan de `JdbcTemplate` a JPA (`JpaCompraAutoridadUsuarioAdapter`, `JpaCompraPedidoAutorizanteAdapter`, con `CompraAutoridadUsuarioEntity` y `CompraPedidoAutorizanteDependenciaEntity` + `@IdClass`) y repositorios derivados, para que asignar o quitar quede auditado. Rutas, DTO y respuestas no cambian.
+- `compras/facturaPendiente`: se elimina el `@Query` nativo `updateFechaPagoInProveedorPago` y su llamada desde `GetFacturasPendientesUseCaseImpl`. `SheetService.generateFacturasPendientes` sincroniza `fecha_pago` con JPA antes de leer: el reporte sale igual, pero la consulta de facturas pendientes ya no escribe. Cuando una orden de pago tiene varios valores, el Criteria toma el de menor `opv_orden` (el `UPDATE` nativo elegía uno cualquiera).
+- Se quitan los `@Modifying` innecesarios de los deletes derivados en 29 repositorios (hexagonal, legacy y Kotlin) y los dos `@Query` de borrado masivo de `ProveedorArticuloRepository` y `ProveedorArticuloTrackRepository` pasan a métodos derivados: las bajas ahora disparan los listeners de auditoría.
+- `ubicacionArticulo`: la baja de vínculos usa `deleteAllById` en lugar de `deleteAllByIdInBatch`, para que cada borrado pase por `em.remove` y quede auditado.
+
+> Based on `git diff HEAD` (staged; HEAD `b32d6707`, merge del PR #480; 89 archivos, +3508/−369) y el código real de `src/main/java/um/tesoreria/core/audit/`, `configuration/KafkaTopicsConfiguration`, `service/ProveedorPagoSincronizacionService`, los adaptadores JPA de `compraAutoridadUsuario`/`compraPedidoAutorizante`, `src/main/resources/bootstrap.yml` y `src/test/resources/{application.yml,audit-coverage-exceptions.txt}`. Propuesta **minor** de SemVer (`11.4.0` → `11.5.0`, `pom.xml`): se agrega una capacidad nueva (auditoría con outbox, modos y resumen masivo) y topics propios, sin cambiar rutas, contratos REST, DTO ni respuestas existentes. Requiere DDL externo (`sql/001_audit_outbox.sql`) y las variables `TESORERIA_AUDIT_*`; sin ese script dejar el modo en `LOG`/`OFF`, porque `SEND` intenta escribir el outbox. Las migraciones JDBC→JPA y la limpieza de `@Query`/`@Modifying` son internas y mantienen las respuestas; el único cambio observable es que la lectura de facturas pendientes ya no normaliza `fecha_pago` por sí sola (lo hace la generación del reporte). Nuevas pruebas: `AuditCoverageGuardTest`, `AuditManualChangeTest`, `AuditMaskingTest`, `AuditTestModeTest`, `KafkaTopicsConfigurationTest` y los `JpaCompraAutoridadUsuarioAdapterTest`/`JpaCompraPedidoAutorizanteAdapterTest` que reemplazan a los `Jdbc*AdapterTest`. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/auditoria.mmd` validado con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-27).
+
+## [11.4.0] - 2026-10-25
+
+### Added
+
+- Cuentas bancarias (#409): slice `contable/bancaria` con casos de uso de alta, edición y baja, `BancariaEntity` propia con columnas explícitas e historial #404 (entidad `bancaria`, clave `cub_id`) en la misma transacción. `BancariaController` suma `POST`, `PUT /{id}`, `DELETE /{id}`, `GET /{id}` y `GET /{id}/uso` (`{valores, libroBanco, eliminable}`); `GET /bancaria/` no cambia.
+- Edición por presencia de campos: ausente conserva, `null` vacía (texto `''`, `proveedorId` en `NULL`); `numeroCuenta` en `null` es `400 CUENTA_REQUERIDA`. Precondición opcional `updated`: si no coincide con lo guardado, `409 CAMBIO_CONCURRENTE`.
+- Validaciones: CUIT (módulo 11, se guarda con guiones) y CBU (22 dígitos con verificadores); textos de hasta 64 caracteres representables en latin1/cp1252; enteros exactos para `proveedorId` (1–32767), `numeroCuenta` (hasta 11 dígitos) y `bancariaId`; existencia de cuenta contable y proveedor por los puertos públicos de sus slices.
+- Baja con `@Lock(PESSIMISTIC_WRITE)` y rechazo `409 EN_USO` con conteos si hay valores (`valores.val_cuentaorigen`) o movimientos de libro banco (`libro_banco.lib_cub_id`), con entidades de lectura mínimas y métodos derivados (sin SQL nativo). Solo una violación de FK se traduce a `409`.
+- Guía [Cuentas bancarias](docs/gestion-cuentas-bancarias.md) y diagrama `docs/hexagonal-bancaria.mmd`; entrada en `TODOS.md` para migrar las lecturas y retirar `Bancaria.kt`.
+
+### Changed
+
+- La cuenta contable de una cuenta bancaria pasa a ser obligatoria en la API: `CompraService` la usa al pagar y fallaba con `NullPointerException` si faltaba. Las 16 cuentas de dev ya la tienen.
+- Los errores de las rutas nuevas llevan cuerpo `{status, error, codigo, message}` (VB6 lo toma como rechazo); las respuestas de éxito no llevan `status`.
+
+> Based on git diff contra `origin/develop` (`feb7267f`): slice `hexagonal/contable/bancaria`, `BancariaController` y `BancariaExceptionAdvice`. Propuesta **minor** (`11.2.0` → `11.4.0`): rutas nuevas, ninguna existente cambia. Sin DDL ni dependencias nuevas; requiere `gestion_escritura_historial` (#404). Verificación: `mvn test` (1272 pruebas, H2 y colaboradores simulados); `BancariaDevDbIT` (6 pruebas, dev con copias `TEMPORARY`); `BancariaDevE2E` (12 pruebas contra las tablas reales de dev vía relay: alta/edición/baja, FK real de MySQL, latin1, precondición `updated`, locks con espera en `INNODB_LOCK_WAITS` y mutantes sin lock; la base quedó idéntica y los `AUTO_INCREMENT` restaurados). Sin probar con el ejecutable VB6 ni con un pago real de `CompraService` (solo unitaria con Mockito). Diagrama Mermaid pendiente de validar en CI.
+
+## [11.3.0] - 2026-10-25
+
+### Added
+
+- `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` (también publicado como `/cursocargocontratado/periodo/{anho}/{mes}`): devuelve todos los cursos-cargo contratados del período en una sola llamada. Reutiliza `CursoCargoContratadoService.findAllByPeriodo` y el derivado `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes` que ya existían (sin `@Query`). Cambio aditivo: ninguna ruta existente cambia.
+- Test `CursoCargoContratadoControllerTest` (`MockMvc` standalone sobre el controlador real con `service` simulado) que caracteriza la respuesta del endpoint de período: `200` y los campos `cursoCargoContratadoId`, `cursoId`, `cargoTipoId` y `horasSemanales`.
+
+> Based on `git diff HEAD` (staged; HEAD `29dc554e`; el cambio funcional son 3 archivos, +86/−0: `CursoCargoContratadoController` con el nuevo `@GetMapping("/periodo/{anho}/{mes}")` de dos `@PathVariable`, el test nuevo en `src/test/java/um/tesoreria/core/controller/CursoCargoContratadoControllerTest.java` y este `CHANGELOG.md`; más la preparación de release en `pom.xml`, `README.md` y `docs/README.md`) y el código real de `CursoCargoContratadoController`, `CursoCargoContratadoService.findAllByPeriodo` y `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes`. Sólo agrega un endpoint de lectura ⇒ incremento **minor** de SemVer (`11.2.1` → `11.3.0`, `pom.xml`). Sin DDL, sin dependencias nuevas y sin cambios en rutas, DTO ni respuesta de los endpoints existentes; el endpoint devuelve `CursoCargoContratadoEntity`, igual que las lecturas vigentes `findAllByPersona` y `findAllByCurso` del mismo slice. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`). Fecha de release tomada del día en curso del entorno de trabajo (2026-10-25).
+
+## [11.2.1] - 2026-10-23
+
+### Changed
+
+- Actualización de dependencias (`pom.xml`): Spring Boot `4.1.1` → `4.1.2`, Spring Cloud `2025.1.3` → `2025.1.4`, Lombok `1.18.38` → `1.18.48`, MySQL Connector/J `26.7.0` → `26.10.0`, Guava `33.6.0-jre` → `33.7.2-jre`, Apache POI y POI-OOXML `5.5.1` → `6.0.0`, springdoc-openapi `3.1.0` → `3.1.1`, ModelMapper `3.2.6` → `3.2.8` y el plugin JaCoCo `0.8.13` → `0.8.15`. Kotlin `2.4.21`, OpenPDF `3.0.5` y json-path `3.0.0` no cambian.
+- Consul (`bootstrap.yml`): `spring.cloud.consul.discovery.query-passing: true`, para que el descubrimiento (Feign/LoadBalancer) resuelva sólo instancias con los checks en `passing`. Se agrega junto al `health-check-path` de readiness y la poda por `health-check-critical-timeout`.
+
+> Based on `git diff HEAD` (staged; HEAD `d1f9584b`; 2 archivos, +12/−10: `pom.xml` con diez versiones actualizadas —incluida la propiedad `lombok.version` y el plugin `jacoco-maven-plugin`— y `src/main/resources/bootstrap.yml` con `query-passing: true` bajo `spring.cloud.consul.discovery`) y el `pom.xml` real. Todo es interno/operativo: ninguna URL, contrato REST, DTO, respuesta ni esquema cambia, no hay dependencias nuevas (sólo versiones) y `spring.cloud.consul.discovery.query-passing` es configuración opcional con default `false`, así que el comportamiento previo se mantiene si no se despliega el archivo ⇒ incremento **patch** de SemVer (`11.2.0` → `11.2.1`, `pom.xml`). Sin DDL. El uso de POI en el código se limita a la API estable `ss.usermodel`/`XSSFWorkbook` (`BalanceService`, `SheetService`, `PayPerTicFileService`), revisado para el salto `5.5.1` → `6.0.0`; no se compiló. Actualizados `README.md` (§versión, Spring Boot, tabla de dependencias y badges) y `docs/dependencies.mmd`. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/dependencies.mmd` validado con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-23).
+
+## [11.2.0] - 2026-10-22
+
+### Added
+
+- Ejercicios (#408): slice `contable/ejercicio` con casos de uso de alta, edición y baja, `EjercicioEntity` propia con columnas explícitas e historial #404 (entidad `ejercicio`, clave `eje_id`) en la misma transacción. `EjercicioController` queda como fachada de POST, PUT y DELETE; las lecturas no cambian.
+- Alta del ejercicio siguiente: id `último + 1`, del 1 de marzo al último día de febrero y nombre `Ejercicio Económico <año>`; lo omitido se deriva y lo enviado tiene que coincidir. Límite `Year(último.fechaInicio) > Year(hoy) + 1` con el `Clock` inyectable. Insert estricto con `persist` + `flush`.
+- Baja del último ejercicio de año futuro, con rechazo si hay movimientos (`movcon`) o asientos (`asiento`) en el período o una FK que lo referencia. Nuevos puertos públicos `ExistsByFechaContableBetweenUseCase` (`contable/cuentaMovimiento`) y `ExistsAsientoByFechaBetweenUseCase` (`contable/asiento`), con métodos derivados y sin SQL nativo.
+- Guía [Ejercicios](docs/gestion-ejercicios.md) y diagrama `docs/hexagonal-ejercicio.mmd`.
+
+### Changed
+
+- `PUT /ejercicio/{id}` solo cambia `bloqueado` (0 o 1) y las órdenes contables; `null` conserva lo guardado. Nombre o fechas distintos de lo guardado responden `409` (`CAMPO_INMUTABLE`); antes el PUT reemplazaba toda la entidad y rellenaba con la fecha actual lo omitido. Sin cambio real no deja historial.
+- Los rechazos de regla responden `409` con `{status, error, codigo, message}` (`SALTO`, `DUPLICADO`, `LIMITE_ALTA`, `NO_ES_ULTIMO`, `NO_FUTURO`, `EN_USO`, `CAMPO_INMUTABLE`); id inexistente `404` y cuerpo mal formado o `bloqueado` fuera de {0,1} `400`, siempre con JSON. `DELETE` de un id inexistente pasa de `204` a `404`.
+- `POST` ya no es un upsert: antes `save` hacía merge sobre cualquier id; ahora el alta es un `INSERT` estricto y responde con el ejercicio derivado (id, fechas y nombre calculados). `PUT` de un id inexistente pasa de un error sin cuerpo (`EjercicioException`) a `404` con JSON; los errores se responden desde `EjercicioExceptionAdvice`, que cubre `EjercicioController` y `AsientoInflacionController`.
+- Las respuestas de POST y PUT ya no incluyen `created` ni `updated`.
+- Alta, baja y edición leen con `@Lock(PESSIMISTIC_WRITE)` (último ejercicio o fila editada); el alta, la edición y la baja reintentan (hasta 3 veces, con espera aleatoria) solo si MySQL revierte la transacción por deadlock (error 1213; el SQLState 40001 no distingue el lock wait timeout 1205); un lock wait timeout u otro fallo de bloqueo responde `409` con `codigo` `CONCURRENCIA`.
+- Validaciones nuevas: órdenes contables entre 0 y 32767 (columna `smallint`), `bloqueado` entre 0 y 1 y `nombre` de hasta 128 caracteres → `400`; el alta exige continuidad con el período del último ejercicio (`409 SALTO`) y, con la tabla vacía, un primer período regular (1 de marzo al último día de febrero). Un `nombre` en blanco o un `ejercicioId` menor o igual a cero se toman como omitidos. `bloqueado` y las órdenes se leen como enteros exactos: un decimal (por ejemplo `0.9`) responde `400` en lugar de truncarse.
+- `AsientoInflacionService` pasa a depender del caso de uso: sus endpoints pueden responder `409`/`404`/`400` con JSON del slice (antes un error sin cuerpo) y, como las demás escrituras, requieren `gestion_escritura_historial`.
+- Se retiran `add`, `update` y `delete` de `EjercicioService` (legacy), sin usuarios desde que la escritura pasó al slice.
+- `AsientoInflacionService` actualiza el ejercicio con `UpdateEjercicioUseCase` mandando solo la orden contable que cambia: ya no puede revertir un bloqueo y deja historial.
+
+### Fixed
+
+- `EjercicioBloqueadoException` usaba `{}` en `MessageFormat` y su constructor lanzaba `IllegalArgumentException`; ahora `ContabilidadService.saveAsiento` lanza la excepción esperada.
+
+> Based on git diff contra `origin/develop` (`bcaba9a0`) y los archivos nuevos de #408: casos de uso Create/Update/Delete, `EjercicioSiguiente`, `JpaEjercicioRepositoryAdapter`, `EjercicioHistorialAdapter`, `EjercicioUsoAdapter`, `EjercicioController`, `AsientoInflacionService` y los puertos nuevos de movimientos y asientos. Propuesta **minor** (`11.1.0` → `11.2.0`): rutas y campos de entrada sin cambios y reglas de negocio nuevas con `409`; el PUT más estricto, el `404` del DELETE y la ausencia de `created`/`updated` en las respuestas de escritura pueden afectar a clientes que dependan del comportamiento anterior, a confirmar en la revisión. Sin dependencias nuevas ni DDL nuevo; requiere `gestion_escritura_historial` (#404). Verificación: `mvn test` (1153 pruebas, con colaboradores simulados en los tres consumidores del flag); `EjercicioDevDbIT` (9 pruebas, dev vía relay con copias `TEMPORARY`); `EjercicioDevE2E` (14 pruebas contra dev vía relay, con reloj simulado en 2026-10-21; la base quedó idéntica y los `AUTO_INCREMENT` restaurados). Sin probar con el ejecutable VB6 ni con `CompraService.anulateValor` y `AsientoInflacionService` de punta a punta (solo unitarias). Diagrama Mermaid pendiente de validar en CI. Detalles en `docs/gestion-ejercicios.md`.
+
 ## [11.1.0] - 2026-10-22
 
 ### Added

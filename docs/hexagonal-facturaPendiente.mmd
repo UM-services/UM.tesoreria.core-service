@@ -24,7 +24,6 @@ classDiagram
 
         class FacturaPendienteRepository {
             << interface >>
-            +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
             +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
         }
     }
@@ -66,13 +65,11 @@ classDiagram
 
             class JpaFacturaPendienteRepository {
                 << JpaRepository >>
-                +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
                 +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendienteEntity~
             }
 
             class JpaFacturaPendienteRepositoryAdapter {
                 -JpaFacturaPendienteRepository repository
-                +updateFechaPagoInProveedorPago(Long, OffsetDateTime)
                 +findFacturasPendientes(OffsetDateTime, OffsetDateTime) List~FacturaPendiente~
             }
     }
@@ -83,3 +80,5 @@ classDiagram
     JpaFacturaPendienteRepositoryAdapter ..|> FacturaPendienteRepository : implements
     JpaFacturaPendienteRepositoryAdapter --> JpaFacturaPendienteRepository : uses
     JpaFacturaPendienteRepository --> FacturaPendienteEntity : persists
+
+    note for JpaFacturaPendienteRepositoryAdapter "fecha_pago ya no se normaliza con un UPDATE nativo:<br/>ProveedorPagoSincronizacionService (JPA + Criteria) lo hace antes de leer y emite CHANGE"

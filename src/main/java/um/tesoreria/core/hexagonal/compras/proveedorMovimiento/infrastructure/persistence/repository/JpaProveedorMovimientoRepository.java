@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
@@ -53,7 +52,6 @@ public interface JpaProveedorMovimientoRepository extends JpaRepository<Proveedo
 
 	Optional<ProveedorMovimientoEntity> findTopByPrefijoAndComprobanteIdInOrderByNumeroComprobanteDesc(Integer prefijo, List<Integer> comprobanteIds);
 
-	@Modifying
     void deleteByProveedorMovimientoId(Long proveedorMovimientoId);
 
 	// Revisar antes de usar

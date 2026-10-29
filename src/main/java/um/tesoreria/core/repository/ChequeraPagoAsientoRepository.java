@@ -4,7 +4,6 @@
 package um.tesoreria.core.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import um.tesoreria.core.kotlin.model.ChequeraPagoAsiento;
 
 import java.time.OffsetDateTime;
@@ -18,7 +17,6 @@ public interface ChequeraPagoAsientoRepository extends JpaRepository<ChequeraPag
 
 	List<ChequeraPagoAsiento> findAllByTipoPagoIdAndFecha(Integer tipoPagoId, OffsetDateTime fecha);
 
-	@Modifying
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 

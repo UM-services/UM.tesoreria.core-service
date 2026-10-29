@@ -1,0 +1,63 @@
+---
+title: Auditoría transversal - tesoreria-core (v11.5.0)
+---
+flowchart TD
+
+    subgraph Entrada["Entrada HTTP"]
+        Req["Request del cliente<br/>X-Request-Id / X-User-Id / X-Usuario-Login"]
+        F["AuditRequestFilter<br/>abre AuditContext + emite REQUEST"]
+        Ctrl["Controladores (hexagonal + legacy)"]
+    end
+
+    subgraph Captura["Captura"]
+        L["AuditEntityListener<br/>POST_INSERT / POST_UPDATE / POST_DELETE"]
+        FL["AuditFlushListener<br/>corre después del flush"]
+        D["AuditDiffBuilder<br/>diff escalar + enmascarado + truncado"]
+        BS["AuditBulkService / AuditBulkScope<br/>SUMMARY por entidad y operación"]
+        MC["AuditManualChange<br/>change / sequence"]
+        G["AuditCoverageGuard (test)<br/>allowlist de escrituras fuera de JPA"]
+    end
+
+    subgraph Outbox["Outbox transaccional (MySQL tesium)"]
+        W["AuditOutboxWriter<br/>INSERT con la conexión de la transacción"]
+        T[("audit_outbox<br/>PENDING / SENDING / SENT / FAILED")]
+    end
+
+    subgraph Envio["Envío"]
+        S["AuditOutboxSender<br/>@Scheduled sender-delay-ms"]
+        API["Servicio de auditoría<br/>POST /api/tesoreria/auditoria/evento/lote"]
+    end
+
+    P["AuditProperties<br/>mode OFF / LOG / SEND"]
+
+    Req --> F
+    F --> Ctrl
+    Ctrl --> L
+    Ctrl --> BS
+    Ctrl --> MC
+    L --> D
+    D --> W
+    BS --> W
+    MC --> W
+    FL --> L
+    W --> T
+    T --> S
+    S --> API
+    G -.-> MC
+    P -.-> F
+    P -.-> L
+    P -.-> BS
+    P -.-> MC
+    P -.-> S
+
+    style F fill:#e1f5fe
+    style L fill:#e1f5fe
+    style FL fill:#e1f5fe
+    style D fill:#e1f5fe
+    style BS fill:#e1f5fe
+    style MC fill:#e1f5fe
+    style G fill:#fff3e0
+    style W fill:#fff3e0
+    style T fill:#fff3e0
+    style S fill:#fff3e0
+    style P fill:#fce4ec
