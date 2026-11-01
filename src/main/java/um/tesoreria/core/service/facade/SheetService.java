@@ -152,6 +152,7 @@ public class SheetService {
     private final FacturacionElectronicaService facturacionElectronicaService;
     private final ProveedorService proveedorService;
     private final FacturaPendienteService facturaPendienteService;
+    private final ProveedorPagoSincronizacionService proveedorPagoSincronizacionService;
     private final GeograficaMapper geograficaMapper;
 
 
@@ -1418,6 +1419,10 @@ public class SheetService {
     }
 
     public String generateFacturasPendientes(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta) {
+        // Normaliza fecha_pago antes de leer: el cambio pasó de un UPDATE nativo a JPA para
+        // que quede auditado (ver ProveedorPagoSincronizacionService).
+        proveedorPagoSincronizacionService.sincronizarFechaPago();
+
         String path = environment.getProperty("path.files");
 
         String filename = path + "pendientes.xlsx";

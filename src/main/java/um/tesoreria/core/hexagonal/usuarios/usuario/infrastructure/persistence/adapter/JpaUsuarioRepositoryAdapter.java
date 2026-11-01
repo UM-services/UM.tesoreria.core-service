@@ -28,6 +28,11 @@ public class JpaUsuarioRepositoryAdapter implements UsuarioRepository {
     }
 
     @Override
+    public boolean existsByLoginIgnoreCase(String login) {
+        return jpaUsuarioRepository.existsByLoginIgnoreCase(login);
+    }
+
+    @Override
     public List<Usuario> findUsuariosBySearch(String texto) {
         return jpaUsuarioRepository.findUsuariosBySearch(texto).stream()
                 .map(usuarioMapper::toDomainModel)

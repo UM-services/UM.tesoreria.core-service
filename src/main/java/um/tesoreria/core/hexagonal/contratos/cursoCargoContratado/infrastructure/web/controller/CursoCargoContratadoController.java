@@ -68,6 +68,12 @@ public class CursoCargoContratadoController {
         return ResponseEntity.ok(service.findAllByCurso(cursoId, anho, mes));
     }
 
+    @GetMapping("/periodo/{anho}/{mes}")
+    public ResponseEntity<List<CursoCargoContratadoEntity>> findAllByPeriodo(@PathVariable Integer anho,
+                                                                             @PathVariable Integer mes) {
+        return ResponseEntity.ok(service.findAllByPeriodo(anho, mes));
+    }
+
     @GetMapping("/{cursocargocontratadoId}")
     public ResponseEntity<CursoCargoContratadoEntity> findByCursoCargo(@PathVariable Long cursocargocontratadoId) {
         return ResponseEntity.ok(service.findByCursoCargo(cursocargocontratadoId));

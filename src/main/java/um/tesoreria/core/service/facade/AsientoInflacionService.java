@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.exception.CoeficienteInflacionException;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.entity.CuentaMovimientoEntity;
+import um.tesoreria.core.hexagonal.contable.ejercicio.domain.ports.in.UpdateEjercicioUseCase;
 import um.tesoreria.core.kotlin.model.Ejercicio;
 import um.tesoreria.core.model.CoeficienteInflacion;
 import um.tesoreria.core.model.view.CuentaMensual;
@@ -33,6 +34,7 @@ import um.tesoreria.core.util.Periodo;
 public class AsientoInflacionService {
 
 	private final EjercicioService ejercicioService;
+	private final UpdateEjercicioUseCase updateEjercicioUseCase;
 	private final CuentaMensualService cuentaMensualService;
 	private final CoeficienteInflacionService coeficienteInflacionService;
 	private final CuentaMovimientoService cuentaMovimientoService;
@@ -57,8 +59,9 @@ public class AsientoInflacionService {
 			ordenContable = 1 + cuentaMovimiento.getOrdenContable();
 		}
 
-		ejercicio.setOrdenContableResultado(ordenContable);
-		ejercicioService.update(ejercicio, ejercicioId);
+		// Solo la orden que cambia: el resto (null) conserva lo guardado, incluido bloqueado.
+		updateEjercicioUseCase.updateEjercicio(ejercicioId,
+				um.tesoreria.core.hexagonal.contable.ejercicio.domain.model.Ejercicio.builder().ordenContableResultado(ordenContable).build());
 
 		Integer item = 0;
 
@@ -179,8 +182,9 @@ public class AsientoInflacionService {
 			ordencontable = 1 + cuentaMovimiento.getOrdenContable();
 		}
 
-		ejercicio.setOrdenContableBienesUso(ordencontable);
-		ejercicioService.update(ejercicio, ejercicioId);
+		// Solo la orden que cambia: el resto (null) conserva lo guardado, incluido bloqueado.
+		updateEjercicioUseCase.updateEjercicio(ejercicioId,
+				um.tesoreria.core.hexagonal.contable.ejercicio.domain.model.Ejercicio.builder().ordenContableBienesUso(ordencontable).build());
 
 		Integer item = 0;
 

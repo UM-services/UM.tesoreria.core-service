@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.util.List;
 
-import jakarta.mail.MessagingException;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -66,8 +65,8 @@ public class ChequeraController {
                                                @PathVariable Long chequeraSerieId, @PathVariable Integer alternativaId,
                                                @PathVariable Boolean copiaInformes) {
         chequeraCuotaService.updateBarras(facultadId, tipoChequeraId, chequeraSerieId);
-        return ResponseEntity.ok(mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId,
-                alternativaId, copiaInformes, false, false));
+        return ResponseEntity.accepted().body(mailChequeraService.sendChequera(facultadId, tipoChequeraId,
+                chequeraSerieId, alternativaId, copiaInformes, false, false));
     }
 
     @GetMapping("/sendCuota/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}/{productoId}/{cuotaId}/{copiaInformes}")
@@ -76,14 +75,13 @@ public class ChequeraController {
                                             @PathVariable Integer productoId, @PathVariable Integer cuotaId,
                                             @PathVariable Boolean copiaInformes) {
         chequeraCuotaService.updateBarras(facultadId, tipoChequeraId, chequeraSerieId);
-        return ResponseEntity.ok(mailChequeraService.sendCuota(facultadId, tipoChequeraId, chequeraSerieId,
-                alternativaId, productoId, cuotaId, copiaInformes, true));
+        return ResponseEntity.accepted().body(mailChequeraService.sendCuota(facultadId, tipoChequeraId,
+                chequeraSerieId, alternativaId, productoId, cuotaId, copiaInformes, true));
     }
 
     @GetMapping("/notificaDeudor/{personaId}/{documentoId}")
-    public ResponseEntity<String> notificaDeudor(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId)
-            throws MessagingException {
-        return ResponseEntity.ok(mailChequeraService.notificaDeudor(personaId, documentoId));
+    public ResponseEntity<String> notificaDeudor(@PathVariable BigDecimal personaId, @PathVariable Integer documentoId) {
+        return ResponseEntity.accepted().body(mailChequeraService.notificaDeudor(personaId, documentoId));
     }
 
     @GetMapping("/generatePdf/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}")

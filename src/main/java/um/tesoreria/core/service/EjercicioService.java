@@ -56,23 +56,4 @@ public class EjercicioService {
 		return repository.findTopByOrderByEjercicioIdDesc().orElseThrow(() -> new EjercicioException("Last"));
 	}
 
-	public Ejercicio add(Ejercicio ejercicio) {
-		repository.save(ejercicio);
-		return ejercicio;
-	}
-
-	public Ejercicio update(Ejercicio newEjercicio, Integer ejercicioId) {
-		return repository.findByEjercicioId(ejercicioId).map(ejercicio -> {
-			ejercicio = new Ejercicio(ejercicioId, newEjercicio.getNombre(), newEjercicio.getFechaInicio(),
-					newEjercicio.getFechaFinal(), newEjercicio.getBloqueado(), newEjercicio.getOrdenContableResultado(),
-					newEjercicio.getOrdenContableBienesUso());
-			ejercicio = repository.save(ejercicio);
-			return ejercicio;
-		}).orElseThrow(() -> new EjercicioException(ejercicioId));
-	}
-
-	public void delete(Integer ejercicioId) {
-		repository.deleteById(ejercicioId);
-	}
-
 }

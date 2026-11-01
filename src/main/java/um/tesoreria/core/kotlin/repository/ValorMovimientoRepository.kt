@@ -21,10 +21,8 @@ interface ValorMovimientoRepository : JpaRepository<ValorMovimiento, Long> {
 
     fun findFirstByFechaContableAndOrdenContable(fechaContable: OffsetDateTime?, ordenContable: Int?): Optional<ValorMovimiento?>?
 
-    @Modifying
     fun deleteByValorMovimientoId(valorMovimientoId: Long?)
 
-    @Modifying
     fun deleteAllByValorMovimientoIdIn(valorMovimientoIds: List<Long>)
 
 }

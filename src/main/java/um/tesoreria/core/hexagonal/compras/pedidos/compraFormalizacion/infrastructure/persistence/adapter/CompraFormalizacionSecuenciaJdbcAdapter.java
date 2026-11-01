@@ -3,6 +3,7 @@ package um.tesoreria.core.hexagonal.compras.pedidos.compraFormalizacion.infrastr
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.audit.AuditManualChange;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraFormalizacion.domain.ports.out.CompraFormalizacionSecuenciaPort;
 
 /**
@@ -15,6 +16,7 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraFormalizacion.domain.po
 public class CompraFormalizacionSecuenciaJdbcAdapter implements CompraFormalizacionSecuenciaPort {
 
     private final JdbcTemplate jdbcTemplate;
+    private final AuditManualChange auditManual;
 
     @Override
     public int reservarNumero(Integer ejercicioId, Integer anio) {
@@ -24,6 +26,8 @@ public class CompraFormalizacionSecuenciaJdbcAdapter implements CompraFormalizac
                         + "ON DUPLICATE KEY UPDATE ultimo_numero = LAST_INSERT_ID(ultimo_numero + 1)",
                 ejercicioId, anio);
         Integer ultimo = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
-        return ultimo == null ? 0 : ultimo;
+        int reservado = ultimo == null ? 0 : ultimo;
+        auditManual.sequence("CompraFormalizacionSecuencia", "compra_formalizacion_secuencia", ejercicioId, anio, reservado);
+        return reservado;
     }
 }

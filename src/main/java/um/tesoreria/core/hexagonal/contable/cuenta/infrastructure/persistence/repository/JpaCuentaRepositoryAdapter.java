@@ -2,7 +2,12 @@ package um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.r
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+import jakarta.persistence.EntityManager;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.annotation.Transactional;
+import um.tesoreria.core.hexagonal.contable.cuenta.application.exception.CuentaConflictoException;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.CuentaJerarquia;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.CuentaSearch;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.out.CuentaRepository;
@@ -15,18 +20,76 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Component
+@Repository
 @RequiredArgsConstructor
 public class JpaCuentaRepositoryAdapter implements CuentaRepository {
 
     private final JpaCuentaRepository jpaRepository;
     private final CuentaSearchService searchService;
     private final CuentaMapper mapper;
+    private final CuentaMovimientoReferenciaRepository movimientos;
+    private final EntityManager entityManager;
 
     @Override
     public Cuenta create(Cuenta cuenta) {
         CuentaEntity entity = mapper.toEntity(cuenta);
-        return mapper.toDomain(jpaRepository.save(entity));
+        // persist obliga a INSERT: save haría merge y podría pisar una cuenta en una carrera.
+        entityManager.persist(entity);
+        entityManager.flush();
+        return mapper.toDomain(entity);
+    }
+
+    @Override
+    public Optional<Cuenta> findWithLockByNumeroCuenta(BigDecimal numeroCuenta) {
+        return jpaRepository.findWithLockByNumeroCuenta(numeroCuenta).map(mapper::toDomain);
+    }
+
+    @Override
+    public boolean existenMovimientos(BigDecimal desde, BigDecimal hasta) {
+        return movimientos.existsByNumeroCuentaBetween(desde, hasta);
+    }
+
+    @Override
+    public boolean existenHijas(BigDecimal desde, BigDecimal hasta) {
+        return jpaRepository.existsByNumeroCuentaGreaterThanAndNumeroCuentaLessThanEqual(desde, hasta);
+    }
+
+    @Override
+    public List<Cuenta> findAllByGeograficaIdAndGrado(Integer geograficaId, Integer grado) {
+        return jpaRepository.findAllByGeograficaIdAndGradoOrderByNumeroCuenta(geograficaId, grado)
+                .stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    @Transactional
+    public void recalcularGrados() {
+        for (CuentaEntity entity : jpaRepository.findAll()) {
+            final CuentaJerarquia.Grados grados;
+            try {
+                grados = CuentaJerarquia.grados(entity.getNumeroCuenta());
+            } catch (IllegalArgumentException ex) {
+                // Un número legado fuera de la estructura conserva sus grados: no debe cortar el balance.
+                continue;
+            }
+            entity.setGrado(grados.grado());
+            entity.setGrado1(grados.grado1());
+            entity.setGrado2(grados.grado2());
+            entity.setGrado3(grados.grado3());
+            entity.setGrado4(grados.grado4());
+        }
+        // Dirty checking sobre entidades gestionadas: no merge ni INSERT de filas borradas.
+        jpaRepository.flush();
+    }
+
+    @Override
+    @Transactional
+    public void limpiarNombres() {
+        // Leer el nombre vigente con bloqueo y conservarlo hasta el flush/commit.
+        // El orden numérico coincide con el de los bloqueos de alta/edición/baja.
+        for (CuentaEntity entity : jpaRepository.findAllByNombreContainingOrderByNumeroCuenta("\r\n")) {
+            entity.setNombre(entity.getNombre().replace("\r\n", ""));
+        }
+        jpaRepository.flush();
     }
 
     @Override
@@ -75,15 +138,28 @@ public class JpaCuentaRepositoryAdapter implements CuentaRepository {
     @Override
     public Optional<Cuenta> update(BigDecimal numeroCuenta, Cuenta cuenta) {
         return jpaRepository.findByNumeroCuenta(numeroCuenta).map(existing -> {
-            CuentaEntity entity = mapper.toEntity(cuenta);
-            entity.setNumeroCuenta(numeroCuenta);
-            return mapper.toDomain(jpaRepository.save(entity));
+            existing.setNombre(cuenta.getNombre());
+            existing.setIntegradora(cuenta.getIntegradora());
+            existing.setGrado(cuenta.getGrado());
+            existing.setGrado1(cuenta.getGrado1());
+            existing.setGrado2(cuenta.getGrado2());
+            existing.setGrado3(cuenta.getGrado3());
+            existing.setGrado4(cuenta.getGrado4());
+            existing.setGeograficaId(cuenta.getGeograficaId());
+            existing.setFechaBloqueo(cuenta.getFechaBloqueo());
+            existing.setVisible(cuenta.getVisible());
+            return mapper.toDomain(existing);
         });
     }
 
     @Override
     public void deleteById(BigDecimal numeroCuenta) {
-        jpaRepository.deleteByNumeroCuenta(numeroCuenta);
+        try {
+            jpaRepository.deleteByNumeroCuenta(numeroCuenta);
+            jpaRepository.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new CuentaConflictoException("La cuenta " + numeroCuenta + " tiene registros asociados");
+        }
     }
 
     @Override

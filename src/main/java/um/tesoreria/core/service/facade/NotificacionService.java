@@ -9,15 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import um.tesoreria.core.event.CorreoPayload;
+import um.tesoreria.core.event.ReferenciaNotificacion;
+import um.tesoreria.core.event.Remitente;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
 import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
 import um.tesoreria.core.hexagonal.personas.domicilio.application.exception.DomicilioException;
@@ -32,6 +29,7 @@ import um.tesoreria.core.model.PersonaSuspendido;
 import um.tesoreria.core.hexagonal.comprobante.application.service.ComprobanteService;
 import um.tesoreria.core.hexagonal.personas.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.dependencias.facultad.application.service.FacultadService;
+import um.tesoreria.core.service.CorreoEventPublisher;
 import um.tesoreria.core.service.PersonaSuspendidoService;
 import um.tesoreria.core.service.ProveedorComprobanteService;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
@@ -49,12 +47,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class NotificacionService {
 
-	@Value("${app.testing}")
-	private Boolean testing;
+	static final String MENSAJE_ENVIO = "Solicitud de envío en proceso";
+	static final String MENSAJE_SIN_CORREOS = "ERROR: Sin correos para ENVIAR";
+	private static final String REPLY_TO = "no-reply@um.edu.ar";
 
 	private final FacultadService facultadService;
 	private final DomicilioService domicilioService;
-	private final JavaMailSender sender;
 	private final PersonaSuspendidoService personaSuspendidoService;
 	private final ProveedorMovimientoService proveedorMovimientoService;
 	private final ProveedorService proveedorService;
@@ -63,8 +61,9 @@ public class NotificacionService {
 	private final ProveedorValorService proveedorValorService;
 	private final ValorMovimientoService valorMovimientoService;
 	private final ValorService valorService;
+	private final CorreoEventPublisher correoEventPublisher;
 
-	public String notifyDeudorSuspendido(PersonaSuspendido personaSuspendido) throws MessagingException {
+	public String notifyDeudorSuspendido(PersonaSuspendido personaSuspendido) {
 		String data = "";
 
 		Domicilio domicilio;
@@ -72,7 +71,7 @@ public class NotificacionService {
 			domicilio = domicilioService.findByUnique(personaSuspendido.getPersonaId(),
 					personaSuspendido.getDocumentoId());
 		} catch (DomicilioException e) {
-			return "ERROR: Sin correos para ENVIAR";
+			return MENSAJE_SIN_CORREOS;
 		}
 
 		Facultad facultad = facultadService.findByFacultadId(personaSuspendido.getFacultadId());
@@ -98,40 +97,24 @@ public class NotificacionService {
 				+ "Por favor no responda este mail, fue generado automáticamente. Su respuesta no será leída."
 				+ (char) 10;
 
-		// Envia correo
-		MimeMessage message = sender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message, true);
-		List<String> addresses = new ArrayList<String>();
-
-		if (!testing) {
-			if (!domicilio.getEmailPersonal().isEmpty())
-				addresses.add(domicilio.getEmailPersonal());
-			if (!domicilio.getEmailInstitucional().isEmpty())
-				addresses.add(domicilio.getEmailInstitucional());
-		} else {
-			log.debug("Testing -> daniel.quinterospinto@gmail.com");
-			addresses.add("daniel.quinterospinto@gmail.com");
+		List<String> addresses = destinatarios(domicilio);
+		if (addresses.isEmpty()) {
+			return MENSAJE_SIN_CORREOS;
 		}
 
-		try {
-			helper.setTo(addresses.toArray(new String[0]));
-			helper.setText(data);
-			helper.setReplyTo("no-reply@um.edu.ar");
-			helper.setSubject("Notificación Deuda");
-			log.debug("Mensaje -> {}", data);
-		} catch (MessagingException e) {
-			log.debug("ERROR: No pudo ENVIARSE -> {}", e.getMessage());
-			return "ERROR: No pudo ENVIARSE";
-		}
-		personaSuspendido.setNotificado((byte) 1);
-		personaSuspendido = personaSuspendidoService.update(personaSuspendido,
-				personaSuspendido.getPersonaSuspendidoId());
-		sender.send(message);
+		correoEventPublisher.publicar(CorreoPayload.builder()
+				.remitente(Remitente.NOTIFICACION)
+				.para(addresses)
+				.replyTo(REPLY_TO)
+				.asunto("Notificación Deuda")
+				.cuerpo(data)
+				.referencia(referenciaPersonaSuspendido(personaSuspendido))
+				.build());
 
-		return "Envío de Correo Ok!!";
+		return MENSAJE_ENVIO;
 	}
 
-	public String notifyPagoProveedor(Long proveedorMovimientoId) throws MessagingException {
+	public String notifyPagoProveedor(Long proveedorMovimientoId) {
 		String data = "";
 
 		ProveedorMovimiento proveedorMovimiento;
@@ -207,34 +190,57 @@ public class NotificacionService {
 				+ "Por favor no responda este mail, fue generado automáticamente. Su respuesta no será leída."
 				+ (char) 10;
 
-		// Envia correo
-		MimeMessage message = sender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message, true);
-		List<String> addresses = new ArrayList<String>();
+		List<String> addresses = new ArrayList<>();
+		if (!proveedor.getEmail().isEmpty())
+			addresses.add(proveedor.getEmail());
+		if (proveedor.getEmailInterno() != null && !proveedor.getEmailInterno().isEmpty())
+			addresses.add(proveedor.getEmailInterno());
 
-		if (!testing) {
-			if (!proveedor.getEmail().isEmpty())
-				addresses.add(proveedor.getEmail());
-			if (!proveedor.getEmailInterno().isEmpty())
-				addresses.add(proveedor.getEmailInterno());
-		} else {
-			log.debug("Testing -> daniel.quinterospinto@gmail.com");
-			addresses.add("daniel.quinterospinto@gmail.com");
+		if (addresses.isEmpty()) {
+			return MENSAJE_SIN_CORREOS;
 		}
 
-		try {
-			helper.setTo(addresses.toArray(new String[0]));
-			helper.setText(data);
-			helper.setReplyTo("no-reply@um.edu.ar");
-			helper.setSubject("Notificación Orden Pago");
-			log.debug("Mensaje -> {}", data);
-		} catch (MessagingException e) {
-			log.debug("ERROR: No pudo ENVIARSE -> {}", e.getMessage());
-			return "ERROR: No pudo ENVIARSE";
-		}
-		sender.send(message);
+		correoEventPublisher.publicar(CorreoPayload.builder()
+				.remitente(Remitente.NOTIFICACION)
+				.para(addresses)
+				.replyTo(REPLY_TO)
+				.asunto("Notificación Orden Pago")
+				.cuerpo(data)
+				.referencia(ReferenciaNotificacion.builder()
+						.tipo("PROVEEDOR_MOVIMIENTO")
+						.id(proveedorMovimientoId == null ? null : proveedorMovimientoId.toString())
+						.build())
+				.build());
 
-		return "Envío de Correo Ok!!";
+		return MENSAJE_ENVIO;
+	}
+
+	private ReferenciaNotificacion referenciaPersonaSuspendido(PersonaSuspendido personaSuspendido) {
+		Long personaSuspendidoId = personaSuspendido.getPersonaSuspendidoId();
+		if (personaSuspendidoId == null) {
+			try {
+				personaSuspendidoId = personaSuspendidoService
+						.findByUnique(personaSuspendido.getPersonaId(), personaSuspendido.getDocumentoId())
+						.getPersonaSuspendidoId();
+			} catch (RuntimeException e) {
+				log.warn("No se pudo resolver personaSuspendidoId para la referencia: {}", e.getMessage());
+			}
+		}
+		return ReferenciaNotificacion.builder()
+				.tipo("PERSONA_SUSPENDIDO")
+				.id(personaSuspendidoId == null ? null : personaSuspendidoId.toString())
+				.build();
+	}
+
+	private List<String> destinatarios(Domicilio domicilio) {
+		List<String> direcciones = new ArrayList<>();
+		if (domicilio.getEmailPersonal() != null && !domicilio.getEmailPersonal().isEmpty()) {
+			direcciones.add(domicilio.getEmailPersonal());
+		}
+		if (domicilio.getEmailInstitucional() != null && !domicilio.getEmailInstitucional().isEmpty()) {
+			direcciones.add(domicilio.getEmailInstitucional());
+		}
+		return direcciones;
 	}
 
 }

@@ -15,7 +15,6 @@ public class GetFacturasPendientesUseCaseImpl implements GetFacturasPendientesUs
 
     @Override
     public List<FacturaPendiente> getFacturasPendientes(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta) {
-        repository.updateFechaPagoInProveedorPago();
         return repository.findFacturasPendientes(fechaDesde, fechaHasta);
     }
 }

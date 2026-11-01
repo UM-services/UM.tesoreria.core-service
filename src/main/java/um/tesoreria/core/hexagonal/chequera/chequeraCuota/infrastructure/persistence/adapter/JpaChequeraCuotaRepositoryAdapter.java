@@ -4,6 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import um.tesoreria.core.audit.AuditBulkScope;
+import um.tesoreria.core.audit.AuditBulkService;
+import um.tesoreria.core.audit.AuditProperties;
+import um.tesoreria.core.audit.BulkContext;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.DeudaData;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.out.ChequeraCuotaRepository;
@@ -34,6 +39,8 @@ public class JpaChequeraCuotaRepositoryAdapter implements ChequeraCuotaRepositor
     private final ChequeraCuotaMapper mapper;
     private final ChequeraCuotaDeudaRepository chequeraCuotaDeudaRepository;
     private final ChequeraPagoMapper chequeraPagoMapper;
+    private final AuditBulkService auditBulkService;
+    private final AuditProperties auditProperties;
 
     @Override
     public DeudaData findDeudaData(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
@@ -160,7 +167,16 @@ public class JpaChequeraCuotaRepositoryAdapter implements ChequeraCuotaRepositor
 
     @Override
     public List<ChequeraCuota> saveAll(List<ChequeraCuota> chequeraCuotas) {
-        return chequeraCuotas.stream().map(this::save).toList();
+        // Una generación masiva se audita como SUMMARY/BULK (conteos por entidad) para no
+        // llenar el outbox con miles de filas; por debajo del umbral se audita fila por fila.
+        if (chequeraCuotas.size() < auditProperties.getBulkMinRows()
+                || !TransactionSynchronizationManager.isSynchronizationActive()) {
+            return chequeraCuotas.stream().map(this::save).toList();
+        }
+        try (AuditBulkScope ignored = auditBulkService.begin(
+                BulkContext.of("alta-cuotas", null, null, null))) {
+            return chequeraCuotas.stream().map(this::save).toList();
+        }
     }
 
     @Override

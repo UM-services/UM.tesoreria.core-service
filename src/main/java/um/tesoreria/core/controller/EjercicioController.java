@@ -21,6 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.exception.EjercicioException;
+import um.tesoreria.core.hexagonal.contable.ejercicio.domain.ports.in.CreateEjercicioUseCase;
+import um.tesoreria.core.hexagonal.contable.ejercicio.domain.ports.in.DeleteEjercicioUseCase;
+import um.tesoreria.core.hexagonal.contable.ejercicio.domain.ports.in.UpdateEjercicioUseCase;
+import um.tesoreria.core.hexagonal.contable.ejercicio.infrastructure.web.dto.EjercicioRequest;
+import um.tesoreria.core.hexagonal.contable.ejercicio.infrastructure.web.dto.EjercicioResponse;
+import um.tesoreria.core.hexagonal.contable.ejercicio.infrastructure.web.mapper.EjercicioDtoMapper;
 import um.tesoreria.core.kotlin.model.Ejercicio;
 import um.tesoreria.core.service.EjercicioService;
 
@@ -34,6 +40,10 @@ import um.tesoreria.core.service.EjercicioService;
 public class EjercicioController {
 	
 	private final EjercicioService service;
+	private final CreateEjercicioUseCase createUseCase;
+	private final UpdateEjercicioUseCase updateUseCase;
+	private final DeleteEjercicioUseCase deleteUseCase;
+	private final EjercicioDtoMapper dtoMapper;
 
 	@GetMapping("/")
 	public ResponseEntity<List<Ejercicio>> findAll() {
@@ -63,19 +73,21 @@ public class EjercicioController {
 		}
 	}
 	
+	// Escrituras: fachada del slice contable/ejercicio; sus errores los responde EjercicioExceptionAdvice.
 	@PostMapping("/")
-	public ResponseEntity<Ejercicio> add(@RequestBody Ejercicio ejercicio) {
-		return ResponseEntity.ok(service.add(ejercicio));
+	public ResponseEntity<EjercicioResponse> add(@RequestBody EjercicioRequest request) {
+		return ResponseEntity.ok(dtoMapper.toResponse(createUseCase.createEjercicio(dtoMapper.toDomain(request))));
 	}
 	
 	@PutMapping("/{ejercicioId}")
-	public ResponseEntity<Ejercicio> update(@RequestBody Ejercicio ejercicio, @PathVariable Integer ejercicioId) {
-		return ResponseEntity.ok(service.update(ejercicio, ejercicioId));
+	public ResponseEntity<EjercicioResponse> update(@RequestBody EjercicioRequest request, @PathVariable Integer ejercicioId) {
+		return ResponseEntity.ok(dtoMapper.toResponse(
+				updateUseCase.updateEjercicio(ejercicioId, dtoMapper.toDomain(request))));
 	}
 	
 	@DeleteMapping("/{ejercicioId}")
 	public ResponseEntity<Void> delete(@PathVariable Integer ejercicioId) {
-		service.delete(ejercicioId);
+		deleteUseCase.deleteEjercicio(ejercicioId);
 		return ResponseEntity.noContent().build();
 	}
 

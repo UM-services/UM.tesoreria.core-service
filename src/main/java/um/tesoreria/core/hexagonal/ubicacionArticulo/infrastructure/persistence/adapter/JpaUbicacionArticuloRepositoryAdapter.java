@@ -128,7 +128,7 @@ public class JpaUbicacionArticuloRepositoryAdapter implements UbicacionArticuloR
                             .build())
                     .toList();
             if (!borrados.isEmpty()) {
-                jpaUbicacionArticuloRepository.deleteAllByIdInBatch(borrados.stream().map(UbicacionArticulo::getUbicacionArticuloId).toList());
+                jpaUbicacionArticuloRepository.deleteAllById(borrados.stream().map(UbicacionArticulo::getUbicacionArticuloId).toList());
             }
             return borrados;
         } catch (RuntimeException ex) {

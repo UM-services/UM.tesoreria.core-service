@@ -3,6 +3,7 @@ package um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoSecuencia.infras
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.audit.AuditManualChange;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoSecuencia.domain.ports.out.CompraPedidoSecuenciaRepository;
 
 /**
@@ -24,12 +25,15 @@ public class CompraPedidoSecuenciaRepositoryAdapter implements CompraPedidoSecue
             """;
 
     private final JdbcTemplate jdbcTemplate;
+    private final AuditManualChange auditManual;
 
     @Override
     public int reservarSiguienteNumero(Integer ejercicioId, Integer anio) {
         jdbcTemplate.update(RESERVAR_SQL, ejercicioId, anio);
         Integer numero = jdbcTemplate.queryForObject("SELECT LAST_INSERT_ID()", Integer.class);
-        return numero == null ? 0 : numero;
+        int reservado = numero == null ? 0 : numero;
+        auditManual.sequence("CompraPedidoSecuencia", "compra_pedido_secuencia", ejercicioId, anio, reservado);
+        return reservado;
     }
 
 }

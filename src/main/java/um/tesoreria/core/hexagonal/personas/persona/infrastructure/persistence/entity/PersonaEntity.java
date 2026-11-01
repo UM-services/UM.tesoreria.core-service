@@ -52,12 +52,15 @@ public class PersonaEntity extends Auditable implements Jsonifyable {
     private String sexo;
 
     @Column(name = "per_primero")
+    @Builder.Default
     private Byte primero = 0;
 
     @Column(name = "per_cuit")
+    @Builder.Default
     private String cuit = "";
 
     @Column(name = "per_cbu")
+    @Builder.Default
     private String cbu = "";
 
     @Column(name = "per_contrasenha")

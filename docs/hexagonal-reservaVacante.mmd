@@ -1,9 +1,14 @@
 ---
-title: Arquitectura Hexagonal - Módulo ReservaVacante (v3.32.0)
+title: Arquitectura Hexagonal - Módulo ReservaVacante (v10.0.0)
 ---
 
 classDiagram
     direction TB
+
+    %% v10.0.0: claim de la notificación de pago. umhub-service no tiene base de datos, así que la
+    %% marca "ya notificado" vive acá (reserva_vacante.notificacion_pago, V416) y se reclama con un
+    %% SELECT ... FOR UPDATE dentro de una transacción. updateNotificacionPago persiste solo el flag
+    %% para no pisar estado/importe/vencimiento.
 
     namespace domain {
         class ReservaVacante {
@@ -13,6 +18,7 @@ classDiagram
             +String estado
             +BigDecimal importe
             +OffsetDateTime vencimiento
+            +Boolean notificacionPago
             +Campanha campanha
             +Persona persona
             +Domicilio domicilio
@@ -25,7 +31,9 @@ classDiagram
             << interface >>
             +create(ReservaVacante) ReservaVacante
             +findByReservaVacanteId(UUID) Optional~ReservaVacante~
+            +findWithLockByReservaVacanteId(UUID) Optional~ReservaVacante~
             +update(ReservaVacante, UUID) ReservaVacante
+            +updateNotificacionPago(ReservaVacante, UUID) ReservaVacante
         }
     }
 
@@ -33,13 +41,17 @@ classDiagram
         class ReservaVacanteService {
             -CreateReservaVacanteUseCase createReservaVacanteUseCase
             -FindReservaVacanteUseCase findReservaVacanteUseCase
+            -ReclamarNotificacionPagoUseCase reclamarNotificacionPagoUseCase
             -UpdateReservaVacanteUseCase updateReservaVacanteUseCase
             +createReservaVacante(ReservaVacanteRequest) ReservaVacante
             +findReservaVacante(UUID) ReservaVacante
             +updateReservaVacante(ReservaVacante, UUID) ReservaVacante
+            +reclamarNotificacionPago(UUID) boolean
+            +liberarNotificacionPago(UUID) void
         }
 
     }
+
     namespace application_usecases {
             class CreateReservaVacanteUseCaseImpl {
                 -ReservaVacanteRepository repository
@@ -57,13 +69,18 @@ classDiagram
                 -DomicilioService domicilioService
                 +findByReservaVacanteId(UUID) ReservaVacante
             }
+            class ReclamarNotificacionPagoUseCaseImpl {
+                -ReservaVacanteRepository reservaVacanteRepository
+                +reclamar(UUID) boolean
+                +liberar(UUID) void
+            }
             class UpdateReservaVacanteUseCaseImpl {
                 -ReservaVacanteRepository repository
                 +update(ReservaVacante, UUID) ReservaVacante
             }
     }
-    namespace application {
 
+    namespace application_ports {
         class CreateReservaVacanteUseCase {
             << interface >>
             +createReservaVacante(ReservaVacanteRequest) ReservaVacante
@@ -71,6 +88,11 @@ classDiagram
         class FindReservaVacanteUseCase {
             << interface >>
             +findByReservaVacanteId(UUID) ReservaVacante
+        }
+        class ReclamarNotificacionPagoUseCase {
+            << interface >>
+            +reclamar(UUID) boolean
+            +liberar(UUID) void
         }
         class UpdateReservaVacanteUseCase {
             << interface >>
@@ -86,6 +108,7 @@ classDiagram
                 +String estado
                 +BigDecimal importe
                 +OffsetDateTime vencimiento
+                +Boolean notificacionPago
                 +LocalDateTime created
                 +LocalDateTime updated
             }
@@ -93,6 +116,7 @@ classDiagram
             class JpaReservaVacanteRepository {
                 << JpaRepository >>
                 +findByReservaVacanteId(UUID) Optional~ReservaVacanteEntity~
+                +findWithLockByReservaVacanteId(UUID) Optional~ReservaVacanteEntity~
             }
 
             class JpaReservaVacanteRepositoryAdapter {
@@ -100,7 +124,9 @@ classDiagram
                 -ReservaVacanteMapper mapper
                 +create(ReservaVacante) ReservaVacante
                 +findByReservaVacanteId(UUID) Optional~ReservaVacante~
+                +findWithLockByReservaVacanteId(UUID) Optional~ReservaVacante~
                 +update(ReservaVacante, UUID) ReservaVacante
+                +updateNotificacionPago(ReservaVacante, UUID) ReservaVacante
             }
 
             class ReservaVacanteMapper {
@@ -108,12 +134,15 @@ classDiagram
                 +toDomainModel(ReservaVacanteEntity) ReservaVacante
             }
     }
+
     namespace infrastructure_web {
             class ReservaVacanteController {
                 -ReservaVacanteService reservaVacanteService
                 -ReservaVacanteDtoMapper reservaVacanteDtoMapper
                 +add(ReservaVacanteRequest) ResponseEntity~ReservaVacanteResponse~
                 +get(UUID) ResponseEntity~ReservaVacanteResponse~
+                +claimNotificacionPago(UUID) ResponseEntity~Boolean~
+                +releaseNotificacionPago(UUID) ResponseEntity~Void~
             }
 
             class ReservaVacanteRequest {
@@ -151,14 +180,17 @@ classDiagram
 
     ReservaVacanteService --> CreateReservaVacanteUseCase : uses
     ReservaVacanteService --> FindReservaVacanteUseCase : uses
+    ReservaVacanteService --> ReclamarNotificacionPagoUseCase : uses
     ReservaVacanteService --> UpdateReservaVacanteUseCase : uses
 
     CreateReservaVacanteUseCaseImpl ..|> CreateReservaVacanteUseCase : implements
     FindReservaVacanteUseCaseImpl ..|> FindReservaVacanteUseCase : implements
+    ReclamarNotificacionPagoUseCaseImpl ..|> ReclamarNotificacionPagoUseCase : implements
     UpdateReservaVacanteUseCaseImpl ..|> UpdateReservaVacanteUseCase : implements
 
     CreateReservaVacanteUseCaseImpl --> ReservaVacanteRepository : uses
     FindReservaVacanteUseCaseImpl --> ReservaVacanteRepository : uses
+    ReclamarNotificacionPagoUseCaseImpl --> ReservaVacanteRepository : uses
     UpdateReservaVacanteUseCaseImpl --> ReservaVacanteRepository : uses
 
     JpaReservaVacanteRepositoryAdapter ..|> ReservaVacanteRepository : implements
@@ -174,3 +206,10 @@ classDiagram
     ReservaVacanteDtoMapper --> ReservaVacante : maps
     ReservaVacanteDtoMapper --> ReservaVacanteRequest : maps
     ReservaVacanteDtoMapper --> ReservaVacanteResponse : maps
+
+    ReservaVacanteDtoMapper --> MercadoPagoContextService : uses
+
+    class MercadoPagoContextService {
+        << external >>
+        +findActiveByReservaVacanteId(UUID) MercadoPagoContext
+    }

@@ -13,9 +13,9 @@ Distributed context — who it talks to:
 | Faculty services (multi-tenant) | REST via `*FacultadConsumer` (`core/extern/consumer/`, 13 classes + variants under `view/`) | Dynamic base URL per `facultad.apiserver`+`facultad.apiport` (default 80) using `extern/resolver/FacultadUrlResolver` |
 | `tesoreria-mercadopago-service` | Feign (`core/client/tesoreria/mercadopago/`) | `PreferenceClient`/`PreferenceVacanteClient` create payment preferences |
 | Mercado Pago → core | Kafka | Consumes topic `payment-processed` (group `tesoreria-core-group`) → `PaymentEventListener` → `MercadoPagoContextService.processPaymentEvent`. Type mapping: `um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent` → `um.tesoreria.core.event.PaymentProcessedEvent` |
-| Core → chequera sending | Kafka | Produces topic `send-chequera` (`service/facade/MailChequeraService`) |
+| Core → correo | Kafka | `CorreoEventPublisher` (`service/CorreoEventPublisher`) is the only publisher: `send-correo` (envelope `CorreoEvent` + `CorreoPayload`), `send-chequera` (`SendChequeraEvent`, JSON without `__TypeId__`) and `send-cuota` (`SendCuotaEvent` with only `chequeraCuotaId`). The legacy `MailChequeraService`/`NotificacionService` answer `202 Accepted` and do not open SMTP |
 | `haberes-core-service` | Feign (`core/client/haberes/`) | `CargoTipoClient`, `CursoClient` |
-| `tesoreria-sender-service` | Feign (`core/client/tesoreria/sender/ChequeraClient`) | chequera notification |
+| `tesoreria-sender-service` | Kafka | core publishes `send-correo`/`send-chequera`/`send-cuota`; the sender publishes `notificacion-resultado`, which is what marks `persona_suspendido.notificado = 1`. No Feign client any more (11.0.0 removed `ChequeraClient`) |
 | `report-service` | HTTP (consumer) | Served the JSON of the `chequera/estadoChequera` slice (field by field: the contract names are NOT changed without breaking the reader) |
 
 - **No Spring Security** (not in `pom.xml`): authentication lives in the `auth` slice + legacy LDAP (`core/service/UsuarioLdapService`). The service trusts the network/gateway; do not add security on your own. See §11 (permissions: catalog, assignment and gating).
@@ -24,12 +24,12 @@ Distributed context — who it talks to:
 
 ## 2. Stack (verified in `pom.xml`, the source of truth)
 
-- Java **25**, Spring Boot **4.1.1**, Spring Cloud **2025.1.3** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.10** (legacy only, §4)
-- Artifact version = service version: **7.0.0** (SemVer; bumped on release, §7)
+- Java **25**, Spring Boot **4.1.2**, Spring Cloud **2025.1.4** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.21** (legacy only, §4)
+- Artifact version = service version: **11.6.1** (SemVer; bumped on release, §7)
 - Data: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
-- Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.0** (Swagger UI)
+- Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.1** (Swagger UI)
 - Docs/exports: Apache POI + `openpdf` (reports), `modelmapper` (legacy only), Guava, Caffeine (`starter-cache`)
-- `spring-kafka`, `starter-mail`, `starter-actuator` + `micrometer-registry-prometheus`, `json-path`, `jackson-datatype-jsr310`
+- `spring-boot-starter-kafka`, `jakarta.mail-api`, `starter-actuator` + `micrometer-registry-prometheus`, `json-path`, `jackson-datatype-jsr310`
 - Quality: JaCoCo (report at `target/site/jacoco/jacoco.xml`) → **SonarCloud** (org `um-services`, projectKey `UM-services_UM.tesoreria.core-service`)
 - The README §"Versiones de Dependencias" may be outdated vs `pom.xml` (e.g. connector/springdoc): when in doubt, `pom.xml`.
 
@@ -63,8 +63,8 @@ repository/       85 legacy repos · model/ 74 legacy JPA entities (base Auditab
 exception/        64 legacy exceptions — there is NO global @ControllerAdvice: each controller
                   handles errors inline (try/catch → ResponseStatusException 404/400)
 extern/           REST consumers to faculty services + FacultadUrlResolver
-client/           Feign: haberes/core, tesoreria/mercadopago, tesoreria/sender
-listener/ event/  PaymentEventListener + PaymentProcessedEvent (consume) · SendChequeraEvent (produce)
+client/           Feign: haberes/core, tesoreria/mercadopago
+listener/ event/  PaymentEventListener + PaymentProcessedEvent and NotificacionResultadoListener (consume) · CorreoEvent/SendChequeraEvent/SendCuotaEvent (produce)
 configuration/    KafkaConsumerConfig, KafkaProducerConfig, RestClientConfig, TesoreriaConfiguration
 kotlin/           60 legacy .kt files (model + repository) being migrated to slices
                   (e.g. arancelTipo/arancelPorcentaje/asiento migrated, docs/README.md)
@@ -158,10 +158,10 @@ The ~67 legacy controllers still serve areas without an equivalent slice: `chequ
 
 ## 8. Runtime and config (`src/main/resources/bootstrap.yml`)
 
-- Port `${APP_PORT:8092}`; app `tesoreria-core-service` registered in Consul `consul-service:8500` (tags `tesoreria,core`).
+- Port `${APP_PORT:8092}`; app `tesoreria-core-service` registered in Consul `consul-service:8500` (tags `tesoreria,core`) con `spring.cloud.consul.discovery.query-passing: true` (Feign/LoadBalancer sólo ven instancias con los checks en `passing`; 11.2.1).
 - Datasource: `jdbc:mysql://${app.server}/${app.database}` — hardcoded development defaults (`10.147.20.20:3306`, `tesium`, `root/root`): override with `APP_SERVER`, `APP_DATABASE`, `APP_USER`, `APP_PASSWORD`. Hikari: pool 100, leak-detection 60s.
-- JPA: `ddl-auto: none`, `open-in-view: false`, MySQLDialect. Kafka: `kafka:9092` (overrides with `SPRING_KAFKA_*`), trusted packages `*`. Mail: SMTP Gmail via `app.mail.username/password` (placeholder defaults `uid`/`pwd` in `bootstrap.yml`; the test yml ships `chequeras@um.edu.ar`). Logging: level `${app.logging}` (debug by default → in prod it is set via env).
-- Unit tests (`src/test/resources/application.yml`): in-memory H2 `tesium_test` + `ddl-auto: create-drop` + `allow-circular-references: true` (there are legacy cycles: **do not** add more), Kafka listener `auto-startup: false`. `it` profile: `application-it.yml` with `IT_DB_*`.
+- JPA: `ddl-auto: none`, `open-in-view: false`, MySQLDialect. Kafka: `${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}`; `KafkaTopicsConfiguration` declara `send-chequera`/`send-cuota`/`send-correo` y los dos DLT (`payment-processed.DLT`, `notificacion-resultado.DLT`, retención 14 días) y los crea el `KafkaAdmin` auto-configurado de `spring-boot-starter-kafka`, con `spring.kafka.admin.fail-fast: true` y `modify-topic-configs: true` (sin broker o sin permisos de topics el servicio no arranca; 11.6.1). Both consumers (`payment-processed` and `notificacion-resultado`) build their own `ConsumerFactory` in `KafkaConsumerConfig` — that factory also carries `auto.offset.reset` from `spring.kafka.consumer.auto-offset-reset`, because the yml value does not reach a hand-built factory by itself — and deserialize to the target type with `useHeadersIfPresent = false` (they ignore `__TypeId__`, so the producer's Java class name is irrelevant); the generic `spring.kafka.consumer.value-deserializer`/`spring.json.*` keys no longer exist in `bootstrap.yml` (11.0.0) and `key-deserializer` was removed in 11.6.1 (the factories pass the `StringDeserializer` instance). Mail: the core does **not** open SMTP any more (11.0.0): it publishes `send-correo`/`send-chequera`/`send-cuota` through `CorreoEventPublisher`, `spring.mail`/`app.mail` were removed and `jakarta.mail-api` is only there for `ToolService.mailValidate`; the old `app.testing` redirect has no readers. Logging: level `${app.logging}` (debug by default → in prod it is set via env).
+- Unit tests (`src/test/resources/application.yml`): in-memory H2 `tesium_test` + `ddl-auto: create-drop` + `allow-circular-references: true` (there are legacy cycles: **do not** add more), Kafka listener `auto-startup: false` and `KafkaAutoConfiguration` excluded (no broker → no topic creation nor admin timeout). `it` profile: `application-it.yml` with `IT_DB_*` and the same exclusion.
 - **`MERCADO_PAGO_ACCESS_TOKEN` (mentioned by the README §Variables de Entorno) is not read in this code.** The Mercado Pago token lives in `tesoreria-mercadopago-service`; core integrates with it only via Feign (create preferences) + Kafka events. In legacy, Mercado Pago is `tipoPagoId = 18` (`TIPO_PAGO_MERCADO_PAGO` in `PagoService`/`TipoPagoFechaService`).
 
 ## 9. Sources of truth (order)

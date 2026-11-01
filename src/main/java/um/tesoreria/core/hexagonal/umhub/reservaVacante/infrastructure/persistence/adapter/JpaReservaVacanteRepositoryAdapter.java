@@ -35,6 +35,12 @@ public class JpaReservaVacanteRepositoryAdapter implements ReservaVacanteReposit
     }
 
     @Override
+    public Optional<ReservaVacante> findWithLockByReservaVacanteId(UUID reservaVacanteId) {
+        return jpaReservaVacanteRepository.findWithLockByReservaVacanteId(reservaVacanteId)
+                .map(reservaVacanteMapper::toDomainModel);
+    }
+
+    @Override
     public ReservaVacante update(ReservaVacante reservaVacante, UUID reservaVacanteId) {
         log.debug("Updating ReservaVacante -> {} with ID {}", reservaVacante.jsonify(), reservaVacanteId);
         ReservaVacanteEntity entity = jpaReservaVacanteRepository.findByReservaVacanteId(reservaVacanteId)
@@ -44,6 +50,17 @@ public class JpaReservaVacanteRepositoryAdapter implements ReservaVacanteReposit
         entity.setImporte(reservaVacante.getImporte());
         entity.setVencimiento(reservaVacante.getVencimiento());
         
+        ReservaVacanteEntity saved = jpaReservaVacanteRepository.save(entity);
+        return reservaVacanteMapper.toDomainModel(saved);
+    }
+
+    @Override
+    public ReservaVacante updateNotificacionPago(ReservaVacante reservaVacante, UUID reservaVacanteId) {
+        ReservaVacanteEntity entity = jpaReservaVacanteRepository.findByReservaVacanteId(reservaVacanteId)
+                .orElseThrow(() -> new RuntimeException("ReservaVacante not found for id: " + reservaVacanteId));
+
+        entity.setNotificacionPago(reservaVacante.getNotificacionPago());
+
         ReservaVacanteEntity saved = jpaReservaVacanteRepository.save(entity);
         return reservaVacanteMapper.toDomainModel(saved);
     }

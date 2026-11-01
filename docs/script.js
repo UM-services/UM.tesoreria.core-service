@@ -160,6 +160,7 @@ const diagrams = [
   { id: 'sequence-diagrams', file: 'sequence-liquidacion-sueldos.mmd', title: 'Liquidacion de Sueldos' },
   { id: 'sequence-diagrams', file: 'sequence-mercadopago-to-change.mmd', title: 'MercadoPago to Change' },
   { id: 'sequence-diagrams', file: 'sequence-movimientos-cuenta.mmd', title: 'Movimientos de Cuenta' },
+  { id: 'sequence-diagrams', file: 'sequence-notificacion-correo.mmd', title: 'Notificación de Correo (core → sender)' },
   { id: 'sequence-diagrams', file: 'sequence-pago-chequera.mmd', title: 'Pago de Chequera' },
   { id: 'sequence-diagrams', file: 'sequence-reemplazo-chequera.mmd', title: 'Reemplazo de Chequera' }
 ];

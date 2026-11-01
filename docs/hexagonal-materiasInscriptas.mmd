@@ -1,0 +1,117 @@
+---
+title: Arquitectura Hexagonal - Módulo MateriasInscriptas bajo chequera/ (v11.6.0)
+---
+
+classDiagram
+    direction TB
+
+    %% GET /api/tesoreria/core/materiasInscriptas/{facultadId}/{tipoChequeraId}/{chequeraSerieId}
+    %% Endpoint aparte del estado de chequera: el estado no llama a la facultad.
+    %% Chequera inexistente: HTTP 400. Chequera que no es de grado: 200 con lista vacía, sin llamar a la facultad.
+    %% Falla de la facultad (llamada, conversión o agrupado): 200 con SIUM/NO_DISPONIBLE y un warn
+    %% (facultad, chequera, clase de la excepción y status HTTP).
+
+    namespace domain {
+        class MateriasEstado {
+            +FuenteMaterias fuente
+            +EstadoMaterias estado
+            +Integer cursoInscripcion
+            +String plan
+            +String carrera
+            +String observaciones
+            +List~CursoMaterias~ cursos
+        }
+
+        class CursoMaterias {
+            +Integer curso
+            +List~PeriodoMaterias~ periodos
+        }
+
+        class PeriodoMaterias {
+            +PeriodoCursada periodo
+            +List~MateriaInscripta~ materias
+        }
+
+        class MateriaInscripta {
+            +String materiaId
+            +String nombre
+        }
+
+        class MateriaAgrupable {
+            +Integer facultadId
+            +Integer planId
+            +String materiaId
+            +String nombre
+            +Integer curso
+            +PeriodoCursada periodo
+        }
+
+        class PeriodoCursada {
+            <<enumeration>>
+            ANUAL
+            PRIMER_SEMESTRE
+            SEGUNDO_SEMESTRE
+            SIN_PERIODO
+            +desde(Integer codigo) PeriodoCursada
+        }
+
+        class EstadoMaterias {
+            <<enumeration>>
+            OK
+            SIN_INSCRIPCION
+            NO_DISPONIBLE
+        }
+
+        class FuenteMaterias {
+            <<enumeration>>
+            SIUM
+            GUARANI
+        }
+
+        class AgrupadorMaterias {
+            +agrupar(List~MateriaAgrupable~) List~CursoMaterias~
+        }
+
+        class GetMateriasInscriptasUseCase {
+            <<interface>>
+            +getMateriasInscriptas(facultadId, tipoChequeraId, chequeraSerieId) List~MateriasEstado~
+        }
+    }
+
+    namespace application {
+        class GetMateriasInscriptasUseCaseImpl
+        class MateriasInscriptasService
+    }
+
+    namespace infrastructure {
+        class MateriasInscriptasController {
+            +GET materiasInscriptas/facultadId/tipoChequeraId/chequeraSerieId
+            +400 si la chequera no existe
+        }
+        class MateriasInscriptasDtoMapper
+        class MateriasEstadoResponse
+    }
+
+    namespace otros_slices {
+        class ChequeraSerieService
+        class TipoChequeraService
+        class PendienteInfoFacultadService
+    }
+
+    MateriasEstado o-- CursoMaterias
+    CursoMaterias o-- PeriodoMaterias
+    PeriodoMaterias o-- MateriaInscripta
+    MateriasEstado --> FuenteMaterias
+    MateriasEstado --> EstadoMaterias
+    AgrupadorMaterias --> MateriaAgrupable
+    AgrupadorMaterias --> CursoMaterias
+    MateriaAgrupable --> PeriodoCursada
+    GetMateriasInscriptasUseCaseImpl ..|> GetMateriasInscriptasUseCase
+    GetMateriasInscriptasUseCaseImpl --> AgrupadorMaterias
+    GetMateriasInscriptasUseCaseImpl --> ChequeraSerieService
+    GetMateriasInscriptasUseCaseImpl --> TipoChequeraService
+    GetMateriasInscriptasUseCaseImpl --> PendienteInfoFacultadService
+    MateriasInscriptasService --> GetMateriasInscriptasUseCase
+    MateriasInscriptasController --> MateriasInscriptasService
+    MateriasInscriptasController --> MateriasInscriptasDtoMapper
+    MateriasInscriptasDtoMapper --> MateriasEstadoResponse

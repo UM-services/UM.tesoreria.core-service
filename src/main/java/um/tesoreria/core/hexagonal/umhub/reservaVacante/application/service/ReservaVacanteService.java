@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.CreateReservaVacanteUseCase;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.FindReservaVacanteUseCase;
+import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.ReclamarNotificacionPagoUseCase;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.ports.in.UpdateReservaVacanteUseCase;
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.infrastructure.web.dto.ReservaVacanteRequest;
 
@@ -16,6 +17,7 @@ public class ReservaVacanteService {
 
     private final CreateReservaVacanteUseCase createReservaVacanteUseCase;
     private final FindReservaVacanteUseCase findReservaVacanteUseCase;
+    private final ReclamarNotificacionPagoUseCase reclamarNotificacionPagoUseCase;
     private final UpdateReservaVacanteUseCase updateReservaVacanteUseCase;
 
     public ReservaVacante createReservaVacante(ReservaVacanteRequest reservaVacanteRequest) {
@@ -28,5 +30,13 @@ public class ReservaVacanteService {
 
     public ReservaVacante updateReservaVacante(ReservaVacante newReservaVacante, UUID reservaVacanteId) {
         return updateReservaVacanteUseCase.update(newReservaVacante, reservaVacanteId);
+    }
+
+    public boolean reclamarNotificacionPago(UUID reservaVacanteId) {
+        return reclamarNotificacionPagoUseCase.reclamar(reservaVacanteId);
+    }
+
+    public void liberarNotificacionPago(UUID reservaVacanteId) {
+        reclamarNotificacionPagoUseCase.liberar(reservaVacanteId);
     }
 }

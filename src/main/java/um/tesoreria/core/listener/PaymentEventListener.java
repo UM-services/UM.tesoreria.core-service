@@ -21,13 +21,15 @@ public class PaymentEventListener {
         log.info("\n\nPaymentEventListener initialized\n\n");
     }
 
+    /**
+     * Sin {@code try/catch}: si el procesamiento falla, la excepción tiene que llegar al
+     * {@code DefaultErrorHandler} del contenedor para que Kafka reintente con backoff y, agotados
+     * los intentos, derive el record a {@code payment-processed.DLT}. Tragarse el error acá
+     * commiteaba el offset y perdía el pago.
+     */
     @KafkaListener(topics = "payment-processed", groupId = "tesoreria-core-group", containerFactory = "kafkaListenerContainerFactory")
     public void handlePaymentProcessed(PaymentProcessedEvent event) {
         log.debug("\n\nReceived payment event: {}\n\n", event);
-        try {
-            mercadoPagoContextService.processPaymentEvent(event);
-        } catch (Exception e) {
-            log.error("Error processing payment event: {}", e.getMessage(), e);
-        }
+        mercadoPagoContextService.processPaymentEvent(event);
     }
 }

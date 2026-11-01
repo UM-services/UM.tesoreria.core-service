@@ -65,12 +65,16 @@ jobs:
           cache-to: type=gha,scope=staging,mode=max
 
   deploy:
-    name: Deploy staging service
+    name: Deploy staging service (${{ matrix.environment }})
     needs: build-image
     if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
-    runs-on: [self-hosted, linux, staging]
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [staging, staging-new]
+    runs-on: [self-hosted, linux, "${{ matrix.environment }}"]
     environment:
-      name: staging
+      name: ${{ matrix.environment }}
     permissions:
       contents: read
 

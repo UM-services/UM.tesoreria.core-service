@@ -14,6 +14,12 @@ public class Usuario {
     private String login;
     private String password;
     private String nombre;
+    /**
+     * Apellido recibido en el alta, usado sólo para generar el login y componer
+     * {@link #nombre}. No se persiste como columna propia: en la base el nombre
+     * completo se guarda en {@code nombre}.
+     */
+    private String apellido;
     private Integer dependenciaId;
     private Integer geograficaId;
     @Builder.Default

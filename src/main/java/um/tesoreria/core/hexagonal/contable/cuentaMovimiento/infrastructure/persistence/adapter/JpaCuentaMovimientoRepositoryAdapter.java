@@ -22,6 +22,11 @@ public class JpaCuentaMovimientoRepositoryAdapter implements CuentaMovimientoRep
     private final CuentaMovimientoMapper cuentaMovimientoMapper;
 
     @Override
+    public boolean existsByFechaContableBetween(OffsetDateTime desde, OffsetDateTime hasta) {
+        return jpaCuentaMovimientoRepository.existsByFechaContableBetween(desde, hasta);
+    }
+
+    @Override
     public List<CuentaMovimiento> findAllByNumeroCuenta(BigDecimal numeroCuenta) {
         return jpaCuentaMovimientoRepository.findAllByNumeroCuenta(numeroCuenta).stream()
                 .map(cuentaMovimientoMapper::toDomainModel)

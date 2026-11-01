@@ -23,6 +23,8 @@ public interface JpaUsuarioRepository extends JpaRepository<UsuarioEntity, Long>
 
 	Optional<UsuarioEntity> findByLogin(String login);
 
+	boolean existsByLoginIgnoreCase(String login);
+
 	Optional<UsuarioEntity> findByUserId(Long userId);
 
 	@Query("SELECT u FROM UsuarioEntity u WHERE u.activo = 1 AND (:texto IS NULL "

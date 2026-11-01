@@ -12,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
@@ -99,7 +98,6 @@ public interface JpaChequeraSerieRepository extends JpaRepository<ChequeraSerieE
 	List<ChequeraSerieEntity> findAllByPersonaIdAndDocumentoIdAndFacultadIdAndTipoChequeraIdIn(
 			BigDecimal personaId, Integer documentoId, Integer facultadId, List<Integer> tipoChequeraIds, Sort sort);
 
-	@Modifying
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 

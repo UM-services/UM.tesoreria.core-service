@@ -18,7 +18,9 @@ flowchart TD
         Ctrl["CompraAutoridadUsuarioController<br/>/api/tesoreria/core/compraAutoridadUsuario<br/>GET /{usuarioId}, GET /limite/{usuarioId}/{ejercicioId}<br/>POST, DELETE /{usuarioId}/{autoridadPerfilId}"]
         DTO["CompraAutoridadUsuarioRequest/Response<br/>LimiteAutorizacionResponse"]
         Map["CompraAutoridadUsuarioDtoMapper"]
-        Adp["JdbcCompraAutoridadUsuarioAdapter<br/>JdbcTemplate (SQL directo)"]
+        Adp["JpaCompraAutoridadUsuarioAdapter<br/>save / delete (auditado por Hibernate)"]
+        Repo["JpaCompraAutoridadUsuarioRepository<br/>derived queries"]
+        Ent["CompraAutoridadUsuarioEntity<br/>extiende Auditable"]
         Tabla["tabla compra_autoridad_usuario<br/>unique (usuario_id, autoridad_perfil_id)"]
     end
 
@@ -38,7 +40,9 @@ flowchart TD
     UCs --> IN
     UCs --> OUT
     Adp --> OUT
-    Adp --> Tabla
+    Adp --> Repo
+    Repo --> Ent
+    Ent --> Tabla
     Svc --> M
 
     style M fill:#e1f5fe
@@ -51,6 +55,8 @@ flowchart TD
     style DTO fill:#fff3e0
     style Map fill:#fff3e0
     style Adp fill:#fff3e0
+    style Repo fill:#fff3e0
+    style Ent fill:#fff3e0
     style Tabla fill:#fff3e0
     style Per fill:#fce4ec
     style Ref fill:#fce4ec

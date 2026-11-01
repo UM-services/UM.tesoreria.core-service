@@ -18,22 +18,9 @@ spring:
     bootstrap-servers: localhost:9092
     listener:
       auto-startup: false
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: chequeras@um.edu.ar
-    password: unused-test-password
-    properties:
-      mail:
-        smtp:
-          starttls:
-            enable: true
-            required: true
-          auth: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-
+  # En tests no hay broker: sin KafkaAdmin no se intenta crear topics ni se espera el timeout.
+  autoconfigure:
+    exclude: org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration
 logging:
   level:
     um.tesoreria.core: debug
@@ -41,3 +28,9 @@ logging:
     org:
       hibernate:
         SQL: debug
+
+tesoreria:
+  audit:
+    # Los tests corren sobre H2 y no tienen la tabla audit_outbox:
+    # con SEND el flush intentaría escribir y fallaría.
+    mode: OFF

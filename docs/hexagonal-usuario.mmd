@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Usuario (v9.0.0)
+title: Arquitectura Hexagonal - Módulo Usuario (v11.1.0)
 ---
 
 classDiagram
@@ -11,6 +11,7 @@ classDiagram
             +String login
             +String password
             +String nombre
+            +String apellido
             +Integer dependenciaId
             +Integer geograficaId
             +Byte imprimeChequera
@@ -29,6 +30,7 @@ classDiagram
         class UsuarioRepository {
             << interface >>
             +findByLogin(String) Optional~Usuario~
+            +existsByLoginIgnoreCase(String) boolean
             +findUsuariosBySearch(String) List~Usuario~
             +findAllBySearch(String) List~Usuario~
             +findByPassword(String) Optional~Usuario~
@@ -36,6 +38,11 @@ classDiagram
             +findByGoogleMailAndActivo(String, Byte) Optional~Usuario~
             +save(Usuario) Usuario
             +updateLastLog(Long, OffsetDateTime) void
+        }
+
+        class LoginGenerator {
+            +normalizar(String) String
+            +candidatos(String, String) List~String~
         }
     }
 
@@ -53,11 +60,13 @@ classDiagram
             -UpdateUsuarioConfiguracionUseCase updateUsuarioConfiguracionUseCase
             -UpdateUsuarioEstadoUseCase updateUsuarioEstadoUseCase
             -ResetUsuarioPasswordUseCase resetUsuarioPasswordUseCase
+            -SugerirLoginUseCase sugerirLoginUseCase
             +findByLogin(String) Usuario
             +findByUserId(Long) Optional~Usuario~
             +search(String) List~Usuario~
             +searchTodos(String) List~Usuario~
             +findByPassword(String) Usuario
+            +sugerirLogin(String, String) String
             +add(Usuario) Usuario
             +update(Usuario, Long) Usuario
             +updateConfiguracion(Usuario, Long) Usuario
@@ -81,6 +90,7 @@ classDiagram
             class UpdateUsuarioConfiguracionUseCaseImpl
             class UpdateUsuarioEstadoUseCaseImpl
             class ResetUsuarioPasswordUseCaseImpl
+            class SugerirLoginUseCaseImpl
     }
     namespace application {
 
@@ -102,6 +112,10 @@ classDiagram
         class UpdateUsuarioConfiguracionUseCase { << interface >> }
         class UpdateUsuarioEstadoUseCase { << interface >> }
         class ResetUsuarioPasswordUseCase { << interface >> }
+        class SugerirLoginUseCase {
+            << interface >>
+            +sugerirLogin(String, String) String
+        }
     }
 
     namespace infrastructure_persistence {
@@ -128,6 +142,7 @@ classDiagram
             class JpaUsuarioRepository {
                 << JpaRepository >>
                 +findByLogin(String) Optional~UsuarioEntity~
+                +existsByLoginIgnoreCase(String) boolean
                 +findByPassword(String) Optional~UsuarioEntity~
                 +findByUserId(Long) Optional~UsuarioEntity~
                 +findUsuariosBySearch(String) List~UsuarioEntity~
@@ -140,6 +155,7 @@ classDiagram
                 -JpaUsuarioRepository jpaUsuarioRepository
                 -UsuarioMapper usuarioMapper
                 +findByLogin(String) Optional~Usuario~
+                +existsByLoginIgnoreCase(String) boolean
                 +findUsuariosBySearch(String) List~Usuario~
                 +findAllBySearch(String) List~Usuario~
                 +findByPassword(String) Optional~Usuario~
@@ -164,7 +180,8 @@ classDiagram
                 +searchTodos(String) ResponseEntity~List~UsuarioResponse~~
                 +findByUserId(Long) ResponseEntity~UsuarioResponse~
                 +findByLogin(String) ResponseEntity~UsuarioResponse~
-                +add(UsuarioRequest) ResponseEntity~UsuarioResponse~
+                +sugerirLogin(String, String) ResponseEntity~LoginSugeridoResponse~
+                +add(UsuarioAltaRequest) ResponseEntity~UsuarioResponse~
                 +update(UsuarioRequest, Long) ResponseEntity~UsuarioResponse~
                 +updateConfiguracion(UsuarioConfiguracionRequest, Long) ResponseEntity~UsuarioResponse~
                 +updateEstado(Long, Integer) ResponseEntity~UsuarioResponse~
@@ -189,6 +206,28 @@ classDiagram
                 +Byte activo
                 +Byte administrador
                 +Byte usuarioExterno
+            }
+
+            class UsuarioAltaRequest {
+                +String login
+                +String password
+                +String nombre
+                +String apellido
+                +Integer dependenciaId
+                +Integer geograficaId
+                +Byte imprimeChequera
+                +Byte numeroOpManual
+                +Byte habilitaOpEliminacion
+                +Byte eliminaChequera
+                +Byte modificaChequera
+                +String googleMail
+                +Byte activo
+                +Byte administrador
+                +Byte usuarioExterno
+            }
+
+            class LoginSugeridoResponse {
+                +String login
             }
 
             class UsuarioResponse {
@@ -232,6 +271,7 @@ classDiagram
 
             class UsuarioDtoMapper {
                 +toDomain(UsuarioRequest) Usuario
+                +toDomain(UsuarioAltaRequest) Usuario
                 +toDomainConfiguracion(UsuarioConfiguracionRequest) Usuario
                 +toResponse(Usuario) UsuarioResponse
             }
@@ -249,6 +289,7 @@ classDiagram
     UsuarioService --> UpdateUsuarioConfiguracionUseCase : uses
     UsuarioService --> UpdateUsuarioEstadoUseCase : uses
     UsuarioService --> ResetUsuarioPasswordUseCase : uses
+    UsuarioService --> SugerirLoginUseCase : uses
 
     CreateUsuarioUseCaseImpl ..|> CreateUsuarioUseCase : implements
     FindUsuarioByGoogleMailUseCaseImpl ..|> FindUsuarioByGoogleMailUseCase : implements
@@ -262,6 +303,7 @@ classDiagram
     UpdateUsuarioConfiguracionUseCaseImpl ..|> UpdateUsuarioConfiguracionUseCase : implements
     UpdateUsuarioEstadoUseCaseImpl ..|> UpdateUsuarioEstadoUseCase : implements
     ResetUsuarioPasswordUseCaseImpl ..|> ResetUsuarioPasswordUseCase : implements
+    SugerirLoginUseCaseImpl ..|> SugerirLoginUseCase : implements
 
     CreateUsuarioUseCaseImpl --> UsuarioRepository : uses
     FindUsuarioByGoogleMailUseCaseImpl --> UsuarioRepository : uses
@@ -275,6 +317,9 @@ classDiagram
     UpdateUsuarioConfiguracionUseCaseImpl --> UsuarioRepository : uses
     UpdateUsuarioEstadoUseCaseImpl --> UsuarioRepository : uses
     ResetUsuarioPasswordUseCaseImpl --> UsuarioRepository : uses
+    SugerirLoginUseCaseImpl --> UsuarioRepository : uses
+    CreateUsuarioUseCaseImpl --> LoginGenerator : uses
+    SugerirLoginUseCaseImpl --> LoginGenerator : uses
 
     JpaUsuarioRepositoryAdapter ..|> UsuarioRepository : implements
     JpaUsuarioRepositoryAdapter --> JpaUsuarioRepository : uses
@@ -288,4 +333,6 @@ classDiagram
     UsuarioController --> UsuarioDtoMapper : uses
     UsuarioDtoMapper --> Usuario : maps
     UsuarioDtoMapper --> UsuarioRequest : maps
+    UsuarioDtoMapper --> UsuarioAltaRequest : maps
     UsuarioDtoMapper --> UsuarioResponse : maps
+    UsuarioController --> LoginSugeridoResponse : returns

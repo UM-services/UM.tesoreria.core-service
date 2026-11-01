@@ -3,6 +3,7 @@ package um.tesoreria.core.service.facade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.exception.ChequeraPagoException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.service.ChequeraPagoService;
@@ -148,19 +149,43 @@ public class PagoService {
         }
     }
 
+    /**
+     * Registra el pago de Mercado Pago asociado a un contexto.
+     * <p>
+     * Idempotente por {@code idMercadoPago}: si el pago ya existe se devuelve el registrado y no se
+     * crea una fila nueva. La unicidad la respalda el índice {@code uk_chequera_pago_id_mp}
+     * ({@code docs/sql/V415__uk_chequera_pago_id_mp.sql}): si dos entregas concurrentes del mismo
+     * evento pasan el pre-check a la vez, la perdedora falla al insertar, la transacción revierte y
+     * Kafka reintenta; en el reintento el pre-check encuentra el pago de la ganadora y termina en
+     * no-op.
+     * <p>
+     * Un pago <b>distinto</b> (otro {@code idMercadoPago}) sobre una cuota ya pagada se registra
+     * igual, con un {@code WARN}: es un doble pago real y se resuelve por el circuito
+     * administrativo (reversa/devolución), no descartándolo acá.
+     */
+    @Transactional
     public ChequeraPago registraPagoMP(Long mercadoPagoContextId) {
         log.debug("\n\nProcessing PagoService.registraPagoMP\n\n");
 
-        final Integer MERCADOPAGO = 18;
-
         var mercadoPagoContext = mercadoPagoContextService.findByMercadoPagoContextId(mercadoPagoContextId);
+
+        if (mercadoPagoContext.getIdMercadoPago() == null || mercadoPagoContext.getIdMercadoPago().isBlank()) {
+            throw new IllegalArgumentException("No se puede registrar un pago de Mercado Pago sin idMercadoPago (contexto "
+                    + mercadoPagoContextId + ")");
+        }
+
+        var pagoExistente = buscarPagoMercadoPago(mercadoPagoContext.getIdMercadoPago());
+        if (pagoExistente != null) {
+            log.info("Pago MP {} ya registrado (chequeraPagoId={}): no-op",
+                    mercadoPagoContext.getIdMercadoPago(), pagoExistente.getChequeraPagoId());
+            return pagoExistente;
+        }
+
         var chequeraCuota = chequeraCuotaService.findByChequeraCuotaId(mercadoPagoContext.getChequeraCuotaId());
 
-        // Evita registrar pagos repetidos para el caso de una nueva notificacion de MP
-        try {
-            return chequeraPagoService.findByIdMercadoPago(mercadoPagoContext.getIdMercadoPago());
-        } catch (ChequeraPagoException e) {
-            log.debug("No Existe Pago de MP previo");
+        if (Byte.valueOf((byte) 1).equals(chequeraCuota.getPagado())) {
+            log.warn("La cuota {} ya estaba pagada y llega un pago de Mercado Pago distinto ({}): se registra un segundo pago (posible doble pago)",
+                    chequeraCuota.getChequeraCuotaId(), mercadoPagoContext.getIdMercadoPago());
         }
 
         var nextOrder = chequeraPagoService.nextOrden(chequeraCuota.getFacultadId(), chequeraCuota.getTipoChequeraId(), chequeraCuota.getChequeraSerieId(), chequeraCuota.getProductoId(), chequeraCuota.getAlternativaId(), chequeraCuota.getCuotaId());
@@ -182,7 +207,7 @@ public class PagoService {
                 .fecha(mercadoPagoContext.getFechaPago().minusHours(3))
                 .acreditacion(fechaAcreditacion.minusHours(3))
                 .importe(mercadoPagoContext.getImportePagado())
-                .tipoPagoId(MERCADOPAGO)
+                .tipoPagoId(TIPO_MERCADO_PAGO)
                 .idMercadoPago(mercadoPagoContext.getIdMercadoPago())
                 .archivo("MercadoPago")
                 .build();
@@ -194,6 +219,18 @@ public class PagoService {
         marcarPago(chequeraCuota.getFacultadId(), chequeraCuota.getTipoChequeraId(), chequeraCuota.getChequeraSerieId(), chequeraCuota.getProductoId(), chequeraCuota.getAlternativaId(), chequeraCuota.getCuotaId(), chequeraCuotaService);
 
         return chequeraPago;
+    }
+
+    /**
+     * @return el pago registrado para ese {@code idMercadoPago}, o {@code null} si todavía no existe.
+     */
+    private ChequeraPago buscarPagoMercadoPago(String idMercadoPago) {
+        try {
+            return chequeraPagoService.findByIdMercadoPago(idMercadoPago);
+        } catch (ChequeraPagoException e) {
+            log.debug("No existe pago de Mercado Pago previo para {}", idMercadoPago);
+            return null;
+        }
     }
 
     public void marcarPago(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, ChequeraCuotaService chequeraCuotaService) {

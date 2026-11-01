@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import um.tesoreria.core.hexagonal.contratos.contrato.infrastructure.persistence.entity.ContratoEntity;
@@ -31,7 +30,6 @@ public interface JpaContratoRepository extends JpaRepository<ContratoEntity, Lon
 
 	Optional<ContratoEntity> findByContratoId(Long contratoId);
 
-	@Modifying
 	void deleteByContratoId(Long contratoId);
 
     boolean existsByContratoId(Long contratoId);

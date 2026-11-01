@@ -8,6 +8,12 @@ import java.util.Optional;
 
 public interface CuentaRepository {
     Cuenta create(Cuenta cuenta);
+    Optional<Cuenta> findWithLockByNumeroCuenta(BigDecimal numeroCuenta);
+    boolean existenMovimientos(BigDecimal desde, BigDecimal hasta);
+    boolean existenHijas(BigDecimal desde, BigDecimal hasta);
+    void recalcularGrados();
+    void limpiarNombres();
+    List<Cuenta> findAllByGeograficaIdAndGrado(Integer geograficaId, Integer grado);
     Optional<Cuenta> findById(BigDecimal numeroCuenta);
     Optional<Cuenta> findByCuentaContableId(Long cuentaContableId);
     List<Cuenta> findAll();

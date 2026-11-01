@@ -1,0 +1,386 @@
+{
+  "inscripcion": {
+    "curso": 5,
+    "planId": 9,
+    "carreraId": 2,
+    "observaciones": "Texto libre de la inscripción"
+  },
+  "plan": {
+    "nombre": "Plan 2016"
+  },
+  "carrera": {
+    "nombre": "Ingeniería en Informática"
+  },
+  "detalles": [
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "0004",
+      "materia": {
+        "nombre": "CALCULO II"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2027",
+      "materia": {
+        "nombre": "ALGEBRA LINEAL"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2047",
+      "materia": {
+        "nombre": "INVESTIGACIÓN OPERATIVA"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2404",
+      "materia": {
+        "nombre": "TRABAJO INTEGRADOR FINAL I"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2409",
+      "materia": {
+        "nombre": "TRABAJO INTEGRADOR FINAL II"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2500",
+      "materia": {
+        "nombre": "PRÁCTICA PROFESIONAL"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2501",
+      "materia": {
+        "nombre": "ASEGURAMIENTO DE CALIDAD DEL SOFTWARE"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2502",
+      "materia": {
+        "nombre": "GESTIÓN DE CALIDAD Y MEDIO AMBIENTE"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2503",
+      "materia": {
+        "nombre": "HIGIENE Y SEGURIDAD DEL TRABAJO"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2504",
+      "materia": {
+        "nombre": "MODELOS Y SIMULACIÓN"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2506",
+      "materia": {
+        "nombre": "SEGURIDAD INFORMÁTICA II"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2508",
+      "materia": {
+        "nombre": "AUDITORÍA DE SISTEMAS"
+      }
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2509",
+      "materia": {
+        "nombre": "PLANEAMIENTO Y GESTIÓN DE EMPRESAS"
+      }
+    }
+  ],
+  "materias": [
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "0004",
+      "nombre": "CALCULO II"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2027",
+      "nombre": "ALGEBRA LINEAL"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2047",
+      "nombre": "INVESTIGACIÓN OPERATIVA"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2404",
+      "nombre": "TRABAJO INTEGRADOR FINAL I"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2409",
+      "nombre": "TRABAJO INTEGRADOR FINAL II"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2500",
+      "nombre": "PRÁCTICA PROFESIONAL"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2501",
+      "nombre": "ASEGURAMIENTO DE CALIDAD DEL SOFTWARE"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2502",
+      "nombre": "GESTIÓN DE CALIDAD Y MEDIO AMBIENTE"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2503",
+      "nombre": "HIGIENE Y SEGURIDAD DEL TRABAJO"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2504",
+      "nombre": "MODELOS Y SIMULACIÓN"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2506",
+      "nombre": "SEGURIDAD INFORMÁTICA II"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2508",
+      "nombre": "AUDITORÍA DE SISTEMAS"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "materiaId": "2509",
+      "nombre": "PLANEAMIENTO Y GESTIÓN DE EMPRESAS"
+    }
+  ],
+  "materiascarrera": [
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "0004"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2027"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2047"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2404"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2409"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2500"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2501"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2502"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2503"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2504"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2506"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2508"
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2509"
+    }
+  ],
+  "materiascurso": [
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "0004",
+      "curso": 1,
+      "periodo": 2
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2027",
+      "curso": 2,
+      "periodo": 2
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2047",
+      "curso": 4,
+      "periodo": 2
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2404",
+      "curso": 4,
+      "periodo": 1
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2409",
+      "curso": 4,
+      "periodo": 2
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2500",
+      "curso": 5,
+      "periodo": 0
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2501",
+      "curso": 5,
+      "periodo": 1
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2502",
+      "curso": 5,
+      "periodo": 1
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2503",
+      "curso": 5,
+      "periodo": 1
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2504",
+      "curso": 5,
+      "periodo": 1
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2506",
+      "curso": 5,
+      "periodo": 2
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2508",
+      "curso": 5,
+      "periodo": 2
+    },
+    {
+      "facultadId": 1,
+      "planId": 9,
+      "carreraId": 2,
+      "materiaId": "2509",
+      "curso": 5,
+      "periodo": 2
+    }
+  ]
+}

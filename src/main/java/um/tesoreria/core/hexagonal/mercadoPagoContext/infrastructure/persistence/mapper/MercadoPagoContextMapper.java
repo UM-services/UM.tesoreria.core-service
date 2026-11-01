@@ -30,6 +30,7 @@ public class MercadoPagoContextMapper {
                 .status(domain.getStatus())
                 .fechaPago(domain.getFechaPago())
                 .fechaAcreditacion(domain.getFechaAcreditacion())
+                .dateLastUpdated(domain.getDateLastUpdated())
                 .payment(domain.getPayment());
 
         if (domain.getImporte() != null) builder.importe(domain.getImporte());
@@ -59,6 +60,7 @@ public class MercadoPagoContextMapper {
                 .status(entity.getStatus())
                 .fechaPago(entity.getFechaPago())
                 .fechaAcreditacion(entity.getFechaAcreditacion())
+                .dateLastUpdated(entity.getDateLastUpdated())
                 .importePagado(entity.getImportePagado())
                 .payment(entity.getPayment())
                 .chequeraCuota(chequeraCuotaMapper.toDomain(entity.getChequeraCuota()))

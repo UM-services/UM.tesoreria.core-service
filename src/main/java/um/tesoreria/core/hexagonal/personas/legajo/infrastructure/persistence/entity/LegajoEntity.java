@@ -43,42 +43,45 @@ public class LegajoEntity extends Auditable implements Jsonifyable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ale_id")
-	private Long legajoId = null;
+	private Long legajoId;
 
 	@Column(name = "ale_per_id")
-	private BigDecimal personaId = null;
+	private BigDecimal personaId;
 
 	@Column(name = "ale_doc_id")
-	private Integer documentoId = null;
+	private Integer documentoId;
 
 	@Column(name = "ale_fac_id")
-	private Integer facultadId = null;
+	private Integer facultadId;
 
 	@Column(name = "ale_leg_id")
+	@Builder.Default
 	private Long numeroLegajo = 0L;
 
 	@Column(name = "ale_fecha")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXX", timezone = "UTC")
-	private OffsetDateTime fecha = null;
+	private OffsetDateTime fecha;
 
 	@Column(name = "ale_lec_id")
-	private Integer lectivoId = null;
+	private Integer lectivoId;
 
 	@Column(name = "ale_pla_id")
-	private Integer planId = null;
+	private Integer planId;
 
 	@Column(name = "ale_car_id")
-	private Integer carreraId = null;
+	private Integer carreraId;
 
 	@Column(name = "ale_carrera")
+	@Builder.Default
 	private Byte tieneCarrera = 0;
 
 	@Column(name = "ale_geo_id")
-	private Integer geograficaId = null;
+	private Integer geograficaId;
 
 	@Column(name = "ale_contrasenia")
-	private String contrasenha = null;
+	private String contrasenha;
 
+	@Builder.Default
 	private Byte intercambio = 0;
 
 	@OneToOne(optional = true)
@@ -86,6 +89,6 @@ public class LegajoEntity extends Auditable implements Jsonifyable {
 			@JoinColumn(name = "ale_fac_id", referencedColumnName = "car_fac_id", insertable = false, updatable = false),
 			@JoinColumn(name = "ale_pla_id", referencedColumnName = "car_pla_id", insertable = false, updatable = false),
 			@JoinColumn(name = "ale_car_id", referencedColumnName = "car_id", insertable = false, updatable = false) })
-	private Carrera carrera = null;
+	private Carrera carrera;
 
 }

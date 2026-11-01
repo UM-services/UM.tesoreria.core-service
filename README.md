@@ -2,9 +2,101 @@
 
 ## Descripción
 
-Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1.
+Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 9.6.0**
+**Versión actual (SemVer): 11.6.1**
+
+## Novedades 11.6.1 (verificado en código)
+- **fix(configuration)**: `pom.xml` usa `spring-boot-starter-kafka` en lugar de `spring-kafka`. En Spring Boot 4 la auto-configuración vive en `spring-boot-kafka`: sin ella no había `KafkaAdmin` y los `NewTopic` de `KafkaTopicsConfiguration` no se aplicaban (los topics existían sólo por `auto.create.topics.enable`, sin retención). `KafkaAutoconfiguracionTest` lo vigila.
+- **fix(configuration)**: los dos consumers propagan `spring.kafka.consumer.auto-offset-reset` (default `earliest`); antes el yml lo declaraba pero las factories armadas a mano no lo leían y el cliente caía en `latest`, salteando pagos en un grupo nuevo. También se quitan las clases `KEY/VALUE_SERIALIZER|DESERIALIZER_CLASS` de las props: las instancias ya se pasan al factory.
+- **feat(kafka)**: `notificacion-resultado.DLT` se declara con retención de 14 días (antes dependía del auto-create del broker).
+- **changed(configuration)**: `SPRING_KAFKA_BOOTSTRAP_SERVERS` permite fijar el broker (default `kafka:9092`) y `spring.kafka.admin.fail-fast`/`modify-topic-configs` quedan en `true`: si el broker no responde o faltan permisos de topics, el servicio **no arranca**. Ver la nota de despliegue en el `CHANGELOG`.
+
+> Basado en `git diff HEAD` (staged; HEAD `9f48ae07`; 10 archivos, +102/−10: `pom.xml`, tres clases de `configuration/`, `bootstrap.yml`, tres tests y los dos yml de test) y el código real de `KafkaTopicsConfiguration`, `KafkaConsumerConfig`, `KafkaProducerConfig` y `bootstrap.yml`. Sin cambios de URL, contrato, DTO ni esquema ⇒ incremento **patch** de SemVer (`11.6.0` → `11.6.1`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/sequence-notificacion-correo.mmd` validado con `mmdc`.
+
+## Novedades 11.6.0 (verificado en código)
+- **feat(chequera/materiasInscriptas)**: `GET /api/tesoreria/core/materiasInscriptas/{facultadId}/{tipoChequeraId}/{chequeraSerieId}` devuelve las materias de grado inscriptas según SIUM, agrupadas por curso y período, en lugar de la lista vacía. Chequera inexistente: `400`. Chequera que no es de grado: `200` con `[]` y sin llamar a la facultad. Facultad sin servidor o con falla: `200` con `SIUM/NO_DISPONIBLE`. Sin inscripción: `SIUM/SIN_INSCRIPCION`.
+- **feat(extern/facultad/pendienteInfo)**: consulta de la inscripción en la facultad (`/pendienteinfo`) con nombres de materia por `/materia/unique` (tope de 10 llamadas y 3 s).
+- **changed**: `GET chequera/estado` no cambia ni llama a la facultad. Diagramas nuevos [`hexagonal-materiasInscriptas.mmd`](docs/hexagonal-materiasInscriptas.mmd) y [`hexagonal-pendienteInfo.mmd`](docs/hexagonal-pendienteInfo.mmd).
+
+## Novedades 11.5.0 (verificado en código)
+- **feat(audit)**: Auditoría transversal en el paquete `core/audit`: eventos `REQUEST` (filtro HTTP con correlación y actor) y `CHANGE` (listeners de Hibernate con `beforeData`/`afterData`, enmascarado por campo y truncado), escritos en el outbox transaccional `audit_outbox` junto con el cambio de negocio y enviados por lotes al servicio de auditoría con reclamo por token, backoff y limpieza diaria. Modos `OFF`/`LOG`/`SEND` (`TESORERIA_AUDIT_MODE`) y resumen `SUMMARY` para la generación masiva de cuotas. Requiere el script `sql/001_audit_outbox.sql`. Guía: [Auditoría transversal](docs/auditoria.md).
+- **feat(kafka)**: `KafkaTopicsConfiguration` declara `send-chequera`, `send-cuota`, `send-correo` y `payment-processed.DLT` (retención 14 días); particiones y réplicas por entorno (`APP_KAFKA_TOPIC_PARTITIONS`/`APP_KAFKA_TOPIC_REPLICAS`, default `1`).
+- **changed**: `compraAutoridadUsuario` y `compraPedidoAutorizante` pasan de `JdbcTemplate` a JPA para que asignar o quitar quede auditado (rutas y respuestas iguales); la normalización de `fecha_pago` de facturas pendientes deja de ser un `UPDATE` nativo y la hace `ProveedorPagoSincronizacionService` (JPA + Criteria) antes de generar el reporte; se quitan `@Modifying` innecesarios y los dos `@Query` de borrado masivo de artículos de proveedor. `AuditCoverageGuard` (test) impide que vuelvan las escrituras fuera de JPA. Sin cambios de API: el único efecto visible es que la consulta de facturas pendientes ya no escribe por sí sola (lo hace la generación del reporte).
+
+## Novedades 11.4.0 (verificado en código)
+- **feat(contable/bancaria)**: Cuentas bancarias (#409): alta, edición por presencia de campos (ausente conserva, `null` vacía) y baja bloqueada si hay valores o movimientos de libro banco (`409 EN_USO` con conteos). Rutas nuevas `GET /bancaria/{id}` y `GET /bancaria/{id}/uso`; `GET /bancaria/` no cambia. Validación de CUIT, CBU, textos latin1 y enteros exactos; precondición opcional `updated` (`409 CAMBIO_CONCURRENTE`); historial #404 en la misma transacción y `@Lock` en PUT y DELETE.
+- **changed**: la cuenta contable es obligatoria en la API (`CompraService` la necesita al pagar). Errores en JSON con `status` y `codigo`. Reglas y límites: [guía de Cuentas bancarias](docs/gestion-cuentas-bancarias.md). Sin DDL nuevo.
+
+## Novedades 11.3.0 (verificado en código)
+- **feat(contratos/cursoCargoContratado)**: `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` (alias `/cursocargocontratado/periodo/{anho}/{mes}`) devuelve en una sola llamada todos los cursos-cargo contratados del período. Reutiliza `CursoCargoContratadoService.findAllByPeriodo` y el derivado `JpaCursoCargoContratadoRepository.findAllByAnhoAndMes` (sin `@Query`); ninguna ruta existente cambia. Sin DDL ni dependencias nuevas.
+- **test**: `CursoCargoContratadoControllerTest` caracteriza el endpoint (`200` y los campos `cursoCargoContratadoId`, `cursoId`, `cargoTipoId` y `horasSemanales`) con `MockMvc` standalone y el `service` simulado.
+
+> Basado en `git diff HEAD` (staged; HEAD `29dc554e`; el cambio funcional son 3 archivos, +86/−0: el controlador del slice `contratos/cursoCargoContratado` con el endpoint de período, el test nuevo y `CHANGELOG.md`; más la preparación de release en `pom.xml`, este `README.md` y `docs/README.md`) y el `pom.xml` real. Todo es aditivo: se suma un `GET` de lectura y no cambia ninguna URL, DTO ni respuesta existente ⇒ incremento **minor** de SemVer (`11.2.1` → `11.3.0`). El endpoint devuelve `CursoCargoContratadoEntity`, como las lecturas vigentes del mismo controlador. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`).
+
+## Novedades 11.2.1 (verificado en código)
+- **chore(deps)**: actualización de dependencias: Spring Boot 4.1.2, Spring Cloud 2025.1.4, Lombok 1.18.48, MySQL Connector/J 26.10.0, Guava 33.7.2-jre, Apache POI 6.0.0 (`poi` y `poi-ooxml`), springdoc-openapi 3.1.1, ModelMapper 3.2.8 y JaCoCo 0.8.15. Sin dependencias nuevas ni cambios de API: Kotlin, OpenPDF y json-path no cambian.
+- **changed(configuration)**: `spring.cloud.consul.discovery.query-passing: true` en `bootstrap.yml`: el descubrimiento por Consul (Feign/LoadBalancer) resuelve sólo instancias con los checks en `passing`. Es opcional (default `false`), así que no obliga a redeploys coordinados.
+
+> Basado en `git diff HEAD` (staged; HEAD `d1f9584b`; 2 archivos, +12/−10: `pom.xml` con diez versiones actualizadas y `bootstrap.yml` con `query-passing`) y el `pom.xml` real. Sin cambios de URL, contrato, DTO ni esquema ⇒ incremento **patch** de SemVer (`11.2.0` → `11.2.1`). Sin DDL y sin dependencias nuevas. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/dependencies.mmd` validado con `mmdc`.
+
+## Novedades 11.2.0 (verificado en código)
+- **feat(contable/ejercicio)**: Ejercicios (#408): alta del ejercicio siguiente (1 de marzo a último día de febrero, id `último + 1`, límite relativo al año actual con `Clock`), baja solo del último ejercicio de año futuro y sin movimientos, asientos ni referencias, y cambio de `bloqueado` y órdenes contables conservando el resto. Historial #404 en la misma transacción; `@Lock` sobre el último ejercicio o la fila editada.
+- **changed(controller)**: `EjercicioController` es fachada de POST, PUT y DELETE del nuevo slice, con rechazos `409`/`404`/`400` en JSON (`codigo`). El PUT ya no reemplaza la entidad completa: nombre o fechas distintos responden `409`. `DELETE` inexistente responde `404`; POST y PUT ya no devuelven `created`/`updated`. Las lecturas no cambian.
+- **fix**: `AsientoInflacionService` ya no puede reabrir un ejercicio bloqueado; `EjercicioBloqueadoException` ya se puede construir (el `{}` de `MessageFormat` lanzaba `IllegalArgumentException`).
+- Reglas, errores y diferencias frente a VB6: [guía de Ejercicios](docs/gestion-ejercicios.md). Sin DDL nuevo; requiere el historial #404 existente.
+
+## Novedades 11.1.0 (verificado en código)
+- **feat(usuarios/usuario)**: login automático en el alta. `POST /usuario/usuario` (alias `/api/tesoreria/core/usuario/usuario`) acepta `UsuarioAltaRequest`: `login` deja de ser obligatorio y se genera como **primera letra del nombre + apellido** normalizados (`Juan Pérez` → `jperez`); ante colisión agrega letras del nombre (`juperez`, `juaperez`, `juanperez`) y después sufijos numéricos (`juanperez2`…), con tope de 15 caracteres (el largo de `usuario.login`). Si el payload trae `login` explícito **se respeta tal cual** (clientes previos sin `apellido` siguen funcionando) y el duplicado responde `409` en vez de `500`. Con `apellido` presente, `usuario.nombre` se persiste como `"<nombre> <apellido>"`; `apellido` no es columna.
+- **feat(usuarios/usuario)**: `GET /usuario/login-sugerido/{nombre}/{apellido}` devuelve `{ "login": "..." }` con el primer login libre sin crear nada (`400` si nombre/apellido no aportan caracteres, `409` si todos los candidatos están tomados). `password` y `nombre` quedan como únicos campos obligatorios del alta; los flags que antes exigía `UsuarioRequest` pasan a ser opcionales y se persisten sólo si vienen.
+
+> Basado en `git diff HEAD` (staged; HEAD `753e3fa8`; 19 archivos, +654/−7: 14 bajo `src/main` —6 nuevos, 8 modificados—, 4 bajo `src/test` —3 tests nuevos y `UsuarioControllerTest` ampliado— y `docs/hexagonal-usuario.mmd`) y el código real de `LoginGenerator`, `CreateUsuarioUseCaseImpl`, `SugerirLoginUseCaseImpl`, `UsuarioController`, `UsuarioAltaRequest`, `LoginSugeridoResponse`, `UsuarioDtoMapper` y `existsByLoginIgnoreCase` en `UsuarioRepository`/`JpaUsuarioRepository`/`JpaUsuarioRepositoryAdapter`. Todo es **aditivo** (endpoint nuevo; el alta conserva la URL y acepta los payloads previos con `login` explícito) ⇒ incremento **minor** de SemVer (`11.0.0` → `11.1.0`, `pom.xml`). Sin DDL (`apellido` no se persiste; el tope de 15 replica el largo que el javadoc de `LoginGenerator` declara para `usuario.login`, sin verificar contra la base) y sin dependencias nuevas. `CreateUsuarioUseCase` sólo lo consume `UsuarioService.add`, así que el legacy (`UsuarioLdapController` → `UsuarioLdapService`) no cambia. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/hexagonal-usuario.mmd` validado con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-22).
+
+## Novedades 11.0.0 (verificado en código)
+- **breaking(mail, notificacion)**: los seis endpoints de envío (`GET /chequera/sendChequera/...`, `GET /chequera/sendCuota/...`, `GET /chequera/notificaDeudor/{personaId}/{documentoId}`, `GET /notificacion/notifyDeudorChequera/...`, `POST /notificacion/deudorSuspendido` y `GET /notificacion/pagoProveedor/{proveedorMovimientoId}`) responden **`202 Accepted`** con `Solicitud de envío en proceso` en lugar de `200 OK` con `Envío de Correo Ok!!`: el envío pasó a ser asíncrono. URLs y cuerpo `String` no cambian; `GET /notificacion/notaDeudorChequera/...` sigue en `200` porque es vista previa síncrona. Los clientes que comparan `status == 200` o el texto exacto deben aceptar cualquier `2xx`. Es el motivo del **major**.
+- **breaking(configuration)**: el topic `send-chequera` deja de llevar el header `__TypeId__` (`KafkaProducerConfig` con `JacksonJsonSerializer` y `setAddTypeInfo(false)`). El contrato del topic es el JSON del evento y el consumidor resuelve por tipo target, no por el FQCN `um.tesoreria.core.event.SendChequeraEvent`.
+- **feat(mail)**: `CorreoEventPublisher` es el único punto de publicación: core deja de hablar SMTP. Topics nuevos `send-correo` (envelope `CorreoEvent` con `eventType=CORREO`, `version`, `eventId`, `occurredAt` y `CorreoPayload`: `remitente` lógico `CHEQUERA`/`RECIBO`/`NOTIFICACION`, `para`, `replyTo`, `asunto`, `cuerpo`, `html`, `referencia`) y `send-cuota` (`SendCuotaEvent` con sólo el `chequeraCuotaId`; el sender resuelve los datos y arma la plantilla). `sendChequera`, `sendCuota`, `notificaDeudor`, `notificaDeudorChequera`, `notifyDeudorSuspendido` y `notifyPagoProveedor` publican y devuelven `Solicitud de envío en proceso`, o `ERROR: Sin correos para ENVIAR` cuando no hay direcciones.
+- **feat(notificacion)**: el resultado del envío vuelve por `notificacion-resultado` (`NotificacionResultadoEvent` + `NotificacionResultadoListener`, consumidor propio en `KafkaConsumerConfig` con backoff exponencial y `notificacion-resultado.DLT`) y **sólo entonces** se marca `persona_suspendido.notificado = 1`, con la referencia `PERSONA_SUSPENDIDO`. Antes la marca era optimista: un fallo de SMTP dejaba al alumno como notificado sin haber recibido nada.
+- **changed(configuration)**: `spring-boot-starter-mail` se reemplaza por `jakarta.mail-api` (sólo lo usa `ToolService.mailValidate`) y se eliminan `spring.mail`, `app.mail` y el health indicator de mail de `bootstrap.yml` y de los yml de test. `app.testing` queda sin lectores (la redirección a una casilla fija desaparece; el destino lo arma el sender).
+- **removed(legacy)**: `MailSender`, `MailSenderService`, `MailSenderRepository`, `MailSenderException` y `ChequeraClient` (Feign al sender): la tabla `mail_sender` y ese cliente quedan sin uso. También se versiona el `.mmd` nuevo del flujo y se corrige `AGENTS.md` (el sender ya no se llama por Feign).
+
+> Basado en `git diff HEAD` de código (HEAD `6bdc31da`; 28 archivos, +715/−431: 20 bajo `src/main` —7 modificados, 8 nuevos, 5 eliminados, incluido `bootstrap.yml`—, 7 bajo `src/test` —4 tests nuevos, `KafkaConsumerConfigTest` ampliado y los dos `application*.yml` de test— y `pom.xml`) y el código real de `KafkaProducerConfig`/`KafkaConsumerConfig`, `CorreoEventPublisher`, los `event/`, `NotificacionResultadoListener`, `MailChequeraService`/`NotificacionService` y los controladores `facade/ChequeraController`/`facade/NotificacionController`. Cambio de contrato público (status `200` → `202`, mensaje de éxito) y del wire de un topic existente ⇒ incremento **major** de SemVer (`10.0.0` → `11.0.0`, `pom.xml`), criterio del repo para breaking (igual que `5.0.0`/`6.0.0`/`10.0.0`). Sin DDL (`persona_suspendido.notificado` ya existe) y sin dependencias nuevas. **Requiere desplegar el consumidor** de `send-correo`/`send-cuota`/`send-chequera` que publique `notificacion-resultado`: sin él los correos quedan publicados y no se envían. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/sequence-notificacion-correo.mmd` y `docs/dependencies.mmd` validados con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-10-22).
+
+## Novedades 10.0.0 (verificado en código)
+- **breaking(mercadoPagoContext)**: se retira `GET /api/tesoreria/core/mercadoPagoContext/all/active/cuota/id` (`FindAllActiveChequeraCuotaUseCase` y `findAllByActivoOrderByMercadoPagoContextIdDesc`), sin consumidores conocidos (no hay referencias en este repo; el relevamiento de servicios y frontends es del autor del cambio). Es el único cambio incompatible y el que fija el **major**. `GET /api/tesoreria/core/mercadoPagoContext/all/active/to/change` sigue vivo pero queda `@Deprecated` y ahora descarta `chequeraCuotaId` nulos y duplicados (los contextos de reserva de vacante abortaban el barrido).
+- **feat(mercadoPagoContext)**: `POST /api/tesoreria/core/mercadopago/renovaciones` (body opcional `RenovacionesCandidatosRequest`: `hoy`, `lookbackDias`, `reintentos`, `afterFecha`, `afterId`, `size` 1-500) devuelve contexto + cuota + `fechaVencimientoDestino`/`importeDestino`, sin el JSON de preferencia. Selección con Criteria API en `JpaMercadoPagoContextRepositoryCustomImpl`: contexto activo, cuota pendiente, un vencimiento posterior vigente, una fila por cuota (el contexto activo más reciente) y keyset por `(fechaVencimiento, mercadoPagoContextId)`. `VencimientoMercadoPagoResolver` centraliza la regla de qué vencimiento publicar.
+- **feat(mercadoPagoContext)**: `PATCH /api/tesoreria/core/mercadopago/updateContext/{id}/preferencia` escribe **sólo** `fechaVencimiento`, `importe`, `initPoint`, `preferenceId`, `preference`, `changed` y `lastVencimientoUpdated` (evita el *lost update* del `PUT` completo sobre `status`/`importePagado`), y `POST /api/tesoreria/core/mercadopago/sanitize/activeContexts` desactiva duplicados por cuota conservando el de mayor id, con `dryRun` por defecto. La misma sanitización corre **online** en `FindActiveByChequeraCuotaIdUseCaseImpl` (no borra filas: un pago tardío se sigue registrando porque el webhook resuelve el contexto por id).
+- **fix(configuration, listener)**: `PaymentEventListener` ya no se traga las excepciones (antes el offset se commiteaba y el evento se perdía). `KafkaConsumerConfig` reintenta con backoff exponencial (1 s × 2, 5 intentos) y deriva a `payment-processed.DLT`; un JSON inválido va directo al DLT; `KafkaProducerConfig` agrega `dltKafkaTemplate` (`byte[]`) para republicar el record crudo sin base64.
+- **fix(service/facade)**: `PagoService.registraPagoMP` refuerza la idempotencia por `idMercadoPago` (antes un pre-check con `try/catch`): `@Transactional`, validación de `idMercadoPago` presente, búsqueda del pago existente y respaldo con el índice único `uk_chequera_pago_id_mp`; un pago **distinto** sobre una cuota ya pagada se registra igual con `WARN` (doble pago real → reversa). `ProcessPaymentEventUseCaseImpl` extrae `aplicarDatosDelPago`, descarta eventos desordenados con `dateLastUpdated` anterior al aplicado y deja explícito que la idempotencia vive en los efectos, no en el `paymentId` (un refund/chargeback se sigue persistiendo).
+- **feat(umhub/reservaVacante)**: claim de la notificación de pago con `SELECT ... FOR UPDATE` y `POST /api/tesoreria/core/umhub/reservaVacante/{id}/notificacion/claim|release`; `updateNotificacionPago` persiste sólo el flag.
+- **docs**: `docs/sql/V415__uk_chequera_pago_id_mp.sql`, `docs/sql/V416__reserva_vacante_notificacion_pago.sql` y `docs/sql/V417__mercado_pago_context_date_last_updated.sql` (idempotentes, con detección previa y rollback). **Aplicarlos antes de desplegar**: con `ddl-auto: none` la aplicación no crea esas columnas/índices. El índice `idx_activo_fecha_vencimiento` (barrido de 50 s a 0,14 s) se aplicó a mano en desarrollo y no tiene script en el repo.
+
+> Basado en `git diff HEAD` (HEAD `bcaba9a0`; 62 archivos de código, tests y SQL, +2093/−111) y el código real de los slices `mercadoPagoContext`, `umhub/reservaVacante`, `chequera/chequeraPago`, `configuration/`, `listener/PaymentEventListener`, `service/facade/PagoService` y `service/facade/MercadoPagoCoreService`. Retiro de una URL expuesta ⇒ incremento **major** de SemVer (`9.7.0` → `10.0.0`, `pom.xml`), criterio del repo para breaking (igual que `5.0.0`/`6.0.0`); el resto es aditivo. Sin dependencias nuevas. Verificación sin compilación ni tests por indicación del usuario; los `.mmd` de `mercadoPagoContext`, `reservaVacante` y `sequence-mercadopago-to-change` se actualizaron y validaron con Mermaid CLI.
+
+## Novedades 9.7.0 (verificado en código)
+- **feat(contable/cuenta)**: Plan de Cuentas (#407): jerarquía de once dígitos validada en servidor; alta, integradoras e historial #404 en una transacción. Edición parcial con `null` = conservar y sede `0` = sin sede (`NULL`). Baja rechazada si hay hijas, movimientos en el rango o referencias protegidas por FK, con `409` y cuerpo JSON para VB6.
+- **feat(contable/cuenta)**: Consulta aditiva `GET /cuenta/sede/{geograficaId}/grado/{grado}` y alias largo `/api/tesoreria/core/cuenta/...`, con coincidencia exacta de sede y grado y orden por número.
+- **fix(contable/cuenta)**: Recálculo sobre entidades gestionadas, sin `saveAll`/merge: no vuelve a insertar cuentas borradas durante el balance. La limpieza de nombres con `\r\n` se conserva mediante una actualización de entidades gestionadas.
+- Compatibilidad y datos detectados en dev: [guía del Plan de Cuentas](docs/gestion-plan-cuentas.md). Sin DDL nuevo; requiere el historial #404 existente.
+
+## Novedades 9.6.3 (verificado en código)
+- **fix(compras/pedidos)**: `compra_pedido_item.referencia_web` pasa de `varchar(500)` a **`TEXT`** (`CompraPedidoItemEntity` con `@Column(length = 65535)`, igual que `especificaciones` en la misma entidad y `necesidad` en `CompraPedidoEntity`). Las URLs de referencia de marketplaces/buscadores con parámetros de seguimiento superan con facilidad los 500 caracteres, así que el valor quedaba limitado en la base (y con `sql_mode` estricto se rechaza con `Data too long for column 'referencia_web'`). Sin cambios de URL, DTOs ni contrato (`String referenciaWeb` en `CompraPedidoItemRequest`/`CompraPedidoItemResponse`).
+- **docs**: `docs/sql/V414__compras_referencia_web_text.sql` (idempotente, `ddl-auto: none`): agrega la columna como `TEXT` si no existe o la migra desde `varchar`, vía `information_schema.COLUMNS` + `PREPARE`/`EXECUTE`. **Aplicarlo antes de desplegar**: sin el DDL la base mantiene el tope de 500.
+
+> Basado en `git diff HEAD` (2 archivos: `CompraPedidoItemEntity.java` +1/−1 y `docs/sql/V414__compras_referencia_web_text.sql` nuevo, +23 líneas) y el código real del slice (`CompraPedidoItemEntity`, `CompraPedidoItemEntity.especificaciones` con `length = 65535`, `CompraPedidoEntity.necesidad`, DTOs sin `@Size`, mappers y `PedidoItemsPendientesJdbcAdapter`). Fix de capacidad de una columna existente, sin cambios de API pública ⇒ incremento **patch** de SemVer (`9.6.2` → `9.6.3`, `pom.xml`). Sin dependencias nuevas. Cambio de esquema (`V414`) que requiere aplicarse antes de desplegar. Ningún diagrama cambia (la estructura del slice es la misma). Verificación sin compilación ni tests por indicación del usuario; el DDL no se ejecutó contra la base.
+
+## Novedades 9.6.2 (verificado en código)
+- **fix(configuration)**: El consumidor de `payment-processed` deserializa por **tipo target** y ya no depende del header `__TypeId__`: `KafkaConsumerConfig` usa `new JacksonJsonDeserializer<>(PaymentProcessedEvent.class, objectMapper, false)`. Se elimina el `DefaultJacksonJavaTypeMapper` con el mapping fijo del FQN `um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent`, que hacía fallar el consumo cuando el productor publicaba otro nombre de clase (p. ej. el paquete nuevo `um.tesoreria.mercadopago.domain.event`): el valor llegaba nulo y el pago no se imputaba (`PaymentEventListener` sólo lo logueaba; los dos reintentos del `DefaultErrorHandler` no aplican a un valor ya nulo). De paso, al ignorar headers de tipo desaparece la deserialización arbitraria por `__TypeId__`.
+- **changed(configuration)**: `consumerFactory()` y `kafkaListenerContainerFactory()` se tipan con `PaymentProcessedEvent` (antes `Object`). Sin cambios de topic, grupo, reintentos, rutas, contratos REST ni esquema; `KafkaProducerConfig` no se toca.
+- **test(configuration)**: `KafkaConsumerConfigTest` cubre JSON sin headers, `__TypeId__` del productor actual y de un paquete inexistente (ignorados), campos nuevos tolerados y la construcción del container factory.
+
+> Basado en `git diff HEAD` (2 archivos, +120/−15 líneas: `KafkaConsumerConfig.java` y `KafkaConsumerConfigTest.java` nuevo) y el código real de `KafkaConsumerConfig`, `PaymentEventListener` (`@KafkaListener` sobre `payment-processed`) y `PaymentProcessedEvent`. Fix interno sin cambio de API pública ⇒ incremento **patch** de SemVer (`9.6.1` → `9.6.2`, `pom.xml`). Sin dependencias nuevas. Verificación sin compilación por indicación del usuario; la firma del constructor de `JacksonJsonDeserializer` se comprobó con `javap` sobre `spring-kafka-4.1.1.jar`.
+
+## Novedades 9.6.1 (verificado en código)
+- **chore(ci)**: El job `deploy` de `.github/workflows/deploy-staging.yml` **despliega a dos ambientes** con el mismo push a `staging`, mediante una matriz (`environment: [staging, staging-new]`, `fail-fast: false`): cada leg corre en el runner self-hosted etiquetado con ese ambiente (`runs-on: [self-hosted, linux, "${{ matrix.environment }}"]`) y usa el environment de GitHub homónimo (`environment.name: ${{ matrix.environment }}`), con el ambiente en el nombre del job (`Deploy staging service (${{ matrix.environment }})`). Un fallo en un ambiente no cancela el otro; `verify`, la publicación de la imagen y el script de despliegue no cambian.
+- **docs**: `docs/README.md` sólo actualiza el encabezado de versión; `docs/deployment.mmd` no cambia porque no enumera ambientes ni runners.
+
+> Basado en `git diff HEAD` (1 archivo, `.github/workflows/deploy-staging.yml`, +7/−3 líneas) y el workflow completo. Los cambios son internos de CI/CD y no modifican contratos, rutas, campos ni comportamiento de la API: incremento **patch** de SemVer (`9.6.0` → `9.6.1`, `pom.xml`), mismo criterio que `4.1.1`. Sin dependencias nuevas ni cambios de esquema. Verificación sin compilación por indicación del usuario (el cambio no toca código Java).
 
 ## Novedades 9.6.0 (verificado en código)
 - **feat(chequera/estadoChequera)**: `GET /api/tesoreria/core/chequera/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` suma dos campos **aditivos**: `estado` en cada cuota (enum serializado como string: `BAJA`, `COMPENSADA`, `PAGADA`, `A_DEFINIR`, `VENCIDA`, `PENDIENTE`) y `deuda` en cada producto (`total - pagado`, con el mismo criterio null -> 0 de `chequera_total`). El `estado` se evalúa en ese orden y gana la primera regla que se cumple; "hoy" es el día calendario de `America/Argentina/Buenos_Aires` (no UTC) y se compara contra el día de `primerVencimiento`. Así `report-service` (PDF) y el frontend muestran lo mismo: los cálculos viven en el backend.
@@ -1373,15 +1465,15 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.1
 - Docker (opcional)
 
 ## Versiones de Dependencias Principales (verificado en `pom.xml`)
-- Spring Boot: 4.1.1
-- Spring Cloud: 2025.1.3
-- Kotlin: 2.4.10
-- MySQL Connector: 9.7.0
-- SpringDoc OpenAPI: 3.0.3
-- Apache POI: 5.5.1
+- Spring Boot: 4.1.2
+- Spring Cloud: 2025.1.4
+- Kotlin: 2.4.21
+- MySQL Connector: 26.10.0
+- SpringDoc OpenAPI: 3.1.1
+- Apache POI: 6.0.0
 - OpenPDF: 3.0.5
-- ModelMapper: 3.2.6
-- Guava: 33.6.0-jre
+- ModelMapper: 3.2.8
+- Guava: 33.7.2-jre
 - json-path: 3.0.0
 
 ## Optimizaciones de Rendimiento (verificado en código)
@@ -1667,6 +1759,7 @@ src/
 │   │       │   ├── umhub/reservaVacante/     # Módulo ReservaVacante (v3.24.0)
 │   │       │   ├── umhub/consulta/           # Módulo Consulta persona/deuda por número (v6.1.0)
 │   │       │   └── matriculacionContext/
+│   │       ├── audit/                  # Auditoría transversal: listeners JPA, outbox y sender (v11.5.0)
 │   │       ├── model/                 # Modelos legacy
 │   │       ├── service/               # Servicios legacy
 │   │       ├── controller/             # Controladores legacy
@@ -1704,11 +1797,11 @@ Daniel Quinteros - daniel.quinterospinto@gmail.com
 Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](https://github.com/UM-services/um.tesoreria.core-service)
 
 [![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.3-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-purple.svg)](https://kotlinlang.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
 [![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-4.3.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.5.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
@@ -1741,6 +1834,13 @@ SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/tesoreria
 SPRING_DATASOURCE_USERNAME=root
 SPRING_DATASOURCE_PASSWORD=root
 MERCADO_PAGO_ACCESS_TOKEN=your_access_token
+```
+
+Auditoría transversal (11.5.0): requiere `sql/001_audit_outbox.sql` en la base; sin esa tabla usar `TESORERIA_AUDIT_MODE=LOG` (o `OFF`). Lista completa: [guía de auditoría](docs/auditoria.md).
+```properties
+TESORERIA_AUDIT_MODE=SEND
+TESORERIA_AUDIT_URL=http://auditoria:8211
+TESORERIA_AUDIT_API_KEY=your_api_key
 ```
 
 ## Desarrollo

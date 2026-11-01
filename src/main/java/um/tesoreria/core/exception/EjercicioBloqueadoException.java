@@ -15,7 +15,7 @@ public class EjercicioBloqueadoException extends RuntimeException {
 	private static final long serialVersionUID = -3664445128796544585L;
 
 	public EjercicioBloqueadoException(OffsetDateTime fechaContable) {
-		super(MessageFormat.format("Ejercicio Bloqueado {}", fechaContable));
+		super(MessageFormat.format("Ejercicio Bloqueado {0}", fechaContable));
 	}
 
 }

@@ -14,7 +14,14 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "chequera_pago", uniqueConstraints = {@UniqueConstraint(columnNames = {"chp_fac_id", "chp_tch_id", "chp_chs_id", "chp_pro_id", "chp_alt_id", "chp_cuo_id", "chp_orden"})})
+@Table(name = "chequera_pago", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"chp_fac_id", "chp_tch_id", "chp_chs_id", "chp_pro_id", "chp_alt_id", "chp_cuo_id", "chp_orden"}),
+        // Idempotencia de los pagos de Mercado Pago. En producción el índice lo crea el script
+        // docs/sql/V415__uk_chequera_pago_id_mp.sql (ddl-auto: none); acá queda declarado para que
+        // H2 lo cree en los tests. MySQL (y H2) permiten múltiples NULL, así que el resto de los
+        // pagos no se ve afectado.
+        @UniqueConstraint(name = "uk_chequera_pago_id_mp", columnNames = {"id_mercado_pago"})
+})
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

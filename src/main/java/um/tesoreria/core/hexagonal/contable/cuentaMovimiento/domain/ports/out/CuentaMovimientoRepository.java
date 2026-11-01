@@ -14,6 +14,7 @@ public interface CuentaMovimientoRepository {
     List<CuentaMovimiento> findAllByFechaContableAndOrdenContableAndDebitaAndItemGreaterThanEqual(OffsetDateTime fechaContable, Integer ordenContable, Byte debita, Integer item);
     List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta, Byte apertura);
     Optional<CuentaMovimiento> findTopByFechaContableOrderByOrdenContableDesc(OffsetDateTime fechaContable);
+    boolean existsByFechaContableBetween(OffsetDateTime desde, OffsetDateTime hasta);
     Optional<CuentaMovimiento> findByCuentaMovimientoId(Long cuentaMovimientoId);
     CuentaMovimiento save(CuentaMovimiento cuentaMovimiento);
     void deleteAllByFechaContableAndOrdenContable(OffsetDateTime fechaContable, Integer ordenContable);

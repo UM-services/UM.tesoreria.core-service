@@ -16,6 +16,7 @@ public class ReservaVacanteMapper {
                 .estado(entity.getEstado())
                 .importe(entity.getImporte())
                 .vencimiento(entity.getVencimiento())
+                .notificacionPago(entity.getNotificacionPago())
                 .created(entity.getCreated())
                 .updated(entity.getUpdated())
                 .build();
@@ -23,13 +24,17 @@ public class ReservaVacanteMapper {
 
     public ReservaVacanteEntity toEntity(ReservaVacante domain) {
         if (domain == null) return null;
-        return ReservaVacanteEntity.builder()
+        var builder = ReservaVacanteEntity.builder()
                 .reservaVacanteId(domain.getReservaVacanteId())
                 .personaUniqueId(domain.getPersonaUniqueId())
                 .campanhaId(domain.getCampanhaId())
                 .estado(domain.getEstado())
                 .importe(domain.getImporte())
-                .vencimiento(domain.getVencimiento())
-                .build();
+                .vencimiento(domain.getVencimiento());
+        // En el alta el flag no viene del dominio: se deja el default (false) de la entidad.
+        if (domain.getNotificacionPago() != null) {
+            builder.notificacionPago(domain.getNotificacionPago());
+        }
+        return builder.build();
     }
 }

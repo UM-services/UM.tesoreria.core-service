@@ -3,6 +3,7 @@ package um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistenc
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.PreferenciaPatch;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.ports.out.MercadoPagoContextRepository;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistence.entity.MercadoPagoContextEntity;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.infrastructure.persistence.mapper.MercadoPagoContextMapper;
@@ -45,6 +46,48 @@ public class JpaMercadoPagoContextRepositoryAdapter implements MercadoPagoContex
     }
 
     @Override
+    public List<MercadoPagoContext> findRenovaciones(OffsetDateTime desde, OffsetDateTime hastaExclusivo, boolean reintentos, OffsetDateTime afterFecha, Long afterId, int size) {
+        return repository.findRenovaciones(desde, hastaExclusivo, reintentos, afterFecha, afterId, size)
+                .stream()
+                .map(mapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> findChequeraCuotaIdsWithMultipleActiveContexts() {
+        return repository.findChequeraCuotaIdsWithMultipleActiveContexts();
+    }
+
+    @Override
+    public Optional<MercadoPagoContext> updatePreferencia(PreferenciaPatch datos, Long mercadoPagoContextId) {
+        return repository.findByMercadoPagoContextId(mercadoPagoContextId)
+                .map(entity -> {
+                    if (datos.fechaVencimiento() != null) {
+                        entity.setFechaVencimiento(datos.fechaVencimiento());
+                    }
+                    if (datos.importe() != null) {
+                        entity.setImporte(datos.importe());
+                    }
+                    if (datos.preferenceId() != null) {
+                        entity.setPreferenceId(datos.preferenceId());
+                    }
+                    if (datos.preference() != null) {
+                        entity.setPreference(datos.preference());
+                    }
+                    if (datos.initPoint() != null) {
+                        entity.setInitPoint(datos.initPoint());
+                    }
+                    if (datos.changed() != null) {
+                        entity.setChanged(datos.changed());
+                    }
+                    if (datos.lastVencimientoUpdated() != null) {
+                        entity.setLastVencimientoUpdated(datos.lastVencimientoUpdated());
+                    }
+                    return mapper.toDomainModel(repository.save(entity));
+                });
+    }
+
+    @Override
     public Optional<MercadoPagoContext> findByMercadoPagoContextId(Long mercadoPagoContextId) {
         return repository.findByMercadoPagoContextId(mercadoPagoContextId)
                 .map(mapper::toDomainModel);
@@ -60,14 +103,6 @@ public class JpaMercadoPagoContextRepositoryAdapter implements MercadoPagoContex
     public Optional<MercadoPagoContext> findByReservaVacanteIdAndActivo(UUID reservaVacanteId, Byte activo) {
         return repository.findByReservaVacanteId(reservaVacanteId)
                 .map(mapper::toDomainModel);
-    }
-
-    @Override
-    public List<MercadoPagoContext> findAllByActivoOrderByMercadoPagoContextIdDesc(Byte activo) {
-        return repository.findAllByActivoOrderByMercadoPagoContextIdDesc(activo)
-                .stream()
-                .map(mapper::toDomainModel)
-                .collect(Collectors.toList());
     }
 
     @Override

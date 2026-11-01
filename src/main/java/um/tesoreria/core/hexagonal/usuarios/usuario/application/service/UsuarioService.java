@@ -16,6 +16,7 @@ public class UsuarioService {
     private final FindUsuarioByLoginUseCase findUsuarioByLoginUseCase;
     private final FindUsuarioByPasswordUseCase findUsuarioByPasswordUseCase;
     private final CreateUsuarioUseCase createUsuarioUseCase;
+    private final SugerirLoginUseCase sugerirLoginUseCase;
     private final UpdateUsuarioUseCase updateUsuarioUseCase;
     private final UpdateLastLogUseCase updateLastLogUseCase;
     private final FindUsuarioByGoogleMailUseCase findUsuarioByGoogleMailUseCase;
@@ -50,6 +51,10 @@ public class UsuarioService {
 
     public Usuario add(Usuario usuario) {
         return createUsuarioUseCase.createUsuario(usuario);
+    }
+
+    public String sugerirLogin(String nombre, String apellido) {
+        return sugerirLoginUseCase.sugerirLogin(nombre, apellido);
     }
 
     public Usuario update(Usuario usuario, Long userId) {

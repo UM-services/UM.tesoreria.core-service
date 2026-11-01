@@ -62,20 +62,8 @@ public class ContabilidadService {
     }
 
     public void recalculateGrados() {
-        List<Cuenta> cuentas = cuentaService.findAll();
-        for (Cuenta cuenta : cuentas) {
-            cuenta.setNombre(cuenta.getNombre().replace("\r\n", ""));
-            cuenta.setGrado(5);
-            cuenta.setGrado1(Objects.requireNonNull(cuenta.getNumeroCuenta()).divideToIntegralValue(new BigDecimal("10000000000.0")).multiply(new BigDecimal("10000000000.0")));
-            cuenta.setGrado2(cuenta.getNumeroCuenta().divideToIntegralValue(new BigDecimal("100000000.0")).multiply(new BigDecimal("100000000.0")));
-            cuenta.setGrado3(cuenta.getNumeroCuenta().divideToIntegralValue(new BigDecimal("1000000.0")).multiply(new BigDecimal("1000000.0")));
-            cuenta.setGrado4(cuenta.getNumeroCuenta().divideToIntegralValue(new BigDecimal("10000.0")).multiply(new BigDecimal("10000.0")));
-            if (cuenta.getNumeroCuenta().compareTo(cuenta.getGrado4()) == 0) cuenta.setGrado(4);
-            if (cuenta.getNumeroCuenta().compareTo(cuenta.getGrado3()) == 0) cuenta.setGrado(3);
-            if (cuenta.getNumeroCuenta().compareTo(cuenta.getGrado2()) == 0) cuenta.setGrado(2);
-            if (cuenta.getNumeroCuenta().compareTo(cuenta.getGrado1()) == 0) cuenta.setGrado(1);
-        }
-        cuentas = cuentaService.saveAll(cuentas);
+        cuentaService.recalculaGrados();
+        cuentaService.limpiarNombres();
     }
 
     public Ejercicio verifyEjercicio(OffsetDateTime desde, OffsetDateTime hasta) {

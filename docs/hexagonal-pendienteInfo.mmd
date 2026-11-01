@@ -1,0 +1,71 @@
+---
+title: Arquitectura Hexagonal - Módulo PendienteInfo (extern/facultad, v11.6.0)
+---
+
+classDiagram
+    direction TB
+
+    %% Consulta a la facultad de la inscripción de un alumno con sus materias.
+    %% Una falla de /pendienteinfo se propaga: el use case de materiasInscriptas la convierte
+    %% en NO_DISPONIBLE. Una falla de /materia/unique solo deja el nombre en null.
+
+    namespace domain {
+        class InscripcionMaterias {
+            +Integer curso
+            +String plan
+            +String carrera
+            +String observaciones
+            +List~MateriaCursada~ materias
+        }
+
+        class MateriaCursada {
+            +Integer facultadId
+            +Integer planId
+            +String materiaId
+            +String nombre
+            +Integer curso
+            +Integer periodo
+        }
+
+        class FindInscripcionMateriasUseCase {
+            <<interface>>
+            +findByAlumno(facultadId, lectivoId, geograficaId, personaId, documentoId) Optional~InscripcionMaterias~
+        }
+
+        class PendienteInfoRepository {
+            <<interface>>
+            +findByAlumno(facultadId, lectivoId, geograficaId, personaId, documentoId) Optional~InscripcionMaterias~
+        }
+    }
+
+    namespace application {
+        class FindInscripcionMateriasUseCaseImpl
+        class PendienteInfoFacultadService
+    }
+
+    namespace infrastructure {
+        class PendienteInfoFacultadConsumer {
+            +GET /pendienteinfo/info/facultadId/lectivoId/geograficaId/personaId/documentoId
+        }
+        class PendienteInfoFacultadMapper
+        class NombreMateriaResolver {
+            <<interface>>
+        }
+        class MateriaUniqueResolver {
+            +tope 10 llamadas
+            +presupuesto 3 s
+            +corta en la primera falla
+        }
+        class PendienteInfoFacultadResponse
+    }
+
+    InscripcionMaterias o-- MateriaCursada
+    FindInscripcionMateriasUseCaseImpl ..|> FindInscripcionMateriasUseCase
+    FindInscripcionMateriasUseCaseImpl --> PendienteInfoRepository
+    PendienteInfoFacultadService --> FindInscripcionMateriasUseCase
+    PendienteInfoFacultadConsumer ..|> PendienteInfoRepository
+    PendienteInfoFacultadConsumer --> PendienteInfoFacultadMapper
+    PendienteInfoFacultadConsumer --> PendienteInfoFacultadResponse
+    PendienteInfoFacultadConsumer --> MateriaUniqueResolver
+    MateriaUniqueResolver ..|> NombreMateriaResolver
+    PendienteInfoFacultadMapper --> NombreMateriaResolver

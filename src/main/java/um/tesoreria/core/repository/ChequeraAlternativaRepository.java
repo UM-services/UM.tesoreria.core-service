@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import um.tesoreria.core.kotlin.model.ChequeraAlternativa;
 
@@ -25,7 +24,6 @@ public interface ChequeraAlternativaRepository extends JpaRepository<ChequeraAlt
 			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId,
 			Integer alternativaId);
 
-	@Modifying
 	public void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 

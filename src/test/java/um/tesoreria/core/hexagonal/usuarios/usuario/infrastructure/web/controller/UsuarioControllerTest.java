@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import um.tesoreria.core.hexagonal.usuarios.usuario.application.exception.LoginNoDisponibleException;
 import um.tesoreria.core.hexagonal.usuarios.usuario.application.service.UsuarioService;
 import um.tesoreria.core.hexagonal.usuarios.usuario.domain.model.Usuario;
 import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.mapper.UsuarioDtoMapper;
@@ -121,5 +122,77 @@ class UsuarioControllerTest {
         mockMvc.put().uri("/api/tesoreria/core/usuario/usuario/7/password")
                 .contentType(MediaType.APPLICATION_JSON).content("{\"password\":\"a\",\"reClave\":\"b\"}")
                 .assertThat().hasStatus(400);
+    }
+
+    private static final String ALTA_JSON = """
+            {"nombre":"Juan","apellido":"Perez","password":"secreta","geograficaId":1,
+             "imprimeChequera":0,"numeroOpManual":0,"habilitaOpEliminacion":0,
+             "eliminaChequera":0,"modificaChequera":0,"activo":1}
+            """;
+
+    @Test
+    void sugerirLoginOk() {
+        when(service.sugerirLogin("Juan", "Perez")).thenReturn("jperez");
+
+        mockMvc.get().uri("/api/tesoreria/core/usuario/login-sugerido/Juan/Perez")
+                .assertThat().hasStatusOk()
+                .bodyJson().extractingPath("$.login").isEqualTo("jperez");
+    }
+
+    @Test
+    void sugerirLoginSinDatosDevuelve400() {
+        when(service.sugerirLogin("---", "Perez"))
+                .thenThrow(new IllegalArgumentException("Nombre y apellido son obligatorios"));
+
+        mockMvc.get().uri("/api/tesoreria/core/usuario/login-sugerido/---/Perez")
+                .assertThat().hasStatus(400);
+    }
+
+    @Test
+    void altaSinLoginGeneraElUsuario() {
+        when(service.add(any()))
+                .thenReturn(Usuario.builder().userId(9L).login("jperez").nombre("Juan Perez").build());
+
+        mockMvc.post().uri("/api/tesoreria/core/usuario/usuario")
+                .contentType(MediaType.APPLICATION_JSON).content(ALTA_JSON)
+                .assertThat().hasStatusOk()
+                .bodyJson().extractingPath("$.login").isEqualTo("jperez");
+    }
+
+    @Test
+    void altaSinApellidoDevuelve400() {
+        mockMvc.post().uri("/api/tesoreria/core/usuario/usuario")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nombre":"Juan","password":"secreta","geograficaId":1,
+                         "imprimeChequera":0,"numeroOpManual":0,"habilitaOpEliminacion":0,
+                         "eliminaChequera":0,"modificaChequera":0,"activo":1}
+                        """)
+                .assertThat().hasStatus(400);
+    }
+
+    @Test
+    void altaLegacyConLoginExplicitoSinApellidoSigueFuncionando() {
+        when(service.add(any()))
+                .thenReturn(Usuario.builder().userId(10L).login("legacy").nombre("Usuario Legacy").build());
+
+        mockMvc.post().uri("/api/tesoreria/core/usuario/usuario")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"login":"legacy","password":"secreta","nombre":"Usuario Legacy",
+                         "geograficaId":1,"imprimeChequera":0,"eliminaChequera":0}
+                        """)
+                .assertThat().hasStatusOk()
+                .bodyJson().extractingPath("$.login").isEqualTo("legacy");
+    }
+
+    @Test
+    void altaConLoginsAgotadosDevuelve409() {
+        when(service.add(any()))
+                .thenThrow(new LoginNoDisponibleException("No se pudo asignar un login unico"));
+
+        mockMvc.post().uri("/api/tesoreria/core/usuario/usuario")
+                .contentType(MediaType.APPLICATION_JSON).content(ALTA_JSON)
+                .assertThat().hasStatus(409);
     }
 }

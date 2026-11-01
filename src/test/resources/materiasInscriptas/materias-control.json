@@ -1,0 +1,119 @@
+[
+  {
+    "fuente": "SIUM",
+    "estado": "OK",
+    "cursoInscripcion": 5,
+    "plan": "Plan 2016",
+    "carrera": "Ingeniería en Informática",
+    "observaciones": "Texto libre de la inscripción",
+    "cursos": [
+      {
+        "curso": 1,
+        "periodos": [
+          {
+            "periodo": "SEGUNDO_SEMESTRE",
+            "materias": [
+              {
+                "materiaId": "0004",
+                "nombre": "CALCULO II"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "curso": 2,
+        "periodos": [
+          {
+            "periodo": "SEGUNDO_SEMESTRE",
+            "materias": [
+              {
+                "materiaId": "2027",
+                "nombre": "ALGEBRA LINEAL"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "curso": 4,
+        "periodos": [
+          {
+            "periodo": "PRIMER_SEMESTRE",
+            "materias": [
+              {
+                "materiaId": "2404",
+                "nombre": "TRABAJO INTEGRADOR FINAL I"
+              }
+            ]
+          },
+          {
+            "periodo": "SEGUNDO_SEMESTRE",
+            "materias": [
+              {
+                "materiaId": "2047",
+                "nombre": "INVESTIGACIÓN OPERATIVA"
+              },
+              {
+                "materiaId": "2409",
+                "nombre": "TRABAJO INTEGRADOR FINAL II"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "curso": 5,
+        "periodos": [
+          {
+            "periodo": "ANUAL",
+            "materias": [
+              {
+                "materiaId": "2500",
+                "nombre": "PRÁCTICA PROFESIONAL"
+              }
+            ]
+          },
+          {
+            "periodo": "PRIMER_SEMESTRE",
+            "materias": [
+              {
+                "materiaId": "2501",
+                "nombre": "ASEGURAMIENTO DE CALIDAD DEL SOFTWARE"
+              },
+              {
+                "materiaId": "2502",
+                "nombre": "GESTIÓN DE CALIDAD Y MEDIO AMBIENTE"
+              },
+              {
+                "materiaId": "2503",
+                "nombre": "HIGIENE Y SEGURIDAD DEL TRABAJO"
+              },
+              {
+                "materiaId": "2504",
+                "nombre": "MODELOS Y SIMULACIÓN"
+              }
+            ]
+          },
+          {
+            "periodo": "SEGUNDO_SEMESTRE",
+            "materias": [
+              {
+                "materiaId": "2506",
+                "nombre": "SEGURIDAD INFORMÁTICA II"
+              },
+              {
+                "materiaId": "2508",
+                "nombre": "AUDITORÍA DE SISTEMAS"
+              },
+              {
+                "materiaId": "2509",
+                "nombre": "PLANEAMIENTO Y GESTIÓN DE EMPRESAS"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
