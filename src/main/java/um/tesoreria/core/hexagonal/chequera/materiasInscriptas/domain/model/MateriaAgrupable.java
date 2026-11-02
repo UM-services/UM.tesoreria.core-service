@@ -10,5 +10,12 @@ public record MateriaAgrupable(
         String materiaId,
         String nombre,
         Integer curso,
-        PeriodoCursada periodo) {
+        PeriodoCursada periodo,
+        Integer periodoLectivo) {
+
+    /** SIUM conserva la clave previa, sin período lectivo. */
+    public MateriaAgrupable(Integer facultadId, Integer planId, String materiaId, String nombre,
+                           Integer curso, PeriodoCursada periodo) {
+        this(facultadId, planId, materiaId, nombre, curso, periodo, null);
+    }
 }

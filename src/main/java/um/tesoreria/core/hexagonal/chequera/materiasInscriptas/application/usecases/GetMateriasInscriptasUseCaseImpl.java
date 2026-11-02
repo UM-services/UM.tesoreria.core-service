@@ -19,11 +19,17 @@ import um.tesoreria.core.hexagonal.extern.facultad.pendienteInfo.application.ser
 import um.tesoreria.core.hexagonal.extern.facultad.pendienteInfo.domain.model.InscripcionMaterias;
 import um.tesoreria.core.hexagonal.extern.facultad.pendienteInfo.domain.model.MateriaCursada;
 
+import um.tesoreria.core.hexagonal.dependencias.facultad.application.service.FacultadService;
+import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
+import um.tesoreria.core.hexagonal.extern.guarani.cursada.domain.ports.out.FindInscripcionesGuaraniPort;
+import um.tesoreria.core.hexagonal.extern.guarani.cursada.domain.model.InscripcionMateriasGuarani;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Arma las materias inscriptas de una chequera de grado con los datos de SIUM.
+ * Arma las materias inscriptas de una chequera de grado con los datos de SIUM y Guaraní, sin mezclar fuentes.
  * <ul>
  *   <li>La chequera debe existir: si no, {@code ChequeraSerieException} sube al controller.</li>
  *   <li>Sin clase de chequera, o con {@code grado != 1}: lista vacía, sin llamar a la facultad.</li>
@@ -43,6 +49,9 @@ public class GetMateriasInscriptasUseCaseImpl implements GetMateriasInscriptasUs
     private final ChequeraSerieService chequeraSerieService;
     private final TipoChequeraService tipoChequeraService;
     private final PendienteInfoFacultadService pendienteInfoFacultadService;
+    private final FacultadService facultadService;
+    private final LectivoService lectivoService;
+    private final FindInscripcionesGuaraniPort guarani;
 
     @Override
     public List<MateriasEstado> getMateriasInscriptas(Integer facultadId, Integer tipoChequeraId,
@@ -53,7 +62,10 @@ public class GetMateriasInscriptasUseCaseImpl implements GetMateriasInscriptasUs
         if (!esDeGrado(tipoChequera)) {
             return List.of();
         }
-        return List.of(materiasDeSium(serie));
+        List<MateriasEstado> fuentes = new ArrayList<>();
+        fuentes.add(materiasDeSium(serie));
+        fuentes.addAll(materiasDeGuarani(serie));
+        return List.copyOf(fuentes);
     }
 
     private boolean esDeGrado(TipoChequera tipoChequera) {
@@ -87,6 +99,48 @@ public class GetMateriasInscriptasUseCaseImpl implements GetMateriasInscriptasUs
         PeriodoCursada periodo = materia.periodo() == null ? null : PeriodoCursada.desde(materia.periodo());
         return new MateriaAgrupable(materia.facultadId(), materia.planId(), materia.materiaId(), materia.nombre(),
                 materia.curso(), periodo);
+    }
+
+    private List<MateriasEstado> materiasDeGuarani(ChequeraSerie serie) {
+        try {
+            var facultad = facultadService.findByFacultadId(serie.getFacultadId());
+            if (facultad == null || facultad.getGuaraniResponsableAcademica() == null) return List.of();
+            var lectivo = lectivoService.findByLectivoId(serie.getLectivoId());
+            var inscripciones = guarani.findByDocumentoAndAnioAcademico(serie.getPersonaId().toPlainString(),
+                    lectivo.getFechaInicio().getYear(), facultad.getGuaraniResponsableAcademica());
+            if (inscripciones.isEmpty()) return List.of(sinDatosGuarani(EstadoMaterias.SIN_INSCRIPCION));
+            return inscripciones.stream().map(i -> conDatosGuarani(serie.getFacultadId(), i)).toList();
+        } catch (RuntimeException e) {
+            // Nunca registrar el mensaje, la URL, el cuerpo o la excepción como Throwable.
+            Integer status = e instanceof feign.FeignException respuesta ? respuesta.status() : null;
+            log.warn("Materias GUARANI no disponibles: facultadId={} chequeraSerieId={} excepcion={} status={}",
+                    serie.getFacultadId(), serie.getChequeraSerieId(), e.getClass().getName(), status);
+            return List.of(sinDatosGuarani(EstadoMaterias.NO_DISPONIBLE));
+        }
+    }
+
+    private MateriasEstado conDatosGuarani(Integer facultadId, InscripcionMateriasGuarani inscripcion) {
+        var materias = inscripcion.materias().stream().map(m -> new MateriaAgrupable(
+                facultadId, inscripcion.planVersion(), m.actividadCodigo(), m.nombre(), m.curso(),
+                periodoGuarani(m.periodo()), m.periodoLectivo())).toList();
+        return new MateriasEstado(FuenteMaterias.GUARANI, EstadoMaterias.OK, inscripcion.cursoInscripcion(),
+                "Versión " + inscripcion.planVersion(), inscripcion.carrera(), null,
+                AgrupadorMaterias.agrupar(materias, Comparator.nullsLast(Comparator.naturalOrder())));
+    }
+
+    private PeriodoCursada periodoGuarani(String periodo) {
+        return switch (periodo) {
+            case "ANUAL" -> PeriodoCursada.ANUAL;
+            case "PRIMER_SEMESTRE" -> PeriodoCursada.PRIMER_SEMESTRE;
+            case "SEGUNDO_SEMESTRE" -> PeriodoCursada.SEGUNDO_SEMESTRE;
+            case "OTRO" -> null;
+            case null -> null;
+            default -> throw new IllegalArgumentException("Período Guaraní fuera del contrato");
+        };
+    }
+
+    private MateriasEstado sinDatosGuarani(EstadoMaterias estado) {
+        return new MateriasEstado(FuenteMaterias.GUARANI, estado, null, null, null, null, List.of());
     }
 
     private MateriasEstado sinDatos(EstadoMaterias estado) {
