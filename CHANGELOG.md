@@ -2,6 +2,23 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.7.0] - 2026-11-02
+
+### Added
+
+- Guaraní como segunda fuente en `GET /api/tesoreria/core/materiasInscriptas/{facultadId}/{tipoChequeraId}/{chequeraSerieId}`. SIUM queda primero. Guaraní devuelve una entrada por propuesta y versión de plan, ordenada por ambas claves.
+- Cliente Feign `GuaraniCursadaClient` para el contrato de cursadas de B1 y slice `extern/guarani/cursada` con modelos propios, puerto de salida y adaptador. Core filtra las filas por igualdad con `Facultad.guaraniResponsableAcademica`.
+- Sin cursadas de la facultad: `GUARANI/SIN_INSCRIPCION`. Falla de consulta, conversión o agrupado: `GUARANI/NO_DISPONIBLE`, sin alterar SIUM y con HTTP 200. Sin responsable académica: no se consulta Guaraní ni se agrega su fuente. Sin grado: lista vacía, sin consultar fuentes.
+
+### Changed
+
+- `GetMateriasInscriptasUseCaseImpl` convierte cada fuente por separado. En Guaraní, curso sale de `anioPlan`, carrera de `propuestaNombre`, plan de `planVersion` con el prefijo `Versión`, curso de inscripción de `anioCursada` y observaciones queda null. `OTRO` se convierte a null para el agrupador.
+- El año solicitado a Guaraní es el año de `lectivo.fechaInicio`. Las cursadas con otro año académico quedan fuera aunque empiecen dentro del mismo año calendario. El documento sale de `serie.personaId.toPlainString()`.
+- La clave interna del agrupador admite `periodoLectivo`. Guaraní elimina duplicados por facultad, versión de plan, actividad y período lectivo. SIUM conserva su clave previa. Las materias de fuentes distintas no se mezclan.
+- El orden de códigos nulos de Guaraní se aplica solo a esa fuente. SIUM conserva su comparación previa: una materia sin código sola en un grupo se conserva; si falla la comparación de códigos en un grupo, la fuente queda en `NO_DISPONIBLE`.
+
+> Based on git diff origin/develop y los archivos nuevos de `client/tesoreria/guarani` y `hexagonal/extern/guarani/cursada`. Se conserva la ruta y la forma del JSON del endpoint de materias aprobado en #487. Se agrega una fuente al contrato existente: incremento minor de `11.6.1` a `11.7.0`. La integración de #484 se aplica en `GetMateriasInscriptasUseCaseImpl`, según la decisión de implementación. Sin DDL ni cambios en guarani-service. Verificación: `mvn -B verify` pasó con 1387 tests, sin fallos, errores ni omitidos. Los tests con fixture B1 y servidores HTTP locales son simulaciones. En develop, el endpoint local de core respondió 200 con SIUM/OK y GUARANI/OK para una chequera existente; sus tres materias coincidieron con B1 después del agrupado. Otro caso real excluyó las tres cursadas de otra responsable y devolvió GUARANI/SIN_INSCRIPCION. La prueba posterior consultó Consul real con `passing` y sin propiedades URL de Feign: pasaron los dos casos de materias y un tercero no de grado sin llamadas a fuentes. Las cinco sesiones del core estuvieron en solo lectura. Se usó una pasarela de transporte hacia los puertos publicados de develop, sin modificar el catálogo ni las respuestas. No se verificó acceso directo desde la Mac a las direcciones anunciadas, ni cursadas Guaraní reales de grado (el caso positivo usa Ingreso).
+
 ## [11.6.1] - 2026-10-28
 
 ### Added

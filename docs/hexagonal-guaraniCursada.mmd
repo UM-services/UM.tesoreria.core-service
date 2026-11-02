@@ -1,0 +1,47 @@
+---
+title: Cursadas Guaraní en core (v11.7.0)
+---
+classDiagram
+    direction TB
+    namespace domain {
+        class FindInscripcionesGuaraniPort {
+            << interface >>
+            +findByDocumentoAndAnioAcademico(documento, anio, responsable) List~InscripcionMateriasGuarani~
+        }
+        class InscripcionMateriasGuarani {
+            +Integer propuesta
+            +Integer planVersion
+            +String carrera
+            +Integer cursoInscripcion
+            +List~MateriaCursadaGuarani~ materias
+        }
+        class MateriaCursadaGuarani {
+            +String actividadCodigo
+            +String nombre
+            +Integer curso
+            +String periodo
+            +Integer periodoLectivo
+        }
+    }
+    namespace infrastructure {
+        class FeignCursadaGuaraniAdapter
+        class GuaraniCursadaClient {
+            << interface >>
+            +findByDocumentoAndAnioAcademico(documento, anio) List~CursadaGuaraniResponse~
+        }
+        class CursadaGuaraniResponse
+    }
+    namespace consumidor {
+        class GetMateriasInscriptasUseCaseImpl
+        class AgrupadorMaterias
+    }
+    FeignCursadaGuaraniAdapter ..|> FindInscripcionesGuaraniPort
+    FeignCursadaGuaraniAdapter --> GuaraniCursadaClient
+    GuaraniCursadaClient --> CursadaGuaraniResponse
+    FeignCursadaGuaraniAdapter --> InscripcionMateriasGuarani
+    InscripcionMateriasGuarani o-- MateriaCursadaGuarani
+    GetMateriasInscriptasUseCaseImpl --> FindInscripcionesGuaraniPort
+    GetMateriasInscriptasUseCaseImpl --> AgrupadorMaterias
+    %% B1 devuelve todas las responsables. El adaptador filtra por igualdad y ordena propuesta y versión.
+    %% Año académico: año de fechaInicio del lectivo. Un elemento por propuesta y versión.
+    %% Endpoint público: materiasInscriptas. El estado de chequera no consulta fuentes de materias.

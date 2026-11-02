@@ -4,7 +4,13 @@
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.6.1**
+**Versión actual (SemVer): 11.7.0**
+
+## Novedades 11.7.0 (verificado en código)
+
+El endpoint separado `GET /api/tesoreria/core/materiasInscriptas/{facultadId}/{tipoChequeraId}/{chequeraSerieId}` consulta SIUM y Guaraní para chequeras de grado. SIUM queda primero. Guaraní agrega una entrada por propuesta y versión de plan de la responsable académica de la facultad. Si no hay responsable configurada, se consulta solo SIUM. Cada fuente conserva su estado y sus grupos. Una falla de Guaraní produce `NO_DISPONIBLE` para esa fuente y mantiene HTTP 200.
+
+Core solicita a B1 el año de `lectivo.fechaInicio`. No incluye cursadas de otro año académico, como ingreso del año siguiente que comienza en el año calendario anterior. Sin cambios de esquema ni de la forma del JSON. Diagramas: [Guaraní cursadas](docs/hexagonal-guaraniCursada.mmd) y [Materias inscriptas](docs/hexagonal-materiasInscriptas.mmd). Los tests con el fixture sintético de B1 prueban simulación, no cursadas reales de grado.
 
 ## Novedades 11.6.1 (verificado en código)
 - **fix(configuration)**: `pom.xml` usa `spring-boot-starter-kafka` en lugar de `spring-kafka`. En Spring Boot 4 la auto-configuración vive en `spring-boot-kafka`: sin ella no había `KafkaAdmin` y los `NewTopic` de `KafkaTopicsConfiguration` no se aplicaban (los topics existían sólo por `auto.create.topics.enable`, sin retención). `KafkaAutoconfiguracionTest` lo vigila.
