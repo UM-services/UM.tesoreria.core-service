@@ -1,10 +1,31 @@
 # Servicio Core de Tesorería
 
+[![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-brightgreen.svg)](https://spring.io/projects/spring-cloud)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
+[![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-blue.svg)](https://www.mysql.com/)
+[![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-black.svg)](https://kafka.apache.org/)
+[![JUnit](https://img.shields.io/badge/JUnit-6.0.3-green.svg)](https://junit.org/)
+[![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
+[![Versión](https://img.shields.io/badge/versión-11.8.0-blue.svg)]()
+
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.7.0**
+**Versión actual (SemVer): 11.8.0**
+
+## Novedades 11.8.0 (verificado en código)
+
+- **feat(localidad, provincia)**: altas `POST /localidad/` y `POST /provincia/` (también con el prefijo `/api/tesoreria/core/...`), sobre los `add` que ya existían en sus services. El `POST /localidad/nombre` previo sigue siendo una consulta.
+- **feat(contratotool)**: `GET /contratotool/reset/marca/temporal/{contratoId}` (alias `/api/core/contratotool/...`) pone `marcaTemporal = 0` en lote a los `ContratoPeriodo` marcados del contrato, en una transacción; sin períodos marcados no escribe.
+- **feat(compatibilidad con Gestión)**: alias de ruta `GET /materia/{facultadId}`, `GET /plan/{facultadId}` y `GET /cuentaMovimiento/{numeroCuenta}/{onlyOne}`; las rutas canónicas `/materia/facultad/...`, `/plan/facultad/...` y `/cuentaMovimiento/cuenta/...` siguen respondiendo igual. `UsuarioRequest`/`UsuarioAltaRequest` aceptan la clave legacy `modificaCHequera` (`@JsonAlias`) y `DeudaChequeraDto` suma `tipoChequeraId`/`chequeraSerieId` sin renombrar `tipochequeraId`/`chequeraserieId`.
+- **feat(contratos/cursoCargoContratado)**: `CursoHaberes` suma y deserializa `facultadId`, `geograficaId` y `nivelId`, que devuelve `CursoClient` de haberes.
+- **fix**: un `PUT` de chequera serie sin `version` y un `PUT` de usuario sin `googleMail` ya no borran el valor guardado.
+
+> Basado en `git diff HEAD` (staged; HEAD `46ddad88`; 25 archivos, +567/−5: 13 en `src/main`, 11 tests nuevos y `UsuarioControllerTest` ampliado) y el código real de los controladores, `ContratoToolService`, `CursoHaberes`, `DeudaChequeraDto` y los dos casos de uso. Todo es aditivo o conserva el contrato previo ⇒ incremento **minor** de SemVer (`11.7.0` → `11.8.0`). Sin DDL ni dependencias nuevas. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`).
 
 ## Novedades 11.7.0 (verificado en código)
 
@@ -1801,13 +1822,6 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 Daniel Quinteros - daniel.quinterospinto@gmail.com
 
 Link del proyecto: [https://github.com/UM-services/um.tesoreria.core-service](https://github.com/UM-services/um.tesoreria.core-service)
-
-[![Java](https://img.shields.io/badge/Java-25-blue.svg)](https://www.java.com/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-brightgreen.svg)](https://spring.io/projects/spring-cloud)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.21-purple.svg)](https://kotlinlang.org/)
-[![Maven](https://img.shields.io/badge/Maven-3.8.8+-orange.svg)](https://maven.apache.org/)
-[![Versión](https://img.shields.io/badge/versión-11.5.0-blue.svg)]()
 
 ## Documentación
 - [Documentación en GitHub Pages](https://um-services.github.io/UM.tesoreria.core-service/)
