@@ -2,6 +2,29 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.8.0] - 2026-11-03
+
+### Added
+
+- `POST /localidad/` (alias `/api/tesoreria/core/localidad/`) da de alta una localidad con `LocalidadService.add`; hasta ahora el controller sólo tenía `POST /nombre` como consulta por nombre, sin alta.
+- `POST /provincia/` (alias `/api/tesoreria/core/provincia/`) da de alta una provincia con `ProvinciaService.add`.
+- Alias de ruta para el cliente de Gestión: `GET /materia/{facultadId}`, `GET /plan/{facultadId}` y `GET /cuentaMovimiento/{numeroCuenta}/{onlyOne}` (más la forma larga `/api/tesoreria/core/cuentaMovimiento/{numeroCuenta}/{onlyOne}`). Las rutas canónicas `/materia/facultad/{facultadId}`, `/plan/facultad/{facultadId}` y `/cuentaMovimiento/cuenta/{numeroCuenta}/{onlyOne}` no cambian.
+- `GET /contratotool/reset/marca/temporal/{contratoId}` (alias `/api/core/contratotool/reset/marca/temporal/{contratoId}`) ejecuta `ContratoToolService.resetMarcaTemporal`: pone `marcaTemporal = 0` en los `ContratoPeriodo` marcados del contrato y guarda el lote en una transacción; sin períodos marcados no escribe.
+- `CursoHaberes` suma `facultadId`, `geograficaId` y `nivelId`, campos del curso que devuelve `CursoClient` (`GET /api/haberes/core/curso/{cursoId}`) y que antes se descartaban al deserializar; el test los lee de un JSON con esas claves.
+- Tests: 11 clases nuevas (`LocalidadControllerTest`, `ProvinciaControllerTest` con el alta y el body de Gestión, `MateriaControllerTest`, `PlanControllerTest`, `CuentaMovimientoControllerTest`, `ContratoToolControllerTest`, `ContratoToolServiceTest`, `UpdateChequeraSerieUseCaseImplTest`, `UpdateUsuarioUseCaseImplTest`, `CursoHaberesMappingTest` y `DeudaChequeraDtoSerializationTest`); `UsuarioControllerTest` suma `updateAceptaLaClaveLegacyModificaCHequera`.
+
+### Changed
+
+- `DeudaChequeraDto` emite además las claves `tipoChequeraId` y `chequeraSerieId` (`@JsonAnyGetter legacyIds()`) sin renombrar `tipochequeraId`/`chequeraserieId`: el cliente VB6 de Gestión lee la grafía camelCase y los consumidores actuales siguen recibiendo las claves originales. Un consumidor que valide el esquema de forma estricta verá dos claves extra.
+- `UsuarioRequest` y `UsuarioAltaRequest` aceptan la clave legacy `modificaCHequera` (`@JsonAlias`) además de `modificaChequera`, con el mismo destino.
+
+### Fixed
+
+- `UpdateChequeraSerieUseCaseImpl` sólo cambia `version` si el payload la trae; antes un `PUT` sin `version` la persistía en `null`.
+- `UpdateUsuarioUseCaseImpl` sólo cambia `googleMail` si el payload lo trae; antes un `PUT` sin el campo lo vaciaba.
+
+> Based on `git diff HEAD` (staged; HEAD `46ddad88`, merge del PR #498; 25 archivos, +567/−5: 13 archivos modificados bajo `src/main`, 11 tests nuevos y `UsuarioControllerTest` ampliado) y el código real de `LocalidadController`/`ProvinciaController` (`@PostMapping("/")` sobre `LocalidadService.add`/`ProvinciaService.add`), `MateriaController`/`PlanController`/`CuentaMovimientoController` (`@GetMapping` con dos rutas y el mismo `@PathVariable`), `ContratoToolController`/`ContratoToolService.resetMarcaTemporal` (`findAllMarcadoByContrato` + `saveAll` en `@Transactional`), `CursoHaberes`, `DeudaChequeraDto.legacyIds`, `UsuarioRequest`/`UsuarioAltaRequest` (`@JsonAlias("modificaCHequera")`) y los dos casos de uso con guarda de `null`. Todo es aditivo o mantiene el contrato previo (las rutas canónicas siguen respondiendo, las claves nuevas del DTO se suman a las existentes y los `PUT` conservan el valor guardado cuando el campo falta) ⇒ incremento **minor** de SemVer (`11.7.0` → `11.8.0`, `pom.xml`). Sin DDL, sin dependencias nuevas y sin cambios de esquema. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); no se modificaron diagramas `.mmd` porque la estructura de los slices no cambia, así que no se ejecutó `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-11-03).
+
 ## [11.7.0] - 2026-11-02
 
 ### Added

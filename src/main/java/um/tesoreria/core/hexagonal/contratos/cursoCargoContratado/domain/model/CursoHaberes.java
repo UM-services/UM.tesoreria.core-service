@@ -19,6 +19,9 @@ public class CursoHaberes {
     private Byte semestre1;
     private Byte semestre2;
     private Byte adicionalCargaHoraria;
+    private Integer facultadId;
+    private Integer geograficaId;
+    private Integer nivelId;
     private FacultadEntity facultad;
     private GeograficaEntity geografica;
 

@@ -33,7 +33,7 @@ public class PlanController {
 		return ResponseEntity.ok(service.findAll());
 	}
 
-	@GetMapping("/facultad/{facultadId}")
+	@GetMapping({"/facultad/{facultadId}", "/{facultadId}"})
 	public ResponseEntity<List<Plan>> findAllByFacultad(@PathVariable Integer facultadId) {
 		return ResponseEntity.ok(service.findAllByFacultadId(facultadId));
 	}

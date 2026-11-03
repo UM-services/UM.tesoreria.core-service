@@ -1,5 +1,6 @@
 package um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -35,6 +36,7 @@ public class UsuarioAltaRequest {
 
     private Byte eliminaChequera;
 
+    @JsonAlias("modificaCHequera")
     private Byte modificaChequera;
 
     private String googleMail;
