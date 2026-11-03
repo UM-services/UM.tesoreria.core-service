@@ -31,6 +31,11 @@ public class LocalidadController {
 
 	private final LocalidadService service;
 
+	@PostMapping("/")
+	public ResponseEntity<Localidad> add(@RequestBody Localidad localidad) {
+		return ResponseEntity.ok(service.add(localidad));
+	}
+
 	@GetMapping("/provincia/{facultadId}/{provinciaId}")
 	public ResponseEntity<List<Localidad>> findAllByProvinciaId(@PathVariable Integer facultadId,
 			@PathVariable Integer provinciaId) {

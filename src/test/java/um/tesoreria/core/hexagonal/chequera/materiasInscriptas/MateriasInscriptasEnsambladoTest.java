@@ -132,7 +132,10 @@ class MateriasInscriptasEnsambladoTest {
         var consumer = new PendienteInfoFacultadConsumer(restClient, urlResolver, new PendienteInfoFacultadMapper(),
                 Clock.systemUTC());
         return new GetMateriasInscriptasUseCaseImpl(chequeraSerieService, tipoChequeraService,
-                new PendienteInfoFacultadService(new FindInscripcionMateriasUseCaseImpl(consumer)));
+                new PendienteInfoFacultadService(new FindInscripcionMateriasUseCaseImpl(consumer)),
+                mock(um.tesoreria.core.hexagonal.dependencias.facultad.application.service.FacultadService.class),
+                mock(um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService.class),
+                mock(um.tesoreria.core.hexagonal.extern.guarani.cursada.domain.ports.out.FindInscripcionesGuaraniPort.class));
     }
 
     private String fixture(String path) throws IOException {

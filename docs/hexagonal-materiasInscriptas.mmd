@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo MateriasInscriptas bajo chequera/ (v11.6.0)
+title: Arquitectura Hexagonal - Módulo MateriasInscriptas bajo chequera/ (v11.7.0)
 ---
 
 classDiagram
@@ -44,10 +44,11 @@ classDiagram
             +String nombre
             +Integer curso
             +PeriodoCursada periodo
+            +Integer periodoLectivo
         }
 
         class PeriodoCursada {
-            <<enumeration>>
+            << enumeration >>
             ANUAL
             PRIMER_SEMESTRE
             SEGUNDO_SEMESTRE
@@ -56,24 +57,25 @@ classDiagram
         }
 
         class EstadoMaterias {
-            <<enumeration>>
+            << enumeration >>
             OK
             SIN_INSCRIPCION
             NO_DISPONIBLE
         }
 
         class FuenteMaterias {
-            <<enumeration>>
+            << enumeration >>
             SIUM
             GUARANI
         }
 
         class AgrupadorMaterias {
             +agrupar(List~MateriaAgrupable~) List~CursoMaterias~
+            +agrupar(List~MateriaAgrupable~, Comparator~String~) List~CursoMaterias~
         }
 
         class GetMateriasInscriptasUseCase {
-            <<interface>>
+            << interface >>
             +getMateriasInscriptas(facultadId, tipoChequeraId, chequeraSerieId) List~MateriasEstado~
         }
     }
@@ -95,6 +97,11 @@ classDiagram
     namespace otros_slices {
         class ChequeraSerieService
         class TipoChequeraService
+        class FindInscripcionesGuaraniPort {
+            << interface >>
+        }
+        class FacultadService
+        class LectivoService
         class PendienteInfoFacultadService
     }
 
@@ -115,3 +122,7 @@ classDiagram
     MateriasInscriptasController --> MateriasInscriptasService
     MateriasInscriptasController --> MateriasInscriptasDtoMapper
     MateriasInscriptasDtoMapper --> MateriasEstadoResponse
+
+    GetMateriasInscriptasUseCaseImpl --> FindInscripcionesGuaraniPort
+    GetMateriasInscriptasUseCaseImpl --> FacultadService
+    GetMateriasInscriptasUseCaseImpl --> LectivoService

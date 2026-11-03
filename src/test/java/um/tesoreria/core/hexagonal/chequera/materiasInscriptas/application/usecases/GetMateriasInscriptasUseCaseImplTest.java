@@ -57,7 +57,10 @@ class GetMateriasInscriptasUseCaseImplTest {
         chequeraSerieService = mock(ChequeraSerieService.class);
         tipoChequeraService = mock(TipoChequeraService.class);
         facultad = mock(PendienteInfoFacultadService.class);
-        useCase = new GetMateriasInscriptasUseCaseImpl(chequeraSerieService, tipoChequeraService, facultad);
+        useCase = new GetMateriasInscriptasUseCaseImpl(chequeraSerieService, tipoChequeraService, facultad,
+                mock(um.tesoreria.core.hexagonal.dependencias.facultad.application.service.FacultadService.class),
+                mock(um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService.class),
+                mock(um.tesoreria.core.hexagonal.extern.guarani.cursada.domain.ports.out.FindInscripcionesGuaraniPort.class));
         when(chequeraSerieService.findByUnique(1, 2, 12345L)).thenReturn(serie());
         when(tipoChequeraService.findByTipoChequeraId(2)).thenReturn(tipo(grado((byte) 1)));
     }
