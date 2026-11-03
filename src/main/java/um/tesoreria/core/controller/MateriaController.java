@@ -31,7 +31,7 @@ public class MateriaController {
 		return ResponseEntity.ok(service.findAll());
 	}
 
-	@GetMapping("/facultad/{facultadId}")
+	@GetMapping({"/facultad/{facultadId}", "/{facultadId}"})
 	public ResponseEntity<List<Materia>> findAllByFacultadId(@PathVariable Integer facultadId) {
 		return ResponseEntity.ok(service.findAllByFacultadId(facultadId));
 	}
