@@ -34,7 +34,7 @@ public class CuentaMovimientoController {
     private final CuentaMovimientoService cuentaMovimientoService;
     private final CuentaMovimientoDtoMapper cuentaMovimientoDtoMapper;
 
-    @GetMapping("/cuenta/{numeroCuenta}/{onlyOne}")
+    @GetMapping({"/cuenta/{numeroCuenta}/{onlyOne}", "/{numeroCuenta}/{onlyOne}"})
     public ResponseEntity<List<CuentaMovimientoResponse>> findAllByNumeroCuenta(
             @PathVariable BigDecimal numeroCuenta, @PathVariable Boolean onlyOne) {
         List<CuentaMovimientoResponse> responses = cuentaMovimientoService.findAllByNumeroCuenta(numeroCuenta, onlyOne).stream()

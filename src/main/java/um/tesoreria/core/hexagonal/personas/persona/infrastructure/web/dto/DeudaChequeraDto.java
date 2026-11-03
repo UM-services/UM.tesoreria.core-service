@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -48,6 +49,19 @@ public class DeudaChequeraDto implements Serializable {
 	private OffsetDateTime vencimiento1;
 
 	private BigDecimal importe1;
+
+	/**
+	 * Alias legacy: el cliente VB6 de Gestión lee las claves camelCase. Se emiten
+	 * además de las grafías originales, sin renombrarlas, para no romper a los
+	 * consumidores actuales.
+	 */
+	@JsonAnyGetter
+	public java.util.Map<String, Object> legacyIds() {
+		java.util.Map<String, Object> ids = new java.util.LinkedHashMap<>();
+		ids.put("tipoChequeraId", tipochequeraId);
+		ids.put("chequeraSerieId", chequeraserieId);
+		return ids;
+	}
 
     public String jsonify() {
         try {

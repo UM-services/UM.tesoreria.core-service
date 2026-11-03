@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.controller;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -15,8 +16,10 @@ import um.tesoreria.core.hexagonal.usuarios.usuario.infrastructure.web.mapper.Us
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(UsuarioController.class)
@@ -122,6 +125,25 @@ class UsuarioControllerTest {
         mockMvc.put().uri("/api/tesoreria/core/usuario/usuario/7/password")
                 .contentType(MediaType.APPLICATION_JSON).content("{\"password\":\"a\",\"reClave\":\"b\"}")
                 .assertThat().hasStatus(400);
+    }
+
+    @Test
+    void updateAceptaLaClaveLegacyModificaCHequera() {
+        when(service.update(any(), eq(7L)))
+                .thenReturn(Usuario.builder().userId(7L).login("pedro").nombre("Pedro").build());
+
+        mockMvc.put().uri("/api/tesoreria/core/usuario/usuario/7")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"login":"pedro","password":"nueva123","nombre":"Pedro","geograficaId":1,
+                         "imprimeChequera":0,"numeroOpManual":0,"habilitaOpEliminacion":0,
+                         "eliminaChequera":0,"modificaCHequera":1,"activo":1}
+                        """)
+                .assertThat().hasStatusOk();
+
+        ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+        verify(service).update(captor.capture(), eq(7L));
+        assertThat(captor.getValue().getModificaChequera()).isEqualTo((byte) 1);
     }
 
     private static final String ALTA_JSON = """

@@ -15,13 +15,18 @@ public final class AgrupadorMaterias {
     private AgrupadorMaterias() {
     }
 
-    /** Keeps the first occurrence of each faculty, plan and subject key. */
+    /** Conserva la primera fila por facultad, plan, materia y período lectivo (null en SIUM). */
     public static List<CursoMaterias> agrupar(List<MateriaAgrupable> materias) {
+        return agrupar(materias, Comparator.naturalOrder());
+    }
+
+    /** Cada fuente define si su contrato admite códigos nulos y cómo ordenarlos. */
+    public static List<CursoMaterias> agrupar(List<MateriaAgrupable> materias, Comparator<String> ordenCodigos) {
         Map<Integer, Map<PeriodoCursada, List<MateriaInscripta>>> cursos =
                 new TreeMap<>(Comparator.nullsLast(Comparator.naturalOrder()));
         Set<ClaveMateria> vistas = new HashSet<>();
         for (MateriaAgrupable materia : materias) {
-            if (!vistas.add(new ClaveMateria(materia.facultadId(), materia.planId(), materia.materiaId()))) {
+            if (!vistas.add(new ClaveMateria(materia.facultadId(), materia.planId(), materia.materiaId(), materia.periodoLectivo()))) {
                 continue;
             }
             boolean sinCursada = materia.curso() == null || materia.periodo() == null;
@@ -34,12 +39,12 @@ public final class AgrupadorMaterias {
         return cursos.entrySet().stream()
                 .map(curso -> new CursoMaterias(curso.getKey(), curso.getValue().entrySet().stream()
                         .map(periodo -> new PeriodoMaterias(periodo.getKey(), periodo.getValue().stream()
-                                .sorted(Comparator.comparing(MateriaInscripta::materiaId))
+                                .sorted(Comparator.comparing(MateriaInscripta::materiaId, ordenCodigos))
                                 .toList()))
                         .toList()))
                 .toList();
     }
 
-    private record ClaveMateria(Integer facultadId, Integer planId, String materiaId) {
+    private record ClaveMateria(Integer facultadId, Integer planId, String materiaId, Integer periodoLectivo) {
     }
 }

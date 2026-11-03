@@ -24,7 +24,7 @@ public class MateriasInscriptasController {
     private final MateriasInscriptasService service;
     private final MateriasInscriptasDtoMapper dtoMapper;
 
-    @Operation(summary = "Materias de grado en las que está inscripto el alumno de una chequera, en el lectivo de la chequera. Un elemento por fuente consultada (SIUM, GUARANI); cada uno trae su estado (OK, SIN_INSCRIPCION, NO_DISPONIBLE) y las materias agrupadas por curso y período. Lista vacía si la chequera no es de grado. 400 si la chequera no existe. Endpoint aparte del estado de chequera: una fuente lenta no demora el estado.")
+    @Operation(summary = "Materias de grado en las que está inscripto el alumno de una chequera, en el lectivo de la chequera. SIUM primero y luego un elemento GUARANI por propuesta y versión de plan; cada uno trae su estado (OK, SIN_INSCRIPCION, NO_DISPONIBLE) y las materias agrupadas por curso y período. Lista vacía si la chequera no es de grado. 400 si la chequera no existe. Endpoint aparte del estado de chequera: una fuente lenta no demora el estado.")
     @GetMapping("/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
     public ResponseEntity<List<MateriasEstadoResponse>> getMateriasInscriptas(@PathVariable Integer facultadId,
                                                                               @PathVariable Integer tipoChequeraId,

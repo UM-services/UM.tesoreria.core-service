@@ -64,6 +64,11 @@ public class ContratoToolController {
         return ResponseEntity.ok(service.anulaEnvio(fecha, envio));
 	}
 
+	@GetMapping("/reset/marca/temporal/{contratoId}")
+	public ResponseEntity<Boolean> resetMarcaTemporal(@PathVariable Long contratoId) {
+		return ResponseEntity.ok(service.resetMarcaTemporal(contratoId));
+	}
+
 	@GetMapping("/savecurso/{cursoId}/{contratoId}/{cargotipoId}/{horasSemanales}")
 	public ResponseEntity<Boolean> saveCurso(@PathVariable Long cursoId,
                                              @PathVariable Long contratoId,
