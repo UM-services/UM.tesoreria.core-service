@@ -159,6 +159,18 @@ public class ContratoToolService {
 	}
 
 	@Transactional
+	public Boolean resetMarcaTemporal(Long contratoId) {
+		List<ContratoPeriodo> periodos = contratoPeriodoService.findAllMarcadoByContrato(contratoId);
+		if (!periodos.isEmpty()) {
+			for (ContratoPeriodo periodo : periodos) {
+				periodo.setMarcaTemporal((byte) 0);
+			}
+			contratoPeriodoService.saveAll(periodos);
+		}
+		return true;
+	}
+
+	@Transactional
 	public Boolean anulaEnvio(OffsetDateTime fecha, Integer envio) {
 		List<ContratoFactura> facturas = contratoFacturaService.findAllByEnvio(fecha, envio);
 		for (ContratoFactura factura : facturas) {
