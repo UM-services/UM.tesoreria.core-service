@@ -30,7 +30,7 @@ public class UpdateUsuarioUseCaseImpl implements UpdateUsuarioUseCase {
             usuario.setEliminaChequera(newUsuario.getEliminaChequera());
             usuario.setModificaChequera(newUsuario.getModificaChequera());
             usuario.setLastLog(Tool.hourAbsoluteArgentina());
-            usuario.setGoogleMail(newUsuario.getGoogleMail());
+            if (newUsuario.getGoogleMail() != null) usuario.setGoogleMail(newUsuario.getGoogleMail());
             usuario.setActivo(newUsuario.getActivo());
             return repository.save(usuario);
         }).orElse(null);
