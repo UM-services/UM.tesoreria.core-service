@@ -1,12 +1,12 @@
 # Diagramas de Documentación
 
-**Versión actual del servicio: 11.8.0** (actualizada: 2026-11-03)
+**Versión actual del servicio: 11.8.1** (actualizada: 2026-11-04)
 
 Este directorio contiene los diagramas Mermaid generados automáticamente para la documentación del servicio:
 
 ## Diagramas de Arquitectura
 - `architecture.mmd`: Arquitectura general (controladores, servicios, repositorios, entidades).
-- `auditoria.mmd`: Auditoría transversal del servicio - v11.5.0 (nuevo paquete `um.tesoreria.core.audit`: eventos `REQUEST`/`CHANGE`, diff con enmascarado, outbox `audit_outbox` escrito en la transacción de negocio, sender por lotes con reclamo por token, resumen `SUMMARY` de operaciones masivas, `AuditManualChange` para escrituras fuera de JPA y guard estático de cobertura). Guía: [Auditoría transversal](auditoria.md).
+- `auditoria.mmd`: Auditoría transversal del servicio - v11.5.0 (nuevo paquete `um.tesoreria.core.audit`: eventos `REQUEST`/`CHANGE`, diff con enmascarado, outbox `audit_outbox` escrito en la transacción de negocio, sender por lotes con reclamo por token, resumen `SUMMARY` de operaciones masivas, `AuditManualChange` para escrituras fuera de JPA y guard estático de cobertura); v11.8.1 (nodo de limpieza `cleanup()`: retención `SENT` 7 d / `FAILED` 30 d, aviso de `PENDING` > 24 h y confirmación por evento de la respuesta `accepted`/`duplicates`/`rejected`). Guía: [Auditoría transversal](auditoria.md).
 - `hexagonal-architecture.mmd`: Arquitectura hexagonal implementada en el caso de uso Curso Cargo Contratado - v11.3.0 (nuevo `GET /api/core/cursocargocontratado/periodo/{anho}/{mes}` en el controlador del slice, sobre el `findAllByPeriodo` existente; la estructura de capas no cambia, por eso el diagrama sigue igual); v11.8.0 (`CursoHaberes` suma `facultadId`, `geograficaId` y `nivelId`, que devuelve `CursoClient` de haberes; sin cambios de capas).
 - `hexagonal-articulo.mmd`: Arquitectura hexagonal del módulo Artículo (gestión de artículos) - v9.2.1 (validación, baja segura con referencias, historial #404 y puertos de otros slices; bloqueo con `@Lock`, conteos con entidades de solo lectura y errores por excepción de Spring, sin SQL nativo).
 - `hexagonal-comprobante.mmd`: Arquitectura hexagonal del módulo Comprobante (tipos de comprobantes AFIP) - v3.36.0 (nuevo módulo, 6 casos de uso).
@@ -37,7 +37,7 @@ Este directorio contiene los diagramas Mermaid generados automáticamente para l
 - `hexagonal-escrituraHistorial.mmd`: Arquitectura hexagonal del módulo EscrituraHistorial (historial transaccional de altas/ediciones/bajas de Gestión; contrato `RegistrarEscrituraHistorialUseCase` con propagación `MANDATORY`; sin consulta pública ni actor verificado; script `docs/sql/V404__gestion_escritura_historial.sql`) - v6.2.0 (nuevo módulo, issue #404).
 - `gestion-escritura-historial.md`: Contrato reutilizable y guía de integración del historial de escrituras (#404).
 - `gestion-articulo-ubicacion.md`: Guía para consumidores de las escrituras de artículo y ubicacionArticulo (#405): reglas, errores, recuperación de fallos parciales, baja segura e historial, con ejemplos ejecutados.
-- `auditoria.md`: Guía operativa de la auditoría transversal (v11.5.0): qué se audita, modos, variables de entorno, contrato de envío, outbox, resumen masivo, cobertura de escrituras y límites conocidos.
+- `auditoria.md`: Guía operativa de la auditoría transversal (v11.5.0): qué se audita, modos, variables de entorno, contrato de envío, outbox, resumen masivo, cobertura de escrituras y límites conocidos; v11.8.1 (retención `SENT` 7 d / `FAILED` 30 d, limpieza cada hora por `fixedDelay`, aviso de `PENDING` > 24 h y confirmación por evento de la respuesta del lote).
 - `hexagonal-baja.mmd`: Arquitectura hexagonal del módulo Baja (gestión de bajas de chequeras) - v3.36.0 (reubicado bajo `chequera/`).
 - `hexagonal-campanha.mmd`: Arquitectura hexagonal del módulo Campanha (gestión de campañas UM Hub) - v3.24.0.
 - `hexagonal-chequeraProducto.mmd`: Arquitectura hexagonal del módulo Producto (gestión de productos chequera) - v3.30.0 (nuevo módulo).
