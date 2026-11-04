@@ -2,6 +2,27 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.8.1] - 2026-11-04
+
+### Added
+
+- Retención diferenciada del outbox de auditoría (`AuditOutboxSender.cleanup`): `tesoreria.audit.sent-retention-days` (7) purga las filas `SENT` por `sent_at` y `tesoreria.audit.failed-retention-days` (30) purga las `FAILED` por `next_attempt_at`, que es el momento del fallo porque `FAILED` no tiene columna propia de fecha. Antes las `FAILED` quedaban en la tabla para siempre.
+- Aviso de entrega trabada: `tesoreria.audit.pending-warn-hours` (24) loguea un `warn` con la cantidad de filas `PENDING` más viejas que ese umbral y la fecha de la más antigua. No borra nada: los `PENDING` son eventos no entregados.
+- Cortes de la limpieza configurables: `tesoreria.audit.cleanup-delay-ms` (`3600000`) y `tesoreria.audit.cleanup-initial-delay-ms` (`60000`). Nuevas variables `TESORERIA_AUDIT_SENT_RETENTION_DAYS`, `TESORERIA_AUDIT_FAILED_RETENTION_DAYS`, `TESORERIA_AUDIT_PENDING_WARN_HOURS`, `TESORERIA_AUDIT_CLEANUP_DELAY_MS` y `TESORERIA_AUDIT_CLEANUP_INITIAL_DELAY_MS`.
+- `AuditOutboxSender.BatchResponse` modela la respuesta de `POST /api/tesoreria/auditoria/evento/lote` (`accepted`, `duplicates`, `rejected[].index/reason`).
+- Tests: `AuditOutboxSenderCleanupTest` (retención de `SENT`/`FAILED`, `PENDING` intacto y tabla ausente sin excepción) y `AuditOutboxSenderResponseTest` (cuerpo vacío, no JSON, conteos ausentes o con tipos inválidos y rechazo sin `index`).
+
+### Changed
+
+- La limpieza del outbox deja de ser un cron diario a las 03:30 y pasa a `@Scheduled(fixedDelayString = "cleanup-delay-ms")` con `cleanup-initial-delay-ms`: un reinicio del contenedor ya no saltea la única ventana del día. Cada purga aísla su `SQLException`: un fallo de una no impide la otra ni el aviso de `PENDING`.
+- `bootstrap.yml`: el default de desarrollo de `app.server` pasa de `10.147.20.20:3306` a `192.168.201.132:3306`; en despliegue sigue mandando `APP_SERVER`. `AGENTS.md` §8 se actualiza con el mismo valor.
+
+### Fixed
+
+- `AuditOutboxSender.handleSuccess` ya no da por entregado lo que no puede verificar. Sólo marca `SENT` cuando `accepted + duplicates + rejected == tamaño del lote` y los índices de rechazo caen dentro del lote; antes, una respuesta sin `rejected` o no interpretable marcaba **todas** las filas como enviadas y el evento se perdía sin rastro. Cuerpo vacío, no JSON, sin los tres conteos, con tipos inválidos o con un rechazo sin `index` devuelven el lote a `PENDING` con backoff, y a `FAILED` al alcanzar `max-attempts`.
+
+> Based on `git diff HEAD` (staged; HEAD `47961416`, merge del PR #500; 6 archivos, +385/−31: `src/main/java/um/tesoreria/core/audit/AuditOutboxSender.java`, `AuditProperties.java`, `src/main/resources/bootstrap.yml`, `AGENTS.md` y los dos tests nuevos bajo `src/test/java/um/tesoreria/core/audit/`; `pom.xml` pasa de `11.8.0` a `11.8.1`) y el código real de `AuditOutboxSender` (`PURGE_SENT`, `PURGE_FAILED`, `STUCK_PENDING`, `BatchResponse.parse`, la guarda `covered() != rows.size()` y el chequeo de índices), `AuditProperties` (los cinco campos nuevos con sus defaults) y `sql/001_audit_outbox.sql` (columnas `sent_at`, `next_attempt_at`, `created`; sin DDL nuevo). No cambian rutas, DTO, contratos REST del servicio ni el esquema: el ajuste es interno del outbox, las claves nuevas tienen default y la retención usa columnas existentes ⇒ incremento **patch** de SemVer (`11.8.0` → `11.8.1`, `pom.xml`). **Nota de despliegue**: el servicio de auditoría debe responder el lote con `accepted`, `duplicates` y `rejected`; con cualquier otra forma de respuesta los lotes se reintentan hasta `max-attempts` y terminan en `FAILED` (antes se marcaban `SENT` a ciegas). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); `docs/auditoria.mmd` validado con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-11-04).
+
 ## [11.8.0] - 2026-11-03
 
 ### Added
