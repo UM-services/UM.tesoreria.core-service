@@ -9,13 +9,22 @@
 [![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-black.svg)](https://kafka.apache.org/)
 [![JUnit](https://img.shields.io/badge/JUnit-6.0.3-green.svg)](https://junit.org/)
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
-[![Versión](https://img.shields.io/badge/versión-11.8.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.8.1-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.8.0**
+**Versión actual (SemVer): 11.8.1**
+
+## Novedades 11.8.1 (verificado en código)
+
+- **fix(audit)**: `AuditOutboxSender` sólo marca `SENT` cuando la respuesta de `POST /evento/lote` confirma cada evento del lote (`accepted + duplicates + rejected == tamaño del lote` y rechazos con índice dentro del lote). Antes, un cuerpo vacío, no interpretable o sin `rejected` marcaba todas las filas como enviadas y el evento se perdía sin rastro; ahora el lote vuelve a `PENDING` con backoff y termina en `FAILED` al llegar a `max-attempts`.
+- **feat(audit)**: retención del outbox con dos plazos: `SENT` se purga a los 7 días (`sent_at`) y `FAILED` a los 30 (`next_attempt_at`, el momento del fallo); antes las `FAILED` quedaban para siempre. Además, un `warn` avisa si hay `PENDING` sin entregar hace más de 24 h, sin borrarlos.
+- **changed(audit)**: la limpieza deja de correr una vez por día a las 03:30 y pasa a `fixedDelay` (`cleanup-delay-ms`, 1 h) con `cleanup-initial-delay-ms`, para que un reinicio no saltee la ventana. Nuevas variables `TESORERIA_AUDIT_SENT_RETENTION_DAYS`, `TESORERIA_AUDIT_FAILED_RETENTION_DAYS`, `TESORERIA_AUDIT_PENDING_WARN_HOURS`, `TESORERIA_AUDIT_CLEANUP_DELAY_MS` y `TESORERIA_AUDIT_CLEANUP_INITIAL_DELAY_MS`.
+- **chore(config)**: el default de desarrollo de `app.server` en `bootstrap.yml` pasa a `192.168.201.132:3306`; en despliegue manda `APP_SERVER`.
+
+> Basado en `git diff HEAD` (staged; HEAD `47961416`; 6 archivos, +385/−31: `AuditOutboxSender`, `AuditProperties`, `bootstrap.yml`, `AGENTS.md` y los dos tests nuevos `AuditOutboxSenderCleanupTest`/`AuditOutboxSenderResponseTest`) y el código real del sender. Sin cambios de rutas, DTO ni esquema ⇒ incremento **patch** de SemVer (`11.8.0` → `11.8.1`). **Ojo al desplegar**: el servicio de auditoría debe responder `accepted`/`duplicates`/`rejected`, o los lotes terminan en `FAILED`. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`).
 
 ## Novedades 11.8.0 (verificado en código)
 
