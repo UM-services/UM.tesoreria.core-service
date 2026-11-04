@@ -43,6 +43,24 @@ public class AuditProperties {
 
     private int maxPayloadChars = 32768;
 
+    /** Días que se conservan las filas ya entregadas ({@code SENT}) antes de purgarlas. */
+    private int sentRetentionDays = 7;
+
+    /**
+     * Días que se conservan las filas {@code FAILED} para poder inspeccionarlas. Sin esto
+     * una entrega rechazada quedaba en la tabla para siempre.
+     */
+    private int failedRetentionDays = 30;
+
+    /** Horas a partir de las cuales se avisa que hay {@code PENDING} sin entregar. */
+    private int pendingWarnHours = 24;
+
+    /** Cada cuánto corre la limpieza (por defecto, cada hora). */
+    private long cleanupDelayMs = 3_600_000;
+
+    /** Espera antes de la primera limpieza después de arrancar. */
+    private long cleanupInitialDelayMs = 60_000;
+
     /**
      * Campos que se enmascaran antes de serializar. Acepta dos formas:
      *

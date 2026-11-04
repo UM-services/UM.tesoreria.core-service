@@ -24,10 +24,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -37,6 +35,11 @@ import java.util.stream.Collectors;
  * <p>Sin SKIP LOCKED (MySQL 5.7): se reclaman con un token y un lease de 60 s. Si el
  * proceso muere, el lease vence y otro intento las retoma. La idempotencia real la
  * garantiza el {@code event_id} del lado de auditoría.</p>
+ *
+ * <p>Una fila sólo se marca {@code SENT} cuando la respuesta del servicio permite
+ * confirmar qué pasó con <b>cada</b> evento del lote. Si el cuerpo viene vacío, no es
+ * interpretable o no cubre todas las filas, el lote se reintenta: nunca se da por
+ * entregado lo que no se puede verificar.</p>
  */
 @Component
 @Slf4j
@@ -59,6 +62,29 @@ public class AuditOutboxSender {
               FROM audit_outbox
              WHERE claim_token = ?
              ORDER BY outbox_id
+            """;
+
+    private static final String PURGE_SENT = """
+            DELETE FROM audit_outbox
+             WHERE status = 'SENT'
+               AND sent_at < ?
+            """;
+
+    /**
+     * {@code FAILED} no tiene columna propia de fecha: al marcarla se deja
+     * {@code next_attempt_at = ahora}, así que sirve como "momento en que falló".
+     */
+    private static final String PURGE_FAILED = """
+            DELETE FROM audit_outbox
+             WHERE status = 'FAILED'
+               AND next_attempt_at < ?
+            """;
+
+    private static final String STUCK_PENDING = """
+            SELECT COUNT(*), MIN(created)
+              FROM audit_outbox
+             WHERE status = 'PENDING'
+               AND created < ?
             """;
 
     private final AuditProperties properties;
@@ -117,19 +143,57 @@ public class AuditOutboxSender {
         }
     }
 
-    @Scheduled(cron = "0 30 3 * * *")
+    /**
+     * Limpieza periódica del outbox. Corre cada hora (no una vez por día) para que un
+     * reinicio del contenedor no saltee la ventana: se purgan las filas ya entregadas y
+     * las fallidas, cada una con su propia retención.
+     */
+    @Scheduled(fixedDelayString = "${tesoreria.audit.cleanup-delay-ms:3600000}",
+            initialDelayString = "${tesoreria.audit.cleanup-initial-delay-ms:60000}")
     public void cleanup() {
-        LocalDateTime cutoff = LocalDateTime.now(ZoneOffset.UTC).minusDays(7);
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        purge(PURGE_SENT, "SENT",
+                now.minusDays(properties.getSentRetentionDays()), properties.getSentRetentionDays());
+        purge(PURGE_FAILED, "FAILED",
+                now.minusDays(properties.getFailedRetentionDays()), properties.getFailedRetentionDays());
+        warnStuckPending(now);
+    }
+
+    private void purge(String sql, String label, LocalDateTime cutoff, int retentionDays) {
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "DELETE FROM audit_outbox WHERE status = 'SENT' AND sent_at < ?")) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setTimestamp(1, Timestamp.from(cutoff.toInstant(ZoneOffset.UTC)));
             int deleted = statement.executeUpdate();
             if (deleted > 0) {
-                log.info("Auditoría: {} fila(s) SENT eliminadas del outbox", deleted);
+                log.info("Auditoría: {} fila(s) {} eliminadas del outbox (retención {} días)",
+                        deleted, label, retentionDays);
             }
         } catch (SQLException e) {
-            log.warn("Auditoría: no se pudo limpiar el outbox: {}", e.getMessage());
+            log.warn("Auditoría: no se pudo limpiar el outbox ({}): {}", label, e.getMessage());
+        }
+    }
+
+    /**
+     * Un PENDING viejo significa que la entrega no está avanzando (URL/API key mal,
+     * servicio caído o lote trabado). Se avisa, no se borra: son eventos no entregados.
+     */
+    private void warnStuckPending(LocalDateTime now) {
+        LocalDateTime threshold = now.minusHours(properties.getPendingWarnHours());
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(STUCK_PENDING)) {
+            statement.setTimestamp(1, Timestamp.from(threshold.toInstant(ZoneOffset.UTC)));
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    long count = resultSet.getLong(1);
+                    Timestamp oldest = resultSet.getTimestamp(2);
+                    if (count > 0) {
+                        log.warn("Auditoría: {} evento(s) PENDING sin entregar hace más de {} h (el más viejo: {})",
+                                count, properties.getPendingWarnHours(), oldest);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.warn("Auditoría: no se pudo revisar el pendiente del outbox: {}", e.getMessage());
         }
     }
 
@@ -162,37 +226,32 @@ public class AuditOutboxSender {
     }
 
     private void handleSuccess(List<OutboxRow> rows, String responseBody) {
-        Set<Integer> rejected = new HashSet<>();
-        Map<Integer, String> reasons = new HashMap<>();
+        BatchResponse response;
         try {
-            JsonNode root = responseBody == null ? null : objectMapper.readTree(responseBody);
-            if (root != null && root.has("rejected")) {
-                for (JsonNode node : root.get("rejected")) {
-                    JsonNode indexNode = node.get("index");
-                    if (indexNode == null || !indexNode.isNumber()) {
-                        continue;
-                    }
-                    int index = indexNode.asInt();
-                    if (index < 0 || index >= rows.size()) {
-                        continue;
-                    }
-                    rejected.add(index);
-                    reasons.put(index, node.has("reason") ? node.get("reason").asString() : "rejected");
-                }
-            }
+            response = BatchResponse.parse(objectMapper, responseBody);
         } catch (RuntimeException e) {
-            log.warn("Auditoría: respuesta inesperada del servicio ({}); se marcan como enviadas", e.getMessage());
+            retry(rows, "respuesta no interpretable del servicio de auditoría: " + truncate(e.getMessage()));
+            return;
+        }
+
+        if (response.covered() != rows.size()) {
+            retry(rows, "respuesta incompleta: confirma " + response.covered() + " de " + rows.size() + " evento(s)");
+            return;
+        }
+        if (response.rejected().keySet().stream().anyMatch(index -> index < 0 || index >= rows.size())) {
+            retry(rows, "respuesta inconsistente: índice de rechazo fuera del lote");
+            return;
         }
 
         List<Long> sent = new ArrayList<>();
         for (int index = 0; index < rows.size(); index++) {
-            if (!rejected.contains(index)) {
+            if (!response.rejected().containsKey(index)) {
                 sent.add(rows.get(index).outboxId());
             }
         }
         markSent(sent);
-        rejected.forEach(index -> markPermanentFailure(
-                List.of(rows.get(index)), "rechazado: " + reasons.getOrDefault(index, "sin motivo")));
+        response.rejected().forEach((index, reason) ->
+                markPermanentFailure(List.of(rows.get(index)), "rechazado: " + reason));
     }
 
     private void markSent(List<Long> outboxIds) {
@@ -270,5 +329,45 @@ public class AuditOutboxSender {
     }
 
     private record OutboxRow(long outboxId, String payload, int attempts) {
+    }
+
+    /**
+     * Respuesta de {@code POST /evento/lote}: {@code accepted + duplicates} quedaron
+     * guardados y {@code rejected} trae los índices que no se aceptaron. Si el cuerpo no
+     * permite calcular eso, no hay confirmación posible y el lote se reintenta.
+     */
+    record BatchResponse(int accepted, int duplicates, Map<Integer, String> rejected) {
+
+        int covered() {
+            return accepted + duplicates + rejected.size();
+        }
+
+        static BatchResponse parse(ObjectMapper objectMapper, String body) {
+            if (body == null || body.isBlank()) {
+                throw new IllegalArgumentException("cuerpo vacío");
+            }
+            JsonNode root = objectMapper.readTree(body);
+            if (root == null || !root.isObject()) {
+                throw new IllegalArgumentException("la respuesta no es un objeto JSON");
+            }
+            if (!root.has("accepted") || !root.has("duplicates") || !root.has("rejected")) {
+                throw new IllegalArgumentException("faltan accepted/duplicates/rejected");
+            }
+            JsonNode acceptedNode = root.get("accepted");
+            JsonNode duplicatesNode = root.get("duplicates");
+            JsonNode rejectedNode = root.get("rejected");
+            if (!acceptedNode.isNumber() || !duplicatesNode.isNumber() || !rejectedNode.isArray()) {
+                throw new IllegalArgumentException("tipos inválidos en accepted/duplicates/rejected");
+            }
+            Map<Integer, String> rejected = new HashMap<>();
+            for (JsonNode node : rejectedNode) {
+                JsonNode indexNode = node.get("index");
+                if (indexNode == null || !indexNode.isNumber()) {
+                    throw new IllegalArgumentException("rechazo sin index");
+                }
+                rejected.put(indexNode.asInt(), node.has("reason") ? node.get("reason").asString() : "rejected");
+            }
+            return new BatchResponse(acceptedNode.asInt(), duplicatesNode.asInt(), rejected);
+        }
     }
 }
