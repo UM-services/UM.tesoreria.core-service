@@ -98,6 +98,13 @@ tesoreria:
     sender-initial-delay-ms: ${TESORERIA_AUDIT_SENDER_INITIAL_DELAY_MS:5000}
     max-attempts: ${TESORERIA_AUDIT_MAX_ATTEMPTS:10}
     max-payload-chars: ${TESORERIA_AUDIT_MAX_PAYLOAD_CHARS:32768}
+    # Limpieza del outbox: SENT se purga a los 7 días, FAILED a los 30 (para inspección).
+    # Corre cada hora, no una vez por día: un reinicio no saltea la ventana.
+    sent-retention-days: ${TESORERIA_AUDIT_SENT_RETENTION_DAYS:7}
+    failed-retention-days: ${TESORERIA_AUDIT_FAILED_RETENTION_DAYS:30}
+    pending-warn-hours: ${TESORERIA_AUDIT_PENDING_WARN_HOURS:24}
+    cleanup-delay-ms: ${TESORERIA_AUDIT_CLEANUP_DELAY_MS:3600000}
+    cleanup-initial-delay-ms: ${TESORERIA_AUDIT_CLEANUP_INITIAL_DELAY_MS:60000}
     # Enmascarado: "campo" aplica a toda entidad; "Entidad.campo" sólo a esa entidad
     # (nombre simple, sin sufijo Entity). `clave` y `cuenta` no van globales: son la clave
     # del permiso y el número de cuenta contable, respectivamente.

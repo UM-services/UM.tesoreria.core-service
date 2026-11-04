@@ -44,6 +44,11 @@ El default es `SEND`. **Si la tabla `audit_outbox` no existe, usar `LOG` u `OFF`
 | `tesoreria.audit.sender-initial-delay-ms` | `TESORERIA_AUDIT_SENDER_INITIAL_DELAY_MS` | `5000` |
 | `tesoreria.audit.max-attempts` | `TESORERIA_AUDIT_MAX_ATTEMPTS` | `10` |
 | `tesoreria.audit.max-payload-chars` | `TESORERIA_AUDIT_MAX_PAYLOAD_CHARS` | `32768` |
+| `tesoreria.audit.sent-retention-days` | `TESORERIA_AUDIT_SENT_RETENTION_DAYS` | `7` |
+| `tesoreria.audit.failed-retention-days` | `TESORERIA_AUDIT_FAILED_RETENTION_DAYS` | `30` |
+| `tesoreria.audit.pending-warn-hours` | `TESORERIA_AUDIT_PENDING_WARN_HOURS` | `24` |
+| `tesoreria.audit.cleanup-delay-ms` | `TESORERIA_AUDIT_CLEANUP_DELAY_MS` | `3600000` |
+| `tesoreria.audit.cleanup-initial-delay-ms` | `TESORERIA_AUDIT_CLEANUP_INITIAL_DELAY_MS` | `60000` |
 | `tesoreria.audit.mask-fields` | `TESORERIA_AUDIT_MASK_FIELDS` | `password,token,cbu,documento,tarjeta` |
 | `tesoreria.audit.bulk-enabled` | `TESORERIA_AUDIT_BULK_ENABLED` | `true` |
 | `tesoreria.audit.bulk-min-rows` | `TESORERIA_AUDIT_BULK_MIN_ROWS` | `20` |
@@ -58,7 +63,8 @@ El default es `SEND`. **Si la tabla `audit_outbox` no existe, usar `LOG` u `OFF`
 - **Misma transacción.** `AuditOutboxWriter` inserta con la conexión de la transacción de negocio: o se confirman el cambio y su evento, o ninguno. El `REQUEST` se escribe en una transacción nueva (`REQUIRES_NEW`) porque se emite cuando la del negocio ya terminó.
 - **Envío.** `AuditOutboxSender` corre cada `sender-delay-ms`, reclama hasta `batch-size` filas con un `claim_token` y un lease de 60 s (no usa `SKIP LOCKED`: no requiere MySQL 8), y hace `POST {url}/api/tesoreria/auditoria/evento/lote` con `X-API-Key` y cuerpo `{"events":[...]}`.
 - **Reintentos.** Los `5xx` y las excepciones vuelven la fila a `PENDING` con backoff exponencial (máximo 60 s) hasta `max-attempts`; `400`/`401`/`403`/`422` y los rechazos parciales (`rejected[].index`) pasan a `FAILED` con `last_error` (500 caracteres). La idempotencia real la garantiza el `event_id` del lado del servicio de auditoría.
-- **Retención.** A las 03:30 se borran las filas `SENT` con más de 7 días. Las `FAILED` se conservan para diagnóstico.
+- **Confirmación por evento.** La respuesta se interpreta como `{accepted, duplicates, rejected[{index, reason}]}` y una fila sólo pasa a `SENT` si `accepted + duplicates + rejected == tamaño del lote` y los índices de rechazo caen dentro del lote. Cuerpo vacío, no JSON, conteos ausentes o con tipos inválidos, rechazo sin `index` o cobertura incompleta devuelven el lote a `PENDING` (y a `FAILED` al llegar a `max-attempts`): no se da por entregado lo que no se puede verificar.
+- **Retención.** La limpieza corre cada `cleanup-delay-ms` (1 h, primera a los `cleanup-initial-delay-ms`) y no una vez por día, para que un reinicio no saltee la ventana. Borra las filas `SENT` con más de `sent-retention-days` (7) días desde `sent_at` y las `FAILED` con más de `failed-retention-days` (30) desde `next_attempt_at` (momento del fallo). Los `PENDING` nunca se borran: si son más viejos que `pending-warn-hours` (24) se loguea un `warn` con la cantidad y la fecha del más antiguo.
 - **Sin URL o sin API key** el sender loguea un warning y deja el outbox pendiente; no pierde eventos.
 
 ## Enmascarado
@@ -84,5 +90,5 @@ Los valores enmascarados conservan los últimos cuatro caracteres (`****1234`) o
 - **El actor no está autenticado.** Sale de `X-User-Id`/`X-Usuario-Id` y del login de `X-Usuario-Login`, ambos falsificables, por eso el evento se marca `actorTrust: CLIENT`. Es la misma identidad transitoria de la capa de permisos; cambiará cuando exista JWT.
 - **Sólo se auditan cambios de columnas.** Cambiar una asociación sin tocar columnas propias no genera diff.
 - **Los `GET` de búsqueda quedan fuera** (`/search`) para no llenar el outbox con lecturas.
-- **El outbox es un buffer, no el registro final.** Pasados 7 días desde el envío, la fila se borra: la fuente de verdad es el servicio de auditoría.
+- **El outbox es un buffer, no el registro final.** Pasados 7 días desde el envío, la fila se borra (las `FAILED` se conservan 30 días desde el fallo): la fuente de verdad es el servicio de auditoría.
 - **La IP** se toma de `X-Forwarded-For` (primer valor) y, si falta, de la conexión. Es lo que informe el proxy.

@@ -23,9 +23,10 @@ flowchart TD
         T[("audit_outbox<br/>PENDING / SENDING / SENT / FAILED")]
     end
 
-    subgraph Envio["Envío"]
+    subgraph Envio["Envío y limpieza"]
         S["AuditOutboxSender<br/>@Scheduled sender-delay-ms"]
-        API["Servicio de auditoría<br/>POST /api/tesoreria/auditoria/evento/lote"]
+        API["Servicio de auditoría<br/>POST /api/tesoreria/auditoria/evento/lote<br/>accepted / duplicates / rejected"]
+        C["AuditOutboxSender.cleanup()<br/>@Scheduled cleanup-delay-ms<br/>purga SENT (7 d) y FAILED (30 d)<br/>avisa PENDING > 24 h"]
     end
 
     P["AuditProperties<br/>mode OFF / LOG / SEND"]
@@ -43,12 +44,14 @@ flowchart TD
     W --> T
     T --> S
     S --> API
+    C -->|"purga SENT/FAILED"| T
     G -.-> MC
     P -.-> F
     P -.-> L
     P -.-> BS
     P -.-> MC
     P -.-> S
+    P -.-> C
 
     style F fill:#e1f5fe
     style L fill:#e1f5fe
@@ -60,4 +63,5 @@ flowchart TD
     style W fill:#fff3e0
     style T fill:#fff3e0
     style S fill:#fff3e0
+    style C fill:#fff3e0
     style P fill:#fce4ec
