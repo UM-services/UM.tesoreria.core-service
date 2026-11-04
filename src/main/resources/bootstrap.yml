@@ -1,7 +1,7 @@
 app:
   port: ${APP_PORT:8092}
   database: tesium
-  server: 10.147.20.20:3306
+  server: 192.168.201.132:3306
   user: root
   password: root
   logging: debug
