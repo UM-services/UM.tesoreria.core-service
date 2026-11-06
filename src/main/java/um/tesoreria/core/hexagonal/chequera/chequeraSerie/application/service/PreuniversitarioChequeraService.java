@@ -9,10 +9,16 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.PreuniversitarioChequeraData;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.CreatePreuniversitarioChequeraUseCase;
+import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.application.service.GuaraniBeneficioService;
+import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.model.GuaraniBeneficio;
+import um.tesoreria.core.hexagonal.guarani.alumnoGuarani.domain.model.RequisitoPresentadoGuarani;
+import um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.domain.policy.BeneficioPolicy;
 import um.tesoreria.core.model.ChequeraSerieControl;
 import um.tesoreria.core.service.ChequeraSerieControlService;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -25,6 +31,8 @@ public class PreuniversitarioChequeraService implements CreatePreuniversitarioCh
     private final ChequeraSerieControlService chequeraSerieControlService;
     private final PreuniversitarioChequeraDetailsCreator detailsCreator;
     private final PreuniversitarioChequeraPolicy policy;
+    private final GuaraniBeneficioService guaraniBeneficioService;
+    private final BeneficioPolicy beneficioPolicy;
 
     @Transactional
     @Override
@@ -47,7 +55,7 @@ public class PreuniversitarioChequeraService implements CreatePreuniversitarioCh
         }
 
         // Determina beneficio
-        var becaPorcentaje = BigDecimal.ZERO;
+        var becaPorcentaje = resolverBeneficio(alumnoGuaraniFull);
 
         long chequeraSerieId = nextChequeraSerieId(data);
         var control = chequeraSerieControlService.add(new ChequeraSerieControl(
@@ -71,6 +79,43 @@ public class PreuniversitarioChequeraService implements CreatePreuniversitarioCh
         } catch (ChequeraSerieControlException exception) {
             log.error("Error al obtener el último chequeraSerieControl -> {}", exception.getMessage());
             return 1L;
+        }
+    }
+
+    private BigDecimal resolverBeneficio(PreuniversitarioChequeraData data) {
+        if (data.requisitosPresentados() == null || data.requisitosPresentados().isEmpty()) {
+            log.warn("Beneficio no resuelto; se emite con 0%. persona={} documentoId={} causa=requisitos ausentes",
+                    data.personaId(), data.documentoId());
+            return BigDecimal.ZERO;
+        }
+        List<Integer> requisitos = data.requisitosPresentados().stream()
+                .filter(Objects::nonNull)
+                .map(RequisitoPresentadoGuarani::getRequisito)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        if (requisitos.isEmpty()) {
+            log.warn("Beneficio no resuelto; se emite con 0%. persona={} documentoId={} causa=requisitos sin identificador",
+                    data.personaId(), data.documentoId());
+            return BigDecimal.ZERO;
+        }
+        try {
+            List<GuaraniBeneficio> beneficios = guaraniBeneficioService.findByRequisitos(requisitos);
+            if (beneficios == null) {
+                log.warn("Beneficio no resuelto; se emite con 0%. persona={} documentoId={} causa=beneficios ausentes",
+                        data.personaId(), data.documentoId());
+                return BigDecimal.ZERO;
+            }
+            if (beneficios.stream().filter(Objects::nonNull)
+                    .anyMatch(beneficio -> beneficio.getPorcentajeBeneficio() == null)) {
+                log.warn("Beneficio incompleto; porcentaje nulo tratado como 0%. persona={} documentoId={}",
+                        data.personaId(), data.documentoId());
+            }
+            return beneficioPolicy.porcentajeEfectivo(data.requisitosPresentados(), beneficios);
+        } catch (RuntimeException exception) {
+            log.warn("Beneficio no resuelto; se emite con 0%. persona={} documentoId={} causa={}",
+                    data.personaId(), data.documentoId(), exception.getMessage());
+            return BigDecimal.ZERO;
         }
     }
 }
