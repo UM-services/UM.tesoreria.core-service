@@ -38,6 +38,10 @@ public interface JpaChequeraPagoRepository extends JpaRepository<ChequeraPagoEnt
 
 	Optional<ChequeraPagoEntity> findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdOrderByOrdenDesc(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId);
 
+	List<ChequeraPagoEntity> findAllByArchivo(String archivo);
+
+	void deleteAllByArchivo(String archivo);
+
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 

@@ -8,8 +8,6 @@ import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.exception.C
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.service.ChequeraPagoService;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.domain.model.ChequeraPago;
-import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
-import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.infrastructure.persistence.entity.ChequeraPagoEntity;
 import um.tesoreria.core.kotlin.model.ChequeraPagoAsiento;
@@ -37,7 +35,6 @@ public class PagoService {
     private final ChequeraPagoService chequeraPagoService;
     private final ChequeraPagoReemplazoService chequeraPagoReemplazoService;
     private final ChequeraCuotaService chequeraCuotaService;
-    private final ChequeraTotalService chequeraTotalService;
     private final MercadoPagoContextService mercadoPagoContextService;
     private final ChequeraPagoAsientoService chequeraPagoAsientoService;
 
@@ -234,23 +231,7 @@ public class PagoService {
     }
 
     public void marcarPago(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId, Integer cuotaId, ChequeraCuotaService chequeraCuotaService) {
-        log.debug("Processing marcarPago");
-
-        boolean pagado = chequeraPagoService.isPagado(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
-
-        var chequeraCuota = chequeraCuotaService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
-        chequeraCuota.setPagado((byte) (pagado ? 1 : 0));
-        chequeraCuota = chequeraCuotaService.update(chequeraCuota, chequeraCuota.getChequeraCuotaId());
-
-        calcularPagado(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId);
-    }
-
-    private void calcularPagado(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId, Integer alternativaId) {
-        log.debug("Processing calcularPagado");
-        var chequeraTotal = chequeraTotalService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId, productoId);
-        chequeraTotal.setTotal(chequeraCuotaService.calculateTotalCuotasActivas(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId));
-        chequeraTotal.setPagado(chequeraCuotaService.calculateTotalCuotasPagadas(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId));
-        chequeraTotal = chequeraTotalService.update(chequeraTotal, chequeraTotal.getChequeraTotalId());
+        chequeraPagoService.marcarPago(facultadId, tipoChequeraId, chequeraSerieId, productoId, alternativaId, cuotaId);
     }
 
 }

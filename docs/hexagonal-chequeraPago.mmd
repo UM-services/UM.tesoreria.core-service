@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraPago (v3.40.0)
+title: Arquitectura Hexagonal - Módulo ChequeraPago (v11.9.0)
 ---
 
 classDiagram
@@ -46,6 +46,9 @@ classDiagram
             +findByChequeraPagoId(Long) Optional~ChequeraPago~
             +findByIdMercadoPago(String) Optional~ChequeraPago~
             +findTopByCompositeKeyOrderByOrdenDesc(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraPago~
+            +findAllByArchivo(String) List~ChequeraPago~
+            +deleteAllByArchivo(String)
+            +deleteById(Long)
             +deleteAllByChequera(Integer, Integer, Long)
             +save(ChequeraPago) ChequeraPago
             +saveAll(List~ChequeraPago~) List~ChequeraPago~
@@ -66,7 +69,16 @@ classDiagram
             -GetChequeraPagoByIdMercadoPagoUseCase getChequeraPagoByIdMercadoPagoUseCase
             -IsPagadoUseCase isPagadoUseCase
             -GetNextOrdenUseCase getNextOrdenUseCase
+            -FindPagosByArchivoUseCase findPagosByArchivoUseCase
+            -DeletePagosByArchivoUseCase deletePagosByArchivoUseCase
+            -UpdateChequeraPagoUseCase updateChequeraPagoUseCase
+            -DeleteChequeraPagoUseCase deleteChequeraPagoUseCase
+            -ChequeraCuotaService chequeraCuotaService
+            -ChequeraTotalService chequeraTotalService
             +create(ChequeraPago) ChequeraPago
+            +update(ChequeraPago) ChequeraPago
+            +delete(Long)
+            +marcarPago(Integer, Integer, Long, Integer, Integer, Integer)
             +deleteByChequera(Integer, Integer, Long)
             +findAllByTipoPagoIdAndFechaAcreditacion(Integer, OffsetDateTime) List~ChequeraPago~
             +findAllByTipoPagoIdAndFechaPago(Integer, OffsetDateTime) List~ChequeraPago~
@@ -78,6 +90,8 @@ classDiagram
             +findByIdMercadoPago(String) ChequeraPago
             +isPagado(Integer, Integer, Long, Integer, Integer, Integer) boolean
             +nextOrden(Integer, Integer, Long, Integer, Integer, Integer) Integer
+            +findAllByArchivo(String) List~ChequeraPago~
+            +deleteAllByArchivo(String)
         }
 
     }
@@ -96,6 +110,10 @@ classDiagram
             class GetChequeraPagoByIdUseCaseImpl
             class GetNextOrdenUseCaseImpl
             class IsPagadoUseCaseImpl
+            class UpdateChequeraPagoUseCaseImpl
+            class DeleteChequeraPagoUseCaseImpl
+            class FindPagosByArchivoUseCaseImpl
+            class DeletePagosByArchivoUseCaseImpl
     }
     namespace application {
 
@@ -113,6 +131,10 @@ classDiagram
         class GetChequeraPagoByIdUseCase { << interface >> }
         class GetNextOrdenUseCase { << interface >> }
         class IsPagadoUseCase { << interface >> }
+        class UpdateChequeraPagoUseCase { << interface >> }
+        class DeleteChequeraPagoUseCase { << interface >> }
+        class FindPagosByArchivoUseCase { << interface >> }
+        class DeletePagosByArchivoUseCase { << interface >> }
     }
 
     namespace infrastructure_persistence {
@@ -153,6 +175,8 @@ classDiagram
                 +findByChequeraPagoId(Long) Optional~ChequeraPagoEntity~
                 +findByIdMercadoPago(String) Optional~ChequeraPagoEntity~
                 +findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdOrderByOrdenDesc(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraPagoEntity~
+                +findAllByArchivo(String) List~ChequeraPagoEntity~
+                +deleteAllByArchivo(String)
                 +deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer, Integer, Long)
             }
 
@@ -171,6 +195,9 @@ classDiagram
                 +findByChequeraPagoId(Long) Optional~ChequeraPago~
                 +findByIdMercadoPago(String) Optional~ChequeraPago~
                 +findTopByCompositeKeyOrderByOrdenDesc(Integer, Integer, Long, Integer, Integer, Integer) Optional~ChequeraPago~
+                +findAllByArchivo(String) List~ChequeraPago~
+                +deleteAllByArchivo(String)
+                +deleteById(Long)
                 +deleteAllByChequera(Integer, Integer, Long)
                 +save(ChequeraPago) ChequeraPago
                 +saveAll(List~ChequeraPago~) List~ChequeraPago~
@@ -264,6 +291,12 @@ classDiagram
     ChequeraPagoService --> GetChequeraPagoByIdMercadoPagoUseCase : uses
     ChequeraPagoService --> IsPagadoUseCase : uses
     ChequeraPagoService --> GetNextOrdenUseCase : uses
+    ChequeraPagoService --> UpdateChequeraPagoUseCase : uses
+    ChequeraPagoService --> DeleteChequeraPagoUseCase : uses
+    ChequeraPagoService --> FindPagosByArchivoUseCase : uses
+    ChequeraPagoService --> DeletePagosByArchivoUseCase : uses
+    ChequeraPagoService --> ChequeraCuotaService : update pagado
+    ChequeraPagoService --> ChequeraTotalService : recalcula totales
 
     CreateChequeraPagoUseCaseImpl ..|> CreateChequeraPagoUseCase : implements
     DeletePagosByChequeraUseCaseImpl ..|> DeletePagosByChequeraUseCase : implements
@@ -277,6 +310,10 @@ classDiagram
     GetChequeraPagoByIdUseCaseImpl ..|> GetChequeraPagoByIdUseCase : implements
     GetNextOrdenUseCaseImpl ..|> GetNextOrdenUseCase : implements
     IsPagadoUseCaseImpl ..|> IsPagadoUseCase : implements
+    UpdateChequeraPagoUseCaseImpl ..|> UpdateChequeraPagoUseCase : implements
+    DeleteChequeraPagoUseCaseImpl ..|> DeleteChequeraPagoUseCase : implements
+    FindPagosByArchivoUseCaseImpl ..|> FindPagosByArchivoUseCase : implements
+    DeletePagosByArchivoUseCaseImpl ..|> DeletePagosByArchivoUseCase : implements
 
     CreateChequeraPagoUseCaseImpl --> ChequeraPagoRepository : uses
     DeletePagosByChequeraUseCaseImpl --> ChequeraPagoRepository : uses
@@ -290,6 +327,10 @@ classDiagram
     GetChequeraPagoByIdUseCaseImpl --> ChequeraPagoRepository : uses
     GetNextOrdenUseCaseImpl --> ChequeraPagoRepository : uses
     IsPagadoUseCaseImpl --> ChequeraPagoRepository : uses
+    UpdateChequeraPagoUseCaseImpl --> ChequeraPagoRepository : uses
+    DeleteChequeraPagoUseCaseImpl --> ChequeraPagoRepository : uses
+    FindPagosByArchivoUseCaseImpl --> ChequeraPagoRepository : uses
+    DeletePagosByArchivoUseCaseImpl --> ChequeraPagoRepository : uses
 
     FindPagosPendientesFacturaUseCaseImpl --> FacturacionElectronicaService : uses
 
@@ -313,6 +354,13 @@ classDiagram
     class ChequeraCuotaService {
         << external >>
         +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
+        +update(ChequeraCuota, Long) ChequeraCuota
+    }
+
+    class ChequeraTotalService {
+        << external >>
+        +findByUnique(Integer, Integer, Long, Integer) ChequeraTotal
+        +update(ChequeraTotal, Long) ChequeraTotal
     }
 
     class FacturacionElectronicaService {
