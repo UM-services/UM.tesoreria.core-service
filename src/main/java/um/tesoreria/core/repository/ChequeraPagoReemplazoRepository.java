@@ -23,4 +23,16 @@ public interface ChequeraPagoReemplazoRepository extends JpaRepository<ChequeraP
 
     Optional<ChequeraPagoReemplazo> findByChequeraPagoReemplazoId(Long chequeraPagoReemplazoId);
 
+    List<ChequeraPagoReemplazo> findAllByArchivo(String archivo);
+
+    void deleteAllByArchivo(String archivo);
+
+    Optional<ChequeraPagoReemplazo> findTopByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdOrderByOrdenDesc(
+            Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId,
+            Integer alternativaId, Integer cuotaId);
+
+    List<ChequeraPagoReemplazo> findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaId(
+            Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId,
+            Integer alternativaId, Integer cuotaId);
+
 }

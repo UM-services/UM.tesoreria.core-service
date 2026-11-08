@@ -24,6 +24,10 @@ spring:
   jackson:
     deserialization:
       fail-on-null-for-primitives: false
+  servlet:
+    multipart:
+      max-file-size: ${APP_MULTIPART_MAX_FILE_SIZE:20MB}
+      max-request-size: ${APP_MULTIPART_MAX_REQUEST_SIZE:25MB}
   application:
     name: tesoreria-core-service
   cloud:
