@@ -19,6 +19,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import um.tesoreria.core.hexagonal.chequera.baja.application.exception.BajaException;
 import um.tesoreria.core.hexagonal.chequera.baja.application.service.BajaService;
+import um.tesoreria.core.hexagonal.chequera.baja.domain.model.ResultadoAnulacionBaja;
+import um.tesoreria.core.hexagonal.chequera.baja.domain.ports.in.AnularBajaUseCase;
+import um.tesoreria.core.hexagonal.chequera.baja.infrastructure.web.dto.AnulacionBajaResponse;
 
 /**
  * @author daniel
@@ -30,6 +33,7 @@ import um.tesoreria.core.hexagonal.chequera.baja.application.service.BajaService
 public class BajaController {
 
 	private final BajaService service;
+	private final AnularBajaUseCase anularBajaUseCase;
 
 	@GetMapping("/unique/{facultadId}/{tipoChequeraId}/{chequeraSerieId}")
 	public ResponseEntity<BajaEntity> findByUnique(@PathVariable Integer facultadId, @PathVariable Integer tipoChequeraId,
@@ -56,6 +60,19 @@ public class BajaController {
 			@PathVariable Long chequeraserieId) {
 		service.deleteByUnique(facultadId, tipochequeraId, chequeraserieId);
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@PostMapping("/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/anulacion")
+	public ResponseEntity<AnulacionBajaResponse> anular(@PathVariable Integer facultadId,
+													   @PathVariable Integer tipoChequeraId,
+													   @PathVariable Long chequeraSerieId) {
+		try {
+			ResultadoAnulacionBaja resultado = anularBajaUseCase.anular(facultadId, tipoChequeraId, chequeraSerieId);
+			return ResponseEntity.ok(new AnulacionBajaResponse(resultado.cuotasActualizadas(),
+					resultado.debitosActualizados(), resultado.bajaEliminada()));
+		} catch (BajaException e) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+		}
 	}
 
 }
