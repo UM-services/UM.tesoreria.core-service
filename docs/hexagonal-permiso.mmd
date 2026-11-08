@@ -1,29 +1,34 @@
 ---
-title: Arquitectura Hexagonal - Módulo Permiso (v6.3.0)
+title: Arquitectura Hexagonal - Módulo Permiso (v11.9.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
         M["Permiso<br/>clave, modulo, aplicacion, activo"]
-        IN["CreatePermisoUseCase<br/>GetPermisoByIdUseCase<br/>GetAllPermisosUseCase<br/>UpdatePermisoUseCase<br/>DeletePermisoUseCase"]
+        IN["CreatePermisoUseCase<br/>GetPermisoByIdUseCase<br/>GetAllPermisosUseCase<br/>UpdatePermisoUseCase<br/>DeletePermisoUseCase<br/>SyncPermisosUseCase"]
         OUT["PermisoRepository<br/>(Puerto de Salida)"]
+        RES["SyncPermisosResultado<br/>agregados, actualizados, retirados"]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
         Svc["PermisoService"]
         UCs["Create/Get/GetAll/Update/Delete<br/>PermisoUseCaseImpl"]
-        Exc["PermisoException"]
+        Sync["SyncPermisosUseCaseImpl<br/>idempotente, sin borrar filas"]
+        Exc["PermisoException<br/>PermisoManifestException"]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        Ctrl["PermisoController<br/>/api/tesoreria/core/permiso"]
-        DTO["PermisoRequest<br/>PermisoResponse"]
-        Map["PermisoDtoMapper<br/>PermisoMapper"]
+        Ctrl["PermisoController<br/>/api/tesoreria/core/permiso<br/>POST /sync (RequierePermiso)"]
+        Manifest["PermisoManifestLoader<br/>src/main/resources/permisos.yaml"]
+        Runner["PermisoManifestSyncRunner<br/>ApplicationRunner"]
+        DTO["PermisoRequest<br/>PermisoResponse<br/>SyncPermisosRequest<br/>SyncPermisosResponse"]
+        Map["PermisoDtoMapper<br/>PermisoMapper<br/>SyncPermisosDtoMapper"]
         Adp["JpaPermisoRepositoryAdapter"]
         Ent["PermisoEntity<br/>tabla permiso"]
         Jpa["JpaPermisoRepository"]
     end
 
     Ctrl --> Svc
+    Ctrl --> Sync
     Ctrl --> Map
     Map --> DTO
     Svc --> IN
@@ -31,6 +36,13 @@ flowchart TD
     Svc --> Exc
     UCs --> IN
     UCs --> OUT
+    Sync --> IN
+    Sync --> OUT
+    Sync --> RES
+    Sync --> Exc
+    Runner --> Manifest
+    Runner --> Sync
+    Manifest --> M
     Adp --> OUT
     Adp --> Map
     Adp --> Jpa
@@ -40,10 +52,14 @@ flowchart TD
     style M fill:#e1f5fe
     style IN fill:#f3e5f5
     style OUT fill:#f3e5f5
+    style RES fill:#f3e5f5
     style Svc fill:#e8f5e8
     style UCs fill:#e8f5e8
+    style Sync fill:#e8f5e8
     style Exc fill:#e8f5e8
     style Ctrl fill:#fff3e0
+    style Manifest fill:#fff3e0
+    style Runner fill:#fff3e0
     style DTO fill:#fff3e0
     style Map fill:#fff3e0
     style Adp fill:#fff3e0

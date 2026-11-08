@@ -34,3 +34,9 @@ tesoreria:
     # Los tests corren sobre H2 y no tienen la tabla audit_outbox:
     # con SEND el flush intentaría escribir y fallaría.
     mode: OFF
+
+app:
+  permissions:
+    # El inventario versionado se prueba con tests propios; no se aplica en cada test de contexto.
+    manifest-sync:
+      enabled: false

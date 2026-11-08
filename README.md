@@ -9,13 +9,27 @@
 [![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-black.svg)](https://kafka.apache.org/)
 [![JUnit](https://img.shields.io/badge/JUnit-6.0.3-green.svg)](https://junit.org/)
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
-[![Versión](https://img.shields.io/badge/versión-11.8.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-11.9.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.8.1**
+**Versión actual (SemVer): 11.9.0**
+
+## Novedades 11.9.0 (verificado en código)
+
+- **feat(cobranza/importacionPago)**: importación de rendiciones de PMC, Rapipago, PayPerTIC, PAGAR, Click de Pagos, Débito Directo y Débito VISA bajo `/api/tesoreria/core/cobranza/importacion` (canales, preview sin escritura, importación transaccional por archivo, re-acreditación de Rapipago, no registrados, rechazos de débito y eliminación con recálculo de cuotas). No agrega DDL. Diagrama: [`hexagonal-cobranzaImportacion.mmd`](docs/hexagonal-cobranzaImportacion.mmd).
+- **feat(cobranza/generacionArchivo)**: generación y preview de archivos de facturación y débito bajo `/api/tesoreria/core/cobranza/generacion`, con layouts PMC (empresa 1417), Click de Pagos, Débito Directo, VISA y facturación común en memoria; PAGAR y PayPerTIC se delegan a los generadores existentes. Incluye anulación de envíos de débito y reprogramación de vencimientos. Diagrama: [`hexagonal-cobranzaGeneracion.mmd`](docs/hexagonal-cobranzaGeneracion.mmd).
+- **feat(cobranza/pagoManual)**: alta y baja de pagos manuales en `/api/tesoreria/core/cobranza/pago-manual`, con validación de saldo, fecha y sede y recálculo de la cuota y de los totales en la misma transacción.
+- **feat(chequera/baja)**: `POST /baja/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/anulacion` revierte una baja completa (cuotas, débitos, seguro y totales) en una transacción.
+- **feat(chequera/chequeraSerie)**: `GET /chequeraserie/bynumber/{facultadId}/{chequeraserieId}/resumen` agrega baja vigente, cuotas pendientes e importe de deuda por serie. Detalle de estas tres operativas: [`hexagonal-cobranzaOperativas.mmd`](docs/hexagonal-cobranzaOperativas.mmd).
+- **feat(usuarios/permiso)**: inventario `src/main/resources/permisos.yaml` sincronizado al arrancar y a demanda con `POST /api/tesoreria/core/permiso/sync` (`{"dryRun":true}`); las claves ausentes del manifiesto se retiran con `activo = 0`, nunca se borran. Diagrama: [`hexagonal-permiso.mmd`](docs/hexagonal-permiso.mmd).
+- **feat(usuarios/solicitudAcceso)**: bandeja de solicitudes de acceso en `/api/tesoreria/core/solicitudAcceso`; `GET /pendiente` y `PUT /{id}/resolver` requieren `permisos.administrar`. Tabla nueva `solicitud_acceso` (`docs/sql/V419__solicitud_acceso.sql`). Diagrama: [`hexagonal-solicitudAcceso.mmd`](docs/hexagonal-solicitudAcceso.mmd).
+- **changed(config)**: límite multipart de 20 MB por archivo y 25 MB por request (override `APP_MULTIPART_MAX_FILE_SIZE`/`APP_MULTIPART_MAX_REQUEST_SIZE`) y nuevas claves `APP_PERMISSIONS_ENFORCE`, `APP_PERMISSIONS_MANIFEST`, `APP_PERMISSIONS_MANIFEST_SYNC_ENABLED` y `APP_PERMISSIONS_MANIFEST_SYNC_DRY_RUN`.
+- **changed(chequera/chequeraPago)**: `PagoService.marcarPago` delega en `ChequeraPagoService.marcarPago`; el recálculo de `chequera_total` tolera la ausencia de la fila (warning) en lugar de fallar.
+
+> Basado en `git diff HEAD` (staged; HEAD `7e66f205`; 229 archivos, +12 511/−45) y el código real de los slices nuevos y de los controladores citados. Todo es aditivo (no se elimina ni renombra ninguna ruta, DTO o campo) ⇒ incremento **minor** de SemVer (`11.8.1` → `11.9.0`). **Antes de desplegar**: aplicar `docs/sql/V419__solicitud_acceso.sql` y revisar que `permisos.yaml` esté completo, porque el arranque retira con `activo = 0` las claves del catálogo que no figuren en el archivo (simular con `manifest-sync.dry-run=true`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); los diagramas nuevos y modificados se validaron con `mmdc`.
 
 ## Novedades 11.8.1 (verificado en código)
 
