@@ -2,8 +2,10 @@ package um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.ma
 
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerieResumen;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieRequest;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieResponse;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieResumenResponse;
 
 @Component
 public class ChequeraSerieDtoMapper {
@@ -82,5 +84,30 @@ public class ChequeraSerieDtoMapper {
                 .importeDeuda(domain.getImporteDeuda())
                 .ultimoEnvio(domain.getUltimoEnvio())
                 .build();
+    }
+
+    public ChequeraSerieResumenResponse toResponse(ChequeraSerieResumen resumen) {
+        if (resumen == null) {
+            return null;
+        }
+        return new ChequeraSerieResumenResponse(
+                resumen.chequeraId(),
+                resumen.facultadId(),
+                resumen.tipoChequeraId(),
+                resumen.chequeraSerieId(),
+                resumen.personaId(),
+                resumen.documentoId(),
+                resumen.lectivoId(),
+                resumen.alternativaId(),
+                resumen.facultadNombre(),
+                resumen.tipoChequeraNombre(),
+                resumen.arancelTipoDescripcion(),
+                resumen.geograficaNombre(),
+                resumen.lectivoNombre(),
+                resumen.personaNombre(),
+                resumen.baja(),
+                resumen.bajaFecha(),
+                resumen.cuotasDeuda(),
+                resumen.importeDeuda());
     }
 }
