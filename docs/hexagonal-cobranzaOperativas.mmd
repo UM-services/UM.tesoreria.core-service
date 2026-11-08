@@ -1,0 +1,231 @@
+---
+title: Arquitectura Hexagonal - Cobranzas / Operativas (pago manual, baja y consulta)
+---
+
+classDiagram
+    direction TB
+
+    namespace pagoManual_domain {
+        class SolicitudPagoManual {
+            +Long chequeraCuotaId
+            +OffsetDateTime fecha
+            +BigDecimal importe
+            +String observaciones
+            +Integer geograficaId
+        }
+        class PagoManual {
+            +Long chequeraPagoId
+            +Long chequeraCuotaId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +OffsetDateTime fecha
+            +BigDecimal importe
+            +String observaciones
+            +Integer tipoPagoId
+        }
+        class ResultadoEliminacionPago {
+            +Long chequeraPagoId
+            +boolean eliminado
+        }
+        class RegistrarPagoManualUseCase { << interface >> }
+        class EliminarPagoManualUseCase { << interface >> }
+    }
+
+    namespace pagoManual_application {
+        class PagoManualService {
+            -ChequeraPagoService chequeraPagoService
+            -ChequeraCuotaService chequeraCuotaService
+            -ChequeraSerieService chequeraSerieService
+            +registrar(SolicitudPagoManual) PagoManual
+            +eliminar(Long) ResultadoEliminacionPago
+        }
+        class RegistrarPagoManualUseCaseImpl
+        class EliminarPagoManualUseCaseImpl
+        class PagoManualException
+        class PagoManualNotFoundException
+    }
+
+    namespace pagoManual_web {
+        class PagoManualController {
+            +registrar(PagoManualRequest) ResponseEntity~PagoManualResponse~
+            +eliminar(Long) ResponseEntity~Void~
+        }
+        class PagoManualRequest
+        class PagoManualResponse
+        class PagoManualDtoMapper
+    }
+
+    namespace chequeraPago_application {
+        class ChequeraPagoService {
+            +create(ChequeraPago) ChequeraPago
+            +update(ChequeraPago) ChequeraPago
+            +delete(Long)
+            +marcarPago(Integer, Integer, Long, Integer, Integer, Integer)
+            +isPagado(Integer, Integer, Long, Integer, Integer, Integer) boolean
+            +nextOrden(Integer, Integer, Long, Integer, Integer, Integer) Integer
+            +findAllByCuota(Integer, Integer, Long, Integer, Integer, Integer) List~ChequeraPago~
+            +findByChequeraPagoId(Long) ChequeraPago
+        }
+        class DeleteChequeraPagoUseCaseImpl
+    }
+
+    namespace baja_domain {
+        class DatosBaja {
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer lectivoId
+            +BigDecimal personaId
+            +Integer documentoId
+            +OffsetDateTime fecha
+            +String observaciones
+        }
+        class ResultadoAnulacionBaja {
+            +int cuotasActualizadas
+            +int debitosActualizados
+            +boolean bajaEliminada
+        }
+        class DebitoBaja {
+            +Long debitoId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +OffsetDateTime fechaBaja
+        }
+        class AnularBajaUseCase { << interface >> }
+        class DebitoBajaRepository { << interface >> }
+        class SeguroBajaRepository { << interface >> }
+    }
+
+    namespace baja_application {
+        class AnularBajaService {
+            -BajaService bajaService
+            -ChequeraCuotaService chequeraCuotaService
+            -ChequeraTotalService chequeraTotalService
+            -DebitoBajaRepository debitoBajaRepository
+            -SeguroBajaRepository seguroBajaRepository
+            +anular(Integer, Integer, Long) ResultadoAnulacionBaja
+        }
+        class AnularBajaUseCaseImpl
+        class BajaService {
+            +findByUnique(Integer, Integer, Long) BajaEntity
+            +findDatosByUnique(Integer, Integer, Long) Optional~DatosBaja~
+            +deleteByUnique(Integer, Integer, Long)
+        }
+    }
+
+    namespace baja_infrastructure {
+        class BajaController {
+            +findByUnique(Integer, Integer, Long) ResponseEntity~BajaEntity~
+            +add(BajaEntity) ResponseEntity~BajaEntity~
+            +update(BajaEntity, Long) ResponseEntity~BajaEntity~
+            +deleteByUnique(Integer, Integer, Long) ResponseEntity~Void~
+            +anular(Integer, Integer, Long) ResponseEntity~AnulacionBajaResponse~
+        }
+        class BajaEntity
+        class SeguroEntity
+        class SeguroId
+        class JpaSeguroRepository
+        class JpaSeguroBajaRepositoryAdapter
+        class JpaDebitoBajaRepositoryAdapter
+    }
+
+    namespace consulta_application {
+        class ChequeraSerieResumen {
+            +Long chequeraId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +String facultadNombre
+            +String tipoChequeraNombre
+            +String arancelTipoDescripcion
+            +String geograficaNombre
+            +String lectivoNombre
+            +String personaNombre
+            +boolean baja
+            +OffsetDateTime bajaFecha
+            +int cuotasDeuda
+            +BigDecimal importeDeuda
+        }
+        class ChequeraSerieResumenService {
+            -GetChequeraSerieByNumberUseCase getChequeraSerieByNumberUseCase
+            -BajaService bajaService
+            -ChequeraCuotaService chequeraCuotaService
+            +resumen(Integer, Long) List~ChequeraSerieResumen~
+        }
+        class ChequeraSerieResumenResponse
+    }
+
+    namespace consulta_web {
+        class ChequeraSerieController {
+            +findAllByNumber(Integer, Long) ResponseEntity~List~ChequeraSerieResponse~~
+            +resumenByNumber(Integer, Long) ResponseEntity~List~ChequeraSerieResumenResponse~~
+        }
+        class ChequeraSerieDtoMapper
+    }
+
+    RegistrarPagoManualUseCaseImpl ..|> RegistrarPagoManualUseCase : implements
+    EliminarPagoManualUseCaseImpl ..|> EliminarPagoManualUseCase : implements
+    RegistrarPagoManualUseCaseImpl --> PagoManualService : delegates
+    EliminarPagoManualUseCaseImpl --> PagoManualService : delegates
+
+    PagoManualService --> ChequeraPagoService : create / delete / marcarPago
+    PagoManualService --> ChequeraCuotaService : valida saldo y baja
+    PagoManualService --> ChequeraSerieService : valida sede
+
+    PagoManualController --> RegistrarPagoManualUseCase : calls
+    PagoManualController --> EliminarPagoManualUseCase : calls
+    PagoManualController --> PagoManualDtoMapper : uses
+
+    ChequeraPagoService --> DeleteChequeraPagoUseCaseImpl : delete
+    ChequeraPagoService --> ChequeraCuotaService : update pagado
+    ChequeraPagoService --> ChequeraTotalService : recalcula totales
+
+    AnularBajaUseCaseImpl ..|> AnularBajaUseCase : implements
+    AnularBajaUseCaseImpl --> AnularBajaService : delegates
+    AnularBajaService --> BajaService : lee y borra la baja
+    AnularBajaService --> ChequeraCuotaService : desmarca cuotas
+    AnularBajaService --> ChequeraTotalService : recalcula totales
+    AnularBajaService --> DebitoBajaRepository : limpia fechaBaja
+    AnularBajaService --> SeguroBajaRepository : resetea seguro.baja
+
+    JpaDebitoBajaRepositoryAdapter ..|> DebitoBajaRepository : implements
+    JpaSeguroBajaRepositoryAdapter ..|> SeguroBajaRepository : implements
+    JpaSeguroBajaRepositoryAdapter --> JpaSeguroRepository : uses
+    JpaSeguroRepository --> SeguroEntity : persists
+
+    BajaController --> BajaService : calls
+    BajaController --> AnularBajaUseCase : calls
+    BajaService --> BajaEntity : persists
+
+    ChequeraSerieController --> ChequeraSerieResumenService : calls
+    ChequeraSerieController --> ChequeraSerieDtoMapper : uses
+    ChequeraSerieResumenService --> GetChequeraSerieByNumberUseCase : series por numero
+    ChequeraSerieResumenService --> BajaService : baja vigente
+    ChequeraSerieResumenService --> ChequeraCuotaService : deuda
+
+    class ChequeraCuotaService {
+        << external >>
+        +findByChequeraCuotaId(Long) ChequeraCuota
+        +findAllByChequera(Integer, Integer, Long) List~ChequeraCuota~
+        +findAllPendientes(Integer, Integer, Long, Integer) List~ChequeraCuota~
+        +update(ChequeraCuota, Long) ChequeraCuota
+        +calculateTotalCuotasActivas(Integer, Integer, Long, Integer, Integer) BigDecimal
+        +calculateTotalCuotasPagadas(Integer, Integer, Long, Integer, Integer) BigDecimal
+    }
+    class ChequeraTotalService {
+        << external >>
+        +findByUnique(Integer, Integer, Long, Integer) ChequeraTotal
+        +update(ChequeraTotal, Long) ChequeraTotal
+    }
+    class GetChequeraSerieByNumberUseCase {
+        << external >>
+        +getAllByNumber(Integer, Long) List~ChequeraSerie~
+    }
