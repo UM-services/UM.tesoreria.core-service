@@ -25,7 +25,7 @@ Distributed context — who it talks to:
 ## 2. Stack (verified in `pom.xml`, the source of truth)
 
 - Java **25**, Spring Boot **4.1.2**, Spring Cloud **2025.1.4** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.21** (legacy only, §4)
-- Artifact version = service version: **11.6.1** (SemVer; bumped on release, §7)
+- Artifact version = service version: **11.9.0** (SemVer; bumped on release, §7)
 - Data: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
 - Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.1** (Swagger UI)
 - Docs/exports: Apache POI + `openpdf` (reports), `modelmapper` (legacy only), Guava, Caffeine (`starter-cache`)
@@ -109,6 +109,8 @@ Real state to keep in mind:
 | `chequera/` | `politicaArancelaria` | `/api/tesoreria/core/politicaArancelaria` (long only) |
 | `chequera/` | `producto` | `/producto` + alias |
 | `chequera/` | `tipoChequera` | `/tipoChequera` + alias |
+| `cobranza/` | `importacionPago` | `/api/tesoreria/core/cobranza/importacion` (long only): `GET /canal`, `POST /{canal}/preview` y `POST /{canal}` (multipart; PMC, PAGAR, Rapipago, Click de Pagos, Débito Directo, Débito VISA y PayPerTIC por período), `POST /pay-per-tic/archivo` (subida del XLSX), `POST /{canal}/{id}/reacreditar` (Rapipago), `POST /buscar`, `GET /{id}`, `GET /{id}/no-registrados`, `GET /{id}/rechazos`, `DELETE /{id}`. Sin cambios de esquema; compone los application services de `chequera/*` (patrón `estadoChequera`). Handoff: `HANDOFF_PAGOS_CHEQUERAS.md` en el root del workspace |
+| `cobranza/` | `generacionArchivo` | `/api/tesoreria/core/cobranza/generacion` (long only): `GET /canal`, `POST /{canal}/preview`, `POST /{canal}`, `POST /debito-directo/anulacion`, `POST /debito-visa/anulacion`, `POST /debito-directo/reprogramacion`. Layouts de PMC, Click de Pagos, Débito Directo y VISA en memoria; PAGAR/PayPerTIC delegados a los generadores existentes. Sin cambios de esquema. Handoff: `HANDOFF_PAGOS_CHEQUERAS.md` |
 | `compras/` | `articulo` | `/articulo` + alias |
 | `compras/` | `facturaPendiente` | — no REST; exposed by the legacy `FacturacionElectronicaController` (`/api/tesoreria/core/facturacionElectronica`) |
 | `compras/` | `proveedor` | `/proveedor` + alias |
@@ -132,6 +134,7 @@ Real state to keep in mind:
 | `personas/` | `legajo` | `/api/tesoreria/core/legajo` (long only) |
 | `umhub/` | `campanha`, `reservaVacante`, `consulta` | each `/api/tesoreria/core/umhub/{slice}` (long only) |
 | `usuarios/` | `usuario` | `/usuario` + alias |
+| `usuarios/` | `solicitudAcceso` | `/api/tesoreria/core/solicitudAcceso` (long only): `POST /` (alta del pedido), `GET /pendiente`, `GET /usuario/{userId}`, `PUT /{id}/resolver`. DDL externo: `docs/sql/V419__solicitud_acceso.sql` (tabla `solicitud_acceso`) |
 | `usuarios/` | `usuarioChequeraClaseChequera`, `usuarioChequeraFacultad`, `usuarioChequeraGeografica` | each `/api/tesoreria/core/{slice}` (long only) |
 
 Rules about routes:
@@ -192,12 +195,14 @@ The permission system lives in the `hexagonal/usuarios/` subdomain (slices `perm
 Current state (verified in code):
 - **Assignment: complete.** Catalog with CRUD (`POST/PUT/DELETE /api/tesoreria/core/permiso`), roles, role×permission matrix (`rolPermiso`), overrides (`usuarioPermiso`), and effective bundle (`GET /api/tesoreria/core/permisoEfectivo/usuario/{userId}`).
 - **Backend gating: implemented and opt-in.** `@RequierePermiso("<clave>")` annotation + `RequierePermisoInterceptor` under `configuration/security`, registered by `PermissionWebConfig`. **Disabled by default** (`app.permissions.enforce`, env `APP_PERMISSIONS_ENFORCE`): it only acts on annotated endpoints, so legacy stays intact. Until real identity exists (JWT, M3), identity is resolved transitionally via the `X-User-Id` header (spoofable): it is PEP plumbing, not definitive security.
+- **Access requests (bandeja):** slice `solicitudAcceso` (also under `usuarios/`) stores "Solicitar acceso" requests from the frontend in `solicitud_acceso` (`docs/sql/V419__solicitud_acceso.sql`, external DDL). `POST /api/tesoreria/core/solicitudAcceso/` is open to any user; `GET /pendiente` and `PUT /{id}/resolver` are annotated `@RequierePermiso("permisos.administrar")`. **Approving does not grant the key**: the administrator still assigns it in the Usuarios screen, so there is a single write path into the permission engine. A 403 must never be translated into a logout on the client.
+- **Inventory as code (source of truth):** `src/main/resources/permisos.yaml` declares every key (`version: 1` + list of `aplicacion`, `clave`, `modulo`, `descripcion`, `activo`). `PermisoManifestSyncRunner` reconciles the `permiso` table on startup (`app.permissions.manifest-sync.enabled`, default true; `dry-run` flag) and `POST /api/tesoreria/core/permiso/sync` does the same on demand (`{ "dryRun": true }` shows the diff). Semantics: missing in DB → insert; present in both → update metadata; present in DB but absent from the file → **`activo = 0`** (never hard delete, to preserve `rol_permiso`/`usuario_permiso`). An empty manifest is rejected. The first deploy with a partial manifest would retire everything else, so keep the file complete; `PermisoManifestLoaderTest` validates the real file in CI. Note: the legacy bridge (`addLegacy`) still grants `administrador.panel`/`chequeras.*` from user flags regardless of `activo`.
 
 ### Golden rule — LEGACY (do not break)
 **Never add or change security (neither `@RequierePermiso`, nor filters, nor token validation) on existing endpoints** consumed by the legacy system (VB6, old frontends, other services) **nor on the legacy layer**. The legacy system sends no token or permissions: any enforcement there **breaks it**. Gating applies **only to new features**. When in doubt, **stop and ask** (§1 rule: "do not add security on your own").
 
 ### How to add a new feature that requires a permission
-1. **Choose the key** `modulo.accion` and **register it in the catalog** `permiso` (from the administrador module, or a versioned seed/SQL in the same PR).
+1. **Choose the key** `modulo.accion` and **register it in the versioned manifest** `src/main/resources/permisos.yaml` in the same PR (the catalog `permiso` table is derived from that file; the Catálogo screen is read-only).
 2. **Wire the key into the new code**:
    - **Backend:** `@RequierePermiso("<clave>")` on the **new** endpoint (the interceptor only acts on annotated endpoints and with enforcement turned on).
    - **Frontend:** `permisoGuard('<clave>')` on the route, `permiso` on the menu item and `*uiPermiso` on actions.
