@@ -127,7 +127,7 @@ const diagrams = [
   { id: 'hexagonal-compraPedido', file: 'hexagonal-compraPedido.mmd', title: 'Arquitectura Hexagonal - CompraPedido' },
   { id: 'hexagonal-compraPedidoItem', file: 'hexagonal-compraPedidoItem.mmd', title: 'Arquitectura Hexagonal - CompraPedidoItem' },
   { id: 'hexagonal-compraPedidoSecuencia', file: 'hexagonal-compraPedidoSecuencia.mmd', title: 'Arquitectura Hexagonal - CompraPedidoSecuencia' },
-  { id: 'hexagonal-compraPedidoAutorizante', file: 'hexagonal-compraPedidoAutorizante.mmd', title: 'Arquitectura Hexagonal - CompraPedidoAutorizante' },
+  { id: 'hexagonal-autorizanteEnvio', file: 'hexagonal-autorizanteEnvio.mmd', title: 'Arquitectura Hexagonal - AutorizanteEnvio' },
   { id: 'hexagonal-compraPedidoHistorial', file: 'hexagonal-compraPedidoHistorial.mmd', title: 'Arquitectura Hexagonal - CompraPedidoHistorial' },
   { id: 'hexagonal-compraReferencia', file: 'hexagonal-compraReferencia.mmd', title: 'Arquitectura Hexagonal - CompraReferencia' },
   { id: 'hexagonal-compraAutoridadPerfil', file: 'hexagonal-compraAutoridadPerfil.mmd', title: 'Arquitectura Hexagonal - CompraAutoridadPerfil' },

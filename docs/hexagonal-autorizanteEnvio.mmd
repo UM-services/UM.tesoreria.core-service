@@ -1,0 +1,55 @@
+---
+title: Arquitectura Hexagonal - Módulo AutorizanteEnvio (v12.1.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["AutorizanteEnvio<br/>usuarioId, Set&lt;dependenciaId&gt;"]
+        IN["GetAutorizanteEnvioUseCase<br/>ReemplazarDependenciasAutorizanteUseCase<br/>AsignarDependenciaAutorizanteUseCase<br/>QuitarDependenciaAutorizanteUseCase<br/>ListAutorizantesEnvioUseCase<br/>(Puertos de Entrada)"]
+        OUT["AutorizanteEnvioRepository<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["AutorizanteEnvioService"]
+        UCs["*UseCaseImpl (5)"]
+        Exc["AutorizanteEnvioException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["AutorizanteEnvioController<br/>/api/tesoreria/core/compras/autorizanteEnvio"]
+        Legacy["CompraPedidoAutorizanteLegacyController<br/>alias /compraPedidoAutorizante (deprecado)"]
+        DTO["AutorizanteEnvioRequest<br/>AutorizanteEnvioResponse"]
+        Map["AutorizanteEnvioDtoMapper"]
+        Adp["JpaAutorizanteEnvioRepositoryAdapter<br/>diff de altas/bajas (auditado por Hibernate)"]
+        Repo["JpaAutorizanteEnvioDependenciaRepository<br/>derived queries"]
+        Ent["AutorizanteEnvioDependenciaEntity<br/>@IdClass + Auditable"]
+        Tabla["tabla compra_autorizante_envio_dependencia<br/>PK (usuario_id, dependencia_id)"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> Map
+    Map --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Exc
+    UCs --> IN
+    UCs --> OUT
+    Adp --> OUT
+    Adp --> Repo
+    Repo --> Ent
+    Ent --> Tabla
+    Legacy --> Svc
+
+    style M fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style Legacy fill:#fff3e0
+    style DTO fill:#fff3e0
+    style Map fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Repo fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Tabla fill:#fff3e0
