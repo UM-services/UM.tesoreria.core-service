@@ -91,6 +91,13 @@ permisos:
     descripcion: "Consultar chequeras por unidad académica y número"
     activo: true
 
+  # --- Chequeras: consultas y planillas ---
+  - aplicacion: TESORERIA
+    clave: chequeras.consultas.detalleCuotas
+    modulo: chequeras
+    descripcion: "Descargar el detalle de cuotas por facultad y sede en formato horizontal o vertical"
+    activo: true
+
   # --- Compras: proceso de pedido ---
   - aplicacion: TESORERIA
     clave: compras.iniciar_pedido
