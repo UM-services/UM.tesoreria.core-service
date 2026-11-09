@@ -122,23 +122,23 @@ permisos:
     descripcion: "Autorizar el inicio del proceso de pedido de presupuesto"
     activo: true
 
-  # --- Compras: cotizaciones y adjudicación ---
+  # --- Compras: presupuestos y adjudicación ---
   - aplicacion: TESORERIA
     clave: compras.cotizaciones.gestionar
     modulo: compras
-    descripcion: "Gestionar procesos de cotización: armar, enviar, cargar respuestas y recomendar"
+    descripcion: "Gestionar procesos de presupuesto: armar, enviar, cargar respuestas y recomendar"
     activo: true
 
   - aplicacion: TESORERIA
     clave: compras.cotizaciones.configurar
     modulo: compras
-    descripcion: "Configurar la cantidad mínima de cotizaciones por monto (tramos)"
+    descripcion: "Configurar la Cantidad Presupuestos Mínima por monto (tramos)"
     activo: true
 
   - aplicacion: TESORERIA
     clave: compras.adjudicacion.autorizar
     modulo: compras
-    descripcion: "Adjudicar la cotización recomendada o devolverla a compras (autoridad por monto)"
+    descripcion: "Adjudicar el presupuesto recomendado o devolverlo a compras (autoridad por monto)"
     activo: true
 
   # --- Compras: formalización y recepción ---

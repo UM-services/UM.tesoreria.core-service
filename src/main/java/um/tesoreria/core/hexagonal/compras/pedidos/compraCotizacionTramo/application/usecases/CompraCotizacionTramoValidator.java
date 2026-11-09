@@ -25,7 +25,7 @@ final class CompraCotizacionTramoValidator {
     /** Valida los campos de un tramo de forma aislada (admite nulos en edición parcial). */
     static void validarCampos(CompraCotizacionTramo tramo) {
         if (tramo == null) {
-            throw new CompraCotizacionTramoException("El tramo de cotizaciones es requerido");
+            throw new CompraCotizacionTramoException("El tramo de presupuestos es requerido");
         }
         if (tramo.getTopeMultiplico() != null && tramo.getTopeMultiplico() < 1) {
             throw new CompraCotizacionTramoException(
@@ -34,7 +34,7 @@ final class CompraCotizacionTramoValidator {
         if (tramo.getCantidadMinima() != null
                 && (tramo.getCantidadMinima() < CANTIDAD_MINIMA_FLOOR
                     || tramo.getCantidadMinima() > CANTIDAD_MINIMA_CEILING)) {
-            throw new CompraCotizacionTramoException("La cantidad mínima de cotizaciones debe estar entre "
+            throw new CompraCotizacionTramoException("La cantidad mínima de presupuestos debe estar entre "
                     + CANTIDAD_MINIMA_FLOOR + " y " + CANTIDAD_MINIMA_CEILING);
         }
     }
@@ -42,14 +42,14 @@ final class CompraCotizacionTramoValidator {
     /** Valida el conjunto completo: cantidades definidas, topes únicos y a lo sumo un tramo abierto. */
     static void validarConjunto(List<CompraCotizacionTramo> tramos) {
         if (tramos == null || tramos.isEmpty()) {
-            throw new CompraCotizacionTramoException("Debe configurarse al menos un tramo de cotizaciones");
+            throw new CompraCotizacionTramoException("Debe configurarse al menos un tramo de presupuestos");
         }
         Set<Integer> topes = new HashSet<>();
         int abiertos = 0;
         for (CompraCotizacionTramo tramo : tramos) {
             validarCampos(tramo);
             if (tramo.getCantidadMinima() == null) {
-                throw new CompraCotizacionTramoException("Cada tramo requiere una cantidad mínima de cotizaciones");
+                throw new CompraCotizacionTramoException("Cada tramo requiere una cantidad mínima de presupuestos");
             }
             if (tramo.getTopeMultiplico() == null) {
                 abiertos++;

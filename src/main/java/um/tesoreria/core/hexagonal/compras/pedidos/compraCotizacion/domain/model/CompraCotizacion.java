@@ -71,7 +71,7 @@ public class CompraCotizacion {
         boolean excepcion = excepcionMotivo != null && !excepcionMotivo.isBlank();
         if (proveedoresActivos < requeridas && !excepcion) {
             throw new IllegalStateException("Se requieren " + requeridas
-                    + " cotizaciones; indique el motivo de la excepción para solicitar menos");
+                    + " presupuestos; indique el motivo de la excepción para solicitar menos");
         }
     }
 

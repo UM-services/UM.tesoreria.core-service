@@ -180,7 +180,7 @@ public class CompraPedidoService {
             return pedido;
         }
         CompraPedido marcado = marcarEnCotizacionCompraPedidoUseCase.marcar(compraPedidoId);
-        registrarHistorial(marcado, null, "Incluido en un proceso de cotización");
+        registrarHistorial(marcado, null, "Incluido en un proceso de presupuesto");
         return marcado;
     }
 
@@ -199,7 +199,7 @@ public class CompraPedidoService {
             return pedido;
         }
         CompraPedido marcado = marcarPendienteAdjudicacionCompraPedidoUseCase.marcar(compraPedidoId);
-        registrarHistorial(marcado, null, "Proceso de cotización recomendado");
+        registrarHistorial(marcado, null, "Proceso de presupuesto recomendado");
         return marcado;
     }
 
@@ -219,7 +219,7 @@ public class CompraPedidoService {
             return pedido;
         }
         CompraPedido marcado = marcarAdjudicadoCompraPedidoUseCase.marcar(compraPedidoId);
-        registrarHistorial(marcado, null, "Cotización adjudicada");
+        registrarHistorial(marcado, null, "Presupuesto adjudicado");
         return marcado;
     }
 

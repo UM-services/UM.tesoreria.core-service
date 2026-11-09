@@ -7,7 +7,7 @@ public class CompraCotizacionTramoException extends RuntimeException {
     }
 
     public CompraCotizacionTramoException(Long cotizacionTramoId) {
-        super("No existe el tramo de cotizaciones con id: " + cotizacionTramoId);
+        super("No existe el tramo de presupuestos con id: " + cotizacionTramoId);
     }
 
 }

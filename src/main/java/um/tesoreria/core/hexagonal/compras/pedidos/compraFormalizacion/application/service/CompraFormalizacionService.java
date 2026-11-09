@@ -92,7 +92,7 @@ public class CompraFormalizacionService {
         CompraAdjudicacion adjudicacion = compraCotizacionService.adjudicacion(compraCotizacionId)
                 .filter(a -> a.getDecision() == DECISION_ADJUDICADA)
                 .orElseThrow(() -> new CompraFormalizacionException(
-                        "El proceso de cotización " + compraCotizacionId + " no tiene una adjudicación válida"));
+                        "El proceso de presupuesto " + compraCotizacionId + " no tiene una adjudicación válida"));
         Optional<CompraFormalizacion> existente = compraFormalizacionRepository
                 .findByCompraAdjudicacionId(adjudicacion.getCompraAdjudicacionId());
         if (existente.isPresent()) {
@@ -100,7 +100,7 @@ public class CompraFormalizacionService {
         }
         CompraCotizacion proceso = compraCotizacionService.getById(compraCotizacionId)
                 .orElseThrow(() -> new CompraFormalizacionException(
-                        "No existe el proceso de cotización " + compraCotizacionId));
+                        "No existe el proceso de presupuesto " + compraCotizacionId));
         CompraCotizacionProveedor awarded = documentoAdjudicado(proceso, adjudicacion)
                 .orElseThrow(() -> new CompraFormalizacionException(
                         "La oferta adjudicada no pertenece al proceso " + compraCotizacionId));
