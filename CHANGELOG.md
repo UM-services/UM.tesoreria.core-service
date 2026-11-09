@@ -2,6 +2,26 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.1.0] - 2026-11-09
+
+### Added
+
+- **Autorizantes de envío (contexto independiente)** (`hexagonal/compras/autorizanteEnvio`): el vínculo usuario ↔ dependencias deja de vivir en el slice del pedido y pasa a un agregado `AutorizanteEnvio(usuarioId, Set<dependenciaId>)` con casos de uso `Get`/`Reemplazar`/`Asignar`/`Quitar`/`List`. La fachada compone el conjunto completo y el adaptador JPA aplica el diff de altas y bajas en una transacción, auditado por los listeners de `Auditable`.
+- REST en `/api/tesoreria/core/compras/autorizanteEnvio`: `GET /usuario/{usuarioId}`, `PUT /usuario/{usuarioId}` con `{ dependenciaIds: [...] }` (reemplazo atómico del conjunto), `POST`/`DELETE /usuario/{usuarioId}/dependencia/{dependenciaId}` y `GET` de listado. Las escrituras exigen `@RequierePermiso("compras.autorizantes.configurar")`.
+- Nueva clave de catálogo `compras.autorizantes.configurar` en `src/main/resources/permisos.yaml` y script idempotente `docs/sql/V422__compras_autorizante_envio.sql`, que crea `compra_autorizante_envio_dependencia` (PK `(usuario_id, dependencia_id)`), copia los datos de `compra_pedido_autorizante_dependencia` si existe y siembra el permiso.
+- Alias deprecado `CompraPedidoAutorizanteLegacyController` en `/api/tesoreria/core/compraPedidoAutorizante` durante una release, para el despliegue escalonado de compras-service y del frontend.
+- Diagrama `docs/hexagonal-autorizanteEnvio.mmd` y suites `AutorizanteEnvioTest`, `AutorizanteEnvioUseCasesTest`, `AutorizanteEnvioDtoMapperTest` y `JpaAutorizanteEnvioRepositoryAdapterTest`.
+
+### Fixed
+
+- **Pool de conexiones**: `spring.datasource.hikari.minimum-idle` baja a `10` (antes, al no declararse, Hikari lo igualaba a `maximum-pool-size: 100`). El pool sigue pudiendo crecer hasta 100 bajo demanda, pero en reposo sólo mantiene 10 conexiones y libera cupo en MySQL para el resto del stack.
+
+### Removed
+
+- El slice `hexagonal/compras/pedidos/compraPedidoAutorizante` (clases, DTOs, adaptador y tests). La tabla `compra_pedido_autorizante_dependencia` se conserva como respaldo hasta completar la migración.
+
+> Based on `git diff HEAD` (staged; HEAD `b891a43e`, merge del PR #511; 53 archivos bajo `src` —30 altas, 21 bajas y 2 modificados—, +1152/−570, más `src/main/resources/bootstrap.yml`, `src/main/resources/permisos.yaml` y el script `docs/sql/V422__compras_autorizante_envio.sql`, +55) y el código real de `AutorizanteEnvioController`, `CompraPedidoAutorizanteLegacyController`, `AutorizanteEnvioService`, el agregado `AutorizanteEnvio`, `JpaAutorizanteEnvioRepositoryAdapter`, `AutorizanteEnvioDependenciaEntity extends Auditable` y `docs/sql/V422__compras_autorizante_envio.sql`. El cambio es **compatible con la API pública**: las rutas nuevas son aditivas y el alias `/api/tesoreria/core/compraPedidoAutorizante` conserva las tres rutas de `7.0.0` (`GET /dependencias/{autorizanteId}`, `POST`, `DELETE /{autorizanteId}/{dependenciaId}`) y el mismo contrato `{ autorizanteId, dependenciaIds[] }`; el retiro del slice viejo es interno y la reducción de `minimum-idle` es configuración. Por el criterio del repo corresponde incremento **minor** de SemVer (`12.0.0` → `12.1.0`, `pom.xml`). Sin dependencias nuevas. **Notas de despliegue**: aplicar `docs/sql/V422__compras_autorizante_envio.sql` antes de desplegar (crea la tabla nueva, copia las filas de `compra_pedido_autorizante_dependencia` si existe y siembra la clave `compras.autorizantes.configurar`); `permisos.yaml` debe seguir completo, porque el arranque retira con `activo = 0` las claves del catálogo que no figuren en el archivo. El alias deprecado se retirará en una release posterior junto con la tabla anterior. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); el diagrama nuevo se validó con `mmdc` 11.15.0. Fecha de release tomada del día en curso del entorno de trabajo (2026-11-09).
+
 ## [12.0.0] - 2026-11-09
 
 ### Added

@@ -9,13 +9,21 @@
 [![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-black.svg)](https://kafka.apache.org/)
 [![JUnit](https://img.shields.io/badge/JUnit-6.0.3-green.svg)](https://junit.org/)
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
-[![Versión](https://img.shields.io/badge/versión-12.0.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.1.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.0.0**
+**Versión actual (SemVer): 12.1.0**
+
+## Novedades 12.1.0 (verificado en código)
+
+- **feat(compras/autorizanteEnvio)**: nuevo contexto independiente para las dependencias habilitadas de los autorizantes de envío. Agregado `AutorizanteEnvio(usuarioId, Set<dependenciaId>)`, API `GET`/`PUT /api/tesoreria/core/compras/autorizanteEnvio/usuario/{usuarioId}` y `POST`/`DELETE /.../usuario/{usuarioId}/dependencia/{dependenciaId}`, más `GET` de listado. Persistencia en `compra_autorizante_envio_dependencia` (`docs/sql/V422__compras_autorizante_envio.sql`), permiso `compras.autorizantes.configurar` para las escrituras y alias deprecado de `/compraPedidoAutorizante` durante una release. El slice `compras/pedidos/compraPedidoAutorizante` se elimina.
+- **fix(config)**: `spring.datasource.hikari.minimum-idle: 10` en `bootstrap.yml`; el pool sigue creciendo hasta 100 bajo demanda pero deja de retener 100 conexiones ociosas.
+- **docs**: nuevo diagrama `hexagonal-autorizanteEnvio.mmd` (v12.1.0) registrado en el visor y en `docs/README.md`; reemplaza a `hexagonal-compraPedidoAutorizante.mmd`.
+
+> Basado en `git diff HEAD` (staged; HEAD `b891a43e`; 53 archivos bajo `src` —30 altas, 21 bajas, 2 modificados—, +1152/−570, más `bootstrap.yml`, `permisos.yaml` y `docs/sql/V422__compras_autorizante_envio.sql`, +55) y el código real de los dos controladores del slice, `AutorizanteEnvioService`, el agregado `AutorizanteEnvio` y `JpaAutorizanteEnvioRepositoryAdapter`. Las rutas nuevas son aditivas y el alias `/api/tesoreria/core/compraPedidoAutorizante` conserva rutas y contrato, por lo que el cambio es compatible con la API pública ⇒ incremento **minor** de SemVer (`12.0.0` → `12.1.0`). Sin dependencias nuevas. **Antes de desplegar**: aplicar `V422` (tabla nueva + copia de la anterior + clave de catálogo) y mantener `permisos.yaml` completo. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); el diagrama nuevo se validó con `mmdc`.
 
 ## Novedades 12.0.0 (verificado en código)
 
