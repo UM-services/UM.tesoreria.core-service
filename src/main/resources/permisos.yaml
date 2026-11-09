@@ -112,6 +112,12 @@ permisos:
     activo: true
 
   - aplicacion: TESORERIA
+    clave: compras.autorizantes.configurar
+    modulo: compras
+    descripcion: "Administrar las dependencias habilitadas de los autorizantes de envío"
+    activo: true
+
+  - aplicacion: TESORERIA
     clave: compras.consultar_pedidos
     modulo: compras
     descripcion: "Consultar pedidos de compra"
