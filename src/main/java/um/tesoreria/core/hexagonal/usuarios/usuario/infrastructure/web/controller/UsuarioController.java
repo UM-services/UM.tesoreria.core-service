@@ -38,6 +38,12 @@ public class UsuarioController {
         return ResponseEntity.ok(responses);
     }
 
+    /** Búsqueda por texto en la ruta, sin query params. */
+    @GetMapping("/search/{texto}")
+    public ResponseEntity<List<UsuarioResponse>> searchPorTexto(@PathVariable String texto) {
+        return search(texto);
+    }
+
     /** Padrón completo de usuarios (activos e inactivos). */
     @GetMapping("/searchTodos")
     public ResponseEntity<List<UsuarioResponse>> searchTodos() {
