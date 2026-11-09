@@ -2,6 +2,32 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.0.0] - 2026-11-09
+
+### Added
+
+- **Autoridad de presupuesto / usuarios por perfil** (`hexagonal/compras/pedidos/compraAutoridadUsuario`): `GET /api/tesoreria/core/compraAutoridadUsuario/asignaciones` devuelve todas las asignaciones usuario ↔ perfil con `login`, `nombre` y `activo`, para mostrarlas en la tabla de perfiles de la pantalla **Autoridades de presupuesto**. Compone `UsuarioService.findByUserId` del slice `usuarios/usuario`; si el usuario no existe en el padrón, los datos personales quedan en `null`. No agrega DDL: usa `compra_autoridad_usuario` y la tabla `usuario`.
+- **Consultas de chequeras:** nueva clave de catálogo `chequeras.consultas.detalleCuotas` ("Descargar el detalle de cuotas por facultad y sede en formato horizontal o vertical") declarada en `src/main/resources/permisos.yaml` y sembrada de forma idempotente por `docs/sql/V420__consultas_detalle_cuotas_permiso.sql`; el script no asigna roles ni usuarios.
+- **Usuarios:** `GET /api/tesoreria/core/usuario/search/{texto}` busca por login o nombre con el texto en la ruta, sin query params, para los clientes nuevos; delega en la misma búsqueda de `GET /usuario/search?q=`, que se mantiene para el resto de los consumidores.
+- Tests: `GetAsignacionesUseCaseImpl`, `JpaCompraAutoridadUsuarioAdapter.findAll`, `CompraAutoridadUsuarioService.getAsignaciones`, mapper y controller de asignaciones; `UsuarioController.searchPorTexto`; y actualización de los tests de compras a las rutas y a la terminología nuevas.
+
+### Changed
+
+- **Compras sin query params (cambio incompatible de rutas).** Se refactorizaron los endpoints del circuito de compras para recibir los filtros por ruta o por cuerpo:
+  - `compraCotizacion`: `GET /pendientes?ejercicioId=&dependenciaIds=` → `POST /pendientes` con cuerpo `{ "ejercicioId": …, "dependenciaIds": [ … ] }`; `GET /proveedores-pendientes?ejercicioId=` → `GET /proveedores-pendientes/{ejercicioId}` (y `GET /proveedores-pendientes` para todos los ejercicios).
+  - `compraCotizacionTramo`: `GET /minimo?ejercicioId=&monto=` → `GET /minimo/{ejercicioId}/{monto}`.
+  - `compraFormalizacion`: `GET /pendientes?ejercicioId=` → `GET /pendientes/{ejercicioId}` (y `GET /pendientes` para el ejercicio en curso); `GET /compraFormalizacion` deja de aceptar `ejercicioId`, `proveedorId`, `fechaDesde` y `fechaHasta` (los filtros quedan en `POST /search`).
+  - `compraRecepcion`: `GET /pendientes?ejercicioId=` → `GET /pendientes/{ejercicioId}` (y `GET /pendientes` para el ejercicio en curso); `GET /compraRecepcion` deja de aceptar `ejercicioId`, `compraFormalizacionId`, `resultado`, `fechaDesde` y `fechaHasta` (los filtros quedan en `POST /search`).
+  - Los consumidores deben migrar las URLs y el método; las llamadas viejas responden `405` (`/pendientes` de cotizaciones), `404` (`/minimo`) o `200` ignorando el filtro (`/compraFormalizacion`, `/compraRecepcion`, `/proveedores-pendientes`, `/pendientes` de formalización y recepción con query param).
+- **Pedido de compra:** presentar un pedido sin monto conocido ahora lo deja en `PENDIENTE_ENVIO` (bandeja del autorizante), que puede aprobarlo igual; la estimación la carga el dpto. de compras en `EN_REVISION_COMPRAS`. `montoConocido` queda como dato informativo. Migración idempotente en `docs/sql/V421__compras_sin_pendiente_estimacion.sql` (mueve las filas existentes y registra el cambio en el historial). Sin cambios de esquema.
+- **Terminología de compras:** los mensajes de error, el historial del pedido y las descripciones del manifiesto de permisos pasan de "cotización/cotizaciones" a "presupuesto/presupuestos" (`compras.cotizaciones.*`, `compras.adjudicacion.autorizar`). Las claves de permiso, las clases y los valores persistidos no cambian.
+
+### Removed
+
+- **`CompraPedidoEstado.PENDIENTE_ESTIMACION`:** se elimina del enum y de `esEditable()`. Los pedidos guardados en ese estado se migran a `PENDIENTE_ENVIO` con `docs/sql/V421__compras_sin_pendiente_estimacion.sql`; el campo `estado` ya no emite ese valor a los clientes.
+
+> Based on `git diff HEAD` (staged; HEAD `f655a977`, merge del PR #509; 42 archivos, +374/−80 —39 bajo `src` + 2 scripts SQL + el borrador de este CHANGELOG; no incluye README, `docs/README.md`, `AGENTS.md`, `pom.xml` ni los diagramas de esta actualización—: 2 scripts SQL —`V420__consultas_detalle_cuotas_permiso.sql` y `V421__compras_sin_pendiente_estimacion.sql`—, 5 archivos nuevos y 21 modificados en `src/main/java` bajo `hexagonal/compras/pedidos` y `hexagonal/usuarios/usuario`, `src/main/resources/permisos.yaml`, 12 tests modificados y el borrador de este CHANGELOG) y el código real de `CompraAutoridadUsuarioService`/`GetAsignacionesUseCaseImpl`/`JpaCompraAutoridadUsuarioAdapter.findAll`, los cuatro controladores de compras (`CompraCotizacionController`, `CompraCotizacionTramoController`, `CompraFormalizacionController`, `CompraRecepcionController`), `CompraPedido`/`CompraPedidoEstado`/`CompraPedidoService`, `UsuarioController.searchPorTexto` y `permisos.yaml`. El cambio de método/URL y la eliminación de `PENDIENTE_ESTIMACION` son incompatibles con la API y el contrato públicos (mismo criterio que `9.0.0`): incremento **major** de SemVer (`11.9.0` → `12.0.0`, `pom.xml`). Sin dependencias nuevas ni cambios de esquema. **Notas de despliegue**: aplicar `docs/sql/V420__consultas_detalle_cuotas_permiso.sql` (clave de catálogo) y `docs/sql/V421__compras_sin_pendiente_estimacion.sql` (migración de pedidos) antes de desplegar; `permisos.yaml` debe seguir completo, porque el arranque retira con `activo = 0` las claves del catálogo que no figuren en el archivo. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); los diagramas modificados (`hexagonal-compraAutoridadUsuario`, `hexagonal-compraCotizacion`, `hexagonal-compraCotizacionTramo`, `hexagonal-compraFormalizacion`, `hexagonal-compraRecepcion`, `hexagonal-usuario` y `hexagonal-permiso`) se validaron con `mmdc`. Fecha de release tomada del día en curso del entorno de trabajo (2026-11-09).
+
 ## [11.9.0] - 2026-11-07
 
 ### Added
