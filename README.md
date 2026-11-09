@@ -9,13 +9,29 @@
 [![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-black.svg)](https://kafka.apache.org/)
 [![JUnit](https://img.shields.io/badge/JUnit-6.0.3-green.svg)](https://junit.org/)
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
-[![Versión](https://img.shields.io/badge/versión-11.9.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.0.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.9.0**
+**Versión actual (SemVer): 12.0.0**
+
+## Novedades 12.0.0 (verificado en código)
+
+- **breaking(compras/pedidos)**: los endpoints del circuito de compras dejan de usar query params. Migración de rutas (mismo host):
+  - `compraCotizacion`: `GET /pendientes?ejercicioId=&dependenciaIds=` → `POST /pendientes` con `{ "ejercicioId": …, "dependenciaIds": [ … ] }`; `GET /proveedores-pendientes?ejercicioId=` → `GET /proveedores-pendientes/{ejercicioId}` (sin filtro: `GET /proveedores-pendientes`).
+  - `compraCotizacionTramo`: `GET /minimo?ejercicioId=&monto=` → `GET /minimo/{ejercicioId}/{monto}`.
+  - `compraFormalizacion`: `GET /pendientes?ejercicioId=` → `GET /pendientes/{ejercicioId}`; el `GET` de la colección deja de aceptar filtros (usar `POST /search`).
+  - `compraRecepcion`: `GET /pendientes?ejercicioId=` → `GET /pendientes/{ejercicioId}`; el `GET` de la colección deja de aceptar filtros (usar `POST /search`).
+- **breaking(compras/pedidos/compraPedido)**: se elimina `CompraPedidoEstado.PENDIENTE_ESTIMACION`. Presentar un pedido sin monto conocido lo deja en `PENDIENTE_ENVIO` y la estimación se carga en `EN_REVISION_COMPRAS`; `montoConocido` queda como dato informativo. La migración de filas existentes está en `docs/sql/V421__compras_sin_pendiente_estimacion.sql`.
+- **feat(compras/pedidos/compraAutoridadUsuario)**: `GET /api/tesoreria/core/compraAutoridadUsuario/asignaciones` lista las asignaciones usuario ↔ perfil con `login`, `nombre` y `activo`, componiendo `UsuarioService.findByUserId`; sin DDL nuevo.
+- **feat(usuarios/usuario)**: `GET /api/tesoreria/core/usuario/search/{texto}` busca por login o nombre con el texto en la ruta, sin query params; el legacy `GET /usuario/search?q=` se mantiene.
+- **feat(usuarios/permiso)**: nueva clave `chequeras.consultas.detalleCuotas` en `permisos.yaml`, sembrada por `docs/sql/V420__consultas_detalle_cuotas_permiso.sql` (sólo catálogo, sin asignar roles ni usuarios).
+- **changed(compras)**: mensajes de error, historial y descripciones de permisos pasan de "cotización/cotizaciones" a "presupuesto/presupuestos"; las claves, las clases y los valores persistidos no cambian.
+- **docs**: `docs/sql/V420__consultas_detalle_cuotas_permiso.sql` y `docs/sql/V421__compras_sin_pendiente_estimacion.sql`; diagramas `hexagonal-compraAutoridadUsuario`, `hexagonal-compraCotizacion`, `hexagonal-compraCotizacionTramo`, `hexagonal-compraFormalizacion`, `hexagonal-compraRecepcion`, `hexagonal-usuario` y `hexagonal-permiso` a v12.0.0.
+
+> Basado en `git diff HEAD` (staged; HEAD `f655a977`; 42 archivos de código y SQL, +374/−80, más esta documentación de release) y el código real de los controladores y slices citados. El cambio de método/URL y la eliminación de `PENDIENTE_ESTIMACION` son incompatibles con la API/contrato públicos ⇒ incremento **major** de SemVer (`11.9.0` → `12.0.0`). Sin dependencias nuevas ni cambios de esquema. **Antes de desplegar**: aplicar `V420` (clave de catálogo) y `V421` (migración de pedidos) y mantener `permisos.yaml` completo. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); los diagramas modificados se validaron con `mmdc`.
 
 ## Novedades 11.9.0 (verificado en código)
 

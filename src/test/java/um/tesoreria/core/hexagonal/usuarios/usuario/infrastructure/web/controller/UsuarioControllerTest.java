@@ -39,6 +39,16 @@ class UsuarioControllerTest {
             """;
 
     @Test
+    void searchPorTextoEnLaRuta() {
+        when(service.search("pedro"))
+                .thenReturn(List.of(Usuario.builder().userId(7L).login("pedro").nombre("Pedro").build()));
+
+        mockMvc.get().uri("/api/tesoreria/core/usuario/search/pedro")
+                .assertThat().hasStatusOk()
+                .bodyJson().extractingPath("$[0].login").isEqualTo("pedro");
+    }
+
+    @Test
     void searchTodosPorTexto() {
         when(service.searchTodos("pedro"))
                 .thenReturn(List.of(Usuario.builder().userId(7L).login("pedro").nombre("Pedro").build()));

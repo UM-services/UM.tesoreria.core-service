@@ -19,7 +19,7 @@ public class CreateCompraCotizacionUseCaseImpl implements CreateCompraCotizacion
     @Override
     public CompraCotizacion crear(CompraCotizacion proceso) {
         if (proceso == null || proceso.getEjercicioId() == null) {
-            throw new CompraCotizacionException("El ejercicio del proceso de cotización es requerido");
+            throw new CompraCotizacionException("El ejercicio del proceso de presupuesto es requerido");
         }
         proceso.setEstado(CompraCotizacionEstado.BORRADOR);
         proceso.setNumero(null);

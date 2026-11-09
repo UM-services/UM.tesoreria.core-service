@@ -15,7 +15,7 @@ public class DeleteCotizacionTramoUseCaseImpl implements DeleteCotizacionTramoUs
     @Override
     public void delete(Long cotizacionTramoId) {
         if (cotizacionTramoId == null) {
-            throw new CompraCotizacionTramoException("cotizacionTramoId es requerido");
+            throw new CompraCotizacionTramoException("El id del tramo es requerido");
         }
         if (!repository.existsById(cotizacionTramoId)) {
             throw new CompraCotizacionTramoException(cotizacionTramoId);

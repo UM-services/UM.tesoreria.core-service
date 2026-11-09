@@ -7,6 +7,6 @@ public class CompraCotizacionException extends RuntimeException {
     }
 
     public CompraCotizacionException(Long compraCotizacionId) {
-        super("No existe el proceso de cotización con id: " + compraCotizacionId);
+        super("No existe el proceso de presupuesto con id: " + compraCotizacionId);
     }
 }

@@ -8,12 +8,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadPerfil.application.service.CompraAutoridadPerfilService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadPerfil.domain.model.CompraAutoridadPerfil;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.application.exception.CompraAutoridadUsuarioException;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.CompraAutoridadUsuario;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.CompraAutoridadUsuarioAsignacion;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.LimiteAutorizacion;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.in.AsignarAutoridadUsuarioUseCase;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.in.GetAsignacionesUseCase;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.in.GetPerfilIdsByUsuarioUseCase;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.in.QuitarAutoridadUsuarioUseCase;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraReferencia.application.service.CompraReferenciaService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraReferencia.domain.model.CompraReferencia;
+import um.tesoreria.core.hexagonal.usuarios.usuario.application.service.UsuarioService;
+import um.tesoreria.core.hexagonal.usuarios.usuario.domain.model.Usuario;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,8 +36,10 @@ class CompraAutoridadUsuarioServiceTest {
     @Mock private AsignarAutoridadUsuarioUseCase asignarAutoridadUsuarioUseCase;
     @Mock private QuitarAutoridadUsuarioUseCase quitarAutoridadUsuarioUseCase;
     @Mock private GetPerfilIdsByUsuarioUseCase getPerfilIdsByUsuarioUseCase;
+    @Mock private GetAsignacionesUseCase getAsignacionesUseCase;
     @Mock private CompraAutoridadPerfilService compraAutoridadPerfilService;
     @Mock private CompraReferenciaService compraReferenciaService;
+    @Mock private UsuarioService usuarioService;
 
     @InjectMocks
     private CompraAutoridadUsuarioService service;
@@ -83,6 +90,25 @@ class CompraAutoridadUsuarioServiceTest {
     void getPerfilIdsDelega() {
         when(getPerfilIdsByUsuarioUseCase.getPerfilIds(9)).thenReturn(List.of(5L));
         assertThat(service.getPerfilIds(9)).containsExactly(5L);
+    }
+
+    @Test
+    void getAsignacionesIncluyeLosDatosDelUsuario() {
+        when(getAsignacionesUseCase.getAsignaciones()).thenReturn(List.of(
+                new CompraAutoridadUsuario(9, 5L),
+                new CompraAutoridadUsuario(10, 5L)));
+        when(usuarioService.findByUserId(9L)).thenReturn(Optional.of(Usuario.builder()
+                .userId(9L).login("juan").nombre("Juan Pérez").activo((byte) 1).build()));
+        when(usuarioService.findByUserId(10L)).thenReturn(Optional.empty());
+
+        List<CompraAutoridadUsuarioAsignacion> asignaciones = service.getAsignaciones();
+
+        assertThat(asignaciones).hasSize(2);
+        assertThat(asignaciones.get(0).login()).isEqualTo("juan");
+        assertThat(asignaciones.get(0).nombre()).isEqualTo("Juan Pérez");
+        assertThat(asignaciones.get(0).activo()).isEqualTo((byte) 1);
+        assertThat(asignaciones.get(1).login()).isNull();
+        assertThat(asignaciones.get(1).nombre()).isNull();
     }
 
     @Test

@@ -46,14 +46,14 @@ class CompraFormalizacionControllerTest {
         when(service.listar(any())).thenReturn(List.of(oc()));
         when(dtoMapper.toResponse(any(CompraFormalizacion.class))).thenReturn(response());
 
-        mockMvc.get().uri("/api/tesoreria/core/compraFormalizacion?ejercicioId=15")
+        mockMvc.get().uri("/api/tesoreria/core/compraFormalizacion")
                 .assertThat().hasStatusOk();
     }
 
     @Test
     void pendientesDevuelveLaLista() {
         when(service.pendientes(15)).thenReturn(List.of());
-        mockMvc.get().uri("/api/tesoreria/core/compraFormalizacion/pendientes?ejercicioId=15")
+        mockMvc.get().uri("/api/tesoreria/core/compraFormalizacion/pendientes/15")
                 .assertThat().hasStatusOk();
     }
 
@@ -75,7 +75,7 @@ class CompraFormalizacionControllerTest {
         when(dtoMapper.toResponse(any(CompraFormalizacionPendiente.class)))
                 .thenReturn(CompraFormalizacionPendienteResponse.builder().compraCotizacionId(1L).build());
 
-        mockMvc.get().uri("/api/tesoreria/core/compraFormalizacion/pendientes?ejercicioId=15")
+        mockMvc.get().uri("/api/tesoreria/core/compraFormalizacion/pendientes/15")
                 .assertThat().hasStatusOk();
     }
 

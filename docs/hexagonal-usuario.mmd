@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Usuario (v11.1.0)
+title: Arquitectura Hexagonal - Módulo Usuario (v12.0.0)
 ---
 
 classDiagram
@@ -176,6 +176,7 @@ classDiagram
                 -UsuarioService service
                 -UsuarioDtoMapper dtoMapper
                 +search(String) ResponseEntity~List~UsuarioResponse~~
+                +searchPorTexto(String) ResponseEntity~List~UsuarioResponse~~
                 +searchTodos() ResponseEntity~List~UsuarioResponse~~
                 +searchTodos(String) ResponseEntity~List~UsuarioResponse~~
                 +findByUserId(Long) ResponseEntity~UsuarioResponse~

@@ -1,7 +1,6 @@
 package um.tesoreria.core.hexagonal.compras.pedidos.compraFormalizacion.infrastructure.web.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraFormalizacion.application.exception.CompraFormalizacionException;
@@ -21,7 +19,6 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraFormalizacion.infrastru
 import um.tesoreria.core.hexagonal.compras.pedidos.compraFormalizacion.infrastructure.web.dto.CompraFormalizacionResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraFormalizacion.infrastructure.web.mapper.CompraFormalizacionDtoMapper;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -37,22 +34,23 @@ public class CompraFormalizacionController {
     private final CompraFormalizacionDtoMapper compraFormalizacionDtoMapper;
 
     @GetMapping
-    public ResponseEntity<List<CompraFormalizacionResponse>> findAll(
-            @RequestParam(required = false) Integer ejercicioId,
-            @RequestParam(required = false) Integer proveedorId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaDesde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaHasta) {
-        CompraFormalizacionCriteria criteria = new CompraFormalizacionCriteria(ejercicioId, proveedorId,
-                fechaDesde, fechaHasta);
+    public ResponseEntity<List<CompraFormalizacionResponse>> findAll() {
+        CompraFormalizacionCriteria criteria = new CompraFormalizacionCriteria(null, null, null, null);
         return ResponseEntity.ok(compraFormalizacionService.listar(criteria).stream()
                 .map(compraFormalizacionDtoMapper::toResponse)
                 .toList());
     }
 
-    /** Adjudicaciones del ejercicio pendientes de emitir la Orden de Compra. */
+    /** Adjudicaciones del ejercicio en curso pendientes de emitir la Orden de Compra. */
     @GetMapping("/pendientes")
+    public ResponseEntity<List<CompraFormalizacionPendienteResponse>> pendientes() {
+        return pendientes(null);
+    }
+
+    /** Adjudicaciones del ejercicio indicado pendientes de emitir la Orden de Compra. */
+    @GetMapping("/pendientes/{ejercicioId}")
     public ResponseEntity<List<CompraFormalizacionPendienteResponse>> pendientes(
-            @RequestParam(required = false) Integer ejercicioId) {
+            @PathVariable Integer ejercicioId) {
         return ResponseEntity.ok(compraFormalizacionService.pendientes(ejercicioId).stream()
                 .map(compraFormalizacionDtoMapper::toResponse)
                 .toList());
