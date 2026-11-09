@@ -6,12 +6,16 @@ import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadPerfil.application.service.CompraAutoridadPerfilService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadPerfil.domain.model.CompraAutoridadPerfil;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.application.exception.CompraAutoridadUsuarioException;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.CompraAutoridadUsuarioAsignacion;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.LimiteAutorizacion;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.in.AsignarAutoridadUsuarioUseCase;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.in.GetAsignacionesUseCase;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.in.GetPerfilIdsByUsuarioUseCase;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.in.QuitarAutoridadUsuarioUseCase;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraReferencia.application.service.CompraReferenciaService;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraReferencia.domain.model.CompraReferencia;
+import um.tesoreria.core.hexagonal.usuarios.usuario.application.service.UsuarioService;
+import um.tesoreria.core.hexagonal.usuarios.usuario.domain.model.Usuario;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,10 +36,12 @@ public class CompraAutoridadUsuarioService {
     private final AsignarAutoridadUsuarioUseCase asignarAutoridadUsuarioUseCase;
     private final QuitarAutoridadUsuarioUseCase quitarAutoridadUsuarioUseCase;
     private final GetPerfilIdsByUsuarioUseCase getPerfilIdsByUsuarioUseCase;
+    private final GetAsignacionesUseCase getAsignacionesUseCase;
 
     // Excepción cross-slice autorizada: composición de slices del subdominio "pedidos".
     private final CompraAutoridadPerfilService compraAutoridadPerfilService;
     private final CompraReferenciaService compraReferenciaService;
+    private final UsuarioService usuarioService;
 
     @Transactional
     public void asignar(Integer usuarioId, Long autoridadPerfilId) {
@@ -61,6 +67,25 @@ public class CompraAutoridadUsuarioService {
 
     public List<Long> getPerfilIds(Integer usuarioId) {
         return getPerfilIdsByUsuarioUseCase.getPerfilIds(usuarioId);
+    }
+
+    /**
+     * Asignaciones usuario ↔ perfil con el nombre/login del usuario, para la pantalla de
+     * administración de perfiles de autoridad.
+     */
+    public List<CompraAutoridadUsuarioAsignacion> getAsignaciones() {
+        return getAsignacionesUseCase.getAsignaciones().stream()
+                .map(asignacion -> {
+                    Usuario usuario = usuarioService.findByUserId(asignacion.usuarioId().longValue())
+                            .orElse(null);
+                    return new CompraAutoridadUsuarioAsignacion(
+                            asignacion.usuarioId(),
+                            asignacion.autoridadPerfilId(),
+                            usuario != null ? usuario.getLogin() : null,
+                            usuario != null ? usuario.getNombre() : null,
+                            usuario != null ? usuario.getActivo() : null);
+                })
+                .toList();
     }
 
     /**

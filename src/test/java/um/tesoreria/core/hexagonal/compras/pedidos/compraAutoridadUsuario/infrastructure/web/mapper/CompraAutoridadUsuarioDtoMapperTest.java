@@ -1,7 +1,9 @@
 package um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.mapper;
 
 import org.junit.jupiter.api.Test;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.CompraAutoridadUsuarioAsignacion;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.LimiteAutorizacion;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.CompraAutoridadUsuarioAsignacionResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.CompraAutoridadUsuarioResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.LimiteAutorizacionResponse;
 
@@ -20,6 +22,18 @@ class CompraAutoridadUsuarioDtoMapperTest {
 
         assertThat(response.getUsuarioId()).isEqualTo(9);
         assertThat(response.getAutoridadPerfilIds()).containsExactly(5L, 6L);
+    }
+
+    @Test
+    void toResponseDeLaAsignacionConUsuario() {
+        CompraAutoridadUsuarioAsignacionResponse response = mapper.toResponse(
+                new CompraAutoridadUsuarioAsignacion(9, 5L, "juan", "Juan Pérez", (byte) 1));
+
+        assertThat(response.usuarioId()).isEqualTo(9);
+        assertThat(response.autoridadPerfilId()).isEqualTo(5L);
+        assertThat(response.login()).isEqualTo("juan");
+        assertThat(response.nombre()).isEqualTo("Juan Pérez");
+        assertThat(response.activo()).isEqualTo((byte) 1);
     }
 
     @Test

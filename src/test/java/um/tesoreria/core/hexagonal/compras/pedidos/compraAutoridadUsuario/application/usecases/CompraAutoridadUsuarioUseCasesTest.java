@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.application.exception.CompraAutoridadUsuarioException;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.CompraAutoridadUsuario;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.out.CompraAutoridadUsuarioRepository;
 
 import java.util.List;
@@ -43,6 +44,14 @@ class CompraAutoridadUsuarioUseCasesTest {
     void getPerfilIdsExigeUsuario() {
         assertThatThrownBy(() -> new GetPerfilIdsByUsuarioUseCaseImpl(repository).getPerfilIds(null))
                 .isInstanceOf(CompraAutoridadUsuarioException.class);
+    }
+
+    @Test
+    void getAsignacionesDelega() {
+        List<CompraAutoridadUsuario> asignaciones = List.of(new CompraAutoridadUsuario(9, 5L));
+        when(repository.findAll()).thenReturn(asignaciones);
+
+        assertThat(new GetAsignacionesUseCaseImpl(repository).getAsignaciones()).isEqualTo(asignaciones);
     }
 
 }
