@@ -2,6 +2,10 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [11.8.0] - 2026-11-10
+### Added 
+- `POST /api/tesoreria/core/balance/mayor/consulta` (también `/balance/mayor/consulta`): mayor en JSON de una o varias cuentas con un rango de fechas que puede abarcar uno o más ejercicios consecutivos. Las cuentas se indican por lista (`cuentas`, una o varias) o por rango (`cuentaDesde`–`cuentaHasta`, solo cuentas no integradoras), nunca ambas. La respuesta trae un bloque por cuenta ordenado por número con saldo inicial (`debe`, `haber`, `saldo`), movimientos con el ejercicio de cada línea, saldo acumulado, totales y saldo final.- `MayorConsultaService` (capa legacy, `service/facade/mayor`) con las reglas del mayor. Se mantiene la regla actual de `BalanceService.makeMayor`: el saldo inicial es el del ejercicio de `desde`, el período se consulta con `apertura = 0` y el saldo acumulado continúa corrido a lo largo de todo el rango.- Rechazos con cuerpo `{status, error, codigo, message}` (`BalanceExceptionAdvice`): `FECHAS_REQUERIDAS` (400), `SELECCION_INVALIDA`, `DESDE_POSTERIOR`, `FUERA_DE_EJERCICIO`, `EJERCICIOS_NO_CONSECUTIVOS` y `RANGO_SIN_CUENTAS` (409) y `CUENTA_INEXISTENTE` (404). No hay límite de cuentas ni de fechas.- Tests `MayorConsultaServiceTest` y `BalanceControllerMayorTest`. ### Changed - `BalanceController` también responde en `/api/tesoreria/core/balance` (antes solo `/balance`: por el gateway, que no quita el prefijo, devolvía 404). Los GET de Excel no cambian de contrato. > Based on git diff: archivos nuevos en `service/facade/mayor` y `controller/facade/BalanceExceptionAdvice`, y cambios en `BalanceController` (alias y endpoint). La exportación a Excel del mayor nuevo la genera `report-service`; `GET /balance/mayor/{numeroCuenta}/{desde}/{hasta}` y `GET /balance/sumasysaldos/{desde}/{hasta}` no se modificaron. Versión propuesta (minor por ser aditivo): verificar contra `pom.xml`.
+
 ## [12.1.0] - 2026-11-09
 
 ### Added
