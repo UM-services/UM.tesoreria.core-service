@@ -228,3 +228,22 @@ permisos:
     modulo: compras
     descripcion: "Descargar la planilla de proveedores"
     activo: true
+
+  # --- Pagos: comprobantes de proveedor (consulta y anulación) ---
+  - aplicacion: TESORERIA
+    clave: pagos.comprobantes.consultar
+    modulo: pagos
+    descripcion: "Consultar comprobantes de proveedor y sus movimientos"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.comprobantes.anular
+    modulo: pagos
+    descripcion: "Anular (borrar) comprobantes de proveedor"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.comprobantes.anular_op
+    modulo: pagos
+    descripcion: "Anular comprobantes que son orden de pago"
+    activo: true
