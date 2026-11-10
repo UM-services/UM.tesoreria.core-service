@@ -9,8 +9,10 @@ import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoDetalleResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoRequest;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoResponse;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoResumenResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.mapper.ProveedorMovimientoDtoMapper;
 
 import java.time.OffsetDateTime;
@@ -18,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/proveedorMovimiento")
+@RequestMapping({"/proveedorMovimiento", "/api/tesoreria/core/proveedorMovimiento"})
 @RequiredArgsConstructor
 public class ProveedorMovimientoController {
 
@@ -53,6 +55,30 @@ public class ProveedorMovimientoController {
             return ResponseEntity.ok(proveedorMovimientoDtoMapper.toResponse(domain));
         } catch (ProveedorMovimientoException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping("/proveedor/{proveedorId}/{desde}/{hasta}/{geograficaId}")
+    public ResponseEntity<List<ProveedorMovimientoResumenResponse>> findAllByProveedorAndFechaRange(
+            @PathVariable Integer proveedorId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime desde,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime hasta,
+            @PathVariable Integer geograficaId) {
+        List<ProveedorMovimientoResumenResponse> responses = service
+                .findAllByProveedorAndFechaRange(proveedorId, desde, hasta, geograficaId)
+                .stream()
+                .map(proveedorMovimientoDtoMapper::toResumen)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/{proveedorMovimientoId}/detalle")
+    public ResponseEntity<ProveedorMovimientoDetalleResponse> findDetalle(
+            @PathVariable Long proveedorMovimientoId) {
+        try {
+            return ResponseEntity.ok(proveedorMovimientoDtoMapper.toDetalle(service.findDetalle(proveedorMovimientoId)));
+        } catch (ProveedorMovimientoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
