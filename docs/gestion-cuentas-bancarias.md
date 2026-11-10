@@ -12,6 +12,8 @@ El servicio decide las reglas de datos de `frmCuentasBancarias` (VB6), que hasta
 | `GET /bancaria/{id}` | una cuenta, con las claves planas del listado (sin el objeto `cuenta` anidado) |
 | `GET /bancaria/{id}/uso` | `{valores, libroBanco, eliminable}` para que el cliente confirme antes de borrar |
 
+El controlador atiende `/bancaria` (VB6, directo al core) y `/api/tesoreria/core/bancaria` (el gateway enruta `/api/tesoreria/core/**` sin quitar el prefijo; lo usa el frontend). Las dos rutas tienen el mismo contrato.
+
 Las respuestas de éxito no llevan la clave `status`; todo error lleva cuerpo JSON `{status, error, codigo, message}` (VB6 toma un cuerpo con `status` como rechazo y uno vacío como éxito).
 
 ## Reglas
