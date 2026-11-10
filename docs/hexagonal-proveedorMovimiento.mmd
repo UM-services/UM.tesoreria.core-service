@@ -1,9 +1,12 @@
 ---
-title: Arquitectura Hexagonal - ProveedorMovimiento (v3.36.0)
+title: Arquitectura Hexagonal - ProveedorMovimiento (v12.2.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
         PM[ProveedorMovimiento<br/>Modelo de Dominio]
+        PMR[ProveedorMovimientoResumen<br/>Modelo de Dominio]
+        PMD[ProveedorMovimientoDetalle<br/>Modelo de Dominio]
+        ANU[AnulacionComprobante<br/>Modelo de Dominio]
         PR[ProveedorMovimientoRepository<br/>Puerto de Salida]
         C[Comprobante<br/>Modelo de Dominio]
         P[Proveedor<br/>Modelo de Dominio]
@@ -25,6 +28,9 @@ flowchart TD
         UC11[GetProveedorMovimientosAsignablesUseCase]
         UC12[GetProveedorMovimientosDisponiblesUseCase]
         UC13[GetProveedorMovimientoIdsForCostAdjustmentUseCase]
+        UC14[GetProveedorMovimientosByProveedor<br/>AndFechaRangeUseCase]
+        UC15[GetProveedorMovimientoDetalleUseCase]
+        FMT[ComprobanteFormato<br/>Formato compartido]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
@@ -34,11 +40,16 @@ flowchart TD
         DM[ProveedorMovimientoDtoMapper<br/>Mapeador DTO]
         Req[ProveedorMovimientoRequest<br/>DTO Entrada]
         Resp[ProveedorMovimientoResponse<br/>DTO Salida]
+        RespResumen[ProveedorMovimientoResumenResponse<br/>DTO Salida]
+        RespDetalle[ProveedorMovimientoDetalleResponse<br/>DTO Salida]
         ENT[ProveedorMovimientoEntity<br/>Entidad JPA]
     end
 
     subgraph Externo ["Externo (External)"]
         JPAR[JpaRepository<br/>Spring Data]
+        ENTREGA[EntregaDetalleService<br/>Legacy: costos asignados]
+        PPAGO[ProveedorPagoService<br/>Legacy: pagos aplicados]
+        PVALOR[ProveedorValorService<br/>Legacy: valores de la OP]
     end
 
     %% Flujo de Dependencias
@@ -61,6 +72,20 @@ flowchart TD
     Svc -->|ejecuta| UC11
     Svc -->|ejecuta| UC12
     Svc -->|ejecuta| UC13
+    Svc -->|ejecuta| UC14
+    Svc -->|ejecuta| UC15
+
+    UC14 -->|usa| FMT
+    UC15 -->|usa| FMT
+    UC14 -->|consulta| PR
+    UC15 -->|consulta| PR
+    UC14 -->|verifica costos| ENTREGA
+    UC15 -->|verifica costos| ENTREGA
+    UC15 -->|lee pagos| PPAGO
+    UC15 -->|lee valores| PVALOR
+    UC14 -->|produce| PMR
+    UC15 -->|produce| PMD
+    UC15 -->|produce| ANU
 
     JPA -->|implementa| PR
     JPA -->|persiste| JPAR
@@ -72,9 +97,14 @@ flowchart TD
 
     DM -->|convierte| Req
     DM -->|convierte| Resp
+    DM -->|convierte| RespResumen
+    DM -->|convierte| RespDetalle
     DM -->|convierte| PM
 
     style PM fill:#e1f5fe
+    style PMR fill:#e1f5fe
+    style PMD fill:#e1f5fe
+    style ANU fill:#e1f5fe
     style C fill:#e1f5fe
     style P fill:#e1f5fe
     style G fill:#e1f5fe

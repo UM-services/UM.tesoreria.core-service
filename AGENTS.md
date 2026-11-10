@@ -25,7 +25,7 @@ Distributed context — who it talks to:
 ## 2. Stack (verified in `pom.xml`, the source of truth)
 
 - Java **25**, Spring Boot **4.1.2**, Spring Cloud **2025.1.4** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.21** (legacy only, §4)
-- Artifact version = service version: **12.1.0** (SemVer; bumped on release, §7)
+- Artifact version = service version: **12.2.0** (SemVer; bumped on release, §7)
 - Data: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
 - Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.1** (Swagger UI)
 - Docs/exports: Apache POI + `openpdf` (reports), `modelmapper` (legacy only), Guava, Caffeine (`starter-cache`)
@@ -96,13 +96,13 @@ Real state to keep in mind:
 | root | `setup` | `/setup` + alias |
 | root | `track` | `/track` + alias |
 | root | `ubicacionArticulo` | `/ubicacionArticulo` + alias |
-| `chequera/` | `arancelPorcentaje` | `/arancelporcentaje` (short only) |
-| `chequera/` | `arancelTipo` | `/aranceltipo` (short only) |
+| `chequera/` | `arancelPorcentaje` | `/arancelporcentaje` (+ alias) |
+| `chequera/` | `arancelTipo` | `/aranceltipo` (+ alias) |
 | `chequera/` | `baja` | `/baja` + alias |
 | `chequera/` | `chequeraCuota` | `/chequeraCuota` + alias |
 | `chequera/` | `chequeraPago` | `/chequeraPago` + alias |
 | `chequera/` | `chequeraSerie` | `/chequeraserie` + alias |
-| `chequera/` | `chequeraTotal` | `/chequeratotal` (short only) |
+| `chequera/` | `chequeraTotal` | `/chequeratotal` (+ alias) |
 | `chequera/` | `claseChequera` | `/clasechequera` + alias |
 | `chequera/` | `estadoChequera` | `/api/tesoreria/core/chequera` → only `/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` (`report-service` contract, 6.0.0 removed `{debitoTipoId}`) |
 | `chequera/` | `lectivoCuota` | — no REST; internal port (consumed by `politicaArancelaria`) |
@@ -115,7 +115,7 @@ Real state to keep in mind:
 | `compras/` | `autorizanteEnvio` | `/api/tesoreria/core/compras/autorizanteEnvio` (long only): `GET /usuario/{usuarioId}`, `PUT /usuario/{usuarioId}` (body `dependenciaIds[]`), `POST`/`DELETE /usuario/{usuarioId}/dependencia/{dependenciaId}`, `GET` (listado). Alias deprecado `/api/tesoreria/core/compraPedidoAutorizante` durante una release |
 | `compras/` | `facturaPendiente` | — no REST; exposed by the legacy `FacturacionElectronicaController` (`/api/tesoreria/core/facturacionElectronica`) |
 | `compras/` | `proveedor` | `/proveedor` + alias |
-| `compras/` | `proveedorMovimiento` | `/proveedorMovimiento` (short only) |
+| `compras/` | `proveedorMovimiento` | `/proveedorMovimiento` (+ alias) |
 | `compras/pedidos/` | `compraPedido` | `/api/tesoreria/core/compraPedido` (long only): `GET /` (`dependenciaIds`), `POST /search`, `GET /{id}`/`/numero/{numero}`, `POST`/`PUT`, `POST /{id}/enviar?usuarioId=`, `POST /{id}/aprobar` (7.0.0: renamed from `autorizar`), `POST /{id}/rechazar` (body `autorizanteId`+`motivo`), `POST /{id}/descartar` |
 | `compras/pedidos/` | `compraPedidoItem` | `/api/tesoreria/core/compraPedidoItem` (long only) |
 | `compras/pedidos/` | `compraPedidoSecuencia` | — no REST; internal port (correlativo anual) |
@@ -124,7 +124,7 @@ Real state to keep in mind:
 | `contable/` | `cuenta` | `/cuenta` + alias |
 | `contable/` | `cuentaMovimiento` | `/cuentaMovimiento` + alias |
 | `contable/` | `lectivoTotalImputacion` | `/lectivototalimputacion` + alias |
-| `contratos/` | `contrato` | `/contrato` (short only) |
+| `contratos/` | `contrato` | `/contrato` (+ alias) |
 | `contratos/` | `cursoCargoContratado` | `/cursocargocontratado` + alias `/api/core/cursocargocontratado` (careful: **without** `/tesoreria`) |
 | `dependencias/` | `dependencia`, `facultad`, `geografica`, `ubicacion` | each `/{entidad}` + long alias |
 | `extern/facultad/` | `tesoreriaEstado` | — no REST; the adapter is a consumer to the faculty service |
@@ -139,7 +139,7 @@ Real state to keep in mind:
 
 Rules about routes:
 
-- The **short alias** (`/chequeraCuota`) exists for compatibility with old frontends; the **long** one (`/api/tesoreria/core/...`) is the standard for new slices. When creating a new slice use only the long one, unless told otherwise.
+- **Every controller exposes the long route** `/api/tesoreria/core/...`, and the controllers inherited from legacy also keep the short one (`/chequeraCuota`), because VB6 calls the service directly on port 8092 without crossing the gateway. The gateway only routes `/api/tesoreria/core/**`: a controller without the long alias exists but is unreachable for frontends (the request falls through to the static-resource handler and returns 404). `ControllerRouteAliasTest` (architecture tests) fails the build if a controller declares only the short mapping. New slices may register the long route only.
 - `personas/persona` also exposes exam debt: `GET /persona/deudaExamen/facultad/{facultadId}/persona/{personaId}/{documentoId}/fecha/{fechaExamen}` (with a temporary `manual == 1` patch marked in the code — see CHANGELOG 5.0.1).
 - The public route is a contract: removing segments or fields → major SemVer + documented consumer migration (`report-service`, frontends, other services).
 
