@@ -25,7 +25,7 @@ import um.tesoreria.core.service.PayPerTicService;
  *
  */
 @RestController
-@RequestMapping("/paypertic")
+@RequestMapping({"/paypertic", "/api/tesoreria/core/paypertic"})
 @RequiredArgsConstructor
 public class PayPerTicController {
 	private final PayPerTicService service;

@@ -29,7 +29,7 @@ import um.tesoreria.core.service.DebitoService;
  *
  */
 @RestController
-@RequestMapping("/debito")
+@RequestMapping({"/debito", "/api/tesoreria/core/debito"})
 @RequiredArgsConstructor
 public class DebitoController {
 

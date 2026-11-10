@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import um.tesoreria.core.service.facade.ContabilidadService;
 
 @RestController
-@RequestMapping("/contabilidad")
+@RequestMapping({"/contabilidad", "/api/tesoreria/core/contabilidad"})
 public class ContabilidadController {
 
     private final ContabilidadService service;

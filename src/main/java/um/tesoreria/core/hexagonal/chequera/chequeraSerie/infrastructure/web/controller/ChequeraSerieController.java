@@ -42,7 +42,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.Ch
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioAsignadasService;
 
 @RestController
-@RequestMapping({"/chequeraserie", "/api/tesoreria/core/chequeraSerie"})
+@RequestMapping({"/chequeraserie", "/api/tesoreria/core/chequeraSerie", "/api/tesoreria/core/chequeraserie"})
 @Slf4j
 @RequiredArgsConstructor
 public class ChequeraSerieController {

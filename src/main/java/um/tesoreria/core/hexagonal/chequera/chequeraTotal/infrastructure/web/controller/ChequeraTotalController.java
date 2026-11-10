@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/chequeratotal")
+@RequestMapping({"/chequeratotal", "/api/tesoreria/core/chequeratotal"})
 @RequiredArgsConstructor
 public class ChequeraTotalController {
 

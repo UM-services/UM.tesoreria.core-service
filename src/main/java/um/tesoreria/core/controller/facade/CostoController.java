@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  * @author daniel
  */
 @RestController
-@RequestMapping("/costo")
+@RequestMapping({"/costo", "/api/tesoreria/core/costo"})
 @Slf4j
 @RequiredArgsConstructor
 public class CostoController {

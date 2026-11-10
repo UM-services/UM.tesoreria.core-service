@@ -21,7 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
  *
  */
 @RestController
-@RequestMapping("/valorMovimiento")
+@RequestMapping({"/valorMovimiento", "/api/tesoreria/core/valorMovimiento"})
 @RequiredArgsConstructor
 public class ValorMovimientoController {
 

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/arancelporcentaje")
+@RequestMapping({"/arancelporcentaje", "/api/tesoreria/core/arancelporcentaje"})
 @RequiredArgsConstructor
 public class ArancelPorcentajeController {
 

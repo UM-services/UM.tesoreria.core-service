@@ -23,7 +23,7 @@ import um.tesoreria.core.service.CoeficienteInflacionService;
  *
  */
 @RestController
-@RequestMapping("/coeficienteinflacion")
+@RequestMapping({"/coeficienteinflacion", "/api/tesoreria/core/coeficienteinflacion"})
 @RequiredArgsConstructor
 public class CoeficienteInflacionController {
 
