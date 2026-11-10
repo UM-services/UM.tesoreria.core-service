@@ -115,6 +115,23 @@ public class JpaChequeraPagoRepositoryAdapter implements ChequeraPagoRepository 
     }
 
     @Override
+    public List<ChequeraPago> findAllByArchivo(String archivo) {
+        return jpaChequeraPagoRepository.findAllByArchivo(archivo).stream()
+                .map(chequeraPagoMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteAllByArchivo(String archivo) {
+        jpaChequeraPagoRepository.deleteAllByArchivo(archivo);
+    }
+
+    @Override
+    public void deleteById(Long chequeraPagoId) {
+        jpaChequeraPagoRepository.deleteById(chequeraPagoId);
+    }
+
+    @Override
     public void deleteAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         jpaChequeraPagoRepository.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId, chequeraSerieId);
     }

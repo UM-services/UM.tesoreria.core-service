@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.application.exception.CompraAutoridadUsuarioException;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.application.service.CompraAutoridadUsuarioService;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.CompraAutoridadUsuarioAsignacionResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.CompraAutoridadUsuarioRequest;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.CompraAutoridadUsuarioResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.LimiteAutorizacionResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.mapper.CompraAutoridadUsuarioDtoMapper;
+
+import java.util.List;
 
 /**
  * Asignación de perfiles de autoridad por monto a usuarios y resolución de su límite efectivo.
@@ -29,6 +32,17 @@ public class CompraAutoridadUsuarioController {
 
     private final CompraAutoridadUsuarioService compraAutoridadUsuarioService;
     private final CompraAutoridadUsuarioDtoMapper compraAutoridadUsuarioDtoMapper;
+
+    /**
+     * Asignaciones de todos los perfiles, con nombre/login del usuario, para mostrarlas en la
+     * tabla de perfiles. El patrón literal tiene prioridad sobre {@code /{usuarioId}}.
+     */
+    @GetMapping("/asignaciones")
+    public ResponseEntity<List<CompraAutoridadUsuarioAsignacionResponse>> getAsignaciones() {
+        return ResponseEntity.ok(compraAutoridadUsuarioService.getAsignaciones().stream()
+                .map(compraAutoridadUsuarioDtoMapper::toResponse)
+                .toList());
+    }
 
     @GetMapping("/{usuarioId}")
     public ResponseEntity<CompraAutoridadUsuarioResponse> getPerfiles(@PathVariable Integer usuarioId) {

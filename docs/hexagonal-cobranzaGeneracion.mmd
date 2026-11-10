@@ -1,0 +1,223 @@
+---
+title: Arquitectura Hexagonal - Cobranzas / Generacion de archivos
+---
+
+classDiagram
+    direction TB
+
+    namespace domain_model {
+        class SolicitudGeneracion {
+            +CanalGeneracion canal
+            +OffsetDateTime desde
+            +OffsetDateTime hasta
+            +Integer grupo
+            +boolean soloSantander
+            +boolean soloOtrosBancos
+            +BigDecimal descuento
+            +descuentoConDefault() BigDecimal
+        }
+        class SolicitudAnulacion {
+            +CanalGeneracion canal
+            +OffsetDateTime fechaEnvio
+            +boolean soloSantander
+            +boolean soloOtrosBancos
+        }
+        class SolicitudReprogramacion {
+            +OffsetDateTime desde
+            +OffsetDateTime hasta
+            +boolean soloSantander
+            +boolean soloOtrosBancos
+            +OffsetDateTime fechaVencimiento
+        }
+        class PreviewGeneracion {
+            +CanalGeneracion canal
+            +int registros
+            +BigDecimal total
+            +int excluidos
+            +List~InconsistenciaGeneracion~ inconsistencias
+            +List~LineaGeneracion~ lineas
+        }
+        class ResultadoGeneracion {
+            +String filename
+            +String contentType
+            +byte[] bytes
+            +int registros
+            +BigDecimal total
+        }
+        class ResultadoOperacionDebito {
+            +String operacion
+            +int registros
+            +int omitidos
+        }
+        class LineaGeneracion {
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +BigDecimal importe
+            +OffsetDateTime vencimiento1
+            +OffsetDateTime vencimiento2
+            +OffsetDateTime vencimiento3
+            +Long debitoId
+            +String cbu
+            +String numeroTarjeta
+            +OffsetDateTime fechaVencimiento
+        }
+        class InconsistenciaGeneracion {
+            +Long chequeraCuotaId
+            +Long debitoId
+            +String descripcion
+        }
+        class CuotaDeuda {
+            +Long chequeraCuotaId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +BigDecimal importe1
+            +BigDecimal importe2
+            +BigDecimal importe3
+            +String codigoBarras
+            +Byte pagado
+            +Byte baja
+            +String facultadNombre
+            +String personaNombre
+            +String productoNombre
+        }
+        class DebitoPendiente {
+            +Long debitoId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +Integer debitoTipoId
+            +String cbu
+            +String numeroTarjeta
+            +OffsetDateTime fechaVencimiento
+            +OffsetDateTime fechaEnvio
+            +OffsetDateTime fechaBaja
+            +Byte rechazado
+        }
+        class CanalGeneracion {
+            << enum >>
+            PMC
+            CLICK_PAGOS
+            DEBITO_DIRECTO
+            DEBITO_VISA
+            PAGAR
+            PAY_PER_TIC
+            +getSlug() String
+            +isDebito() boolean
+            +fromPath(String)$ CanalGeneracion
+        }
+    }
+
+    namespace domain_ports_in {
+        class PreviewGeneracionUseCase { << interface >> }
+        class GenerarArchivoUseCase { << interface >> }
+        class AnularEnvioDebitoUseCase { << interface >> }
+        class ReprogramarVencimientoDebitoUseCase { << interface >> }
+    }
+
+    namespace domain_ports_out {
+        class CuotaDeudaRepository { << interface >> }
+        class DebitoGeneracionRepository { << interface >> }
+        class PagarFileGenerator { << interface >> }
+        class PayPerTicFileGenerator { << interface >> }
+    }
+
+    namespace application_layout {
+        class LayoutFormat {
+            +formatear(BigDecimal, int) String
+            +completar(String, int) String
+        }
+        class PmcLayout
+        class ClickPagosLayout
+        class DebitoDirectoLayout
+        class DebitoVisaLayout
+        class FacturacionLayout
+    }
+
+    namespace application {
+        class GeneracionArchivoService {
+            -CuotaDeudaRepository cuotaDeudaRepository
+            -DebitoGeneracionRepository debitoGeneracionRepository
+            -PagarFileGenerator pagarFileGenerator
+            -PayPerTicFileGenerator payPerTicFileGenerator
+            +preview(SolicitudGeneracion) PreviewGeneracion
+            +generar(SolicitudGeneracion) ResultadoGeneracion
+            +anular(SolicitudAnulacion) ResultadoOperacionDebito
+            +reprogramar(SolicitudReprogramacion) ResultadoOperacionDebito
+        }
+        class PreviewGeneracionUseCaseImpl
+        class GenerarArchivoUseCaseImpl
+        class AnularEnvioDebitoUseCaseImpl
+        class ReprogramarVencimientoDebitoUseCaseImpl
+    }
+
+    namespace infrastructure_generator {
+        class PagarFileGeneratorAdapter
+        class PayPerTicFileGeneratorAdapter
+    }
+
+    namespace infrastructure_persistence {
+        class JpaCuotaDeudaRepositoryAdapter
+        class JpaDebitoGeneracionRepositoryAdapter
+    }
+
+    namespace infrastructure_web {
+        class GeneracionArchivoController {
+            +canales() ResponseEntity~List~CanalGeneracionResponse~~
+            +preview(String, SolicitudGeneracionRequest) ResponseEntity~PreviewGeneracionResponse~
+            +generar(String, SolicitudGeneracionRequest) ResponseEntity~byte[]~
+            +anularDebitoDirecto(SolicitudAnulacionRequest) ResponseEntity~ResultadoOperacionDebitoResponse~
+            +anularVisa(SolicitudAnulacionRequest) ResponseEntity~ResultadoOperacionDebitoResponse~
+            +reprogramar(SolicitudReprogramacionRequest) ResponseEntity~ResultadoOperacionDebitoResponse~
+        }
+        class GeneracionArchivoDtoMapper
+    }
+
+    GeneracionArchivoService --> CuotaDeudaRepository : consulta deuda
+    GeneracionArchivoService --> DebitoGeneracionRepository : consulta y marca envio
+    GeneracionArchivoService --> PagarFileGenerator : layout PAGAR
+    GeneracionArchivoService --> PayPerTicFileGenerator : layout PayPerTIC
+    GeneracionArchivoService --> PmcLayout : arma lineas
+    GeneracionArchivoService --> ClickPagosLayout : arma lineas
+    GeneracionArchivoService --> DebitoDirectoLayout : arma lineas
+    GeneracionArchivoService --> DebitoVisaLayout : arma lineas
+    GeneracionArchivoService --> FacturacionLayout : arma lineas
+
+    PreviewGeneracionUseCaseImpl ..|> PreviewGeneracionUseCase : implements
+    GenerarArchivoUseCaseImpl ..|> GenerarArchivoUseCase : implements
+    AnularEnvioDebitoUseCaseImpl ..|> AnularEnvioDebitoUseCase : implements
+    ReprogramarVencimientoDebitoUseCaseImpl ..|> ReprogramarVencimientoDebitoUseCase : implements
+
+    PreviewGeneracionUseCaseImpl --> GeneracionArchivoService : delegates
+    GenerarArchivoUseCaseImpl --> GeneracionArchivoService : delegates
+    AnularEnvioDebitoUseCaseImpl --> GeneracionArchivoService : delegates
+    ReprogramarVencimientoDebitoUseCaseImpl --> GeneracionArchivoService : delegates
+
+    PagarFileGeneratorAdapter ..|> PagarFileGenerator : implements
+    PayPerTicFileGeneratorAdapter ..|> PayPerTicFileGenerator : implements
+    JpaCuotaDeudaRepositoryAdapter ..|> CuotaDeudaRepository : implements
+    JpaDebitoGeneracionRepositoryAdapter ..|> DebitoGeneracionRepository : implements
+
+    GeneracionArchivoController --> GeneracionArchivoService : calls
+    GeneracionArchivoController --> GeneracionArchivoDtoMapper : uses
+
+    class CuotaDeudaView {
+        << external >>
+        vw_chequera_cuota_deuda
+    }
+    class CuotaDeudaPptView {
+        << external >>
+        vw_cuota_deuda_ppt
+    }
+    JpaCuotaDeudaRepositoryAdapter --> CuotaDeudaView : reads
+    JpaCuotaDeudaRepositoryAdapter --> CuotaDeudaPptView : reads

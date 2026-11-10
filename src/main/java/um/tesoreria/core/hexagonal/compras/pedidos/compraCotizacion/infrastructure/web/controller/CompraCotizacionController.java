@@ -13,6 +13,7 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructu
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.web.dto.CompraCotizacionCriteriaRequest;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.web.dto.CompraAdjudicacionResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.web.dto.CompraCotizacionPendienteResponse;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.web.dto.CompraCotizacionPendientesRequest;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.web.dto.CompraCotizacionProveedorPendienteResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.web.dto.CompraCotizacionProveedorResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.web.dto.CompraCotizacionRequest;
@@ -54,19 +55,25 @@ public class CompraCotizacionController {
         return ResponseEntity.ok(responses);
     }
 
-    @GetMapping("/pendientes")
+    @PostMapping("/pendientes")
     public ResponseEntity<List<CompraCotizacionPendienteResponse>> pendientes(
-            @RequestParam(required = false) Integer ejercicioId,
-            @RequestParam(required = false) List<Integer> dependenciaIds) {
-        return ResponseEntity.ok(compraCotizacionService.pendientes(ejercicioId, dependenciaIds).stream()
+            @RequestBody CompraCotizacionPendientesRequest request) {
+        return ResponseEntity.ok(compraCotizacionService.pendientes(request.ejercicioId(), request.dependenciaIds())
+                .stream()
                 .map(compraCotizacionDtoMapper::toResponse)
                 .toList());
     }
 
     /** Bandeja transversal "Cotizaciones pedidas": documentos de proveedor en ENVIADA. */
     @GetMapping("/proveedores-pendientes")
+    public ResponseEntity<List<CompraCotizacionProveedorPendienteResponse>> proveedoresPendientes() {
+        return proveedoresPendientes(null);
+    }
+
+    /** Bandeja transversal "Cotizaciones pedidas" para un ejercicio. */
+    @GetMapping("/proveedores-pendientes/{ejercicioId}")
     public ResponseEntity<List<CompraCotizacionProveedorPendienteResponse>> proveedoresPendientes(
-            @RequestParam(required = false) Integer ejercicioId) {
+            @PathVariable Integer ejercicioId) {
         return ResponseEntity.ok(compraCotizacionService.respuestasPendientes(ejercicioId).stream()
                 .map(compraCotizacionDtoMapper::toResponse)
                 .toList());
@@ -78,7 +85,7 @@ public class CompraCotizacionController {
                 .map(compraCotizacionDtoMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Proceso de cotización no encontrado: " + compraCotizacionId));
+                        "Proceso de presupuesto no encontrado: " + compraCotizacionId));
     }
 
     @PostMapping

@@ -9,13 +9,51 @@
 [![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-black.svg)](https://kafka.apache.org/)
 [![JUnit](https://img.shields.io/badge/JUnit-6.0.3-green.svg)](https://junit.org/)
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
-[![Versión](https://img.shields.io/badge/versión-11.8.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.1.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 11.8.1**
+**Versión actual (SemVer): 12.1.0**
+
+## Novedades 12.1.0 (verificado en código)
+
+- **feat(compras/autorizanteEnvio)**: nuevo contexto independiente para las dependencias habilitadas de los autorizantes de envío. Agregado `AutorizanteEnvio(usuarioId, Set<dependenciaId>)`, API `GET`/`PUT /api/tesoreria/core/compras/autorizanteEnvio/usuario/{usuarioId}` y `POST`/`DELETE /.../usuario/{usuarioId}/dependencia/{dependenciaId}`, más `GET` de listado. Persistencia en `compra_autorizante_envio_dependencia` (`docs/sql/V422__compras_autorizante_envio.sql`), permiso `compras.autorizantes.configurar` para las escrituras y alias deprecado de `/compraPedidoAutorizante` durante una release. El slice `compras/pedidos/compraPedidoAutorizante` se elimina.
+- **fix(config)**: `spring.datasource.hikari.minimum-idle: 10` en `bootstrap.yml`; el pool sigue creciendo hasta 100 bajo demanda pero deja de retener 100 conexiones ociosas.
+- **docs**: nuevo diagrama `hexagonal-autorizanteEnvio.mmd` (v12.1.0) registrado en el visor y en `docs/README.md`; reemplaza a `hexagonal-compraPedidoAutorizante.mmd`.
+
+> Basado en `git diff HEAD` (staged; HEAD `b891a43e`; 53 archivos bajo `src` —30 altas, 21 bajas, 2 modificados—, +1152/−570, más `bootstrap.yml`, `permisos.yaml` y `docs/sql/V422__compras_autorizante_envio.sql`, +55) y el código real de los dos controladores del slice, `AutorizanteEnvioService`, el agregado `AutorizanteEnvio` y `JpaAutorizanteEnvioRepositoryAdapter`. Las rutas nuevas son aditivas y el alias `/api/tesoreria/core/compraPedidoAutorizante` conserva rutas y contrato, por lo que el cambio es compatible con la API pública ⇒ incremento **minor** de SemVer (`12.0.0` → `12.1.0`). Sin dependencias nuevas. **Antes de desplegar**: aplicar `V422` (tabla nueva + copia de la anterior + clave de catálogo) y mantener `permisos.yaml` completo. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); el diagrama nuevo se validó con `mmdc`.
+
+## Novedades 12.0.0 (verificado en código)
+
+- **breaking(compras/pedidos)**: los endpoints del circuito de compras dejan de usar query params. Migración de rutas (mismo host):
+  - `compraCotizacion`: `GET /pendientes?ejercicioId=&dependenciaIds=` → `POST /pendientes` con `{ "ejercicioId": …, "dependenciaIds": [ … ] }`; `GET /proveedores-pendientes?ejercicioId=` → `GET /proveedores-pendientes/{ejercicioId}` (sin filtro: `GET /proveedores-pendientes`).
+  - `compraCotizacionTramo`: `GET /minimo?ejercicioId=&monto=` → `GET /minimo/{ejercicioId}/{monto}`.
+  - `compraFormalizacion`: `GET /pendientes?ejercicioId=` → `GET /pendientes/{ejercicioId}`; el `GET` de la colección deja de aceptar filtros (usar `POST /search`).
+  - `compraRecepcion`: `GET /pendientes?ejercicioId=` → `GET /pendientes/{ejercicioId}`; el `GET` de la colección deja de aceptar filtros (usar `POST /search`).
+- **breaking(compras/pedidos/compraPedido)**: se elimina `CompraPedidoEstado.PENDIENTE_ESTIMACION`. Presentar un pedido sin monto conocido lo deja en `PENDIENTE_ENVIO` y la estimación se carga en `EN_REVISION_COMPRAS`; `montoConocido` queda como dato informativo. La migración de filas existentes está en `docs/sql/V421__compras_sin_pendiente_estimacion.sql`.
+- **feat(compras/pedidos/compraAutoridadUsuario)**: `GET /api/tesoreria/core/compraAutoridadUsuario/asignaciones` lista las asignaciones usuario ↔ perfil con `login`, `nombre` y `activo`, componiendo `UsuarioService.findByUserId`; sin DDL nuevo.
+- **feat(usuarios/usuario)**: `GET /api/tesoreria/core/usuario/search/{texto}` busca por login o nombre con el texto en la ruta, sin query params; el legacy `GET /usuario/search?q=` se mantiene.
+- **feat(usuarios/permiso)**: nueva clave `chequeras.consultas.detalleCuotas` en `permisos.yaml`, sembrada por `docs/sql/V420__consultas_detalle_cuotas_permiso.sql` (sólo catálogo, sin asignar roles ni usuarios).
+- **changed(compras)**: mensajes de error, historial y descripciones de permisos pasan de "cotización/cotizaciones" a "presupuesto/presupuestos"; las claves, las clases y los valores persistidos no cambian.
+- **docs**: `docs/sql/V420__consultas_detalle_cuotas_permiso.sql` y `docs/sql/V421__compras_sin_pendiente_estimacion.sql`; diagramas `hexagonal-compraAutoridadUsuario`, `hexagonal-compraCotizacion`, `hexagonal-compraCotizacionTramo`, `hexagonal-compraFormalizacion`, `hexagonal-compraRecepcion`, `hexagonal-usuario` y `hexagonal-permiso` a v12.0.0.
+
+> Basado en `git diff HEAD` (staged; HEAD `f655a977`; 42 archivos de código y SQL, +374/−80, más esta documentación de release) y el código real de los controladores y slices citados. El cambio de método/URL y la eliminación de `PENDIENTE_ESTIMACION` son incompatibles con la API/contrato públicos ⇒ incremento **major** de SemVer (`11.9.0` → `12.0.0`). Sin dependencias nuevas ni cambios de esquema. **Antes de desplegar**: aplicar `V420` (clave de catálogo) y `V421` (migración de pedidos) y mantener `permisos.yaml` completo. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); los diagramas modificados se validaron con `mmdc`.
+
+## Novedades 11.9.0 (verificado en código)
+
+- **feat(cobranza/importacionPago)**: importación de rendiciones de PMC, Rapipago, PayPerTIC, PAGAR, Click de Pagos, Débito Directo y Débito VISA bajo `/api/tesoreria/core/cobranza/importacion` (canales, preview sin escritura, importación transaccional por archivo, re-acreditación de Rapipago, no registrados, rechazos de débito y eliminación con recálculo de cuotas). No agrega DDL. Diagrama: [`hexagonal-cobranzaImportacion.mmd`](docs/hexagonal-cobranzaImportacion.mmd).
+- **feat(cobranza/generacionArchivo)**: generación y preview de archivos de facturación y débito bajo `/api/tesoreria/core/cobranza/generacion`, con layouts PMC (empresa 1417), Click de Pagos, Débito Directo, VISA y facturación común en memoria; PAGAR y PayPerTIC se delegan a los generadores existentes. Incluye anulación de envíos de débito y reprogramación de vencimientos. Diagrama: [`hexagonal-cobranzaGeneracion.mmd`](docs/hexagonal-cobranzaGeneracion.mmd).
+- **feat(cobranza/pagoManual)**: alta y baja de pagos manuales en `/api/tesoreria/core/cobranza/pago-manual`, con validación de saldo, fecha y sede y recálculo de la cuota y de los totales en la misma transacción.
+- **feat(chequera/baja)**: `POST /baja/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/anulacion` revierte una baja completa (cuotas, débitos, seguro y totales) en una transacción.
+- **feat(chequera/chequeraSerie)**: `GET /chequeraserie/bynumber/{facultadId}/{chequeraserieId}/resumen` agrega baja vigente, cuotas pendientes e importe de deuda por serie. Detalle de estas tres operativas: [`hexagonal-cobranzaOperativas.mmd`](docs/hexagonal-cobranzaOperativas.mmd).
+- **feat(usuarios/permiso)**: inventario `src/main/resources/permisos.yaml` sincronizado al arrancar y a demanda con `POST /api/tesoreria/core/permiso/sync` (`{"dryRun":true}`); las claves ausentes del manifiesto se retiran con `activo = 0`, nunca se borran. Diagrama: [`hexagonal-permiso.mmd`](docs/hexagonal-permiso.mmd).
+- **feat(usuarios/solicitudAcceso)**: bandeja de solicitudes de acceso en `/api/tesoreria/core/solicitudAcceso`; `GET /pendiente` y `PUT /{id}/resolver` requieren `permisos.administrar`. Tabla nueva `solicitud_acceso` (`docs/sql/V419__solicitud_acceso.sql`). Diagrama: [`hexagonal-solicitudAcceso.mmd`](docs/hexagonal-solicitudAcceso.mmd).
+- **changed(config)**: límite multipart de 20 MB por archivo y 25 MB por request (override `APP_MULTIPART_MAX_FILE_SIZE`/`APP_MULTIPART_MAX_REQUEST_SIZE`) y nuevas claves `APP_PERMISSIONS_ENFORCE`, `APP_PERMISSIONS_MANIFEST`, `APP_PERMISSIONS_MANIFEST_SYNC_ENABLED` y `APP_PERMISSIONS_MANIFEST_SYNC_DRY_RUN`.
+- **changed(chequera/chequeraPago)**: `PagoService.marcarPago` delega en `ChequeraPagoService.marcarPago`; el recálculo de `chequera_total` tolera la ausencia de la fila (warning) en lugar de fallar.
+
+> Basado en `git diff HEAD` (staged; HEAD `7e66f205`; 229 archivos, +12 511/−45) y el código real de los slices nuevos y de los controladores citados. Todo es aditivo (no se elimina ni renombra ninguna ruta, DTO o campo) ⇒ incremento **minor** de SemVer (`11.8.1` → `11.9.0`). **Antes de desplegar**: aplicar `docs/sql/V419__solicitud_acceso.sql` y revisar que `permisos.yaml` esté completo, porque el arranque retira con `activo = 0` las claves del catálogo que no figuren en el archivo (simular con `manifest-sync.dry-run=true`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); los diagramas nuevos y modificados se validaron con `mmdc`.
 
 ## Novedades 11.8.1 (verificado en código)
 

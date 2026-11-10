@@ -13,6 +13,8 @@ public interface JpaCompraAutoridadUsuarioRepository
 
     List<CompraAutoridadUsuarioEntity> findAllByUsuarioIdOrderByAutoridadPerfilIdAsc(Integer usuarioId);
 
+    List<CompraAutoridadUsuarioEntity> findAllByOrderByAutoridadPerfilIdAscUsuarioIdAsc();
+
     Optional<CompraAutoridadUsuarioEntity> findByUsuarioIdAndAutoridadPerfilId(Integer usuarioId, Long autoridadPerfilId);
 
     boolean existsByUsuarioIdAndAutoridadPerfilId(Integer usuarioId, Long autoridadPerfilId);

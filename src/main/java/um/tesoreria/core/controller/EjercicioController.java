@@ -35,7 +35,7 @@ import um.tesoreria.core.service.EjercicioService;
  *
  */
 @RestController
-@RequestMapping("/ejercicio")
+@RequestMapping({"/ejercicio", "/api/tesoreria/core/ejercicio"})
 @RequiredArgsConstructor
 public class EjercicioController {
 	

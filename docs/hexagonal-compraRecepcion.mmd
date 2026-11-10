@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo CompraRecepcion (v9.3.0)
+title: Arquitectura Hexagonal - Módulo CompraRecepcion (v12.0.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -19,7 +19,7 @@ flowchart TD
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        Ctrl["CompraRecepcionController<br/>/api/tesoreria/core/compraRecepcion"]
+        Ctrl["CompraRecepcionController<br/>/api/tesoreria/core/compraRecepcion<br/>GET /pendientes[/{ejercicioId}], POST /search"]
         DTO["CompraRecepcionRequest/Response<br/>CompraRecepcionItemRequest/Response<br/>CompraRecepcionCriteriaRequest<br/>CompraRecepcionPendienteResponse<br/>CompraRecepcionPendienteItemResponse"]
         Map["CompraRecepcionDtoMapper<br/>CompraRecepcionMapper"]
         Adp["JpaCompraRecepcionRepositoryAdapter<br/>CompraRecepcionSecuenciaJdbcAdapter<br/>CompraRecepcionPedidoJdbcAdapter"]

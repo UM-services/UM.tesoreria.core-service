@@ -135,7 +135,7 @@ class CompraCotizacionTramoControllerTest {
     void minimoResuelveElTramo() {
         when(service.resolverMinimo(eq(15), any())).thenReturn(Optional.of(2));
 
-        mockMvc.get().uri("/api/tesoreria/core/compraCotizacionTramo/minimo?ejercicioId=15&monto=150000")
+        mockMvc.get().uri("/api/tesoreria/core/compraCotizacionTramo/minimo/15/150000")
                 .assertThat().hasStatusOk()
                 .bodyJson().extractingPath("$.cantidadMinima").isEqualTo(2);
     }
@@ -144,7 +144,7 @@ class CompraCotizacionTramoControllerTest {
     void minimoSinConfiguracionDevuelve409() {
         when(service.resolverMinimo(eq(15), any())).thenReturn(Optional.empty());
 
-        mockMvc.get().uri("/api/tesoreria/core/compraCotizacionTramo/minimo?ejercicioId=15&monto=150000")
+        mockMvc.get().uri("/api/tesoreria/core/compraCotizacionTramo/minimo/15/150000")
                 .assertThat().hasStatus(409);
     }
 

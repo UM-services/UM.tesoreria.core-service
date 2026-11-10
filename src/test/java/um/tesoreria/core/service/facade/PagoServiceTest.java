@@ -12,8 +12,6 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraC
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.exception.ChequeraPagoException;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.service.ChequeraPagoService;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.domain.model.ChequeraPago;
-import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
-import um.tesoreria.core.hexagonal.chequera.chequeraTotal.domain.model.ChequeraTotal;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.service.ChequeraPagoAsientoService;
@@ -53,8 +51,6 @@ class PagoServiceTest {
     @Mock
     private ChequeraCuotaService chequeraCuotaService;
     @Mock
-    private ChequeraTotalService chequeraTotalService;
-    @Mock
     private MercadoPagoContextService mercadoPagoContextService;
     @Mock
     private ChequeraPagoAsientoService chequeraPagoAsientoService;
@@ -91,7 +87,7 @@ class PagoServiceTest {
         assertThat(creado.getImporte()).isEqualByComparingTo("1500.00");
         assertThat(resultado.getChequeraPagoId()).isEqualTo(99L);
         verify(mercadoPagoContextService).update(any(), eq(CONTEXTO_ID));
-        verify(chequeraCuotaService).update(any(), eq(CUOTA_ID));
+        verify(chequeraPagoService).marcarPago(1, 2, 100L, 4, 1, 5);
     }
 
     /**
@@ -144,24 +140,6 @@ class PagoServiceTest {
         when(chequeraPagoService.nextOrden(anyInt(), anyInt(), any(), anyInt(), anyInt(), anyInt())).thenReturn(3);
         when(chequeraPagoService.create(any())).thenReturn(ChequeraPago.builder().chequeraPagoId(99L).build());
         when(mercadoPagoContextService.update(any(), eq(CONTEXTO_ID))).thenReturn(contexto(PAGO_MP));
-        when(chequeraPagoService.isPagado(anyInt(), anyInt(), any(), anyInt(), anyInt(), anyInt())).thenReturn(true);
-        when(chequeraCuotaService.findByUnique(anyInt(), anyInt(), any(), anyInt(), anyInt(), anyInt()))
-                .thenReturn(cuota(pagado));
-        when(chequeraCuotaService.update(any(), eq(CUOTA_ID))).thenReturn(cuota(pagado));
-        when(chequeraCuotaService.calculateTotalCuotasActivas(anyInt(), anyInt(), any(), anyInt(), anyInt()))
-                .thenReturn(new BigDecimal("1500.00"));
-        when(chequeraCuotaService.calculateTotalCuotasPagadas(anyInt(), anyInt(), any(), anyInt(), anyInt()))
-                .thenReturn(new BigDecimal("1500.00"));
-        when(chequeraTotalService.findByUnique(anyInt(), anyInt(), any(), anyInt())).thenReturn(ChequeraTotal.builder()
-                .chequeraTotalId(3L)
-                .facultadId(1)
-                .tipoChequeraId(2)
-                .chequeraSerieId(100L)
-                .productoId(4)
-                .total(BigDecimal.ZERO)
-                .pagado(BigDecimal.ZERO)
-                .build());
-        when(chequeraTotalService.update(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     private MercadoPagoContext contexto(String idMercadoPago) {

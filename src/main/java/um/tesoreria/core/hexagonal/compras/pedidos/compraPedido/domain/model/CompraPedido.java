@@ -75,9 +75,10 @@ public class CompraPedido {
     }
 
     /**
-     * Presenta el pedido: fija el número ya reservado y pasa a estimación (si no se conoce
-     * el monto) o a la bandeja del autorizante. Se admite desde un borrador o desde un
-     * pedido rechazado que se corrige.
+     * Presenta el pedido: fija el número ya reservado y pasa a la bandeja del autorizante.
+     * El monto estimado es opcional; si el solicitante no lo conoce, lo carga el dpto. de
+     * compras durante la revisión. Se admite desde un borrador o desde un pedido rechazado
+     * que se corrige.
      */
     public void enviar(String numero) {
         if (!esPresentable()) {
@@ -88,9 +89,7 @@ public class CompraPedido {
         }
         this.numero = numero;
         this.rechazoMotivo = null;
-        this.estado = Boolean.FALSE.equals(montoConocido)
-                ? CompraPedidoEstado.PENDIENTE_ESTIMACION
-                : CompraPedidoEstado.PENDIENTE_ENVIO;
+        this.estado = CompraPedidoEstado.PENDIENTE_ENVIO;
     }
 
     /**
@@ -192,7 +191,7 @@ public class CompraPedido {
     public void marcarPendienteAdjudicacion() {
         if (estado != CompraPedidoEstado.EN_COTIZACION) {
             throw new IllegalStateException(
-                    "El pedido no está en cotización (estado actual: " + estado + ")");
+                    "El pedido no está en presupuesto (estado actual: " + estado + ")");
         }
         this.estado = CompraPedidoEstado.PENDIENTE_ADJUDICACION;
     }

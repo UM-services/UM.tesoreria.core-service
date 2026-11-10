@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo CompraCotizacion (v9.2.0)
+title: Arquitectura Hexagonal - Módulo CompraCotizacion (v12.0.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -17,8 +17,8 @@ flowchart TD
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        Ctrl["CompraCotizacionController<br/>/api/tesoreria/core/compraCotizacion"]
-        DTO["CompraCotizacionRequest/Response<br/>CompraCotizacionCriteriaRequest<br/>CompraCotizacionRespuestaRequest<br/>Recomendar/AdjudicarCompraCotizacionRequest<br/>CompraAdjudicacionResponse<br/>CompraCotizacionPendiente/ProveedorPendienteResponse"]
+        Ctrl["CompraCotizacionController<br/>/api/tesoreria/core/compraCotizacion<br/>POST /pendientes (body), GET /proveedores-pendientes[/{ejercicioId}]"]
+        DTO["CompraCotizacionRequest/Response<br/>CompraCotizacionCriteriaRequest<br/>CompraCotizacionPendientesRequest<br/>CompraCotizacionRespuestaRequest<br/>Recomendar/AdjudicarCompraCotizacionRequest<br/>CompraAdjudicacionResponse<br/>CompraCotizacionPendiente/ProveedorPendienteResponse"]
         Map["CompraCotizacionDtoMapper<br/>CompraCotizacionMapper<br/>CompraAdjudicacionMapper"]
         Adp["JpaCompraCotizacionRepositoryAdapter<br/>JpaCompraAdjudicacionRepositoryAdapter<br/>CompraCotizacionSecuenciaJdbcAdapter<br/>PedidoItemsPendientesJdbcAdapter"]
         Ent["CompraCotizacionEntity (compra_cotizacion)<br/>CompraCotizacionItemEntity<br/>CompraCotizacionProveedorEntity<br/>CompraCotizacionProveedorItemEntity<br/>CompraAdjudicacionEntity (compra_adjudicacion)"]

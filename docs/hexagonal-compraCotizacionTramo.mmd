@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo CompraCotizacionTramo (v9.1.0)
+title: Arquitectura Hexagonal - Módulo CompraCotizacionTramo (v12.0.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -17,7 +17,7 @@ flowchart TD
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        Ctrl["CompraCotizacionTramoController<br/>/api/tesoreria/core/compraCotizacionTramo<br/>GET, GET /{id}, GET /minimo,<br/>POST, PUT /{id}, DELETE /{id}"]
+        Ctrl["CompraCotizacionTramoController<br/>/api/tesoreria/core/compraCotizacionTramo<br/>GET, GET /{id},<br/>GET /minimo/{ejercicioId}/{monto},<br/>POST, PUT /{id}, DELETE /{id}"]
         DTO["CompraCotizacionTramoRequest/Response<br/>CompraCotizacionMinimoResponse"]
         Map["CompraCotizacionTramoDtoMapper<br/>CompraCotizacionTramoMapper"]
         Adp["JpaCompraCotizacionTramoRepositoryAdapter"]

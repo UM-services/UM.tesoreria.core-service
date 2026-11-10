@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo CompraFormalizacion (v9.2.0)
+title: Arquitectura Hexagonal - Módulo CompraFormalizacion (v12.0.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -17,7 +17,7 @@ flowchart TD
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        Ctrl["CompraFormalizacionController<br/>/api/tesoreria/core/compraFormalizacion"]
+        Ctrl["CompraFormalizacionController<br/>/api/tesoreria/core/compraFormalizacion<br/>GET /pendientes[/{ejercicioId}], POST /search"]
         DTO["CompraFormalizacionRequest/Response<br/>CompraFormalizacionCriteriaRequest<br/>CompraFormalizacionPendienteResponse<br/>CompraFormalizacionItemResponse"]
         Map["CompraFormalizacionDtoMapper<br/>CompraFormalizacionMapper"]
         Adp["JpaCompraFormalizacionRepositoryAdapter<br/>CompraFormalizacionSecuenciaJdbcAdapter"]

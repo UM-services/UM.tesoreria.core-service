@@ -83,14 +83,16 @@ class CompraCotizacionControllerTest {
     @Test
     void pendientesDevuelveLaLista() {
         when(service.pendientes(eq(15), any())).thenReturn(List.of());
-        mockMvc.get().uri("/api/tesoreria/core/compraCotizacion/pendientes?ejercicioId=15")
+        mockMvc.post().uri("/api/tesoreria/core/compraCotizacion/pendientes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"ejercicioId\":15,\"dependenciaIds\":[14]}")
                 .assertThat().hasStatusOk();
     }
 
     @Test
     void proveedoresPendientesDevuelveLaLista() {
         when(service.respuestasPendientes(eq(15))).thenReturn(List.of());
-        mockMvc.get().uri("/api/tesoreria/core/compraCotizacion/proveedores-pendientes?ejercicioId=15")
+        mockMvc.get().uri("/api/tesoreria/core/compraCotizacion/proveedores-pendientes/15")
                 .assertThat().hasStatusOk();
     }
 
