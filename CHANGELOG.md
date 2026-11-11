@@ -2,6 +2,21 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.3.0] - 2026-11-10
+
+### Added
+
+- **Mayor en JSON** (`controller/facade/BalanceController` y `service/facade/mayor`): `POST /api/tesoreria/core/balance/mayor/consulta` (también `/balance/mayor/consulta`) devuelve el mayor de una o varias cuentas en un rango de fechas que puede abarcar uno o más ejercicios consecutivos. Las cuentas se indican por lista (`cuentas`, una o varias) o por rango (`cuentaDesde`–`cuentaHasta`, sólo cuentas no integradoras), nunca ambas. La respuesta trae un bloque por cuenta ordenado por número con saldo inicial (`debe`, `haber`, `saldo`), movimientos con el ejercicio de cada línea, saldo acumulado, totales y saldo final.
+- **`MayorConsultaService`** (capa legacy, `service/facade/mayor`) con las reglas del mayor. Se mantiene la regla actual de `BalanceService.makeMayor`: el saldo inicial es el del ejercicio de `desde`, el período se consulta con `apertura = 0` y el saldo acumulado continúa corrido a lo largo de todo el rango.
+- **`BalanceExceptionAdvice`**: rechazos con cuerpo `{status, error, codigo, message}` — `FECHAS_REQUERIDAS` (400); `SELECCION_INVALIDA`, `DESDE_POSTERIOR`, `FUERA_DE_EJERCICIO`, `EJERCICIOS_NO_CONSECUTIVOS` y `RANGO_SIN_CUENTAS` (409); `CUENTA_INEXISTENTE` (404). No hay límite de cuentas ni de fechas.
+- Tests `MayorConsultaServiceTest` y `BalanceControllerMayorTest`.
+
+### Changed
+
+- `BalanceController` suma `POST /mayor/consulta` sobre las rutas que ya expone desde `12.2.0` (`/balance` y `/api/tesoreria/core/balance`); los `GET` de Excel no cambian de contrato.
+
+> Based on git diff: archivos nuevos `service/facade/mayor/*` y `controller/facade/BalanceExceptionAdvice`, y cambios en `BalanceController` (endpoint nuevo) y su test de slice. La exportación a Excel del mayor nuevo la genera `report-service`; `GET /balance/mayor/{numeroCuenta}/{desde}/{hasta}` y `GET /balance/sumasysaldos/{desde}/{hasta}` no se modificaron. Todo es aditivo (endpoint nuevo sobre rutas existentes, ningún DTO ni contrato previo cambia) ⇒ incremento **minor** de SemVer (`12.2.0` → `12.3.0`, `pom.xml`). Sin dependencias nuevas ni cambios de esquema. Pendiente de confirmar con Contabilidad que el rango excluye cuentas integradoras.
+
 ## [12.2.0] - 2026-11-10
 
 ### Added
