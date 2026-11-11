@@ -3,6 +3,8 @@ package um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.factory.ChequeraCuotaFactory;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.ChequeraAlternativaFaltanteException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
@@ -22,8 +24,13 @@ import um.tesoreria.core.util.Tool;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -35,69 +42,154 @@ class PreuniversitarioChequeraDetailsCreator {
     private final LectivoAlternativaService lectivoAlternativaService;
     private final ChequeraAlternativaService chequeraAlternativaService;
     private final LectivoCuotaService lectivoCuotaService;
+    private final ChequeraCuotaFactory chequeraCuotaFactory;
     private final ChequeraCuotaService chequeraCuotaService;
 
     void create(ChequeraSerie chequeraSerie) {
-        createTotals(chequeraSerie);
-        createAlternatives(chequeraSerie);
-        createCuotas(chequeraSerie);
+        var cuotas = createCuotas(chequeraSerie);
+        createTotals(chequeraSerie, cuotas);
+        var alternativas = createAlternatives(chequeraSerie);
+        verificarAlternativas(chequeraSerie, cuotas, alternativas);
+        saveCuotas(cuotas);
     }
 
-    private void createTotals(ChequeraSerie chequeraSerie) {
+    /**
+     * Par producto/alternativa: la parte variable de la foreign key que {@code chequera_cuota}
+     * tiene contra {@code chequera_alternativa}. El resto de la clave (facultad, tipo de chequera y
+     * serie) es constante dentro de una emisión.
+     */
+    private record ProductoAlternativa(Integer productoId, Integer alternativaId) {
+    }
+
+    private void createTotals(ChequeraSerie chequeraSerie, List<ChequeraCuota> cuotas) {
+        Map<Integer, List<ChequeraCuota>> activasPorProducto = cuotas.stream()
+                .filter(Objects::nonNull)
+                .filter(cuota -> cuota.getProductoId() != null)
+                .filter(cuota -> Byte.valueOf((byte) 0).equals(cuota.getBaja()))
+                .collect(Collectors.groupingBy(ChequeraCuota::getProductoId));
         List<ChequeraTotal> totals = new ArrayList<>();
-        for (LectivoTotal source : lectivoTotalService.findAllByTipo(
-                chequeraSerie.getFacultadId(), chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId())) {
+        for (Integer productoId : productos(chequeraSerie, activasPorProducto.keySet())) {
             totals.add(ChequeraTotal.builder()
                     .facultadId(chequeraSerie.getFacultadId())
                     .tipoChequeraId(chequeraSerie.getTipoChequeraId())
                     .chequeraSerieId(chequeraSerie.getChequeraSerieId())
-                    .productoId(source.getProductoId())
-                    .total(source.getTotal())
+                    .productoId(productoId)
+                    .total(sumarActivas(chequeraSerie, productoId,
+                            activasPorProducto.getOrDefault(productoId, List.of())))
                     .pagado(BigDecimal.ZERO)
                     .build());
         }
         log.debug("ChequeraTotals -> {}", Jsonifier.builder(chequeraTotalService.saveAll(totals)).build());
     }
 
-    private void createAlternatives(ChequeraSerie chequeraSerie) {
-        List<ChequeraAlternativa> alternatives = new ArrayList<>();
-        for (LectivoAlternativa source : lectivoAlternativaService.findAllByTipo(
+    /**
+     * Los productos salen de {@code lectivo_total}, que no filtra por alternativa, unidos a los que
+     * efectivamente generaron cuotas. Derivarlos solo de las cuotas dejaría sin fila de
+     * {@code chequera_total} a un producto con total configurado pero sin cuotas en la alternativa
+     * elegida; esa fila se persiste igual, en cero.
+     */
+    private Collection<Integer> productos(ChequeraSerie chequeraSerie, Set<Integer> conCuotas) {
+        Set<Integer> productos = new LinkedHashSet<>();
+        for (LectivoTotal source : lectivoTotalService.findAllByTipo(
+                chequeraSerie.getFacultadId(), chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId())) {
+            if (source.getProductoId() != null) {
+                productos.add(source.getProductoId());
+            }
+        }
+        productos.addAll(conCuotas);
+        return productos;
+    }
+
+    /**
+     * Mismo invariante que {@code CalculateTotalCuotasActivasUseCaseImpl}: suma de {@code importe1}
+     * de las cuotas con {@code baja = 0}. Un importe nulo se excluye de la suma y se loguea, pero no
+     * aborta la emisión ni se confunde con un cero legítimo del beneficio del 100 %.
+     */
+    private BigDecimal sumarActivas(ChequeraSerie chequeraSerie, Integer productoId, List<ChequeraCuota> cuotas) {
+        BigDecimal total = BigDecimal.ZERO;
+        for (ChequeraCuota cuota : cuotas) {
+            if (cuota.getImporte1() == null) {
+                log.warn("Importe1 nulo excluido del total; la chequera se emite igual. facultadId={} "
+                                + "tipoChequeraId={} chequeraSerieId={} productoId={} cuotaId={}",
+                        chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
+                        chequeraSerie.getChequeraSerieId(), productoId, cuota.getCuotaId());
+                continue;
+            }
+            total = total.add(cuota.getImporte1());
+        }
+        return total;
+    }
+
+    /**
+     * Devuelve los pares producto/alternativa que quedaron efectivamente copiados, para que
+     * las cuotas ya construidas puedan verificar la foreign key antes de intentar el INSERT.
+     */
+    private Set<ProductoAlternativa> createAlternatives(ChequeraSerie chequeraSerie) {
+        List<LectivoAlternativa> sources = lectivoAlternativaService.findAllByTipo(
                 chequeraSerie.getFacultadId(), chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(),
-                chequeraSerie.getAlternativaId())) {
+                chequeraSerie.getAlternativaId());
+        log.debug("LectivoAlternativas -> {} filas para facultadId={} lectivoId={} tipoChequeraId={} alternativaId={}",
+                sources.size(), chequeraSerie.getFacultadId(), chequeraSerie.getLectivoId(),
+                chequeraSerie.getTipoChequeraId(), chequeraSerie.getAlternativaId());
+        List<ChequeraAlternativa> alternatives = new ArrayList<>();
+        for (LectivoAlternativa source : sources) {
             alternatives.add(new ChequeraAlternativa(null, chequeraSerie.getFacultadId(),
                     chequeraSerie.getTipoChequeraId(), chequeraSerie.getChequeraSerieId(), source.getProductoId(),
                     source.getAlternativaId(), Objects.requireNonNull(source.getTitulo()),
                     Objects.requireNonNull(source.getCuotas())));
         }
-        log.debug("ChequeraAlternativas -> {}", Jsonifier.builder(chequeraAlternativaService.saveAll(alternatives)).build());
+        List<ChequeraAlternativa> guardadas = chequeraAlternativaService.saveAll(alternatives);
+        log.debug("ChequeraAlternativas -> {}", Jsonifier.builder(guardadas).build());
+        return guardadas.stream()
+                .map(alternativa -> new ProductoAlternativa(alternativa.getProductoId(),
+                        alternativa.getAlternativaId()))
+                .collect(Collectors.toSet());
     }
 
-    private void createCuotas(ChequeraSerie chequeraSerie) {
+    private List<ChequeraCuota> createCuotas(ChequeraSerie chequeraSerie) {
         List<ChequeraCuota> cuotas = new ArrayList<>();
         int offset = 0;
+        OffsetDateTime ahora = Tool.hourAbsoluteArgentina();
         for (LectivoCuota source : lectivoCuotaService.findAllByTipo(
                 chequeraSerie.getFacultadId(), chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(),
                 chequeraSerie.getAlternativaId())) {
-            OffsetDateTime vencimiento1 = source.getVencimiento1();
-            OffsetDateTime vencimiento2 = source.getVencimiento2();
-            OffsetDateTime vencimiento3 = source.getVencimiento3();
-            if (OffsetDateTime.now().isAfter(vencimiento1)) {
-                vencimiento1 = Tool.dateAbsoluteArgentina().plusDays(7 + 30L * offset);
-                vencimiento2 = Tool.dateAbsoluteArgentina().plusDays(20 + 30L * offset);
-                vencimiento3 = Tool.dateAbsoluteArgentina().plusDays(40 + 30L * offset);
+            ChequeraCuota cuota = chequeraCuotaFactory.crear(chequeraSerie, source, offset, ahora);
+            if (ChequeraCuotaFactory.vencio(source, ahora)) {
                 offset++;
             }
-            ChequeraCuota cuota = new ChequeraCuota(null, chequeraSerie.getChequeraId(),
-                    chequeraSerie.getFacultadId(), chequeraSerie.getTipoChequeraId(),
-                    chequeraSerie.getChequeraSerieId(), source.getProductoId(), source.getAlternativaId(),
-                    source.getCuotaId(), source.getMes(), source.getAnho(), chequeraSerie.getArancelTipoId(),
-                    vencimiento1, source.getImporte1(), source.getImporte1(), vencimiento2, source.getImporte2(),
-                    source.getImporte2(), vencimiento3, source.getImporte3(), source.getImporte3(), "", "",
-                    (byte) 0, (byte) 0, (byte) 0, (byte) 0, 0, null, null, null, null);
             log.debug("chequera_cuota -> {}", cuota.jsonify());
-            cuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(cuota));
             cuotas.add(cuota);
         }
-        log.debug("ChequeraCuotas -> {}", Jsonifier.builder(chequeraCuotaService.saveAll(cuotas)).build());
+        return cuotas;
+    }
+
+    private void saveCuotas(List<ChequeraCuota> cuotas) {
+        List<ChequeraCuota> cuotasGuardadas = chequeraCuotaService.saveAll(cuotas);
+        log.debug("ChequeraCuotas -> {}", Jsonifier.builder(cuotasGuardadas).build());
+    }
+
+    /**
+     * {@code chequera_cuota} referencia a {@code chequera_alternativa} por
+     * (facultad, tipo de chequera, serie, producto, alternativa). La cuota hereda producto y
+     * alternativa de {@code lectivo_cuota}, mientras que las alternativas se copian de
+     * {@code lectivo_alternativa}: si una tabla tiene el par y la otra no, el INSERT viola la
+     * foreign key y MySQL devuelve un 500 que no dice qué configuración falta. Se corta antes, con
+     * la clave completa en el mensaje.
+     */
+    private void verificarAlternativas(ChequeraSerie chequeraSerie, List<ChequeraCuota> cuotas,
+                                       Set<ProductoAlternativa> alternativas) {
+        for (ChequeraCuota cuota : cuotas) {
+            verificarAlternativa(chequeraSerie, cuota, alternativas);
+        }
+    }
+
+    private void verificarAlternativa(ChequeraSerie chequeraSerie, ChequeraCuota cuota,
+                                      Set<ProductoAlternativa> alternativas) {
+        var clave = new ProductoAlternativa(cuota.getProductoId(), cuota.getAlternativaId());
+        if (!alternativas.contains(clave)) {
+            throw new ChequeraAlternativaFaltanteException(chequeraSerie.getFacultadId(),
+                    chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(),
+                    chequeraSerie.getChequeraSerieId(), cuota.getProductoId(), cuota.getAlternativaId());
+        }
     }
 }
