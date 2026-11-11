@@ -20,7 +20,7 @@ import um.tesoreria.core.service.view.TipoChequeraLectivoSedeService;
  *
  */
 @RestController
-@RequestMapping("/tipochequeralectivosede")
+@RequestMapping({"/tipochequeralectivosede", "/api/tesoreria/core/tipochequeralectivosede"})
 @RequiredArgsConstructor
 public class TipoChequeraLectivoSedeController {
 	

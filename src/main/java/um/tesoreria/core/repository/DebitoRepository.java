@@ -4,6 +4,7 @@
 package um.tesoreria.core.repository;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,5 +75,7 @@ public interface DebitoRepository extends JpaRepository<Debito, Long> {
 																										   String cbu2);
 
 	public Optional<Debito> findByDebitoId(Long debitoId);
+
+	public List<Debito> findAllByArchivoBancoIdIn(Collection<Long> archivoBancoIds);
 
 }

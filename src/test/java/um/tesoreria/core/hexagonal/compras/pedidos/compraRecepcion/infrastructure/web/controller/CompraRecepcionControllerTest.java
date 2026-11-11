@@ -48,7 +48,7 @@ class CompraRecepcionControllerTest {
         when(service.listar(any())).thenReturn(List.of(recepcion()));
         when(dtoMapper.toResponse(any(CompraRecepcion.class))).thenReturn(response());
 
-        mockMvc.get().uri("/api/tesoreria/core/compraRecepcion?ejercicioId=15&resultado=conforme")
+        mockMvc.get().uri("/api/tesoreria/core/compraRecepcion")
                 .assertThat().hasStatusOk();
     }
 
@@ -66,7 +66,7 @@ class CompraRecepcionControllerTest {
     @Test
     void pendientesDevuelveLaLista() {
         when(service.pendientes(15)).thenReturn(List.of());
-        mockMvc.get().uri("/api/tesoreria/core/compraRecepcion/pendientes?ejercicioId=15")
+        mockMvc.get().uri("/api/tesoreria/core/compraRecepcion/pendientes/15")
                 .assertThat().hasStatusOk();
     }
 
@@ -77,7 +77,7 @@ class CompraRecepcionControllerTest {
         when(dtoMapper.toResponse(any(CompraRecepcionPendiente.class)))
                 .thenReturn(CompraRecepcionPendienteResponse.builder().compraFormalizacionId(50L).build());
 
-        mockMvc.get().uri("/api/tesoreria/core/compraRecepcion/pendientes?ejercicioId=15")
+        mockMvc.get().uri("/api/tesoreria/core/compraRecepcion/pendientes/15")
                 .assertThat().hasStatusOk();
     }
 

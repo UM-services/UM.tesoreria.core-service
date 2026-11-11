@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacionTramo.application.exception.CompraCotizacionTramoException;
@@ -51,12 +50,12 @@ public class CompraCotizacionTramoController {
                 .map(compraCotizacionTramoDtoMapper::toResponse)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Tramo de cotizaciones no encontrado: " + cotizacionTramoId));
+                        "Tramo de presupuestos no encontrado: " + cotizacionTramoId));
     }
 
-    @GetMapping("/minimo")
-    public ResponseEntity<CompraCotizacionMinimoResponse> minimo(@RequestParam Integer ejercicioId,
-                                                                 @RequestParam BigDecimal monto) {
+    @GetMapping("/minimo/{ejercicioId}/{monto}")
+    public ResponseEntity<CompraCotizacionMinimoResponse> minimo(@PathVariable Integer ejercicioId,
+                                                                 @PathVariable BigDecimal monto) {
         return compraCotizacionTramoService.resolverMinimo(ejercicioId, monto)
                 .map(minimo -> ResponseEntity.ok(new CompraCotizacionMinimoResponse(minimo)))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "COTIZACIONES_NO_CONFIGURADAS"));

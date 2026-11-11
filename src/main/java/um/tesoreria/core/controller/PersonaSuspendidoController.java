@@ -27,7 +27,7 @@ import um.tesoreria.core.service.PersonaSuspendidoService;
  *
  */
 @RestController
-@RequestMapping("/personaSuspendido")
+@RequestMapping({"/personaSuspendido", "/api/tesoreria/core/personaSuspendido"})
 @RequiredArgsConstructor
 public class PersonaSuspendidoController {
 

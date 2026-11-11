@@ -269,4 +269,37 @@ class BancariaControllerTest {
         mvc.delete().uri("/bancaria/15").assertThat().hasStatus(HttpStatus.NO_CONTENT).body().isEmpty();
         verify(delete).deleteBancaria(15L);
     }
+
+    // --- Ruta del gateway -----------------------------------------------------------------------------------
+
+    /** El gateway enruta `/api/tesoreria/core/**` sin `StripPrefix`: el front llega con el prefijo. */
+    static final String GATEWAY = "/api/tesoreria/core/bancaria";
+
+    @Test
+    void lasRutasTambienRespondenConElPrefijoDelGateway() {
+        when(service.findAll()).thenReturn(List.of());
+        when(get.getBancariaById(8L)).thenReturn(cuenta());
+        when(uso.getBancariaUso(8L)).thenReturn(new BancariaUso(0, 0));
+        when(create.createBancaria(any())).thenReturn(cuenta());
+        when(update.updateBancaria(eq(8L), any())).thenReturn(cuenta());
+
+        mvc.get().uri(GATEWAY + "/").assertThat().hasStatus(HttpStatus.OK);
+        mvc.get().uri(GATEWAY + "/8").assertThat().hasStatus(HttpStatus.OK).bodyJson()
+                .extractingPath("$.bancariaId").isEqualTo(8);
+        mvc.get().uri(GATEWAY + "/8/uso").assertThat().hasStatus(HttpStatus.OK).bodyJson()
+                .extractingPath("$.eliminable").isEqualTo(true);
+        mvc.post().uri(GATEWAY + "/").contentType(JSON).content("{\"banco\":\"Santander\",\"numeroCuenta\":11101010001}")
+                .assertThat().hasStatus(HttpStatus.OK);
+        mvc.put().uri(GATEWAY + "/8").contentType(JSON).content("{\"titular\":\"UM\"}").assertThat().hasStatus(HttpStatus.OK);
+        mvc.delete().uri(GATEWAY + "/15").assertThat().hasStatus(HttpStatus.NO_CONTENT);
+        verify(delete).deleteBancaria(15L);
+    }
+
+    @Test
+    void conElPrefijoDelGatewayLosErroresConservanStatusYCodigo() {
+        when(get.getBancariaById(99L)).thenThrow(new BancariaNoEncontradaException(99L));
+        var json = mvc.get().uri(GATEWAY + "/99").assertThat().hasStatus(HttpStatus.NOT_FOUND).bodyJson();
+        json.extractingPath("$.status").isEqualTo(404);
+        json.extractingPath("$.codigo").isEqualTo("NO_ENCONTRADA");
+    }
 }

@@ -29,7 +29,7 @@ import um.tesoreria.core.hexagonal.contratos.cursoCargoContratado.infrastructure
  * @author daniel
  */
 @RestController
-@RequestMapping({"/cursocargocontratado", "/api/core/cursocargocontratado"})
+@RequestMapping({"/cursocargocontratado", "/api/core/cursocargocontratado", "/api/tesoreria/core/cursocargocontratado"})
 @Slf4j
 @RequiredArgsConstructor
 public class CursoCargoContratadoController {

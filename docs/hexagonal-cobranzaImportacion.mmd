@@ -1,0 +1,265 @@
+---
+title: Arquitectura Hexagonal - Cobranzas / Importacion de rendiciones
+---
+
+classDiagram
+    direction TB
+
+    namespace domain_model {
+        class SolicitudImportacion {
+            +CanalImportacion canal
+            +String filename
+            +byte[] contenido
+            +List~Integer~ lineasAceptadas
+            +boolean permitirDuplicados
+            +OffsetDateTime desde
+            +OffsetDateTime hasta
+            +deArchivo(canal, filename, contenido, lineasAceptadas, permitirDuplicados)$ SolicitudImportacion
+            +dePeriodo(canal, filename, desde, hasta, lineasAceptadas, permitirDuplicados)$ SolicitudImportacion
+        }
+        class PreviewImportacion {
+            +String filename
+            +CanalImportacion canal
+            +boolean yaImportada
+            +int registros
+            +BigDecimal total
+            +int encontrados
+            +int perdidos
+            +int duplicados
+            +int rechazados
+            +List~LineaImportacion~ lineas
+        }
+        class ResultadoImportacion {
+            +Long importacionId
+            +String filename
+            +CanalImportacion canal
+            +int registros
+            +int importados
+            +int omitidos
+            +int noEncontrados
+            +int duplicados
+            +int rechazados
+            +BigDecimal total
+            +List~String~ errores
+        }
+        class ResultadoReacreditacion {
+            +String filename
+            +CanalImportacion canal
+            +int registros
+            +int actualizados
+            +int sinPago
+            +int sinRegistro
+            +List~String~ errores
+        }
+        class ResultadoEliminacion {
+            +String filename
+            +int pagosEliminados
+            +int pagosReemplazoEliminados
+            +int archivosBancoEliminados
+            +int cuotasRecalculadas
+        }
+        class LineaImportacion {
+            +int numeroLinea
+            +String referencia
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +BigDecimal importe
+            +OffsetDateTime fechaPago
+            +boolean rechazado
+            +boolean reemplazo
+            +EstadoLinea estado
+            +String motivo
+        }
+        class EstadoLinea {
+            << enum >>
+            OK
+            NO_ENCONTRADA
+            SIN_ALTERNATIVA
+            DUPLICADA
+            RECHAZADA
+        }
+        class CanalImportacion {
+            << enum >>
+            PMC
+            RAPIPAGO
+            PAY_PER_TIC
+            PAGAR
+            CLICK_PAGOS
+            DEBITO_DIRECTO
+            DEBITO_VISA
+            +getTipoPagoIds() Set~Integer~
+            +isPorPeriodo() boolean
+        }
+        class ArchivoImportado {
+            +Integer id
+            +String nombre
+            +OffsetDateTime fecha
+            +Integer registros
+        }
+        class ArchivoBanco {
+            +Long id
+            +String codigoEmpresa
+            +Integer productoId
+            +Integer mesPago
+            +Integer anhoPago
+            +Integer cuotaId
+            +BigDecimal importe
+            +OffsetDateTime fechaPago
+            +OffsetDateTime fechaAcreditacion
+            +Byte pasado
+            +Integer tipoPagoId
+            +Byte repetido
+        }
+        class Rechazo {
+            +Long debitoId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer productoId
+            +Integer alternativaId
+            +Integer cuotaId
+            +BigDecimal importe
+            +OffsetDateTime fechaPago
+            +String motivoRechazo
+            +Long archivoBancoId
+        }
+    }
+
+    namespace domain_ports_in {
+        class PreviewImportacionUseCase { << interface >> }
+        class ImportarArchivoUseCase { << interface >> }
+        class ListarImportacionesUseCase { << interface >> }
+        class FindNoRegistradosUseCase { << interface >> }
+        class EliminarImportacionUseCase { << interface >> }
+    }
+
+    namespace domain_ports_out {
+        class ArchivoImportadoRepository { << interface >> }
+        class ArchivoBancoRepository { << interface >> }
+        class DebitoCobranzaRepository { << interface >> }
+        class PayPerTicRendicionRepository { << interface >> }
+        class ReemplazoRepository { << interface >> }
+        class ParserArchivoPago { << interface >> }
+    }
+
+    namespace application {
+        class ImportacionPagoService {
+            -List~ParserArchivoPago~ parsers
+            -ArchivoImportadoRepository archivoImportadoRepository
+            -ArchivoBancoRepository archivoBancoRepository
+            -ChequeraSerieService chequeraSerieService
+            -ChequeraCuotaService chequeraCuotaService
+            -ChequeraPagoService chequeraPagoService
+            +preview(SolicitudImportacion) PreviewImportacion
+            +importar(SolicitudImportacion) ResultadoImportacion
+            +reacreditar(Integer, SolicitudImportacion) ResultadoReacreditacion
+            +eliminar(Integer) ResultadoEliminacion
+            +noRegistrados(Integer) List~ArchivoBanco~
+            +rechazos(Integer) List~Rechazo~
+            +listar(CanalImportacion) List~ArchivoImportado~
+            +findImportacion(Integer) ArchivoImportado
+        }
+        class PreviewImportacionUseCaseImpl
+        class ImportarArchivoUseCaseImpl
+        class ListarImportacionesUseCaseImpl
+        class FindNoRegistradosUseCaseImpl
+        class EliminarImportacionUseCaseImpl
+    }
+
+    namespace infrastructure_parser {
+        class PmcFileParser
+        class RapipagoFileParser
+        class DebitoDirectoFileParser
+        class DebitoVisaFileParser
+        class PayPerTicPeriodoParser
+        class PagarFileParser
+        class ClickPagosFileParser
+    }
+
+    namespace infrastructure_persistence {
+        class JpaArchivoImportadoRepositoryAdapter
+        class JpaArchivoBancoRepositoryAdapter
+        class JpaDebitoCobranzaRepositoryAdapter
+        class JpaPayPerTicRendicionRepositoryAdapter
+        class JpaReemplazoRepositoryAdapter
+        class ArchivoImportadoEntity
+        class ArchivoBancoEntity
+        class ReemplazoTotalEntity
+    }
+
+    namespace infrastructure_web {
+        class ImportacionPagoController {
+            +canales() ResponseEntity~List~String~~
+            +preview(String, MultipartFile, Integer, Integer, boolean) ResponseEntity~PreviewImportacionResponse~
+            +importar(String, MultipartFile, Integer, Integer, boolean) ResponseEntity~ResultadoImportacionResponse~
+            +subirPayPerTic(MultipartFile) ResponseEntity~Void~
+            +reacreditar(String, Integer, MultipartFile, Integer, Integer, boolean) ResponseEntity~ResultadoReacreditacionResponse~
+            +buscar(ImportacionBusquedaRequest) ResponseEntity~List~ImportacionResumenResponse~~
+            +find(Integer) ResponseEntity~ImportacionResumenResponse~
+            +noRegistrados(Integer) ResponseEntity~List~NoRegistradoResponse~~
+            +rechazos(Integer) ResponseEntity~List~RechazoResponse~~
+            +eliminar(Integer) ResponseEntity~ResultadoEliminacionResponse~
+        }
+        class ImportacionPagoDtoMapper
+    }
+
+    ImportacionPagoService --> ParserArchivoPago : selecciona por canal
+    ImportacionPagoService --> ArchivoImportadoRepository : uses
+    ImportacionPagoService --> ArchivoBancoRepository : uses
+    ImportacionPagoService --> DebitoCobranzaRepository : uses
+    ImportacionPagoService --> PayPerTicRendicionRepository : uses
+    ImportacionPagoService --> ReemplazoRepository : uses
+    ImportacionPagoService --> ChequeraCuotaService : recalcula
+    ImportacionPagoService --> ChequeraPagoService : marcarPago
+
+    PreviewImportacionUseCaseImpl ..|> PreviewImportacionUseCase : implements
+    ImportarArchivoUseCaseImpl ..|> ImportarArchivoUseCase : implements
+    ListarImportacionesUseCaseImpl ..|> ListarImportacionesUseCase : implements
+    FindNoRegistradosUseCaseImpl ..|> FindNoRegistradosUseCase : implements
+    EliminarImportacionUseCaseImpl ..|> EliminarImportacionUseCase : implements
+
+    PreviewImportacionUseCaseImpl --> ImportacionPagoService : delegates
+    ImportarArchivoUseCaseImpl --> ImportacionPagoService : delegates
+    ListarImportacionesUseCaseImpl --> ImportacionPagoService : delegates
+    FindNoRegistradosUseCaseImpl --> ImportacionPagoService : delegates
+    EliminarImportacionUseCaseImpl --> ImportacionPagoService : delegates
+
+    PmcFileParser ..|> ParserArchivoPago : implements
+    RapipagoFileParser ..|> ParserArchivoPago : implements
+    DebitoDirectoFileParser ..|> ParserArchivoPago : implements
+    DebitoVisaFileParser ..|> ParserArchivoPago : implements
+    PayPerTicPeriodoParser ..|> ParserArchivoPago : implements
+    PagarFileParser ..|> ParserArchivoPago : implements
+    ClickPagosFileParser ..|> ParserArchivoPago : implements
+
+    JpaArchivoImportadoRepositoryAdapter ..|> ArchivoImportadoRepository : implements
+    JpaArchivoBancoRepositoryAdapter ..|> ArchivoBancoRepository : implements
+    JpaDebitoCobranzaRepositoryAdapter ..|> DebitoCobranzaRepository : implements
+    JpaPayPerTicRendicionRepositoryAdapter ..|> PayPerTicRendicionRepository : implements
+    JpaReemplazoRepositoryAdapter ..|> ReemplazoRepository : implements
+
+    JpaArchivoImportadoRepositoryAdapter --> ArchivoImportadoEntity : persists
+    JpaArchivoBancoRepositoryAdapter --> ArchivoBancoEntity : persists
+    JpaReemplazoRepositoryAdapter --> ReemplazoTotalEntity : persists
+
+    ImportacionPagoController --> ImportacionPagoService : calls
+    ImportacionPagoController --> ImportacionPagoDtoMapper : uses
+
+    class ChequeraCuotaService {
+        << external >>
+        +findByUnique(Integer, Integer, Long, Integer, Integer, Integer) ChequeraCuota
+        +update(ChequeraCuota, Long) ChequeraCuota
+    }
+    class ChequeraPagoService {
+        << external >>
+        +create(ChequeraPago) ChequeraPago
+        +marcarPago(Integer, Integer, Long, Integer, Integer, Integer)
+    }
+    class ChequeraSerieService {
+        << external >>
+        +findByUnique(Integer, Integer, Long) ChequeraSerie
+    }

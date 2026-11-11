@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/bancoMovimiento")
+@RequestMapping({"/bancoMovimiento", "/api/tesoreria/core/bancoMovimiento"})
 @RequiredArgsConstructor
 public class BancoMovimientoController {
 

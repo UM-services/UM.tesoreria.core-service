@@ -19,7 +19,7 @@ import um.tesoreria.core.service.view.ContratoExcluidoService;
  *
  */
 @RestController
-@RequestMapping("/contratoexcluido")
+@RequestMapping({"/contratoexcluido", "/api/tesoreria/core/contratoexcluido"})
 @RequiredArgsConstructor
 public class ContratoExcluidoController {
 

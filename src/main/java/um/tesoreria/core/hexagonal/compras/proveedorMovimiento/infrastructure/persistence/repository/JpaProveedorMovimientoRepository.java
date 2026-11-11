@@ -44,6 +44,12 @@ public interface JpaProveedorMovimientoRepository extends JpaRepository<Proveedo
 
 	List<ProveedorMovimientoEntity> findAllByProveedorIdAndGeograficaId(Integer proveedorId, Integer geograficaId);
 
+	List<ProveedorMovimientoEntity> findAllByProveedorIdAndFechaComprobanteBetween(
+			Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta);
+
+	List<ProveedorMovimientoEntity> findAllByProveedorIdAndFechaComprobanteBetweenAndGeograficaId(
+			Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta, Integer geograficaId);
+
 	List<ProveedorMovimientoEntity> findAllByFechaComprobanteBetweenAndFechaAnulacionIsNullAndComprobanteIdNotOrderByNombreBeneficiario(OffsetDateTime fechaDesde, OffsetDateTime fechaHasta, Integer comprobanteId);
 
 	Optional<ProveedorMovimientoEntity> findByProveedorMovimientoId(Long proveedorMovimientoId);

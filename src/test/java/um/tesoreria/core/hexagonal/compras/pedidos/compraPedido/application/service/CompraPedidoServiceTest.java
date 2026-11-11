@@ -251,7 +251,7 @@ class CompraPedidoServiceTest {
 
         assertThat(service.marcarEnCotizacion(5).getEstado()).isEqualTo(CompraPedidoEstado.EN_COTIZACION);
         verify(compraPedidoHistorialService).registrar(5, "EN_COTIZACION", null,
-                "Incluido en un proceso de cotización");
+                "Incluido en un proceso de presupuesto");
     }
 
     @Test
@@ -278,7 +278,7 @@ class CompraPedidoServiceTest {
         assertThat(service.marcarPendienteAdjudicacion(5).getEstado())
                 .isEqualTo(CompraPedidoEstado.PENDIENTE_ADJUDICACION);
         verify(compraPedidoHistorialService).registrar(5, "PENDIENTE_ADJUDICACION", null,
-                "Proceso de cotización recomendado");
+                "Proceso de presupuesto recomendado");
     }
 
     @Test
@@ -301,7 +301,7 @@ class CompraPedidoServiceTest {
         when(marcarAdjudicadoCompraPedidoUseCase.marcar(5)).thenReturn(marcado);
 
         assertThat(service.marcarAdjudicado(5).getEstado()).isEqualTo(CompraPedidoEstado.ADJUDICADO);
-        verify(compraPedidoHistorialService).registrar(5, "ADJUDICADO", null, "Cotización adjudicada");
+        verify(compraPedidoHistorialService).registrar(5, "ADJUDICADO", null, "Presupuesto adjudicado");
     }
 
     @Test

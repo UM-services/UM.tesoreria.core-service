@@ -26,6 +26,7 @@ import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.exception.
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieRequest;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieResponse;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraSerieResumenResponse;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraEstadoUsuarioResponse;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.dto.ChequeraEstadoUsuarioPageResponse;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.web.mapper.ChequeraSerieDtoMapper;
@@ -36,11 +37,12 @@ import um.tesoreria.core.model.view.ChequeraIncompleta;
 import um.tesoreria.core.model.view.ChequeraKey;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieResumenService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioAsignadasService;
 
 @RestController
-@RequestMapping({"/chequeraserie", "/api/tesoreria/core/chequeraSerie"})
+@RequestMapping({"/chequeraserie", "/api/tesoreria/core/chequeraSerie", "/api/tesoreria/core/chequeraserie"})
 @Slf4j
 @RequiredArgsConstructor
 public class ChequeraSerieController {
@@ -50,6 +52,7 @@ public class ChequeraSerieController {
     private final ChequeraSerieDtoMapper chequeraSerieDtoMapper;
     private final ChequerasPorUsuarioService chequerasPorUsuarioService;
     private final ChequerasPorUsuarioAsignadasService chequerasPorUsuarioAsignadasService;
+    private final ChequeraSerieResumenService chequeraSerieResumenService;
 
     @Operation(
             summary = "Estado de chequeras por usuario y lectivo",
@@ -202,6 +205,16 @@ public class ChequeraSerieController {
     public ResponseEntity<List<ChequeraSerieResponse>> findAllByNumber(@PathVariable Integer facultadId,
                                                                       @PathVariable Long chequeraserieId) {
         List<ChequeraSerieResponse> responses = service.findAllByNumber(facultadId, chequeraserieId).stream()
+                .map(chequeraSerieDtoMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/bynumber/{facultadId}/{chequeraserieId}/resumen")
+    public ResponseEntity<List<ChequeraSerieResumenResponse>> resumenByNumber(@PathVariable Integer facultadId,
+                                                                              @PathVariable Long chequeraserieId) {
+        List<ChequeraSerieResumenResponse> responses = chequeraSerieResumenService
+                .resumen(facultadId, chequeraserieId).stream()
                 .map(chequeraSerieDtoMapper::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);

@@ -45,13 +45,13 @@ class CompraPedidoTest {
     }
 
     @Test
-    void enviarSinMontoConocidoPasaAEstimacion() {
+    void enviarSinMontoConocidoPasaAEnvio() {
         CompraPedido pedido = borrador();
         pedido.setMontoConocido(false);
 
         pedido.enviar("PC-2026-000002");
 
-        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_ESTIMACION);
+        assertThat(pedido.getEstado()).isEqualTo(CompraPedidoEstado.PENDIENTE_ENVIO);
     }
 
     @Test

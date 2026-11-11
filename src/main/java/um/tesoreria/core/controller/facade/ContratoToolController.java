@@ -27,7 +27,7 @@ import um.tesoreria.core.service.facade.ContratoToolService;
  *
  */
 @RestController
-@RequestMapping({"/contratotool", "/api/core/contratotool"})
+@RequestMapping({"/contratotool", "/api/core/contratotool", "/api/tesoreria/core/contratotool"})
 @RequiredArgsConstructor
 public class ContratoToolController {
 

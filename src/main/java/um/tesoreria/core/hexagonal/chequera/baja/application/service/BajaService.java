@@ -12,6 +12,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.hexagonal.chequera.baja.application.exception.BajaException;
+import um.tesoreria.core.hexagonal.chequera.baja.domain.model.DatosBaja;
 import um.tesoreria.core.hexagonal.chequera.baja.infrastructure.persistence.entity.BajaEntity;
 import um.tesoreria.core.hexagonal.chequera.baja.infrastructure.persistence.repository.JpaBajaRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,15 @@ public class BajaService {
                     return baja;
 				})
 				.orElseThrow(() -> new BajaException(facultadId, tipoChequeraId, chequeraSerieId));
+	}
+
+	public java.util.Optional<DatosBaja> findDatosByUnique(Integer facultadId, Integer tipoChequeraId,
+														   Long chequeraSerieId) {
+		return repository.findByFacultadIdAndTipoChequeraIdAndChequeraSerieId(facultadId, tipoChequeraId,
+						chequeraSerieId)
+				.map(baja -> new DatosBaja(baja.getFacultadId(), baja.getTipoChequeraId(),
+						baja.getChequeraSerieId(), baja.getLectivoId(), baja.getPersonaId(),
+						baja.getDocumentoId(), baja.getFecha(), baja.getObservaciones()));
 	}
 
 	public BajaEntity add(BajaEntity baja) {

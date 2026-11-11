@@ -29,6 +29,12 @@ public interface ChequeraPagoRepository {
                                                                   Long chequeraSerieId, Integer productoId,
                                                                   Integer alternativaId, Integer cuotaId);
 
+    List<ChequeraPago> findAllByArchivo(String archivo);
+
+    void deleteAllByArchivo(String archivo);
+
+    void deleteById(Long chequeraPagoId);
+
     void deleteAllByChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId);
 
     ChequeraPago save(ChequeraPago chequeraPago);

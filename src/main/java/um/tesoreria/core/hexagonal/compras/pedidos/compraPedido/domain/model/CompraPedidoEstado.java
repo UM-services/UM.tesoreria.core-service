@@ -14,12 +14,11 @@ package um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.domain.model;
  * ({@code -> RECHAZADO}) el inicio del proceso de pedido de presupuesto.</p>
  *
  * <p>La edición del pedido está permitida mientras no haya pasado a compras: en
- * {@link #BORRADOR}, {@link #RECHAZADO} y los estados previos de la etapa de estimación.</p>
+ * {@link #BORRADOR}, {@link #RECHAZADO} y {@link #ACLARACION_REQUERIDA}.</p>
  */
 public enum CompraPedidoEstado {
 
     BORRADOR,
-    PENDIENTE_ESTIMACION,
     PENDIENTE_ENVIO,
     ACLARACION_REQUERIDA,
     /**
@@ -44,8 +43,7 @@ public enum CompraPedidoEstado {
     DESCARTADO;
 
     public boolean esEditable() {
-        return this == BORRADOR || this == RECHAZADO
-                || this == PENDIENTE_ESTIMACION || this == ACLARACION_REQUERIDA;
+        return this == BORRADOR || this == RECHAZADO || this == ACLARACION_REQUERIDA;
     }
 
 }

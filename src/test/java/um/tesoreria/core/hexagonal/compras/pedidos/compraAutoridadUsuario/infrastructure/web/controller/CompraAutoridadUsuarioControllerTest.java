@@ -8,7 +8,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.application.exception.CompraAutoridadUsuarioException;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.application.service.CompraAutoridadUsuarioService;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.CompraAutoridadUsuarioAsignacion;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.LimiteAutorizacion;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.CompraAutoridadUsuarioAsignacionResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.CompraAutoridadUsuarioResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.LimiteAutorizacionResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.mapper.CompraAutoridadUsuarioDtoMapper;
@@ -41,6 +43,19 @@ class CompraAutoridadUsuarioControllerTest {
         mockMvc.get().uri("/api/tesoreria/core/compraAutoridadUsuario/9")
                 .assertThat().hasStatusOk()
                 .bodyJson().extractingPath("$.usuarioId").isEqualTo(9);
+    }
+
+    @Test
+    void getAsignacionesDevuelveLosUsuariosPorPerfil() {
+        CompraAutoridadUsuarioAsignacion asignacion =
+                new CompraAutoridadUsuarioAsignacion(9, 5L, "juan", "Juan Pérez", (byte) 1);
+        when(service.getAsignaciones()).thenReturn(List.of(asignacion));
+        when(dtoMapper.toResponse(asignacion)).thenReturn(
+                new CompraAutoridadUsuarioAsignacionResponse(9, 5L, "juan", "Juan Pérez", (byte) 1));
+
+        mockMvc.get().uri("/api/tesoreria/core/compraAutoridadUsuario/asignaciones")
+                .assertThat().hasStatusOk()
+                .bodyJson().extractingPath("$[0].autoridadPerfilId").isEqualTo(5);
     }
 
     @Test

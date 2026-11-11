@@ -21,7 +21,7 @@ import um.tesoreria.core.service.view.OrdenPagoEntregadoService;
  *
  */
 @RestController
-@RequestMapping("/ordenPagoEntregado")
+@RequestMapping({"/ordenPagoEntregado", "/api/tesoreria/core/ordenPagoEntregado"})
 @RequiredArgsConstructor
 public class OrdenPagoEntregadoController {
 	

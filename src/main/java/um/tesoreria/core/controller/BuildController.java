@@ -18,7 +18,7 @@ import um.tesoreria.core.service.BuildService;
  *
  */
 @RestController
-@RequestMapping("/build")
+@RequestMapping({"/build", "/api/tesoreria/core/build"})
 @RequiredArgsConstructor
 public class BuildController {
 

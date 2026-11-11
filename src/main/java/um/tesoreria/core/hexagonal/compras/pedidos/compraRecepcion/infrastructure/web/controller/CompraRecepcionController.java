@@ -1,7 +1,6 @@
 package um.tesoreria.core.hexagonal.compras.pedidos.compraRecepcion.infrastructure.web.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraRecepcion.application.exception.CompraRecepcionException;
@@ -23,7 +21,6 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraRecepcion.infrastructur
 import um.tesoreria.core.hexagonal.compras.pedidos.compraRecepcion.infrastructure.web.dto.CompraRecepcionResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraRecepcion.infrastructure.web.mapper.CompraRecepcionDtoMapper;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -39,14 +36,8 @@ public class CompraRecepcionController {
     private final CompraRecepcionDtoMapper compraRecepcionDtoMapper;
 
     @GetMapping
-    public ResponseEntity<List<CompraRecepcionResponse>> findAll(
-            @RequestParam(required = false) Integer ejercicioId,
-            @RequestParam(required = false) Long compraFormalizacionId,
-            @RequestParam(required = false) String resultado,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaDesde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaHasta) {
-        CompraRecepcionCriteria criteria = new CompraRecepcionCriteria(ejercicioId, compraFormalizacionId,
-                parseResultado(resultado), fechaDesde, fechaHasta);
+    public ResponseEntity<List<CompraRecepcionResponse>> findAll() {
+        CompraRecepcionCriteria criteria = new CompraRecepcionCriteria(null, null, null, null, null);
         return ResponseEntity.ok(compraRecepcionService.listar(criteria).stream()
                 .map(compraRecepcionDtoMapper::toResponse)
                 .toList());
@@ -62,10 +53,16 @@ public class CompraRecepcionController {
                 .toList());
     }
 
-    /** Órdenes de Compra del ejercicio con recepción pendiente. */
+    /** Órdenes de Compra del ejercicio en curso con recepción pendiente. */
     @GetMapping("/pendientes")
+    public ResponseEntity<List<CompraRecepcionPendienteResponse>> pendientes() {
+        return pendientes(null);
+    }
+
+    /** Órdenes de Compra del ejercicio indicado con recepción pendiente. */
+    @GetMapping("/pendientes/{ejercicioId}")
     public ResponseEntity<List<CompraRecepcionPendienteResponse>> pendientes(
-            @RequestParam(required = false) Integer ejercicioId) {
+            @PathVariable Integer ejercicioId) {
         return ResponseEntity.ok(compraRecepcionService.pendientes(ejercicioId).stream()
                 .map(compraRecepcionDtoMapper::toResponse)
                 .toList());

@@ -1,0 +1,249 @@
+# Inventario de permisos del sistema — FUENTE DE VERDAD.
+#
+# Este archivo se sincroniza contra la tabla `permiso` de `tesium` al arrancar
+# tesoreria-core (app.permissions.manifest-sync.enabled) y también se puede
+# aplicar a demanda desde el endpoint admin POST /api/tesoreria/core/permiso/sync.
+#
+# Reglas:
+#  - La identidad de una clave es (aplicacion, clave).
+#  - Si una clave está en este archivo y no en la base, se crea.
+#  - Si está en ambos, se actualizan descripcion, modulo y activo.
+#  - Si existe en la base y NO está en este archivo, se retira con activo = false.
+#    Nunca se borra físicamente: conserva roles/usuarios asignados.
+#  - Renombrar una clave = alta de la nueva + retiro de la vieja.
+#
+# Para agregar una funcionalidad nueva: agregá la clave acá en el mismo PR en
+# que se cablea en el código (guard, menú, directiva o @RequierePermiso).
+version: 1
+
+permisos:
+  - aplicacion: TESORERIA
+    clave: administrador.panel
+    modulo: administrador
+    descripcion: "Acceder al panel de administración"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: permisos.administrar
+    modulo: permisos
+    descripcion: "Administrar el catálogo de permisos, roles y solicitudes de acceso"
+    activo: true
+
+  # --- Chequeras: flags legacy (puente administrador.panel / chequeras.*) ---
+  - aplicacion: TESORERIA
+    clave: chequeras.imprimir
+    modulo: chequeras
+    descripcion: "Imprimir chequeras"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.numero_manual
+    modulo: chequeras
+    descripcion: "Numerar operaciones de chequera manualmente"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.habilitar_eliminacion
+    modulo: chequeras
+    descripcion: "Habilitar la eliminación de operaciones de chequera"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.eliminar
+    modulo: chequeras
+    descripcion: "Eliminar chequeras"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.modificar
+    modulo: chequeras
+    descripcion: "Modificar chequeras"
+    activo: true
+
+  # --- Chequeras: cobranzas ---
+  - aplicacion: TESORERIA
+    clave: chequeras.cobranzas.importar
+    modulo: chequeras
+    descripcion: "Importar rendiciones de pago, consultar el historial y eliminar una importación"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.cobranzas.generar
+    modulo: chequeras
+    descripcion: "Generar archivos de facturación/débito y anular o reprogramar un envío"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.cobranzas.pagoManual
+    modulo: chequeras
+    descripcion: "Registrar y eliminar pagos manuales de una cuota"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.cobranzas.baja
+    modulo: chequeras
+    descripcion: "Dar de baja una chequera y anular una baja vigente"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.cobranzas.consultar
+    modulo: chequeras
+    descripcion: "Consultar chequeras por unidad académica y número"
+    activo: true
+
+  # --- Chequeras: consultas y planillas ---
+  - aplicacion: TESORERIA
+    clave: chequeras.consultas.detalleCuotas
+    modulo: chequeras
+    descripcion: "Descargar el detalle de cuotas por facultad y sede en formato horizontal o vertical"
+    activo: true
+
+  # --- Compras: proceso de pedido ---
+  - aplicacion: TESORERIA
+    clave: compras.iniciar_pedido
+    modulo: compras
+    descripcion: "Iniciar un pedido de compra"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.enviar_pedido
+    modulo: compras
+    descripcion: "Enviar un pedido de compra a revisión"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.autorizantes.configurar
+    modulo: compras
+    descripcion: "Administrar las dependencias habilitadas de los autorizantes de envío"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.consultar_pedidos
+    modulo: compras
+    descripcion: "Consultar pedidos de compra"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.estimar
+    modulo: compras
+    descripcion: "Revisar el pedido enviado y cargar/confirmar el valor estimado (dpto. de compras)"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.presupuesto.autorizar
+    modulo: compras
+    descripcion: "Autorizar el inicio del proceso de pedido de presupuesto"
+    activo: true
+
+  # --- Compras: presupuestos y adjudicación ---
+  - aplicacion: TESORERIA
+    clave: compras.cotizaciones.gestionar
+    modulo: compras
+    descripcion: "Gestionar procesos de presupuesto: armar, enviar, cargar respuestas y recomendar"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.cotizaciones.configurar
+    modulo: compras
+    descripcion: "Configurar la Cantidad Presupuestos Mínima por monto (tramos)"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.adjudicacion.autorizar
+    modulo: compras
+    descripcion: "Adjudicar el presupuesto recomendado o devolverlo a compras (autoridad por monto)"
+    activo: true
+
+  # --- Compras: formalización y recepción ---
+  - aplicacion: TESORERIA
+    clave: compras.formalizar
+    modulo: compras
+    descripcion: "Emitir la Orden de Compra de una adjudicación (dpto. de compras)"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.recepcionar
+    modulo: compras
+    descripcion: "Registrar la recepción y conformidad de una Orden de Compra (entregas totales o parciales y cierre con motivo)"
+    activo: true
+
+  # --- Compras: gastos ---
+  - aplicacion: TESORERIA
+    clave: compras.gastos
+    modulo: compras
+    descripcion: "Acceder a Gastos (ver artículos de tipo gasto)"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.gastos.crear
+    modulo: compras
+    descripcion: "Crear gastos"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.gastos.editar
+    modulo: compras
+    descripcion: "Editar gastos"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.gastos.eliminar
+    modulo: compras
+    descripcion: "Eliminar gastos"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.gastos.imputar
+    modulo: compras
+    descripcion: "Asignar imputaciones por ubicación a un gasto"
+    activo: true
+
+  # --- Compras: proveedores ---
+  - aplicacion: TESORERIA
+    clave: compras.proveedores
+    modulo: compras
+    descripcion: "Acceder a Proveedores (ver el padrón)"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.proveedores.crear
+    modulo: compras
+    descripcion: "Crear proveedores"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.proveedores.editar
+    modulo: compras
+    descripcion: "Editar proveedores"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.proveedores.eliminar
+    modulo: compras
+    descripcion: "Eliminar proveedores"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: compras.proveedores.descargar
+    modulo: compras
+    descripcion: "Descargar la planilla de proveedores"
+    activo: true
+
+  # --- Pagos: comprobantes de proveedor (consulta y anulación) ---
+  - aplicacion: TESORERIA
+    clave: pagos.comprobantes.consultar
+    modulo: pagos
+    descripcion: "Consultar comprobantes de proveedor y sus movimientos"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.comprobantes.anular
+    modulo: pagos
+    descripcion: "Anular (borrar) comprobantes de proveedor"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.comprobantes.anular_op
+    modulo: pagos
+    descripcion: "Anular comprobantes que son orden de pago"
+    activo: true

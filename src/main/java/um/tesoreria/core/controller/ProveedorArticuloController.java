@@ -23,7 +23,7 @@ import um.tesoreria.core.kotlin.model.ProveedorArticulo;
  *
  */
 @RestController
-@RequestMapping("/proveedorArticulo")
+@RequestMapping({"/proveedorArticulo", "/api/tesoreria/core/proveedorArticulo"})
 @RequiredArgsConstructor
 public class ProveedorArticuloController {
 

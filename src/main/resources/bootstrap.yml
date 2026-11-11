@@ -6,6 +6,14 @@ app:
   password: root
   logging: debug
   testing: false
+  permissions:
+    # PEP de endpoints anotados con @RequierePermiso (off por defecto; ver AGENTS §11).
+    enforce: ${APP_PERMISSIONS_ENFORCE:false}
+    # Inventario de permisos como código (src/main/resources/permisos.yaml).
+    manifest: ${APP_PERMISSIONS_MANIFEST:classpath:permisos.yaml}
+    manifest-sync:
+      enabled: ${APP_PERMISSIONS_MANIFEST_SYNC_ENABLED:true}
+      dry-run: ${APP_PERMISSIONS_MANIFEST_SYNC_DRY_RUN:false}
   # Topics de los que este servicio es dueño (KafkaTopicsConfiguration). El réplication factor es
   # ambiental: 1 con el broker único actual, 3 en la fase de cluster. KafkaAdmin nunca reasigna el
   # RF de un topic existente.
@@ -24,6 +32,10 @@ spring:
   jackson:
     deserialization:
       fail-on-null-for-primitives: false
+  servlet:
+    multipart:
+      max-file-size: ${APP_MULTIPART_MAX_FILE_SIZE:20MB}
+      max-request-size: ${APP_MULTIPART_MAX_REQUEST_SIZE:25MB}
   application:
     name: tesoreria-core-service
   cloud:
@@ -45,6 +57,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 100
+      minimum-idle: 10             # sólo 10 conexiones ociosas; el resto se abre por demanda
       connection-timeout: 60000
       idle-timeout: 600000        # 10 minutos
       max-lifetime: 1800000       # 30 minutos

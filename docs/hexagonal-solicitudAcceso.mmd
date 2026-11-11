@@ -1,0 +1,104 @@
+---
+title: Arquitectura Hexagonal - SolicitudAcceso (v11.9.0)
+---
+
+classDiagram
+    direction TB
+
+    namespace domain_model {
+        class SolicitudAcceso {
+            +Long solicitudAccesoId
+            +Long userId
+            +String aplicacion
+            +String clave
+            +String modulo
+            +String comentario
+            +String estado
+            +String observacion
+            +Long resueltoPor
+            +LocalDateTime resuelto
+            +LocalDateTime created
+            +LocalDateTime updated
+        }
+        class EstadoSolicitudAcceso {
+            << enum >>
+            PENDIENTE
+            APROBADA
+            RECHAZADA
+        }
+    }
+
+    namespace domain_ports_in {
+        class CreateSolicitudAccesoUseCase { << interface >> }
+        class FindSolicitudesAccesoUseCase { << interface >> }
+        class ResolveSolicitudAccesoUseCase { << interface >> }
+    }
+
+    namespace domain_ports_out {
+        class SolicitudAccesoRepository { << interface >> }
+    }
+
+    namespace application {
+        class SolicitudAccesoService {
+            +create(SolicitudAcceso) SolicitudAcceso
+            +findPendientes() List~SolicitudAcceso~
+            +findByUserId(Long) List~SolicitudAcceso~
+            +resolve(Long, String, String, Long) SolicitudAcceso
+        }
+        class CreateSolicitudAccesoUseCaseImpl
+        class FindSolicitudesAccesoUseCaseImpl
+        class ResolveSolicitudAccesoUseCaseImpl
+        class SolicitudAccesoException
+    }
+
+    namespace infrastructure_persistence {
+        class SolicitudAccesoEntity
+        class SolicitudAccesoMapper
+        class JpaSolicitudAccesoRepository
+        class JpaSolicitudAccesoRepositoryAdapter
+    }
+
+    namespace infrastructure_web {
+        class SolicitudAccesoController {
+            +create(SolicitudAccesoRequest) ResponseEntity~SolicitudAccesoResponse~
+            +pendientes() ResponseEntity~List~SolicitudAccesoResponse~~
+            +porUsuario(Long) ResponseEntity~List~SolicitudAccesoResponse~~
+            +resolver(Long, ResolverSolicitudAccesoRequest) ResponseEntity~SolicitudAccesoResponse~
+        }
+        class SolicitudAccesoRequest
+        class ResolverSolicitudAccesoRequest
+        class SolicitudAccesoResponse
+        class SolicitudAccesoDtoMapper
+    }
+
+    SolicitudAccesoController --> SolicitudAccesoService : calls
+    SolicitudAccesoController --> SolicitudAccesoDtoMapper : uses
+    SolicitudAccesoController --> CreateSolicitudAccesoUseCase : POST /
+    SolicitudAccesoController --> FindSolicitudesAccesoUseCase : GET pendiente / usuario
+    SolicitudAccesoController --> ResolveSolicitudAccesoUseCase : PUT resolver
+
+    SolicitudAccesoService --> CreateSolicitudAccesoUseCase : delegates
+    SolicitudAccesoService --> FindSolicitudesAccesoUseCase : delegates
+    SolicitudAccesoService --> ResolveSolicitudAccesoUseCase : delegates
+
+    CreateSolicitudAccesoUseCaseImpl ..|> CreateSolicitudAccesoUseCase : implements
+    FindSolicitudesAccesoUseCaseImpl ..|> FindSolicitudesAccesoUseCase : implements
+    ResolveSolicitudAccesoUseCaseImpl ..|> ResolveSolicitudAccesoUseCase : implements
+
+    CreateSolicitudAccesoUseCaseImpl --> SolicitudAccesoRepository : uses
+    FindSolicitudesAccesoUseCaseImpl --> SolicitudAccesoRepository : uses
+    ResolveSolicitudAccesoUseCaseImpl --> SolicitudAccesoRepository : uses
+
+    JpaSolicitudAccesoRepositoryAdapter ..|> SolicitudAccesoRepository : implements
+    JpaSolicitudAccesoRepositoryAdapter --> JpaSolicitudAccesoRepository : uses
+    JpaSolicitudAccesoRepositoryAdapter --> SolicitudAccesoMapper : uses
+    JpaSolicitudAccesoRepository --> SolicitudAccesoEntity : persists
+    SolicitudAccesoMapper --> SolicitudAcceso : maps
+    SolicitudAccesoMapper --> SolicitudAccesoEntity : maps
+
+    SolicitudAccesoDtoMapper --> SolicitudAccesoRequest : maps
+    SolicitudAccesoDtoMapper --> ResolverSolicitudAccesoRequest : maps
+    SolicitudAccesoDtoMapper --> SolicitudAccesoResponse : maps
+    SolicitudAccesoDtoMapper --> SolicitudAcceso : maps
+
+    SolicitudAcceso --> EstadoSolicitudAcceso : estado

@@ -10,6 +10,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieResumenService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioAsignadasService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequerasPorUsuarioService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
@@ -35,6 +36,8 @@ class ChequeraSerieUsuarioControllerTest {
     private ChequerasPorUsuarioService chequerasPorUsuarioService;
     @MockitoBean
     private ChequerasPorUsuarioAsignadasService chequerasPorUsuarioAsignadasService;
+    @MockitoBean
+    private ChequeraSerieResumenService chequeraSerieResumenService;
 
     @Test
     void exposesPaginatedDebtStatusForAssignedUser() {

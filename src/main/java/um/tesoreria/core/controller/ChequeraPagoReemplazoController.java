@@ -17,7 +17,7 @@ import um.tesoreria.core.service.ChequeraPagoReemplazoService;
  *
  */
 @RestController
-@RequestMapping("/chequerapagoreemplazo")
+@RequestMapping({"/chequerapagoreemplazo", "/api/tesoreria/core/chequerapagoreemplazo"})
 public class ChequeraPagoReemplazoController {
 
 	private final ChequeraPagoReemplazoService service;

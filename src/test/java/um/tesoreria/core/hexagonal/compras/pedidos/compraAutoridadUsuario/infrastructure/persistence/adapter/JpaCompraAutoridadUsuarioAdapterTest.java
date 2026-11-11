@@ -6,12 +6,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.CompraAutoridadUsuario;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.persistence.entity.CompraAutoridadUsuarioEntity;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.persistence.repository.JpaCompraAutoridadUsuarioRepository;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -33,6 +35,17 @@ class JpaCompraAutoridadUsuarioAdapterTest {
                         new CompraAutoridadUsuarioEntity(9, 6L)));
 
         assertThat(adapter.findPerfilIdsByUsuarioId(9)).containsExactly(5L, 6L);
+    }
+
+    @Test
+    void findAllDevuelveLasAsignacionesOrdenadas() {
+        when(repository.findAllByOrderByAutoridadPerfilIdAscUsuarioIdAsc())
+                .thenReturn(List.of(new CompraAutoridadUsuarioEntity(9, 5L),
+                        new CompraAutoridadUsuarioEntity(10, 5L)));
+
+        assertThat(adapter.findAll())
+                .extracting(CompraAutoridadUsuario::usuarioId, CompraAutoridadUsuario::autoridadPerfilId)
+                .containsExactly(tuple(9, 5L), tuple(10, 5L));
     }
 
     @Test

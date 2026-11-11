@@ -3,6 +3,7 @@ package um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infra
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.CompraAutoridadUsuario;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.ports.out.CompraAutoridadUsuarioRepository;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.persistence.entity.CompraAutoridadUsuarioEntity;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.persistence.repository.JpaCompraAutoridadUsuarioRepository;
@@ -25,6 +26,13 @@ public class JpaCompraAutoridadUsuarioAdapter implements CompraAutoridadUsuarioR
     public List<Long> findPerfilIdsByUsuarioId(Integer usuarioId) {
         return repository.findAllByUsuarioIdOrderByAutoridadPerfilIdAsc(usuarioId).stream()
                 .map(CompraAutoridadUsuarioEntity::getAutoridadPerfilId)
+                .toList();
+    }
+
+    @Override
+    public List<CompraAutoridadUsuario> findAll() {
+        return repository.findAllByOrderByAutoridadPerfilIdAscUsuarioIdAsc().stream()
+                .map(entity -> new CompraAutoridadUsuario(entity.getUsuarioId(), entity.getAutoridadPerfilId()))
                 .toList();
     }
 

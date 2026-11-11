@@ -1,7 +1,9 @@
 package um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.mapper;
 
 import org.springframework.stereotype.Component;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.CompraAutoridadUsuarioAsignacion;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.domain.model.LimiteAutorizacion;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.CompraAutoridadUsuarioAsignacionResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.CompraAutoridadUsuarioResponse;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraAutoridadUsuario.infrastructure.web.dto.LimiteAutorizacionResponse;
 
@@ -15,6 +17,16 @@ public class CompraAutoridadUsuarioDtoMapper {
                 .usuarioId(usuarioId)
                 .autoridadPerfilIds(autoridadPerfilIds)
                 .build();
+    }
+
+    public CompraAutoridadUsuarioAsignacionResponse toResponse(CompraAutoridadUsuarioAsignacion asignacion) {
+        if (asignacion == null) return null;
+        return new CompraAutoridadUsuarioAsignacionResponse(
+                asignacion.usuarioId(),
+                asignacion.autoridadPerfilId(),
+                asignacion.login(),
+                asignacion.nombre(),
+                asignacion.activo());
     }
 
     public LimiteAutorizacionResponse toResponse(LimiteAutorizacion limite) {
