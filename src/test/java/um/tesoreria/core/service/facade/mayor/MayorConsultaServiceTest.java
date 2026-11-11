@@ -281,6 +281,39 @@ class MayorConsultaServiceTest {
         assertThat(linea.importeValor()).isNull();
     }
 
+    // protects=si el período arranca el primer día del ejercicio, el asiento de apertura es el primer movimiento y el saldo inicial es cero (como en el listado anterior); fails_when=la apertura no aparece, se cuenta dos veces (en el saldo inicial y como línea) o se pide el saldo inicial al servicio; no_claim=no prueba cuándo un asiento tiene apertura = 1 (lo decide el repositorio)
+    @Test
+    void siElPeriodoArrancaConElEjercicioLaAperturaEsElPrimerMovimientoYElSaldoInicialEsCero() {
+        dado(cuenta(CAJA, 0), saldoInicial(CAJA, ejercicio2026, fecha(2026, 3, 1), "999.00", "0.00"),
+                movimiento(CAJA, fecha(2026, 3, 2), 5, 1, "10.00"));
+        when(cuentaMovimientoService.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(
+                eq(CAJA), any(), any(), eq((byte) 1)))
+                .thenReturn(List.of(movimiento(CAJA, fecha(2026, 3, 1), 1, 1, "100.00")));
+
+        MayorCuentaResponse caja = service.consultar(
+                pedido(fecha(2026, 3, 1), fecha(2026, 3, 31), List.of(CAJA), null, null)).cuentas().getFirst();
+
+        assertThat(caja.saldoInicial().saldo()).isEqualByComparingTo("0.00");
+        assertThat(caja.movimientos()).extracting(MayorMovimientoResponse::ordenContable).containsExactly(1, 5);
+        assertThat(caja.movimientos()).extracting(MayorMovimientoResponse::saldo)
+                .usingComparatorForType(BigDecimal::compareTo, BigDecimal.class)
+                .containsExactly(new BigDecimal("100.00"), new BigDecimal("110.00"));
+        assertThat(caja.totalDebe()).isEqualByComparingTo("110.00");
+        assertThat(caja.saldoFinal()).isEqualByComparingTo("110.00");
+        verify(contabilidadService, never()).saldoInicial(any(), any(), any());
+    }
+
+    // protects=si el período arranca después del inicio del ejercicio la apertura no se lista y va en el saldo inicial; fails_when=se consulta la apertura como movimiento y se duplica; no_claim=no prueba el cálculo del saldo inicial
+    @Test
+    void siElPeriodoArrancaDespuesDelInicioLaAperturaNoSeListaComoMovimiento() {
+        dado(cuenta(CAJA, 0), saldoInicial(CAJA, ejercicio2026, fecha(2026, 4, 1), "100.00", "0.00"));
+
+        service.consultar(pedido(fecha(2026, 4, 1), fecha(2026, 6, 30), List.of(CAJA), null, null));
+
+        verify(cuentaMovimientoService, never()).findAllByNumeroCuentaAndFechaContableBetweenAndApertura(
+                any(), any(), any(), eq((byte) 1));
+    }
+
     // ---- ayudas ----
 
     private void dado(Cuenta cuenta, List<BigDecimal> iniciales, CuentaMovimiento... movimientos) {
