@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping({ "/tipoChequeraMercadoPagoCreditCard", "/api/tesoreria/core/tipoChequeraMercadoPagoCreditCard"})
+@RequestMapping({"/tipoChequeraMercadoPagoCreditCard", "/api/tesoreria/core/tipoChequeraMercadoPagoCreditCard"})
 public class TipoChequeraMercadoPagoCreditCardController {
 
     private final TipoChequeraMercadoPagoCreditCardService service;

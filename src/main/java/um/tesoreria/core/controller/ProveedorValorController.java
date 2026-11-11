@@ -20,7 +20,7 @@ import java.util.List;
  *
  */
 @RestController
-@RequestMapping("/proveedorValor")
+@RequestMapping({"/proveedorValor", "/api/tesoreria/core/proveedorValor"})
 @RequiredArgsConstructor
 public class ProveedorValorController {
 

@@ -28,7 +28,7 @@ import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.service.Aran
  *
  */
 @RestController
-@RequestMapping("/aranceltipo")
+@RequestMapping({"/aranceltipo", "/api/tesoreria/core/aranceltipo"})
 @RequiredArgsConstructor
 public class ArancelTipoController {
 

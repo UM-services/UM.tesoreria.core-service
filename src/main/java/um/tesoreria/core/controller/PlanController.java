@@ -19,7 +19,7 @@ import um.tesoreria.core.service.PlanService;
  *
  */
 @RestController
-@RequestMapping("/plan")
+@RequestMapping({"/plan", "/api/tesoreria/core/plan"})
 public class PlanController {
 
 	private final PlanService service;

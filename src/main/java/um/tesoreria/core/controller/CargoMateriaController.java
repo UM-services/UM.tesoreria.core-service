@@ -19,7 +19,7 @@ import um.tesoreria.core.service.CargoMateriaService;
  *
  */
 @RestController
-@RequestMapping("/cargomateria")
+@RequestMapping({"/cargomateria", "/api/tesoreria/core/cargomateria"})
 @RequiredArgsConstructor
 public class CargoMateriaController {
 

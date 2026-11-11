@@ -7,7 +7,7 @@ import um.tesoreria.core.kotlin.model.internal.ClickPagosEntity;
 import um.tesoreria.core.service.facade.ClickPagosService;
 
 @RestController
-@RequestMapping("/clickPagos")
+@RequestMapping({"/clickPagos", "/api/tesoreria/core/clickPagos"})
 @RequiredArgsConstructor
 public class ClickPagosController {
 

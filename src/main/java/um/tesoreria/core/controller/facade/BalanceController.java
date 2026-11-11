@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.core.controller.facade;
 
@@ -19,21 +19,27 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import um.tesoreria.core.service.facade.BalanceService;
+import um.tesoreria.core.service.facade.mayor.MayorConsultaRequest;
+import um.tesoreria.core.service.facade.mayor.MayorConsultaResponse;
+import um.tesoreria.core.service.facade.mayor.MayorConsultaService;
 
 /**
  * @author daniel
  *
  */
 @RestController
-@RequestMapping("/balance")
+@RequestMapping({"/balance", "/api/tesoreria/core/balance"})
 @RequiredArgsConstructor
 public class BalanceController {
 
 	private final BalanceService service;
+	private final MayorConsultaService mayorConsultaService;
 
 
 	@GetMapping("/sumasysaldos/{desde}/{hasta}")
@@ -50,6 +56,12 @@ public class BalanceController {
 		headers.add("Expires", "0");
 		return ResponseEntity.ok().headers(headers).contentLength(file.length())
 				.contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+	}
+
+	/** Mayor en JSON de una o varias cuentas, con rango de fechas que puede cruzar ejercicios. */
+	@PostMapping("/mayor/consulta")
+	public ResponseEntity<MayorConsultaResponse> consultarMayor(@RequestBody MayorConsultaRequest request) {
+		return ResponseEntity.ok(mayorConsultaService.consultar(request));
 	}
 
 	@GetMapping("/mayor/{numeroCuenta}/{desde}/{hasta}")

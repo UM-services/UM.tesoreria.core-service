@@ -115,6 +115,27 @@ public class JpaProveedorMovimientoRepositoryAdapter implements ProveedorMovimie
     }
 
     @Override
+    public List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetween(
+            Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta) {
+        return jpaProveedorMovimientoRepository
+                .findAllByProveedorIdAndFechaComprobanteBetween(proveedorId, desde, hasta)
+                .stream()
+                .map(proveedorMovimientoMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetweenAndGeograficaId(
+            Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta, Integer geograficaId) {
+        return jpaProveedorMovimientoRepository
+                .findAllByProveedorIdAndFechaComprobanteBetweenAndGeograficaId(
+                        proveedorId, desde, hasta, geograficaId)
+                .stream()
+                .map(proveedorMovimientoMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndFechaAnulacionIsNull(
             Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta, List<Integer> comprobanteIds) {
         return jpaProveedorMovimientoRepository

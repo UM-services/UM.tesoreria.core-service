@@ -18,7 +18,7 @@ import um.tesoreria.core.service.facade.AsientoInflacionService;
  *
  */
 @RestController
-@RequestMapping("/asientoinflacion")
+@RequestMapping({"/asientoinflacion", "/api/tesoreria/core/asientoinflacion"})
 @RequiredArgsConstructor
 public class AsientoInflacionController {
 

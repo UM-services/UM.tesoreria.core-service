@@ -19,7 +19,7 @@ import um.tesoreria.core.service.TipoPagoService;
  *
  */
 @RestController
-@RequestMapping("/tipopago")
+@RequestMapping({"/tipopago", "/api/tesoreria/core/tipopago"})
 @RequiredArgsConstructor
 public class TipoPagoController {
 

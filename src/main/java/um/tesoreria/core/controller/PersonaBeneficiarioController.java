@@ -25,7 +25,7 @@ import um.tesoreria.core.service.PersonaBeneficiarioService;
  *
  */
 @RestController
-@RequestMapping("/personaBeneficiario")
+@RequestMapping({"/personaBeneficiario", "/api/tesoreria/core/personaBeneficiario"})
 @RequiredArgsConstructor
 public class PersonaBeneficiarioController {
 

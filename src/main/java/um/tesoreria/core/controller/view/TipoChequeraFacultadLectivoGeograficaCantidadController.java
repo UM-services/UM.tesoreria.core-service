@@ -12,7 +12,7 @@ import um.tesoreria.core.service.view.TipoChequeraFacultadLectivoGeograficaCanti
 import java.util.List;
 
 @RestController
-@RequestMapping("/tipoChequeraFacultadLectivoGeografica")
+@RequestMapping({"/tipoChequeraFacultadLectivoGeografica", "/api/tesoreria/core/tipoChequeraFacultadLectivoGeografica"})
 @RequiredArgsConstructor
 public class TipoChequeraFacultadLectivoGeograficaCantidadController {
 
