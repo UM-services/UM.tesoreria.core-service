@@ -23,7 +23,7 @@ import um.tesoreria.core.service.facade.NotificacionService;
  *
  */
 @RestController
-@RequestMapping("/notificacion")
+@RequestMapping({"/notificacion", "/api/tesoreria/core/notificacion"})
 @RequiredArgsConstructor
 public class NotificacionController {
 

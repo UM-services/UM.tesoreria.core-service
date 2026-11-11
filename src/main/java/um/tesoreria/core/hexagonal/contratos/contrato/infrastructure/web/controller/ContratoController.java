@@ -18,7 +18,7 @@ import um.tesoreria.core.hexagonal.contratos.contrato.infrastructure.web.dto.Con
 import um.tesoreria.core.hexagonal.contratos.contrato.infrastructure.web.mapper.ContratoDtoMapper;
 
 @RestController
-@RequestMapping("/contrato")
+@RequestMapping({"/contrato", "/api/tesoreria/core/contrato"})
 @RequiredArgsConstructor
 public class ContratoController {
 

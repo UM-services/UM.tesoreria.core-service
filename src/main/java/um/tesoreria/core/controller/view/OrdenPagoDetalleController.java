@@ -12,7 +12,7 @@ import um.tesoreria.core.service.view.OrdenPagoDetalleService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/ordenPagoDetalle")
+@RequestMapping({"/ordenPagoDetalle", "/api/tesoreria/core/ordenPagoDetalle"})
 @RequiredArgsConstructor
 public class OrdenPagoDetalleController {
 

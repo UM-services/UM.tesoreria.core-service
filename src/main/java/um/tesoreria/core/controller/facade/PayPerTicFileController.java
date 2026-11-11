@@ -29,7 +29,7 @@ import static um.tesoreria.core.util.Tool.generateFile;
  *
  */
 @RestController
-@RequestMapping("/payperticfile")
+@RequestMapping({"/payperticfile", "/api/tesoreria/core/payperticfile"})
 @RequiredArgsConstructor
 public class PayPerTicFileController {
 

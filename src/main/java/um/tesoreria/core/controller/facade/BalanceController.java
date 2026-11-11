@@ -29,7 +29,7 @@ import um.tesoreria.core.service.facade.BalanceService;
  *
  */
 @RestController
-@RequestMapping("/balance")
+@RequestMapping({"/balance", "/api/tesoreria/core/balance"})
 @RequiredArgsConstructor
 public class BalanceController {
 

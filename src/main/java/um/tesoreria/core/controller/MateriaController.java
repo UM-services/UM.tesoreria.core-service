@@ -20,7 +20,7 @@ import um.tesoreria.core.service.MateriaService;
  *
  */
 @RestController
-@RequestMapping("/materia")
+@RequestMapping({"/materia", "/api/tesoreria/core/materia"})
 @RequiredArgsConstructor
 public class MateriaController {
 

@@ -17,7 +17,7 @@ import um.tesoreria.core.service.dto.CostoParameterService;
  *
  */
 @RestController
-@RequestMapping("/costoParameter")
+@RequestMapping({"/costoParameter", "/api/tesoreria/core/costoParameter"})
 @RequiredArgsConstructor
 public class CostoParameterController {
 

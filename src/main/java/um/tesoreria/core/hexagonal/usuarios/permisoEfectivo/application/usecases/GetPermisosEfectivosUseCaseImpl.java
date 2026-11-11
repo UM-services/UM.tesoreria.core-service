@@ -74,6 +74,7 @@ public class GetPermisosEfectivosUseCaseImpl implements GetPermisosEfectivosUseC
         addLegacy(claves, "chequeras.habilitar_eliminacion", usuario.getHabilitaOpEliminacion());
         addLegacy(claves, "chequeras.eliminar", usuario.getEliminaChequera());
         addLegacy(claves, "chequeras.modificar", usuario.getModificaChequera());
+        addLegacy(claves, "pagos.comprobantes.anular_op", usuario.getHabilitaOpEliminacion());
 
         return PermisoEfectivo.builder()
                 .userId(userId)

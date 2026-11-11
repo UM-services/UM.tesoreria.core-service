@@ -24,7 +24,7 @@ import um.tesoreria.core.service.view.TipoChequeraSedeService;
  *
  */
 @RestController
-@RequestMapping("/tipochequerasede")
+@RequestMapping({"/tipochequerasede", "/api/tesoreria/core/tipochequerasede"})
 @RequiredArgsConstructor
 public class TipoChequeraSedeController {
 

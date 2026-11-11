@@ -19,7 +19,7 @@ import um.tesoreria.core.service.view.ContratadoPersonaService;
  *
  */
 @RestController
-@RequestMapping("/contratadopersona")
+@RequestMapping({"/contratadopersona", "/api/tesoreria/core/contratadopersona"})
 @RequiredArgsConstructor
 public class ContratadoPersonaController {
 

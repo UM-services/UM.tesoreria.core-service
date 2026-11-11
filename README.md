@@ -9,13 +9,24 @@
 [![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-black.svg)](https://kafka.apache.org/)
 [![JUnit](https://img.shields.io/badge/JUnit-6.0.3-green.svg)](https://junit.org/)
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
-[![Versión](https://img.shields.io/badge/versión-12.1.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.2.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.1.0**
+**Versión actual (SemVer): 12.2.0**
+
+## Novedades 12.2.0 (verificado en código)
+
+- **feat(compras/proveedorMovimiento)**: consulta de comprobantes de proveedor bajo `/api/tesoreria/core/proveedorMovimiento` (y la ruta corta `/proveedorMovimiento`): `GET /proveedor/{proveedorId}/{desde}/{hasta}/{geograficaId}` devuelve el listado con `importe`/`cancelado`/`saldo` calculados, `anulable`, `motivosNoAnulable` y `requierePrivilegioOp` (incluye anulados, ordena por fecha descendente y órdenes de pago primero, y resuelve los costos asignados sin N+1); `GET /{proveedorMovimientoId}/detalle` devuelve `FACTURA` con los pagos aplicados u `ORDEN_PAGO` con sus valores, más el estado de anulación. Diagrama: [`hexagonal-proveedorMovimiento.mmd`](docs/hexagonal-proveedorMovimiento.mmd).
+- **feat(pagos)**: `DELETE /compra/comprobante/{proveedorMovimientoId}` (y `/api/tesoreria/core/compra/comprobante/{...}`) anula un comprobante revalidando en el servidor las reglas del legacy (ya anulada, costos asignados, privilegio de orden de pago) y responde `200`, `409` con los motivos, `403`, `404` o `406`. Exige `pagos.comprobantes.anular` (con `app.permissions.enforce` activo) y, para órdenes de pago, `pagos.comprobantes.anular_op` resuelto por el header `X-User-Id`.
+- **feat(usuarios/permiso)**: nuevas claves `pagos.comprobantes.consultar`, `pagos.comprobantes.anular` y `pagos.comprobantes.anular_op` en `src/main/resources/permisos.yaml`; `anular_op` también se deriva del flag legacy `habilitaOpEliminacion`. Sin DDL: el manifiesto reconcilia el catálogo al arrancar.
+- **fix(bancaria)**: `BancariaController` atiende también `/api/tesoreria/core/bancaria`; sin el alias el gateway devolvía `404` en todas las rutas de cuentas bancarias.
+- **fix(compras)**: el borrado de un comprobante desacopla la entidad `movprov` antes del borrado en bloque de sus artículos (fallaba con `TransientPropertyValueException` por la colección EAGER).
+- **feat(rutas)**: 51 controllers que sólo declaraban la ruta corta exponen ahora el alias `/api/tesoreria/core/...` sin perder la corta que usa el VB6; `ControllerRouteAliasTest` falla el build si un controller no declara la ruta larga.
+
+> Basado en `git diff 0df12806` (release `12.1.0`) hasta HEAD `dbbe7b4c` más el índice staged (84 archivos, +1691/−57 antes de esta documentación de release) y el código real de los controllers, casos de uso y `permisos.yaml` citados. Todo es aditivo (las rutas cortas se conservan y ningún contrato existente cambia) ⇒ incremento **minor** (`12.1.0` → `12.2.0`). Sin dependencias nuevas ni cambios de esquema. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); el diagrama modificado se validó con `mmdc`.
 
 ## Novedades 12.1.0 (verificado en código)
 

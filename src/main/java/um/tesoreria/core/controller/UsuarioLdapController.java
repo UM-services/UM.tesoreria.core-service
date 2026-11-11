@@ -26,7 +26,7 @@ import um.tesoreria.core.service.UsuarioLdapService;
  *
  */
 @RestController
-@RequestMapping("/usuarioldap")
+@RequestMapping({"/usuarioldap", "/api/tesoreria/core/usuarioldap"})
 @RequiredArgsConstructor
 public class UsuarioLdapController {
 
