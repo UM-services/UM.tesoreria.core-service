@@ -66,8 +66,8 @@ public class BalanceController {
 
 	@GetMapping("/mayor/{numeroCuenta}/{desde}/{hasta}")
 	public ResponseEntity<Resource> makeMayor(@PathVariable BigDecimal numeroCuenta,
-											  @PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime desde,
-											  @PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) throws FileNotFoundException {
+			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime desde,
+			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) throws FileNotFoundException {
 		String filename = service.makeMayor(numeroCuenta, desde, hasta);
 		File file = new File(filename);
 		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));

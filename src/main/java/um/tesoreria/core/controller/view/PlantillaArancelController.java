@@ -20,7 +20,7 @@ import um.tesoreria.core.service.view.PlantillaArancelService;
  *
  */
 @RestController
-@RequestMapping("/plantillaarancel")
+@RequestMapping({"/plantillaarancel", "/api/tesoreria/core/plantillaarancel"})
 @RequiredArgsConstructor
 public class PlantillaArancelController {
 	private final PlantillaArancelService service;

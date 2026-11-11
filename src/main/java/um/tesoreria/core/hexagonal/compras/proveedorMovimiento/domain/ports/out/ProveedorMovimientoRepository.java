@@ -34,6 +34,12 @@ public interface ProveedorMovimientoRepository {
 
     List<ProveedorMovimiento> findAllByProveedorIdAndGeograficaId(Integer proveedorId, Integer geograficaId);
 
+    List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetween(
+            Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta);
+
+    List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetweenAndGeograficaId(
+            Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta, Integer geograficaId);
+
     List<ProveedorMovimiento> findAllByProveedorIdAndFechaComprobanteBetweenAndComprobanteIdInAndFechaAnulacionIsNull(
             Integer proveedorId, OffsetDateTime desde, OffsetDateTime hasta, List<Integer> comprobanteIds);
 

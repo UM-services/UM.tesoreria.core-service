@@ -25,7 +25,7 @@ import um.tesoreria.core.service.ContratoPeriodoService;
  *
  */
 @RestController
-@RequestMapping("/contratoperiodo")
+@RequestMapping({"/contratoperiodo", "/api/tesoreria/core/contratoperiodo"})
 @RequiredArgsConstructor
 public class ContratoPeriodoController {
 

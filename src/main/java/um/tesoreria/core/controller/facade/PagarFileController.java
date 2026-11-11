@@ -25,7 +25,7 @@ import static um.tesoreria.core.util.Tool.generateFile;
  *
  */
 @RestController
-@RequestMapping("/pagarfile")
+@RequestMapping({"/pagarfile", "/api/tesoreria/core/pagarfile"})
 @RequiredArgsConstructor
 public class PagarFileController {
 

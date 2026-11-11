@@ -25,7 +25,7 @@ import um.tesoreria.core.service.EntregaDetalleService;
  *
  */
 @RestController
-@RequestMapping("/entregaDetalle")
+@RequestMapping({"/entregaDetalle", "/api/tesoreria/core/entregaDetalle"})
 @RequiredArgsConstructor
 public class EntregaDetalleController {
 

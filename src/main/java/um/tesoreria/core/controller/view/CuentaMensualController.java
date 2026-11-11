@@ -20,7 +20,7 @@ import um.tesoreria.core.service.view.CuentaMensualService;
  *
  */
 @RestController
-@RequestMapping("/cuentamensual")
+@RequestMapping({"/cuentamensual", "/api/tesoreria/core/cuentamensual"})
 @RequiredArgsConstructor
 public class CuentaMensualController {
 	

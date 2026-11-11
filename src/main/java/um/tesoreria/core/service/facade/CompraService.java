@@ -2,10 +2,13 @@ package um.tesoreria.core.service.facade;
 
 import lombok.RequiredArgsConstructor;
 import um.tesoreria.core.exception.BancoMovimientoException;
+import um.tesoreria.core.exception.ComprobanteAnulacionException;
+import um.tesoreria.core.exception.PermisoInsuficienteException;
 import um.tesoreria.core.exception.ProveedorValorException;
 import um.tesoreria.core.exception.facade.ContableException;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.AnulacionComprobante;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
 import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
@@ -13,6 +16,8 @@ import um.tesoreria.core.hexagonal.comprobante.infrastructure.persistence.entity
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.persistence.entity.CuentaEntity;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.entity.ProveedorEntity;
+import um.tesoreria.core.hexagonal.usuarios.permisoEfectivo.application.exception.PermisoEfectivoException;
+import um.tesoreria.core.hexagonal.usuarios.permisoEfectivo.domain.ports.in.GetPermisosEfectivosUseCase;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.service.*;
@@ -50,6 +55,63 @@ public class CompraService {
     private final EjercicioService ejercicioService;
     private final ValorService valorService;
     private final BancariaService bancariaService;
+    private final EntregaDetalleService entregaDetalleService;
+    private final GetPermisosEfectivosUseCase getPermisosEfectivosUseCase;
+
+    /** Clave que habilita anular comprobantes que son orden de pago (flag legacy `habilitaOPeliminacion`). */
+    public static final String PERMISO_ANULAR_ORDEN_PAGO = "pagos.comprobantes.anular_op";
+
+    /**
+     * Anula (borra) un comprobante de proveedor revalidando en el servidor las mismas
+     * reglas que el legacy evaluaba en el cliente:
+     *
+     * <ul>
+     *   <li>no debe estar ya anulado ({@code mvp_anulado} nulo);</li>
+     *   <li>no debe tener asignaciones de costos ({@code entrega_detalle});</li>
+     *   <li>si es una orden de pago, el usuario necesita {@link #PERMISO_ANULAR_ORDEN_PAGO}.</li>
+     * </ul>
+     *
+     * <p>La cascada de borrado es la de {@link #deleteComprobante(Long)}: una sola
+     * implementación para el comando nuevo y el endpoint legacy.
+     */
+    @Transactional
+    public void anularComprobante(Long proveedorMovimientoId, Long userId) {
+        ProveedorMovimiento proveedorMovimiento = proveedorMovimientoService
+                .findByProveedorMovimientoId(proveedorMovimientoId);
+
+        List<String> motivos = new ArrayList<>();
+        if (proveedorMovimiento.getFechaAnulacion() != null) {
+            motivos.add(AnulacionComprobante.YA_ANULADA);
+        }
+        if (!entregaDetalleService.findAllByProveedorMovimientoId(proveedorMovimientoId).isEmpty()) {
+            motivos.add(AnulacionComprobante.COSTOS_ASIGNADOS);
+        }
+        if (!motivos.isEmpty()) {
+            throw new ComprobanteAnulacionException(motivos);
+        }
+
+        Comprobante comprobante = proveedorMovimiento.getComprobante();
+        boolean esOrdenPago = comprobante != null && comprobante.getOrdenPago() != null
+                && comprobante.getOrdenPago() != 0;
+        if (esOrdenPago && !tienePermiso(userId, PERMISO_ANULAR_ORDEN_PAGO)) {
+            throw new PermisoInsuficienteException(PERMISO_ANULAR_ORDEN_PAGO);
+        }
+
+        deleteComprobante(proveedorMovimientoId);
+    }
+
+    private boolean tienePermiso(Long userId, String clave) {
+        if (userId == null) {
+            return false;
+        }
+        try {
+            var efectivo = getPermisosEfectivosUseCase.getPermisosEfectivos(userId);
+            return efectivo.getPermisos() != null && efectivo.getPermisos().contains(clave);
+        } catch (PermisoEfectivoException e) {
+            log.debug("Sin permisos efectivos para usuario {} -> {}", userId, e.getMessage());
+            return false;
+        }
+    }
 
     @Transactional
     public void deleteComprobante(Long proveedorMovimientoId) {
@@ -141,6 +203,16 @@ public class CompraService {
             .toList();
 
         if (!proveedorArticuloIds.isEmpty()) {
+            // `movprov` carga la colección EAGER `proveedorArticulos` (sólo lectura). Al borrar
+            // los artículos en bloque, el flush recorre esa colección y encuentra instancias ya
+            // eliminadas: Hibernate las reporta como transitorias (TransientPropertyValueException).
+            // El movimiento se elimina al final, así que se desacopla del contexto antes.
+            ProveedorMovimientoEntity movimientoEnContexto = entityManager
+                .find(ProveedorMovimientoEntity.class, proveedorMovimientoId);
+            if (movimientoEnContexto != null) {
+                entityManager.detach(movimientoEnContexto);
+            }
+
             // Primero desvinculamos las relaciones
             log.debug("Desvinculando relaciones para {} artículos", proveedorArticuloIds.size());
             proveedorArticulos.forEach(proveedorArticulo -> {

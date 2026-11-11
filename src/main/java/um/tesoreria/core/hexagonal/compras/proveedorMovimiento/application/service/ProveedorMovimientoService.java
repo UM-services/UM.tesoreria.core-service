@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoDetalle;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoResumen;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.ports.in.*;
 
 import java.time.OffsetDateTime;
@@ -27,6 +29,8 @@ public class ProveedorMovimientoService {
     private final GetProveedorMovimientosAsignablesUseCase getProveedorMovimientosAsignablesUseCase;
     private final GetProveedorMovimientosDisponiblesUseCase getProveedorMovimientosDisponiblesUseCase;
     private final GetProveedorMovimientoIdsForCostAdjustmentUseCase getProveedorMovimientoIdsForCostAdjustmentUseCase;
+    private final GetProveedorMovimientosByProveedorAndFechaRangeUseCase getProveedorMovimientosByProveedorAndFechaRangeUseCase;
+    private final GetProveedorMovimientoDetalleUseCase getProveedorMovimientoDetalleUseCase;
 
     public ProveedorMovimiento createProveedorMovimiento(ProveedorMovimiento proveedorMovimiento) {
         return createProveedorMovimientoUseCase.createProveedorMovimiento(proveedorMovimiento);
@@ -89,5 +93,15 @@ public class ProveedorMovimientoService {
 
     public List<Long> findDistinctProveedorMovimientoIdsForCostAdjustment() {
         return getProveedorMovimientoIdsForCostAdjustmentUseCase.getProveedorMovimientoIdsForCostAdjustment();
+    }
+
+    public List<ProveedorMovimientoResumen> findAllByProveedorAndFechaRange(Integer proveedorId, OffsetDateTime desde,
+                                                                           OffsetDateTime hasta, Integer geograficaId) {
+        return getProveedorMovimientosByProveedorAndFechaRangeUseCase
+                .getProveedorMovimientos(proveedorId, desde, hasta, geograficaId);
+    }
+
+    public ProveedorMovimientoDetalle findDetalle(Long proveedorMovimientoId) {
+        return getProveedorMovimientoDetalleUseCase.getProveedorMovimientoDetalle(proveedorMovimientoId);
     }
 }

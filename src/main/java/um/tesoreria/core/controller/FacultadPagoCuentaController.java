@@ -18,7 +18,7 @@ import um.tesoreria.core.service.FacultadPagoCuentaService;
  *
  */
 @RestController
-@RequestMapping("/facultadpagocuenta")
+@RequestMapping({"/facultadpagocuenta", "/api/tesoreria/core/facultadpagocuenta"})
 @RequiredArgsConstructor
 public class FacultadPagoCuentaController {
 

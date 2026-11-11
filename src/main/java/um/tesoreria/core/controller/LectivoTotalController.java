@@ -23,7 +23,7 @@ import um.tesoreria.core.service.LectivoTotalService;
  *
  */
 @RestController
-@RequestMapping("/lectivototal")
+@RequestMapping({"/lectivototal", "/api/tesoreria/core/lectivototal"})
 @RequiredArgsConstructor
 public class LectivoTotalController {
 
