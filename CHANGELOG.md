@@ -2,6 +2,14 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.4.0] - 2026-11-12
+
+### Added
+
+- **Datos de impresión de la orden de pago** (`hexagonal/compras/proveedorMovimiento`): `GET /proveedorMovimiento/{proveedorMovimientoId}/impresion` (también `/api/tesoreria/core/proveedorMovimiento/{id}/impresion`) devuelve la orden lista para imprimir: cabecera (`numero` `0000-00000000`, más `prefijo` y `numeroComprobante` sueltos, `fechaComprobante`, `concepto`, `fechaAnulacion`), datos del proveedor (`razonSocial`, `domicilio`, `cuit`), los `comprobantes` que cancela (`importe` del comprobante e `importeAplicado` por la orden) con `totalComprobantes`, los `valores` con `totalValores` y la `traza` contable consolidada por cuenta (`numeroCuenta`, `nombreCuenta`, `debe`, `haber`, debe primero) con `totalDebe` y `totalHaber`. `404` si el comprobante no existe y `409` si no es una orden de pago (la impresión de facturas y notas de crédito llega después). El `/detalle` que consume la pantalla no cambia.
+- `GetOrdenPagoImpresionUseCase` y su implementación (reutilizan `ProveedorComprobanteService.findAllByOrdenPagoId` y `ProveedorValorService`), modelo `OrdenPagoImpresion`, puerto de salida `TrazaContableOrdenPagoRepository` con el adaptador `JdbcTrazaContableOrdenPagoRepositoryAdapter`, excepción `ComprobanteNoImprimibleException` y `OrdenPagoImpresionResponse`.
+- Tests `GetOrdenPagoImpresionUseCaseImplTest` y tres casos nuevos en `ProveedorMovimientoControllerTest`.
+
 ## [12.3.0] - 2026-11-10
 
 ### Added
