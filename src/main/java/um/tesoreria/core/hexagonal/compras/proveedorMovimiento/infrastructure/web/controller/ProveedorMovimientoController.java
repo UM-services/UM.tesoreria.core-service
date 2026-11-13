@@ -6,9 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ComprobanteNoImprimibleException;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.OrdenPagoImpresionResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoDetalleResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoRequest;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoResponse;
@@ -82,9 +84,21 @@ public class ProveedorMovimientoController {
         }
     }
 
+    @GetMapping("/{proveedorMovimientoId}/impresion")
+    public ResponseEntity<OrdenPagoImpresionResponse> findImpresion(@PathVariable Long proveedorMovimientoId) {
+        try {
+            return ResponseEntity.ok(proveedorMovimientoDtoMapper
+                    .toImpresion(service.findOrdenPagoImpresion(proveedorMovimientoId)));
+        } catch (ProveedorMovimientoException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (ComprobanteNoImprimibleException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
     @GetMapping("/ordenPago/{prefijo}/{numeroComprobante}")
     public ResponseEntity<ProveedorMovimientoResponse> findByOrdenPago(@PathVariable Integer prefijo,
-                                                                        @PathVariable Long numeroComprobante) {
+                                                                       @PathVariable Long numeroComprobante) {
         try {
             var domain = service.findByOrdenPago(prefijo, numeroComprobante);
             return ResponseEntity.ok(proveedorMovimientoDtoMapper.toResponse(domain));

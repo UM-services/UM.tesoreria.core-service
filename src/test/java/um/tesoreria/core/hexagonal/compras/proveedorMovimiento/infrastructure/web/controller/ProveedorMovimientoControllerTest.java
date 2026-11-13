@@ -5,7 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ComprobanteNoImprimibleException;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.OrdenPagoImpresion;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.OrdenPagoImpresionResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.AnulacionComprobante;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoDetalle;
@@ -104,5 +107,44 @@ class ProveedorMovimientoControllerTest {
 
         mockMvc.get().uri("/api/tesoreria/core/proveedorMovimiento/99/detalle")
                 .assertThat().hasStatus(404);
+    }
+
+    @Test
+    void laImpresionDeUnaOrdenDePagoDevuelveLosTresBloques() {
+        OrdenPagoImpresion impresion = OrdenPagoImpresion.builder().proveedorMovimientoId(10L).build();
+        when(service.findOrdenPagoImpresion(10L)).thenReturn(impresion);
+        when(dtoMapper.toImpresion(impresion)).thenReturn(OrdenPagoImpresionResponse.builder()
+                .proveedorMovimientoId(10L)
+                .numero("0015-00003684")
+                .comprobantes(List.of())
+                .valores(List.of())
+                .traza(List.of(OrdenPagoImpresionResponse.Traza.builder()
+                        .numeroCuenta(new BigDecimal("2110101"))
+                        .nombreCuenta("Proveedores")
+                        .debe(new BigDecimal("1000"))
+                        .haber(BigDecimal.ZERO)
+                        .build()))
+                .build());
+
+        var respuesta = mockMvc.get().uri("/api/tesoreria/core/proveedorMovimiento/10/impresion");
+
+        respuesta.assertThat().hasStatusOk().bodyJson().extractingPath("$.numero").isEqualTo("0015-00003684");
+        respuesta.assertThat().bodyJson().extractingPath("$.traza[0].nombreCuenta").isEqualTo("Proveedores");
+    }
+
+    @Test
+    void laImpresionDeUnComprobanteInexistenteDevuelve404() {
+        when(service.findOrdenPagoImpresion(99L)).thenThrow(new ProveedorMovimientoException(99L));
+
+        mockMvc.get().uri("/api/tesoreria/core/proveedorMovimiento/99/impresion")
+                .assertThat().hasStatus(404);
+    }
+
+    @Test
+    void laImpresionDeUnComprobanteQueNoEsOrdenDePagoDevuelve409() {
+        when(service.findOrdenPagoImpresion(5L)).thenThrow(new ComprobanteNoImprimibleException(5L));
+
+        mockMvc.get().uri("/api/tesoreria/core/proveedorMovimiento/5/impresion")
+                .assertThat().hasStatus(409);
     }
 }
