@@ -2,6 +2,15 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.5.0] - 2026-11-13
+
+### Added
+
+- **Datos de impresión de facturas y notas de crédito de compras** (`hexagonal/compras/proveedorMovimiento`): `GET /proveedorMovimiento/{proveedorMovimientoId}/impresion-compra` (también `/api/tesoreria/core/proveedorMovimiento/{id}/impresion-compra`) devuelve el comprobante listo para imprimir («Ingreso de Comprobante de Compras» del legacy, `rptIngresoCompra`): cabecera (`comprobanteDescripcion`, `numero` `0000-00000000`, `prefijo` y `numeroComprobante` sueltos, `fechaComprobante`, `fechaAnulacion`, `concepto`, `importe` con su signo), proveedor (`razonSocial`, `domicilio`, `cuit`), `detalle` de artículos (`articulo`, `concepto`, `cantidad`, `precioUnitario`, `precioFinal`) y el asiento contable del comprobante, con todas las líneas ligadas a él en `movcon.proveedormovimiento_id` como hace el reporte de VB6 (`fechaContable`, `ordenContable`, `asiento` con `numeroCuenta`, `nombreCuenta`, `debe` y `haber`, el debe primero, con `totalDebe` y `totalHaber`). `404` si el comprobante no existe y `409` si es una orden de pago (esa se pide en `/impresion`). Una nota de crédito sale con los importes negativos tal como están guardados.
+- `GetCompraImpresionUseCase` y su implementación (reutilizan `ProveedorArticuloService` y `FindAllByAsientoUseCase`, este último sólo como respaldo si el comprobante no tiene líneas ligadas), modelo `CompraImpresion`, excepción `ComprobanteEsOrdenPagoException` y `CompraImpresionResponse`.
+- Slice `cuentaMovimiento`: `FindAllByProveedorMovimientoIdUseCase` (+ impl), `findAllByProveedorMovimientoId` en el puerto `CuentaMovimientoRepository`, `JpaCuentaMovimientoRepository` y su adaptador (consulta derivada, sin SQL nativo).
+- Tests `GetCompraImpresionUseCaseImplTest` y tres casos nuevos en `ProveedorMovimientoControllerTest`.
+
 ## [12.4.0] - 2026-11-12
 
 ### Added

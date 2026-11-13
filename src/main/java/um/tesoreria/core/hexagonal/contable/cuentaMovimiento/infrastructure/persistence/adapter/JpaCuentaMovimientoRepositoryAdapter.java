@@ -62,6 +62,16 @@ public class JpaCuentaMovimientoRepositoryAdapter implements CuentaMovimientoRep
     }
 
     @Override
+    public List<CuentaMovimiento> findAllByProveedorMovimientoId(Long proveedorMovimientoId) {
+        return jpaCuentaMovimientoRepository
+                .findAllByProveedorMovimientoId(proveedorMovimientoId,
+                        Sort.by("debita").descending().and(Sort.by("fechaContable").ascending())
+                                .and(Sort.by("ordenContable").ascending()).and(Sort.by("item").ascending())).stream()
+                .map(cuentaMovimientoMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(
             BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
         return jpaCuentaMovimientoRepository

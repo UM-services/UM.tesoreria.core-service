@@ -4,11 +4,13 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.comprobante.infrastructure.web.mapper.ComprobanteDtoMapper;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.web.mapper.ProveedorDtoMapper;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.AnulacionComprobante;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.CompraImpresion;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.OrdenPagoImpresion;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoDetalle;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoResumen;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.AnulacionComprobanteResponse;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.CompraImpresionResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.OrdenPagoImpresionResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoDetalleResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoRequest;
@@ -161,6 +163,47 @@ public class ProveedorMovimientoDtoMapper {
                                 .nombreCuenta(t.nombreCuenta())
                                 .debe(t.debe())
                                 .haber(t.haber())
+                                .build())
+                        .collect(Collectors.toList()))
+                .totalDebe(domain.getTotalDebe())
+                .totalHaber(domain.getTotalHaber())
+                .build();
+    }
+
+    public CompraImpresionResponse toImpresionCompra(CompraImpresion domain) {
+        if (domain == null) return null;
+        return CompraImpresionResponse.builder()
+                .proveedorMovimientoId(domain.getProveedorMovimientoId())
+                .comprobanteDescripcion(domain.getComprobanteDescripcion())
+                .numero(domain.getNumero())
+                .prefijo(domain.getPrefijo())
+                .numeroComprobante(domain.getNumeroComprobante())
+                .fechaComprobante(domain.getFechaComprobante())
+                .fechaAnulacion(domain.getFechaAnulacion())
+                .concepto(domain.getConcepto())
+                .proveedorId(domain.getProveedorId())
+                .razonSocial(domain.getRazonSocial())
+                .domicilio(domain.getDomicilio())
+                .cuit(domain.getCuit())
+                .importe(domain.getImporte())
+                .detalle(domain.getDetalle().stream()
+                        .map(d -> CompraImpresionResponse.Detalle.builder()
+                                .orden(d.orden())
+                                .articulo(d.articulo())
+                                .concepto(d.concepto())
+                                .cantidad(d.cantidad())
+                                .precioUnitario(d.precioUnitario())
+                                .precioFinal(d.precioFinal())
+                                .build())
+                        .collect(Collectors.toList()))
+                .fechaContable(domain.getFechaContable())
+                .ordenContable(domain.getOrdenContable())
+                .asiento(domain.getAsiento().stream()
+                        .map(a -> CompraImpresionResponse.Asiento.builder()
+                                .numeroCuenta(a.numeroCuenta())
+                                .nombreCuenta(a.nombreCuenta())
+                                .debe(a.debe())
+                                .haber(a.haber())
                                 .build())
                         .collect(Collectors.toList()))
                 .totalDebe(domain.getTotalDebe())
