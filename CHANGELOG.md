@@ -2,6 +2,13 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.5.1] - 2026-11-16
+
+### Fixed
+
+- **Asiento de la reimpresión de facturas y notas de crédito** (`GET /proveedorMovimiento/{id}/impresion-compra`): el asiento se netea por cuenta. Se suma el debe y el haber de cada cuenta del comprobante y sólo se informa la diferencia, en el debe si es positiva y en el haber si es negativa. Las cuentas que se compensan (mismo importe en el debe y en el haber) ya no se imprimen, y `totalDebe` y `totalHaber` salen de las líneas netas. Antes se informaban todas las líneas ligadas al comprobante, con la misma cuenta repetida en las dos columnas. Por ejemplo, la factura `0007-00118482` pasa de 4 líneas a 2 (`40102010005 … RECT` al debe y `20101090099 Obligaciones a Pagar` al haber, 364.893,02 en cada columna). Orden de las líneas: primero el debe y después el haber.
+- Tests de `GetCompraImpresionUseCaseImplTest`: nota de crédito y factura con una cuenta compensada, cuenta con importes distintos en debe y haber, y respaldo por fecha y orden contable.
+
 ## [12.5.0] - 2026-11-13
 
 ### Added

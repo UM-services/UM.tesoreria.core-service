@@ -17,7 +17,9 @@ import um.tesoreria.core.kotlin.model.ProveedorArticulo;
 import um.tesoreria.core.service.ProveedorArticuloService;
 
 import java.math.BigDecimal;
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -91,9 +93,10 @@ public class GetCompraImpresionUseCaseImpl implements GetCompraImpresionUseCase 
     }
 
     /**
-     * Líneas contables del comprobante, con el debe primero. Igual que el reporte de VB6 se buscan por
-     * {@code movcon.proveedormovimiento_id}, que incluye también las líneas de otros asientos ligados al
-     * comprobante (rectificaciones); si no hay ninguna se cae a la fecha y orden contable del comprobante.
+     * Asiento del comprobante, neteado por cuenta: se toman todas las líneas ligadas al comprobante
+     * ({@code movcon.proveedormovimiento_id}; si no hay ninguna, las de su fecha y orden contable), se suma el debe y
+     * el haber de cada cuenta y sólo queda la diferencia, en el debe si es positiva y en el haber si es negativa.
+     * Las cuentas que se compensan (mismo importe en el debe y en el haber) no se imprimen. El debe va primero.
      */
     private List<AsientoLinea> asiento(ProveedorMovimiento compra) {
         List<CuentaMovimiento> movimientos =
@@ -102,24 +105,31 @@ public class GetCompraImpresionUseCaseImpl implements GetCompraImpresionUseCase 
             movimientos = findAllByAsientoUseCase.findAllByAsiento(
                     compra.getFechaContable(), compra.getOrdenContable(), DESDE_EL_PRIMER_ITEM, DEBE_Y_HABER);
         }
-        return movimientos.stream()
-                .sorted(Comparator
-                        .comparing((CuentaMovimiento m) -> m.getDebita() != null && m.getDebita() == DEBITA ? 0 : 1)
-                        .thenComparing(CuentaMovimiento::getFechaContable, Comparator.nullsLast(Comparator.naturalOrder()))
-                        .thenComparing(CuentaMovimiento::getOrdenContable, Comparator.nullsLast(Comparator.naturalOrder()))
-                        .thenComparing(CuentaMovimiento::getItem, Comparator.nullsLast(Comparator.naturalOrder())))
-                .map(this::linea)
-                .toList();
-    }
 
-    private AsientoLinea linea(CuentaMovimiento movimiento) {
-        boolean debe = movimiento.getDebita() != null && movimiento.getDebita() == DEBITA;
-        BigDecimal importe = ComprobanteFormato.valor(movimiento.getImporte());
-        return new AsientoLinea(
-                movimiento.getNumeroCuenta(),
-                movimiento.getCuenta() != null ? movimiento.getCuenta().getNombre() : null,
-                debe ? importe : BigDecimal.ZERO,
-                debe ? BigDecimal.ZERO : importe);
+        // neto por cuenta (debe positivo, haber negativo), en el orden en que aparece cada cuenta
+        Map<BigDecimal, BigDecimal> netos = new LinkedHashMap<>();
+        Map<BigDecimal, String> nombres = new LinkedHashMap<>();
+        for (CuentaMovimiento movimiento : movimientos) {
+            BigDecimal importe = ComprobanteFormato.valor(movimiento.getImporte());
+            boolean debe = movimiento.getDebita() != null && movimiento.getDebita() == DEBITA;
+            netos.merge(movimiento.getNumeroCuenta(), debe ? importe : importe.negate(), BigDecimal::add);
+            if (movimiento.getCuenta() != null) {
+                nombres.putIfAbsent(movimiento.getNumeroCuenta(), movimiento.getCuenta().getNombre());
+            }
+        }
+
+        List<AsientoLinea> debe = new ArrayList<>();
+        List<AsientoLinea> haber = new ArrayList<>();
+        netos.forEach((cuenta, neto) -> {
+            int signo = neto.signum();
+            if (signo > 0) {
+                debe.add(new AsientoLinea(cuenta, nombres.get(cuenta), neto, BigDecimal.ZERO));
+            } else if (signo < 0) {
+                haber.add(new AsientoLinea(cuenta, nombres.get(cuenta), BigDecimal.ZERO, neto.negate()));
+            }
+        });
+        debe.addAll(haber);
+        return debe;
     }
 
     private static BigDecimal sumar(Stream<BigDecimal> importes) {

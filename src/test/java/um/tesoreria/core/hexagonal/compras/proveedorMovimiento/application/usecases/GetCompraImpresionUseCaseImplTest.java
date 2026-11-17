@@ -93,7 +93,7 @@ class GetCompraImpresionUseCaseImplTest {
                 comprobante(20L, (byte) 0, "N. Credito B", "-344825.51", FECHA, 60)));
         when(proveedorArticuloService.findAllByProveedorMovimientoId(20L, false)).thenReturn(List.of(
                 renglon(1, "Mantenimiento Bienes de Uso", "", "1.00", "344825.51", "-344825.51")));
-        // las líneas ligadas al comprobante (movcon.proveedormovimiento_id), con el haber antes que el debe
+        // las líneas ligadas al comprobante: la cuenta 40102980005 está una vez en el debe y otra en el haber
         when(findAllByProveedorMovimientoIdUseCase.findAllByProveedorMovimientoId(20L)).thenReturn(List.of(
                 linea(1, 40102980005L, "Mantenimiento Bienes de Uso ***", 0, "344825.51"),
                 linea(2, 40102040005L, "Mantenimiento Bienes de Uso FI", 0, "344825.51"),
@@ -112,13 +112,15 @@ class GetCompraImpresionUseCaseImplTest {
             assertThat(d.precioFinal()).isEqualByComparingTo("-344825.51");
         });
         assertThat(impresion.getOrdenContable()).isEqualTo(60);
+        // la cuenta ***, que se compensa, no se imprime; queda el debe primero y después el haber
         assertThat(impresion.getAsiento()).extracting(CompraImpresion.AsientoLinea::numeroCuenta)
                 .extracting(BigDecimal::longValue)
-                .containsExactly(20101090099L, 40102980005L, 40102980005L, 40102040005L);
+                .containsExactly(20101090099L, 40102040005L);
         assertThat(impresion.getAsiento().get(0).debe()).isEqualByComparingTo("344825.51");
-        assertThat(impresion.getAsiento().get(2).haber()).isEqualByComparingTo("344825.51");
-        assertThat(impresion.getTotalDebe()).isEqualByComparingTo("689651.02");
-        assertThat(impresion.getTotalHaber()).isEqualByComparingTo("689651.02");
+        assertThat(impresion.getAsiento().get(0).haber()).isEqualByComparingTo("0");
+        assertThat(impresion.getAsiento().get(1).haber()).isEqualByComparingTo("344825.51");
+        assertThat(impresion.getTotalDebe()).isEqualByComparingTo("344825.51");
+        assertThat(impresion.getTotalHaber()).isEqualByComparingTo("344825.51");
     }
 
     @Test
@@ -137,22 +139,45 @@ class GetCompraImpresionUseCaseImplTest {
     }
 
     @Test
-    void lasLineasDeVariosAsientosLigadosAlComprobanteSeImprimenTodas() {
+    void laFacturaCompensaLaCuentaQueEstaEnDebeYHaberConElMismoImporte() {
         when(repository.findById(22L)).thenReturn(Optional.of(
                 comprobante(22L, (byte) 0, "Factura B", "364893.02", FECHA, 74)));
         when(proveedorArticuloService.findAllByProveedorMovimientoId(22L, false)).thenReturn(List.of());
-        // como la factura 0007-00118482 de VB6: 4 líneas, dos en el debe y dos en el haber
+        // factura 0007-00118482: VB6 la imprimía con 4 líneas
         when(findAllByProveedorMovimientoIdUseCase.findAllByProveedorMovimientoId(22L)).thenReturn(List.of(
-                linea(1, 20101090099L, "Obligaciones a Pagar", 0, "364893.02"),
-                linea(2, 40102980005L, "Mantenimiento Bienes de Uso ***", 0, "364893.02"),
-                linea(3, 40102980005L, "Mantenimiento Bienes de Uso ***", 1, "364893.02"),
-                linea(4, 40102010005L, "Mantenimiento Bienes de Uso RECT", 1, "364893.02")));
+                linea(1, 40102980005L, "Mantenimiento Bienes de Uso ***", 1, "364893.02"),
+                linea(2, 40102010005L, "Mantenimiento Bienes de Uso RECT", 1, "364893.02"),
+                linea(3, 20101090099L, "Obligaciones a Pagar", 0, "364893.02"),
+                linea(4, 40102980005L, "Mantenimiento Bienes de Uso ***", 0, "364893.02")));
 
         CompraImpresion impresion = useCase().getCompraImpresion(22L);
 
-        assertThat(impresion.getAsiento()).hasSize(4);
-        assertThat(impresion.getTotalDebe()).isEqualByComparingTo("729786.04");
-        assertThat(impresion.getTotalHaber()).isEqualByComparingTo("729786.04");
+        assertThat(impresion.getAsiento()).hasSize(2);
+        assertThat(impresion.getAsiento().get(0).numeroCuenta().longValue()).isEqualTo(40102010005L);
+        assertThat(impresion.getAsiento().get(0).debe()).isEqualByComparingTo("364893.02");
+        assertThat(impresion.getAsiento().get(1).numeroCuenta().longValue()).isEqualTo(20101090099L);
+        assertThat(impresion.getAsiento().get(1).haber()).isEqualByComparingTo("364893.02");
+        assertThat(impresion.getTotalDebe()).isEqualByComparingTo("364893.02");
+        assertThat(impresion.getTotalHaber()).isEqualByComparingTo("364893.02");
+    }
+
+    @Test
+    void unaCuentaConImportesDistintosEnDebeYHaberImprimeSoloLaDiferencia() {
+        when(repository.findById(24L)).thenReturn(Optional.of(
+                comprobante(24L, (byte) 0, "Factura B", "100", FECHA, 8)));
+        when(proveedorArticuloService.findAllByProveedorMovimientoId(24L, false)).thenReturn(List.of());
+        when(findAllByProveedorMovimientoIdUseCase.findAllByProveedorMovimientoId(24L)).thenReturn(List.of(
+                linea(1, 11111L, "Gasto", 1, "100"),
+                linea(2, 22222L, "Proveedores", 0, "150"),
+                linea(3, 11111L, "Gasto", 0, "20"),
+                linea(4, 33333L, "IVA", 1, "70")));
+
+        CompraImpresion impresion = useCase().getCompraImpresion(24L);
+
+        assertThat(impresion.getAsiento()).extracting(CompraImpresion.AsientoLinea::numeroCuenta)
+                .extracting(BigDecimal::longValue).containsExactly(11111L, 33333L, 22222L);
+        assertThat(impresion.getAsiento().get(0).debe()).isEqualByComparingTo("80");
+        assertThat(impresion.getAsiento().get(2).haber()).isEqualByComparingTo("150");
     }
 
     @Test
