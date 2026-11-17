@@ -259,3 +259,22 @@ permisos:
     modulo: pagos
     descripcion: "Anular comprobantes que son orden de pago"
     activo: true
+
+  # --- Contable: asiento de ingreso ---
+  - aplicacion: TESORERIA
+    clave: contable.asiento_ingreso.consultar
+    modulo: contable
+    descripcion: "Ver el asiento de ingreso de una fecha y un tipo de pago"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_ingreso.regenerar
+    modulo: contable
+    descripcion: "Regenerar el asiento de ingreso de una fecha y un tipo de pago"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_ingreso.masivo
+    modulo: contable
+    descripcion: "Regenerar asientos de ingreso por rango de fechas"
+    activo: true

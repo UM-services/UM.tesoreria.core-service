@@ -1,0 +1,224 @@
+package um.tesoreria.core.hexagonal.contable.asientoIngreso.application.usecases;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionOperations;
+import um.tesoreria.core.audit.AuditBulkScope;
+import um.tesoreria.core.audit.AuditBulkService;
+import um.tesoreria.core.exception.FacultadPagoCuentaException;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.GetChequeraSerieByUniqueUseCase;
+import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoService;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.application.exception.AsientoIngresoException;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.application.service.AsientoIngresoCatalogo;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.application.service.AsientoIngresoResumenBuilder;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.AsientoIngresoAccion;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.AsientoIngresoResumen;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.AsientoIngresoResultado;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.ports.out.ChequeraPagoAsientoEscrituraRepository;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.ports.out.IngresoAsientoMapaRepository;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.ports.out.IngresoItemRepository;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
+import um.tesoreria.core.hexagonal.contable.lectivoTotalImputacion.application.service.LectivoTotalImputacionService;
+import um.tesoreria.core.hexagonal.contable.lectivoTotalImputacion.domain.model.LectivoTotalImputacion;
+import um.tesoreria.core.kotlin.model.Ejercicio;
+import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
+import um.tesoreria.core.model.FacultadPagoCuenta;
+import um.tesoreria.core.model.dto.ItemAsientoDto;
+import um.tesoreria.core.model.dto.PagoDto;
+import um.tesoreria.core.service.ChequeraSerieReemplazoService;
+import um.tesoreria.core.service.EjercicioService;
+import um.tesoreria.core.service.FacultadPagoCuentaService;
+import um.tesoreria.core.service.facade.ContabilidadService;
+import um.tesoreria.core.service.facade.PagoService;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class RegenerarAsientoIngresoUseCaseImplTest {
+
+    private static final OffsetDateTime FECHA = OffsetDateTime.of(2026, 11, 17, 0, 0, 0, 0, ZoneOffset.UTC);
+    private static final Integer TIPO_PAGO = 3;
+
+    @Mock IngresoAsientoMapaRepository mapaRepository;
+    @Mock IngresoItemRepository ingresoItemRepository;
+    @Mock ChequeraPagoAsientoEscrituraRepository chequeraPagoAsientoRepository;
+    @Mock PagoService pagoService;
+    @Mock ContabilidadService contabilidadService;
+    @Mock AsientoService asientoService;
+    @Mock CuentaMovimientoService cuentaMovimientoService;
+    @Mock FacultadPagoCuentaService facultadPagoCuentaService;
+    @Mock LectivoTotalImputacionService lectivoTotalImputacionService;
+    @Mock GetChequeraSerieByUniqueUseCase getChequeraSerieByUniqueUseCase;
+    @Mock ChequeraSerieReemplazoService chequeraSerieReemplazoService;
+    @Mock EjercicioService ejercicioService;
+    @Mock AsientoIngresoCatalogo catalogo;
+    @Mock AsientoIngresoResumenBuilder resumenBuilder;
+    @Mock AuditBulkService auditBulkService;
+
+    RegenerarAsientoIngresoUseCaseImpl useCase;
+
+    @BeforeEach
+    void preparar() {
+        useCase = new RegenerarAsientoIngresoUseCaseImpl(
+                mapaRepository,
+                ingresoItemRepository,
+                chequeraPagoAsientoRepository,
+                pagoService,
+                contabilidadService,
+                asientoService,
+                cuentaMovimientoService,
+                facultadPagoCuentaService,
+                lectivoTotalImputacionService,
+                getChequeraSerieByUniqueUseCase,
+                chequeraSerieReemplazoService,
+                ejercicioService,
+                catalogo,
+                resumenBuilder,
+                auditBulkService,
+                TransactionOperations.withoutTransaction());
+        lenient().when(auditBulkService.begin(any())).thenReturn(mock(AuditBulkScope.class));
+    }
+
+    private void ejercicioHabilitado() {
+        Ejercicio ejercicio = new Ejercicio();
+        ejercicio.setBloqueado((byte) 0);
+        when(ejercicioService.findByFecha(FECHA)).thenReturn(ejercicio);
+    }
+
+    private PagoDto pago(int facultadId, BigDecimal importe) {
+        return PagoDto.builder()
+                .facultadId(facultadId)
+                .tipoChequeraId(1)
+                .chequeraSerieId(10L)
+                .productoId(1)
+                .alternativaId(1)
+                .cuotaId(1)
+                .orden(1)
+                .fecha(FECHA)
+                .importePagado(importe)
+                .tipoPagoId(TIPO_PAGO)
+                .chequeraPagoId(100L)
+                .build();
+    }
+
+    private void prepararPagoConImputacion(Boolean conImputacion) {
+        ejercicioHabilitado();
+        when(pagoService.getPagos(TIPO_PAGO, FECHA)).thenReturn(List.of(pago(1, new BigDecimal("100.00"))));
+        when(facultadPagoCuentaService.findByUnique(1, TIPO_PAGO))
+                .thenReturn(new FacultadPagoCuenta(1L, 1, TIPO_PAGO, new BigDecimal("11100000001")));
+        when(getChequeraSerieByUniqueUseCase.getByUnique(1, 1, 10L))
+                .thenReturn(Optional.of(ChequeraSerie.builder().lectivoId(2026).build()));
+        when(lectivoTotalImputacionService.findByProducto(1, 2026, 1, 1))
+                .thenReturn(conImputacion
+                        ? Optional.of(LectivoTotalImputacion.builder().numeroCuenta(new BigDecimal("41100000003")).build())
+                        : Optional.empty());
+        when(mapaRepository.findWithLockByFechaAndTipoPago(FECHA, TIPO_PAGO)).thenReturn(Optional.empty());
+        when(mapaRepository.create(FECHA, TIPO_PAGO, 7)).thenReturn(
+                um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.AsientoIngresoRegistro.builder()
+                        .id(1L).fechaContable(FECHA).tipoPagoId(TIPO_PAGO).ordenContable(7).build());
+        when(contabilidadService.nextAsiento(FECHA, null))
+                .thenReturn(new AsientoInternal(FECHA, 7, BigDecimal.ZERO, BigDecimal.ZERO));
+        when(contabilidadService.deleteAsiento(FECHA, 7)).thenReturn(true);
+        when(pagoService.getItems(TIPO_PAGO, FECHA)).thenReturn(List.of(ItemAsientoDto.builder()
+                .fecha(FECHA)
+                .numeroCuenta(new BigDecimal("11100000001"))
+                .debita((byte) 1)
+                .importe(new BigDecimal("100.00"))
+                .build()));
+        when(ingresoItemRepository.findAllByFechaAndTipoPago(FECHA, TIPO_PAGO)).thenReturn(List.of());
+        when(resumenBuilder.build(eq(FECHA), eq(TIPO_PAGO), any()))
+                .thenReturn(AsientoIngresoResumen.builder().fecha(FECHA).tipoPagoId(TIPO_PAGO)
+                        .existe(true).ordenContable(7).totalDebe(new BigDecimal("100.00"))
+                        .totalHaber(new BigDecimal("100.00")).cuadra(true).build());
+    }
+
+    @Test
+    void regeneraConDebeYHaberCuandoHayImputacion() {
+        prepararPagoConImputacion(true);
+
+        AsientoIngresoResultado resultado = useCase.regenerar(FECHA, TIPO_PAGO);
+
+        assertThat(resultado.getAccion()).isEqualTo(AsientoIngresoAccion.GENERADO);
+        assertThat(resultado.getFaltantes()).isEmpty();
+        verify(mapaRepository).create(FECHA, TIPO_PAGO, 7);
+        verify(contabilidadService).deleteAsiento(FECHA, 7);
+        verify(asientoService).add(any());
+        verify(cuentaMovimientoService).createCuentaMovimiento(any());
+    }
+
+    @Test
+    void sinImputacionGeneraFaltanteYNoloEscribeEnElHaber() {
+        prepararPagoConImputacion(false);
+        when(catalogo.tipoChequera(1)).thenReturn(null);
+
+        AsientoIngresoResultado resultado = useCase.regenerar(FECHA, TIPO_PAGO);
+
+        assertThat(resultado.getFaltantes()).hasSize(1);
+        assertThat(resultado.getFaltantes().get(0).getFacultadId()).isEqualTo(1);
+        verify(chequeraPagoAsientoRepository).create(any(), eq(1), any(), eq((byte) 1), any());
+        verify(chequeraPagoAsientoRepository, never()).create(any(), eq(2), any(), eq((byte) 0), any());
+    }
+
+    @Test
+    void sinItemsNiIngresoItemsBorraElMapaYDevuelveSinMovimientos() {
+        prepararPagoConImputacion(true);
+        when(pagoService.getItems(TIPO_PAGO, FECHA)).thenReturn(List.of());
+        when(resumenBuilder.build(FECHA, TIPO_PAGO, null)).thenReturn(AsientoIngresoResumen.builder()
+                .fecha(FECHA).tipoPagoId(TIPO_PAGO).existe(false)
+                .totalDebe(BigDecimal.ZERO).totalHaber(BigDecimal.ZERO).cuadra(true).lineas(List.of()).build());
+
+        AsientoIngresoResultado resultado = useCase.regenerar(FECHA, TIPO_PAGO);
+
+        assertThat(resultado.getAccion()).isEqualTo(AsientoIngresoAccion.SIN_MOVIMIENTOS);
+        verify(mapaRepository).delete(any());
+        verify(asientoService, never()).add(any());
+    }
+
+    @Test
+    void sinCuentaDePagoNoEscribeNada() {
+        ejercicioHabilitado();
+        when(pagoService.getPagos(TIPO_PAGO, FECHA)).thenReturn(List.of(pago(1, new BigDecimal("100.00"))));
+        when(facultadPagoCuentaService.findByUnique(1, TIPO_PAGO))
+                .thenThrow(new FacultadPagoCuentaException(1, TIPO_PAGO));
+
+        assertThatThrownBy(() -> useCase.regenerar(FECHA, TIPO_PAGO))
+                .isInstanceOf(AsientoIngresoException.class)
+                .hasMessageContaining("facultad");
+
+        verify(contabilidadService, never()).deleteAsiento(any(), anyInt());
+        verify(asientoService, never()).add(any());
+    }
+
+    @Test
+    void ejercicioBloqueadoNoTocaDatos() {
+        Ejercicio ejercicio = new Ejercicio();
+        ejercicio.setBloqueado((byte) 1);
+        when(ejercicioService.findByFecha(FECHA)).thenReturn(ejercicio);
+
+        assertThatThrownBy(() -> useCase.regenerar(FECHA, TIPO_PAGO))
+                .isInstanceOf(AsientoIngresoException.class)
+                .hasMessageContaining("bloqueado");
+
+        verify(contabilidadService, never()).deleteAsiento(any(), anyInt());
+    }
+
+}

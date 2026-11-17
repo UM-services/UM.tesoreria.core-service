@@ -122,11 +122,23 @@ tesoreria:
     # (nombre simple, sin sufijo Entity). `clave` y `cuenta` no van globales: son la clave
     # del permiso y el número de cuenta contable, respectivamente.
     mask-fields: ${TESORERIA_AUDIT_MASK_FIELDS:password,token,cbu,documento,tarjeta}
-    # RESUMEN de operaciones masivas (generación de cuotas). false = auditar fila por fila.
+    # Entidades técnicas que no se auditan: el estado de los jobs del asiento de ingreso cambia
+    # muchas veces por minuto y no es un dato de negocio.
+    excluded-entities: ${TESORERIA_AUDIT_EXCLUDED_ENTITIES:AsientoIngresoJobEntity,AsientoIngresoJobTareaEntity}
+    # RESUMEN de operaciones masivas (generación de cuotas y asientos de ingreso). false = auditar fila por fila.
     bulk-enabled: ${TESORERIA_AUDIT_BULK_ENABLED:true}
     # Desde esta cantidad de filas una generación se resume (SUMMARY). Debajo, fila por fila.
     bulk-min-rows: ${TESORERIA_AUDIT_BULK_MIN_ROWS:20}
-    summary-entities: ${TESORERIA_AUDIT_SUMMARY_ENTITIES:ChequeraCuotaEntity,ChequeraSerieEntity,ChequeraTotalEntity}
+    summary-entities: ${TESORERIA_AUDIT_SUMMARY_ENTITIES:ChequeraCuotaEntity,ChequeraSerieEntity,ChequeraTotalEntity,CuentaMovimientoEntity,AsientoEntity,ChequeraPagoAsiento}
+  asiento-ingreso:
+    masivo:
+      # Tope de días de un job masivo (días × tipos de pago). Se puede subir sin deploy.
+      max-dias: ${TESORERIA_ASIENTO_INGRESO_MAX_DIAS:366}
+    job:
+      delay-ms: ${TESORERIA_ASIENTO_INGRESO_JOB_DELAY_MS:5000}
+      recovery-delay-ms: ${TESORERIA_ASIENTO_INGRESO_JOB_RECOVERY_DELAY_MS:300000}
+      stale-minutes: ${TESORERIA_ASIENTO_INGRESO_JOB_STALE_MINUTES:15}
+      retention-days: ${TESORERIA_ASIENTO_INGRESO_JOB_RETENTION_DAYS:30}
 
 management:
   endpoints:
