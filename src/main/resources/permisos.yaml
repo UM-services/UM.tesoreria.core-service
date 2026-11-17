@@ -31,6 +31,18 @@ permisos:
 
   # --- Chequeras: flags legacy (puente administrador.panel / chequeras.*) ---
   - aplicacion: TESORERIA
+    clave: chequeras.emision.individual
+    modulo: chequeras
+    descripcion: "Emitir chequeras individuales (borrador y emisión)"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.emision.forzar
+    modulo: chequeras
+    descripcion: "Forzar la emisión de chequeras con deuda excedida"
+    activo: true
+
+  - aplicacion: TESORERIA
     clave: chequeras.imprimir
     modulo: chequeras
     descripcion: "Imprimir chequeras"

@@ -1,0 +1,83 @@
+---
+title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.6.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["BorradorChequera<br/>BorradorCuota<br/>EstadoBorrador<br/>ContextoEmision<br/>SolicitudEmision<br/>ResultadoEmision"]
+        DS["ReglasEmision<br/>CodigoI2of5<br/>(dominio puro)"]
+        IN["EmisionChequeraUseCase<br/>(Puerto de Entrada)"]
+        OUT["BorradorChequeraRepository<br/>NumeradorChequeraPort<br/>(Puertos de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Facade["EmisionChequeraFacade<br/>(implementa el puerto)"]
+        Borrador["BorradorEmisionService<br/>contexto, borrador, cuotas, política"]
+        Emision["EmisionChequeraService<br/>emisión transaccional"]
+        Factory["BorradorFactory<br/>paridad con el legacy"]
+        Exc["EmisionException<br/>codigo + mensaje"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["EmisionChequeraController<br/>/api/tesoreria/core/emision/chequera<br/>alias /api/tesoreria/core/emisionChequera"]
+        Handler["EmisionExceptionHandler<br/>409 / 400 con codigo"]
+        DTO["CrearBorradorRequest<br/>ActualizarBorradorRequest<br/>CompletarBorradorRequest<br/>EmitirBorradorRequest<br/>BorradorResponse<br/>ContextoEmisionResponse<br/>ResultadoEmisionResponse"]
+        DtoMap["EmisionDtoMapper"]
+        Adp["JpaBorradorChequeraRepositoryAdapter"]
+        Num["JpaNumeradorChequeraAdapter"]
+        Repo["JpaBorradorChequeraRepository<br/>derived queries"]
+        Ent["BorradorChequeraEntity<br/>BorradorCuotaEntity"]
+        Tabla["chequera_borrador<br/>chequera_borrador_cuota<br/>docs/sql/V423"]
+        Job["BorradorRetentionJob<br/>cron 03:30, retención 30 días"]
+    end
+
+    subgraph Reuso ["Slices y legacy reutilizados"]
+        Slices["ChequeraSerie / ChequeraCuota / ChequeraPago<br/>ChequeraTotal / TipoChequera / ArancelTipo<br/>Baja / Persona / Domicilio / Facultad<br/>Setup / PermisoEfectivo"]
+        Legacy["ChequeraSerieControlRepository @Lock<br/>ChequeraAlternativa / Debito<br/>LectivoTotal / PlantillaArancel"]
+    end
+
+    Ctrl --> Facade
+    Ctrl --> DtoMap
+    Ctrl --> Handler
+    DtoMap --> DTO
+    Facade --> IN
+    Facade --> Borrador
+    Facade --> Emision
+    Borrador --> Factory
+    Borrador --> DS
+    Emision --> DS
+    Borrador --> OUT
+    Emision --> OUT
+    Borrador --> Exc
+    Emision --> Exc
+    Adp --> OUT
+    Num --> OUT
+    Adp --> Repo
+    Repo --> Ent
+    Ent --> Tabla
+    Job --> OUT
+    Borrador --> Slices
+    Emision --> Slices
+    Emision --> Legacy
+    Num --> Legacy
+
+    style M fill:#e1f5fe
+    style DS fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Facade fill:#e8f5e8
+    style Borrador fill:#e8f5e8
+    style Emision fill:#e8f5e8
+    style Factory fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style Handler fill:#fff3e0
+    style DTO fill:#fff3e0
+    style DtoMap fill:#fff3e0
+    style Adp fill:#fff3e0
+    style Num fill:#fff3e0
+    style Repo fill:#fff3e0
+    style Ent fill:#fff3e0
+    style Tabla fill:#fff3e0
+    style Job fill:#fff3e0
+    style Slices fill:#f5f5f5
+    style Legacy fill:#f5f5f5
