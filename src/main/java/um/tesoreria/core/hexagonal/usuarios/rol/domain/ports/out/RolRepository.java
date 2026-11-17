@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface RolRepository {
     Optional<Rol> findByRolId(Long rolId);
 
+    Optional<Rol> findByAplicacionAndNombre(String aplicacion, String nombre);
+
     List<Rol> findAll();
 
     Rol save(Rol rol);

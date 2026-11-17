@@ -44,6 +44,11 @@ public class UpdateChequeraSerieUseCaseImpl implements UpdateChequeraSerieUseCas
         chequeraSerie.setEnviado(newChequeraSerie.getEnviado());
         chequeraSerie.setRetenida(newChequeraSerie.getRetenida());
         if (newChequeraSerie.getVersion() != null) chequeraSerie.setVersion(newChequeraSerie.getVersion());
+        chequeraSerie.setHpum(newChequeraSerie.getHpum());
+        chequeraSerie.setBecaPorcentaje(newChequeraSerie.getBecaPorcentaje());
+        chequeraSerie.setBecaResolucion(newChequeraSerie.getBecaResolucion());
+        chequeraSerie.setBecaFecha(newChequeraSerie.getBecaFecha());
+        chequeraSerie.setBecaUserId(newChequeraSerie.getBecaUserId());
 
         return repository.save(chequeraSerie);
     }

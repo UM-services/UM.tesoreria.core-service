@@ -2,6 +2,67 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.7.0] - 2026-11-17
+
+### Added
+
+- **Asiento Ingreso** (`hexagonal/contable/asientoIngreso`), migración de `frmAsientoIngreso` de `tesoreria.vb6`:
+  - `GET /api/tesoreria/core/asientoIngreso/{fecha}/{tipoPagoId}` (alias `/asientoIngreso/...`): totales, cuadre, orden contable, `vinculo` y líneas con nombre de cuenta del asiento de una fecha y un tipo de pago. Fechas como `yyyy-MM-ddT00:00:00Z`, igual que el legacy.
+  - `POST /api/tesoreria/core/asientoIngreso/{fecha}/{tipoPagoId}/regenerar`: reproduce `clsCtlPagos.regenerarAsientoIngreso` en una sola transacción. Reutiliza el `ordenContable` de `ingreso_asiento`, borra el asiento anterior, regenera `chequera_pago_asiento` por pago (debe por `facultadpagocuenta`, haber por `lectivo_total_imp`), consolida `movcon` desde `/pago/items` + `ingreso_items` y devuelve las cuentas faltantes. Valida ejercicio y todas las cuentas de pago antes de escribir (el legacy abortaba en el primer pago con un `MsgBox`).
+  - `POST /api/tesoreria/core/asientoIngreso/masivo/{fechaDesde}/{fechaHasta}` (202), `GET .../masivo/{jobId}` y `POST .../masivo/{jobId}/cancelar`: job persistido (días × tipos de pago) procesado por un worker con heartbeat, recuperación de jobs vencidos, cancelación entre tareas y retención de finalizados. DDL `docs/sql/V425__contable_asiento_ingreso_job.sql`.
+  - Sin `@Query` nuevos. Reusa `ContabilidadService`, `PagoService.getPagos/getItems`, `ChequeraPagoAsientoService`, `FacultadPagoCuentaService`, `LectivoTotalImputacionService` y `ChequeraSerie(Reemplazo)Service`.
+- `ingreso_items` se lee con `JdbcClient` (tabla legacy sin PK simple e `iit_importe` `double`).
+- Permisos `contable.asiento_ingreso.consultar`, `.regenerar` y `.masivo` en `permisos.yaml`, con `@RequierePermiso` en los endpoints nuevos.
+- Auditoría: `CuentaMovimientoEntity`, `AsientoEntity` y `ChequeraPagoAsiento` se resumen con `AuditBulkScope` por tarea; `AsientoIngresoJobEntity` y `AsientoIngresoJobTareaEntity` quedan excluidos.
+- Configuración nueva en `bootstrap.yml`: `tesoreria.asiento-ingreso.max-dias` (tope de días del rango masivo, 366 por defecto) y `tesoreria.asiento-ingreso.job.{delay-ms,recovery-delay-ms,stale-minutes,retention-days}`; `TESORERIA_AUDIT_EXCLUDED_ENTITIES` excluye las dos entidades del job.
+- Tests del caso de uso de regeneración, del resumen, del alta del masivo y del controller.
+- **Semilla de roles como código** (`hexagonal/usuarios/rol`), sin REST nuevo:
+  - `src/main/resources/roles.yaml` (fuente de verdad) declara `ADMIN_TESORERIA`, `OPERADOR_CHEQUERAS`, `OPERADOR_COMPRAS_PAGOS` y `CONSULTA_EXTERNO` con su matriz; `permisos` acepta claves exactas y comodines (`*`, `modulo.*`).
+  - `RolManifestLoader`, `SyncRolesUseCase`/`SyncRolesUseCaseImpl` y `RolesManifestSyncRunner` (`@Order(2)`, después del manifiesto de permisos) crean los roles faltantes, actualizan `descripcion`/`activo` y **reconcilian `rol_permiso` sólo para los roles declarados**; los roles creados desde la UI no se tocan y las excepciones por usuario siguen en `usuario_permiso`. El manifiesto vacío se rechaza y una clave exacta inexistente aborta el arranque.
+  - `findByAplicacionAndNombre` derivado en el puerto `RolRepository` y en `JpaRolRepository` (sin `@Query`), y `PermisoManifestSyncRunner` pasa a `@Order(1)` para que las claves existan antes de asignarlas.
+  - Config `app.roles.manifest` y `app.roles.manifest-sync.{enabled,dry-run}` (`APP_ROLES_MANIFEST*`). DDL offline/idempotente `docs/sql/V424__roles_semilla.sql` (espeja la matriz, crea las tablas RBAC si faltan y no crea claves de permiso).
+  - Tests `RolManifestLoaderTest` y `SyncRolesUseCaseImplTest`.
+
+### Fixed
+
+- `FacultadPagoCuentaException` usaba `{}` en `MessageFormat` (inválido): lanzaba `IllegalArgumentException` en lugar del rechazo de negocio al faltar la cuenta de pago.
+
+### Notes
+
+- **Antes de desplegar**: aplicar `V424` y `V425` (`ddl-auto: none`). No se modifican tablas existentes. Mantener `permisos.yaml` completo: el primer arranque reconcilia `rol_permiso` de los roles semilla y **quita** las claves que el rol tenga y `roles.yaml` no declare.
+
+> Based on `git diff HEAD` (staged, 2026-11-17): 57 archivos nuevos de producción y 6 tests en `hexagonal/contable/asientoIngreso`, 7 archivos nuevos del slice `usuarios/rol`, `roles.yaml`, `permisos.yaml`, `bootstrap.yml`, `ChequeraPagoAsientoRepository`, `ChequeraSerieControlRepository`, `IngresoAsientoRepository`, `FacultadPagoCuentaException` y `V424`/`V425`. Sólo agrega slice, endpoints, claves de permiso y semilla de roles, sin cambiar contratos existentes ⇒ incremento **minor** (`12.6.0` → `12.7.0`). Sin dependencias nuevas; el DDL nuevo es aditivo.
+
+## [12.6.0] - 2026-11-17
+
+### Added
+
+- **Emisión individual de chequeras** (`hexagonal/chequera/emision`), migración de `frmImpChequera` de `tesoreria.vb6`:
+  - `GET /api/tesoreria/core/emision/chequera/contexto/{personaId}/{documentoId}/{lectivoId}`: persona, domicilio (con validez de mails), deuda vs. `setup.cuotasPermitidas`, series del lectivo (con pagada, última emisión, sede, arancel y baja) y permisos efectivos.
+  - Las chequeras dadas de baja no se pueden editar ni emitir: `409 CHEQUERA_DE_BAJA` al crear el borrador sobre una serie de baja y al emitir sin forzar una nueva.
+  - `POST /borradores`, `GET|PUT|DELETE /borradores/{id}`, `GET /borradores/pendientes`, `POST /borradores/{id}/completar` (`DISENO|PLANTILLA|GUARDADAS`), `POST /borradores/{id}/politica/{productoId}/{alternativaId}/{cuotaId}` y `POST /borradores/{id}/emision`.
+  - Borrador persistido con *optimistic locking* (`chb_version`), idempotencia por `claveIdempotencia` y retención diaria a 30 días.
+  - Emisión transaccional: numeración con bloqueo pesimista (`chequera_serie_control`), alta/actualización de `chequera_serie`, cuotas con código de barras RapiPago de 50 dígitos + i2of5, `chequera_total`, `chequera_alt`, `debito.fechaVencimiento`, pagos y `track`.
+  - Reglas de paridad en `ReglasEmision` y `BorradorFactory` (beca con producto 2 excluido, `calculaBeca`, manual/compensada/pagada, descuento por pago en término, corte 202108, redondeo `HALF_UP` a 2 decimales, validación de importes/vencimientos).
+  - Errores estructurados (`{codigo, mensaje}`): `DEUDA_EXCEDIDA`, `SIN_PERMISO_OVERRIDE`, `MOTIVO_OVERRIDE_REQUERIDO`, `BORRADOR_DESACTUALIZADO`, `CUOTA_INCONSISTENTE`, etc.
+- DDL `docs/sql/V423__chequera_borrador_emision.sql` (`chequera_borrador`, `chequera_borrador_cuota`).
+- Permisos `chequeras.emision.individual` y `chequeras.emision.forzar` en `permisos.yaml`.
+- `BorradorResponse` incluye `facultadNombre` y `tipoChequeraNombre`, resueltos en `BorradorEmisionService.enriquecer` (el nombre se omite, sin romper la respuesta, si el catálogo no lo encuentra).
+- Tests `ReglasEmisionTest`, `CodigoI2of5Test`, `BorradorFactoryTest` (cuotas inmutables), `BorradorEmisionServiceTest` (nombres de facultad y tipo de chequera en el borrador) y `EmisionDtoMapperTest`.
+- `UpdateChequeraSerieUseCaseImpl` ahora copia HPUM y datos de beca (antes el `PUT` los descartaba).
+
+### Fixed
+
+- Las cuotas que en la chequera real están **pagadas, dadas de baja, compensadas o marcadas como manual** ya no se pueden modificar desde el borrador: `CuotaDto.editable` viene en `false` y un cambio real sobre ellas responde `409 CUOTA_INMUTABLE` (un payload con los mismos valores se acepta sin tocar nada). El candado de origen se persiste en `bloqueado`; editar una cuota en el borrador ya no la bloquea para las siguientes ediciones (antes `bloqueado` se recalculaba desde `manual`).
+- `incluyeBarras` arranca en **false** al crear un borrador (el legacy deja `chkCodigoBarras` destildado) y la lectura del borrador ya no lo fuerza a `true` cuando la columna viene nula.
+
+### Notes
+
+- El descuento por pago en término se aplica después de beca/arancel; en el legacy lo pisaba el recálculo.
+- **Antes de desplegar**: aplicar `V423` (`ddl-auto: none`); son tablas nuevas (`chequera_borrador`, `chequera_borrador_cuota`) y no se modifican las existentes.
+
+> Based on `git diff HEAD` (staged, 2026-11-17): 46 archivos nuevos de producción y 5 tests en `hexagonal/chequera/emision`, más `UpdateChequeraSerieUseCaseImpl`, `LectivoAlternativaRepository`/`LectivoAlternativaService`, `permisos.yaml` (`chequeras.emision.*`) y `V423`. Sólo agrega slice, rutas y claves de permiso; `UpdateChequeraSerieUseCaseImpl` completa campos que antes no copiaba sin cambiar su firma ⇒ incremento **minor** (`12.5.0` → `12.6.0`). Sin dependencias nuevas; el DDL nuevo es aditivo.
+
 ## [12.5.1] - 2026-11-16
 
 ### Fixed

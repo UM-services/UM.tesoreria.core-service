@@ -20,4 +20,12 @@ public interface ChequeraPagoAsientoRepository extends JpaRepository<ChequeraPag
 	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(Integer facultadId, Integer tipoChequeraId,
 			Long chequeraSerieId);
 
+	/**
+	 * Baja las líneas de un pago puntual (clave compuesta del legacy, sin {@code item}) antes de
+	 * regenerarlas. Es el equivalente derivado de {@code clsDAOCheqPagoAsiento.deleteAll}.
+	 */
+	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdAndOrden(
+			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId,
+			Integer alternativaId, Integer cuotaId, Integer orden);
+
 }
