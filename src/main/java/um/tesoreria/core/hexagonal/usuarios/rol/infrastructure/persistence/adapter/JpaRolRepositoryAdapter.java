@@ -28,6 +28,11 @@ public class JpaRolRepositoryAdapter implements RolRepository {
     }
 
     @Override
+    public Optional<Rol> findByAplicacionAndNombre(String aplicacion, String nombre) {
+        return repository.findByAplicacionAndNombre(aplicacion, nombre).map(mapper::toDomain);
+    }
+
+    @Override
     public List<Rol> findAll() {
         return repository.findAll().stream()
                 .map(mapper::toDomain)

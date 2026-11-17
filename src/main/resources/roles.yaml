@@ -1,0 +1,57 @@
+# Semilla de roles RBAC del sistema — FUENTE DE VERDAD de los roles declarados acá.
+#
+# Se sincroniza contra las tablas `rol` y `rol_permiso` de `tesium` al arrancar
+# tesoreria-core (app.roles.manifest-sync.enabled), DESPUÉS del manifiesto de
+# permisos (permisos.yaml), que es el que crea las claves.
+#
+# Reglas:
+#  - La identidad de un rol es (aplicacion, nombre). `nombre` va en MAYÚSCULAS y
+#    sólo admite A-Z, 0-9 y '_' (convención del plan de permisos).
+#  - Si el rol no existe, se crea con su matriz `rol_permiso`.
+#  - Si existe, se actualizan descripcion/activo y se RECONCILIA la matriz:
+#    se agregan las claves declaradas que falten y se quitan las que el rol
+#    tenga y acá no estén. Las excepciones individuales van en `usuario_permiso`,
+#    no editando estos roles (se revertirían en el próximo arranque).
+#  - Los roles NO declarados en este archivo no se tocan (los creados desde la
+#    UI sobreviven).
+#  - `permisos` acepta claves exactas y comodines:
+#      `*`            → todas las claves de la `aplicacion` del rol
+#      `modulo.*`     → todas las claves con ese prefijo
+#    Un comodín sin coincidencias sólo emite un warning; una clave exacta
+#    inexistente corta el arranque (evita semillas silenciosamente incompletas).
+#
+# Para agregar un rol nuevo: agregalo acá en el mismo PR y reflejalo en
+# docs/sql/V424__roles_semilla.sql (camino offline para recuperar tras un restore).
+version: 1
+
+roles:
+  - nombre: ADMIN_TESORERIA
+    descripcion: "Administración completa de tesorería: todos los permisos de TESORERIA, incluidos roles y permisos"
+    aplicacion: TESORERIA
+    activo: true
+    permisos:
+      - "*"
+
+  - nombre: OPERADOR_CHEQUERAS
+    descripcion: "Operación completa de chequeras: emisión, impresión, numeración, cobranzas y consultas"
+    aplicacion: TESORERIA
+    activo: true
+    permisos:
+      - "chequeras.*"
+
+  - nombre: OPERADOR_COMPRAS_PAGOS
+    descripcion: "Operación del circuito de compras y de comprobantes de pago"
+    aplicacion: TESORERIA
+    activo: true
+    permisos:
+      - "compras.*"
+      - "pagos.*"
+
+  # El acceso externo se controla con usuario.usuarioExterno (no es un permiso).
+  # Hoy el catálogo no tiene claves `externo.*`: el rol queda vacío a propósito
+  # y se completa cuando la app externa empiece a exigir permisos.
+  - nombre: CONSULTA_EXTERNO
+    descripcion: "Consulta externa (usuarioExterno): sin claves propias en el catálogo actual"
+    aplicacion: TESORERIA
+    activo: true
+    permisos: []

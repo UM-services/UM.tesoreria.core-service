@@ -14,6 +14,13 @@ app:
     manifest-sync:
       enabled: ${APP_PERMISSIONS_MANIFEST_SYNC_ENABLED:true}
       dry-run: ${APP_PERMISSIONS_MANIFEST_SYNC_DRY_RUN:false}
+  roles:
+    # Semilla de roles como código (src/main/resources/roles.yaml); se aplica
+    # DESPUÉS del manifiesto de permisos, que es el que crea las claves.
+    manifest: ${APP_ROLES_MANIFEST:classpath:roles.yaml}
+    manifest-sync:
+      enabled: ${APP_ROLES_MANIFEST_SYNC_ENABLED:true}
+      dry-run: ${APP_ROLES_MANIFEST_SYNC_DRY_RUN:false}
   # Topics de los que este servicio es dueño (KafkaTopicsConfiguration). El réplication factor es
   # ambiental: 1 con el broker único actual, 3 en la fase de cluster. KafkaAdmin nunca reasigna el
   # RF de un topic existente.
