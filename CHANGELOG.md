@@ -2,6 +2,17 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.6.0] - 2026-11-18
+
+### Added
+- **Sumas y saldos en JSON**: `POST /api/tesoreria/core/balance/sumasysaldos/consulta` (también `/balance/sumasysaldos/consulta`) con `{desde, hasta}` devuelve una fila por cuenta imputable (grado 5) con saldo inicial, débitos, créditos, saldo deudor y acreedor, más los totales por columna ([BalanceController.java], [SumasSaldosService.java], [SumasSaldosFila.java], [SumasSaldosRequest.java], [SumasSaldosResponse.java])
+- `ContabilidadService.saldosPorCuenta`: saldo inicial y movimientos del período de todas las cuentas en tres consultas agrupadas (apertura, movimientos anteriores al período y período) ([ContabilidadService.java], [SaldosCuenta.java])
+- Slice `contable/cuentaMovimiento`: caso de uso `SumarPorCuentaUseCase` y consulta derivada `findAllByFechaContableBetweenAndApertura` con proyección cerrada (sólo cuenta, sentido e importe) y suma por cuenta en el adaptador, sin `@Query` ([SumaCuenta.java], [MovimientoImporteProjection.java], [SumarPorCuentaUseCase.java], [SumarPorCuentaUseCaseImpl.java], [CuentaMovimientoRepository.java], [JpaCuentaMovimientoRepository.java], [JpaCuentaMovimientoRepositoryAdapter.java], [CuentaMovimientoService.java])
+- Tests `SumasSaldosServiceTest` y `ContabilidadSaldosPorCuentaTest`
+### Changed
+- El Excel `GET /balance/sumasysaldos/{desde}/{hasta}` usa el mismo cálculo por lotes: pasa de hasta 3 consultas por cuenta a 3 consultas en total. Las columnas, los importes y la regla de saldo no cambian; se siguen listando todas las cuentas de grado 5, también las sin movimientos ([BalanceService.java])
+- `CuentaPersistenceTest` y `BalanceControllerMayorTest` se adaptan a los colaboradores nuevos
+
 ## [12.8.0] - 2026-11-18
 
 ### Added
