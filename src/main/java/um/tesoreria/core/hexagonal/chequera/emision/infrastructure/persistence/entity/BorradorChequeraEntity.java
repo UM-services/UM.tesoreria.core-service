@@ -38,93 +38,93 @@ public class BorradorChequeraEntity extends Auditable implements Jsonifyable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chb_id")
+    @Column(name = "chequera_borrador_id")
     private Long borradorId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "chb_estado")
+    @Column(name = "estado")
     private EstadoBorrador estado;
 
-    @Column(name = "chb_persona_id")
+    @Column(name = "persona_id")
     private BigDecimal personaId;
 
-    @Column(name = "chb_documento_id")
+    @Column(name = "documento_id")
     private Integer documentoId;
 
-    @Column(name = "chb_facultad_id")
+    @Column(name = "facultad_id")
     private Integer facultadId;
 
-    @Column(name = "chb_lectivo_id")
+    @Column(name = "lectivo_id")
     private Integer lectivoId;
 
-    @Column(name = "chb_tipo_chequera_id")
+    @Column(name = "tipo_chequera_id")
     private Integer tipoChequeraId;
 
-    @Column(name = "chb_arancel_tipo_id")
+    @Column(name = "arancel_tipo_id")
     private Integer arancelTipoId;
 
-    @Column(name = "chb_alternativa_id")
+    @Column(name = "alternativa_id")
     private Integer alternativaId;
 
-    @Column(name = "chb_curso_id")
+    @Column(name = "curso_id")
     private Integer cursoId;
 
-    @Column(name = "chb_chequera_serie_id")
+    @Column(name = "chequera_serie_id")
     private Long chequeraSerieId;
 
-    @Column(name = "chb_fecha")
+    @Column(name = "fecha")
     private OffsetDateTime fecha;
 
-    @Column(name = "chb_hpum")
+    @Column(name = "hpum")
     private Byte hpum;
 
-    @Column(name = "chb_beca_porcentaje")
+    @Column(name = "beca_porcentaje")
     private BigDecimal becaPorcentaje;
 
-    @Column(name = "chb_beca_resolucion")
+    @Column(name = "beca_resolucion")
     private String becaResolucion;
 
-    @Column(name = "chb_beca_fecha")
+    @Column(name = "beca_fecha")
     private OffsetDateTime becaFecha;
 
-    @Column(name = "chb_beca_user_id")
+    @Column(name = "beca_user_id")
     private Long becaUserId;
 
-    @Column(name = "chb_calcula_beca")
+    @Column(name = "calcula_beca")
     private Byte calculaBeca;
 
-    @Column(name = "chb_email_personal")
+    @Column(name = "email_personal")
     private String emailPersonal;
 
-    @Column(name = "chb_email_institucional")
+    @Column(name = "email_institucional")
     private String emailInstitucional;
 
-    @Column(name = "chb_email_copia")
+    @Column(name = "email_copia")
     private String emailCopia;
 
-    @Column(name = "chb_incluye_barras")
+    @Column(name = "incluye_barras")
     private Byte incluyeBarras;
 
-    @Column(name = "chb_copia_facultad")
+    @Column(name = "copia_facultad")
     private Byte copiaFacultad;
 
-    @Column(name = "chb_chequera_id")
+    @Column(name = "chequera_id")
     private Long chequeraId;
 
-    @Column(name = "chb_chequera_serie_id_emitida")
+    @Column(name = "chequera_serie_id_emitida")
     private Long chequeraSerieIdEmitida;
 
-    @Column(name = "chb_auditoria_id")
+    @Column(name = "auditoria_id")
     private String auditoriaId;
 
-    @Column(name = "chb_clave_idempotencia")
+    @Column(name = "clave_idempotencia")
     private String claveIdempotencia;
 
-    @Column(name = "chb_usuario_id")
+    @Column(name = "usuario_id")
     private String usuarioId;
 
     @Version
-    @Column(name = "chb_version")
+    @Column(name = "version")
     private Integer version;
 
     @Column(name = "emitido_at")
