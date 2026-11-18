@@ -22,6 +22,7 @@ import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaSer
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.SumaCuenta;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.kotlin.model.internal.AsientoInternal;
 import um.tesoreria.core.service.*;
@@ -32,7 +33,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -110,6 +113,46 @@ public class ContabilidadService {
         return Arrays.asList(saldoDeudor, saldoAcreedor);
     }
 
+    /** Clave para cruzar cuentas de distintas consultas sin depender de la escala del número. */
+    public static BigDecimal claveCuenta(BigDecimal numeroCuenta) {
+        return numeroCuenta.stripTrailingZeros();
+    }
+
+    /**
+     * Saldo inicial y movimientos del período de <b>todas</b> las cuentas con movimientos, en tres consultas
+     * agrupadas. Es el mismo resultado que llamar, cuenta por cuenta, a {@link #saldoInicial} y {@link #saldoPeriodo}:
+     * <ul>
+     *   <li>saldo inicial = asiento de apertura del día de inicio del ejercicio + movimientos sin apertura desde el
+     *   inicio del ejercicio hasta el día anterior a {@code desde} (si {@code desde} es el inicio, sólo la apertura);</li>
+     *   <li>período = movimientos sin apertura entre {@code desde} y {@code hasta}.</li>
+     * </ul>
+     * Las cuentas sin movimientos no figuran en el mapa; la clave es {@link #claveCuenta}.
+     */
+    public Map<BigDecimal, SaldosCuenta> saldosPorCuenta(Ejercicio ejercicio, OffsetDateTime desde, OffsetDateTime hasta) {
+        OffsetDateTime ejercicioInicio = Objects.requireNonNull(ejercicio.getFechaInicio()).withOffsetSameInstant(ZoneOffset.UTC);
+        Map<BigDecimal, SaldosCuenta> saldos = new HashMap<>();
+        acumular(saldos, cuentaMovimientoService.sumarPorCuenta(ejercicioInicio, ejercicioInicio, (byte) 1), true);
+        if (!desde.isEqual(ejercicioInicio)) {
+            acumular(saldos, cuentaMovimientoService.sumarPorCuenta(ejercicioInicio, desde.minusDays(1), (byte) 0), true);
+        }
+        acumular(saldos, cuentaMovimientoService.sumarPorCuenta(desde, hasta, (byte) 0), false);
+        return saldos;
+    }
+
+    private void acumular(Map<BigDecimal, SaldosCuenta> saldos, List<SumaCuenta> sumas, boolean inicial) {
+        for (SumaCuenta suma : sumas) {
+            saldos.merge(claveCuenta(suma.numeroCuenta()),
+                    inicial
+                            ? new SaldosCuenta(suma.debitos(), suma.creditos(), BigDecimal.ZERO, BigDecimal.ZERO)
+                            : new SaldosCuenta(BigDecimal.ZERO, BigDecimal.ZERO, suma.debitos(), suma.creditos()),
+                    (actual, nuevo) -> new SaldosCuenta(
+                            actual.inicialDebitos().add(nuevo.inicialDebitos()),
+                            actual.inicialCreditos().add(nuevo.inicialCreditos()),
+                            actual.debitos().add(nuevo.debitos()),
+                            actual.creditos().add(nuevo.creditos())));
+        }
+    }
+
     public AsientoInternal nextAsiento(OffsetDateTime fechaContable, List<AsientoInternal> asientos) {
         log.debug("Processing ContabilidadService.nextAsiento");
         CuentaMovimiento cuentaMovimiento = cuentaMovimientoService.findLastByFecha(fechaContable);
@@ -156,12 +199,12 @@ public class ContabilidadService {
 
             // Batch delete cuenta movimientos
             List<Long> cuentaMovimientoIds = cuentaMovimientoService
-                .findAllByAsiento(fechaContable, ordenContable, item, 2)
-                .stream()
+                    .findAllByAsiento(fechaContable, ordenContable, item, 2)
+                    .stream()
 //                .peek(this::logCuentaMovimiento)
-                .map(CuentaMovimiento::getCuentaMovimientoId)
-                .toList();
-            
+                    .map(CuentaMovimiento::getCuentaMovimientoId)
+                    .toList();
+
             cuentaMovimientoService.deleteAllByCuentaMovimientoIdIn(cuentaMovimientoIds);
 
             return true;

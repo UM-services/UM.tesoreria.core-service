@@ -23,6 +23,13 @@ public interface JpaCuentaMovimientoRepository extends JpaRepository<CuentaMovim
 	List<CuentaMovimientoEntity> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta,
 																						 OffsetDateTime desde, OffsetDateTime hasta, Byte apertura, Sort sort);
 
+	/**
+	 * Cuenta, sentido e importe de todos los movimientos de un rango de fechas y tipo de asiento (apertura sí/no),
+	 * en una sola consulta. La proyección cerrada trae sólo esas tres columnas, sin cargar la entidad ni sus relaciones.
+	 */
+	List<MovimientoImporteProjection> findAllByFechaContableBetweenAndApertura(OffsetDateTime desde,
+																			   OffsetDateTime hasta, Byte apertura);
+
 	List<CuentaMovimientoEntity> findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(
 			OffsetDateTime fechaContable, Integer ordenContable, Integer item, Sort sort);
 

@@ -28,6 +28,9 @@ import um.tesoreria.core.service.facade.BalanceService;
 import um.tesoreria.core.service.facade.mayor.MayorConsultaRequest;
 import um.tesoreria.core.service.facade.mayor.MayorConsultaResponse;
 import um.tesoreria.core.service.facade.mayor.MayorConsultaService;
+import um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosRequest;
+import um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosResponse;
+import um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosService;
 
 /**
  * @author daniel
@@ -40,6 +43,7 @@ public class BalanceController {
 
 	private final BalanceService service;
 	private final MayorConsultaService mayorConsultaService;
+	private final SumasSaldosService sumasSaldosService;
 
 
 	@GetMapping("/sumasysaldos/{desde}/{hasta}")
@@ -58,6 +62,12 @@ public class BalanceController {
 				.contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
 	}
 
+	/** Sumas y saldos en JSON (una fila por cuenta imputable y totales), para mostrar en pantalla. */
+	@PostMapping("/sumasysaldos/consulta")
+	public ResponseEntity<SumasSaldosResponse> consultarSumasSaldos(@RequestBody SumasSaldosRequest request) {
+		return ResponseEntity.ok(sumasSaldosService.consultar(request));
+	}
+
 	/** Mayor en JSON de una o varias cuentas, con rango de fechas que puede cruzar ejercicios. */
 	@PostMapping("/mayor/consulta")
 	public ResponseEntity<MayorConsultaResponse> consultarMayor(@RequestBody MayorConsultaRequest request) {
@@ -66,8 +76,8 @@ public class BalanceController {
 
 	@GetMapping("/mayor/{numeroCuenta}/{desde}/{hasta}")
 	public ResponseEntity<Resource> makeMayor(@PathVariable BigDecimal numeroCuenta,
-			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime desde,
-			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) throws FileNotFoundException {
+											  @PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime desde,
+											  @PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) throws FileNotFoundException {
 		String filename = service.makeMayor(numeroCuenta, desde, hasta);
 		File file = new File(filename);
 		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
