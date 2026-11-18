@@ -36,6 +36,8 @@ import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.Lec
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.domain.model.LectivoCuota;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
+import um.tesoreria.core.hexagonal.dependencias.geografica.application.service.GeograficaService;
+import um.tesoreria.core.hexagonal.lectivo.application.service.LectivoService;
 import um.tesoreria.core.hexagonal.dependencias.facultad.application.service.FacultadService;
 import um.tesoreria.core.hexagonal.personas.domicilio.application.service.DomicilioService;
 import um.tesoreria.core.hexagonal.personas.domicilio.domain.model.Domicilio;
@@ -76,6 +78,8 @@ public class BorradorEmisionService {
     private final LectivoAlternativaService lectivoAlternativaService;
     private final TipoChequeraService tipoChequeraService;
     private final FacultadService facultadService;
+    private final LectivoService lectivoService;
+    private final GeograficaService geograficaService;
     private final ArancelTipoService arancelTipoService;
     private final PlantillaArancelService plantillaArancelService;
     private final GetPermisosEfectivosUseCase getPermisosEfectivosUseCase;
@@ -133,6 +137,22 @@ public class BorradorEmisionService {
                     "La chequera " + serie.getChequeraSerieId()
                             + " está dada de baja: no se puede editar ni emitir. Cree una chequera nueva.");
         }
+
+        // Un solo borrador por chequera: si ya hay uno abierto para esta serie (o, cuando la
+        // chequera todavía no existe, para la misma persona/lectivo/facultad/tipo), se retoma en
+        // lugar de crear un duplicado. No se recalculan sus cuotas para no perder ediciones.
+        Optional<BorradorChequera> abierto = serie != null
+                ? borradorRepository.findAbiertoBySerie(serie.getFacultadId(), serie.getTipoChequeraId(),
+                        serie.getChequeraSerieId())
+                : borradorRepository.findAbiertoByNueva(data.getPersonaId(), data.getDocumentoId(),
+                        data.getLectivoId(), data.getFacultadId(), data.getTipoChequeraId());
+        if (abierto.isPresent()) {
+            log.debug("Borrador abierto reutilizado para {}/{}/{}: {}", data.getFacultadId(),
+                    data.getTipoChequeraId(), serie == null ? "nueva" : serie.getChequeraSerieId(),
+                    abierto.get().getBorradorId());
+            return enriquecer(abierto.get());
+        }
+
         Domicilio domicilio = domicilio(data.getPersonaId(), data.getDocumentoId());
 
         Integer arancelTipoId = data.getArancelTipoId() == null ? 0 : data.getArancelTipoId();
@@ -149,13 +169,27 @@ public class BorradorEmisionService {
                 : chequeraCuotaService.findAllByChequera(data.getFacultadId(), data.getTipoChequeraId(),
                         serie.getChequeraSerieId());
 
+        // Beca y hpum son atributos de la serie: si el request no los trae se preservan. Una
+        // reparación de una chequera existente no debe borrarlos (ni recalcular sin beca).
+        BigDecimal becaPorcentaje = data.getBecaPorcentaje() != null ? data.getBecaPorcentaje()
+                : serie != null && serie.getBecaPorcentaje() != null ? serie.getBecaPorcentaje()
+                : BigDecimal.ZERO;
+        String becaResolucion = primeroNoVacio(data.getBecaResolucion(),
+                serie == null ? null : serie.getBecaResolucion());
+        OffsetDateTime becaFecha = data.getBecaFecha() != null ? data.getBecaFecha()
+                : serie == null ? null : serie.getBecaFecha();
+        Long becaUserId = data.getBecaUserId() != null ? data.getBecaUserId()
+                : serie == null ? null : serie.getBecaUserId();
+        Byte hpum = data.getHpum() != null ? data.getHpum()
+                : serie != null && serie.getHpum() != null ? serie.getHpum() : hpum(persona);
+
         DatosConstruccion datos = DatosConstruccion.builder()
                 .facultadId(data.getFacultadId())
                 .lectivoId(data.getLectivoId())
                 .tipoChequeraId(data.getTipoChequeraId())
                 .arancelTipoIdSeleccionado(arancelTipoId)
                 .arancelTipoIdChequera(serie == null ? null : serie.getArancelTipoId())
-                .becaPorcentaje(nz(data.getBecaPorcentaje()))
+                .becaPorcentaje(nz(becaPorcentaje))
                 .calculaBeca(Boolean.TRUE.equals(data.getCalculaBeca()))
                 .personaId(data.getPersonaId())
                 .documentoId(data.getDocumentoId())
@@ -182,8 +216,11 @@ public class BorradorEmisionService {
                 .cursoId(data.getCursoId() != null ? data.getCursoId() : serie == null ? null : serie.getCursoId())
                 .chequeraSerieId(serie == null ? null : serie.getChequeraSerieId())
                 .fecha(data.getFecha() == null ? OffsetDateTime.now() : data.getFecha())
-                .hpum(hpum(persona))
-                .becaPorcentaje(nz(data.getBecaPorcentaje()))
+                .hpum(hpum)
+                .becaPorcentaje(nz(becaPorcentaje))
+                .becaResolucion(becaResolucion)
+                .becaFecha(becaFecha)
+                .becaUserId(becaUserId)
                 .calculaBeca(Boolean.TRUE.equals(data.getCalculaBeca()))
                 .emailPersonal(primeroNoVacio(data.getEmailPersonal(), domicilio == null ? null : domicilio.getEmailPersonal()))
                 .emailInstitucional(primeroNoVacio(data.getEmailInstitucional(),
@@ -337,6 +374,9 @@ public class BorradorEmisionService {
         }
         borrador.setFacultadNombre(facultadNombre(borrador.getFacultadId()));
         borrador.setTipoChequeraNombre(tipoChequeraNombre(borrador.getTipoChequeraId()));
+        borrador.setLectivoNombre(lectivoNombre(borrador.getLectivoId()));
+        personaEmision(borrador);
+        sedeEmision(borrador);
         borrador.setAlternativas(alternativas(borrador.getFacultadId(), borrador.getLectivoId(),
                 borrador.getTipoChequeraId()));
         borrador.setArancelTipos(arancelTipos());
@@ -745,6 +785,46 @@ public class BorradorEmisionService {
 
     private static String primeroNoVacio(String primero, String segundo) {
         return primero != null && !primero.isBlank() ? primero : segundo;
+    }
+
+    private String lectivoNombre(Integer lectivoId) {
+        try {
+            return lectivoService.findByLectivoId(lectivoId).getNombre();
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Apellido y nombre para listar los borradores: el nombre vive en {@code persona}, no en el
+     * borrador. Nunca rompe el enriquecido si la persona no existe.
+     */
+    private void personaEmision(BorradorChequera borrador) {
+        try {
+            var persona = personaService.findByUnique(borrador.getPersonaId(), borrador.getDocumentoId());
+            borrador.setPersonaApellido(persona == null ? null : persona.getApellido());
+            borrador.setPersonaNombre(persona == null ? null : persona.getNombre());
+        } catch (RuntimeException e) {
+            log.debug("Borrador {}: sin datos de persona {}", borrador.getBorradorId(), borrador.getPersonaId());
+        }
+    }
+
+    /**
+     * Sede del borrador: la define el tipo de chequera (igual que {@code chequera_serie.geografica}).
+     */
+    private void sedeEmision(BorradorChequera borrador) {
+        TipoChequera tipo = tipoChequeraSeguro(borrador.getTipoChequeraId());
+        if (tipo == null || tipo.getGeograficaId() == null) {
+            return;
+        }
+        borrador.setGeograficaId(tipo.getGeograficaId());
+        try {
+            borrador.setGeograficaNombre(geograficaService.findByGeograficaId(tipo.getGeograficaId())
+                    .map(geografica -> geografica.getNombre())
+                    .orElse(null));
+        } catch (RuntimeException e) {
+            log.debug("Borrador {}: sin nombre de sede {}", borrador.getBorradorId(), tipo.getGeograficaId());
+        }
     }
 
     /**

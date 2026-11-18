@@ -21,9 +21,14 @@ public class BorradorResponse {
     private Integer documentoId;
     private Integer facultadId;
     private String facultadNombre;
+    private String personaApellido;
+    private String personaNombre;
     private Integer lectivoId;
+    private String lectivoNombre;
     private Integer tipoChequeraId;
     private String tipoChequeraNombre;
+    private Integer geograficaId;
+    private String geograficaNombre;
     private Integer arancelTipoId;
     private Integer alternativaId;
     private Integer cursoId;

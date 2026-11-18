@@ -15,6 +15,7 @@ import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.persistence.e
 import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.persistence.mapper.BorradorEntityMapper;
 import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.persistence.repository.JpaBorradorChequeraRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -85,6 +86,32 @@ public class JpaBorradorChequeraRepositoryAdapter implements BorradorChequeraRep
     @Transactional
     public void deleteById(Long borradorId) {
         repository.deleteById(borradorId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<BorradorChequera> findAbiertoBySerie(Integer facultadId, Integer tipoChequeraId,
+                                                        Long chequeraSerieId) {
+        if (facultadId == null || tipoChequeraId == null || chequeraSerieId == null) {
+            return Optional.empty();
+        }
+        return repository.findFirstByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndEstadoOrderByBorradorIdDesc(
+                facultadId, tipoChequeraId, chequeraSerieId, EstadoBorrador.ABIERTO).map(mapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<BorradorChequera> findAbiertoByNueva(BigDecimal personaId, Integer documentoId,
+                                                         Integer lectivoId, Integer facultadId,
+                                                         Integer tipoChequeraId) {
+        if (personaId == null || documentoId == null || lectivoId == null || facultadId == null
+                || tipoChequeraId == null) {
+            return Optional.empty();
+        }
+        return repository
+                .findFirstByPersonaIdAndDocumentoIdAndLectivoIdAndFacultadIdAndTipoChequeraIdAndChequeraSerieIdIsNullAndEstadoOrderByBorradorIdDesc(
+                        personaId, documentoId, lectivoId, facultadId, tipoChequeraId, EstadoBorrador.ABIERTO)
+                .map(mapper::toDomain);
     }
 
     @Override

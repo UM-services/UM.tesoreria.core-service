@@ -71,6 +71,14 @@ public final class ReglasEmision {
     public static final String SIN_ARANCEL_PORCENTAJE = "SIN_ARANCEL_PORCENTAJE";
     public static final String SIN_CURSO_RESUELTO = "SIN_CURSO_RESUELTO";
 
+    // Chequeras incompletas (job de reparación masiva)
+    public static final String INCOMPLETAS_FILTRO_INCOMPLETO = "INCOMPLETAS_FILTRO_INCOMPLETO";
+    public static final String INCOMPLETAS_JOB_INEXISTENTE = "INCOMPLETAS_JOB_INEXISTENTE";
+    public static final String INCOMPLETAS_JOB_ACTIVO = "INCOMPLETAS_JOB_ACTIVO";
+    public static final String INCOMPLETAS_JOB_NO_CANCELABLE = "INCOMPLETAS_JOB_NO_CANCELABLE";
+    public static final String INCOMPLETAS_SIN_BORRADORES = "INCOMPLETAS_SIN_BORRADORES";
+    public static final String INCOMPLETAS_SIN_TAREAS = "INCOMPLETAS_SIN_TAREAS";
+
     private static final BigDecimal CIEN = BigDecimal.valueOf(100);
 
     /**

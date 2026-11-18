@@ -11,13 +11,26 @@
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
 ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-Hibernate-6DB33F?logo=spring&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)
-[![Versión](https://img.shields.io/badge/versión-12.7.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.8.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.7.1**
+**Versión actual (SemVer): 12.8.0**
+
+## Novedades 12.8.0 (verificado en código)
+
+- **feat(chequera/emision)**: reparación masiva de **chequeras incompletas** (migración de `frmIncompletas`), job de dos etapas en el slice existente:
+  - `POST /api/tesoreria/core/emision/chequera/incompletas/borradores` (`202`) arma el padrón con `lectivoId`, `facultadId`, `geograficaId` y `claseChequeraId` (los cuatro obligatorios), `soloNoEnviadas` y `chequeraIds` opcional; `POST .../job/{jobId}/emision` (`202`) emite todos los borradores del job o sólo los `borradorIds` indicados; `GET .../job/{jobId}`, `POST .../job/{jobId}/cancelar` y `GET .../job/pendientes`. Ruta corta: `/emision/chequera/incompletas`.
+  - Etapa `BORRADORES`: crea o reutiliza el borrador abierto (sincronizando beca y `hpum` con la serie) y completa las cuotas con `PLANTILLA`, sin escribir en `chequera_*`. Etapa `EMISION`: emite con `forzarNueva=false` + clave de idempotencia `incompletas:{borradorId}` y extiende el débito; una falla en `extendDebito` se loguea y no revierte la emisión, como el legacy.
+  - Omisiones por tarea sin abortar el job: `SUSPENDIDO`, `BAJA`, `PAGADA`, `SIN_DISENO` y `BORRADOR_NO_ABIERTO`. Worker `@Scheduled` en el executor `chequerasIncompletasJobExecutor` con heartbeat, reencolado de vencidos, cancelación entre tareas y retención de 30 días (`tesoreria.chequeras-incompletas.job.*`, con defaults). Un solo job activo por etapa (`409 INCOMPLETAS_JOB_ACTIVO`).
+  - DDL: `docs/sql/V428__chequeras_incompletas_job.sql` (tablas `chequera_incompleta_job` y `chequera_incompleta_job_tarea`) y `docs/sql/V429__descartar_borradores_duplicados.sql` (un solo borrador `ABIERTO` por chequera). Permisos `chequeras.incompletas.consultar` y `chequeras.incompletas.generar`.
+- **feat(chequera/emision)**: `GET /api/tesoreria/core/emision/chequera/borradores/{borradorId}/impresion` devuelve el snapshot `BorradorImpresion` para que `tesoreria-sender` imprima la leyenda BORRADOR; sólo sobre borradores `ABIERTO` (`409`) y sin `@RequierePermiso` (consumo servicio-a-servicio).
+- **refactor(chequera/emision)**: **un solo borrador abierto por chequera**. `crearBorrador` retoma el borrador `ABIERTO` de la serie —o, si la chequera no existe, el de la misma persona/documento/lectivo/facultad/tipo— en lugar de duplicarlo y sin recalcular cuotas; beca y `hpum` se preservan desde la serie cuando el request no los trae. La emisión sobre una serie existente **sincroniza** `chequera_total` y `chequera_alternativa` (conserva lo pagado) en vez de borrar y recrear, y `chequera_serie.usuario_id` guarda el login (FK a `usuario.login`), nunca el id numérico.
+- `BorradorResponse` suma `personaApellido`, `personaNombre`, `lectivoNombre`, `geograficaId` y `geograficaNombre`; `CrearBorradorRequest` acepta `becaResolucion`, `becaFecha`, `becaUserId` y `hpum` (campos aditivos). Diagrama: [`hexagonal-emisionChequera.mmd`](docs/hexagonal-emisionChequera.mmd).
+
+> Basado en `git diff HEAD` (staged, 2026-11-18): 31 archivos nuevos y 14 modificados de producción del slice `hexagonal/chequera/emision`, 4 tests (3 nuevos), `docs/sql/V428..V429` y `permisos.yaml`. Endpoints, permisos, tablas y job nuevos; `BorradorResponse`/`CrearBorradorRequest` sólo suman campos y los contratos existentes de emisión no cambian ⇒ **minor** (`12.7.1` → `12.8.0`). `V426`/`V427` quedaron usados por `12.7.1`, por eso esta release usa `V428`/`V429`. Verificación sin compilación ni tests por indicación del usuario; el diagrama se validó con `mmdc`.
 
 ## Novedades 12.7.1 (verificado en código)
 
