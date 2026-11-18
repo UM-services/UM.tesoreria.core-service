@@ -1,59 +1,88 @@
 ---
-title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.7.1)
+title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.8.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
-        M["BorradorChequera<br/>BorradorCuota<br/>EstadoBorrador<br/>ContextoEmision<br/>SolicitudEmision<br/>ResultadoEmision"]
+        M["BorradorChequera<br/>BorradorCuota<br/>BorradorImpresion<br/>EstadoBorrador<br/>ContextoEmision<br/>SolicitudEmision<br/>ResultadoEmision"]
+        MI["IncompletasJob<br/>IncompletasJobTarea<br/>IncompletasJobDetalle<br/>IncompletasEtapa<br/>IncompletasJobEstado<br/>IncompletasTareaEstado<br/>FiltroIncompletas<br/>ResultadoIncompleta"]
         DS["ReglasEmision<br/>CodigoI2of5<br/>(dominio puro)"]
-        IN["EmisionChequeraUseCase<br/>(Puerto de Entrada)"]
-        OUT["BorradorChequeraRepository<br/>NumeradorChequeraPort<br/>(Puertos de Salida)"]
+        IN["EmisionChequeraUseCase<br/>IncompletasChequerasUseCase<br/>ObtenerBorradorImpresionUseCase<br/>(Puertos de Entrada)"]
+        OUT["BorradorChequeraRepository<br/>IncompletasJobRepository<br/>NumeradorChequeraPort<br/>(Puertos de Salida)"]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
         Facade["EmisionChequeraFacade<br/>(implementa el puerto)"]
+        FacadeInc["IncompletasChequerasFacade<br/>alta, emisión, consulta y cancelación del job"]
         Borrador["BorradorEmisionService<br/>contexto, borrador, cuotas, política"]
         Emision["EmisionChequeraService<br/>emisión transaccional"]
+        Completar["CompletarChequerasIncompletasService<br/>padrón, prepararBorrador, emitir"]
+        JobSvc["IncompletasJobService<br/>reclamar, registrar tarea, cerrar"]
+        Impresion["ObtenerBorradorImpresionUseCaseImpl<br/>snapshot para el sender"]
         Factory["BorradorFactory<br/>paridad con el legacy"]
         Exc["EmisionException<br/>codigo + mensaje"]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         Ctrl["EmisionChequeraController<br/>/api/tesoreria/core/emision/chequera<br/>alias /api/tesoreria/core/emisionChequera"]
-        Handler["EmisionExceptionHandler<br/>409 / 400 con codigo"]
-        DTO["CrearBorradorRequest<br/>ActualizarBorradorRequest<br/>CompletarBorradorRequest<br/>EmitirBorradorRequest<br/>BorradorResponse<br/>ContextoEmisionResponse<br/>ResultadoEmisionResponse"]
-        DtoMap["EmisionDtoMapper"]
+        CtrlInc["IncompletasChequeraController<br/>/api/tesoreria/core/emision/chequera/incompletas<br/>borradores, emision, job, cancelar, pendientes"]
+        Handler["EmisionExceptionHandler<br/>404 / 409 / 422 con codigo"]
+        DTO["CrearBorradorRequest<br/>ActualizarBorradorRequest<br/>CompletarBorradorRequest<br/>EmitirBorradorRequest<br/>BorradorResponse<br/>BorradorImpresion<br/>IncompletasJobRequest<br/>IncompletasEmisionRequest<br/>IncompletasJobResponse<br/>IncompletasJobDetalleResponse"]
+        DtoMap["EmisionDtoMapper<br/>IncompletasDtoMapper"]
         Adp["JpaBorradorChequeraRepositoryAdapter"]
+        AdpInc["JpaIncompletasJobRepositoryAdapter"]
         Num["JpaNumeradorChequeraAdapter"]
         Repo["JpaBorradorChequeraRepository<br/>derived queries"]
-        Ent["BorradorChequeraEntity<br/>BorradorCuotaEntity"]
-        Tabla["chequera_borrador<br/>chequera_borrador_cuota<br/>V423 (nuevas) · V426/V427 (renombre)"]
+        RepoInc["JpaIncompletasJobRepository<br/>JpaIncompletasJobTareaRepository"]
+        Ent["BorradorChequeraEntity<br/>BorradorCuotaEntity<br/>IncompletasJobEntity<br/>IncompletasJobTareaEntity"]
+        Tabla["chequera_borrador<br/>chequera_borrador_cuota<br/>V423 · V426/V427 (renombre) · V429 (duplicados)"]
+        TablaInc["chequera_incompleta_job<br/>chequera_incompleta_job_tarea<br/>V428 (nuevas)"]
+        Worker["IncompletasJobWorker<br/>@Scheduled, heartbeat, reencolado, retención"]
+        Exec["chequerasIncompletasJobExecutor<br/>1 hilo, cola 1"]
         Job["BorradorRetentionJob<br/>cron 03:30, retención 30 días"]
     end
 
     subgraph Reuso ["Slices y legacy reutilizados"]
-        Slices["ChequeraSerie / ChequeraCuota / ChequeraPago<br/>ChequeraTotal / TipoChequera / ArancelTipo<br/>Baja / Persona / Domicilio / Facultad<br/>Setup / PermisoEfectivo"]
-        Legacy["ChequeraSerieControlRepository @Lock<br/>ChequeraAlternativa / Debito<br/>LectivoTotal / PlantillaArancel"]
+        Slices["ChequeraSerie / ChequeraCuota / ChequeraPago<br/>ChequeraTotal / TipoChequera / ArancelTipo<br/>Baja / Persona / Domicilio / Facultad<br/>Lectivo / Geografica / Setup / PermisoEfectivo"]
+        Legacy["ChequeraSerieControlRepository @Lock<br/>ChequeraAlternativa / Debito<br/>LectivoTotal / PlantillaArancel<br/>ChequeraIncompletaService (vw_chequera_incompleta)<br/>PersonaSuspendido / LectivoCuota"]
     end
 
     Ctrl --> Facade
+    Ctrl --> Impresion
     Ctrl --> DtoMap
     Ctrl --> Handler
+    CtrlInc --> FacadeInc
+    CtrlInc --> DtoMap
+    CtrlInc --> Handler
     DtoMap --> DTO
     Facade --> IN
     Facade --> Borrador
     Facade --> Emision
+    FacadeInc --> IN
+    FacadeInc --> Completar
+    FacadeInc --> JobSvc
+    Impresion --> Borrador
     Borrador --> Factory
     Borrador --> DS
     Emision --> DS
+    Completar --> Borrador
+    Completar --> Emision
+    Completar --> Legacy
     Borrador --> OUT
     Emision --> OUT
-    Borrador --> Exc
-    Emision --> Exc
+    FacadeInc --> OUT
+    JobSvc --> OUT
     Adp --> OUT
+    AdpInc --> OUT
     Num --> OUT
     Adp --> Repo
+    AdpInc --> RepoInc
     Repo --> Ent
+    RepoInc --> Ent
     Ent --> Tabla
+    Ent --> TablaInc
+    Worker --> JobSvc
+    Worker --> Completar
+    Worker --> Exec
     Job --> OUT
     Borrador --> Slices
     Emision --> Slices
@@ -61,23 +90,34 @@ flowchart TD
     Num --> Legacy
 
     style M fill:#e1f5fe
+    style MI fill:#e1f5fe
     style DS fill:#e1f5fe
     style IN fill:#f3e5f5
     style OUT fill:#f3e5f5
     style Facade fill:#e8f5e8
+    style FacadeInc fill:#e8f5e8
     style Borrador fill:#e8f5e8
     style Emision fill:#e8f5e8
+    style Completar fill:#e8f5e8
+    style JobSvc fill:#e8f5e8
+    style Impresion fill:#e8f5e8
     style Factory fill:#e8f5e8
     style Exc fill:#e8f5e8
     style Ctrl fill:#fff3e0
+    style CtrlInc fill:#fff3e0
     style Handler fill:#fff3e0
     style DTO fill:#fff3e0
     style DtoMap fill:#fff3e0
     style Adp fill:#fff3e0
+    style AdpInc fill:#fff3e0
     style Num fill:#fff3e0
     style Repo fill:#fff3e0
+    style RepoInc fill:#fff3e0
     style Ent fill:#fff3e0
     style Tabla fill:#fff3e0
+    style TablaInc fill:#fff3e0
+    style Worker fill:#fff3e0
+    style Exec fill:#fff3e0
     style Job fill:#fff3e0
     style Slices fill:#f5f5f5
     style Legacy fill:#f5f5f5

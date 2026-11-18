@@ -110,6 +110,18 @@ permisos:
     descripcion: "Descargar el detalle de cuotas por facultad y sede en formato horizontal o vertical"
     activo: true
 
+  - aplicacion: TESORERIA
+    clave: chequeras.incompletas.consultar
+    modulo: chequeras
+    descripcion: "Listar chequeras incompletas y consultar el avance de la reparación masiva"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.incompletas.generar
+    modulo: chequeras
+    descripcion: "Generar borradores y emitir chequeras incompletas"
+    activo: true
+
   # --- Compras: proceso de pedido ---
   - aplicacion: TESORERIA
     clave: compras.iniciar_pedido

@@ -14,8 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import um.tesoreria.core.configuration.security.RequierePermiso;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.FuenteCompletado;
+import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorImpresion;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.SolicitudEmision;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.in.EmisionChequeraUseCase;
+import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.in.ObtenerBorradorImpresionUseCase;
 import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.web.dto.ActualizarBorradorRequest;
 import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.web.dto.BorradorResponse;
 import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.web.dto.CompletarBorradorRequest;
@@ -34,6 +36,7 @@ import java.util.List;
 public class EmisionChequeraController {
 
     private final EmisionChequeraUseCase useCase;
+    private final ObtenerBorradorImpresionUseCase impresionUseCase;
     private final EmisionDtoMapper mapper;
 
     @GetMapping("/contexto/{personaId}/{documentoId}/{lectivoId}")
@@ -55,6 +58,16 @@ public class EmisionChequeraController {
     @GetMapping("/borradores/{borradorId}")
     public ResponseEntity<BorradorResponse> obtener(@PathVariable Long borradorId) {
         return ResponseEntity.ok(mapper.toResponse(useCase.obtenerBorrador(borradorId)));
+    }
+
+    /**
+     * Snapshot para imprimir el borrador con la leyenda BORRADOR ({@code tesoreria-sender}).
+     * Sin permiso: lo consume el sender servicio-a-servicio (sin identidad de usuario) y la
+     * pantalla que lo dispara ya está protegida.
+     */
+    @GetMapping("/borradores/{borradorId}/impresion")
+    public ResponseEntity<BorradorImpresion> impresion(@PathVariable Long borradorId) {
+        return ResponseEntity.ok(impresionUseCase.obtener(borradorId));
     }
 
     @GetMapping("/borradores/pendientes")

@@ -29,9 +29,11 @@ public class EmisionExceptionHandler {
         return switch (codigo) {
             case ReglasEmision.BORRADOR_DESACTUALIZADO, ReglasEmision.CONFLICTO_NUMERACION,
                  ReglasEmision.CLAVE_IDEMPOTENCIA_USADA, ReglasEmision.BORRADOR_NO_ABIERTO,
-                 ReglasEmision.CHEQUERA_DE_BAJA -> HttpStatus.CONFLICT;
+                 ReglasEmision.CHEQUERA_DE_BAJA, ReglasEmision.INCOMPLETAS_JOB_ACTIVO,
+                 ReglasEmision.INCOMPLETAS_JOB_NO_CANCELABLE -> HttpStatus.CONFLICT;
             case ReglasEmision.SIN_PERMISO_IMPRESION, ReglasEmision.SIN_PERMISO_MODIFICACION,
                  ReglasEmision.SIN_PERMISO_OVERRIDE -> HttpStatus.FORBIDDEN;
+            case ReglasEmision.INCOMPLETAS_JOB_INEXISTENTE -> HttpStatus.NOT_FOUND;
             default -> HttpStatus.UNPROCESSABLE_ENTITY;
         };
     }

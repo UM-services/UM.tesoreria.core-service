@@ -1,5 +1,6 @@
 package um.tesoreria.core.hexagonal.chequera.emision.application.service;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,9 +47,11 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Emisión de la chequera a partir de un borrador.
@@ -81,6 +84,13 @@ public class EmisionChequeraService {
     private final SetupService setupService;
     private final DebitoService debitoService;
     private final ChequeraService chequeraService;
+    private final um.tesoreria.core.hexagonal.usuarios.usuario.application.service.UsuarioService usuarioService;
+    /**
+     * Hibernate ejecuta los INSERT antes de los DELETE de un mismo flush: al regenerar totales y
+     * alternativas hay que forzar el borrado para no chocar con la unique (facultad, tipo, serie,
+     * producto).
+     */
+    private final EntityManager entityManager;
 
     @Transactional
     public ResultadoEmision emitir(Long borradorId, SolicitudEmision solicitud, Long usuarioId) {
@@ -139,9 +149,10 @@ public class EmisionChequeraService {
         Long numero = nueva
                 ? numeradorChequeraPort.siguienteNumero(borrador.getFacultadId(), borrador.getTipoChequeraId())
                 : existente.getChequeraSerieId();
+        String login = usuario(solicitud, usuarioId, borrador);
         ChequeraSerie serie = nueva
-                ? crearSerie(borrador, tipo, numero, curso, usuarioId)
-                : actualizarSerie(existente, borrador, tipo, curso, usuarioId);
+                ? crearSerie(borrador, tipo, numero, curso, login)
+                : actualizarSerie(existente, borrador, tipo, curso, login);
 
         Long chequeraId = serie.getChequeraId();
         List<ChequeraCuota> cuotas = construirCuotas(borrador, serie, nueva);
@@ -203,7 +214,7 @@ public class EmisionChequeraService {
     }
 
     private ChequeraSerie crearSerie(BorradorChequera borrador, TipoChequera tipo, Long numero, Integer curso,
-                                     Long usuarioId) {
+                                     String login) {
         ChequeraSerie serie = ChequeraSerie.builder()
                 .facultadId(borrador.getFacultadId())
                 .tipoChequeraId(borrador.getTipoChequeraId())
@@ -221,7 +232,7 @@ public class EmisionChequeraService {
                 .algoPagado((byte) 0)
                 .tipoImpresionId(ReglasEmision.TIPO_IMPRESION_RAPIPAGO)
                 .flagPayperTic((byte) 0)
-                .usuarioId(usuario(usuarioId, borrador))
+                .usuarioId(login)
                 .enviado((byte) 0)
                 .retenida((byte) 0)
                 .version(0L)
@@ -235,14 +246,14 @@ public class EmisionChequeraService {
     }
 
     private ChequeraSerie actualizarSerie(ChequeraSerie serie, BorradorChequera borrador, TipoChequera tipo,
-                                          Integer curso, Long usuarioId) {
+                                          Integer curso, String login) {
         serie.setArancelTipoId(borrador.getArancelTipoId());
         serie.setCursoId(curso);
         serie.setGeograficaId(tipo.getGeograficaId());
         serie.setFecha(borrador.getFecha() == null ? OffsetDateTime.now() : borrador.getFecha());
         serie.setAlternativaId(borrador.getAlternativaId());
         serie.setTipoImpresionId(ReglasEmision.TIPO_IMPRESION_RAPIPAGO);
-        serie.setUsuarioId(usuario(usuarioId, borrador));
+        serie.setUsuarioId(login);
         serie.setEnviado((byte) 0);
         serie.setHpum(borrador.getHpum() == null ? (byte) 0 : borrador.getHpum());
         serie.setBecaPorcentaje(borrador.getBecaPorcentaje() == null ? BigDecimal.ZERO : borrador.getBecaPorcentaje());
@@ -291,40 +302,76 @@ public class EmisionChequeraService {
         return cuotas;
     }
 
+    /**
+     * Sincroniza los totales de la serie sin borrarlos: {@code chequera_alternativa} los referencia
+     * por FK y el legacy sólo podía regenerarlos desactivando los checks de integridad. Se conserva
+     * el importe pagado de cada producto y se actualiza el total.
+     */
     private void regenerarTotales(BorradorChequera borrador, ChequeraSerie serie) {
-        chequeraTotalService.deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieId(serie.getFacultadId(),
-                serie.getTipoChequeraId(), serie.getChequeraSerieId());
         List<LectivoTotal> totales = lectivoTotalService.findAllByTipo(serie.getFacultadId(), serie.getLectivoId(),
                 serie.getTipoChequeraId());
-        List<ChequeraTotal> nuevos = new ArrayList<>();
+        Map<Integer, ChequeraTotal> existentes = chequeraTotalService
+                .findAllByChequera(serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId())
+                .stream()
+                .collect(Collectors.toMap(ChequeraTotal::getProductoId, total -> total, (primera, segunda) -> primera));
+
+        List<ChequeraTotal> aGuardar = new ArrayList<>();
         for (LectivoTotal total : totales) {
-            nuevos.add(ChequeraTotal.builder()
-                    .facultadId(serie.getFacultadId())
-                    .tipoChequeraId(serie.getTipoChequeraId())
-                    .chequeraSerieId(serie.getChequeraSerieId())
-                    .productoId(total.getProductoId())
-                    .total(ReglasEmision.redondear2(ReglasEmision.aplicarPorcentaje(total.getTotal(),
-                            porcentaje(borrador.getArancelTipoId(), total.getProductoId()))))
-                    .pagado(BigDecimal.ZERO)
-                    .build());
+            BigDecimal importe = ReglasEmision.redondear2(ReglasEmision.aplicarPorcentaje(total.getTotal(),
+                    porcentaje(borrador.getArancelTipoId(), total.getProductoId())));
+            ChequeraTotal actual = existentes.get(total.getProductoId());
+            if (actual != null) {
+                actual.setTotal(importe);
+                aGuardar.add(actual);
+            } else {
+                aGuardar.add(ChequeraTotal.builder()
+                        .facultadId(serie.getFacultadId())
+                        .tipoChequeraId(serie.getTipoChequeraId())
+                        .chequeraSerieId(serie.getChequeraSerieId())
+                        .productoId(total.getProductoId())
+                        .total(importe)
+                        .pagado(BigDecimal.ZERO)
+                        .build());
+            }
         }
-        if (!nuevos.isEmpty()) {
-            chequeraTotalService.saveAll(nuevos);
+        if (!aGuardar.isEmpty()) {
+            chequeraTotalService.saveAll(aGuardar);
         }
+        // Las alternativas referencian a los totales: la fila padre tiene que existir antes.
+        entityManager.flush();
     }
 
+    /**
+     * Sincroniza las alternativas de la serie en lugar de borrarlas y recrearlas: {@code
+     * chequera_cuota} las referencia por FK, así que el legacy sólo podía borrarlas desactivando
+     * los checks de integridad. Se actualiza la fila existente y se insertan las faltantes.
+     */
     private void regenerarAlternativas(BorradorChequera borrador, ChequeraSerie serie) {
-        chequeraAlternativaService.deleteAllByFacultadIdAndTipochequeraIdAndChequeraserieId(serie.getFacultadId(),
-                serie.getTipoChequeraId(), serie.getChequeraSerieId());
-        List<ChequeraAlternativa> alternativas = new ArrayList<>();
-        lectivoAlternativaService.findAllByTipo(serie.getFacultadId(), serie.getLectivoId(),
-                        serie.getTipoChequeraId(), borrador.getAlternativaId())
-                .forEach(lectivo -> alternativas.add(new ChequeraAlternativa(null, serie.getFacultadId(),
-                        serie.getTipoChequeraId(), serie.getChequeraSerieId(), lectivo.getProductoId(),
-                        lectivo.getAlternativaId(), lectivo.getTitulo() == null ? "" : lectivo.getTitulo(),
-                        lectivo.getCuotas() == null ? 0 : lectivo.getCuotas())));
-        if (!alternativas.isEmpty()) {
-            chequeraAlternativaService.saveAll(alternativas);
+        Map<Integer, ChequeraAlternativa> existentes = chequeraAlternativaService
+                .findAllByChequera(serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId(),
+                        borrador.getAlternativaId())
+                .stream()
+                .collect(Collectors.toMap(ChequeraAlternativa::getProductoId, alternativa -> alternativa,
+                        (primera, segunda) -> primera));
+
+        List<ChequeraAlternativa> aGuardar = new ArrayList<>();
+        for (var lectivo : lectivoAlternativaService.findAllByTipo(serie.getFacultadId(), serie.getLectivoId(),
+                serie.getTipoChequeraId(), borrador.getAlternativaId())) {
+            String titulo = lectivo.getTitulo() == null ? "" : lectivo.getTitulo();
+            int cuotas = lectivo.getCuotas() == null ? 0 : lectivo.getCuotas();
+            ChequeraAlternativa actual = existentes.get(lectivo.getProductoId());
+            if (actual != null) {
+                actual.setTitulo(titulo);
+                actual.setCuotas(cuotas);
+                aGuardar.add(actual);
+            } else {
+                aGuardar.add(new ChequeraAlternativa(null, serie.getFacultadId(), serie.getTipoChequeraId(),
+                        serie.getChequeraSerieId(), lectivo.getProductoId(), lectivo.getAlternativaId(), titulo,
+                        cuotas));
+            }
+        }
+        if (!aGuardar.isEmpty()) {
+            chequeraAlternativaService.saveAll(aGuardar);
         }
     }
 
@@ -457,10 +504,37 @@ public class EmisionChequeraService {
                 .build();
     }
 
-    private static String usuario(Long usuarioId, BorradorChequera borrador) {
-        if (usuarioId != null) {
-            return String.valueOf(usuarioId);
+    /**
+     * {@code chequera_serie.usuario_id} es un login con FK a {@code usuario.login}: nunca se escribe
+     * el id numérico. Se resuelve el login del operador y, si no hay identidad, se deja el login del
+     * borrador sólo cuando existe en {@code usuario} (NULL es válido).
+     */
+    private String usuario(SolicitudEmision solicitud, Long usuarioId, BorradorChequera borrador) {
+        if (solicitud != null && solicitud.getUsuarioLogin() != null
+                && !solicitud.getUsuarioLogin().isBlank()) {
+            return solicitud.getUsuarioLogin();
         }
-        return borrador.getUsuarioId();
+        if (usuarioId != null) {
+            try {
+                return usuarioService.findByUserId(usuarioId)
+                        .map(um.tesoreria.core.hexagonal.usuarios.usuario.domain.model.Usuario::getLogin)
+                        .orElse(null);
+            } catch (RuntimeException e) {
+                log.warn("No se pudo resolver el login del usuario {}: {}", usuarioId, e.getMessage());
+                return null;
+            }
+        }
+        String delBorrador = borrador.getUsuarioId();
+        if (delBorrador == null || delBorrador.isBlank()) {
+            return null;
+        }
+        try {
+            return usuarioService.findByLogin(delBorrador).getLogin();
+        } catch (RuntimeException e) {
+            // Un borrador viejo puede tener un id numérico guardado por error: no violar la FK.
+            log.warn("El login '{}' del borrador {} no existe en usuario; se deja usuario_id en NULL",
+                    delBorrador, borrador.getBorradorId());
+            return null;
+        }
     }
 }

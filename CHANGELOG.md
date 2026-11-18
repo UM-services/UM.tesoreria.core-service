@@ -2,6 +2,40 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.8.0] - 2026-11-18
+
+### Added
+
+- **chequera/emision**: reparación masiva de **chequeras incompletas** (migración de `frmIncompletas` de `prjChequera`), como job de dos etapas dentro del slice existente:
+  - `POST /api/tesoreria/core/emision/chequera/incompletas/borradores` (`202`): crea el job de la etapa `BORRADORES` a partir de `lectivoId`, `facultadId`, `geograficaId` y `claseChequeraId` (los cuatro obligatorios) más `soloNoEnviadas` y una lista opcional `chequeraIds` para una reparación puntual. El padrón sale de la vista `vw_chequera_incompleta` (misma consulta que la pantalla, ya expuesta por `GET /chequeraSerie/incompletas/{lectivoId}/{facultadId}/{geograficaId}/clase/{claseChequeraId}`), sin las series dadas de baja.
+  - `POST .../job/{jobId}/emision` (`202`): etapa `EMISION` sobre los borradores del job de origen; con `borradorIds` emite sólo esos, sin él emite todos los que quedaron en `BORRADOR_CREADO`/`BORRADOR_REUTILIZADO`.
+  - `GET .../job/{jobId}` (job + tareas), `POST .../job/{jobId}/cancelar` y `GET .../job/pendientes`. También responde en la ruta corta `/emision/chequera/incompletas`.
+  - Etapa `BORRADORES`: por serie, crea o **reutiliza** el borrador abierto (sincronizando beca y `hpum` con la serie) y completa las cuotas con `FuenteCompletado.PLANTILLA`; no escribe en `chequera_*`. Etapa `EMISION`: emite con `forzarNueva=false` y clave de idempotencia `incompletas:{borradorId}`, y después extiende el débito con `ChequeraService.extendDebito` (una falla ahí se loguea y no revierte la emisión, igual que el legacy).
+  - Omisiones registradas por tarea sin abortar el job: `SUSPENDIDO` (persona suspendida), `BAJA` (chequera de baja), `PAGADA` (totalmente paga), `SIN_DISENO` (sin diseño de cuotas para facultad/lectivo/tipo), `BORRADOR_NO_ABIERTO`; los errores de negocio quedan en la tarea como `codigo` + `mensaje`.
+  - Worker `@Scheduled` en el executor propio `chequerasIncompletasJobExecutor` (1 hilo, cola 1): reclama un job pendiente, procesa tarea por tarea en su propia transacción, sostiene `heartbeat`, reencola jobs vencidos y cancela entre tareas. Retención de finalizados a los 30 días (cron `04:50`). Config con defaults: `tesoreria.chequeras-incompletas.job.{delay-ms:5000, recovery-delay-ms:300000, stale-minutes:15, retention-days:30}`.
+  - Sólo un job activo por etapa: dos altas simultáneas responden `409 INCOMPLETAS_JOB_ACTIVO`.
+- `GET /api/tesoreria/core/emision/chequera/borradores/{borradorId}/impresion`: snapshot `BorradorImpresion` (persona, facultad, tipo, lectivo, arancel, alternativa, beca, `hpum`, `fecha` y cuotas con vencimientos e importes del borrador, más `total` de lo adeudado) para que `tesoreria-sender` imprima el borrador con la leyenda BORRADOR. Sólo se permite sobre borradores `ABIERTO` (`409 BORRADOR_NO_ABIERTO`). Sin `@RequierePermiso`: lo consume el sender servicio-a-servicio y la pantalla que lo dispara ya está protegida.
+- `BorradorResponse` suma `personaApellido`, `personaNombre`, `lectivoNombre`, `geograficaId` y `geograficaNombre` (campos aditivos, resueltos en `BorradorEmisionService.enriquecer`; si el catálogo no los encuentra quedan en `null`). `CrearBorradorRequest` acepta `becaResolucion`, `becaFecha`, `becaUserId` y `hpum`.
+- Permisos `chequeras.incompletas.consultar` y `chequeras.incompletas.generar` en `permisos.yaml`, aplicados con `@RequierePermiso` en los endpoints nuevos del job.
+- DDL (externo, `ddl-auto: none`): `docs/sql/V428__chequeras_incompletas_job.sql` crea `chequera_incompleta_job` y `chequera_incompleta_job_tarea` (`CREATE TABLE IF NOT EXISTS`, FK con `ON DELETE CASCADE` y único por `job_id` + `chequera_id`); `docs/sql/V429__descartar_borradores_duplicados.sql` deja un único borrador `ABIERTO` por chequera (y por persona/lectivo cuando la chequera todavía no existe), con tabla temporal y `estado = 'DESCARTADO'`.
+- Tests: `CompletarChequerasIncompletasServiceTest` (padrón, omisiones, creación/reutilización del borrador, emisión + `extendDebito`), `IncompletasChequerasFacadeTest` (filtros, job activo, padrón vacío, emisión selectiva, cancelación) y `EmisionChequeraServiceTest` (preservación de beca/`hpum` y login en `usuario_id`); se amplía `BorradorEmisionServiceTest` (beca/`hpum` de la serie y reutilización del borrador abierto).
+
+### Changed
+
+- **Un solo borrador abierto por chequera**: `BorradorEmisionService.crearBorrador` devuelve el borrador `ABIERTO` existente en lugar de crear un duplicado —por serie (`facultad`, `tipo`, `chequeraSerieId`) o, cuando la chequera todavía no existe, por persona/documento/lectivo/facultad/tipo— sin recalcular sus cuotas, para no perder ediciones. Se agregan las consultas derivadas `findFirstBy…OrderByBorradorIdDesc` en `JpaBorradorChequeraRepository` y `findAbiertoBySerie`/`findAbiertoByNueva` al puerto `BorradorChequeraRepository`.
+- Beca y `hpum` del borrador se preservan desde la serie cuando el request no los trae (una reparación de una chequera existente ya no borra la beca ni recalcula sin ella).
+- La emisión sobre una serie existente **sincroniza** `chequera_total` y `chequera_alternativa` (actualiza la fila del producto y agrega las faltantes, conservando el importe pagado) en lugar de borrarlas y recrearlas; se agrega un `flush` explícito antes de las alternativas porque Hibernate ejecuta los `INSERT` antes de los `DELETE` del mismo flush.
+- `chequera_serie.usuario_id` guarda el **login** (FK a `usuario.login`), resuelto desde `SolicitudEmision.usuarioLogin` (jobs), desde `usuarioId` vía `UsuarioService`, o desde el login del borrador sólo si existe en `usuario`; nunca el id numérico, y `NULL` cuando no se puede resolver.
+- `EmisionExceptionHandler`: `INCOMPLETAS_JOB_ACTIVO` e `INCOMPLETAS_JOB_NO_CANCELABLE` → `409`; `INCOMPLETAS_JOB_INEXISTENTE` → `404`; el resto de los códigos nuevos (`INCOMPLETAS_FILTRO_INCOMPLETO`, `INCOMPLETAS_SIN_TAREAS`, `INCOMPLETAS_SIN_BORRADORES`) → `422`.
+
+### Notes
+
+- **Antes de desplegar**: aplicar `V428` y `V429` (`ddl-auto: none`). `V428` es aditivo; `V429` es una limpieza única e idempotente de borradores duplicados.
+- Los números `V426`/`V427` ya quedaron usados por la release `12.7.1` (renombre de columnas del borrador); por eso esta release empieza en `V428`. Sin dependencias nuevas y sin `@Query` nuevos.
+- Diagrama actualizado: [`docs/hexagonal-emisionChequera.mmd`](docs/hexagonal-emisionChequera.mmd).
+
+> Based on `git diff HEAD` (staged, 2026-11-18): 31 archivos nuevos y 14 modificados de producción del slice `hexagonal/chequera/emision` (45 archivos), 4 tests (3 nuevos), `docs/sql/V428__chequeras_incompletas_job.sql`, `docs/sql/V429__descartar_borradores_duplicados.sql` y `permisos.yaml`. Todo lo nuevo son endpoints, permisos, tablas y job del slice; `BorradorResponse`/`CrearBorradorRequest` sólo suman campos y la emisión existente mantiene rutas y JSON ⇒ incremento **minor** (`12.7.1` → `12.8.0`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); el diagrama se validó con `mmdc`.
+
 ## [12.7.1] - 2026-11-17
 
 ### Added

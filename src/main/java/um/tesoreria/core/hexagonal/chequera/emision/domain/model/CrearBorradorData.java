@@ -27,6 +27,10 @@ public class CrearBorradorData {
     private Integer cursoId;
     private Long chequeraSerieId;
     private BigDecimal becaPorcentaje;
+    private String becaResolucion;
+    private OffsetDateTime becaFecha;
+    private Long becaUserId;
+    private Byte hpum;
     private Boolean calculaBeca;
     private OffsetDateTime fecha;
     private FuenteCompletado fuente;
