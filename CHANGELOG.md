@@ -2,6 +2,23 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.7.1] - 2026-11-17
+
+### Added
+
+- `docs/sql/V426__chequera_borrador_sin_prefijo.sql` y `docs/sql/V427__chequera_borrador_cuota_sin_prefijo.sql`: renombran las columnas de las dos tablas del borrador en las bases donde se crearon con prefijo. Son idempotentes (guard por `information_schema`: si `chb_id`/`chbc_id` ya no existe, el script no hace nada) y usan `CHANGE COLUMN` con el tipo completo porque `RENAME COLUMN` recién existe desde MySQL 8.0. Se aplican `V426` (padre) antes de `V427` (hija); la FK `fk_chequera_borrador_cuota_borrador` se conserva.
+
+### Changed
+
+- **chequera/emision**: `BorradorChequeraEntity` y `BorradorCuotaEntity` mapean las columnas sin prefijo en `chequera_borrador` y `chequera_borrador_cuota`. Las PK pasan a `chequera_borrador_id` y `chequera_borrador_cuota_id`, el resto pierde `chb_`/`chbc_` y los ordinales de vencimientos e importes van al final (`vencimiento_1`, `importe_original_1`, `importe_borrador_1`, y 2/3), para no dejar columnas que empiecen con dígito. El `@Version` del borrador queda en `version`; el *optimistic locking* no cambia.
+- `docs/sql/V423__chequera_borrador_emision.sql` queda con los nombres definitivos: aplica a instalaciones nuevas, no a bases que ya tengan la tabla creada con prefijo.
+
+### Notes
+
+- **Antes de desplegar**: en bases que ya tengan `V423` aplicado, ejecutar `V426` y luego `V427` (`ddl-auto: none`). No cambian rutas, DTOs, JSON, permisos ni tablas ajenas al borrador. Aplicado en `tesium` el 2026-11-17.
+
+> Based on `git diff HEAD` (staged, 2026-11-17): renombre de columnas en `BorradorChequeraEntity` (29 `@Column`; `emitido_at` queda igual) y `BorradorCuotaEntity` (25, incluido el `@JoinColumn` de `borrador_id` y la `@UniqueConstraint`), `V423` reescrito con los nombres definitivos y los scripts nuevos `V426`/`V427`. Sólo cambia la persistencia interna de dos tablas propias del slice `chequera/emision`; no toca rutas, DTOs, JSON, permisos ni dependencias ⇒ incremento **patch** (`12.7.0` → `12.7.1`).
+
 ## [12.7.0] - 2026-11-17
 
 ### Added
@@ -41,7 +58,7 @@ Todos los cambios notables en este proyecto serán documentados en este archivo.
   - `GET /api/tesoreria/core/emision/chequera/contexto/{personaId}/{documentoId}/{lectivoId}`: persona, domicilio (con validez de mails), deuda vs. `setup.cuotasPermitidas`, series del lectivo (con pagada, última emisión, sede, arancel y baja) y permisos efectivos.
   - Las chequeras dadas de baja no se pueden editar ni emitir: `409 CHEQUERA_DE_BAJA` al crear el borrador sobre una serie de baja y al emitir sin forzar una nueva.
   - `POST /borradores`, `GET|PUT|DELETE /borradores/{id}`, `GET /borradores/pendientes`, `POST /borradores/{id}/completar` (`DISENO|PLANTILLA|GUARDADAS`), `POST /borradores/{id}/politica/{productoId}/{alternativaId}/{cuotaId}` y `POST /borradores/{id}/emision`.
-  - Borrador persistido con *optimistic locking* (`chb_version`), idempotencia por `claveIdempotencia` y retención diaria a 30 días.
+  - Borrador persistido con *optimistic locking* (`version`), idempotencia por `claveIdempotencia` y retención diaria a 30 días.
   - Emisión transaccional: numeración con bloqueo pesimista (`chequera_serie_control`), alta/actualización de `chequera_serie`, cuotas con código de barras RapiPago de 50 dígitos + i2of5, `chequera_total`, `chequera_alt`, `debito.fechaVencimiento`, pagos y `track`.
   - Reglas de paridad en `ReglasEmision` y `BorradorFactory` (beca con producto 2 excluido, `calculaBeca`, manual/compensada/pagada, descuento por pago en término, corte 202108, redondeo `HALF_UP` a 2 decimales, validación de importes/vencimientos).
   - Errores estructurados (`{codigo, mensaje}`): `DEUDA_EXCEDIDA`, `SIN_PERMISO_OVERRIDE`, `MOTIVO_OVERRIDE_REQUERIDO`, `BORRADOR_DESACTUALIZADO`, `CUOTA_INCONSISTENTE`, etc.

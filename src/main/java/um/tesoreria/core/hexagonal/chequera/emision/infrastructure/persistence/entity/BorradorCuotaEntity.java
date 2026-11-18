@@ -24,7 +24,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "chequera_borrador_cuota",
         uniqueConstraints = @UniqueConstraint(columnNames = {
-                "chbc_borrador_id", "chbc_producto_id", "chbc_alternativa_id", "chbc_cuota_id"}))
+                "borrador_id", "producto_id", "alternativa_id", "cuota_id"}))
 @Getter
 @Setter
 @Builder
@@ -34,82 +34,82 @@ public class BorradorCuotaEntity extends Auditable implements Jsonifyable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chbc_id")
+    @Column(name = "chequera_borrador_cuota_id")
     private Long borradorCuotaId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "chbc_borrador_id", nullable = false)
+    @JoinColumn(name = "borrador_id", nullable = false)
     private BorradorChequeraEntity borrador;
 
-    @Column(name = "chbc_chequera_cuota_id")
+    @Column(name = "chequera_cuota_id")
     private Long chequeraCuotaId;
 
-    @Column(name = "chbc_producto_id")
+    @Column(name = "producto_id")
     private Integer productoId;
 
-    @Column(name = "chbc_alternativa_id")
+    @Column(name = "alternativa_id")
     private Integer alternativaId;
 
-    @Column(name = "chbc_cuota_id")
+    @Column(name = "cuota_id")
     private Integer cuotaId;
 
-    @Column(name = "chbc_mes")
+    @Column(name = "mes")
     private Integer mes;
 
-    @Column(name = "chbc_anio")
+    @Column(name = "anio")
     private Integer anio;
 
-    @Column(name = "chbc_1er_vencimiento")
+    @Column(name = "vencimiento_1")
     private OffsetDateTime vencimiento1;
 
-    @Column(name = "chbc_2do_vencimiento")
+    @Column(name = "vencimiento_2")
     private OffsetDateTime vencimiento2;
 
-    @Column(name = "chbc_3er_vencimiento")
+    @Column(name = "vencimiento_3")
     private OffsetDateTime vencimiento3;
 
-    @Column(name = "chbc_1er_importe_original")
+    @Column(name = "importe_original_1")
     private BigDecimal importe1Original;
 
-    @Column(name = "chbc_2do_importe_original")
+    @Column(name = "importe_original_2")
     private BigDecimal importe2Original;
 
-    @Column(name = "chbc_3er_importe_original")
+    @Column(name = "importe_original_3")
     private BigDecimal importe3Original;
 
-    @Column(name = "chbc_1er_importe_borrador")
+    @Column(name = "importe_borrador_1")
     private BigDecimal importe1Borrador;
 
-    @Column(name = "chbc_2do_importe_borrador")
+    @Column(name = "importe_borrador_2")
     private BigDecimal importe2Borrador;
 
-    @Column(name = "chbc_3er_importe_borrador")
+    @Column(name = "importe_borrador_3")
     private BigDecimal importe3Borrador;
 
-    @Column(name = "chbc_arancel_tipo_id")
+    @Column(name = "arancel_tipo_id")
     private Integer arancelTipoId;
 
-    @Column(name = "chbc_tramo_id")
+    @Column(name = "tramo_id")
     private Integer tramoId;
 
-    @Column(name = "chbc_descuento_pt")
+    @Column(name = "descuento_pt")
     private BigDecimal descuentoPagoTermino;
 
-    @Column(name = "chbc_pagado")
+    @Column(name = "pagado")
     private Byte pagado;
 
-    @Column(name = "chbc_baja")
+    @Column(name = "baja")
     private Byte baja;
 
-    @Column(name = "chbc_manual")
+    @Column(name = "manual")
     private Byte manual;
 
-    @Column(name = "chbc_compensada")
+    @Column(name = "compensada")
     private Byte compensada;
 
-    @Column(name = "chbc_modificado")
+    @Column(name = "modificado")
     private Byte modificado;
 
-    @Column(name = "chbc_bloqueado")
+    @Column(name = "bloqueado")
     private Byte bloqueado;
 }

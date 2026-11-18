@@ -11,13 +11,21 @@
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
 ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-Hibernate-6DB33F?logo=spring&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)
-[![Versión](https://img.shields.io/badge/versión-12.7.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.7.1-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.7.0**
+**Versión actual (SemVer): 12.7.1**
+
+## Novedades 12.7.1 (verificado en código)
+
+- **refactor(chequera/emision)**: las tablas del borrador de chequera quedan sin prefijo en las columnas. `BorradorChequeraEntity` y `BorradorCuotaEntity` mapean PK `chequera_borrador_id` y `chequera_borrador_cuota_id`; el resto pierde `chb_`/`chbc_` y los ordinales de vencimientos e importes van al final (`vencimiento_1`, `importe_original_1`, `importe_borrador_1`, y 2/3). El `@Version` del borrador queda en `version`, sin cambios en el *optimistic locking*.
+- `docs/sql/V423__chequera_borrador_emision.sql` queda con los nombres definitivos (instalaciones nuevas). Para bases donde la tabla ya existía con prefijo: aplicar `V426__chequera_borrador_sin_prefijo.sql` y después `V427__chequera_borrador_cuota_sin_prefijo.sql`, idempotentes y con `CHANGE COLUMN` (compatible con MySQL 5.7, donde no existe `RENAME COLUMN`); la FK `fk_chequera_borrador_cuota_borrador` se conserva.
+- Sin cambios de API: rutas, DTOs, JSON y permisos intactos. Diagrama: [`hexagonal-emisionChequera.mmd`](docs/hexagonal-emisionChequera.mmd).
+
+> Basado en `git diff HEAD` (staged, 2026-11-17): `BorradorChequeraEntity` (29 `@Column` renombradas), `BorradorCuotaEntity` (25, más `@JoinColumn` y `@UniqueConstraint`), `V423` reescrito y los scripts nuevos `V426`/`V427`. Sólo cambia la persistencia interna de dos tablas del slice `chequera/emision` ⇒ **patch**. Verificación sin compilación ni tests por indicación del usuario; el diagrama se validó con `mmdc`.
 
 ## Novedades 12.7.0 (verificado en código)
 
@@ -37,7 +45,7 @@ Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2
 - **feat(chequera/emision)**: emisión individual de chequeras (migración de `frmImpChequera`), slice `hexagonal/chequera/emision`:
   - `GET /api/tesoreria/core/emision/chequera/contexto/{personaId}/{documentoId}/{lectivoId}`: persona, domicilio con validez de mails, deuda contra `setup.cuotasPermitidas`, series del lectivo (pagada, última emisión, sede, arancel, baja) y permisos efectivos.
   - `POST /borradores`, `GET|PUT|DELETE /borradores/{id}`, `GET /borradores/pendientes`, `POST /borradores/{id}/completar` (`DISENO|PLANTILLA|GUARDADAS`), `POST /borradores/{id}/politica/{productoId}/{alternativaId}/{cuotaId}` y `POST /borradores/{id}/emision`. El controlador responde también en `/api/tesoreria/core/emisionChequera`.
-  - Borrador persistido con *optimistic locking* (`chb_version`), idempotencia por `claveIdempotencia` y retención diaria a 30 días (`BorradorRetentionJob`). Emisión transaccional con numeración bajo bloqueo pesimista (`chequera_serie_control`), cuotas con código de barras RapiPago de 50 dígitos + i2of5, `chequera_total`, `chequera_alt`, `debito.fechaVencimiento`, pagos y `track`.
+  - Borrador persistido con *optimistic locking* (`version`), idempotencia por `claveIdempotencia` y retención diaria a 30 días (`BorradorRetentionJob`). Emisión transaccional con numeración bajo bloqueo pesimista (`chequera_serie_control`), cuotas con código de barras RapiPago de 50 dígitos + i2of5, `chequera_total`, `chequera_alt`, `debito.fechaVencimiento`, pagos y `track`.
   - Reglas de paridad en `ReglasEmision`/`BorradorFactory` y errores estructurados `{codigo, mensaje}` (`DEUDA_EXCEDIDA`, `CHEQUERA_DE_BAJA`, `CUOTA_INMUTABLE`, `BORRADOR_DESACTUALIZADO`, `SIN_PERMISO_OVERRIDE`, etc.). Las cuotas pagadas, dadas de baja, compensadas o manuales no se pueden editar desde el borrador.
   - DDL: `docs/sql/V423__chequera_borrador_emision.sql`; permisos `chequeras.emision.individual` y `chequeras.emision.forzar`. `UpdateChequeraSerieUseCaseImpl` ahora copia HPUM y datos de beca (antes el `PUT` los descartaba).
   - Diagrama: [`hexagonal-emisionChequera.mmd`](docs/hexagonal-emisionChequera.mmd).

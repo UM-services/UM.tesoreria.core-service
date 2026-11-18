@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.6.0)
+title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.7.1)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -26,7 +26,7 @@ flowchart TD
         Num["JpaNumeradorChequeraAdapter"]
         Repo["JpaBorradorChequeraRepository<br/>derived queries"]
         Ent["BorradorChequeraEntity<br/>BorradorCuotaEntity"]
-        Tabla["chequera_borrador<br/>chequera_borrador_cuota<br/>docs/sql/V423"]
+        Tabla["chequera_borrador<br/>chequera_borrador_cuota<br/>V423 (nuevas) · V426/V427 (renombre)"]
         Job["BorradorRetentionJob<br/>cron 03:30, retención 30 días"]
     end
 
