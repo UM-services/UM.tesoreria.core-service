@@ -4,13 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.SumaCuenta;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.ports.out.CuentaMovimientoRepository;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.mapper.CuentaMovimientoMapper;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.repository.JpaCuentaMovimientoRepository;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -62,6 +65,16 @@ public class JpaCuentaMovimientoRepositoryAdapter implements CuentaMovimientoRep
     }
 
     @Override
+    public List<CuentaMovimiento> findAllByProveedorMovimientoId(Long proveedorMovimientoId) {
+        return jpaCuentaMovimientoRepository
+                .findAllByProveedorMovimientoId(proveedorMovimientoId,
+                        Sort.by("debita").descending().and(Sort.by("fechaContable").ascending())
+                                .and(Sort.by("ordenContable").ascending()).and(Sort.by("item").ascending())).stream()
+                .map(cuentaMovimientoMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(
             BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
         return jpaCuentaMovimientoRepository
@@ -69,6 +82,25 @@ public class JpaCuentaMovimientoRepositoryAdapter implements CuentaMovimientoRep
                         numeroCuenta, desde, hasta, apertura,
                         Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending())).stream()
                 .map(cuentaMovimientoMapper::toDomainModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SumaCuenta> sumarPorCuenta(OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
+        // debita = 1 es debe y debita = 0 es haber, igual que ContabilidadService.saldoPeriodo; otro valor no suma.
+        Map<BigDecimal, BigDecimal[]> acumulado = new LinkedHashMap<>();
+        for (var movimiento : jpaCuentaMovimientoRepository.findAllByFechaContableBetweenAndApertura(desde, hasta, apertura)) {
+            BigDecimal importe = movimiento.getImporte() == null ? BigDecimal.ZERO : movimiento.getImporte();
+            BigDecimal[] par = acumulado.computeIfAbsent(movimiento.getNumeroCuenta(),
+                    cuenta -> new BigDecimal[]{BigDecimal.ZERO, BigDecimal.ZERO});
+            if (movimiento.getDebita() == 1) {
+                par[0] = par[0].add(importe);
+            } else if (movimiento.getDebita() == 0) {
+                par[1] = par[1].add(importe);
+            }
+        }
+        return acumulado.entrySet().stream()
+                .map(e -> new SumaCuenta(e.getKey(), e.getValue()[0], e.getValue()[1]))
                 .collect(Collectors.toList());
     }
 

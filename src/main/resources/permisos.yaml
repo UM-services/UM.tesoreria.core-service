@@ -31,6 +31,18 @@ permisos:
 
   # --- Chequeras: flags legacy (puente administrador.panel / chequeras.*) ---
   - aplicacion: TESORERIA
+    clave: chequeras.emision.individual
+    modulo: chequeras
+    descripcion: "Emitir chequeras individuales (borrador y emisión)"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.emision.forzar
+    modulo: chequeras
+    descripcion: "Forzar la emisión de chequeras con deuda excedida"
+    activo: true
+
+  - aplicacion: TESORERIA
     clave: chequeras.imprimir
     modulo: chequeras
     descripcion: "Imprimir chequeras"
@@ -96,6 +108,18 @@ permisos:
     clave: chequeras.consultas.detalleCuotas
     modulo: chequeras
     descripcion: "Descargar el detalle de cuotas por facultad y sede en formato horizontal o vertical"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.incompletas.consultar
+    modulo: chequeras
+    descripcion: "Listar chequeras incompletas y consultar el avance de la reparación masiva"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.incompletas.generar
+    modulo: chequeras
+    descripcion: "Generar borradores y emitir chequeras incompletas"
     activo: true
 
   # --- Compras: proceso de pedido ---
@@ -246,4 +270,23 @@ permisos:
     clave: pagos.comprobantes.anular_op
     modulo: pagos
     descripcion: "Anular comprobantes que son orden de pago"
+    activo: true
+
+  # --- Contable: asiento de ingreso ---
+  - aplicacion: TESORERIA
+    clave: contable.asiento_ingreso.consultar
+    modulo: contable
+    descripcion: "Ver el asiento de ingreso de una fecha y un tipo de pago"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_ingreso.regenerar
+    modulo: contable
+    descripcion: "Regenerar el asiento de ingreso de una fecha y un tipo de pago"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_ingreso.masivo
+    modulo: contable
+    descripcion: "Regenerar asientos de ingreso por rango de fechas"
     activo: true

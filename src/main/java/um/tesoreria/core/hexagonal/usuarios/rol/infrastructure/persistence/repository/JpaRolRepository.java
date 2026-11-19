@@ -11,6 +11,8 @@ public interface JpaRolRepository extends JpaRepository<RolEntity, Long> {
 
     Optional<RolEntity> findByRolId(Long rolId);
 
+    Optional<RolEntity> findByAplicacionAndNombre(String aplicacion, String nombre);
+
     boolean existsByRolId(Long rolId);
 
     void deleteByRolId(Long rolId);

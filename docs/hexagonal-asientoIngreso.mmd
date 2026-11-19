@@ -1,0 +1,94 @@
+---
+title: Arquitectura Hexagonal - Módulo AsientoIngreso (v12.7.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["AsientoIngresoResumen<br/>AsientoIngresoLinea<br/>AsientoIngresoRegistro<br/>AsientoIngresoResultado<br/>CuentaFaltante<br/>PagoIngreso"]
+        MJ["AsientoIngresoJob<br/>AsientoIngresoJobTarea<br/>AsientoIngresoJobEstado<br/>AsientoIngresoJobTareaEstado<br/>AsientoIngresoJobDetalle<br/>AsientoIngresoJobResumenDia"]
+        IN["ConsultarAsientoIngresoUseCase<br/>RegenerarAsientoIngresoUseCase<br/>IniciarRegeneracionMasivaUseCase<br/>ConsultarJobAsientoIngresoUseCase<br/>CancelarJobAsientoIngresoUseCase<br/>(Puertos de Entrada)"]
+        OUT["AsientoIngresoJobRepository<br/>IngresoAsientoMapaRepository<br/>ChequeraPagoAsientoEscrituraRepository<br/>IngresoItemRepository<br/>(Puertos de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc["AsientoIngresoService<br/>(orquesta consulta, regeneración y job)"]
+        Builder["AsientoIngresoResumenBuilder"]
+        Catalogo["AsientoIngresoCatalogo<br/>FechasContables"]
+        JobSvc["AsientoIngresoJobService<br/>reclamar, registrar tarea, cerrar"]
+        UCs["*UseCaseImpl (5)"]
+        Exc["AsientoIngresoException"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        Ctrl["AsientoIngresoController<br/>/api/tesoreria/core/asientoIngreso<br/>alias /asientoIngreso"]
+        Advice["AsientoIngresoExceptionAdvice"]
+        DTO["AsientoIngresoResumenResponse<br/>AsientoIngresoResultadoResponse<br/>AsientoIngresoJobResponse<br/>AsientoIngresoJobDetalleResponse<br/>AsientoIngresoErrorResponse"]
+        DtoMap["AsientoIngresoDtoMapper"]
+        Worker["AsientoIngresoJobWorker<br/>@Scheduled fixedDelay"]
+        Config["AsientoIngresoJobConfiguration<br/>executor asientoIngresoJobExecutor (1 hilo)"]
+        AdpJob["JpaAsientoIngresoJobRepositoryAdapter"]
+        AdpMapa["JpaIngresoAsientoMapaRepositoryAdapter"]
+        AdpAsiento["JpaChequeraPagoAsientoEscrituraRepositoryAdapter"]
+        AdpItems["JdbcIngresoItemRepositoryAdapter<br/>JdbcClient sobre ingreso_items"]
+        RepoJob["JpaAsientoIngresoJobRepository<br/>JpaAsientoIngresoJobTareaRepository"]
+        EntJob["AsientoIngresoJobEntity<br/>AsientoIngresoJobTareaEntity"]
+        Tabla["contable_asiento_ingreso_job<br/>contable_asiento_ingreso_job_tarea<br/>docs/sql/V425"]
+    end
+
+    subgraph Reuso ["Slices y legacy reutilizados"]
+        Slices["Cuenta / CuentaMovimiento / Asiento<br/>Facultad / Geografica / Lectivo<br/>Producto / TipoChequera"]
+        Legacy["PagoService.getPagos/getItems<br/>ContabilidadService<br/>ChequeraPagoAsientoService<br/>FacultadPagoCuentaService<br/>LectivoTotalImputacionService<br/>ChequeraSerie(Reemplazo)Service<br/>TipoPagoService"]
+    end
+
+    Ctrl --> Svc
+    Ctrl --> DtoMap
+    Ctrl --> Advice
+    DtoMap --> DTO
+    Svc --> IN
+    Svc --> UCs
+    Svc --> Builder
+    Svc --> Catalogo
+    Svc --> JobSvc
+    Svc --> Exc
+    UCs --> IN
+    UCs --> OUT
+    Builder --> OUT
+    JobSvc --> OUT
+    Worker --> JobSvc
+    Worker --> Config
+    Worker --> UCs
+    AdpJob --> OUT
+    AdpMapa --> OUT
+    AdpAsiento --> OUT
+    AdpItems --> OUT
+    AdpJob --> RepoJob
+    RepoJob --> EntJob
+    EntJob --> Tabla
+    Svc --> Slices
+    Svc --> Legacy
+    UCs --> Legacy
+
+    style M fill:#e1f5fe
+    style MJ fill:#e1f5fe
+    style IN fill:#f3e5f5
+    style OUT fill:#f3e5f5
+    style Svc fill:#e8f5e8
+    style Builder fill:#e8f5e8
+    style Catalogo fill:#e8f5e8
+    style JobSvc fill:#e8f5e8
+    style UCs fill:#e8f5e8
+    style Exc fill:#e8f5e8
+    style Ctrl fill:#fff3e0
+    style Advice fill:#fff3e0
+    style DTO fill:#fff3e0
+    style DtoMap fill:#fff3e0
+    style Worker fill:#fff3e0
+    style Config fill:#fff3e0
+    style AdpJob fill:#fff3e0
+    style AdpMapa fill:#fff3e0
+    style AdpAsiento fill:#fff3e0
+    style AdpItems fill:#fff3e0
+    style RepoJob fill:#fff3e0
+    style EntJob fill:#fff3e0
+    style Tabla fill:#fff3e0
+    style Slices fill:#f5f5f5
+    style Legacy fill:#f5f5f5

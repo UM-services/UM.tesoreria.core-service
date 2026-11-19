@@ -21,6 +21,7 @@ import um.tesoreria.core.service.facade.mayor.MayorConsultaResponse;
 import um.tesoreria.core.service.facade.mayor.MayorConsultaService;
 import um.tesoreria.core.service.facade.mayor.MayorCuentaResponse;
 import um.tesoreria.core.service.facade.mayor.MayorSaldoInicialResponse;
+import um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosService;
 
 @WebMvcTest(BalanceController.class)
 class BalanceControllerMayorTest {
@@ -36,6 +37,9 @@ class BalanceControllerMayorTest {
 
     @MockitoBean
     private MayorConsultaService mayorConsultaService;
+
+    @MockitoBean
+    private SumasSaldosService sumasSaldosService;
 
     // protects=la consulta responde por la ruta corta y por la del gateway con el mismo cuerpo; fails_when=falta el alias /api/tesoreria/core/balance y el gateway devuelve 404; no_claim=no prueba el enrutamiento real del gateway
     @Test

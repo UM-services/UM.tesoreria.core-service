@@ -237,19 +237,17 @@ public class CuentaPersistenceTest {
         var hasta = java.time.OffsetDateTime.parse("2026-01-31T00:00:00Z");
         var ejercicio = mock(um.tesoreria.core.kotlin.model.Ejercicio.class);
         doReturn(ejercicio).when(contabilidad).verifyEjercicio(desde, hasta);
-        doAnswer(i -> switch (((BigDecimal) i.getArgument(0)).remainder(BigDecimal.TEN).intValueExact()) {
-            case 1 -> java.util.List.of(new BigDecimal("100.50"), new BigDecimal("20.25"));
-            case 2 -> java.util.List.of(BigDecimal.ZERO, new BigDecimal("80"));
-            default -> java.util.List.of(BigDecimal.ZERO, BigDecimal.ZERO);
-        }).when(contabilidad).saldoInicial(any(), eq(ejercicio), eq(desde));
-        doAnswer(i -> switch (((BigDecimal) i.getArgument(0)).remainder(BigDecimal.TEN).intValueExact()) {
-            case 1 -> java.util.List.of(new BigDecimal("30.25"), new BigDecimal("10"));
-            case 2 -> java.util.List.of(new BigDecimal("10"), new BigDecimal("40"));
-            default -> java.util.List.of(BigDecimal.ZERO, BigDecimal.ZERO);
-        }).when(contabilidad).saldoPeriodo(any(), eq(desde), eq(hasta), eq((byte) 0));
+        // Una sola consulta agrupada entrega los saldos de todas las cuentas; la cuenta ...003 no tiene movimientos.
+        doReturn(java.util.Map.of(
+                new BigDecimal("11010100001"), new um.tesoreria.core.service.facade.SaldosCuenta(
+                        new BigDecimal("100.50"), new BigDecimal("20.25"), new BigDecimal("30.25"), new BigDecimal("10")),
+                new BigDecimal("11010100002"), new um.tesoreria.core.service.facade.SaldosCuenta(
+                        BigDecimal.ZERO, new BigDecimal("80"), new BigDecimal("10"), new BigDecimal("40"))))
+                .when(contabilidad).saldosPorCuenta(ejercicio, desde, hasta);
         var balance = new um.tesoreria.core.service.facade.BalanceService(
                 new org.springframework.mock.env.MockEnvironment().withProperty("path.files", directorio + java.io.File.separator),
-                cuentas, contabilidad, null, null, null, null, null, null, null);
+                cuentas, contabilidad, null, null, null, null, null, null, null,
+                new um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosService(contabilidad, cuentas));
         int eventos = jdbc.queryForObject("SELECT COUNT(*) FROM gestion_escritura_historial", Integer.class);
         var esperado = java.util.List.of(
                 java.util.List.of("Desde 01-01-2026"), java.util.List.of("Hasta 31-01-2026"),

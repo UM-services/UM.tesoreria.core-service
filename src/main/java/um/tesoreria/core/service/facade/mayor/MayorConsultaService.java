@@ -52,7 +52,9 @@ import um.tesoreria.core.service.facade.mayor.MayorConsultaException.Codigo;
  * valor) que un slice no puede importar. Las reglas de cálculo y validación viven acá y no en el front.
  *
  * <p>Regla de saldo (se mantiene como en {@code BalanceService.makeMayor}): el saldo inicial es el del ejercicio
- * de {@code desde}; el período se consulta sin los asientos de apertura ({@code apertura = 0}); el saldo acumulado
+ * de {@code desde}; el período se consulta sin los asientos de apertura ({@code apertura = 0}), salvo que {@code desde}
+ * sea el primer día del ejercicio: ahí el saldo inicial es cero y el asiento de apertura se lista como primer
+ * movimiento (como en el listado anterior); el saldo acumulado
  * continúa corrido a lo largo de todo el rango, sin cortes por ejercicio.
  */
 @Slf4j
@@ -61,6 +63,7 @@ import um.tesoreria.core.service.facade.mayor.MayorConsultaException.Codigo;
 public class MayorConsultaService {
 
     private static final Byte SIN_APERTURA = (byte) 0;
+    private static final Byte CON_APERTURA = (byte) 1;
 
     private final EjercicioService ejercicioService;
     private final CuentaService cuentaService;
@@ -184,17 +187,35 @@ public class MayorConsultaService {
                                             List<Ejercicio> ejercicios, Map<Integer, Comprobante> comprobantes) {
         BigDecimal numeroCuenta = cuenta.getNumeroCuenta();
 
-        List<BigDecimal> iniciales = contabilidadService.saldoInicial(numeroCuenta, ejercicios.getFirst(), desde);
-        BigDecimal saldo = BigDecimal.ZERO.add(iniciales.get(0)).setScale(2, RoundingMode.HALF_UP);
-        saldo = saldo.subtract(iniciales.get(1)).setScale(2, RoundingMode.HALF_UP);
-        MayorSaldoInicialResponse saldoInicial = new MayorSaldoInicialResponse(iniciales.get(0), iniciales.get(1), saldo);
+        // Si el período arranca el primer día del ejercicio, el asiento de apertura se muestra como un movimiento más
+        // (como en el listado anterior) y el saldo inicial es cero. Si arranca después, el saldo inicial lo incluye.
+        OffsetDateTime inicioEjercicio = Objects.requireNonNull(ejercicios.getFirst().getFechaInicio())
+                .withOffsetSameInstant(ZoneOffset.UTC);
+        boolean arrancaConLaApertura = desde.withOffsetSameInstant(ZoneOffset.UTC).isEqual(inicioEjercicio);
+
+        BigDecimal inicialDebe = BigDecimal.ZERO;
+        BigDecimal inicialHaber = BigDecimal.ZERO;
+        List<CuentaMovimiento> lineas = new ArrayList<>();
+        if (arrancaConLaApertura) {
+            lineas.addAll(cuentaMovimientoService.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(
+                    numeroCuenta, desde, desde, CON_APERTURA));
+        } else {
+            List<BigDecimal> iniciales = contabilidadService.saldoInicial(numeroCuenta, ejercicios.getFirst(), desde);
+            inicialDebe = iniciales.get(0);
+            inicialHaber = iniciales.get(1);
+        }
+        BigDecimal saldo = BigDecimal.ZERO.add(inicialDebe).setScale(2, RoundingMode.HALF_UP);
+        saldo = saldo.subtract(inicialHaber).setScale(2, RoundingMode.HALF_UP);
+        MayorSaldoInicialResponse saldoInicial = new MayorSaldoInicialResponse(inicialDebe, inicialHaber, saldo);
+
+        lineas.addAll(cuentaMovimientoService
+                .findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, SIN_APERTURA));
 
         BigDecimal totalDebe = BigDecimal.ZERO;
         BigDecimal totalHaber = BigDecimal.ZERO;
         List<MayorMovimientoResponse> movimientos = new ArrayList<>();
 
-        for (CuentaMovimiento movimiento : cuentaMovimientoService
-                .findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, SIN_APERTURA)) {
+        for (CuentaMovimiento movimiento : lineas) {
             BigDecimal debe = null;
             BigDecimal haber = null;
             if (movimiento.getDebita() == 1) {

@@ -4,10 +4,14 @@ import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.comprobante.infrastructure.web.mapper.ComprobanteDtoMapper;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.web.mapper.ProveedorDtoMapper;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.AnulacionComprobante;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.CompraImpresion;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.OrdenPagoImpresion;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoDetalle;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoResumen;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.AnulacionComprobanteResponse;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.CompraImpresionResponse;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.OrdenPagoImpresionResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoDetalleResponse;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoRequest;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.web.dto.ProveedorMovimientoResponse;
@@ -120,6 +124,90 @@ public class ProveedorMovimientoDtoMapper {
                 .pagos(domain.getPagos().stream().map(this::toPagoAplicado).collect(Collectors.toList()))
                 .valores(domain.getValores().stream().map(this::toValor).collect(Collectors.toList()))
                 .anulacion(toAnulacion(domain.getAnulacion()))
+                .build();
+    }
+
+    public OrdenPagoImpresionResponse toImpresion(OrdenPagoImpresion domain) {
+        if (domain == null) return null;
+        return OrdenPagoImpresionResponse.builder()
+                .proveedorMovimientoId(domain.getProveedorMovimientoId())
+                .comprobanteDescripcion(domain.getComprobanteDescripcion())
+                .numero(domain.getNumero())
+                .prefijo(domain.getPrefijo())
+                .numeroComprobante(domain.getNumeroComprobante())
+                .fechaComprobante(domain.getFechaComprobante())
+                .fechaAnulacion(domain.getFechaAnulacion())
+                .concepto(domain.getConcepto())
+                .nombreBeneficiario(domain.getNombreBeneficiario())
+                .proveedorId(domain.getProveedorId())
+                .razonSocial(domain.getRazonSocial())
+                .domicilio(domain.getDomicilio())
+                .cuit(domain.getCuit())
+                .comprobantes(domain.getComprobantes().stream()
+                        .map(c -> OrdenPagoImpresionResponse.Comprobante.builder()
+                                .proveedorMovimientoId(c.proveedorMovimientoId())
+                                .comprobanteDescripcion(c.comprobanteDescripcion())
+                                .prefijo(c.prefijo())
+                                .numeroComprobante(c.numeroComprobante())
+                                .fechaComprobante(c.fechaComprobante())
+                                .importe(c.importe())
+                                .importeAplicado(c.importeAplicado())
+                                .build())
+                        .collect(Collectors.toList()))
+                .totalComprobantes(domain.getTotalComprobantes())
+                .valores(domain.getValores().stream().map(this::toValor).collect(Collectors.toList()))
+                .totalValores(domain.getTotalValores())
+                .traza(domain.getTraza().stream()
+                        .map(t -> OrdenPagoImpresionResponse.Traza.builder()
+                                .numeroCuenta(t.numeroCuenta())
+                                .nombreCuenta(t.nombreCuenta())
+                                .debe(t.debe())
+                                .haber(t.haber())
+                                .build())
+                        .collect(Collectors.toList()))
+                .totalDebe(domain.getTotalDebe())
+                .totalHaber(domain.getTotalHaber())
+                .build();
+    }
+
+    public CompraImpresionResponse toImpresionCompra(CompraImpresion domain) {
+        if (domain == null) return null;
+        return CompraImpresionResponse.builder()
+                .proveedorMovimientoId(domain.getProveedorMovimientoId())
+                .comprobanteDescripcion(domain.getComprobanteDescripcion())
+                .numero(domain.getNumero())
+                .prefijo(domain.getPrefijo())
+                .numeroComprobante(domain.getNumeroComprobante())
+                .fechaComprobante(domain.getFechaComprobante())
+                .fechaAnulacion(domain.getFechaAnulacion())
+                .concepto(domain.getConcepto())
+                .proveedorId(domain.getProveedorId())
+                .razonSocial(domain.getRazonSocial())
+                .domicilio(domain.getDomicilio())
+                .cuit(domain.getCuit())
+                .importe(domain.getImporte())
+                .detalle(domain.getDetalle().stream()
+                        .map(d -> CompraImpresionResponse.Detalle.builder()
+                                .orden(d.orden())
+                                .articulo(d.articulo())
+                                .concepto(d.concepto())
+                                .cantidad(d.cantidad())
+                                .precioUnitario(d.precioUnitario())
+                                .precioFinal(d.precioFinal())
+                                .build())
+                        .collect(Collectors.toList()))
+                .fechaContable(domain.getFechaContable())
+                .ordenContable(domain.getOrdenContable())
+                .asiento(domain.getAsiento().stream()
+                        .map(a -> CompraImpresionResponse.Asiento.builder()
+                                .numeroCuenta(a.numeroCuenta())
+                                .nombreCuenta(a.nombreCuenta())
+                                .debe(a.debe())
+                                .haber(a.haber())
+                                .build())
+                        .collect(Collectors.toList()))
+                .totalDebe(domain.getTotalDebe())
+                .totalHaber(domain.getTotalHaber())
                 .build();
     }
 

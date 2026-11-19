@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimiento;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.CompraImpresion;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.OrdenPagoImpresion;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoDetalle;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoResumen;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.ports.in.*;
@@ -31,6 +33,8 @@ public class ProveedorMovimientoService {
     private final GetProveedorMovimientoIdsForCostAdjustmentUseCase getProveedorMovimientoIdsForCostAdjustmentUseCase;
     private final GetProveedorMovimientosByProveedorAndFechaRangeUseCase getProveedorMovimientosByProveedorAndFechaRangeUseCase;
     private final GetProveedorMovimientoDetalleUseCase getProveedorMovimientoDetalleUseCase;
+    private final GetOrdenPagoImpresionUseCase getOrdenPagoImpresionUseCase;
+    private final GetCompraImpresionUseCase getCompraImpresionUseCase;
 
     public ProveedorMovimiento createProveedorMovimiento(ProveedorMovimiento proveedorMovimiento) {
         return createProveedorMovimientoUseCase.createProveedorMovimiento(proveedorMovimiento);
@@ -96,12 +100,20 @@ public class ProveedorMovimientoService {
     }
 
     public List<ProveedorMovimientoResumen> findAllByProveedorAndFechaRange(Integer proveedorId, OffsetDateTime desde,
-                                                                           OffsetDateTime hasta, Integer geograficaId) {
+                                                                            OffsetDateTime hasta, Integer geograficaId) {
         return getProveedorMovimientosByProveedorAndFechaRangeUseCase
                 .getProveedorMovimientos(proveedorId, desde, hasta, geograficaId);
     }
 
     public ProveedorMovimientoDetalle findDetalle(Long proveedorMovimientoId) {
         return getProveedorMovimientoDetalleUseCase.getProveedorMovimientoDetalle(proveedorMovimientoId);
+    }
+
+    public OrdenPagoImpresion findOrdenPagoImpresion(Long proveedorMovimientoId) {
+        return getOrdenPagoImpresionUseCase.getOrdenPagoImpresion(proveedorMovimientoId);
+    }
+
+    public CompraImpresion findCompraImpresion(Long proveedorMovimientoId) {
+        return getCompraImpresionUseCase.getCompraImpresion(proveedorMovimientoId);
     }
 }

@@ -93,6 +93,8 @@ const diagrams = [
   { id: 'hexagonal-facultad', file: 'hexagonal-facultad.mmd', title: 'Arquitectura Hexagonal - Facultad' },
   { id: 'hexagonal-contrato', file: 'hexagonal-contrato.mmd', title: 'Arquitectura Hexagonal - Contrato' },
   { id: 'hexagonal-chequeraSerie', file: 'hexagonal-chequeraSerie.mmd', title: 'Arquitectura Hexagonal - ChequeraSerie' },
+  { id: 'hexagonal-emisionChequera', file: 'hexagonal-emisionChequera.mmd', title: 'Arquitectura Hexagonal - EmisionChequera' },
+  { id: 'hexagonal-asientoIngreso', file: 'hexagonal-asientoIngreso.mmd', title: 'Arquitectura Hexagonal - AsientoIngreso' },
   { id: 'hexagonal-estadoChequera', file: 'hexagonal-estadoChequera.mmd', title: 'Arquitectura Hexagonal - EstadoChequera' },
   { id: 'hexagonal-escrituraHistorial', file: 'hexagonal-escrituraHistorial.mmd', title: 'Arquitectura Hexagonal - EscrituraHistorial (Gestión)' },
   { id: 'hexagonal-baja', file: 'hexagonal-baja.mmd', title: 'Arquitectura Hexagonal - Baja' },

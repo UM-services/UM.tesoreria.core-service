@@ -30,6 +30,11 @@ public class LectivoAlternativaService {
 				tipoChequeraId, alternativaId);
 	}
 
+	public List<LectivoAlternativa> findAllByFacultadLectivoTipo(Integer facultadId, Integer lectivoId,
+																 Integer tipoChequeraId) {
+		return repository.findAllByFacultadIdAndLectivoIdAndTipoChequeraId(facultadId, lectivoId, tipoChequeraId);
+	}
+
 	public LectivoAlternativa findByFacultadIdAndLectivoIdAndTipochequeraIdAndProductoIdAndAlternativaId(
 			Integer facultadId, Integer lectivoId, Integer tipoChequeraId, Integer productoId, Integer alternativaId) {
 		return repository

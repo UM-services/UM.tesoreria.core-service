@@ -20,6 +20,9 @@ public interface LectivoAlternativaRepository extends JpaRepository<LectivoAlter
 	List<LectivoAlternativa> findAllByFacultadIdAndLectivoIdAndTipoChequeraIdAndAlternativaId(Integer facultadId,
 																							  Integer lectivoId, Integer tipoChequeraId, Integer alternativaId);
 
+	List<LectivoAlternativa> findAllByFacultadIdAndLectivoIdAndTipoChequeraId(Integer facultadId, Integer lectivoId,
+																			 Integer tipoChequeraId);
+
 	Optional<LectivoAlternativa> findByFacultadIdAndLectivoIdAndTipoChequeraIdAndProductoIdAndAlternativaId(
 			Integer facultadId, Integer lectivoId, Integer tipoChequeraId, Integer productoId, Integer alternativaId);
 
