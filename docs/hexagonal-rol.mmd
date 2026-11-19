@@ -1,17 +1,20 @@
 ---
-title: Arquitectura Hexagonal - Módulo Rol (v6.3.0)
+title: Arquitectura Hexagonal - Módulo Rol (v12.7.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
         M["Rol<br/>nombre, descripcion, aplicacion, activo"]
-        IN["CreateRolUseCase<br/>GetRolByIdUseCase<br/>GetAllRolesUseCase<br/>UpdateRolUseCase<br/>DeleteRolUseCase"]
-        OUT["RolRepository<br/>(Puerto de Salida)"]
+        Sem["RolSemilla<br/>permisos exactos y comodines"]
+        Res["SyncRolesResultado"]
+        IN["CreateRolUseCase<br/>GetRolByIdUseCase<br/>GetAllRolesUseCase<br/>UpdateRolUseCase<br/>DeleteRolUseCase<br/>SyncRolesUseCase<br/>(Puertos de Entrada)"]
+        OUT["RolRepository<br/>findByAplicacionAndNombre<br/>(Puerto de Salida)"]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
         Svc["RolService"]
+        Sync["SyncRolesUseCaseImpl<br/>crea/actualiza y reconcilia rol_permiso"]
         UCs["Create/Get/GetAll/Update/Delete<br/>RolUseCaseImpl"]
-        Exc["RolException"]
+        Exc["RolException<br/>RolManifestException"]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
@@ -20,7 +23,15 @@ flowchart TD
         Map["RolDtoMapper<br/>RolMapper"]
         Adp["JpaRolRepositoryAdapter"]
         Ent["RolEntity<br/>tabla rol"]
-        Jpa["JpaRolRepository"]
+        Jpa["JpaRolRepository<br/>derived queries"]
+        Loader["RolManifestLoader<br/>roles.yaml"]
+        Runner["RolesManifestSyncRunner<br/>@Order(2)"]
+        Sql["docs/sql/V424__roles_semilla.sql<br/>camino offline idempotente"]
+    end
+
+    subgraph Otros ["Slices consumidos"]
+        Perm["GetAllPermisosUseCase<br/>(usuarios.permiso)"]
+        RolePerm["RolPermisoRepository<br/>(usuarios.rolPermiso)"]
     end
 
     Ctrl --> Svc
@@ -36,11 +47,24 @@ flowchart TD
     Adp --> Jpa
     Jpa --> Ent
     Svc --> M
+    Sync --> IN
+    Sync --> Sem
+    Sync --> Res
+    Sync --> OUT
+    Sync --> Perm
+    Sync --> RolePerm
+    Runner --> Loader
+    Runner --> Sync
+    Loader --> Sem
+    Sql --> Ent
 
     style M fill:#e1f5fe
+    style Sem fill:#e1f5fe
+    style Res fill:#e1f5fe
     style IN fill:#f3e5f5
     style OUT fill:#f3e5f5
     style Svc fill:#e8f5e8
+    style Sync fill:#e8f5e8
     style UCs fill:#e8f5e8
     style Exc fill:#e8f5e8
     style Ctrl fill:#fff3e0
@@ -49,3 +73,8 @@ flowchart TD
     style Adp fill:#fff3e0
     style Ent fill:#fff3e0
     style Jpa fill:#fff3e0
+    style Loader fill:#fff3e0
+    style Runner fill:#fff3e0
+    style Sql fill:#fff3e0
+    style Perm fill:#f5f5f5
+    style RolePerm fill:#f5f5f5

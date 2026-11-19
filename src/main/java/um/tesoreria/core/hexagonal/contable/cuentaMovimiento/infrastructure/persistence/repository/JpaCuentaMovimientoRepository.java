@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.repository;
 
@@ -21,13 +21,22 @@ public interface JpaCuentaMovimientoRepository extends JpaRepository<CuentaMovim
 	List<CuentaMovimientoEntity> findAllByNumeroCuenta(BigDecimal numeroCuenta);
 
 	List<CuentaMovimientoEntity> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta,
-	                                                                                     OffsetDateTime desde, OffsetDateTime hasta, Byte apertura, Sort sort);
+																						 OffsetDateTime desde, OffsetDateTime hasta, Byte apertura, Sort sort);
+
+	/**
+	 * Cuenta, sentido e importe de todos los movimientos de un rango de fechas y tipo de asiento (apertura sí/no),
+	 * en una sola consulta. La proyección cerrada trae sólo esas tres columnas, sin cargar la entidad ni sus relaciones.
+	 */
+	List<MovimientoImporteProjection> findAllByFechaContableBetweenAndApertura(OffsetDateTime desde,
+																			   OffsetDateTime hasta, Byte apertura);
 
 	List<CuentaMovimientoEntity> findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(
 			OffsetDateTime fechaContable, Integer ordenContable, Integer item, Sort sort);
 
 	List<CuentaMovimientoEntity> findAllByFechaContableAndOrdenContableAndDebitaAndItemGreaterThanEqual(
 			OffsetDateTime fechaContable, Integer ordenContable, Byte debita, Integer item, Sort sort);
+
+	List<CuentaMovimientoEntity> findAllByProveedorMovimientoId(Long proveedorMovimientoId, Sort sort);
 
 	Optional<CuentaMovimientoEntity> findTopByNumeroCuenta(BigDecimal numeroCuenta);
 
@@ -41,6 +50,6 @@ public interface JpaCuentaMovimientoRepository extends JpaRepository<CuentaMovim
 
 	void deleteByCuentaMovimientoId(Long cuentaMovimientoId);
 
-    void deleteAllByCuentaMovimientoIdIn(List<Long> cuentaMovimientoIds);
+	void deleteAllByCuentaMovimientoIdIn(List<Long> cuentaMovimientoIds);
 
 }

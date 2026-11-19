@@ -9,13 +9,75 @@
 [![Apache Kafka](https://img.shields.io/badge/Apache%20Kafka-black.svg)](https://kafka.apache.org/)
 [![JUnit](https://img.shields.io/badge/JUnit-6.0.3-green.svg)](https://junit.org/)
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
-[![Versión](https://img.shields.io/badge/versión-12.2.0-blue.svg)]()
+![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-Hibernate-6DB33F?logo=spring&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)
+[![Versión](https://img.shields.io/badge/versión-12.8.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.2.0**
+**Versión actual (SemVer): 12.8.0**
+
+## Novedades 12.8.0 (verificado en código)
+
+- **feat(chequera/emision)**: reparación masiva de **chequeras incompletas** (migración de `frmIncompletas`), job de dos etapas en el slice existente:
+  - `POST /api/tesoreria/core/emision/chequera/incompletas/borradores` (`202`) arma el padrón con `lectivoId`, `facultadId`, `geograficaId` y `claseChequeraId` (los cuatro obligatorios), `soloNoEnviadas` y `chequeraIds` opcional; `POST .../job/{jobId}/emision` (`202`) emite todos los borradores del job o sólo los `borradorIds` indicados; `GET .../job/{jobId}`, `POST .../job/{jobId}/cancelar` y `GET .../job/pendientes`. Ruta corta: `/emision/chequera/incompletas`.
+  - Etapa `BORRADORES`: crea o reutiliza el borrador abierto (sincronizando beca y `hpum` con la serie) y completa las cuotas con `PLANTILLA`, sin escribir en `chequera_*`. Etapa `EMISION`: emite con `forzarNueva=false` + clave de idempotencia `incompletas:{borradorId}` y extiende el débito; una falla en `extendDebito` se loguea y no revierte la emisión, como el legacy.
+  - Omisiones por tarea sin abortar el job: `SUSPENDIDO`, `BAJA`, `PAGADA`, `SIN_DISENO` y `BORRADOR_NO_ABIERTO`. Worker `@Scheduled` en el executor `chequerasIncompletasJobExecutor` con heartbeat, reencolado de vencidos, cancelación entre tareas y retención de 30 días (`tesoreria.chequeras-incompletas.job.*`, con defaults). Un solo job activo por etapa (`409 INCOMPLETAS_JOB_ACTIVO`).
+  - DDL: `docs/sql/V428__chequeras_incompletas_job.sql` (tablas `chequera_incompleta_job` y `chequera_incompleta_job_tarea`) y `docs/sql/V429__descartar_borradores_duplicados.sql` (un solo borrador `ABIERTO` por chequera). Permisos `chequeras.incompletas.consultar` y `chequeras.incompletas.generar`.
+- **feat(chequera/emision)**: `GET /api/tesoreria/core/emision/chequera/borradores/{borradorId}/impresion` devuelve el snapshot `BorradorImpresion` para que `tesoreria-sender` imprima la leyenda BORRADOR; sólo sobre borradores `ABIERTO` (`409`) y sin `@RequierePermiso` (consumo servicio-a-servicio).
+- **refactor(chequera/emision)**: **un solo borrador abierto por chequera**. `crearBorrador` retoma el borrador `ABIERTO` de la serie —o, si la chequera no existe, el de la misma persona/documento/lectivo/facultad/tipo— en lugar de duplicarlo y sin recalcular cuotas; beca y `hpum` se preservan desde la serie cuando el request no los trae. La emisión sobre una serie existente **sincroniza** `chequera_total` y `chequera_alternativa` (conserva lo pagado) en vez de borrar y recrear, y `chequera_serie.usuario_id` guarda el login (FK a `usuario.login`), nunca el id numérico.
+- `BorradorResponse` suma `personaApellido`, `personaNombre`, `lectivoNombre`, `geograficaId` y `geograficaNombre`; `CrearBorradorRequest` acepta `becaResolucion`, `becaFecha`, `becaUserId` y `hpum` (campos aditivos). Diagrama: [`hexagonal-emisionChequera.mmd`](docs/hexagonal-emisionChequera.mmd).
+
+> Basado en `git diff HEAD` (staged, 2026-11-18): 31 archivos nuevos y 14 modificados de producción del slice `hexagonal/chequera/emision`, 4 tests (3 nuevos), `docs/sql/V428..V429` y `permisos.yaml`. Endpoints, permisos, tablas y job nuevos; `BorradorResponse`/`CrearBorradorRequest` sólo suman campos y los contratos existentes de emisión no cambian ⇒ **minor** (`12.7.1` → `12.8.0`). `V426`/`V427` quedaron usados por `12.7.1`, por eso esta release usa `V428`/`V429`. Verificación sin compilación ni tests por indicación del usuario; el diagrama se validó con `mmdc`.
+
+## Novedades 12.7.1 (verificado en código)
+
+- **refactor(chequera/emision)**: las tablas del borrador de chequera quedan sin prefijo en las columnas. `BorradorChequeraEntity` y `BorradorCuotaEntity` mapean PK `chequera_borrador_id` y `chequera_borrador_cuota_id`; el resto pierde `chb_`/`chbc_` y los ordinales de vencimientos e importes van al final (`vencimiento_1`, `importe_original_1`, `importe_borrador_1`, y 2/3). El `@Version` del borrador queda en `version`, sin cambios en el *optimistic locking*.
+- `docs/sql/V423__chequera_borrador_emision.sql` queda con los nombres definitivos (instalaciones nuevas). Para bases donde la tabla ya existía con prefijo: aplicar `V426__chequera_borrador_sin_prefijo.sql` y después `V427__chequera_borrador_cuota_sin_prefijo.sql`, idempotentes y con `CHANGE COLUMN` (compatible con MySQL 5.7, donde no existe `RENAME COLUMN`); la FK `fk_chequera_borrador_cuota_borrador` se conserva.
+- Sin cambios de API: rutas, DTOs, JSON y permisos intactos. Diagrama: [`hexagonal-emisionChequera.mmd`](docs/hexagonal-emisionChequera.mmd).
+
+> Basado en `git diff HEAD` (staged, 2026-11-17): `BorradorChequeraEntity` (29 `@Column` renombradas), `BorradorCuotaEntity` (25, más `@JoinColumn` y `@UniqueConstraint`), `V423` reescrito y los scripts nuevos `V426`/`V427`. Sólo cambia la persistencia interna de dos tablas del slice `chequera/emision` ⇒ **patch**. Verificación sin compilación ni tests por indicación del usuario; el diagrama se validó con `mmdc`.
+
+## Novedades 12.7.0 (verificado en código)
+
+- **feat(contable/asientoIngreso)**: migración de `frmAsientoIngreso` de `tesoreria.vb6` como slice `hexagonal/contable/asientoIngreso`:
+  - `GET /api/tesoreria/core/asientoIngreso/{fecha}/{tipoPagoId}` (también `/asientoIngreso/{fecha}/{tipoPagoId}`): totales, cuadre, orden contable, `vinculo` y líneas con nombre de cuenta del asiento de una fecha y un tipo de pago; las fechas se reciben como `yyyy-MM-ddT00:00:00Z`, igual que el legacy.
+  - `POST .../{fecha}/{tipoPagoId}/regenerar`: reproduce `clsCtlPagos.regenerarAsientoIngreso` en una transacción. Reutiliza el `ordenContable` de `ingreso_asiento` (con `@Lock` pesimista), borra el asiento anterior, regenera `chequera_pago_asiento` por pago (debe por `facultadpagocuenta`, haber por `lectivo_total_imp`), consolida `movcon` y devuelve las cuentas faltantes. Valida el ejercicio y todas las cuentas de pago antes de escribir.
+  - `POST .../masivo/{fechaDesde}/{fechaHasta}` (`202`), `GET .../masivo/{jobId}` y `POST .../masivo/{jobId}/cancelar`: job persistido (días × tipos de pago) con una tarea por combinación, worker `@Scheduled` en executor propio (`asientoIngresoJobExecutor`), heartbeat, recuperación de jobs vencidos, cancelación entre tareas y retención de finalizados. DDL: `docs/sql/V425__contable_asiento_ingreso_job.sql`.
+  - Permisos `contable.asiento_ingreso.consultar`, `.regenerar` y `.masivo` con `@RequierePermiso`; auditoría con `AuditBulkScope` por tarea (`CuentaMovimientoEntity`, `AsientoEntity`, `ChequeraPagoAsiento`) y las dos entidades del job excluidas. Sin `@Query` nuevos. Diagrama: [`hexagonal-asientoIngreso.mmd`](docs/hexagonal-asientoIngreso.mmd).
+- **feat(usuarios/rol)**: semilla de roles como código. `src/main/resources/roles.yaml` declara `ADMIN_TESORERIA`, `OPERADOR_CHEQUERAS`, `OPERADOR_COMPRAS_PAGOS` y `CONSULTA_EXTERNO` (claves exactas y comodines `*`/`modulo.*`); `RolesManifestSyncRunner` (`@Order(2)`, después de `PermisoManifestSyncRunner`, que pasa a `@Order(1)`) crea los roles faltantes, actualiza `descripcion`/`activo` y reconcilia `rol_permiso` sólo para los declarados, sin tocar los roles creados desde la UI. Manifiesto vacío ⇒ se rechaza; clave exacta inexistente ⇒ aborta el arranque. DDL offline idempotente: `docs/sql/V424__roles_semilla.sql`. Diagrama: [`hexagonal-rol.mmd`](docs/hexagonal-rol.mmd).
+- **fix(exception)**: `FacultadPagoCuentaException` usaba `{}` en `MessageFormat`, que es inválido y lanzaba `IllegalArgumentException` en lugar del rechazo de negocio al faltar la cuenta de pago; ahora usa `{0}/{1}`.
+- **config**: `tesoreria.asiento-ingreso.max-dias` y `tesoreria.asiento-ingreso.job.*` (delay, recuperación, staleness, retención); `app.roles.manifest` y `app.roles.manifest-sync.*`; `TESORERIA_AUDIT_EXCLUDED_ENTITIES`.
+
+> Basado en `git diff HEAD` (staged; 142 archivos, +9426/−3 antes de esta documentación): código real de `EmisionChequeraController`, `AsientoIngresoController`, `AsientoIngresoJobWorker`, `SyncRolesUseCaseImpl`, `RolesManifestSyncRunner`, `roles.yaml`, `permisos.yaml`, `bootstrap.yml` y los tres scripts `docs/sql/V423..V425`. Todo es aditivo (slices, endpoints y claves nuevas; ningún contrato existente cambia) ⇒ incremento **minor**. El `pom.xml` estaba en `12.3.0` porque las releases `12.4.0`–`12.6.0` se documentaron sin bump; este release lo alinea en **`12.7.0`**. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); los diagramas se validaron con `mmdc`.
+
+## Novedades 12.6.0 (verificado en código)
+
+- **feat(chequera/emision)**: emisión individual de chequeras (migración de `frmImpChequera`), slice `hexagonal/chequera/emision`:
+  - `GET /api/tesoreria/core/emision/chequera/contexto/{personaId}/{documentoId}/{lectivoId}`: persona, domicilio con validez de mails, deuda contra `setup.cuotasPermitidas`, series del lectivo (pagada, última emisión, sede, arancel, baja) y permisos efectivos.
+  - `POST /borradores`, `GET|PUT|DELETE /borradores/{id}`, `GET /borradores/pendientes`, `POST /borradores/{id}/completar` (`DISENO|PLANTILLA|GUARDADAS`), `POST /borradores/{id}/politica/{productoId}/{alternativaId}/{cuotaId}` y `POST /borradores/{id}/emision`. El controlador responde también en `/api/tesoreria/core/emisionChequera`.
+  - Borrador persistido con *optimistic locking* (`version`), idempotencia por `claveIdempotencia` y retención diaria a 30 días (`BorradorRetentionJob`). Emisión transaccional con numeración bajo bloqueo pesimista (`chequera_serie_control`), cuotas con código de barras RapiPago de 50 dígitos + i2of5, `chequera_total`, `chequera_alt`, `debito.fechaVencimiento`, pagos y `track`.
+  - Reglas de paridad en `ReglasEmision`/`BorradorFactory` y errores estructurados `{codigo, mensaje}` (`DEUDA_EXCEDIDA`, `CHEQUERA_DE_BAJA`, `CUOTA_INMUTABLE`, `BORRADOR_DESACTUALIZADO`, `SIN_PERMISO_OVERRIDE`, etc.). Las cuotas pagadas, dadas de baja, compensadas o manuales no se pueden editar desde el borrador.
+  - DDL: `docs/sql/V423__chequera_borrador_emision.sql`; permisos `chequeras.emision.individual` y `chequeras.emision.forzar`. `UpdateChequeraSerieUseCaseImpl` ahora copia HPUM y datos de beca (antes el `PUT` los descartaba).
+  - Diagrama: [`hexagonal-emisionChequera.mmd`](docs/hexagonal-emisionChequera.mmd).
+
+> Basado en `git diff HEAD` del slice `hexagonal/chequera/emision` (46 archivos de producción y 5 tests), `UpdateChequeraSerieUseCaseImpl`, `LectivoAlternativa(Repository|Service)`, `permisos.yaml` y `V423`. Todo es aditivo (slice y rutas nuevas; `UpdateChequeraSerieUseCaseImpl` sólo completa campos que antes quedaban sin copiar y no cambia la firma) ⇒ **minor**.
+
+## Novedades 12.5.0 (verificado en código)
+
+- **feat(compras/proveedorMovimiento)**: `GET /proveedorMovimiento/{proveedorMovimientoId}/impresion-compra` (también `/api/tesoreria/core/proveedorMovimiento/{id}/impresion-compra`) devuelve facturas y notas de crédito listas para imprimir («Ingreso de Comprobante de Compras»): cabecera con `prefijo`/`numeroComprobante`, proveedor, detalle de artículos y asiento contable con `totalDebe`/`totalHaber`. `404` si no existe y `409` si es una orden de pago.
+- **feat(contable/cuentaMovimiento)**: `FindAllByProveedorMovimientoIdUseCase` y consulta derivada por `proveedorMovimientoId` (sin SQL nativo).
+
+> Basado en `git show 4bd6e4ca` (PR #527): `GetCompraImpresionUseCaseImpl`, `CompraImpresion`, `CompraImpresionResponse`, `ComprobanteEsOrdenPagoException` y el endpoint nuevo de `ProveedorMovimientoController`. Aditivo ⇒ **minor**.
+
+## Novedades 12.4.0 (verificado en código)
+
+- **feat(compras/proveedorMovimiento)**: `GET /proveedorMovimiento/{proveedorMovimientoId}/impresion` (también `/api/tesoreria/core/proveedorMovimiento/{id}/impresion`) devuelve la orden de pago lista para imprimir: cabecera, proveedor, comprobantes cancelados, valores y traza contable consolidada por cuenta con totales. `404` si no existe y `409` si no es una orden de pago.
+- **feat(contable/cuentaMovimiento)**: `TrazaContableOrdenPagoRepository` con adaptador JDBC.
+
+> Basado en `git show 7a7876a4` (PR #525): `GetOrdenPagoImpresionUseCaseImpl`, `OrdenPagoImpresion`, `OrdenPagoImpresionResponse`, `ComprobanteNoImprimibleException` y el adaptador `JdbcTrazaContableOrdenPagoRepositoryAdapter`. Aditivo ⇒ **minor**.
 
 ## Novedades 12.2.0 (verificado en código)
 

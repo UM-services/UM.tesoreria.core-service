@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.usuarios.permiso.domain.model.SyncPermisosResultado;
 import um.tesoreria.core.hexagonal.usuarios.permiso.domain.ports.in.SyncPermisosUseCase;
@@ -21,6 +22,7 @@ import um.tesoreria.core.hexagonal.usuarios.permiso.infrastructure.manifest.Perm
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Order(1)
 public class PermisoManifestSyncRunner implements ApplicationRunner {
 
     private final PermisoManifestLoader manifestLoader;

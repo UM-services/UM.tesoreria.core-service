@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.exception.CuentaMovimientoException;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.SumaCuenta;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.ports.in.*;
 import um.tesoreria.core.model.view.CuentaMovimientoAsiento;
 import um.tesoreria.core.service.EntregaService;
@@ -28,6 +29,7 @@ public class CuentaMovimientoService {
     private final FindAllByNumeroCuentaUseCase findAllByNumeroCuentaUseCase;
     private final FindAllByAsientoUseCase findAllByAsientoUseCase;
     private final FindAllByNumeroCuentaAndFechaContableBetweenAndAperturaUseCase findAllByNumeroCuentaAndFechaContableBetweenAndAperturaUseCase;
+    private final SumarPorCuentaUseCase sumarPorCuentaUseCase;
     private final FindLastByFechaUseCase findLastByFechaUseCase;
     private final DeleteByCuentaMovimientoIdUseCase deleteByCuentaMovimientoIdUseCase;
     private final DeleteAllByCuentaMovimientoIdInUseCase deleteAllByCuentaMovimientoIdInUseCase;
@@ -58,6 +60,10 @@ public class CuentaMovimientoService {
 
     public List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
         return findAllByNumeroCuentaAndFechaContableBetweenAndAperturaUseCase.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, apertura);
+    }
+
+    public List<SumaCuenta> sumarPorCuenta(OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
+        return sumarPorCuentaUseCase.sumarPorCuenta(desde, hasta, apertura);
     }
 
     public CuentaMovimiento findLastByFecha(OffsetDateTime fechaContable) {

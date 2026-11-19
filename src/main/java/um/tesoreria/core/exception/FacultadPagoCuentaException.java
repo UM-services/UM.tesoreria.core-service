@@ -16,7 +16,7 @@ public class FacultadPagoCuentaException extends RuntimeException {
 	private static final long serialVersionUID = 7639436109130937391L;
 
 	public FacultadPagoCuentaException(Integer facultadId, Integer tipoPagoId) {
-		super(MessageFormat.format("Cannot find FacultadPagoCuenta {}/{}", facultadId, tipoPagoId));
+		super(MessageFormat.format("Cannot find FacultadPagoCuenta {0}/{1}", facultadId, tipoPagoId));
 	}
 
 }

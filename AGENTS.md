@@ -25,7 +25,7 @@ Distributed context — who it talks to:
 ## 2. Stack (verified in `pom.xml`, the source of truth)
 
 - Java **25**, Spring Boot **4.1.2**, Spring Cloud **2025.1.4** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.21** (legacy only, §4)
-- Artifact version = service version: **12.2.0** (SemVer; bumped on release, §7)
+- Artifact version = service version: **12.8.0** (SemVer; bumped on release, §7)
 - Data: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
 - Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.1** (Swagger UI)
 - Docs/exports: Apache POI + `openpdf` (reports), `modelmapper` (legacy only), Guava, Caffeine (`starter-cache`)
@@ -102,6 +102,7 @@ Real state to keep in mind:
 | `chequera/` | `chequeraCuota` | `/chequeraCuota` + alias |
 | `chequera/` | `chequeraPago` | `/chequeraPago` + alias |
 | `chequera/` | `chequeraSerie` | `/chequeraserie` + alias |
+| `chequera/` | `emision` | `/api/tesoreria/core/emision/chequera` + alias `/api/tesoreria/core/emisionChequera` (contexto, borrador, completar, política, emisión e impresión del borrador; `.../incompletas` con `borradores`, `job/{id}/emision`, `job/{id}`, `job/{id}/cancelar` y `job/pendientes`) |
 | `chequera/` | `chequeraTotal` | `/chequeratotal` (+ alias) |
 | `chequera/` | `claseChequera` | `/clasechequera` + alias |
 | `chequera/` | `estadoChequera` | `/api/tesoreria/core/chequera` → only `/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` (`report-service` contract, 6.0.0 removed `{debitoTipoId}`) |
@@ -121,6 +122,7 @@ Real state to keep in mind:
 | `compras/pedidos/` | `compraPedidoSecuencia` | — no REST; internal port (correlativo anual) |
 | `compras/pedidos/` | `compraPedidoHistorial` | `/api/tesoreria/core/compraPedidoHistorial` (long only) |
 | `contable/` | `asiento` | — no REST (empty web/controller) |
+| `contable/` | `asientoIngreso` | `/api/tesoreria/core/asientoIngreso` + alias `/asientoIngreso` (consulta, regeneración y job masivo por rango) |
 | `contable/` | `cuenta` | `/cuenta` + alias |
 | `contable/` | `cuentaMovimiento` | `/cuentaMovimiento` + alias |
 | `contable/` | `lectivoTotalImputacion` | `/lectivototalimputacion` + alias |
@@ -197,6 +199,7 @@ Current state (verified in code):
 - **Backend gating: implemented and opt-in.** `@RequierePermiso("<clave>")` annotation + `RequierePermisoInterceptor` under `configuration/security`, registered by `PermissionWebConfig`. **Disabled by default** (`app.permissions.enforce`, env `APP_PERMISSIONS_ENFORCE`): it only acts on annotated endpoints, so legacy stays intact. Until real identity exists (JWT, M3), identity is resolved transitionally via the `X-User-Id` header (spoofable): it is PEP plumbing, not definitive security.
 - **Access requests (bandeja):** slice `solicitudAcceso` (also under `usuarios/`) stores "Solicitar acceso" requests from the frontend in `solicitud_acceso` (`docs/sql/V419__solicitud_acceso.sql`, external DDL). `POST /api/tesoreria/core/solicitudAcceso/` is open to any user; `GET /pendiente` and `PUT /{id}/resolver` are annotated `@RequierePermiso("permisos.administrar")`. **Approving does not grant the key**: the administrator still assigns it in the Usuarios screen, so there is a single write path into the permission engine. A 403 must never be translated into a logout on the client.
 - **Inventory as code (source of truth):** `src/main/resources/permisos.yaml` declares every key (`version: 1` + list of `aplicacion`, `clave`, `modulo`, `descripcion`, `activo`). `PermisoManifestSyncRunner` reconciles the `permiso` table on startup (`app.permissions.manifest-sync.enabled`, default true; `dry-run` flag) and `POST /api/tesoreria/core/permiso/sync` does the same on demand (`{ "dryRun": true }` shows the diff). Semantics: missing in DB → insert; present in both → update metadata; present in DB but absent from the file → **`activo = 0`** (never hard delete, to preserve `rol_permiso`/`usuario_permiso`). An empty manifest is rejected. The first deploy with a partial manifest would retire everything else, so keep the file complete; `PermisoManifestLoaderTest` validates the real file in CI. Note: the legacy bridge (`addLegacy`) still grants `administrador.panel`/`chequeras.*` from user flags regardless of `activo`.
+- **Role seed as code:** `src/main/resources/roles.yaml` declares the seed roles and their matrix (`ADMIN_TESORERIA`, `OPERADOR_CHEQUERAS`, `OPERADOR_COMPRAS_PAGOS`, `CONSULTA_EXTERNO`). `RolesManifestSyncRunner` (`@Order(2)`, after the permission sync) creates missing roles, updates `descripcion`/`activo` and **reconciles `rol_permiso`** for the declared roles only; roles created from the UI are untouched, and per-user exceptions stay in `usuario_permiso`. `permisos` accepts exact keys and wildcards (`*`, `modulo.*`). Empty manifest is rejected; an exact key that does not exist aborts startup; a wildcard with no matches only logs a warning. Offline recovery after a DB restore: `docs/sql/V424__roles_semilla.sql` (same matrix, idempotent, creates the RBAC tables if missing).
 
 ### Golden rule — LEGACY (do not break)
 **Never add or change security (neither `@RequierePermiso`, nor filters, nor token validation) on existing endpoints** consumed by the legacy system (VB6, old frontends, other services) **nor on the legacy layer**. The legacy system sends no token or permissions: any enforcement there **breaks it**. Gating applies **only to new features**. When in doubt, **stop and ask** (§1 rule: "do not add security on your own").
