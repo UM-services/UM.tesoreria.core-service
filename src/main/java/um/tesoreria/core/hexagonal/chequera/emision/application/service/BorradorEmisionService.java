@@ -150,12 +150,12 @@ public class BorradorEmisionService {
             log.debug("Borrador abierto reutilizado para {}/{}/{}: {}", data.getFacultadId(),
                     data.getTipoChequeraId(), serie == null ? "nueva" : serie.getChequeraSerieId(),
                     abierto.get().getBorradorId());
-            return enriquecer(abierto.get());
+            return enriquecer(heredarArancelDeLaSerie(abierto.get(), serie));
         }
 
         Domicilio domicilio = domicilio(data.getPersonaId(), data.getDocumentoId());
 
-        Integer arancelTipoId = data.getArancelTipoId() == null ? 0 : data.getArancelTipoId();
+        Integer arancelTipoId = resolverArancelTipo(data.getArancelTipoId(), serie);
         List<AlternativaEmision> alternativas = alternativas(data.getFacultadId(), data.getLectivoId(),
                 data.getTipoChequeraId());
         Integer alternativaId = Optional.ofNullable(data.getAlternativaId())
@@ -379,7 +379,7 @@ public class BorradorEmisionService {
         sedeEmision(borrador);
         borrador.setAlternativas(alternativas(borrador.getFacultadId(), borrador.getLectivoId(),
                 borrador.getTipoChequeraId()));
-        borrador.setArancelTipos(arancelTipos());
+        borrador.setArancelTipos(arancelTipos(borrador.getLectivoId(), borrador.getArancelTipoId()));
         borrador.setAvisos(avisosBorrador(borrador, datosConstruccionSeguro(borrador)));
         return borrador;
     }
@@ -405,6 +405,10 @@ public class BorradorEmisionService {
         if (borrador.getAlternativaId() == null) {
             avisos.add(AvisoEmision.bloqueante(ReglasEmision.SIN_ALTERNATIVA,
                     "Debe seleccionar una alternativa de pago"));
+        }
+        if (borrador.getArancelTipoId() == null || borrador.getArancelTipoId() == 0) {
+            avisos.add(AvisoEmision.bloqueante(ReglasEmision.SIN_ARANCEL_TIPO,
+                    "Debe seleccionar el tipo de arancel antes de emitir"));
         }
         if (borrador.getEmailPersonal() == null || borrador.getEmailPersonal().isBlank()) {
             avisos.add(AvisoEmision.bloqueante(ReglasEmision.SIN_EMAIL_PERSONAL,
@@ -579,6 +583,54 @@ public class BorradorEmisionService {
                 .findFirst().orElse(null);
     }
 
+    /**
+     * Tipo de arancel del borrador.
+     *
+     * <p>El legacy precarga el combo con el arancel de la chequera al seleccionar la fila
+     * ({@code frmImpChequera:1040}) y no deja emitir sin arancel ({@code frm:1005}). Si el
+     * request no trae uno válido se hereda el de la serie: escribir {@code 0} en
+     * {@code chequera_serie.ChS_ArT_ID} rompe la FK contra {@code arancel_tipo}.</p>
+     */
+    private Integer resolverArancelTipo(Integer solicitado, ChequeraSerie serie) {
+        if (solicitado != null && solicitado > 0) {
+            return solicitado;
+        }
+        if (serie != null && serie.getArancelTipoId() != null && serie.getArancelTipoId() > 0) {
+            log.debug("Borrador sin tipo de arancel: se hereda {} de la chequera {}", serie.getArancelTipoId(),
+                    serie.getChequeraSerieId());
+            return serie.getArancelTipoId();
+        }
+        return 0;
+    }
+
+    /**
+     * Repara un borrador abierto que quedó con arancel {@code 0} (creado por una versión que no
+     * heredaba el arancel de la serie): copia el arancel de la chequera y reconstruye las cuotas,
+     * igual que "Guardar" con el arancel elegido. Sin esto el borrador no se puede emitir porque
+     * {@code chequera_serie.ChS_ArT_ID} y {@code chequera_cuota.arancel_tipo_id} son FK a
+     * {@code arancel_tipo}.
+     */
+    private BorradorChequera heredarArancelDeLaSerie(BorradorChequera borrador, ChequeraSerie serie) {
+        if (serie == null || serie.getArancelTipoId() == null || serie.getArancelTipoId() == 0
+                || borrador.getArancelTipoId() != null && borrador.getArancelTipoId() > 0) {
+            return borrador;
+        }
+        log.warn("Borrador {} sin tipo de arancel: se hereda {} de la chequera {}", borrador.getBorradorId(),
+                serie.getArancelTipoId(), serie.getChequeraSerieId());
+        borrador.setArancelTipoId(serie.getArancelTipoId());
+        try {
+            if (borrador.getCuotas() != null && !borrador.getCuotas().isEmpty()) {
+                borrador.setCuotas(borradorFactory.construirDesdeBorrador(new ArrayList<>(borrador.getCuotas()),
+                        datosConstruccion(borrador)));
+            }
+        } catch (RuntimeException e) {
+            // La emisión vuelve a resolver el arancel de las cuotas: no romper el alta del borrador.
+            log.warn("No se pudieron recalcular las cuotas del borrador {} al heredar el arancel: {}",
+                    borrador.getBorradorId(), e.getMessage());
+        }
+        return borradorRepository.save(borrador);
+    }
+
     private Optional<ChequeraSerie> serie(BorradorChequera borrador) {
         if (borrador.getChequeraSerieId() == null) {
             return Optional.empty();
@@ -647,13 +699,39 @@ public class BorradorEmisionService {
                 .toList();
     }
 
-    public List<ArancelTipoEmision> arancelTipos() {
-        return arancelTipoService.findAll().stream()
+    /**
+     * Tipos de arancel que ofrece el borrador.
+     *
+     * <p>{@code cboArancelTipo}: si el lectivo es {@code >= 37} sólo se ofrecen los habilitados
+     * ({@code frmImpChequera:1292-1296}); con lectivos viejos se ofrecen todos. El arancel que ya
+     * tiene el borrador se agrega siempre, para no dejar sin opción a un borrador creado con un
+     * arancel que hoy está deshabilitado.</p>
+     */
+    public List<ArancelTipoEmision> arancelTipos(Integer lectivoId, Integer arancelTipoIdActual) {
+        boolean soloHabilitados = lectivoId != null && lectivoId >= ReglasEmision.LECTIVO_ARANCELES_HABILITADOS;
+        List<ArancelTipoEmision> tipos = new ArrayList<>((soloHabilitados
+                ? arancelTipoService.findAllHabilitados()
+                : arancelTipoService.findAll())
+                .stream()
                 .map(tipo -> ArancelTipoEmision.builder()
                         .arancelTipoId(tipo.getArancelTipoId())
                         .nombre(tipo.getDescripcion())
                         .build())
-                .toList();
+                .toList());
+        if (arancelTipoIdActual != null && arancelTipoIdActual > 0
+                && tipos.stream().noneMatch(tipo -> Objects.equals(tipo.getArancelTipoId(), arancelTipoIdActual))) {
+            try {
+                var actual = arancelTipoService.findByArancelTipoId(arancelTipoIdActual);
+                tipos.add(ArancelTipoEmision.builder()
+                        .arancelTipoId(actual.getArancelTipoId())
+                        .nombre(actual.getDescripcion())
+                        .build());
+                tipos.sort(java.util.Comparator.comparing(ArancelTipoEmision::getArancelTipoId));
+            } catch (RuntimeException e) {
+                log.warn("El borrador referencia el arancel {} que no existe en arancel_tipo", arancelTipoIdActual);
+            }
+        }
+        return tipos;
     }
 
     private PermisosEmision permisos(Long usuarioId) {

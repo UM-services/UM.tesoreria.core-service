@@ -36,6 +36,12 @@ public final class ReglasEmision {
     /** {@code cboLectivo} deshabilita los lectivos mayores o iguales a este valor. */
     public static final int LECTIVO_MAXIMO_SELECCIONABLE = 37;
 
+    /**
+     * {@code cboLectivo_Click} ({@code :1292-1296}): desde este lectivo el combo de aranceles
+     * ofrece sólo los tipos habilitados.
+     */
+    public static final int LECTIVO_ARANCELES_HABILITADOS = 37;
+
     /** {@code makeChequera}: tipo de impresión Rapipago. */
     public static final int TIPO_IMPRESION_RAPIPAGO = 2;
 
@@ -52,6 +58,8 @@ public final class ReglasEmision {
     public static final String SIN_DATOS = "SIN_DATOS";
     public static final String SIN_CURSO = "SIN_CURSO";
     public static final String SIN_ALTERNATIVA = "SIN_ALTERNATIVA";
+    /** Sin tipo de arancel no se puede emitir: {@code chequera_serie.ChS_ArT_ID} es FK a {@code arancel_tipo}. */
+    public static final String SIN_ARANCEL_TIPO = "SIN_ARANCEL_TIPO";
     public static final String SIN_CUOTAS = "SIN_CUOTAS";
     public static final String SIN_EMAIL_PERSONAL = "SIN_EMAIL_PERSONAL";
     public static final String EMAIL_INVALIDO = "EMAIL_INVALIDO";

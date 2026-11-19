@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - CuentaMovimiento (v3.36.0)
+title: Arquitectura Hexagonal - CuentaMovimiento (v12.9.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -10,6 +10,7 @@ flowchart TD
         CO[Comprobante<br/>Modelo de Dominio]
         PM[ProveedorMovimiento<br/>Modelo de Dominio]
         T[Track<br/>Modelo de Dominio]
+        SC[SumaCuenta<br/>Débitos y créditos por cuenta]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
@@ -24,6 +25,7 @@ flowchart TD
         UC8[DeleteByCuentaMovimientoIdUseCase]
         UC9[DeleteAllByCuentaMovimientoIdInUseCase]
         UC10[DeleteAsientoUseCase]
+        UC11[SumarPorCuentaUseCase]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
@@ -34,6 +36,7 @@ flowchart TD
         Req[CuentaMovimientoRequest<br/>DTO Entrada]
         Resp[CuentaMovimientoResponse<br/>DTO Salida]
         ENT[CuentaMovimientoEntity<br/>Entidad JPA]
+        PR[MovimientoImporteProjection<br/>cuenta, sentido e importe]
     end
 
     subgraph Externo ["Externo (External)"]
@@ -57,11 +60,14 @@ flowchart TD
     Svc -->|ejecuta| UC8
     Svc -->|ejecuta| UC9
     Svc -->|ejecuta| UC10
+    Svc -->|ejecuta| UC11
+    UC11 -->|produce| SC
 
     JPA -->|implementa| CR
     JPA -->|persiste| JPAR
     JPA -->|gestiona| ENT
     JPA -->|usa| CMM
+    JPA -->|suma con| PR
 
     CMM -->|convierte| CM
     CMM -->|convierte| ENT
@@ -76,6 +82,7 @@ flowchart TD
     style CO fill:#e1f5fe
     style PM fill:#e1f5fe
     style T fill:#e1f5fe
+    style SC fill:#e1f5fe
     style CR fill:#f3e5f5
     style Svc fill:#fff3e0
     style CC fill:#e8f5e8
@@ -83,3 +90,4 @@ flowchart TD
     style CMM fill:#e8f5e8
     style DM fill:#e8f5e8
     style ENT fill:#e8f5e8
+    style PR fill:#fff3e0

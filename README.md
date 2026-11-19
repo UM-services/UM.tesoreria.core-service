@@ -11,13 +11,22 @@
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
 ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-Hibernate-6DB33F?logo=spring&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)
-[![Versión](https://img.shields.io/badge/versión-12.8.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.9.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.8.0**
+**Versión actual (SemVer): 12.9.0**
+
+## Novedades 12.9.0 (verificado en código)
+
+- **feat(balance)**: sumas y saldos en JSON. `POST /api/tesoreria/core/balance/sumasysaldos/consulta` (también `/balance/sumasysaldos/consulta`) con `{desde, hasta}` devuelve una fila por cuenta imputable (grado 5, también sin movimientos) con saldo inicial de débitos/créditos, débitos y créditos del período, saldo deudor/acreedor y totales por columna; valida que ambas fechas caigan en el mismo ejercicio (`MayorConsultaException`). El cálculo vive en `SumasSaldosService` y `ContabilidadService.saldosPorCuenta`, no en el front.
+- **perf(contable)**: `ContabilidadService.saldosPorCuenta` obtiene todas las cuentas en tres consultas agrupadas (apertura del ejercicio, movimientos anteriores al período y período) mediante el caso de uso `SumarPorCuentaUseCase` del slice `contable/cuentaMovimiento` (consulta derivada `findAllByFechaContableBetweenAndApertura` con proyección cerrada, suma en el adaptador, sin `@Query`). El Excel `GET /balance/sumasysaldos/{desde}/{hasta}` usa el mismo cálculo: pasa de hasta 3 consultas por cuenta a 3 en total, con las mismas columnas, importes y regla de saldo.
+- **fix(chequera/emision)**: el borrador no nace más con `arancelTipoId = 0`. Si el request no trae un arancel válido se hereda el de la serie y un borrador `ABIERTO` que quedó en `0` se repara al retomarlo (copia el arancel de la chequera y reconstruye las cuotas con `BorradorFactory`, igual que «Guardar»), porque `chequera_serie.ChS_ArT_ID` y `chequera_cuota.arancel_tipo_id` son FK a `arancel_tipo`. La emisión valida el arancel antes de escribir: hereda el de la serie existente, verifica que exista y responde `422 SIN_ARANCEL_TIPO` en lugar del `500` de integridad referencial; el `arancel_tipo_id` de la cuota tampoco persiste el `0`.
+- **feat(chequera/emision)**: aviso bloqueante `SIN_ARANCEL_TIPO` en el borrador y combo de aranceles acorde al legacy: con `lectivoId >= 37` (`ReglasEmision.LECTIVO_ARANCELES_HABILITADOS`) sólo se ofrecen los tipos con `habilitado = 1`; con lectivos viejos, todos. El arancel ya elegido por el borrador se ofrece siempre, aunque hoy esté deshabilitado. Sin DDL, dependencias ni `@Query` nuevos.
+
+> Basado en `git diff HEAD` (staged, 2026-11-19) más el diff de `bb55b628` (merge #537, ya en `develop`): 5 archivos locales del slice `hexagonal/chequera/emision` (+285/−12, incluidos sus dos tests) y, del balance, `BalanceController` (`POST /sumasysaldos/consulta`), `SumasSaldosService`/`SumasSaldosFila`/`SumasSaldosRequest`/`SumasSaldosResponse`, `SaldosCuenta`, `ContabilidadService.saldosPorCuenta`, `BalanceService` y `SumarPorCuentaUseCase` en `contable/cuentaMovimiento`. Endpoint JSON nuevo (aditivo) + correcciones de emisión ⇒ **minor** (`12.8.0` → `12.9.0`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); los diagramas se validaron con `mmdc`.
 
 ## Novedades 12.8.0 (verificado en código)
 

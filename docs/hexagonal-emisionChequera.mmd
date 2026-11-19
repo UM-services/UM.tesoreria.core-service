@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.8.0)
+title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.9.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -13,8 +13,8 @@ flowchart TD
     subgraph Aplicacion ["Aplicación (Application)"]
         Facade["EmisionChequeraFacade<br/>(implementa el puerto)"]
         FacadeInc["IncompletasChequerasFacade<br/>alta, emisión, consulta y cancelación del job"]
-        Borrador["BorradorEmisionService<br/>contexto, borrador, cuotas, política"]
-        Emision["EmisionChequeraService<br/>emisión transaccional"]
+        Borrador["BorradorEmisionService<br/>contexto, borrador, cuotas, política<br/>hereda y repara el arancel de la serie"]
+        Emision["EmisionChequeraService<br/>emisión transaccional<br/>valida arancel (SIN_ARANCEL_TIPO)"]
         Completar["CompletarChequerasIncompletasService<br/>padrón, prepararBorrador, emitir"]
         JobSvc["IncompletasJobService<br/>reclamar, registrar tarea, cerrar"]
         Impresion["ObtenerBorradorImpresionUseCaseImpl<br/>snapshot para el sender"]
@@ -44,6 +44,7 @@ flowchart TD
     subgraph Reuso ["Slices y legacy reutilizados"]
         Slices["ChequeraSerie / ChequeraCuota / ChequeraPago<br/>ChequeraTotal / TipoChequera / ArancelTipo<br/>Baja / Persona / Domicilio / Facultad<br/>Lectivo / Geografica / Setup / PermisoEfectivo"]
         Legacy["ChequeraSerieControlRepository @Lock<br/>ChequeraAlternativa / Debito<br/>LectivoTotal / PlantillaArancel<br/>ChequeraIncompletaService (vw_chequera_incompleta)<br/>PersonaSuspendido / LectivoCuota"]
+        Arancel["ArancelTipoService<br/>findAllHabilitados / findByArancelTipoId"]
     end
 
     Ctrl --> Facade
@@ -85,6 +86,8 @@ flowchart TD
     Worker --> Exec
     Job --> OUT
     Borrador --> Slices
+    Borrador --> Arancel
+    Emision --> Arancel
     Emision --> Slices
     Emision --> Legacy
     Num --> Legacy
@@ -121,3 +124,4 @@ flowchart TD
     style Job fill:#fff3e0
     style Slices fill:#f5f5f5
     style Legacy fill:#f5f5f5
+    style Arancel fill:#f5f5f5
