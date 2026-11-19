@@ -2,16 +2,33 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
-## [12.6.0] - 2026-11-18
+## [12.9.0] - 2026-11-19
 
 ### Added
-- **Sumas y saldos en JSON**: `POST /api/tesoreria/core/balance/sumasysaldos/consulta` (también `/balance/sumasysaldos/consulta`) con `{desde, hasta}` devuelve una fila por cuenta imputable (grado 5) con saldo inicial, débitos, créditos, saldo deudor y acreedor, más los totales por columna ([BalanceController.java], [SumasSaldosService.java], [SumasSaldosFila.java], [SumasSaldosRequest.java], [SumasSaldosResponse.java])
-- `ContabilidadService.saldosPorCuenta`: saldo inicial y movimientos del período de todas las cuentas en tres consultas agrupadas (apertura, movimientos anteriores al período y período) ([ContabilidadService.java], [SaldosCuenta.java])
-- Slice `contable/cuentaMovimiento`: caso de uso `SumarPorCuentaUseCase` y consulta derivada `findAllByFechaContableBetweenAndApertura` con proyección cerrada (sólo cuenta, sentido e importe) y suma por cuenta en el adaptador, sin `@Query` ([SumaCuenta.java], [MovimientoImporteProjection.java], [SumarPorCuentaUseCase.java], [SumarPorCuentaUseCaseImpl.java], [CuentaMovimientoRepository.java], [JpaCuentaMovimientoRepository.java], [JpaCuentaMovimientoRepositoryAdapter.java], [CuentaMovimientoService.java])
-- Tests `SumasSaldosServiceTest` y `ContabilidadSaldosPorCuentaTest`
+
+- **Sumas y saldos en JSON** (`controller/facade/BalanceController`, capa legacy a propósito como el mayor): `POST /api/tesoreria/core/balance/sumasysaldos/consulta` (también `/balance/sumasysaldos/consulta`) recibe `{desde, hasta}` y devuelve una fila por cuenta imputable (grado 5, también las sin movimientos) con saldo inicial de débitos/créditos, débitos y créditos del período, saldo deudor/acreedor y los totales por columna; valida que ambas fechas caigan en el mismo ejercicio (`MayorConsultaException`) ([BalanceController.java], [SumasSaldosService.java], [SumasSaldosFila.java], [SumasSaldosRequest.java], [SumasSaldosResponse.java], [SaldosCuenta.java])
+- `ContabilidadService.saldosPorCuenta`: saldo inicial y movimientos del período de todas las cuentas en tres consultas agrupadas (apertura del ejercicio, movimientos anteriores al período y período), con la clave de cuenta normalizada ([ContabilidadService.java])
+- Slice `contable/cuentaMovimiento`: caso de uso `SumarPorCuentaUseCase` y consulta derivada `findAllByFechaContableBetweenAndApertura` con proyección cerrada (sólo cuenta, sentido e importe) y suma por cuenta en el adaptador (`debita = 1` debe, `debita = 0` haber), sin `@Query` ([SumaCuenta.java], [MovimientoImporteProjection.java], [SumarPorCuentaUseCase.java], [SumarPorCuentaUseCaseImpl.java], [CuentaMovimientoRepository.java], [JpaCuentaMovimientoRepository.java], [JpaCuentaMovimientoRepositoryAdapter.java], [CuentaMovimientoService.java])
+- **chequera/emision**: aviso bloqueante `SIN_ARANCEL_TIPO` en el borrador cuando no hay tipo de arancel, con `ReglasEmision.LECTIVO_ARANCELES_HABILITADOS = 37` como umbral del combo ([ReglasEmision.java], [BorradorEmisionService.java])
+- Tests `SumasSaldosServiceTest` y `ContabilidadSaldosPorCuentaTest`, más casos nuevos en `BorradorEmisionServiceTest` (herencia y reparación del arancel, combo filtrado) y `EmisionChequeraServiceTest` (emisión sin arancel y herencia desde la serie)
+
 ### Changed
-- El Excel `GET /balance/sumasysaldos/{desde}/{hasta}` usa el mismo cálculo por lotes: pasa de hasta 3 consultas por cuenta a 3 consultas en total. Las columnas, los importes y la regla de saldo no cambian; se siguen listando todas las cuentas de grado 5, también las sin movimientos ([BalanceService.java])
+
+- El Excel `GET /balance/sumasysaldos/{desde}/{hasta}` usa el mismo cálculo por lotes (`SumasSaldosService.filas`): pasa de hasta 3 consultas por cuenta a 3 consultas en total. Las columnas, los importes y la regla de saldo no cambian; se siguen listando todas las cuentas de grado 5, también las sin movimientos ([BalanceService.java])
+- **chequera/emision**: `arancelTipos` del borrador respeta `cboArancelTipo` del legacy: con `lectivoId >= 37` sólo ofrece los tipos con `habilitado = 1` (`ArancelTipoService.findAllHabilitados`); con lectivos viejos ofrece todos. El arancel que ya tiene el borrador se agrega siempre, aunque hoy esté deshabilitado, para no dejar el combo sin su valor actual ([BorradorEmisionService.java], [ArancelTipoService.java])
 - `CuentaPersistenceTest` y `BalanceControllerMayorTest` se adaptan a los colaboradores nuevos
+
+### Fixed
+
+- **chequera/emision**: el borrador deja de nacer con `arancelTipoId = 0`. Si el request no trae un arancel válido se hereda el de la serie (`resolverArancelTipo`), y un borrador `ABIERTO` que quedó en `0` se repara al retomarlo (`heredarArancelDeLaSerie`: copia el arancel de la chequera y reconstruye las cuotas con `BorradorFactory`, igual que «Guardar»), porque `chequera_serie.ChS_ArT_ID` y `chequera_cuota.arancel_tipo_id` son FK a `arancel_tipo` ([BorradorEmisionService.java])
+- **chequera/emision**: la emisión resuelve el arancel antes de escribir (`resolverArancelTipo`): hereda el de la serie existente cuando el borrador trae `0`, valida que exista en `arancel_tipo` y, si no hay arancel, falla con `EmisionException(SIN_ARANCEL_TIPO)` ⇒ `422` en lugar del `500` de integridad referencial. El `arancel_tipo_id` de la cuota tampoco persiste el `0` del borrador (`arancelTipoDeCuota`) ([EmisionChequeraService.java], [EmisionExceptionHandler.java])
+
+### Notes
+
+- **Corrección de documentación**: la refactorización de sumas y saldos (merge #537) se había anotado en el `CHANGELOG` bajo un encabezado `[12.6.0] - 2026-11-18` duplicado y fuera de orden, sin bump de versión. Su contenido queda en esta release, que además normaliza el archivo en orden descendente.
+- Sin DDL externo, sin dependencias nuevas y sin `@Query` nuevos. Los contratos existentes no cambian: se agrega un endpoint y se corrigen reglas de negocio de la emisión.
+
+> Based on `git diff HEAD` (staged, 2026-11-19) + `git diff` de `bb55b628` (merge #537, ya en `develop`): el diff local toca `BorradorEmisionService`, `EmisionChequeraService`, `ReglasEmision` y sus dos tests (285 inserciones, 12 borrados); el balance aporta `BalanceController` (`POST /sumasysaldos/consulta`), `SumasSaldosService`/`SumasSaldosFila`/`SumasSaldosRequest`/`SumasSaldosResponse`, `SaldosCuenta`, `ContabilidadService.saldosPorCuenta`, `BalanceService` y el caso de uso `SumarPorCuentaUseCase` en `contable/cuentaMovimiento`. Un endpoint JSON nuevo (capacidad pública aditiva) + correcciones de la emisión ⇒ incremento **minor** (`12.8.0` → `12.9.0`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); los diagramas se validaron con `mmdc`.
 
 ## [12.8.0] - 2026-11-18
 

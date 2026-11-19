@@ -6,18 +6,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import um.tesoreria.core.hexagonal.chequera.arancelPorcentaje.application.service.ArancelPorcentajeService;
+import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.service.ArancelTipoService;
 import um.tesoreria.core.hexagonal.chequera.baja.application.service.BajaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.service.ChequeraPagoService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraTotal.application.service.ChequeraTotalService;
+import um.tesoreria.core.hexagonal.chequera.emision.application.exception.EmisionException;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorChequera;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorCuota;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.EstadoBorrador;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.SolicitudEmision;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.out.BorradorChequeraRepository;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.out.NumeradorChequeraPort;
+import um.tesoreria.core.hexagonal.chequera.emision.domain.service.ReglasEmision;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.application.service.TipoChequeraService;
 import um.tesoreria.core.hexagonal.chequera.tipoChequera.domain.model.TipoChequera;
@@ -35,7 +38,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -73,6 +79,8 @@ class EmisionChequeraServiceTest {
     private LectivoAlternativaService lectivoAlternativaService;
     @Mock
     private ArancelPorcentajeService arancelPorcentajeService;
+    @Mock
+    private ArancelTipoService arancelTipoService;
     @Mock
     private TipoChequeraService tipoChequeraService;
     @Mock
@@ -189,6 +197,41 @@ class EmisionChequeraServiceTest {
         service.emitir(1L, SolicitudEmision.builder().forzarNueva(false).usuarioLogin("edgardo").build(), null);
 
         assertEquals("edgardo", serie.getUsuarioId());
+    }
+
+    @Test
+    void noEmiteSinTipoDeArancelCuandoLaChequeraEsNueva() {
+        BorradorChequera borrador = borradorAbierto();
+        borrador.setArancelTipoId(0);
+        borrador.setChequeraSerieId(null);
+        when(borradorEmisionService.cargarAbierto(1L)).thenReturn(borrador);
+        when(tipoChequeraService.findByTipoChequeraId(2))
+                .thenReturn(TipoChequera.builder().tipoChequeraId(2).nombre("Cuota").geograficaId(1).build());
+        when(chequeraSerieService.findAllByPersonaLectivo(any(), any(), any())).thenReturn(List.of());
+
+        EmisionException exception = assertThrows(EmisionException.class,
+                () -> service.emitir(1L, SolicitudEmision.builder().forzarNueva(false).build(), null));
+
+        assertEquals(ReglasEmision.SIN_ARANCEL_TIPO, exception.getCodigo());
+        verify(chequeraSerieService, never()).update(any(), any());
+    }
+
+    @Test
+    void heredaElArancelDeLaSerieCuandoElBorradorNoLoTre() {
+        ChequeraSerie serie = ChequeraSerie.builder()
+                .chequeraId(1L).facultadId(5).tipoChequeraId(2).chequeraSerieId(10L)
+                .personaId(new BigDecimal("49024730")).documentoId(1).lectivoId(38)
+                .arancelTipoId(9).alternativaId(2).cursoId(7)
+                .becaPorcentaje(new BigDecimal("0.30")).hpum((byte) 5)
+                .build();
+        BorradorChequera borrador = borradorAbierto();
+        borrador.setArancelTipoId(0);
+        prepararStubs(serie, borrador);
+
+        service.emitir(1L, SolicitudEmision.builder().forzarNueva(false).build(), null);
+
+        assertEquals(9, serie.getArancelTipoId());
+        assertEquals(9, borrador.getArancelTipoId());
     }
 
     private void prepararStubs(ChequeraSerie serie, BorradorChequera borrador) {
