@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.chequera.arancelPorcentaje.application.service.ArancelPorcentajeService;
+import um.tesoreria.core.hexagonal.chequera.arancelTipo.application.service.ArancelTipoService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraPago.application.service.ChequeraPagoService;
@@ -79,6 +80,7 @@ public class EmisionChequeraService {
     private final LectivoTotalService lectivoTotalService;
     private final LectivoAlternativaService lectivoAlternativaService;
     private final ArancelPorcentajeService arancelPorcentajeService;
+    private final ArancelTipoService arancelTipoService;
     private final TipoChequeraService tipoChequeraService;
     private final PersonaService personaService;
     private final SetupService setupService;
@@ -126,6 +128,7 @@ public class EmisionChequeraService {
                     "La chequera " + existente.getChequeraSerieId()
                             + " está dada de baja: no se puede emitir. Marque «forzar nueva» para generar otra.");
         }
+        resolverArancelTipo(borrador, existente);
         if (nueva) {
             validarDeuda(borrador, solicitud, claves, usuarioId, avisos);
         }
@@ -213,6 +216,36 @@ public class EmisionChequeraService {
                         + solicitud.getMotivoOverride()));
     }
 
+    /**
+     * Tipo de arancel efectivo de la emisión.
+     *
+     * <p>{@code chequera_serie.ChS_ArT_ID} y {@code chequera_cuota.arancel_tipo_id} son FK a
+     * {@code arancel_tipo}: un borrador con {@code 0} (o un id inexistente) no puede emitirse y
+     * debe fallar con un error de negocio, no con un 500 de integridad referencial. Un borrador
+     * viejo sin arancel hereda el de la chequera existente, que es lo que el legacy precargaba al
+     * seleccionar la fila.</p>
+     */
+    private void resolverArancelTipo(BorradorChequera borrador, ChequeraSerie existente) {
+        Integer arancelTipoId = borrador.getArancelTipoId();
+        if ((arancelTipoId == null || arancelTipoId == 0) && existente != null
+                && existente.getArancelTipoId() != null && existente.getArancelTipoId() > 0) {
+            arancelTipoId = existente.getArancelTipoId();
+            log.warn("Borrador {} sin tipo de arancel: se hereda {} de la chequera {}", borrador.getBorradorId(),
+                    arancelTipoId, existente.getChequeraSerieId());
+            borrador.setArancelTipoId(arancelTipoId);
+        }
+        if (arancelTipoId == null || arancelTipoId == 0) {
+            throw new EmisionException(ReglasEmision.SIN_ARANCEL_TIPO,
+                    "Debe seleccionar el tipo de arancel antes de emitir");
+        }
+        try {
+            arancelTipoService.findByArancelTipoId(arancelTipoId);
+        } catch (RuntimeException e) {
+            throw new EmisionException(ReglasEmision.SIN_ARANCEL_TIPO,
+                    "El tipo de arancel " + arancelTipoId + " no existe");
+        }
+    }
+
     private ChequeraSerie crearSerie(BorradorChequera borrador, TipoChequera tipo, Long numero, Integer curso,
                                      String login) {
         ChequeraSerie serie = ChequeraSerie.builder()
@@ -279,7 +312,7 @@ public class EmisionChequeraService {
                     .cuotaId(item.getCuotaId())
                     .mes(item.getMes())
                     .anho(item.getAnio())
-                    .arancelTipoId(item.getArancelTipoId() == null ? borrador.getArancelTipoId() : item.getArancelTipoId())
+                    .arancelTipoId(arancelTipoDeCuota(item, borrador.getArancelTipoId()))
                     .vencimiento1(item.getVencimiento1())
                     .vencimiento2(item.getVencimiento2())
                     .vencimiento3(item.getVencimiento3())
@@ -460,6 +493,12 @@ public class EmisionChequeraService {
                     borrador.getDocumentoId(), e.getMessage());
         }
         return null;
+    }
+
+    /** {@code arancel_tipo_id} de la cuota es FK: nunca se persiste el {@code 0} del borrador. */
+    private static Integer arancelTipoDeCuota(BorradorCuota cuota, Integer arancelTipoId) {
+        return cuota.getArancelTipoId() == null || cuota.getArancelTipoId() == 0
+                ? arancelTipoId : cuota.getArancelTipoId();
     }
 
     private Integer tramoId(List<LectivoCuota> diseno, BorradorCuota item, Integer actual) {
