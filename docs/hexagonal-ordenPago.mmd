@@ -1,0 +1,95 @@
+---
+title: Arquitectura Hexagonal - Orden de Pago de Proveedor
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M1["OrdenPagoSolicitud<br/>OrdenPagoFactura<br/>OrdenPagoValor"]
+        M2["OrdenPagoContexto<br/>ContextoFactura<br/>ContextoEntrega<br/>ContextoValor"]
+        M3["AsientoPropuesto<br/>LineaPropuesta<br/>OrigenAsiento"]
+        M4["OrdenPagoPreview<br/>OrdenPagoResultado<br/>OrdenPagoDetalle"]
+        B["AsientoPropuestoBuilder<br/>motor puro de líneas"]
+        IN["PreviewOrdenPagoUseCase<br/>CreateOrdenPagoUseCase<br/>GetOrdenPagoDetalleUseCase<br/>(Puertos de Entrada)"]
+        OUT["NotificacionOrdenPagoPort<br/>(Puerto de Salida)"]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        P["OrdenPagoPreparador<br/>resuelve comprobante, facturas,<br/>artículos, entregas, valores y numeración"]
+        U1["PreviewOrdenPagoUseCaseImpl"]
+        U2["CreateOrdenPagoUseCaseImpl<br/>@Transactional"]
+        U3["GetOrdenPagoDetalleUseCaseImpl"]
+        S["OrdenPagoService"]
+        E["OrdenPagoException<br/>OrdenPagoValidacionException"]
+        PM["OrdenPagoPreparado"]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        C["OrdenPagoController<br/>/pagos/ordenPago"]
+        DTO["OrdenPagoRequest<br/>OrdenPagoPreviewResponse<br/>OrdenPagoResponse<br/>OrdenPagoDetalleResponse"]
+        DM["OrdenPagoDtoMapper"]
+    end
+
+    subgraph Dependientes ["Slices dependientes"]
+        PA["compras/proveedorArticulo"]
+        PMV["compras/proveedorMovimiento"]
+        VM["pagos/valorMovimiento"]
+        PV["pagos/proveedorValor"]
+        PP["pagos/proveedorPago"]
+        EN["pagos/entrega"]
+        BM["contable/bancoMovimiento"]
+        AS["contable/asiento<br/>reserva de orden"]
+        CM["contable/cuentaMovimiento"]
+        EJ["contable/ejercicio"]
+        BA["contable/bancaria"]
+        CP["comprobante"]
+        PR["compras/proveedor"]
+        AR["compras/articulo"]
+        UA["ubicacionArticulo"]
+    end
+
+    subgraph Legacy ["Capa legacy"]
+        N["OrdenPagoNotificacionAdapter"]
+        NS["NotificacionService"]
+    end
+
+    C --> S
+    C --> DM
+    C --> OUT
+    DTO --> DM
+    S --> U1
+    S --> U2
+    S --> U3
+    U1 --> P
+    U1 --> B
+    U2 --> P
+    U2 --> B
+    U3 --> PMV
+    U3 --> PP
+    U3 --> PV
+    U3 --> VM
+    P --> PMV
+    P --> CP
+    P --> PR
+    P --> PA
+    P --> AR
+    P --> EN
+    P --> UA
+    P --> VM
+    P --> BA
+    P --> EJ
+    P --> PM
+    B --> M2
+    B --> M3
+    U2 --> AS
+    U2 --> CM
+    U2 --> VM
+    U2 --> PV
+    U2 --> PP
+    U2 --> BM
+    U2 --> EN
+    N --> OUT
+    N --> NS
+    U1 --> E
+    U2 --> E
+    U3 --> E
+    M1 --> U1
+    M4 --> U3
