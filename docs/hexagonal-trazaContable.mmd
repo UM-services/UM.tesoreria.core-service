@@ -1,0 +1,60 @@
+---
+title: Traza contable de una orden de pago — slice hexagonal pagos/ordenPago
+---
+
+flowchart TD
+    subgraph Dominio
+        RA["ReconstruccionAccion<br/>CREAR / ACTUALIZAR / SIN_CAMBIOS"]
+        RS["ReconstruccionAsiento<br/>fecha, orden, orígenes, líneas a agregar,<br/>ids a eliminar, compartido"]
+        RP["ReconstruccionPlan<br/>asientos, contadores, requiereForzar"]
+        PI1["PreviewReconstruccionUseCase"]
+        PI2["ReconstruirTrazaUseCase"]
+    end
+
+    subgraph Aplicacion
+        CAL["TrazaContableCalculator<br/>diff multiconjunto por asiento"]
+        PV["PreviewReconstruccionUseCaseImpl"]
+        RC["ReconstruirTrazaUseCaseImpl<br/>@Transactional"]
+        ST["TrazaContableService<br/>@Service pagosTrazaContableService"]
+    end
+
+    subgraph Infraestructura
+        CT["TrazaContableController<br/>GET /pagos/trazaContable/{id}<br/>POST /pagos/trazaContable/{id}/reconstruir"]
+        MP["TrazaContableDtoMapper"]
+        D1["ReconstruccionRequest / ReconstruccionPlanResponse"]
+    end
+
+    subgraph "Slices de apoyo"
+        PM["ProveedorMovimientoService"]
+        PR["OrdenPagoPreparador.contextoDe"]
+        MO["AsientoPropuestoBuilder.buildOrdenPago"]
+        CM["CuentaMovimientoService"]
+        AS["AsientoService"]
+        RK["ReservarOrdenContableUseCase"]
+        EN["EntregaService.updateAsiento"]
+        VM["ValorMovimientoService.updateAsiento"]
+        EJ["EjercicioService"]
+    end
+
+    CT --> MP
+    MP --> D1
+    D1 --> ST
+    ST --> PV
+    ST --> RC
+    PV --> CAL
+    RC --> CAL
+    CAL --> PM
+    CAL --> PR
+    PR --> MO
+    CAL --> CM
+    RC --> RK
+    RC --> AS
+    RC --> CM
+    RC --> EN
+    RC --> VM
+    RC --> EJ
+    CAL --> RP
+    RP --> RS
+    RS --> RA
+    PI1 --> PV
+    PI2 --> RC

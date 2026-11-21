@@ -6,6 +6,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import um.tesoreria.core.hexagonal.contable.asiento.application.exception.AsientoException;
+import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoService;
+import um.tesoreria.core.hexagonal.contable.asiento.domain.ports.in.ReservarOrdenContableUseCase;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.hexagonal.contable.ejercicio.domain.ports.in.UpdateEjercicioUseCase;
@@ -37,6 +40,8 @@ class AsientoInflacionEjercicioTest {
     @Mock CuentaMensualService cuentaMensualService;
     @Mock CoeficienteInflacionService coeficienteInflacionService;
     @Mock CuentaMovimientoService cuentaMovimientoService;
+    @Mock ReservarOrdenContableUseCase reservarOrdenContable;
+    @Mock AsientoService asientoService;
     @InjectMocks AsientoInflacionService service;
 
     void preparar() {
@@ -44,9 +49,9 @@ class AsientoInflacionEjercicioTest {
         when(ejercicioService.findByEjercicioId(15)).thenReturn(new Ejercicio(15, "Ejercicio Económico 2026",
                 OffsetDateTime.parse("2026-03-01T00:00:00Z"), OffsetDateTime.parse("2026-03-31T00:00:00Z"),
                 (byte) 1, 0, 0));
-        CuentaMovimiento ultimo = new CuentaMovimiento();
-        ultimo.setOrdenContable(40);
-        when(cuentaMovimientoService.findLastByFecha(any())).thenReturn(ultimo);
+        when(reservarOrdenContable.reservar(any())).thenReturn(41);
+        when(asientoService.findByAsiento(any(), any()))
+                .thenThrow(new AsientoException(OffsetDateTime.parse("2026-03-31T00:00:00Z"), 41));
         when(coeficienteInflacionService.findByUnique(anyInt(), anyInt()))
                 .thenAnswer(i -> new CoeficienteInflacion(1L, i.getArgument(0), i.getArgument(1), BigDecimal.ONE));
     }

@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AsientoIngresoResumenBuilder {
 
+    private static final int COMPROBANTE_INGRESO = 3;
+
     private final CuentaMovimientoService cuentaMovimientoService;
     private final AsientoService asientoService;
     private final CuentaService cuentaService;
@@ -44,6 +46,8 @@ public class AsientoIngresoResumenBuilder {
 
         Integer orden = registro.getOrdenContable();
         List<AsientoIngresoLinea> lineas = cuentaMovimientoService.findAllByAsiento(fecha, orden, 0, 2).stream()
+                .filter(movimiento -> movimiento.getComprobanteId() != null
+                        && movimiento.getComprobanteId() == COMPROBANTE_INGRESO)
                 .map(movimiento -> AsientoIngresoLinea.builder()
                         .numeroCuenta(movimiento.getNumeroCuenta())
                         .nombreCuenta(movimiento.getCuenta() == null ? null : movimiento.getCuenta().getNombre())

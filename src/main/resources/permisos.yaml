@@ -122,6 +122,19 @@ permisos:
     descripcion: "Generar borradores y emitir chequeras incompletas"
     activo: true
 
+  # --- Chequeras: envío masivo (frmCheqMail) ---
+  - aplicacion: TESORERIA
+    clave: chequeras.envio.consultar
+    modulo: chequeras
+    descripcion: "Consultar el padrón de chequeras por lectivo, unidad académica y sede y el avance de los envíos masivos"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.envio.ejecutar
+    modulo: chequeras
+    descripcion: "Ejecutar operaciones masivas: capturar correos, extender débitos y enviar chequeras"
+    activo: true
+
   # --- Compras: proceso de pedido ---
   - aplicacion: TESORERIA
     clave: compras.iniciar_pedido
@@ -289,4 +302,128 @@ permisos:
     clave: contable.asiento_ingreso.masivo
     modulo: contable
     descripcion: "Regenerar asientos de ingreso por rango de fechas"
+    activo: true
+
+  # --- Contable: asiento manual ---
+  - aplicacion: TESORERIA
+    clave: contable.asiento_manual.crear
+    modulo: contable
+    descripcion: "Registrar un asiento contable manual"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_manual.consultar
+    modulo: contable
+    descripcion: "Consultar un asiento contable manual"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_manual.eliminar
+    modulo: contable
+    descripcion: "Eliminar un asiento contable manual"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_manual.importar
+    modulo: contable
+    descripcion: "Importar líneas de asiento manual desde una planilla XLS"
+    activo: true
+
+  # --- Contable: apertura y cierres ---
+  - aplicacion: TESORERIA
+    clave: contable.asiento_apertura.calcular
+    modulo: contable
+    descripcion: "Calcular el asiento de apertura desde el cierre anterior"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_apertura.generar
+    modulo: contable
+    descripcion: "Generar el asiento de apertura"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_cierre.calcular
+    modulo: contable
+    descripcion: "Calcular el asiento de cierre de resultado o activo-pasivo"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: contable.asiento_cierre.generar
+    modulo: contable
+    descripcion: "Generar el asiento de cierre de resultado o activo-pasivo"
+    activo: true
+
+  # --- Pagos: facturas de compras ---
+  - aplicacion: TESORERIA
+    clave: pagos.factura.crear
+    modulo: pagos
+    descripcion: "Registrar una factura de compra"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.factura.consultar
+    modulo: pagos
+    descripcion: "Consultar facturas de compra"
+    activo: true
+
+  # --- Pagos: órdenes de pago de proveedor ---
+  - aplicacion: TESORERIA
+    clave: pagos.orden_pago.crear
+    modulo: pagos
+    descripcion: "Registrar una orden de pago de proveedor"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.orden_pago.consultar
+    modulo: pagos
+    descripcion: "Consultar órdenes de pago de proveedor y su traza contable"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.orden_pago.numero_manual
+    modulo: pagos
+    descripcion: "Usar un número manual al registrar una orden de pago"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.orden_pago.anular
+    modulo: pagos
+    descripcion: "Anular una orden de pago de proveedor"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.traza.consultar
+    modulo: pagos
+    descripcion: "Consultar la traza contable de una orden de pago y su plan de reconstrucción"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.traza.reconstruir
+    modulo: pagos
+    descripcion: "Reconstruir la traza contable de una orden de pago"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.costos.asignar
+    modulo: pagos
+    descripcion: "Asignar costos a las facturas de una orden de pago"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.valores.editar
+    modulo: pagos
+    descripcion: "Agregar valores a una orden de pago existente"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.valores.anular
+    modulo: pagos
+    descripcion: "Anular un valor de una orden de pago"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: pagos.valores.eliminar
+    modulo: pagos
+    descripcion: "Eliminar un valor de una orden de pago"
     activo: true

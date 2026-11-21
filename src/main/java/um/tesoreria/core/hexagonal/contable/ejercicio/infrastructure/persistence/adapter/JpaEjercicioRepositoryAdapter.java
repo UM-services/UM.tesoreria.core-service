@@ -45,6 +45,20 @@ public class JpaEjercicioRepositoryAdapter implements EjercicioRepository {
     }
 
     @Override
+    public Optional<Ejercicio> findByEjercicioId(Integer ejercicioId) {
+        return jpaRepository.findById(ejercicioId).map(mapper::toDomain);
+    }
+
+    @Override
+    public Optional<Ejercicio> findByFecha(java.time.LocalDate fecha) {
+        java.time.OffsetDateTime contable = fecha.atStartOfDay().atOffset(java.time.ZoneOffset.UTC);
+        return jpaRepository
+                .findFirstByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqualOrderByEjercicioIdDesc(
+                        contable, contable)
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public Ejercicio create(Ejercicio ejercicio) {
         EjercicioEntity entity = mapper.toEntity(ejercicio);
         try {

@@ -1,0 +1,42 @@
+---
+title: Asiento de Cierre — slice hexagonal contable/asientoCierre (v12.10.0)
+---
+
+flowchart TD
+    subgraph Dominio
+        PI["AsientoCierreUseCase<br/>preview(ejercicioId, variante)<br/>registrar(ejercicioId, variante, concepto, lineas)"]
+        V["VarianteCierre<br/>RESULTADO → 'Asiento Cierre Resultado'<br/>ACTIVO_PASIVO → 'Asiento Cierre Activo-Pasivo'"]
+        L["AsientoContableLinea<br/>AsientoContableResultado<br/>(contable/asiento)"]
+    end
+
+    subgraph Aplicacion
+        S["AsientoCierreService<br/>saldo (debe - haber) del período por cuenta,<br/>invierte el sentido y omite saldos en cero"]
+        E["AsientoCierreException<br/>EJERCICIO_INEXISTENTE, EJERCICIO_BLOQUEADO,<br/>SIN_LINEAS, LINEA_INVALIDA"]
+    end
+
+    subgraph Infraestructura
+        C["AsientoCierreController<br/>GET/POST /api/tesoreria/core/asientoCierre/{ejercicioId}/resultado[/preview]<br/>GET/POST /api/tesoreria/core/asientoCierre/{ejercicioId}/activo-pasivo[/preview]<br/>comprobanteId = 1"]
+        M["AsientoContableDtoMapper"]
+        D1["CierreRequest<br/>concepto, lineas"]
+    end
+
+    subgraph "Slices de apoyo"
+        AS["AsientoService.add<br/>cabecera del asiento"]
+        CM["CuentaMovimientoService<br/>sumarPorCuenta / createCuentaMovimiento"]
+        CU["CuentaService<br/>findAllByCierreResultado<br/>findAllByCierreActivoPasivo"]
+        RK["ReservarOrdenContableUseCase<br/>reservar(fecha de cierre)"]
+        EJ["EjercicioRepository<br/>findByEjercicioId"]
+    end
+
+    C --> M
+    M --> D1
+    D1 --> S
+    S --> PI
+    PI --> V
+    PI --> L
+    S --> EJ
+    S --> CU
+    S --> CM
+    S --> RK
+    S --> AS
+    S --> E

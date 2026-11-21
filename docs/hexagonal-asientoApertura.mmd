@@ -1,0 +1,43 @@
+---
+title: Asiento de Apertura — slice hexagonal contable/asientoApertura (v12.10.0)
+---
+
+flowchart TD
+    subgraph Dominio
+        PI["AsientoAperturaUseCase<br/>preview(ejercicioId, referencia)<br/>registrar(ejercicioId, concepto, lineas)"]
+        L["AsientoContableLinea<br/>AsientoContableResultado<br/>(contable/asiento)"]
+    end
+
+    subgraph Aplicacion
+        S["AsientoAperturaService<br/>clona el cierre del ejercicio anterior,<br/>invierte Debe/Haber y guarda al inicio<br/>del ejercicio con vínculo 'Asiento Apertura'"]
+        E["AsientoAperturaException<br/>REFERENCIA_INVALIDA, EJERCICIO_ANTERIOR_INEXISTENTE,<br/>EJERCICIO_INEXISTENTE, EJERCICIO_BLOQUEADO,<br/>SIN_LINEAS, LINEA_INVALIDA"]
+    end
+
+    subgraph Infraestructura
+        C["AsientoAperturaController<br/>POST /api/tesoreria/core/asientoApertura/{ejercicioId}/preview<br/>POST /api/tesoreria/core/asientoApertura/{ejercicioId}<br/>comprobanteId = 1"]
+        M["AsientoContableDtoMapper"]
+        D1["AperturaPreviewRequest<br/>referencia"]
+        D2["AperturaRequest<br/>concepto, lineas"]
+    end
+
+    subgraph "Slices de apoyo"
+        AS["AsientoService.add<br/>cabecera del asiento"]
+        CM["CuentaMovimientoService<br/>findAllByAsiento / createCuentaMovimiento"]
+        CU["CuentaService<br/>findAllByNumeroCuentaIn"]
+        RK["ReservarOrdenContableUseCase<br/>reservar(fecha)"]
+        EJ["EjercicioRepository<br/>findByEjercicioId"]
+    end
+
+    C --> M
+    M --> D1
+    M --> D2
+    D1 --> S
+    D2 --> S
+    S --> PI
+    PI --> L
+    S --> EJ
+    S --> CM
+    S --> CU
+    S --> RK
+    S --> AS
+    S --> E

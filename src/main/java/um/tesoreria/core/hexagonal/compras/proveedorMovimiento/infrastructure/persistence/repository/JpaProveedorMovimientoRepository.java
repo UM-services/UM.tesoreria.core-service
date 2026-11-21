@@ -56,6 +56,9 @@ public interface JpaProveedorMovimientoRepository extends JpaRepository<Proveedo
 
 	Optional<ProveedorMovimientoEntity> findByPrefijoAndNumeroComprobanteAndComprobanteIdIn(Integer prefijo, Long numeroComprobante, List<Integer> comprobanteIds);
 
+	Optional<ProveedorMovimientoEntity> findFirstByProveedorIdAndComprobanteIdAndPrefijoAndNumeroComprobante(
+			Integer proveedorId, Integer comprobanteId, Integer prefijo, Long numeroComprobante);
+
 	Optional<ProveedorMovimientoEntity> findTopByPrefijoAndComprobanteIdInOrderByNumeroComprobanteDesc(Integer prefijo, List<Integer> comprobanteIds);
 
     void deleteByProveedorMovimientoId(Long proveedorMovimientoId);

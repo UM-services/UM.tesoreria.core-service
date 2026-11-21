@@ -8,7 +8,7 @@ class ContabilidadGradosTest {
     @Test
     void balanceDelegaRecalculoYConservaLimpiezaSinMergeDeCuentas() {
         CuentaService cuentas = mock(CuentaService.class);
-        ContabilidadService contabilidad = new ContabilidadService(null, cuentas, null, null, null, null, null, null);
+        ContabilidadService contabilidad = new ContabilidadService(null, null, cuentas, null, null, null, null, null, null);
         contabilidad.recalculateGrados();
         var orden = inOrder(cuentas);
         orden.verify(cuentas).recalculaGrados();

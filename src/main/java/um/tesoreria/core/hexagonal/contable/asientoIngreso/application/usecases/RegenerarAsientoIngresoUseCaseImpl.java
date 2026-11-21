@@ -12,7 +12,9 @@ import um.tesoreria.core.exception.EjercicioException;
 import um.tesoreria.core.exception.FacultadPagoCuentaException;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.GetChequeraSerieByUniqueUseCase;
+import um.tesoreria.core.hexagonal.contable.asiento.application.exception.AsientoException;
 import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoService;
+import um.tesoreria.core.hexagonal.contable.asiento.domain.ports.in.ReservarOrdenContableUseCase;
 import um.tesoreria.core.hexagonal.contable.asiento.infrastructure.persistence.entity.AsientoEntity;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.application.exception.AsientoIngresoException;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.application.exception.AsientoIngresoException.Codigo;
@@ -37,7 +39,6 @@ import um.tesoreria.core.model.dto.PagoDto;
 import um.tesoreria.core.service.ChequeraSerieReemplazoService;
 import um.tesoreria.core.service.EjercicioService;
 import um.tesoreria.core.service.FacultadPagoCuentaService;
-import um.tesoreria.core.service.facade.ContabilidadService;
 import um.tesoreria.core.service.facade.PagoService;
 
 import java.math.BigDecimal;
@@ -69,7 +70,7 @@ public class RegenerarAsientoIngresoUseCaseImpl implements RegenerarAsientoIngre
     private final IngresoItemRepository ingresoItemRepository;
     private final ChequeraPagoAsientoEscrituraRepository chequeraPagoAsientoRepository;
     private final PagoService pagoService;
-    private final ContabilidadService contabilidadService;
+    private final ReservarOrdenContableUseCase reservarOrdenContable;
     private final AsientoService asientoService;
     private final CuentaMovimientoService cuentaMovimientoService;
     private final FacultadPagoCuentaService facultadPagoCuentaService;
@@ -157,15 +158,17 @@ public class RegenerarAsientoIngresoUseCaseImpl implements RegenerarAsientoIngre
         AsientoIngresoRegistro registro = mapaRepository.findWithLockByFechaAndTipoPago(fecha, tipoPagoId)
                 .orElse(null);
         if (registro == null) {
-            var memoria = contabilidadService.nextAsiento(fecha, null);
-            registro = mapaRepository.create(fecha, tipoPagoId, memoria.getOrdenContable());
+            registro = mapaRepository.create(fecha, tipoPagoId, reservarOrdenContable.reservar(fecha));
+        } else if (!ordenDisponible(fecha, tipoPagoId, registro.getOrdenContable())) {
+            // El orden reservado por el legacy quedó compartido con una OP/factura: se re-reserva
+            // para no pisar ni borrar líneas ajenas.
+            log.warn("Orden {} de {} tipo {} ocupado por otro comprobante: se re-reserva",
+                    registro.getOrdenContable(), fecha.toLocalDate(), tipoPagoId);
+            registro = mapaRepository.updateOrden(registro, reservarOrdenContable.reservar(fecha));
         }
         Integer orden = registro.getOrdenContable();
 
-        if (!contabilidadService.deleteAsiento(fecha, orden)) {
-            throw new AsientoIngresoException(Codigo.REGENERACION_FALLIDA,
-                    "No se pudo borrar el asiento anterior de la fecha " + fecha.toLocalDate() + " orden " + orden);
-        }
+        borrarAsientoPropio(fecha, orden);
         // Las bajas de asiento/movcon quedan encoladas: hay que ejecutarlas antes de insertar las
         // líneas nuevas (Hibernate ordena INSERT antes que DELETE en el mismo flush).
         chequeraPagoAsientoRepository.flush();
@@ -234,6 +237,51 @@ public class RegenerarAsientoIngresoUseCaseImpl implements RegenerarAsientoIngre
         }
     }
 
+    /** El orden del mapa se puede reutilizar sólo si sigue siendo de este ingreso y de nadie más. */
+    private boolean ordenDisponible(OffsetDateTime fecha, Integer tipoPagoId, Integer orden) {
+        if (mapaRepository.existsOtherByFechaAndOrden(fecha, orden, tipoPagoId)) {
+            return false;
+        }
+        try {
+            AsientoEntity asiento = asientoService.findByAsiento(fecha, orden);
+            if (!VINCULO.equals(asiento.getVinculo())) {
+                return false;
+            }
+        } catch (AsientoException ignored) {
+            // Sin cabecera: puede ser un mapa de un intento anterior sin movimientos.
+        }
+        return cuentaMovimientoService.findAllByAsiento(fecha, orden, 0, 2).stream()
+                .allMatch(this::esLineaIngreso);
+    }
+
+    /**
+     * Borra sólo las líneas del ingreso. Si el orden tuviera líneas de otro comprobante no se
+     * borra nada: se aborta para no destruir un asiento ajeno.
+     */
+    private void borrarAsientoPropio(OffsetDateTime fecha, Integer orden) {
+        List<CuentaMovimiento> movimientos = cuentaMovimientoService.findAllByAsiento(fecha, orden, 0, 2);
+        boolean hayAjenos = movimientos.stream().anyMatch(movimiento -> !esLineaIngreso(movimiento));
+        if (hayAjenos) {
+            throw new AsientoIngresoException(Codigo.REGENERACION_FALLIDA,
+                    "El orden " + orden + " de la fecha " + fecha.toLocalDate()
+                            + " tiene líneas de otro comprobante; no se puede regenerar el ingreso");
+        }
+        if (!movimientos.isEmpty()) {
+            cuentaMovimientoService.deleteAllByCuentaMovimientoIdIn(movimientos.stream()
+                    .map(CuentaMovimiento::getCuentaMovimientoId)
+                    .toList());
+        }
+        try {
+            asientoService.deleteByAsientoId(asientoService.findByAsiento(fecha, orden).getAsientoId());
+        } catch (AsientoException ignored) {
+            // Sin cabecera: nada que borrar.
+        }
+    }
+
+    private boolean esLineaIngreso(CuentaMovimiento movimiento) {
+        return movimiento.getComprobanteId() != null && movimiento.getComprobanteId() == COMPROBANTE_INGRESO;
+    }
+
     private PagoIngreso toPago(PagoDto pago) {
         return PagoIngreso.builder()
                 .facultadId(pago.getFacultadId())
@@ -243,12 +291,24 @@ public class RegenerarAsientoIngresoUseCaseImpl implements RegenerarAsientoIngre
                 .alternativaId(pago.getAlternativaId())
                 .cuotaId(pago.getCuotaId())
                 .orden(pago.getOrden())
-                .fecha(pago.getFecha())
+                .fecha(diaContable(pago.getFecha()))
                 .importe(pago.getImportePagado() == null ? BigDecimal.ZERO : pago.getImportePagado())
                 .tipoPagoId(pago.getTipoPagoId())
                 .chequeraPagoId(pago.getChequeraPagoId())
                 .chequeraPagoReemplazoId(pago.getChequeraPagoReemplazoId())
                 .build();
+    }
+
+    /**
+     * El legacy guarda en {@code chequera_pago_asiento.fecha} el día contable
+     * ({@code DateValue(pago.fecha)}), no el timestamp. Mercado Pago trae pagos con hora
+     * (00:03:20) y, sin truncar, {@code getItems} —que filtra por medianoche exacta— no los ve.
+     */
+    private static OffsetDateTime diaContable(OffsetDateTime fecha) {
+        if (fecha == null) {
+            return null;
+        }
+        return fecha.toLocalDate().atStartOfDay().atOffset(fecha.getOffset());
     }
 
     private Integer lectivoId(PagoIngreso pago) {

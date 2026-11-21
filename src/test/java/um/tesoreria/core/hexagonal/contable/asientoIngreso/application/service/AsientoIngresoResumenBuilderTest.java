@@ -54,6 +54,7 @@ class AsientoIngresoResumenBuilderTest {
                 CuentaMovimiento.builder()
                         .numeroCuenta(new BigDecimal("11100000001"))
                         .debita((byte) 1)
+                        .comprobanteId(3)
                         .importe(new BigDecimal("100.00"))
                         .build()));
         when(cuentaService.findAllByNumeroCuentaIn(List.of(new BigDecimal("11100000001"))))
@@ -92,11 +93,33 @@ class AsientoIngresoResumenBuilderTest {
                 .containsExactly("Caja", "Matrícula", "Otro ingreso");
     }
 
+    @Test
+    void ignoraLineasDeOtroComprobanteEnElMismoOrden() {
+        when(catalogo.tipoPagoNombre(3)).thenReturn("Efectivo");
+        when(cuentaMovimientoService.findAllByAsiento(FECHA, 7, 0, 2)).thenReturn(List.of(
+                linea("11100000001", "Caja", (byte) 1, "100.00"),
+                CuentaMovimiento.builder()
+                        .numeroCuenta(new BigDecimal("20101090099"))
+                        .debita((byte) 1)
+                        .comprobanteId(6)
+                        .importe(new BigDecimal("4707.67"))
+                        .build()));
+        when(asientoService.findByAsiento(FECHA, 7))
+                .thenReturn(new AsientoEntity(1L, FECHA, 7, "Asiento Ingreso", null, null, null, null));
+
+        AsientoIngresoResumen resumen = builder.build(FECHA, 3,
+                AsientoIngresoRegistro.builder().fechaContable(FECHA).tipoPagoId(3).ordenContable(7).build());
+
+        assertThat(resumen.getLineas()).hasSize(1);
+        assertThat(resumen.getTotalDebe()).isEqualByComparingTo("100.00");
+    }
+
     private static CuentaMovimiento linea(String numero, String nombre, byte debita, String importe) {
         return CuentaMovimiento.builder()
                 .numeroCuenta(new BigDecimal(numero))
                 .cuenta(Cuenta.builder().numeroCuenta(new BigDecimal(numero)).nombre(nombre).build())
                 .debita(debita)
+                .comprobanteId(3)
                 .importe(new BigDecimal(importe))
                 .build();
     }

@@ -13,6 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.exception.CoeficienteInflacionException;
+import um.tesoreria.core.hexagonal.contable.asiento.application.exception.AsientoException;
+import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoService;
+import um.tesoreria.core.hexagonal.contable.asiento.domain.ports.in.ReservarOrdenContableUseCase;
+import um.tesoreria.core.hexagonal.contable.asiento.infrastructure.persistence.entity.AsientoEntity;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.entity.CuentaMovimientoEntity;
 import um.tesoreria.core.hexagonal.contable.ejercicio.domain.ports.in.UpdateEjercicioUseCase;
@@ -33,11 +37,16 @@ import um.tesoreria.core.util.Periodo;
 @RequiredArgsConstructor
 public class AsientoInflacionService {
 
+	private static final int COMPROBANTE_ASIENTO = 1;
+	private static final String VINCULO = "Asiento Inflación";
+
 	private final EjercicioService ejercicioService;
 	private final UpdateEjercicioUseCase updateEjercicioUseCase;
 	private final CuentaMensualService cuentaMensualService;
 	private final CoeficienteInflacionService coeficienteInflacionService;
 	private final CuentaMovimientoService cuentaMovimientoService;
+	private final ReservarOrdenContableUseCase reservarOrdenContable;
+	private final AsientoService asientoService;
 
 	public void generateAsientoInflacionResultado(Integer ejercicioId) {
 		Ejercicio ejercicio = ejercicioService.findByEjercicioId(ejercicioId);
@@ -55,8 +64,7 @@ public class AsientoInflacionService {
 		Integer ordenContable = ejercicio.getOrdenContableResultado();
 
 		if (ordenContable == 0) {
-			CuentaMovimiento cuentaMovimiento = cuentaMovimientoService.findLastByFecha(fechaContable);
-			ordenContable = 1 + cuentaMovimiento.getOrdenContable();
+			ordenContable = reservarOrdenContable.reservar(fechaContable);
 		}
 
 		// Solo la orden que cambia: el resto (null) conserva lo guardado, incluido bloqueado.
@@ -138,7 +146,8 @@ public class AsientoInflacionService {
 			periodo.next();
 		}
 
-		cuentaMovimientoService.deleteAsiento(fechaContable, ordenContable);
+		borrarAsientoPropio(fechaContable, ordenContable);
+		guardarCabecera(fechaContable, ordenContable);
 
 		movimientosGastos.forEach((cuenta, cuentaMovimiento) -> {
 			if (cuentaMovimiento.getImporte().compareTo(BigDecimal.ZERO) > 0)
@@ -178,8 +187,7 @@ public class AsientoInflacionService {
 		Integer ordencontable = ejercicio.getOrdenContableBienesUso();
 
 		if (ordencontable == 0) {
-			CuentaMovimiento cuentaMovimiento = cuentaMovimientoService.findLastByFecha(fechacontable);
-			ordencontable = 1 + cuentaMovimiento.getOrdenContable();
+			ordencontable = reservarOrdenContable.reservar(fechacontable);
 		}
 
 		// Solo la orden que cambia: el resto (null) conserva lo guardado, incluido bloqueado.
@@ -238,7 +246,8 @@ public class AsientoInflacionService {
 			periodo.next();
 		}
 
-		cuentaMovimientoService.deleteAsiento(fechacontable, ordencontable);
+		borrarAsientoPropio(fechacontable, ordencontable);
+		guardarCabecera(fechacontable, ordencontable);
 
 		movimientosbienesuso.forEach((cuenta, cuentaMovimiento) -> {
 			if (cuentaMovimiento.getImporte().compareTo(BigDecimal.ZERO) > 0)
@@ -250,5 +259,34 @@ public class AsientoInflacionService {
 			if (cuentaMovimiento.getImporte().compareTo(BigDecimal.ZERO) != 0)
 				cuentaMovimientoService.createCuentaMovimiento(cuentaMovimiento);
 		});
+	}
+
+	/**
+	 * Borra sólo las líneas del asiento de inflación (comprobante 1). Si el orden tuviera líneas
+	 * de otro comprobante, {@code deleteAsiento} aborta y no se toca nada.
+	 */
+	private void borrarAsientoPropio(OffsetDateTime fecha, Integer orden) {
+		cuentaMovimientoService.deleteAsiento(fecha, orden, COMPROBANTE_ASIENTO);
+		try {
+			AsientoEntity asiento = asientoService.findByAsiento(fecha, orden);
+			asientoService.deleteByAsientoId(asiento.getAsientoId());
+		} catch (AsientoException ignored) {
+			// Sin cabecera: nada que borrar.
+		}
+	}
+
+	/** Crea la cabecera del asiento de inflación (o corrige su vínculo si ya existía). */
+	private void guardarCabecera(OffsetDateTime fecha, Integer orden) {
+		try {
+			AsientoEntity asiento = asientoService.findByAsiento(fecha, orden);
+			if (!VINCULO.equals(asiento.getVinculo())) {
+				asiento.setVinculo(VINCULO);
+				asientoService.update(asiento, asiento.getAsientoId());
+			}
+			return;
+		} catch (AsientoException ignored) {
+			// No existe: se crea abajo.
+		}
+		asientoService.add(new AsientoEntity(null, fecha, orden, VINCULO, null, null, null, null));
 	}
 }

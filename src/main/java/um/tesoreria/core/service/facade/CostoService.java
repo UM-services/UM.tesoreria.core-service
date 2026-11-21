@@ -72,7 +72,9 @@ public class CostoService {
             // Asiento
             log.debug("Eliminando asiento previo si existiera -> {}-{}", asientoInternal.getFechaContable(), asientoInternal.getOrdenContable());
             try {
-                contabilidadService.deleteAsiento(asientoInternal.getFechaContable(), asientoInternal.getOrdenContable());
+                contabilidadService.deleteAsiento(asientoInternal.getFechaContable(),
+                        asientoInternal.getOrdenContable(),
+                        asignacionCostoDto.getComprobante().getComprobanteId());
                 entityManager.flush();
             } catch (EjercicioBloqueadoException e) {
                 log.debug("Error Ejercicio : {}", e.getMessage());

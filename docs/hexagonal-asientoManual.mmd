@@ -1,0 +1,47 @@
+---
+title: Asiento Manual — slice hexagonal contable/asientoManual (v12.10.0)
+---
+
+flowchart TD
+    subgraph Dominio
+        PI["AsientoManualUseCase<br/>registrar / consultar / eliminar / importar"]
+        L["AsientoContableLinea<br/>AsientoContableResultado<br/>(contable/asiento)"]
+    end
+
+    subgraph Aplicacion
+        S["AsientoManualService<br/>vínculo 'Registro de Asiento', comprobanteId = 1,<br/>número manual opcional y alta desde planilla XLS"]
+        E["AsientoManualException<br/>ORDEN_OCUPADO, ASIENTO_INEXISTENTE, EJERCICIO_INEXISTENTE,<br/>EJERCICIO_BLOQUEADO, SIN_LINEAS, LINEA_INVALIDA,<br/>IMPORTACION_INVALIDA"]
+        X["Apache POI<br/>WorkbookFactory / Sheet / Cell<br/>columnas 'cuenta', 'debe', 'haber'"]
+    end
+
+    subgraph Infraestructura
+        C["AsientoManualController<br/>POST /api/tesoreria/core/asientoManual<br/>GET|DELETE /api/tesoreria/core/asientoManual/{fecha}/{orden}<br/>POST /api/tesoreria/core/asientoManual/importar (multipart 'archivo')"]
+        M["AsientoContableDtoMapper"]
+        D1["AsientoManualRequest<br/>fecha, numero, concepto, lineas"]
+        H["@ExceptionHandler<br/>409 conflicto de asiento"]
+    end
+
+    subgraph "Slices de apoyo"
+        AS["AsientoService<br/>add / findByAsiento / deleteByAsientoId"]
+        CM["CuentaMovimientoService<br/>findAllByAsiento / createCuentaMovimiento<br/>deleteAsiento(fecha, orden, comprobanteId)"]
+        CU["CuentaService<br/>findAllByNumeroCuentaIn"]
+        RK["ReservarOrdenContableUseCase<br/>reservar / registrarUso"]
+        EJ["EjercicioRepository<br/>findByFecha"]
+        AC["AsientoConflictoException<br/>(contable/cuentaMovimiento)"]
+    end
+
+    C --> M
+    M --> D1
+    D1 --> S
+    S --> PI
+    PI --> L
+    S --> X
+    S --> EJ
+    S --> CU
+    S --> CM
+    S --> RK
+    S --> AS
+    S --> E
+    C --> H
+    H --> AC
+    CM --> AC
