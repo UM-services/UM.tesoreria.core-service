@@ -1076,6 +1076,9 @@ public class SheetService {
                     BigDecimal debe = BigDecimal.ZERO;
                     BigDecimal haber = BigDecimal.ZERO;
                     for (CuentaMovimiento movimiento : cuentaMovimientoService.findAllByAsiento(asiento.getFechaContable(), asiento.getOrdenContable(), 0, 2)) {
+                        if (movimiento.getComprobanteId() == null || movimiento.getComprobanteId() != 3) {
+                            continue;
+                        }
                         if (movimiento.getDebita() == 1) {
                             debe = debe.add(movimiento.getImporte()).setScale(2, RoundingMode.HALF_UP);
                         } else {

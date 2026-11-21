@@ -16,4 +16,7 @@ public interface JpaEjercicioRepository extends JpaRepository<EjercicioEntity, I
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<EjercicioEntity> findWithLockByEjercicioId(Integer ejercicioId);
+
+    Optional<EjercicioEntity> findFirstByFechaInicioLessThanEqualAndFechaFinalGreaterThanEqualOrderByEjercicioIdDesc(
+            java.time.OffsetDateTime desde, java.time.OffsetDateTime hasta);
 }

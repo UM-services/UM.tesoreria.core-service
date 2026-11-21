@@ -35,7 +35,7 @@ class ContabilidadSaldosPorCuentaTest {
     @BeforeEach
     void setUp() {
         movimientos = mock(CuentaMovimientoService.class);
-        contabilidad = new ContabilidadService(null, null, null, movimientos, null, null, null, null);
+        contabilidad = new ContabilidadService(null, null, null, null, movimientos, null, null, null, null);
         ejercicio = new Ejercicio();
         ejercicio.setFechaInicio(INICIO);
         ejercicio.setFechaFinal(fecha(2027, 2, 28));

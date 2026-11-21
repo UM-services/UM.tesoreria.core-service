@@ -232,7 +232,7 @@ public class CuentaPersistenceTest {
         var cuentas = new um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService(
                 crear, editar, borrar, null, null, null, null, recalcular, null, repository);
         var contabilidad = spy(new um.tesoreria.core.service.facade.ContabilidadService(
-                null, cuentas, null, null, null, null, null, null));
+                null, null, cuentas, null, null, null, null, null, null));
         var desde = java.time.OffsetDateTime.parse("2026-01-01T00:00:00Z");
         var hasta = java.time.OffsetDateTime.parse("2026-01-31T00:00:00Z");
         var ejercicio = mock(um.tesoreria.core.kotlin.model.Ejercicio.class);
