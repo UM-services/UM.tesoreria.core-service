@@ -178,6 +178,15 @@ public class JpaProveedorMovimientoRepositoryAdapter implements ProveedorMovimie
     }
 
     @Override
+    public Optional<ProveedorMovimiento> findByProveedorIdAndComprobanteIdAndPrefijoAndNumeroComprobante(
+            Integer proveedorId, Integer comprobanteId, Integer prefijo, Long numeroComprobante) {
+        return jpaProveedorMovimientoRepository
+                .findFirstByProveedorIdAndComprobanteIdAndPrefijoAndNumeroComprobante(
+                        proveedorId, comprobanteId, prefijo, numeroComprobante)
+                .map(proveedorMovimientoMapper::toDomainModel);
+    }
+
+    @Override
     public Optional<ProveedorMovimiento> findTopByPrefijoAndComprobanteIdInOrderByNumeroComprobanteDesc(
             Integer prefijo, List<Integer> comprobanteIds) {
         return jpaProveedorMovimientoRepository

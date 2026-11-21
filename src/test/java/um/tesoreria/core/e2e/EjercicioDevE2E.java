@@ -491,7 +491,7 @@ class EjercicioDevE2E {
     void elFlagBloqueadoDetieneSaveAsientoYDeleteAsientoDesdeEnContabilidadService() throws Exception {
         alta();
         // Real: el flag leído de MySQL por EjercicioService legacy y AsientoService con su repositorio JPA. Simulado: el resto.
-        var contabilidad = new ContabilidadService(new AsientoService(asientosJpa), null, new EjercicioService(repositorioLegacy),
+        var contabilidad = new ContabilidadService(new AsientoService(asientosJpa), null, null, new EjercicioService(repositorioLegacy),
                 mock(CuentaMovimientoService.class), null, null, null, null);
         OffsetDateTime fecha = OffsetDateTime.parse("2027-09-15T00:00:00Z");
         http.perform(put("/ejercicio/16").contentType(MediaType.APPLICATION_JSON).content("{\"bloqueado\":1}"));
@@ -566,6 +566,16 @@ class EjercicioDevE2E {
             @Override
             public java.util.Optional<Ejercicio> findWithLockByEjercicioId(Integer id) {
                 return java.util.Optional.ofNullable(entityManager.find(EjercicioEntity.class, id)).map(mapper::toDomain);
+            }
+
+            @Override
+            public java.util.Optional<Ejercicio> findByEjercicioId(Integer id) {
+                return repositorio.findByEjercicioId(id);
+            }
+
+            @Override
+            public java.util.Optional<Ejercicio> findByFecha(java.time.LocalDate fecha) {
+                return repositorio.findByFecha(fecha);
             }
 
             @Override

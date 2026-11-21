@@ -37,6 +37,21 @@ public class JpaIngresoAsientoMapaRepositoryAdapter implements IngresoAsientoMap
     }
 
     @Override
+    public AsientoIngresoRegistro updateOrden(AsientoIngresoRegistro registro, Integer ordenContable) {
+        IngresoAsiento entity = repository.findById(registro.getId())
+                .orElseThrow(() -> new IllegalStateException(
+                        "No existe el mapa ingreso_asiento " + registro.getId()));
+        entity.setOrdenContable(ordenContable);
+        return toDomain(repository.saveAndFlush(entity));
+    }
+
+    @Override
+    public boolean existsOtherByFechaAndOrden(OffsetDateTime fecha, Integer ordenContable, Integer tipoPagoId) {
+        return repository.existsByFechaContableAndOrdenContableAndTipoPagoIdNot(
+                fecha, ordenContable, tipoPagoId);
+    }
+
+    @Override
     public void delete(AsientoIngresoRegistro registro) {
         if (registro.getId() != null) {
             repository.deleteById(registro.getId());

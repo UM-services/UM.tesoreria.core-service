@@ -13,6 +13,11 @@ public interface IngresoAsientoMapaRepository {
 
     AsientoIngresoRegistro create(OffsetDateTime fecha, Integer tipoPagoId, Integer ordenContable);
 
+    AsientoIngresoRegistro updateOrden(AsientoIngresoRegistro registro, Integer ordenContable);
+
+    /** Verdadero si otro tipo de pago de la misma fecha apunta al mismo orden. */
+    boolean existsOtherByFechaAndOrden(OffsetDateTime fecha, Integer ordenContable, Integer tipoPagoId);
+
     void delete(AsientoIngresoRegistro registro);
 
 }

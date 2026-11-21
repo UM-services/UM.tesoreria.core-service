@@ -1,0 +1,66 @@
+---
+title: Orden de Pago Directa (OP libre) — slice hexagonal pagos/ordenPago
+---
+
+flowchart TD
+    subgraph Dominio
+        S["OrdenPagoDirectaSolicitud<br/>nombreBeneficiario, fechas, importe,<br/>concepto, gastos, valores"]
+        G["OrdenPagoDirectaGasto<br/>numeroCuenta, importe"]
+        C["OrdenPagoDirectaContexto<br/>comprobante, debita, prefijo, número,<br/>obligación 20101090099, gastos, valores"]
+        V["ContextoValor<br/>valor, importe, fechaEmisión,<br/>contrapartida, posicion"]
+        B["AsientoPropuestoBuilder.buildDirecta<br/>encabezado + un asiento por valor"]
+        P["PreviewOrdenPagoDirectaUseCase<br/>CreateOrdenPagoDirectaUseCase"]
+    end
+
+    subgraph Aplicacion
+        PP["OrdenPagoDirectaPreparador<br/>valida, numera, arma el contexto"]
+        PV["PreviewOrdenPagoDirectaUseCaseImpl"]
+        CR["CreateOrdenPagoDirectaUseCaseImpl<br/>@Transactional"]
+        SV["OrdenPagoService<br/>previewDirecta / createDirecta"]
+    end
+
+    subgraph Infraestructura
+        CT["OrdenPagoDirectaController<br/>POST /pagos/ordenPagoDirecta/preview<br/>POST /pagos/ordenPagoDirecta"]
+        MP["OrdenPagoDtoMapper"]
+        D1["OrdenPagoDirectaRequest"]
+        D2["OrdenPagoPreviewResponse / OrdenPagoResponse"]
+    end
+
+    subgraph "Slices de apoyo"
+        CO["ComprobanteService<br/>(comprobante 6)"]
+        PM["ProveedorMovimientoService"]
+        EJ["EjercicioService"]
+        VA["ValorService / GetBancariaByIdUseCase"]
+        AS["AsientoService"]
+        CM["CuentaMovimientoService"]
+        RK["ReservarOrdenContableUseCase"]
+        VM["ValorMovimientoService"]
+        PVS["ProveedorValorService"]
+        BM["BancoMovimientoService"]
+    end
+
+    S --> PP
+    G --> PP
+    PP --> C
+    PP --> V
+    C --> B
+    V --> B
+    B --> PV
+    B --> CR
+    PV --> SV
+    CR --> SV
+    CT --> MP
+    MP --> D1
+    D1 --> SV
+    SV --> D2
+    PP --> CO
+    PP --> PM
+    PP --> EJ
+    PP --> VA
+    CR --> PM
+    CR --> AS
+    CR --> CM
+    CR --> RK
+    CR --> VM
+    CR --> PVS
+    CR --> BM

@@ -53,6 +53,10 @@ public interface ProveedorMovimientoRepository {
     Optional<ProveedorMovimiento> findByPrefijoAndNumeroComprobanteAndComprobanteIdIn(
             Integer prefijo, Long numeroComprobante, List<Integer> comprobanteIds);
 
+    /** Clave de unicidad del legacy para facturas: (proveedor, comprobante, prefijo, número). */
+    Optional<ProveedorMovimiento> findByProveedorIdAndComprobanteIdAndPrefijoAndNumeroComprobante(
+            Integer proveedorId, Integer comprobanteId, Integer prefijo, Long numeroComprobante);
+
     Optional<ProveedorMovimiento> findTopByPrefijoAndComprobanteIdInOrderByNumeroComprobanteDesc(
             Integer prefijo, List<Integer> comprobanteIds);
 
