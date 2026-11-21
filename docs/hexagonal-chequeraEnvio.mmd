@@ -1,0 +1,286 @@
+---
+title: Arquitectura Hexagonal - Módulo EnvioChequeras (v12.10.0)
+---
+
+classDiagram
+    direction TB
+
+    %% Envío masivo de chequeras por facultad y sede (ex formulario de Escritorio "Envío de
+    %% Chequeras por Sede"). Un job por operación (CAPTURAR_CORREOS, EXTENDER_DEBITOS, MAILING)
+    %% sobre el padrón de altas de un lectivo + facultad + sede. Por fila: si el domicilio no
+    %% tiene ningún correo válido se omite; si la persona tiene más de N cuotas impagas del
+    %% lectivo se marca retenida y se envía una notificación de deuda en lugar de la chequera.
+    %% El envío real lo confirma tesoreria-sender por notificacion-resultado (CHEQUERA/id).
+
+    namespace domain {
+        class ChequeraEnvioAlta {
+            << record >>
+            +Long chequeraId
+            +Integer facultadId
+            +Integer tipoChequeraId
+            +Long chequeraSerieId
+            +Integer alternativaId
+            +BigDecimal personaId
+            +Integer documentoId
+            +Integer lectivoId
+            +Integer geograficaId
+            +String apellido
+            +String nombre
+            +String tipoChequera
+            +String arancelTipo
+            +String emailPersonal
+            +String emailInstitucional
+            +boolean emailPersonalValido
+            +boolean emailInstitucionalValido
+            +boolean enviado
+            +boolean retenida
+            +apellidoNombre() String
+            +numero() String
+            +hayCorreoValido() boolean
+        }
+
+        class EnvioJob {
+            +Long jobId
+            +EnvioOperacion operacion
+            +Integer lectivoId
+            +Integer facultadId
+            +Integer geograficaId
+            +boolean soloNoEnviadas
+            +boolean codigoBarras
+            +int umbralCuotasDeuda
+            +EnvioJobEstado estado
+            +int totalTareas
+            +int tareasOk
+            +int tareasOmitidas
+            +int tareasError
+            +int tareasPendientes
+            +String usuarioLogin
+        }
+
+        class EnvioJobTarea {
+            +Long tareaId
+            +Long chequeraId
+            +BigDecimal personaId
+            +String personaNombre
+            +EnvioTareaEstado estado
+            +String codigo
+            +String mensaje
+            +String detalle
+            +Boolean retenida
+            +Boolean enviado
+        }
+
+        class FiltroEnvio {
+            +EnvioOperacion operacion
+            +Integer lectivoId
+            +Integer facultadId
+            +Integer geograficaId
+            +boolean soloNoEnviadas
+            +List~Long~ chequeraIds
+            +boolean codigoBarras
+            +int umbralCuotasDeuda
+        }
+
+        class ResultadoEnvio {
+            +EnvioTareaEstado estado
+            +String codigo
+            +String mensaje
+            +String detalle
+            +Boolean retenida
+            +Boolean enviado
+        }
+
+        class DeudaEnvio {
+            +BigDecimal personaId
+            +Integer documentoId
+            +List~DeudaChequeraEnvio~ deudas
+        }
+
+        class RetencionPolicy {
+            << utility >>
+            +retener(DeudaEnvio, Integer, int) boolean
+            +cuotasDelLectivo(DeudaEnvio, Integer) Integer
+        }
+
+        class EnvioOperacion {
+            << enumeration >>
+            CAPTURAR_CORREOS
+            EXTENDER_DEBITOS
+            MAILING
+        }
+
+        class EnvioJobEstado {
+            << enumeration >>
+            PENDIENTE
+            EN_PROCESO
+            COMPLETADO
+            CANCELADO
+            ERROR
+        }
+
+        class EnvioTareaEstado {
+            << enumeration >>
+            PENDIENTE
+            ENCOLADA
+            ENVIADA
+            ERROR_SMTP
+            RETENIDA
+            SIN_CORREOS
+            CORREO_CAPTURADO
+            DEBITO_EXTENDIDO
+            OMITIDA
+            ERROR
+        }
+    }
+
+    namespace ports {
+        class EnvioMasivoUseCase {
+            << interface >>
+            +iniciar(FiltroEnvio, Long) EnvioJob
+            +consultar(Long) EnvioJobDetalle
+            +cancelar(Long) EnvioJob
+            +reintentar(Long, boolean) EnvioJob
+            +pendientes() List~EnvioJob~
+        }
+
+        class GetChequeraEnvioAltasUseCase {
+            << interface >>
+            +getAltas(Integer, Integer, Integer) List~ChequeraEnvioAlta~
+        }
+
+        class ChequeraEnvioAltaReader {
+            << interface >>
+            +findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraEnvioAlta~
+            +findByChequeraId(Long) Optional~ChequeraEnvioAlta~
+        }
+
+        class EnvioChequeraGateway {
+            << interface >>
+            +capturarCorreos(BigDecimal, Integer) Integer
+            +extenderDebito(Integer, Integer, Long) void
+            +deuda(BigDecimal, Integer) DeudaEnvio
+            +marcarRetenida(Integer, Integer, Long, boolean) void
+            +enviarChequera(Integer, Integer, Long, Integer, boolean) String
+            +notificarDeuda(Integer, Integer, Long) String
+        }
+
+        class EnvioJobRepository {
+            << interface >>
+            +create(EnvioJob, List~EnvioJobTarea~) EnvioJob
+            +claimNextPending() Optional~EnvioJob~
+            +findPendingTareasByJobId(Long) List~EnvioJobTarea~
+            +registrarAcuse(Long, boolean, String) Optional~EnvioJobTarea~
+            +reactivarTareas(Long, List~EnvioTareaEstado~) int
+            +requeueStale(OffsetDateTime) int
+        }
+    }
+
+    namespace application {
+        class EnvioMasivoFacade {
+            +iniciar(FiltroEnvio, Long) EnvioJob
+            +consultar(Long) EnvioJobDetalle
+            +cancelar(Long) EnvioJob
+            +reintentar(Long, boolean) EnvioJob
+        }
+
+        class EnvioService {
+            +altas(Integer, Integer, Integer) List~ChequeraEnvioAlta~
+        }
+
+        class EnvioJobService {
+            +reclamarSiguiente() Optional~EnvioJob~
+            +registrarTarea(Long, EnvioJobTarea, ResultadoEnvio) void
+            +registrarAcuse(Long, boolean, String) boolean
+            +completar(Long) void
+        }
+
+        class EnvioChequerasService {
+            +ejecutar(EnvioJobTarea, EnvioJob) ResultadoEnvio
+        }
+
+        class GetChequeraEnvioAltasUseCaseImpl {
+            +getAltas(Integer, Integer, Integer) List~ChequeraEnvioAlta~
+        }
+    }
+
+    namespace infrastructure {
+        class EnvioChequeraController {
+            +altas(Integer, Integer, Integer) ResponseEntity
+            +iniciar(EnvioJobRequest, HttpServletRequest) ResponseEntity
+            +consultar(Long) ResponseEntity
+            +cancelar(Long) ResponseEntity
+            +reintentar(Long, EnvioReintentoRequest) ResponseEntity
+            +pendientes() ResponseEntity
+        }
+
+        class JdbcChequeraEnvioAltaReaderAdapter {
+            << adapter >>
+            +findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraEnvioAlta~
+            +findByChequeraId(Long) Optional~ChequeraEnvioAlta~
+        }
+
+        class JpaEnvioJobRepositoryAdapter {
+            +create(EnvioJob, List~EnvioJobTarea~) EnvioJob
+            +registrarAcuse(Long, boolean, String) Optional~EnvioJobTarea~
+        }
+
+        class EnvioChequeraGatewayAdapter {
+            +enviarChequera(Integer, Integer, Long, Integer, boolean) String
+            +notificarDeuda(Integer, Integer, Long) String
+            +marcarRetenida(Integer, Integer, Long, boolean) void
+        }
+
+        class EnvioJobWorker {
+            +despachar() void
+            +recuperarVencidos() void
+            +purgarFinalizados() void
+        }
+
+        class ChequeraEnvioAltaDtoMapper {
+            +toResponse(ChequeraEnvioAlta) ChequeraEnvioAltaResponse
+        }
+
+        class EnvioJobDtoMapper {
+            +toFiltro(EnvioJobRequest) FiltroEnvio
+            +toResponse(EnvioJob) EnvioJobResponse
+            +toResponse(EnvioJobDetalle) EnvioJobDetalleResponse
+        }
+    }
+
+    EnvioChequeraController --> EnvioService
+    EnvioChequeraController --> EnvioMasivoUseCase
+    EnvioChequeraController --> ChequeraEnvioAltaDtoMapper
+    EnvioChequeraController --> EnvioJobDtoMapper
+
+    EnvioService --> GetChequeraEnvioAltasUseCase
+    GetChequeraEnvioAltasUseCaseImpl ..|> GetChequeraEnvioAltasUseCase
+    GetChequeraEnvioAltasUseCaseImpl --> ChequeraEnvioAltaReader
+
+    EnvioMasivoFacade ..|> EnvioMasivoUseCase
+    EnvioMasivoFacade --> EnvioJobRepository
+    EnvioMasivoFacade --> ChequeraEnvioAltaReader
+    EnvioMasivoFacade --> EnvioJobService
+
+    EnvioJobService --> EnvioJobRepository
+    EnvioChequerasService --> ChequeraEnvioAltaReader
+    EnvioChequerasService --> EnvioChequeraGateway
+    EnvioChequerasService --> RetencionPolicy
+
+    JdbcChequeraEnvioAltaReaderAdapter ..|> ChequeraEnvioAltaReader
+    JpaEnvioJobRepositoryAdapter ..|> EnvioJobRepository
+    EnvioChequeraGatewayAdapter ..|> EnvioChequeraGateway
+
+    EnvioJobWorker --> EnvioJobService
+    EnvioJobWorker --> EnvioChequerasService
+
+    EnvioJob --> EnvioOperacion
+    EnvioJob --> EnvioJobEstado
+    EnvioJobTarea --> EnvioTareaEstado
+    EnvioMasivoUseCase ..> FiltroEnvio
+    EnvioMasivoUseCase ..> EnvioJob
+    ResultadoEnvio --> EnvioTareaEstado
+    RetencionPolicy ..> DeudaEnvio
+
+    note for EnvioChequeraGatewayAdapter "Anticorrupción: compone DomicilioService, PersonaService, ChequeraSerieService y los facades legacy de chequeras y correo. retenida se escribe con un caso de uso de una sola columna (no el PUT completo)."
+    note for EnvioChequerasService "Orden por fila: correo válido (si no, OMITIDA/SIN_CORREOS sin publicar), retención por deuda (RETENIDA + notificación) y envío (ENCOLADA, acuse por notificacion-resultado)."
+    note for JdbcChequeraEnvioAltaReaderAdapter "Una sola consulta sobre vw_chequera_alta + persona + domicilio + tipo_chequera + arancel_tipo + chequera_serie.retenida."

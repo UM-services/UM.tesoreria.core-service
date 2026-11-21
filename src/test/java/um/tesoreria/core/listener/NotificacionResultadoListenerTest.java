@@ -13,18 +13,21 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import um.tesoreria.core.event.NotificacionResultadoEvent;
 import um.tesoreria.core.event.ReferenciaNotificacion;
+import um.tesoreria.core.hexagonal.chequera.envio.application.service.EnvioJobService;
 import um.tesoreria.core.model.PersonaSuspendido;
 import um.tesoreria.core.service.PersonaSuspendidoService;
 
 class NotificacionResultadoListenerTest {
 
     private PersonaSuspendidoService personaSuspendidoService;
+    private EnvioJobService envioJobService;
     private NotificacionResultadoListener listener;
 
     @BeforeEach
     void setUp() {
         personaSuspendidoService = mock(PersonaSuspendidoService.class);
-        listener = new NotificacionResultadoListener(personaSuspendidoService);
+        envioJobService = mock(EnvioJobService.class);
+        listener = new NotificacionResultadoListener(personaSuspendidoService, envioJobService);
     }
 
     @Test
@@ -55,6 +58,29 @@ class NotificacionResultadoListenerTest {
         listener.handleResultado(evento);
 
         verify(personaSuspendidoService, never()).findByPersonaSuspendidoId(org.mockito.ArgumentMatchers.anyLong());
+    }
+
+    @Test
+    void cierraLaTareaDelEnvioMasivoCuandoLaReferenciaEsDeChequera() {
+        var evento = resultado(true, "342038");
+        evento.getReferencia().setTipo("CHEQUERA");
+        when(envioJobService.registrarAcuse(342038L, true, null)).thenReturn(true);
+
+        listener.handleResultado(evento);
+
+        verify(envioJobService).registrarAcuse(342038L, true, null);
+        verify(personaSuspendidoService, never()).findByPersonaSuspendidoId(org.mockito.ArgumentMatchers.anyLong());
+    }
+
+    @Test
+    void informaElFalloCuandoElEnvioMasivoNoSalio() {
+        var evento = resultado(false, "342038");
+        evento.getReferencia().setTipo("CHEQUERA");
+        evento.setError("SMTP timeout");
+
+        listener.handleResultado(evento);
+
+        verify(envioJobService).registrarAcuse(342038L, false, "SMTP timeout");
     }
 
     private NotificacionResultadoEvent resultado(boolean enviado, String id) {
