@@ -66,8 +66,12 @@ public class ProveedorArticuloService {
 				.orElseThrow(() -> new ProveedorArticuloException(proveedorArticuloId));
 	}
 
-	public ProveedorArticulo update(ProveedorArticulo newProveedorArticulo, Long proveedorArticuloId) {
-		log.debug("Processing update");
+	@Transactional
+	public ProveedorArticulo add(ProveedorArticulo proveedorArticulo) {
+		return repository.save(proveedorArticulo);
+	}
+
+	public ProveedorArticulo update(ProveedorArticulo newProveedorArticulo, Long proveedorArticuloId) {		log.debug("Processing update");
 		return repository.findByProveedorArticuloId(proveedorArticuloId).map(proveedorArticulo -> {
 			proveedorArticulo = new ProveedorArticulo(proveedorArticuloId,
 					newProveedorArticulo.getProveedorMovimientoId(), newProveedorArticulo.getOrden(),

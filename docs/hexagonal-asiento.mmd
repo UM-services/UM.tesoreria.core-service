@@ -1,31 +1,57 @@
 ---
-title: Arquitectura Hexagonal - Asiento (v3.29.0)
+title: Arquitectura Hexagonal - Asiento (secuencia de orden contable)
 ---
 flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        M["AsientoSecuencia<br/>(último orden por fecha)"]
+        IN["ExistsAsientoByFechaBetweenUseCase<br/>ReservarOrdenContableUseCase<br/>(Puertos de Entrada)"]
+        OUT["AsientoRepository<br/>AsientoSecuenciaRepository<br/>AsientoOrdenMaximoRepository<br/>(Puertos de Salida)"]
+    end
+
     subgraph Aplicacion ["Aplicación (Application)"]
-        S["AsientoService<br/>(Servicio de Aplicación)"]
-        E["AsientoException<br/>(Excepción de Dominio)"]
+        S["AsientoService"]
+        R["ReservarOrdenContableUseCaseImpl<br/>REQUIRES_NEW + reintento"]
+        E["AsientoException<br/>AsientoSecuenciaException"]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        R["JpaAsientoRepository<br/>(Repositorio JPA)"]
-        Ent["AsientoEntity<br/>(Entidad JPA)"]
+        Repo["JpaAsientoRepository"]
+        Ent["AsientoEntity"]
+        AdpSec["JpaAsientoSecuenciaRepositoryAdapter"]
+        RepoSec["JpaAsientoSecuenciaRepository<br/>@Lock PESSIMISTIC_WRITE"]
+        EntSec["AsientoSecuenciaEntity"]
+        Max["JdbcAsientoOrdenMaximoRepositoryAdapter<br/>asiento + movcon + ingreso_asiento + valores"]
+        Tabla["contable_asiento_secuencia<br/>docs/sql/V431"]
     end
 
     subgraph Externa ["Módulos Externos"]
-        CS["ContabilidadService<br/>(Facade Contable)"]
-        CO["CostoService<br/>(Asignación Costos)"]
+        CS["ContabilidadService<br/>(nextAsiento delega)"]
+        CO["CostoService<br/>CompraService<br/>AsientoIngreso"]
     end
 
+    CS --> R
+    CO --> R
     CS --> S
     CO --> S
-    S --> R
-    R --> Ent
+    R --> OUT
+    S --> Repo
+    Repo --> Ent
+    AdpSec --> OUT
+    AdpSec --> RepoSec
+    RepoSec --> EntSec
+    EntSec --> Tabla
+    Max --> OUT
     S -.->|"lanza"| E
+    R -.->|"lanza"| E
 
     style S fill:#f3e5f5
+    style R fill:#f3e5f5
     style E fill:#fce4ec
     style CS fill:#ffe0b2
     style CO fill:#ffe0b2
-    style R fill:#e8f5e8
+    style Repo fill:#e8f5e8
     style Ent fill:#e8f5e8
+    style AdpSec fill:#e8f5e8
+    style RepoSec fill:#e8f5e8
+    style EntSec fill:#e8f5e8
+    style Max fill:#e8f5e8

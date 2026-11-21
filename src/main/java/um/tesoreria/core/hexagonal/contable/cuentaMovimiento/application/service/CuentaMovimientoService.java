@@ -76,6 +76,12 @@ public class CuentaMovimientoService {
         deleteAsientoUseCase.deleteAsiento(fechaContable, ordenContable);
     }
 
+    /** Borra sólo las líneas del comprobante; aborta si hay líneas ajenas. */
+    @Transactional
+    public void deleteAsiento(OffsetDateTime fechaContable, Integer ordenContable, Integer comprobanteId) {
+        deleteAsientoUseCase.deleteAsiento(fechaContable, ordenContable, comprobanteId);
+    }
+
     @Transactional
     public void deleteByCuentaMovimientoId(Long cuentaMovimientoId) {
         deleteByCuentaMovimientoIdUseCase.deleteByCuentaMovimientoId(cuentaMovimientoId);

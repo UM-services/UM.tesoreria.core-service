@@ -63,6 +63,18 @@ public class MailChequeraService {
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
             Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
+        return sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes,
+                incluyeMatricula, codigoBarras, false, false);
+    }
+
+    /**
+     * Envío con los flags del camino masivo. {@code bulk} usa el contexto MercadoPago bulk (una
+     * llamada por serie en lugar de una por cuota) y {@code actualizarCodigosBarras} hace que el
+     * sender refresque los códigos antes de generar el PDF, como el shim {@code /bulk} del legacy.
+     */
+    public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
+            Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras,
+            Boolean bulk, Boolean actualizarCodigosBarras) {
         log.debug("\n\nProcessing MailChequeraService.sendChequera\n\n");
         var event = SendChequeraEvent.builder()
                 .facultadId(facultadId)
@@ -72,6 +84,8 @@ public class MailChequeraService {
                 .copiaInformes(copiaInformes)
                 .incluyeMatricula(incluyeMatricula)
                 .codigoBarras(codigoBarras)
+                .bulk(bulk)
+                .actualizarCodigosBarras(actualizarCodigosBarras)
                 .build();
         log.debug("Publishing SendChequeraEvent: {}", event);
         correoEventPublisher.publicarChequera(event);

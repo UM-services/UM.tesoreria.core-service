@@ -30,4 +30,8 @@ public interface IngresoAsientoRepository extends JpaRepository<IngresoAsiento, 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	public Optional<IngresoAsiento> findFirstByFechaContableAndTipoPagoId(OffsetDateTime fechaContable, Integer tipoPagoId);
 
+	public boolean existsByFechaContableAndOrdenContableAndTipoPagoIdNot(OffsetDateTime fechaContable,
+																	   Integer ordenContable,
+																	   Integer tipoPagoId);
+
 }

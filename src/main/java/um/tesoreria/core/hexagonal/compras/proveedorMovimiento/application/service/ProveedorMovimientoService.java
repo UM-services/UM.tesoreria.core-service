@@ -9,6 +9,7 @@ import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.Orde
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoDetalle;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.model.ProveedorMovimientoResumen;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.ports.in.*;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.domain.ports.out.ProveedorMovimientoRepository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -24,6 +25,7 @@ public class ProveedorMovimientoService {
     private final GetProveedorMovimientoByIdUseCase getProveedorMovimientoByIdUseCase;
     private final GetProveedorMovimientoByOrdenPagoUseCase getProveedorMovimientoByOrdenPagoUseCase;
     private final GetLastProveedorMovimientoByOrdenPagoUseCase getLastProveedorMovimientoByOrdenPagoUseCase;
+    private final GetLastProveedorMovimientoByComprobanteUseCase getLastProveedorMovimientoByComprobanteUseCase;
     private final GetProveedorMovimientosByIdsUseCase getProveedorMovimientosByIdsUseCase;
     private final GetProveedorMovimientosByProveedorUseCase getProveedorMovimientosByProveedorUseCase;
     private final GetProveedorMovimientosByComprobanteAndFechaRangeUseCase getProveedorMovimientosByComprobanteAndFechaRangeUseCase;
@@ -35,6 +37,7 @@ public class ProveedorMovimientoService {
     private final GetProveedorMovimientoDetalleUseCase getProveedorMovimientoDetalleUseCase;
     private final GetOrdenPagoImpresionUseCase getOrdenPagoImpresionUseCase;
     private final GetCompraImpresionUseCase getCompraImpresionUseCase;
+    private final ProveedorMovimientoRepository proveedorMovimientoRepository;
 
     public ProveedorMovimiento createProveedorMovimiento(ProveedorMovimiento proveedorMovimiento) {
         return createProveedorMovimientoUseCase.createProveedorMovimiento(proveedorMovimiento);
@@ -67,6 +70,22 @@ public class ProveedorMovimientoService {
                 .orElseThrow(() -> new ProveedorMovimientoException(prefijo));
     }
 
+    /**
+     * Variante segura usada para numerar: devuelve vacío cuando todavía no hay ninguna orden de
+     * pago para el prefijo.
+     */
+    public Optional<ProveedorMovimiento> findLastOrdenPagoOptional(Integer prefijo) {
+        return getLastProveedorMovimientoByOrdenPagoUseCase.getLastProveedorMovimientoByOrdenPago(prefijo);
+    }
+
+    public Optional<ProveedorMovimiento> findLastByComprobante(Integer prefijo, Integer comprobanteId) {
+        return getLastProveedorMovimientoByComprobanteUseCase.getLastProveedorMovimientoByComprobante(prefijo, comprobanteId);
+    }
+
+    public boolean existsByOrdenPago(Integer prefijo, Long numeroComprobante) {
+        return getProveedorMovimientoByOrdenPagoUseCase.getProveedorMovimientoByOrdenPago(prefijo, numeroComprobante).isPresent();
+    }
+
     public List<ProveedorMovimiento> findAllByProveedorMovimientoIdIn(List<Long> proveedorMovimientoIds) {
         return getProveedorMovimientosByIdsUseCase.getProveedorMovimientosByIds(proveedorMovimientoIds);
     }
@@ -97,6 +116,13 @@ public class ProveedorMovimientoService {
 
     public List<Long> findDistinctProveedorMovimientoIdsForCostAdjustment() {
         return getProveedorMovimientoIdsForCostAdjustmentUseCase.getProveedorMovimientoIdsForCostAdjustment();
+    }
+
+    public Optional<ProveedorMovimiento> findByComprobante(
+            Integer proveedorId, Integer comprobanteId, Integer prefijo, Long numeroComprobante) {
+        return proveedorMovimientoRepository
+                .findByProveedorIdAndComprobanteIdAndPrefijoAndNumeroComprobante(
+                        proveedorId, comprobanteId, prefijo, numeroComprobante);
     }
 
     public List<ProveedorMovimientoResumen> findAllByProveedorAndFechaRange(Integer proveedorId, OffsetDateTime desde,

@@ -17,6 +17,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoService;
+import um.tesoreria.core.hexagonal.contable.asiento.domain.ports.in.ReservarOrdenContableUseCase;
 import um.tesoreria.core.hexagonal.contable.asiento.infrastructure.persistence.entity.AsientoEntity;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
@@ -47,6 +48,7 @@ import java.util.Objects;
 public class ContabilidadService {
 
     private final AsientoService asientoService;
+    private final ReservarOrdenContableUseCase reservarOrdenContable;
     private final CuentaService cuentaService;
     private final EjercicioService ejercicioService;
     private final CuentaMovimientoService cuentaMovimientoService;
@@ -153,28 +155,51 @@ public class ContabilidadService {
         }
     }
 
+    /**
+     * @deprecated la numeración se reserva con {@link ReservarOrdenContableUseCase}, que bloquea
+     * la secuencia por fecha y no reutiliza números reservados por otros comprobantes. Se mantiene
+     * sólo como fachada para los llamadores legacy de este servicio.
+     */
+    @Deprecated
     public AsientoInternal nextAsiento(OffsetDateTime fechaContable, List<AsientoInternal> asientos) {
-        log.debug("Processing ContabilidadService.nextAsiento");
-        CuentaMovimiento cuentaMovimiento = cuentaMovimientoService.findLastByFecha(fechaContable);
-        int ordenContable = 1 + cuentaMovimiento.getOrdenContable();
-        if (asientos != null) {
-            for (AsientoInternal asiento : asientos) {
-                if (Objects.requireNonNull(asiento.getFechaContable()).isEqual(fechaContable)) {
-                    if (asiento.getOrdenContable() == ordenContable) {
-                        ordenContable += 1;
-                    }
-                }
-            }
-        }
-        var internal = new AsientoInternal(fechaContable, ordenContable, BigDecimal.ZERO, BigDecimal.ZERO);
-        log.debug("Internal -> {}", internal.jsonify());
-        return internal;
+        log.debug("Processing ContabilidadService.nextAsiento (delegado a secuencia)");
+        return new AsientoInternal(fechaContable, reservarOrdenContable.reservar(fechaContable),
+                BigDecimal.ZERO, BigDecimal.ZERO);
     }
 
     @Transactional
     public Boolean deleteAsiento(OffsetDateTime fechaContable, Integer ordenContable) throws EjercicioBloqueadoException {
         log.debug("Processing deleteAsiento");
         return deleteAsientoDesde(fechaContable, ordenContable, 0);
+    }
+
+    /**
+     * Borra el asiento sólo si todas sus líneas son del comprobante indicado. Si hay líneas de
+     * otro comprobante aborta con {@code AsientoConflictoException} (no borra nada).
+     */
+    @Transactional
+    public Boolean deleteAsiento(OffsetDateTime fechaContable, Integer ordenContable, Integer comprobanteId) {
+        log.debug("Processing deleteAsiento comprobante {}", comprobanteId);
+        try {
+            Ejercicio ejercicio = ejercicioService.findByFecha(fechaContable);
+            if (ejercicio == null || ejercicio.getBloqueado() == 1) {
+                throw new EjercicioBloqueadoException(fechaContable);
+            }
+
+            cuentaMovimientoService.deleteAsiento(fechaContable, ordenContable, comprobanteId);
+
+            try {
+                AsientoEntity asiento = asientoService.findByAsiento(fechaContable, ordenContable);
+                asientoService.deleteByAsientoId(asiento.getAsientoId());
+            } catch (AsientoException ignored) {
+                log.debug(ignored.getMessage());
+            }
+
+            return true;
+        } catch (EjercicioBloqueadoException e) {
+            log.debug("Error Ejercicio {}", e.getMessage());
+            return false;
+        }
     }
 
     @Transactional
