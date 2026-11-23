@@ -58,7 +58,7 @@ spring:
         health-check-critical-timeout: 5m
         tags: tesoreria,core
   datasource:
-    url: jdbc:mysql://${app.server}/${app.database}?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://${app.server}/${app.database}?useSSL=false&serverTimezone=UTC&rewriteBatchedStatements=true
     username: ${app.user}
     password: ${app.password}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -74,6 +74,15 @@ spring:
     hibernate:
       ddl-auto: none
     open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          # Lotes para las escrituras/borrados masivos por entidad (las altas con IDENTITY no se
+          # pueden batchear en Hibernate). El driver necesita rewriteBatchedStatements para que el
+          # lote viaje en un solo paquete.
+          batch_size: ${APP_HIBERNATE_JDBC_BATCH_SIZE:50}
+          order_inserts: true
+          order_updates: true
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     admin:

@@ -11,13 +11,24 @@
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
 ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-Hibernate-6DB33F?logo=spring&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)
-[![Versión](https://img.shields.io/badge/versión-12.10.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.10.1-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.10.0**
+**Versión actual (SemVer): 12.10.1**
+
+## Novedades 12.10.1 (verificado en código)
+
+- **refactor(hexagonal)**: el árbol hexagonal queda sin SQL escrito a mano. Los adaptadores que todavía usaban `JdbcTemplate`/`JdbcClient` (once eliminados y el del correlativo del pedido reescrito) se reemplazan por JPA (derived queries, Criteria con proyección de tupla y `@IdClass`): padrón de envío sobre `vw_chequera_alta`, lecturas de `ingreso_items` y de referencias del asiento de ingreso, traza contable de la OP, siembra del orden contable, sugerencias de persona, ejercicio actual, ítems pendientes de cotizar, pedido de origen de la recepción y los correlativos anuales de compras. Sin `@Query` nuevos y sin cambios en rutas, DTOs, permisos ni firmas públicas.
+  - **Correlativos anuales**: el `INSERT ... LAST_INSERT_ID` de pedido/cotización/formalización/recepción pasa a `ReservaCorrelativoAnual` (fila del ejercicio creada en `REQUIRES_NEW`, entrega del número con `SELECT ... FOR UPDATE` en la transacción del llamador; el número vuelve con el rollback). `AuditManualChange.sequence` se retira y `audit-coverage-exceptions.txt` queda sin excepciones.
+  - **Asiento de ingreso**: lectivos de serie y reemplazo y cuentas de imputación se resuelven en bloque (antes una búsqueda por pago); la baja de `chequera_pago_asiento` es por día/tipo con derived delete y el alta con `saveAll`. Medido en desarrollo: 45–66 s / 5.255 sentencias → 14–17 s / ~2.700, además de `rewriteBatchedStatements` y `hibernate.jdbc.batch_size` (50) en `bootstrap.yml`.
+  - **Traza contable de la OP**: se consulta cada rama por `MvP_ID` y se consolida en memoria en lugar de la vista `vw_trazaContablePagosConsolidada`.
+  - DDL externo: `docs/sql/V433__movcon_asientos_mixtos.sql` (+ `rollback_V433.sql`) separa comprobantes mezclados en un mismo asiento de `movcon` y crea `uk_movcon_fecha_nrocomp_item`; `docs/sql/V434__chequera_pago_asiento_indice_fecha.sql` agrega el índice `(tipo_pago_id, fecha)`.
+  - Diagramas: [`hexagonal-asientoIngreso.mmd`](docs/hexagonal-asientoIngreso.mmd), [`hexagonal-asiento.mmd`](docs/hexagonal-asiento.mmd), [`hexagonal-chequeraEnvio.mmd`](docs/hexagonal-chequeraEnvio.mmd), [`hexagonal-persona.mmd`](docs/hexagonal-persona.mmd) y los de `compras/pedidos`.
+
+> Basado en `git diff HEAD` (staged, 2026-11-23): 80 archivos, +3089/−761 antes de esta documentación. Se eliminan 11 adaptadores `Jdbc*`, se agrega el paquete interno `compras/correlativo` (`ReservaCorrelativoAnual`, `SecuenciaAnual`, `SecuenciaAnualRepository`), los puertos `AsientoIngresoReferenciaRepository` y los `Jpa*` de reemplazo, las entidades `IngresoItemEntity`, `ChequeraEnvioAltaEntity`, las cuatro `*SecuenciaEntity`, cinco IT de contraste con el SQL anterior como oráculo y `ReservaCorrelativoAnualTest`. Nada de eso cambia el contrato público (sin endpoints, DTOs ni permisos nuevos) ⇒ **patch** (`12.10.0` → `12.10.1`). Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); los diagramas tocados se validaron con `mmdc`.
 
 ## Novedades 12.10.0 (verificado en código)
 

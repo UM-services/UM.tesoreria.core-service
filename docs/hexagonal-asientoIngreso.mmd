@@ -6,7 +6,7 @@ flowchart TD
         M["AsientoIngresoResumen<br/>AsientoIngresoLinea<br/>AsientoIngresoRegistro<br/>AsientoIngresoResultado<br/>CuentaFaltante<br/>PagoIngreso"]
         MJ["AsientoIngresoJob<br/>AsientoIngresoJobTarea<br/>AsientoIngresoJobEstado<br/>AsientoIngresoJobTareaEstado<br/>AsientoIngresoJobDetalle<br/>AsientoIngresoJobResumenDia"]
         IN["ConsultarAsientoIngresoUseCase<br/>RegenerarAsientoIngresoUseCase<br/>IniciarRegeneracionMasivaUseCase<br/>ConsultarJobAsientoIngresoUseCase<br/>CancelarJobAsientoIngresoUseCase<br/>(Puertos de Entrada)"]
-        OUT["AsientoIngresoJobRepository<br/>IngresoAsientoMapaRepository<br/>ChequeraPagoAsientoEscrituraRepository<br/>IngresoItemRepository<br/>(Puertos de Salida)"]
+        OUT["AsientoIngresoJobRepository<br/>IngresoAsientoMapaRepository<br/>ChequeraPagoAsientoEscrituraRepository<br/>AsientoIngresoReferenciaRepository<br/>IngresoItemRepository<br/>(Puertos de Salida)"]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
@@ -27,8 +27,9 @@ flowchart TD
         Config["AsientoIngresoJobConfiguration<br/>executor asientoIngresoJobExecutor (1 hilo)"]
         AdpJob["JpaAsientoIngresoJobRepositoryAdapter"]
         AdpMapa["JpaIngresoAsientoMapaRepositoryAdapter"]
-        AdpAsiento["JpaChequeraPagoAsientoEscrituraRepositoryAdapter"]
-        AdpItems["JdbcIngresoItemRepositoryAdapter<br/>JdbcClient sobre ingreso_items"]
+        AdpAsiento["JpaChequeraPagoAsientoEscrituraRepositoryAdapter<br/>derived delete por día + saveAll"]
+        AdpRef["JpaAsientoIngresoReferenciaRepositoryAdapter<br/>Criteria + proyección de tupla"]
+        AdpItems["JpaIngresoItemRepositoryAdapter<br/>@IdClass sobre ingreso_items"]
         RepoJob["JpaAsientoIngresoJobRepository<br/>JpaAsientoIngresoJobTareaRepository"]
         EntJob["AsientoIngresoJobEntity<br/>AsientoIngresoJobTareaEntity"]
         Tabla["contable_asiento_ingreso_job<br/>contable_asiento_ingreso_job_tarea<br/>docs/sql/V425"]
@@ -36,7 +37,7 @@ flowchart TD
 
     subgraph Reuso ["Slices y legacy reutilizados"]
         Slices["Cuenta / CuentaMovimiento / Asiento<br/>Facultad / Geografica / Lectivo<br/>Producto / TipoChequera"]
-        Legacy["PagoService.getPagos/getItems<br/>ContabilidadService<br/>ChequeraPagoAsientoService<br/>FacultadPagoCuentaService<br/>LectivoTotalImputacionService<br/>ChequeraSerie(Reemplazo)Service<br/>TipoPagoService"]
+        Legacy["PagoService.getPagos/getItems<br/>ContabilidadService<br/>ChequeraPagoAsientoService<br/>FacultadPagoCuentaService<br/>TipoPagoService"]
     end
 
     Ctrl --> Svc
@@ -59,6 +60,7 @@ flowchart TD
     AdpJob --> OUT
     AdpMapa --> OUT
     AdpAsiento --> OUT
+    AdpRef --> OUT
     AdpItems --> OUT
     AdpJob --> RepoJob
     RepoJob --> EntJob
@@ -86,6 +88,7 @@ flowchart TD
     style AdpJob fill:#fff3e0
     style AdpMapa fill:#fff3e0
     style AdpAsiento fill:#fff3e0
+    style AdpRef fill:#fff3e0
     style AdpItems fill:#fff3e0
     style RepoJob fill:#fff3e0
     style EntJob fill:#fff3e0

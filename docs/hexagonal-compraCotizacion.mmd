@@ -20,7 +20,7 @@ flowchart TD
         Ctrl["CompraCotizacionController<br/>/api/tesoreria/core/compraCotizacion<br/>POST /pendientes (body), GET /proveedores-pendientes[/{ejercicioId}]"]
         DTO["CompraCotizacionRequest/Response<br/>CompraCotizacionCriteriaRequest<br/>CompraCotizacionPendientesRequest<br/>CompraCotizacionRespuestaRequest<br/>Recomendar/AdjudicarCompraCotizacionRequest<br/>CompraAdjudicacionResponse<br/>CompraCotizacionPendiente/ProveedorPendienteResponse"]
         Map["CompraCotizacionDtoMapper<br/>CompraCotizacionMapper<br/>CompraAdjudicacionMapper"]
-        Adp["JpaCompraCotizacionRepositoryAdapter<br/>JpaCompraAdjudicacionRepositoryAdapter<br/>CompraCotizacionSecuenciaJdbcAdapter<br/>PedidoItemsPendientesJdbcAdapter"]
+        Adp["JpaCompraCotizacionRepositoryAdapter<br/>JpaCompraAdjudicacionRepositoryAdapter<br/>CompraCotizacionSecuenciaRepositoryAdapter<br/>JpaPedidoItemsPendientesAdapter"]
         Ent["CompraCotizacionEntity (compra_cotizacion)<br/>CompraCotizacionItemEntity<br/>CompraCotizacionProveedorEntity<br/>CompraCotizacionProveedorItemEntity<br/>CompraAdjudicacionEntity (compra_adjudicacion)"]
         Jpa["JpaCompraCotizacionRepository<br/>JpaCompraCotizacionItemRepository<br/>JpaCompraCotizacionProveedorRepository<br/>JpaCompraCotizacionProveedorItemRepository<br/>JpaCompraAdjudicacionRepository"]
     end
