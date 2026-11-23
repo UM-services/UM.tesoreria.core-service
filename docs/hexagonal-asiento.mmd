@@ -20,7 +20,7 @@ flowchart TD
         AdpSec["JpaAsientoSecuenciaRepositoryAdapter"]
         RepoSec["JpaAsientoSecuenciaRepository<br/>@Lock PESSIMISTIC_WRITE"]
         EntSec["AsientoSecuenciaEntity"]
-        Max["JdbcAsientoOrdenMaximoRepositoryAdapter<br/>asiento + movcon + ingreso_asiento + valores"]
+        Max["JpaAsientoOrdenMaximoRepositoryAdapter<br/>Criteria: asiento + movcon + ingreso_asiento + valores + ejercicios"]
         Tabla["contable_asiento_secuencia<br/>docs/sql/V431"]
     end
 

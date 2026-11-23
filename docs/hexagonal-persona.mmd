@@ -171,8 +171,9 @@ classDiagram
                 +toDomain(PersonaEntity) Persona
             }
 
-            class JdbcPersonaSugerenciaRepositoryAdapter {
-                -NamedParameterJdbcTemplate jdbc
+            class JpaPersonaSugerenciaRepositoryAdapter {
+                -EntityManager entityManager
+                -JpaDocumentoRepository documentoRepository
                 implements PersonaSugerenciaRepository
                 +findByUsuarioAndTerms(Long, List~String~, int) List~PersonaSugerencia~
             }
@@ -263,7 +264,7 @@ classDiagram
     PersonaController --> PersonaDtoMapper : uses
     PersonaController --> PersonaSugerenciaService : calls
     PersonaSugerenciaService --> PersonaSugerenciaRepository : uses
-    JdbcPersonaSugerenciaRepositoryAdapter ..|> PersonaSugerenciaRepository : implements
+    JpaPersonaSugerenciaRepositoryAdapter ..|> PersonaSugerenciaRepository : implements
     PersonaSugerenciaResponse --> PersonaSugerencia : maps
     PersonaDtoMapper --> Persona : maps
     PersonaDtoMapper --> PersonaRequest : maps

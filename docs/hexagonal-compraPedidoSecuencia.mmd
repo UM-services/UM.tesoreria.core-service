@@ -14,8 +14,8 @@ flowchart TD
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        Adp["CompraPedidoSecuenciaRepositoryAdapter<br/>JdbcTemplate"]
-        Tabla["tabla compra_pedido_secuencia<br/>INSERT ... LAST_INSERT_ID"]
+        Adp["CompraPedidoSecuenciaRepositoryAdapter<br/>ReservaCorrelativoAnual (lock pesimista)"]
+        Tabla["tabla compra_pedido_secuencia<br/>una fila por ejercicio"]
     end
 
     subgraph Callers ["Consumidor"]

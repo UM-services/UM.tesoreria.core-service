@@ -213,7 +213,7 @@ classDiagram
             +pendientes() ResponseEntity
         }
 
-        class JdbcChequeraEnvioAltaReaderAdapter {
+        class JpaChequeraEnvioAltaReaderAdapter {
             << adapter >>
             +findAllByLectivoIdAndFacultadIdAndGeograficaId(Integer, Integer, Integer) List~ChequeraEnvioAlta~
             +findByChequeraId(Long) Optional~ChequeraEnvioAlta~
@@ -266,7 +266,7 @@ classDiagram
     EnvioChequerasService --> EnvioChequeraGateway
     EnvioChequerasService --> RetencionPolicy
 
-    JdbcChequeraEnvioAltaReaderAdapter ..|> ChequeraEnvioAltaReader
+    JpaChequeraEnvioAltaReaderAdapter ..|> ChequeraEnvioAltaReader
     JpaEnvioJobRepositoryAdapter ..|> EnvioJobRepository
     EnvioChequeraGatewayAdapter ..|> EnvioChequeraGateway
 
@@ -283,4 +283,4 @@ classDiagram
 
     note for EnvioChequeraGatewayAdapter "Anticorrupción: compone DomicilioService, PersonaService, ChequeraSerieService y los facades legacy de chequeras y correo. retenida se escribe con un caso de uso de una sola columna (no el PUT completo)."
     note for EnvioChequerasService "Orden por fila: correo válido (si no, OMITIDA/SIN_CORREOS sin publicar), retención por deuda (RETENIDA + notificación) y envío (ENCOLADA, acuse por notificacion-resultado)."
-    note for JdbcChequeraEnvioAltaReaderAdapter "Una sola consulta sobre vw_chequera_alta + persona + domicilio + tipo_chequera + arancel_tipo + chequera_serie.retenida."
+    note for JpaChequeraEnvioAltaReaderAdapter "Criteria con proyección de tupla sobre vw_chequera_alta + joins a persona, domicilio, tipo_chequera y arancel_tipo; retenida se lee en bloque de chequera_serie (sin hidratar la serie)."
