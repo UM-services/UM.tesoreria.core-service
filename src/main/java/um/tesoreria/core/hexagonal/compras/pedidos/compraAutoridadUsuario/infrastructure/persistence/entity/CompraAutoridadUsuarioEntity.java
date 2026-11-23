@@ -15,9 +15,10 @@ import um.tesoreria.core.model.Auditable;
 /**
  * Tabla puente usuario ↔ perfil de autoridad.
  *
- * <p>Antes se escribía con {@code JdbcTemplate} (INSERT ... ON DUPLICATE KEY UPDATE / DELETE),
- * así que las asignaciones de permisos de compras no quedaban auditadas. Al mapearla como
- * entidad JPA, cada alta y cada baja emiten su {@code CHANGE} por el listener de Hibernate.</p>
+ * <p>Antes se escribía con acceso directo a la base mediante {@code INSERT ... ON DUPLICATE KEY
+ * UPDATE} / {@code DELETE}, así que las asignaciones de permisos de compras no quedaban auditadas.
+ * Al mapearla como entidad JPA, cada alta y cada baja emiten su {@code CHANGE} por el listener de
+ * Hibernate.</p>
  */
 @Entity
 @Table(name = "compra_autoridad_usuario",

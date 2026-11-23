@@ -80,32 +80,6 @@ public class AuditManualChange {
         }
     }
 
-    /**
-     * Atajo para los correlativos anuales ({@code compra_*_secuencia}), que se reservan con
-     * {@code LAST_INSERT_ID} por SQL directo y por eso no pasan por JPA.
-     *
-     * <p>{@code numero} es el valor ya reservado: {@code 1} implica alta de la fila del
-     * ejercicio; cualquier otro valor implica incremento desde {@code numero - 1}.</p>
-     */
-    public void sequence(String entity, String table, Integer ejercicioId, Integer anio, Integer numero) {
-        if (numero == null) {
-            return;
-        }
-        Map<String, Object> metadata = new LinkedHashMap<>();
-        metadata.put("ejercicioId", ejercicioId);
-        metadata.put("anio", anio);
-        metadata.put("operacion", "reserva-correlativo");
-
-        String entityId = ejercicioId + "/" + anio;
-        if (numero <= 1) {
-            change(Change.inserted(entity, table, entityId,
-                    Map.of("ultimoNumero", numero), metadata));
-        } else {
-            change(Change.scalar(entity, table, entityId, "ultimoNumero",
-                    numero - 1, numero, metadata));
-        }
-    }
-
     private List<String> changedFields(Change change) {        Set<String> fields = new LinkedHashSet<>();
         if (change.before() != null) {
             fields.addAll(change.before().keySet());

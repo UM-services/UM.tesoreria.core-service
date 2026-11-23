@@ -61,11 +61,11 @@ data class ChequeraPagoAsiento(
     @Column(name = "cpa_importe")
     var importe: BigDecimal = BigDecimal.ZERO,
 
-    @OneToOne(optional = true)
+    @OneToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "chequeraPagoId", referencedColumnName = "clave", updatable = false, insertable = false)
     var chequeraPago: ChequeraPagoEntity? = null,
 
-    @OneToOne(optional = true)
+    @OneToOne(optional = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "chequeraPagoReemplazoId", referencedColumnName = "clave", updatable = false, insertable = false)
     var chequeraPagoReemplazo: ChequeraPagoReemplazo? = null
 

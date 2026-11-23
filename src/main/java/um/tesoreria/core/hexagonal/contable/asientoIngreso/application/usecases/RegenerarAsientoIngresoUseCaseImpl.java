@@ -10,8 +10,6 @@ import um.tesoreria.core.audit.BulkContext;
 import um.tesoreria.core.exception.EjercicioBloqueadoException;
 import um.tesoreria.core.exception.EjercicioException;
 import um.tesoreria.core.exception.FacultadPagoCuentaException;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.ports.in.GetChequeraSerieByUniqueUseCase;
 import um.tesoreria.core.hexagonal.contable.asiento.application.exception.AsientoException;
 import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoService;
 import um.tesoreria.core.hexagonal.contable.asiento.domain.ports.in.ReservarOrdenContableUseCase;
@@ -25,18 +23,20 @@ import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.AsientoI
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.AsientoIngresoLinea;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.AsientoIngresoRegistro;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.AsientoIngresoResultado;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.ClaveImputacion;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.ClaveSerie;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.CuentaFaltante;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.LineaChequeraPagoAsiento;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.model.PagoIngreso;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.ports.in.RegenerarAsientoIngresoUseCase;
+import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.ports.out.AsientoIngresoReferenciaRepository;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.ports.out.ChequeraPagoAsientoEscrituraRepository;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.ports.out.IngresoAsientoMapaRepository;
 import um.tesoreria.core.hexagonal.contable.asientoIngreso.domain.ports.out.IngresoItemRepository;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
-import um.tesoreria.core.hexagonal.contable.lectivoTotalImputacion.application.service.LectivoTotalImputacionService;
 import um.tesoreria.core.model.dto.ItemAsientoDto;
 import um.tesoreria.core.model.dto.PagoDto;
-import um.tesoreria.core.service.ChequeraSerieReemplazoService;
 import um.tesoreria.core.service.EjercicioService;
 import um.tesoreria.core.service.FacultadPagoCuentaService;
 import um.tesoreria.core.service.facade.PagoService;
@@ -45,10 +45,13 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Regeneración del asiento de ingreso de una fecha y un tipo de pago. Reproduce
@@ -74,9 +77,7 @@ public class RegenerarAsientoIngresoUseCaseImpl implements RegenerarAsientoIngre
     private final AsientoService asientoService;
     private final CuentaMovimientoService cuentaMovimientoService;
     private final FacultadPagoCuentaService facultadPagoCuentaService;
-    private final LectivoTotalImputacionService lectivoTotalImputacionService;
-    private final GetChequeraSerieByUniqueUseCase getChequeraSerieByUniqueUseCase;
-    private final ChequeraSerieReemplazoService chequeraSerieReemplazoService;
+    private final AsientoIngresoReferenciaRepository referenciaRepository;
     private final EjercicioService ejercicioService;
     private final AsientoIngresoCatalogo catalogo;
     private final AsientoIngresoResumenBuilder resumenBuilder;
@@ -88,13 +89,17 @@ public class RegenerarAsientoIngresoUseCaseImpl implements RegenerarAsientoIngre
         OffsetDateTime normalizada = FechasContables.normalizar(fecha);
         validarEjercicio(normalizada);
         List<PagoIngreso> pagos = cargarPagos(normalizada, tipoPagoId);
+        // Las referencias se resuelven antes y en bloque: son lecturas de catálogo y no deben
+        // estirar la transacción que bloquea el asiento.
         Map<Integer, BigDecimal> cuentasDebe = resolverCuentasDebe(pagos, tipoPagoId);
+        Map<ClaveSerie, Integer> lectivos = resolverLectivos(pagos);
+        Map<ClaveImputacion, BigDecimal> cuentasImputacion = resolverCuentasImputacion(pagos);
 
         try {
             return Objects.requireNonNull(transaction.execute(status -> {
                 try (AuditBulkScope ignored = auditBulkService.begin(
                         BulkContext.of("asiento-ingreso", null, null, null))) {
-                    return ejecutar(normalizada, tipoPagoId, pagos, cuentasDebe);
+                    return ejecutar(normalizada, tipoPagoId, pagos, cuentasDebe, lectivos, cuentasImputacion);
                 }
             }));
         } catch (EjercicioBloqueadoException e) {
@@ -153,8 +158,38 @@ public class RegenerarAsientoIngresoUseCaseImpl implements RegenerarAsientoIngre
         return cuentas;
     }
 
+    /**
+     * Lectivo de cada serie en dos consultas (vigentes y, sólo para las que falten, reemplazos) en
+     * lugar de una búsqueda por pago. Si la serie no está en ninguna tabla, el pago queda sin clave
+     * y se resuelve con lectivo 0, igual que el legacy.
+     */
+    private Map<ClaveSerie, Integer> resolverLectivos(List<PagoIngreso> pagos) {
+        Set<ClaveSerie> claves = new LinkedHashSet<>();
+        for (PagoIngreso pago : pagos) {
+            claves.add(new ClaveSerie(pago.getFacultadId(), pago.getTipoChequeraId(), pago.getChequeraSerieId()));
+        }
+        Map<ClaveSerie, Integer> lectivos = new HashMap<>(referenciaRepository.findLectivosBySeries(claves));
+        Set<ClaveSerie> faltantes = new LinkedHashSet<>(claves);
+        faltantes.removeAll(lectivos.keySet());
+        if (!faltantes.isEmpty()) {
+            lectivos.putAll(referenciaRepository.findLectivosReemplazoBySeries(faltantes));
+        }
+        return lectivos;
+    }
+
+    /** Cuentas de imputación de todas las facultades del día en una sola consulta. */
+    private Map<ClaveImputacion, BigDecimal> resolverCuentasImputacion(List<PagoIngreso> pagos) {
+        Set<Integer> facultades = new LinkedHashSet<>();
+        for (PagoIngreso pago : pagos) {
+            facultades.add(pago.getFacultadId());
+        }
+        return referenciaRepository.findCuentasByFacultades(facultades);
+    }
+
     private AsientoIngresoResultado ejecutar(OffsetDateTime fecha, Integer tipoPagoId,
-                                             List<PagoIngreso> pagos, Map<Integer, BigDecimal> cuentasDebe) {
+                                             List<PagoIngreso> pagos, Map<Integer, BigDecimal> cuentasDebe,
+                                             Map<ClaveSerie, Integer> lectivos,
+                                             Map<ClaveImputacion, BigDecimal> cuentasImputacion) {
         AsientoIngresoRegistro registro = mapaRepository.findWithLockByFechaAndTipoPago(fecha, tipoPagoId)
                 .orElse(null);
         if (registro == null) {
@@ -173,24 +208,27 @@ public class RegenerarAsientoIngresoUseCaseImpl implements RegenerarAsientoIngre
         // líneas nuevas (Hibernate ordena INSERT antes que DELETE en el mismo flush).
         chequeraPagoAsientoRepository.flush();
 
-        Map<String, CuentaFaltante> faltantes = new LinkedHashMap<>();
-        for (PagoIngreso pago : pagos) {
-            chequeraPagoAsientoRepository.deleteAllByPago(pago);
-            chequeraPagoAsientoRepository.create(pago, 1, cuentasDebe.get(pago.getFacultadId()),
-                    (byte) 1, pago.getImporte());
+        // Un borrado por alcance (día/tipo), en lugar de dos sentencias por pago.
+        chequeraPagoAsientoRepository.deleteAllByFechaAndTipoPago(fecha, tipoPagoId);
 
-            Integer lectivoId = lectivoId(pago);
-            var imputacion = lectivoTotalImputacionService.findByProducto(
-                    pago.getFacultadId(), lectivoId, pago.getTipoChequeraId(), pago.getProductoId());
-            if (imputacion.isPresent() && imputacion.get().getNumeroCuenta() != null) {
-                chequeraPagoAsientoRepository.create(pago, 2, imputacion.get().getNumeroCuenta(),
-                        (byte) 0, pago.getImporte());
+        Map<String, CuentaFaltante> faltantes = new LinkedHashMap<>();
+        List<LineaChequeraPagoAsiento> lineas = new ArrayList<>(pagos.size() * 2);
+        for (PagoIngreso pago : pagos) {
+            lineas.add(new LineaChequeraPagoAsiento(pago, 1, cuentasDebe.get(pago.getFacultadId()),
+                    (byte) 1, pago.getImporte()));
+
+            Integer lectivoId = lectivoId(pago, lectivos);
+            BigDecimal cuenta = cuentasImputacion.get(new ClaveImputacion(pago.getFacultadId(),
+                    lectivoId, pago.getTipoChequeraId(), pago.getProductoId()));
+            if (cuenta != null) {
+                lineas.add(new LineaChequeraPagoAsiento(pago, 2, cuenta, (byte) 0, pago.getImporte()));
             } else {
                 CuentaFaltante faltante = faltante(pago.getFacultadId(), lectivoId,
                         pago.getTipoChequeraId(), pago.getProductoId());
                 faltantes.putIfAbsent(faltante.clave(), faltante);
             }
         }
+        chequeraPagoAsientoRepository.createAll(lineas);
 
         String concepto = "Ingreso " + fecha.format(FECHA_CONCEPTO) + " " + tipoPagoId;
         List<CuentaMovimiento> movimientos = new ArrayList<>();
@@ -311,21 +349,10 @@ public class RegenerarAsientoIngresoUseCaseImpl implements RegenerarAsientoIngre
         return fecha.toLocalDate().atStartOfDay().atOffset(fecha.getOffset());
     }
 
-    private Integer lectivoId(PagoIngreso pago) {
-        return getChequeraSerieByUniqueUseCase
-                .getByUnique(pago.getFacultadId(), pago.getTipoChequeraId(), pago.getChequeraSerieId())
-                .map(ChequeraSerie::getLectivoId)
-                .map(lectivo -> lectivo == null ? 0 : lectivo)
-                .orElseGet(() -> {
-                    try {
-                        Integer lectivo = chequeraSerieReemplazoService.findByUnique(
-                                pago.getFacultadId(), pago.getTipoChequeraId(), pago.getChequeraSerieId()).getLectivoId();
-                        return lectivo == null ? 0 : lectivo;
-                    } catch (RuntimeException e) {
-                        // Serie y reemplazo ausentes: el legacy sigue con lectivo 0 y lo informa como faltante.
-                        return 0;
-                    }
-                });
+    private Integer lectivoId(PagoIngreso pago, Map<ClaveSerie, Integer> lectivos) {
+        // Serie y reemplazo ausentes: el legacy sigue con lectivo 0 y lo informa como faltante.
+        return lectivos.getOrDefault(new ClaveSerie(pago.getFacultadId(), pago.getTipoChequeraId(),
+                pago.getChequeraSerieId()), 0);
     }
 
     private CuentaFaltante faltante(Integer facultadId, Integer lectivoId, Integer tipoChequeraId,

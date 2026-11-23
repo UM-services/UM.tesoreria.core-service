@@ -1,10 +1,14 @@
 package um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.persistence.adapter;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.application.exception.CompraCotizacionException;
@@ -15,28 +19,38 @@ import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.domain.model
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.domain.model.CompraCotizacionProveedorItem;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.domain.ports.out.CompraCotizacionRepository;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.persistence.entity.CompraCotizacionEntity;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.persistence.entity.CompraCotizacionItemEntity;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.persistence.entity.CompraCotizacionProveedorEntity;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.persistence.mapper.CompraCotizacionMapper;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.persistence.repository.JpaCompraCotizacionItemRepository;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.persistence.repository.JpaCompraCotizacionProveedorItemRepository;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.persistence.repository.JpaCompraCotizacionProveedorRepository;
 import um.tesoreria.core.hexagonal.compras.pedidos.compraCotizacion.infrastructure.persistence.repository.JpaCompraCotizacionRepository;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.infrastructure.persistence.entity.CompraPedidoItemEntity;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedidoItem.infrastructure.persistence.repository.JpaCompraPedidoItemRepository;
+import um.tesoreria.core.hexagonal.compras.pedidos.compraPedido.infrastructure.persistence.entity.CompraPedidoEntity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class JpaCompraCotizacionRepositoryAdapter implements CompraCotizacionRepository {
+
+    /** Estados en los que un proceso cuenta como enviado para completar el pedido. */
+    private static final List<String> ESTADOS_ENVIADOS = List.of("ENVIADA", "RECOMENDADA", "CERRADA");
 
     private final JpaCompraCotizacionRepository repository;
     private final JpaCompraCotizacionItemRepository itemRepository;
     private final JpaCompraCotizacionProveedorRepository proveedorRepository;
     private final JpaCompraCotizacionProveedorItemRepository proveedorItemRepository;
     private final CompraCotizacionMapper mapper;
-    private final JdbcTemplate jdbcTemplate;
+    private final JpaCompraPedidoItemRepository pedidoItemRepository;
+    private final EntityManager entityManager;
 
     @Override
     @Transactional
@@ -153,25 +167,46 @@ public class JpaCompraCotizacionRepositoryAdapter implements CompraCotizacionRep
 
     @Override
     public List<Integer> findPedidoIdsByProceso(Long compraCotizacionId) {
-        return jdbcTemplate.queryForList(
-                "SELECT DISTINCT pi.compra_pedido_id FROM compra_cotizacion_item ci "
-                        + "JOIN compra_pedido_item pi ON pi.compra_pedido_item_id = ci.compra_pedido_item_id "
-                        + "WHERE ci.compra_cotizacion_id = ?",
-                Integer.class, compraCotizacionId);
+        Set<Integer> itemIds = new LinkedHashSet<>();
+        for (CompraCotizacionItemEntity item : itemRepository.findByCompraCotizacionIdOrderByOrden(compraCotizacionId)) {
+            if (item.getCompraPedidoItemId() != null) {
+                itemIds.add(item.getCompraPedidoItemId());
+            }
+        }
+        Set<Integer> pedidoIds = new LinkedHashSet<>();
+        for (CompraPedidoItemEntity pedidoItem : pedidoItemRepository.findAllById(itemIds)) {
+            if (pedidoItem.getCompraPedidoId() != null) {
+                pedidoIds.add(pedidoItem.getCompraPedidoId());
+            }
+        }
+        return List.copyOf(pedidoIds);
     }
 
     @Override
     public boolean todosLosItemsEnProcesosEnviados(Integer compraPedidoId) {
-        Integer total = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM compra_pedido_item WHERE compra_pedido_id = ?",
-                Integer.class, compraPedidoId);
-        Integer cubiertos = jdbcTemplate.queryForObject(
-                "SELECT COUNT(DISTINCT pi.compra_pedido_item_id) FROM compra_pedido_item pi "
-                        + "JOIN compra_cotizacion_item ci ON ci.compra_pedido_item_id = pi.compra_pedido_item_id "
-                        + "JOIN compra_cotizacion c ON c.compra_cotizacion_id = ci.compra_cotizacion_id "
-                        + "WHERE pi.compra_pedido_id = ? AND c.estado IN ('ENVIADA','RECOMENDADA','CERRADA')",
-                Integer.class, compraPedidoId);
-        return total != null && total > 0 && total.equals(cubiertos);
+        long total = pedidoItemRepository.countByCompraPedidoId(compraPedidoId);
+        if (total == 0) {
+            return false;
+        }
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<CompraCotizacionItemEntity> item = query.from(CompraCotizacionItemEntity.class);
+
+        Subquery<Integer> itemsDelPedido = query.subquery(Integer.class);
+        Root<CompraPedidoItemEntity> pedidoItem = itemsDelPedido.from(CompraPedidoItemEntity.class);
+        itemsDelPedido.select(pedidoItem.get("compraPedidoItemId"))
+                .where(builder.equal(pedidoItem.get("compraPedidoId"), compraPedidoId));
+
+        Subquery<Long> procesosEnviados = query.subquery(Long.class);
+        Root<CompraCotizacionEntity> proceso = procesosEnviados.from(CompraCotizacionEntity.class);
+        procesosEnviados.select(proceso.get("compraCotizacionId"))
+                .where(proceso.get("estado").in(ESTADOS_ENVIADOS));
+
+        query.select(builder.countDistinct(item.get("compraPedidoItemId")))
+                .where(item.get("compraPedidoItemId").in(itemsDelPedido),
+                        item.get("compraCotizacionId").in(procesosEnviados));
+        long cubiertos = entityManager.createQuery(query).getSingleResult();
+        return total == cubiertos;
     }
 
     @Override
@@ -179,12 +214,19 @@ public class JpaCompraCotizacionRepositoryAdapter implements CompraCotizacionRep
         if (compraPedidoItemIds == null || compraPedidoItemIds.isEmpty()) {
             return BigDecimal.ZERO;
         }
-        String placeholders = String.join(",", compraPedidoItemIds.stream().map(x -> "?").toList());
-        BigDecimal suma = jdbcTemplate.queryForObject(
-                "SELECT COALESCE(SUM(p.monto_estimado), 0) FROM compra_pedido p WHERE p.compra_pedido_id IN ("
-                        + "SELECT DISTINCT pi.compra_pedido_id FROM compra_pedido_item pi "
-                        + "WHERE pi.compra_pedido_item_id IN (" + placeholders + "))",
-                BigDecimal.class, compraPedidoItemIds.toArray());
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<BigDecimal> query = builder.createQuery(BigDecimal.class);
+        Root<CompraPedidoEntity> pedido = query.from(CompraPedidoEntity.class);
+
+        Subquery<Integer> pedidosDeLosItems = query.subquery(Integer.class);
+        Root<CompraPedidoItemEntity> pedidoItem = pedidosDeLosItems.from(CompraPedidoItemEntity.class);
+        pedidosDeLosItems.select(pedidoItem.get("compraPedidoId"))
+                .where(pedidoItem.get("compraPedidoItemId").in(compraPedidoItemIds))
+                .distinct(true);
+
+        query.select(builder.sum(pedido.get("montoEstimado")))
+                .where(pedido.get("compraPedidoId").in(pedidosDeLosItems));
+        BigDecimal suma = entityManager.createQuery(query).getSingleResult();
         return suma == null ? BigDecimal.ZERO : suma;
     }
 

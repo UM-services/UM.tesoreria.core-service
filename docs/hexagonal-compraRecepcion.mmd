@@ -22,7 +22,7 @@ flowchart TD
         Ctrl["CompraRecepcionController<br/>/api/tesoreria/core/compraRecepcion<br/>GET /pendientes[/{ejercicioId}], POST /search"]
         DTO["CompraRecepcionRequest/Response<br/>CompraRecepcionItemRequest/Response<br/>CompraRecepcionCriteriaRequest<br/>CompraRecepcionPendienteResponse<br/>CompraRecepcionPendienteItemResponse"]
         Map["CompraRecepcionDtoMapper<br/>CompraRecepcionMapper"]
-        Adp["JpaCompraRecepcionRepositoryAdapter<br/>CompraRecepcionSecuenciaJdbcAdapter<br/>CompraRecepcionPedidoJdbcAdapter"]
+        Adp["JpaCompraRecepcionRepositoryAdapter<br/>CompraRecepcionSecuenciaRepositoryAdapter<br/>JpaCompraRecepcionPedidoAdapter"]
         Ent["CompraRecepcionEntity (compra_recepcion)<br/>CompraRecepcionItemEntity<br/>(compra_recepcion_item)"]
         Jpa["JpaCompraRecepcionRepository<br/>JpaCompraRecepcionItemRepository"]
     end

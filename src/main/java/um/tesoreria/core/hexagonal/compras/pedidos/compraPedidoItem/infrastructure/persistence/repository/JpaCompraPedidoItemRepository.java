@@ -11,6 +11,8 @@ public interface JpaCompraPedidoItemRepository extends JpaRepository<CompraPedid
 
     List<CompraPedidoItemEntity> findByCompraPedidoIdOrderByOrdenAsc(Integer compraPedidoId);
 
+    long countByCompraPedidoId(Integer compraPedidoId);
+
     void deleteByCompraPedidoId(Integer compraPedidoId);
 
 }
