@@ -11,7 +11,7 @@ No agrega ni cambia rutas REST, DTO ni permisos: el enforcement de permisos sigu
 | `REQUEST` | `AuditRequestFilter` | método, endpoint, estado HTTP, resultado (`OK`/`ERROR`), duración, actor, IP, correlación y cantidad de cambios |
 | `CHANGE` | `AuditEntityListener` (`POST_INSERT`/`POST_UPDATE`/`POST_DELETE` + `AuditFlushListener`) | entidad, id, operación, `changedFields`, `beforeData`/`afterData` del diff escalar |
 | `SUMMARY` | `AuditBulkService` + `AuditBulkScope` | conteos por entidad y operación de una generación masiva, con `bulkId`/`label`/`anho`/`mes` |
-| `CHANGE` manual | `AuditManualChange.change(...)` / `.sequence(...)` | escrituras que no pasan por JPA (correlativos con `LAST_INSERT_ID`) |
+| `CHANGE` manual | `AuditManualChange.change(...)` | escrituras que no pasan por JPA |
 
 - El `REQUEST` se emite para toda operación mutante (`POST`/`PUT`/`PATCH`/`DELETE`) y también para un `GET` que haya cambiado filas, incluso si la operación falló o hizo rollback. Se excluyen `/actuator`, `/error` y cualquier ruta que contenga `/search`.
 - El diff sólo mira propiedades escalares: ignora asociaciones, colecciones y las columnas `created`/`updated`. Un update que no cambia campos no emite evento.
@@ -82,7 +82,7 @@ Los valores enmascarados conservan los últimos cuatro caracteres (`****1234`) o
 
 - No marca falsos positivos: un delete derivado con `@Modifying` (Spring Data lo ignora y usa `em.remove`), un `@Query` de lectura o un `JdbcTemplate` que sólo consulta no son violaciones.
 - La allowlist es `src/test/resources/audit-coverage-exceptions.txt` (`archivo|patrón|motivo`). Una entrada que ya no corresponde también rompe el test.
-- Sólo hay cuatro excepciones: los correlativos anuales de compras (`compra_pedido_secuencia`, `compra_cotizacion_secuencia`, `compra_formalizacion_secuencia`, `compra_recepcion_secuencia`), que reservan con `LAST_INSERT_ID` en una sola sentencia por atomicidad y emiten su evento con `AuditManualChange.sequence(...)`.
+- No hay excepciones (`src/test/resources/audit-coverage-exceptions.txt` está vacío desde 12.10.1): los correlativos anuales de compras se reservan con JPA y lock pesimista (`ReservaCorrelativoAnual`), con la misma atomicidad que el `LAST_INSERT_ID` anterior y dentro del ciclo de vida de JPA.
 - Para regenerar la lista después de una migración deliberada: `mvn test -Dtest=AuditCoverageGuardTest -Daudit.exceptions.write=true`.
 
 ## Límites conocidos

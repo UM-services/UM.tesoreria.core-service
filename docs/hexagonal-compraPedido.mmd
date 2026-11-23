@@ -19,7 +19,7 @@ flowchart TD
         DTO["CompraPedidoRequest/Response<br/>CompraPedidoCriteriaRequest (POST /search)<br/>Aprobar/Rechazar/Descartar/EnviarCompraPedidoRequest<br/>Estimar/AutorizarPresupuesto/RechazarPresupuestoRequest<br/>CompraPedidoCotizacionesMinimasResponse"]
         Map["CompraPedidoDtoMapper<br/>CompraPedidoMapper"]
         Adp["JpaCompraPedidoRepositoryAdapter"]
-        Eje["EjercicioActualJdbcAdapter<br/>tabla ejercicios (SQL directo)"]
+        Eje["JpaEjercicioActualAdapter<br/>GetEjercicioByFechaUseCase (ejercicios)"]
         Ent["CompraPedidoEntity<br/>tabla compra_pedido<br/>(estado varchar(100), fecha_envio, rechazo_motivo,<br/>descartado_motivo, cantidad_cotizaciones_minima)"]
         Jpa["JpaCompraPedidoRepository"]
     end

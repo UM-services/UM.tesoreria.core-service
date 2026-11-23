@@ -20,7 +20,7 @@ flowchart TD
         Ctrl["CompraFormalizacionController<br/>/api/tesoreria/core/compraFormalizacion<br/>GET /pendientes[/{ejercicioId}], POST /search"]
         DTO["CompraFormalizacionRequest/Response<br/>CompraFormalizacionCriteriaRequest<br/>CompraFormalizacionPendienteResponse<br/>CompraFormalizacionItemResponse"]
         Map["CompraFormalizacionDtoMapper<br/>CompraFormalizacionMapper"]
-        Adp["JpaCompraFormalizacionRepositoryAdapter<br/>CompraFormalizacionSecuenciaJdbcAdapter"]
+        Adp["JpaCompraFormalizacionRepositoryAdapter<br/>CompraFormalizacionSecuenciaRepositoryAdapter"]
         Ent["CompraFormalizacionEntity (compra_formalizacion)<br/>CompraFormalizacionItemEntity<br/>(compra_formalizacion_item)"]
         Jpa["JpaCompraFormalizacionRepository<br/>JpaCompraFormalizacionItemRepository"]
     end

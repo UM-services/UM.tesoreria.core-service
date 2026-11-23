@@ -21,11 +21,12 @@ public interface ChequeraPagoAsientoRepository extends JpaRepository<ChequeraPag
 			Long chequeraSerieId);
 
 	/**
-	 * Baja las líneas de un pago puntual (clave compuesta del legacy, sin {@code item}) antes de
-	 * regenerarlas. Es el equivalente derivado de {@code clsDAOCheqPagoAsiento.deleteAll}.
+	 * Baja todas las líneas de un día/tipo antes de regenerarlas (equivalente al
+	 * {@code deleteAll} por pago de {@code clsDAOCheqPagoAsiento}, pero por alcance). El rango
+	 * incluye las líneas que quedaron con hora (Mercado Pago previo al 2026-11-21).
+	 * Derived delete: cada {@code PostDelete} alimenta el resumen de auditoría.
 	 */
-	void deleteAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndProductoIdAndAlternativaIdAndCuotaIdAndOrden(
-			Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer productoId,
-			Integer alternativaId, Integer cuotaId, Integer orden);
+	void deleteAllByTipoPagoIdAndFechaGreaterThanEqualAndFechaLessThan(Integer tipoPagoId,
+			OffsetDateTime desde, OffsetDateTime hasta);
 
 }
