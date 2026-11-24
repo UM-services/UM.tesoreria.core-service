@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.chequera.emision.domain.ports.out;
 
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorChequera;
+import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorSede;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.EstadoBorrador;
 
 import java.time.OffsetDateTime;
@@ -16,6 +17,18 @@ public interface BorradorChequeraRepository {
     Optional<BorradorChequera> findByClaveIdempotencia(String claveIdempotencia);
 
     List<BorradorChequera> findAllByUsuarioIdAndEstado(String usuarioId, EstadoBorrador estado);
+
+    /**
+     * Borradores de una facultad y lectivo en un estado (consulta de exportación por sede).
+     */
+    List<BorradorChequera> findAllByLectivoIdAndFacultadIdAndEstado(Integer lectivoId, Integer facultadId,
+                                                                    EstadoBorrador estado);
+
+    /**
+     * Referencias mínimas (facultad y tipo de chequera) de los borradores de un lectivo, para
+     * armar el resumen por facultad/sede sin cargar cuotas.
+     */
+    List<BorradorSede> findAllSedesByLectivoIdAndEstado(Integer lectivoId, EstadoBorrador estado);
 
     /**
      * Borrador abierto más reciente de una serie concreta. Permite reparar una chequera sin

@@ -67,6 +67,14 @@ public class BorradorCuota {
         return esVerdadero(bloqueado) || esVerdadero(pagado) || esVerdadero(baja) || esVerdadero(compensada);
     }
 
+    /**
+     * Cuota pagada, de baja o compensada: no se modifica ni en fecha ni en importe, ni siquiera
+     * con una recalculación explícita de beca/arancel.
+     */
+    public boolean protegida() {
+        return esVerdadero(pagado) || esVerdadero(baja) || esVerdadero(compensada);
+    }
+
     public static boolean esVerdadero(Byte valor) {
         return valor != null && valor != 0;
     }
