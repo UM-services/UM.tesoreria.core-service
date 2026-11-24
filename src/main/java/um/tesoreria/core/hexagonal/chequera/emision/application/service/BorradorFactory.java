@@ -76,11 +76,14 @@ public class BorradorFactory {
                             multiplicador);
                 }
 
-                // Regla temporal heredada (clsCtlChequera 451-456)
-                cuota.setArancelTipoId(ReglasEmision.periodo(cuota.getAnio(), cuota.getMes())
-                        > ReglasEmision.CORTE_ARANCEL_POR_CUOTA
-                        ? datos.getArancelTipoIdSeleccionado()
-                        : arancelTipoIdChequera);
+                // Regla temporal heredada (clsCtlChequera 451-456). Las cuotas pagadas, de baja
+                // o compensadas no se tocan.
+                if (!cuota.protegida()) {
+                    cuota.setArancelTipoId(ReglasEmision.periodo(cuota.getAnio(), cuota.getMes())
+                            > ReglasEmision.CORTE_ARANCEL_POR_CUOTA
+                            ? datos.getArancelTipoIdSeleccionado()
+                            : arancelTipoIdChequera);
+                }
 
                 aplicarBeca(cuota, datos, porcentajes);
                 aplicarDescuentoPagoTermino(cuota, datos);
@@ -212,8 +215,12 @@ public class BorradorFactory {
 
     private void refrescarDesdeDiseno(BorradorCuota cuota, LectivoCuota diseno, boolean enTerminoAnterior,
                                       OffsetDateTime hoy, int puntosDescuento, BigDecimal multiplicador) {
-        if (cero(cuota.getImporte1Original()) && positivo(diseno.getImporte1())
-                && !BorradorCuota.esVerdadero(cuota.getCompensada())) {
+        // Las cuotas pagadas, de baja o compensadas no se tocan; las editadas a mano tampoco.
+        if (cuota.protegida() || BorradorCuota.esVerdadero(cuota.getManual())) {
+            return;
+        }
+
+        if (cero(cuota.getImporte1Original()) && positivo(diseno.getImporte1())) {
             cuota.setImporte1Original(ReglasEmision.redondear2(diseno.getImporte1()));
             cuota.setImporte2Original(ReglasEmision.redondear2(diseno.getImporte2()));
             cuota.setImporte3Original(ReglasEmision.redondear2(diseno.getImporte3()));
@@ -221,27 +228,27 @@ public class BorradorFactory {
             cuota.setImporte2Borrador(ReglasEmision.redondear2(diseno.getImporte2()));
             cuota.setImporte3Borrador(ReglasEmision.redondear2(diseno.getImporte3()));
         }
-        boolean vencimientoFuturo = diseno.getVencimiento1() != null && !diseno.getVencimiento1().isBefore(hoy);
-        if (cero(cuota.getImporte1Borrador()) && vencimientoFuturo
-                && !BorradorCuota.esVerdadero(cuota.getManual())
-                && !BorradorCuota.esVerdadero(cuota.getCompensada())) {
-            cuota.setMes(diseno.getMes());
-            cuota.setAnio(diseno.getAnho());
-            cuota.setVencimiento1(diseno.getVencimiento1());
+
+        // Las fechas del diseño son la referencia: el borrador se alinea con el diseño vigente
+        // aunque la cuota ya exista en la chequera emitida.
+        if (diseno.getVencimiento1() == null) {
+            return;
+        }
+        cuota.setMes(diseno.getMes());
+        cuota.setAnio(diseno.getAnho());
+        cuota.setVencimiento1(diseno.getVencimiento1());
+        if (diseno.getVencimiento2() != null) {
             cuota.setVencimiento2(diseno.getVencimiento2());
+        }
+        if (diseno.getVencimiento3() != null) {
             cuota.setVencimiento3(diseno.getVencimiento3());
-            cuota.setImporte1Borrador(ReglasEmision.redondear2(cuota.getImporte1Original()));
-            cuota.setDescuentoPagoTermino(BigDecimal.valueOf(enTerminoAnterior ? puntosDescuento : 0));
-            cuota.setImporte2Borrador(ReglasEmision.redondear2(cuota.getImporte2Original()));
-            cuota.setImporte3Borrador(ReglasEmision.redondear2(cuota.getImporte3Original()));
         }
     }
 
     private void aplicarBeca(BorradorCuota cuota, DatosConstruccion datos, Map<String, BigDecimal> porcentajes) {
         BigDecimal beca = ReglasEmision.becaAplicable(datos.getBecaPorcentaje(), cuota.getProductoId());
-        if (BorradorCuota.esVerdadero(cuota.getPagado())
-                || !positivo(cuota.getImporte1Borrador())
-                || BorradorCuota.esVerdadero(cuota.getCompensada())) {
+        if (cuota.protegida()
+                || !positivo(cuota.getImporte1Borrador())) {
             return;
         }
         if (BorradorCuota.esVerdadero(cuota.getManual()) && !datos.isCalculaBeca()) {
@@ -263,8 +270,7 @@ public class BorradorFactory {
      */
     private void aplicarDescuentoPagoTermino(BorradorCuota cuota, DatosConstruccion datos) {
         if (!datos.isEnTerminoAnterior()
-                || BorradorCuota.esVerdadero(cuota.getPagado())
-                || BorradorCuota.esVerdadero(cuota.getCompensada())
+                || cuota.protegida()
                 || BorradorCuota.esVerdadero(cuota.getManual())) {
             return;
         }

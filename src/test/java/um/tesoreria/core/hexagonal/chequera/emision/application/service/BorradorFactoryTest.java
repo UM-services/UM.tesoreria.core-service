@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -202,6 +203,164 @@ class BorradorFactoryTest {
 
         assertTrue(resultado.stream().anyMatch(cuota -> cuota.key().equals("9.1.1")));
         assertTrue(resultado.stream().anyMatch(cuota -> cuota.key().equals("1.1.1")));
+    }
+
+    @Test
+    void alineaElVencimientoDelBorradorConElDisenoAunqueLaCuotaTengaImporte() {
+        ChequeraCuota persistida = ChequeraCuota.builder()
+                .chequeraCuotaId(1L).facultadId(1).tipoChequeraId(1).chequeraSerieId(1L)
+                .productoId(1).alternativaId(1).cuotaId(1).mes(12).anho(2026)
+                .vencimiento1(OffsetDateTime.parse("2026-12-09T00:00:00Z"))
+                .vencimiento2(OffsetDateTime.parse("2026-12-31T00:00:00Z"))
+                .vencimiento3(OffsetDateTime.parse("2027-01-31T00:00:00Z"))
+                .importe1(new BigDecimal("313000")).importe2(new BigDecimal("313000"))
+                .importe3(new BigDecimal("313000"))
+                .importe1Original(new BigDecimal("313000")).importe2Original(new BigDecimal("313000"))
+                .importe3Original(new BigDecimal("313000"))
+                .pagado((byte) 0).baja((byte) 0).manual((byte) 0).compensada((byte) 0)
+                .build();
+
+        List<BorradorCuota> cuotas = factory.construir(List.of(persistida), datosDe(disenoDiciembre()));
+
+        assertEquals(OffsetDateTime.parse("2026-12-10T00:00:00Z"), cuotas.get(0).getVencimiento1());
+        assertEquals(OffsetDateTime.parse("2026-12-31T00:00:00Z"), cuotas.get(0).getVencimiento2());
+        assertEquals(OffsetDateTime.parse("2027-01-31T00:00:00Z"), cuotas.get(0).getVencimiento3());
+    }
+
+    @Test
+    void noAlineaElVencimientoDeUnaCuotaPagadaBajaOCompensada() {
+        ChequeraCuota pagada = ChequeraCuota.builder()
+                .chequeraCuotaId(1L).facultadId(1).tipoChequeraId(1).chequeraSerieId(1L)
+                .productoId(1).alternativaId(1).cuotaId(1).mes(12).anho(2026)
+                .vencimiento1(OffsetDateTime.parse("2026-12-09T00:00:00Z"))
+                .importe1(new BigDecimal("313000")).importe1Original(new BigDecimal("313000"))
+                .pagado((byte) 1).baja((byte) 0).manual((byte) 0).compensada((byte) 0)
+                .build();
+
+        List<BorradorCuota> cuotas = factory.construir(List.of(pagada), datosDe(disenoDiciembre()));
+
+        assertEquals(OffsetDateTime.parse("2026-12-09T00:00:00Z"), cuotas.get(0).getVencimiento1());
+    }
+
+    @Test
+    void noAlineaElVencimientoDeUnaCuotaEditadaAManoEnElBorrador() {
+        BorradorCuota editada = cuotaBorrador((byte) 0, (byte) 0, (byte) 1, (byte) 0, (byte) 0);
+        editada.setVencimiento1(OffsetDateTime.parse("2026-03-02T00:00:00Z"));
+
+        List<BorradorCuota> cuotas = factory.construirDesdeBorrador(new java.util.ArrayList<>(List.of(editada)),
+                datosDe(disenoDiciembre()));
+
+        assertEquals(OffsetDateTime.parse("2026-03-02T00:00:00Z"), cuotas.get(0).getVencimiento1());
+        assertEquals(3, cuotas.get(0).getMes());
+        assertEquals(2026, cuotas.get(0).getAnio());
+        assertEquals(new BigDecimal("1000.00"), cuotas.get(0).getImporte1Borrador());
+        assertNull(cuotas.get(0).getImporte1Original());
+    }
+
+    @Test
+    void completaImportesCeroYAlineaElVencimientoEnLaMismaPasada() {
+        ChequeraCuota sinImporte = ChequeraCuota.builder()
+                .chequeraCuotaId(1L).facultadId(1).tipoChequeraId(1).chequeraSerieId(1L)
+                .productoId(1).alternativaId(1).cuotaId(1).mes(12).anho(2026)
+                .vencimiento1(OffsetDateTime.parse("2026-12-09T00:00:00Z"))
+                .importe1(BigDecimal.ZERO).importe2(BigDecimal.ZERO).importe3(BigDecimal.ZERO)
+                .importe1Original(BigDecimal.ZERO).importe2Original(BigDecimal.ZERO)
+                .importe3Original(BigDecimal.ZERO)
+                .pagado((byte) 0).baja((byte) 0).manual((byte) 0).compensada((byte) 0)
+                .build();
+
+        List<BorradorCuota> cuotas = factory.construir(List.of(sinImporte), datosDe(disenoDiciembre()));
+
+        assertEquals(0, cuotas.get(0).getImporte1Original().compareTo(new BigDecimal("313000")));
+        assertEquals(OffsetDateTime.parse("2026-12-10T00:00:00Z"), cuotas.get(0).getVencimiento1());
+    }
+
+    @Test
+    void noModificaNiFechasNiImportesDeCuotasPagadasDeBajaOCompensadas() {
+        byte[][] inmutables = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+        for (byte[] flags : inmutables) {
+            ChequeraCuota cuota = ChequeraCuota.builder()
+                    .chequeraCuotaId(1L).facultadId(1).tipoChequeraId(1).chequeraSerieId(1L)
+                    .productoId(1).alternativaId(1).cuotaId(1).mes(12).anho(2026)
+                    .vencimiento1(OffsetDateTime.parse("2026-12-09T00:00:00Z"))
+                    .vencimiento2(OffsetDateTime.parse("2026-12-31T00:00:00Z"))
+                    .vencimiento3(OffsetDateTime.parse("2027-01-31T00:00:00Z"))
+                    .importe1(BigDecimal.ZERO).importe2(BigDecimal.ZERO).importe3(BigDecimal.ZERO)
+                    .importe1Original(BigDecimal.ZERO).importe2Original(BigDecimal.ZERO)
+                    .importe3Original(BigDecimal.ZERO)
+                    .pagado(flags[0]).baja(flags[1]).manual((byte) 0).compensada(flags[2])
+                    .build();
+
+            BorradorCuota resultado = factory.construir(List.of(cuota), datosDe(disenoDiciembre())).get(0);
+
+            assertEquals(0, resultado.getImporte1Original().signum(),
+                    "no debe completar importes de una cuota inmutable");
+            assertEquals(0, resultado.getImporte1Borrador().signum(),
+                    "no debe completar importes de una cuota inmutable");
+            assertEquals(OffsetDateTime.parse("2026-12-09T00:00:00Z"), resultado.getVencimiento1(),
+                    "no debe cambiar la fecha de una cuota inmutable");
+        }
+    }
+
+    @Test
+    void noAplicaBecaArancelNiDescuentoAUnaCuotaDeBajaBloqueadaOPagada() {
+        ChequeraCuota deBaja = ChequeraCuota.builder()
+                .chequeraCuotaId(1L).facultadId(1).tipoChequeraId(1).chequeraSerieId(1L)
+                .productoId(1).alternativaId(1).cuotaId(1).mes(12).anho(2026)
+                .vencimiento1(OffsetDateTime.parse("2026-12-09T00:00:00Z"))
+                .importe1(new BigDecimal("1000")).importe2(new BigDecimal("1000"))
+                .importe3(new BigDecimal("1000"))
+                .importe1Original(new BigDecimal("1000")).importe2Original(new BigDecimal("1000"))
+                .importe3Original(new BigDecimal("1000"))
+                .arancelTipoId(9)
+                .pagado((byte) 0).baja((byte) 1).manual((byte) 0).compensada((byte) 0)
+                .build();
+        DatosConstruccion datos = DatosConstruccion.builder()
+                .facultadId(1).lectivoId(37).tipoChequeraId(1)
+                .arancelTipoIdSeleccionado(1).arancelTipoIdChequera(1)
+                .becaPorcentaje(new BigDecimal("50")).calculaBeca(false)
+                .personaId(BigDecimal.ONE).documentoId(1).enTerminoAnterior(true)
+                .diseno(List.of(disenoDiciembre()))
+                .alternativas(List.of())
+                .build();
+
+        BorradorCuota resultado = factory.construir(List.of(deBaja), datos).get(0);
+
+        assertEquals(0, resultado.getImporte1Borrador().compareTo(new BigDecimal("1000")),
+                "la beca y el arancel no deben tocar el importe de una cuota de baja");
+        assertEquals(Integer.valueOf(9), resultado.getArancelTipoId(),
+                "el arancel de una cuota de baja no debe cambiar");
+        assertEquals(OffsetDateTime.parse("2026-12-09T00:00:00Z"), resultado.getVencimiento1());
+    }
+
+    private DatosConstruccion datosDe(LectivoCuota diseno) {
+        return DatosConstruccion.builder()
+                .facultadId(1)
+                .lectivoId(37)
+                .tipoChequeraId(1)
+                .arancelTipoIdSeleccionado(1)
+                .arancelTipoIdChequera(1)
+                .becaPorcentaje(BigDecimal.ZERO)
+                .calculaBeca(false)
+                .personaId(BigDecimal.ONE)
+                .documentoId(1)
+                .enTerminoAnterior(false)
+                .diseno(List.of(diseno))
+                .alternativas(List.of())
+                .build();
+    }
+
+    private LectivoCuota disenoDiciembre() {
+        return LectivoCuota.builder()
+                .facultadId(1).lectivoId(37).tipoChequeraId(1)
+                .productoId(1).alternativaId(1).cuotaId(1)
+                .mes(12).anho(2026)
+                .vencimiento1(OffsetDateTime.parse("2026-12-10T00:00:00Z"))
+                .vencimiento2(OffsetDateTime.parse("2026-12-31T00:00:00Z"))
+                .vencimiento3(OffsetDateTime.parse("2027-01-31T00:00:00Z"))
+                .importe1(new BigDecimal("313000")).importe2(new BigDecimal("313000"))
+                .importe3(new BigDecimal("313000"))
+                .build();
     }
 
     private BorradorCuota cuotaBorrador(byte pagado, byte baja, byte manual, byte compensada, byte bloqueado) {
