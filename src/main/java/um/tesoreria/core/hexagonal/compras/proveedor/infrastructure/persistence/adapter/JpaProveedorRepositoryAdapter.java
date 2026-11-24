@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorNombre;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorSearch;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorRepository;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.entity.ProveedorEntity;
@@ -11,6 +12,7 @@ import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.repository.JpaProveedorRepository;
 import um.tesoreria.core.hexagonal.compras.proveedor.infrastructure.persistence.repository.JpaProveedorSearchRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -67,6 +69,13 @@ public class JpaProveedorRepositoryAdapter implements ProveedorRepository {
         return jpaProveedorRepository.findAll().stream()
                 .map(proveedorMapper::toDomainModel)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ProveedorNombre> findNombresByProveedorIdIn(Collection<Integer> proveedorIds) {
+        return jpaProveedorRepository.findAllByProveedorIdIn(proveedorIds).stream()
+                .map(p -> new ProveedorNombre(p.getProveedorId(), p.getRazonSocial()))
+                .toList();
     }
 
     @Override

@@ -1,9 +1,11 @@
 package um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.adapter;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.LineaMovimiento;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.SumaCuenta;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.ports.out.CuentaMovimientoRepository;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.mapper.CuentaMovimientoMapper;
@@ -83,6 +85,22 @@ public class JpaCuentaMovimientoRepositoryAdapter implements CuentaMovimientoRep
                         Sort.by("fechaContable").ascending().and(Sort.by("ordenContable").ascending())).stream()
                 .map(cuentaMovimientoMapper::toDomainModel)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LineaMovimiento> findLineasByFechaContable(OffsetDateTime desde, OffsetDateTime hasta, int limite) {
+        Sort orden = Sort.by("fechaContable", "ordenContable", "item", "cuentaMovimientoId").ascending();
+        return jpaCuentaMovimientoRepository
+                .findAllByFechaContableGreaterThanEqualAndFechaContableLessThan(desde, hasta, orden, Limit.of(limite)).stream()
+                .map(l -> new LineaMovimiento(l.getCuentaMovimientoId(), l.getFechaContable(), l.getOrdenContable(),
+                        l.getItem(), l.getNumeroCuenta(), l.getDebita(), l.getImporte(), l.getConcepto(),
+                        l.getComprobanteId(), l.getProveedorId(), l.getApertura()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public long countByFechaContable(OffsetDateTime desde, OffsetDateTime hasta) {
+        return jpaCuentaMovimientoRepository.countByFechaContableGreaterThanEqualAndFechaContableLessThan(desde, hasta);
     }
 
     @Override

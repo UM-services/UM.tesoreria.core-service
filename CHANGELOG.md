@@ -2,6 +2,29 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.12.0] - 2026-11-24
+
+### Added
+
+- **Libro Diario en JSON** (#545), slice nuevo `contable/movimientoConsulta`: `POST /api/tesoreria/core/movimientoConsulta/libroDiario` (también `/movimientoConsulta/libroDiario`) recibe `{desde, hasta}` y devuelve los asientos del rango (fecha y orden) con sus líneas y totales, y los totales del rango. Cada línea trae `numeroCuenta`, `nombreCuenta`, `comprobante`, `proveedor`, `concepto` y `debe` o `haber` (el otro lado es `null`). Orden: fecha, orden, ítem e `id`. Compone los application services de `cuentaMovimiento`, `cuenta`, `comprobante` y `proveedor`; los nombres se resuelven una vez por pedido ([MovimientoConsultaController.java], [ConsultarLibroDiarioUseCaseImpl.java], [RangoContable.java], [LibroDiario.java], [AsientoDiario.java], [LineaDiario.java], [MovimientoConsultaExceptionHandler.java])
+- Fechas: se toma el día de calendario de cada fecha tal como llega, con su offset y cualquier hora; el rango consultado es `[00:00Z de desde, 00:00Z del día siguiente a hasta)`. `RangoFechasRequest` lee las fechas sin pasarlas a UTC (`ADJUST_DATES_TO_CONTEXT_TIME_ZONE` desactivado) para no correr el día ([RangoFechasRequest.java])
+- Rechazos con cuerpo `{status, error, codigo, message}`: `400 FECHAS_REQUERIDAS`, `400 FECHA_FUERA_DE_RANGO` (fechas fuera del `datetime` de MySQL: `desde` o `hasta` antes de 1000-01-01 o después de 9999-12-30), `400 CUERPO_INVALIDO` (JSON roto o fecha sin hora ni offset), `409 DESDE_POSTERIOR`, `409 RANGO_DEMASIADO_LARGO` cuando el rango supera `app.contabilidad.consulta.max-dias` (por defecto 400 días: un ejercicio completo entra; evita contar toda la historia en cada pedido) y `409 DEMASIADOS_MOVIMIENTOS` cuando supera `app.contabilidad.consulta.max-lineas` (por defecto 100.000). El conteo se hace antes de leer y la lectura trae como mucho `tope + 1` líneas (`Limit` de Spring Data), en la misma transacción de solo lectura: líneas agregadas entre el conteo y la lectura no pasan el tope ([TopeMovimientos.java], [MovimientoConsultaException.java], [MovimientoConsultaExceptionHandler.java])
+- Slice `contable/cuentaMovimiento`: casos de uso `FindLineasByFechaContableUseCase` y `CountByFechaContableUseCase` con `LineaMovimiento` y la proyección cerrada `LineaMovimientoProjection` sobre las consultas derivadas `findAllByFechaContableGreaterThanEqualAndFechaContableLessThan` (con `Sort` y `Limit`) y `countBy...`; una sola consulta sin las relaciones de la entidad, sin `@Query` ([LineaMovimiento.java], [LineaMovimientoProjection.java], [JpaCuentaMovimientoRepository.java], [JpaCuentaMovimientoRepositoryAdapter.java], [CuentaMovimientoService.java])
+- Slice `compras/proveedor`: caso de uso `GetNombresByProveedorIdsUseCase` con `ProveedorNombre` y la proyección `ProveedorNombreProjection` (`findAllByProveedorIdIn`): razón social por id sin cargar la cuenta del proveedor ([ProveedorNombre.java], [ProveedorNombreProjection.java], [JpaProveedorRepository.java], [ProveedorService.java])
+- Tests `ConsultarLibroDiarioUseCaseImplTest`, `MovimientoConsultaControllerTest`, `LineasPorRangoPersistenceTest` (H2, cuenta las sentencias SQL) y `LineasPorRangoAdapterTest` (H2, orden y mapeo de cada columna)
+- Diagrama nuevo `docs/hexagonal-movimientoConsulta.mmd`; `hexagonal-cuentaMovimiento.mmd` y `hexagonal-proveedor.mmd` suman los casos de uso nuevos
+
+### Changed
+
+- **Auditoría**: `AuditRequestFilter` no registra el evento `REQUEST` de las consultas que usan POST para mandar el filtro en el cuerpo (`POST /balance/mayor/consulta`, `/balance/sumasysaldos/consulta` y `/movimientoConsulta/libroDiario`, rutas exactas cortas y largas) cuando no cambian filas. Si cambian alguna (Sumas y Saldos recalcula grados de `plancta`), se auditan con su usuario y endpoint; con `change-events` apagado no se pueden contar las filas y también se auditan. El contexto de auditoría se arma siempre, así los eventos `CHANGE` conservan el actor. Antes cada consulta escribía una fila `INSERT` en `audit_outbox` ([AuditRequestFilter.java], [AuditRequestFilterConsultaTest.java])
+- `bootstrap.yml` declara los topes del Libro Diario: `app.contabilidad.consulta.max-lineas` (`TESORERIA_CONTABILIDAD_CONSULTA_MAX_LINEAS`, 100.000) y `max-dias` (`TESORERIA_CONTABILIDAD_CONSULTA_MAX_DIAS`, 400). `TopeMovimientos` los valida al arrancar ([TopeMovimientosTest.java])
+
+### Notes
+
+- Sin DDL externo, sin dependencias nuevas y sin `@Query`. Los contratos existentes no cambian; la auditoría deja de registrar las consultas POST de solo lectura.
+
+> Based on `git diff` contra `develop` (`1cd832f5`): 35 archivos nuevos (slice `movimientoConsulta`, casos de uso y proyecciones en `cuentaMovimiento` y `proveedor`, siete tests y el diagrama `hexagonal-movimientoConsulta.mmd`) y 10 de código modificados (puertos, adaptadores, repositorios JPA y servicios de `cuentaMovimiento` y `proveedor`, `AuditRequestFilter` y `bootstrap.yml`). Endpoint JSON nuevo (capacidad pública aditiva) ⇒ incremento **minor** (`12.11.0` → `12.12.0`).
+
 ## [12.11.0] - 2026-11-24
 
 ### Added

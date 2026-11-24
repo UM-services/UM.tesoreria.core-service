@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo Proveedor (v3.36.0)
+title: Arquitectura Hexagonal - Módulo Proveedor (v12.12.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
@@ -7,6 +7,7 @@ flowchart TD
         PS[ProveedorSearch<br/>Modelo de Búsqueda]
         PR[ProveedorRepository<br/>Puerto de Salida]
         C[Cuenta<br/>Modelo de Cuenta]
+        PN[ProveedorNombre<br/>id y razón social]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
@@ -20,6 +21,7 @@ flowchart TD
         UC7[SearchProveedoresUseCase]
         UC8[UpdateProveedorUseCase]
         UC9[GetPaginatedProveedoresUseCase]
+        UC10[GetNombresByProveedorIdsUseCase]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
@@ -32,6 +34,7 @@ flowchart TD
         Resp2[ProveedorSearchResponse<br/>DTO Búsqueda<br/>+fechaAuditoria, +usuarioAuditoria, +Cuenta, +numeroCuenta]
         Resp3[PaginatedResponse<br/>DTO Paginación]
         ENT[ProveedorEntity<br/>Entidad JPA]
+        PNP[ProveedorNombreProjection<br/>id y razón social, sin la cuenta]
     end
 
     subgraph Externo ["Externo (External)"]
@@ -57,12 +60,15 @@ flowchart TD
     Svc -->|ejecuta| UC7
     Svc -->|ejecuta| UC8
     Svc -->|ejecuta| UC9
+    Svc -->|ejecuta| UC10
+    UC10 -->|produce| PN
 
     JPA -->|implementa| PR
     JPA -->|persiste| JPAR
     JPA -->|gestiona| ENT
     JPA -->|usa| PM
     JPA -->|usa| JPSR
+    JPA -->|lee con| PNP
 
     PM -->|convierte| P
     PM -->|convierte| PS
@@ -79,6 +85,7 @@ flowchart TD
     style P fill:#e1f5fe
     style PS fill:#e1f5fe
     style C fill:#e1f5fe
+    style PN fill:#e1f5fe
     style PR fill:#f3e5f5
     style Svc fill:#fff3e0
     style PC fill:#e8f5e8
@@ -87,3 +94,4 @@ flowchart TD
     style DM fill:#e8f5e8
     style ENT fill:#e8f5e8
     style Resp3 fill:#e8f5e8
+    style PNP fill:#fff3e0
