@@ -25,7 +25,7 @@ Distributed context — who it talks to:
 ## 2. Stack (verified in `pom.xml`, the source of truth)
 
 - Java **25**, Spring Boot **4.1.2**, Spring Cloud **2025.1.4** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.21** (legacy only, §4)
-- Artifact version = service version: **12.9.0** (SemVer; bumped on release, §7)
+- Artifact version = service version: **12.11.0** (SemVer; bumped on release, §7)
 - Data: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
 - Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.1** (Swagger UI)
 - Docs/exports: Apache POI + `openpdf` (reports), `modelmapper` (legacy only), Guava, Caffeine (`starter-cache`)
@@ -102,7 +102,7 @@ Real state to keep in mind:
 | `chequera/` | `chequeraCuota` | `/chequeraCuota` + alias |
 | `chequera/` | `chequeraPago` | `/chequeraPago` + alias |
 | `chequera/` | `chequeraSerie` | `/chequeraserie` + alias |
-| `chequera/` | `emision` | `/api/tesoreria/core/emision/chequera` + alias `/api/tesoreria/core/emisionChequera` (contexto, borrador, completar, política, emisión e impresión del borrador; `.../incompletas` con `borradores`, `job/{id}/emision`, `job/{id}`, `job/{id}/cancelar` y `job/pendientes`) |
+| `chequera/` | `emision` | `/api/tesoreria/core/emision/chequera` + alias `/api/tesoreria/core/emisionChequera` (contexto, borrador, completar, política, emisión e impresión del borrador; `.../incompletas` con `borradores`, `job/{id}/emision`, `job/{id}`, `job/{id}/cancelar` y `job/pendientes`; `.../borradores/resumen/lectivo/{lectivoId}` y `.../borradores/sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}` para la exportación de borradores abiertos por facultad y sede) |
 | `chequera/` | `chequeraTotal` | `/chequeratotal` (+ alias) |
 | `chequera/` | `claseChequera` | `/clasechequera` + alias |
 | `chequera/` | `estadoChequera` | `/api/tesoreria/core/chequera` → only `/estado/{facultadId}/{tipoChequeraId}/{chequeraSerieId}/{alternativaId}` (`report-service` contract, 6.0.0 removed `{debitoTipoId}`) |

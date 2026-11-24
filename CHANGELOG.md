@@ -2,6 +2,24 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.11.0] - 2026-11-24
+
+### Added
+
+- **feat(chequeras)**: consultas de **borradores abiertos** por facultad y sede para la exportación de planillas: `GET /api/tesoreria/core/emision/chequera/borradores/resumen/lectivo/{lectivoId}` (facultad, sede y cantidad de borradores `ABIERTO`) y `GET .../borradores/sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}` (borradores enriquecidos con cuotas, alternativas y aranceles). La sede se deriva del tipo de chequera porque `chequera_borrador` no persiste `geografica_id`; el resumen y el listado usan consultas derivadas y agregan en el servicio, sin `@Query` ni `@RequestParam`.
+- **feat(chequeras)**: clave de catálogo `chequeras.consultas.detalleCuotasBorrador` en `permisos.yaml` y en `docs/sql/V435__consultas_detalle_cuotas_borrador_permiso.sql` (idempotente, sin asignar roles ni usuarios). Los endpoints de lectura quedan sin `@RequierePermiso` porque los consume `tesoreria-report` servicio-a-servicio.
+
+### Fixed
+
+- **fix(chequeras)**: al generar un borrador de emisión, las cuotas toman los vencimientos del **diseño vigente** (`lectivo_cuota`) aunque la chequera ya esté emitida. `BorradorFactory.refrescarDesdeDiseno` copiaba las fechas sólo si `importe1Borrador` era cero —condición que nunca se cumplía, porque el importe se completa antes en la misma pasada—, así que un borrador de reparación conservaba los vencimientos viejos de `chequera_cuota` (por ejemplo, 09/12/2026, 08/01/2027 y 08/02/2027 cuando el diseño ya decía 10/12/2026, 11/01/2027 y 10/02/2027). Las cuotas **pagadas, de baja o compensadas no se modifican en nada** (ni fechas, ni importes, ni arancel/beca/descuento); las editadas a mano en el borrador conservan sus valores. Al emitir, los vencimientos alineados se escriben en la chequera.
+
+### Notes
+
+- **DDL externo** (`ddl-auto: none`): `docs/sql/V435__consultas_detalle_cuotas_borrador_permiso.sql` sólo siembra la fila del catálogo `permiso` (idempotente, con rollback documentado); no toca esquema ni asignaciones de roles/usuarios. Las dos rutas nuevas son aditivas y no modifican rutas ni DTOs existentes; la clave `chequeras.consultas.detalleCuotasBorrador` se sincroniza desde `permisos.yaml` y queda sin asignar ⇒ **minor** (`12.10.1` → `12.11.0`).
+- Sin dependencias nuevas, sin `@Query` ni `@RequestParam` nuevos. El borrador no persiste `geografica_id`: la sede se deriva de `tipo_chequera.geografica_id` y el resumen/listado agregan en el servicio.
+
+> Based on `git diff HEAD` (staged, 2026-11-24): 20 archivos, +761/−23 antes de esta documentación; slice `chequera/emision` (nuevos `BorradorConsultaController`, `BorradorConsultaService`, los puertos `ListarBorradoresSedeUseCase`/`ResumenBorradoresLectivoUseCase` con sus implementaciones, el modelo `BorradorSede` y el DTO `FacultadSedeBorradorResponse`; dos consultas derivadas nuevas en `JpaBorradorChequeraRepository`), `BorradorEmisionService.enriquecerParaConsulta`, `BorradorCuota.protegida()` con el alineado de vencimientos en `BorradorFactory.refrescarDesdeDiseno`, `permisos.yaml`, DDL `V435` (catálogo) y 3 archivos de test con 14 casos (2 test nuevos y 6 casos nuevos en `BorradorFactoryTest`). Los endpoints, DTO, permiso y consultas son aditivos y el endpoint existente no cambia ⇒ **minor**. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`); el diagrama tocado se validó con `mmdc`.
+
 ## [12.10.1] - 2026-11-23
 
 ### Changed

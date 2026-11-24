@@ -1,12 +1,12 @@
 ---
-title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.9.0)
+title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.11.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
-        M["BorradorChequera<br/>BorradorCuota<br/>BorradorImpresion<br/>EstadoBorrador<br/>ContextoEmision<br/>SolicitudEmision<br/>ResultadoEmision"]
+        M["BorradorChequera<br/>BorradorCuota<br/>BorradorImpresion<br/>BorradorSede<br/>EstadoBorrador<br/>ContextoEmision<br/>SolicitudEmision<br/>ResultadoEmision"]
         MI["IncompletasJob<br/>IncompletasJobTarea<br/>IncompletasJobDetalle<br/>IncompletasEtapa<br/>IncompletasJobEstado<br/>IncompletasTareaEstado<br/>FiltroIncompletas<br/>ResultadoIncompleta"]
         DS["ReglasEmision<br/>CodigoI2of5<br/>(dominio puro)"]
-        IN["EmisionChequeraUseCase<br/>IncompletasChequerasUseCase<br/>ObtenerBorradorImpresionUseCase<br/>(Puertos de Entrada)"]
+        IN["EmisionChequeraUseCase<br/>IncompletasChequerasUseCase<br/>ObtenerBorradorImpresionUseCase<br/>ResumenBorradoresLectivoUseCase<br/>ListarBorradoresSedeUseCase<br/>(Puertos de Entrada)"]
         OUT["BorradorChequeraRepository<br/>IncompletasJobRepository<br/>NumeradorChequeraPort<br/>(Puertos de Salida)"]
     end
 
@@ -18,6 +18,7 @@ flowchart TD
         Completar["CompletarChequerasIncompletasService<br/>padrón, prepararBorrador, emitir"]
         JobSvc["IncompletasJobService<br/>reclamar, registrar tarea, cerrar"]
         Impresion["ObtenerBorradorImpresionUseCaseImpl<br/>snapshot para el sender"]
+        Consulta["BorradorConsultaService<br/>resumen por facultad y sede<br/>sede derivada del tipo de chequera"]
         Factory["BorradorFactory<br/>paridad con el legacy"]
         Exc["EmisionException<br/>codigo + mensaje"]
     end
@@ -25,13 +26,14 @@ flowchart TD
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         Ctrl["EmisionChequeraController<br/>/api/tesoreria/core/emision/chequera<br/>alias /api/tesoreria/core/emisionChequera"]
         CtrlInc["IncompletasChequeraController<br/>/api/tesoreria/core/emision/chequera/incompletas<br/>borradores, emision, job, cancelar, pendientes"]
+        CtrlCons["BorradorConsultaController<br/>/api/tesoreria/core/emision/chequera/borradores<br/>resumen por lectivo y listado por sede"]
         Handler["EmisionExceptionHandler<br/>404 / 409 / 422 con codigo"]
-        DTO["CrearBorradorRequest<br/>ActualizarBorradorRequest<br/>CompletarBorradorRequest<br/>EmitirBorradorRequest<br/>BorradorResponse<br/>BorradorImpresion<br/>IncompletasJobRequest<br/>IncompletasEmisionRequest<br/>IncompletasJobResponse<br/>IncompletasJobDetalleResponse"]
+        DTO["CrearBorradorRequest<br/>ActualizarBorradorRequest<br/>CompletarBorradorRequest<br/>EmitirBorradorRequest<br/>BorradorResponse<br/>BorradorImpresion<br/>FacultadSedeBorradorResponse<br/>IncompletasJobRequest<br/>IncompletasEmisionRequest<br/>IncompletasJobResponse<br/>IncompletasJobDetalleResponse"]
         DtoMap["EmisionDtoMapper<br/>IncompletasDtoMapper"]
         Adp["JpaBorradorChequeraRepositoryAdapter"]
         AdpInc["JpaIncompletasJobRepositoryAdapter"]
         Num["JpaNumeradorChequeraAdapter"]
-        Repo["JpaBorradorChequeraRepository<br/>derived queries"]
+        Repo["JpaBorradorChequeraRepository<br/>derived queries<br/>incluye consultas por lectivo, facultad y estado"]
         RepoInc["JpaIncompletasJobRepository<br/>JpaIncompletasJobTareaRepository"]
         Ent["BorradorChequeraEntity<br/>BorradorCuotaEntity<br/>IncompletasJobEntity<br/>IncompletasJobTareaEntity"]
         Tabla["chequera_borrador<br/>chequera_borrador_cuota<br/>V423 · V426/V427 (renombre) · V429 (duplicados)"]
@@ -54,6 +56,8 @@ flowchart TD
     CtrlInc --> FacadeInc
     CtrlInc --> DtoMap
     CtrlInc --> Handler
+    CtrlCons --> Consulta
+    CtrlCons --> DtoMap
     DtoMap --> DTO
     Facade --> IN
     Facade --> Borrador
@@ -62,6 +66,9 @@ flowchart TD
     FacadeInc --> Completar
     FacadeInc --> JobSvc
     Impresion --> Borrador
+    Consulta --> Borrador
+    Consulta --> OUT
+    Consulta --> Slices
     Borrador --> Factory
     Borrador --> DS
     Emision --> DS
@@ -104,10 +111,12 @@ flowchart TD
     style Completar fill:#e8f5e8
     style JobSvc fill:#e8f5e8
     style Impresion fill:#e8f5e8
+    style Consulta fill:#e8f5e8
     style Factory fill:#e8f5e8
     style Exc fill:#e8f5e8
     style Ctrl fill:#fff3e0
     style CtrlInc fill:#fff3e0
+    style CtrlCons fill:#fff3e0
     style Handler fill:#fff3e0
     style DTO fill:#fff3e0
     style DtoMap fill:#fff3e0

@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.hexagonal.chequera.emision.application.exception.EmisionException;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorChequera;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorCuota;
+import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorSede;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.EstadoBorrador;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.out.BorradorChequeraRepository;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.service.ReglasEmision;
@@ -112,6 +113,28 @@ public class JpaBorradorChequeraRepositoryAdapter implements BorradorChequeraRep
                 .findFirstByPersonaIdAndDocumentoIdAndLectivoIdAndFacultadIdAndTipoChequeraIdAndChequeraSerieIdIsNullAndEstadoOrderByBorradorIdDesc(
                         personaId, documentoId, lectivoId, facultadId, tipoChequeraId, EstadoBorrador.ABIERTO)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BorradorChequera> findAllByLectivoIdAndFacultadIdAndEstado(Integer lectivoId, Integer facultadId,
+                                                                          EstadoBorrador estado) {
+        if (lectivoId == null || facultadId == null || estado == null) {
+            return List.of();
+        }
+        return repository.findAllByLectivoIdAndFacultadIdAndEstadoOrderByBorradorIdAsc(lectivoId, facultadId, estado)
+                .stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BorradorSede> findAllSedesByLectivoIdAndEstado(Integer lectivoId, EstadoBorrador estado) {
+        if (lectivoId == null || estado == null) {
+            return List.of();
+        }
+        return repository.findAllByLectivoIdAndEstadoOrderByBorradorIdAsc(lectivoId, estado).stream()
+                .map(entity -> new BorradorSede(entity.getFacultadId(), entity.getTipoChequeraId()))
+                .toList();
     }
 
     @Override

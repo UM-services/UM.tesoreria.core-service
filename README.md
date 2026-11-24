@@ -11,13 +11,24 @@
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
 ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-Hibernate-6DB33F?logo=spring&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)
-[![Versión](https://img.shields.io/badge/versión-12.10.1-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.11.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.10.1**
+**Versión actual (SemVer): 12.11.0**
+
+## Novedades 12.11.0 (verificado en código)
+
+- **feat(chequera/emision)**: consultas de **borradores abiertos** por facultad y sede para la exportación de planillas, en `BorradorConsultaController` (bajo `/api/tesoreria/core/emision/chequera/borradores`):
+  - `GET /resumen/lectivo/{lectivoId}` → `FacultadSedeBorradorResponse` (`facultadId`, `facultad`, `geograficaId`, `geografica`, `cantidad`) con los borradores `ABIERTO` agregados por facultad y sede, ordenados por facultad y sede.
+  - `GET /sede/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}` → `BorradorResponse` enriquecidos con cuotas, alternativas y aranceles (`BorradorEmisionService.enriquecerParaConsulta`, sin avisos ni contexto), ordenados por apellido y nombre con collator es-AR.
+  - La sede **se deriva del tipo de chequera** (`tipo_chequera.geografica_id`) porque `chequera_borrador` no persiste `geografica_id`; el resumen usa `BorradorSede` como referencia mínima y ambos endpoints agregan en el servicio con consultas derivadas nuevas en `JpaBorradorChequeraRepository` (sin `@Query` ni `@RequestParam`). Ninguno lleva `@RequierePermiso`: los consume `tesoreria-report` servicio-a-servicio.
+  - Permiso de la pantalla: `chequeras.consultas.detalleCuotasBorrador` en `permisos.yaml`, sembrado por `docs/sql/V435__consultas_detalle_cuotas_borrador_permiso.sql` (sólo catálogo, idempotente, con rollback documentado; sin asignar roles ni usuarios). Diagrama: [`hexagonal-emisionChequera.mmd`](docs/hexagonal-emisionChequera.mmd).
+- **fix(chequera/emision)**: el borrador de reparación toma los **vencimientos del diseño vigente** (`lectivo_cuota`) aunque la chequera ya esté emitida. `BorradorFactory.refrescarDesdeDiseno` copiaba las fechas sólo si `importe1Borrador` era cero —condición que no se cumplía porque el importe se completa antes en la misma pasada—, así que conservaba los vencimientos viejos de `chequera_cuota`. Ahora alinea mes, año y vencimientos con el diseño (sólo pisa `vencimiento2`/`vencimiento3` cuando el diseño los trae) y **no toca** las cuotas pagadas, de baja o compensadas (`BorradorCuota.protegida()`, aplicado también al arancel, la beca y el descuento por pago en término) ni las editadas a mano en el borrador. Al emitir, los vencimientos alineados se escriben en la chequera.
+
+> Basado en `git diff HEAD` (staged, 2026-11-24): 20 archivos, +761/−23 antes de esta documentación. Slice `chequera/emision` (controlador, servicio de consulta, dos puertos de entrada con sus implementaciones, `BorradorSede`, `FacultadSedeBorradorResponse` y dos consultas derivadas), `enriquecerParaConsulta` en `BorradorEmisionService`, `BorradorCuota.protegida()` y el alineado de fechas en `BorradorFactory`, `permisos.yaml`, DDL `V435` de catálogo y 3 archivos de test con 14 casos (2 test nuevos; 6 casos nuevos en `BorradorFactoryTest`). Todo lo nuevo es aditivo (dos rutas `GET`, un DTO de resumen, una clave de permiso y el script de catálogo) y el comportamiento previo no cambia de contrato ⇒ **minor** (`12.10.1` → `12.11.0`). Sin dependencias nuevas, sin `@Query` ni `@RequestParam` nuevos. Verificación sin compilación ni tests por indicación del usuario (no se ejecutó `mvn`).
 
 ## Novedades 12.10.1 (verificado en código)
 
