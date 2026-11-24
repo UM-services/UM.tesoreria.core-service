@@ -111,6 +111,12 @@ permisos:
     activo: true
 
   - aplicacion: TESORERIA
+    clave: chequeras.consultas.detalleCuotasBorrador
+    modulo: chequeras
+    descripcion: "Descargar las planillas de borradores abiertos por facultad y sede en formato horizontal o vertical"
+    activo: true
+
+  - aplicacion: TESORERIA
     clave: chequeras.incompletas.consultar
     modulo: chequeras
     descripcion: "Listar chequeras incompletas y consultar el avance de la reparación masiva"

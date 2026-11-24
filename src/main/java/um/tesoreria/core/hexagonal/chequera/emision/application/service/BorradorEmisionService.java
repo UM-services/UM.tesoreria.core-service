@@ -368,6 +368,25 @@ public class BorradorEmisionService {
                 .build();
     }
 
+    /**
+     * Enriquecimiento liviano para consultas y exportaciones: nombres, persona, sede, alternativas
+     * y aranceles. Omite avisos y la reconstrucción del contexto, que no se usan en una planilla.
+     */
+    public BorradorChequera enriquecerParaConsulta(BorradorChequera borrador) {
+        if (borrador == null) {
+            return null;
+        }
+        borrador.setFacultadNombre(facultadNombre(borrador.getFacultadId()));
+        borrador.setTipoChequeraNombre(tipoChequeraNombre(borrador.getTipoChequeraId()));
+        borrador.setLectivoNombre(lectivoNombre(borrador.getLectivoId()));
+        personaEmision(borrador);
+        sedeEmision(borrador);
+        borrador.setAlternativas(alternativas(borrador.getFacultadId(), borrador.getLectivoId(),
+                borrador.getTipoChequeraId()));
+        borrador.setArancelTipos(arancelTipos(borrador.getLectivoId(), borrador.getArancelTipoId()));
+        return borrador;
+    }
+
     public BorradorChequera enriquecer(BorradorChequera borrador) {
         if (borrador == null) {
             return null;
