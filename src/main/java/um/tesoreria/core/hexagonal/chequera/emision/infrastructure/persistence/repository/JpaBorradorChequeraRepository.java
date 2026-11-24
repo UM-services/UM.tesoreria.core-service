@@ -17,6 +17,13 @@ public interface JpaBorradorChequeraRepository extends JpaRepository<BorradorChe
 
     List<BorradorChequeraEntity> findAllByUsuarioIdAndEstadoOrderByBorradorIdDesc(String usuarioId, EstadoBorrador estado);
 
+    List<BorradorChequeraEntity> findAllByLectivoIdAndFacultadIdAndEstadoOrderByBorradorIdAsc(Integer lectivoId,
+                                                                                              Integer facultadId,
+                                                                                              EstadoBorrador estado);
+
+    List<BorradorChequeraEntity> findAllByLectivoIdAndEstadoOrderByBorradorIdAsc(Integer lectivoId,
+                                                                                 EstadoBorrador estado);
+
     List<BorradorChequeraEntity> findAllByEstadoAndUpdatedBefore(EstadoBorrador estado, LocalDateTime limite);
 
     Optional<BorradorChequeraEntity> findFirstByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndEstadoOrderByBorradorIdDesc(
