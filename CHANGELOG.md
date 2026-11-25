@@ -2,6 +2,23 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.13.0] - 2026-11-25
+
+### Added
+
+- **feat(client/haberes)**: autenticación servicio-a-servicio contra `haberes-core-service`. `HaberesServiceTokenFeignConfig` —configuración Feign por cliente, deliberadamente sin `@Configuration`— lee `HABERES_SERVICE_TOKEN` y, si no está vacía, agrega `Authorization: Bearer <token>` a cada llamada; no pisa un `Authorization` ya presente y, con la variable ausente o en blanco, no envía cabecera, así el comportamiento anterior se mantiene. `CargoTipoClient` (`/api/haberes/core/cargotipo`) y `CursoClient` (`/api/haberes/core/curso`) la declaran en `configuration`, de modo que el token no se propaga a los demás clientes Feign de Tesorería ([HaberesServiceTokenFeignConfig.java], [CargoTipoClient.java], [CursoClient.java])
+- Documentación: `HABERES_SERVICE_TOKEN` queda descrita en README §Variables de Entorno.
+
+### Changed
+
+- `CursoCargoContratadoDtoMapper` (slice `contratos/cursoCargoContratado`, que usa ambos clientes para completar `CursoHaberes` y `CargoTipo`) consulta haberes autenticado cuando el entorno define el token; sin cambios en rutas, DTOs ni respuestas.
+
+### Notes
+
+- Sin DDL externo, sin dependencias nuevas, sin `@Query` ni `@RequestParam`. No hay endpoints, DTOs ni permisos nuevos: las llamadas salientes sólo suman la cabecera cuando el operador configura `HABERES_SERVICE_TOKEN` ⇒ capacidad de configuración aditiva ⇒ incremento **minor** (`12.12.0` → `12.13.0`).
+
+> Based on `git diff HEAD` (staged, 2026-11-25): 3 archivos, +33/−2 antes de esta documentación —`HaberesServiceTokenFeignConfig` nuevo y la anotación `@FeignClient` de `CargoTipoClient`/`CursoClient`—. Verificación sin compilación ni tests por indicación del usuario: las pruebas fueron realizadas previamente por el usuario.
+
 ## [12.12.0] - 2026-11-24
 
 ### Added

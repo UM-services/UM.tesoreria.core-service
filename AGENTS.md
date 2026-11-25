@@ -14,7 +14,7 @@ Distributed context — who it talks to:
 | `tesoreria-mercadopago-service` | Feign (`core/client/tesoreria/mercadopago/`) | `PreferenceClient`/`PreferenceVacanteClient` create payment preferences |
 | Mercado Pago → core | Kafka | Consumes topic `payment-processed` (group `tesoreria-core-group`) → `PaymentEventListener` → `MercadoPagoContextService.processPaymentEvent`. Type mapping: `um.tesoreria.mercadopago.service.domain.event.PaymentProcessedEvent` → `um.tesoreria.core.event.PaymentProcessedEvent` |
 | Core → correo | Kafka | `CorreoEventPublisher` (`service/CorreoEventPublisher`) is the only publisher: `send-correo` (envelope `CorreoEvent` + `CorreoPayload`), `send-chequera` (`SendChequeraEvent`, JSON without `__TypeId__`) and `send-cuota` (`SendCuotaEvent` with only `chequeraCuotaId`). The legacy `MailChequeraService`/`NotificacionService` answer `202 Accepted` and do not open SMTP |
-| `haberes-core-service` | Feign (`core/client/haberes/`) | `CargoTipoClient`, `CursoClient` |
+| `haberes-core-service` | Feign (`core/client/haberes/`) | `CargoTipoClient`, `CursoClient`; both declare `configuration = HaberesServiceTokenFeignConfig.class`, which adds `Authorization: Bearer ${HABERES_SERVICE_TOKEN}` when the variable is set (blank ⇒ no header, and an existing `Authorization` is never overwritten) |
 | `tesoreria-sender-service` | Kafka | core publishes `send-correo`/`send-chequera`/`send-cuota`; the sender publishes `notificacion-resultado`, which is what marks `persona_suspendido.notificado = 1`. No Feign client any more (11.0.0 removed `ChequeraClient`) |
 | `report-service` | HTTP (consumer) | Served the JSON of the `chequera/estadoChequera` slice (field by field: the contract names are NOT changed without breaking the reader) |
 
@@ -25,7 +25,7 @@ Distributed context — who it talks to:
 ## 2. Stack (verified in `pom.xml`, the source of truth)
 
 - Java **25**, Spring Boot **4.1.2**, Spring Cloud **2025.1.4** (Consul discovery + OpenFeign + hc5), Kotlin **2.4.21** (legacy only, §4)
-- Artifact version = service version: **12.11.0** (SemVer; bumped on release, §7)
+- Artifact version = service version: **12.13.0** (SemVer; bumped on release, §7)
 - Data: `spring-boot-starter-data-jpa` + `mysql-connector-j` (runtime) + `h2` (test) + `spring-boot-starter-jdbc`
 - Web: `starter-web` (MVC servlet) + `starter-webflux` (WebClient of the consumers) + `starter-validation` + `springdoc-openapi-starter-webmvc-ui` **3.1.1** (Swagger UI)
 - Docs/exports: Apache POI + `openpdf` (reports), `modelmapper` (legacy only), Guava, Caffeine (`starter-cache`)
