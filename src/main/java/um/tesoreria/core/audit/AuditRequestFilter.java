@@ -31,6 +31,19 @@ import java.util.UUID;
 public class AuditRequestFilter extends OncePerRequestFilter {
 
     private static final Set<String> MUTATING = Set.of("POST", "PUT", "PATCH", "DELETE");
+
+    /**
+     * Consultas que usan POST sólo para mandar el filtro en el cuerpo. Si no cambian filas no dejan evento REQUEST;
+     * si cambian alguna (Sumas y Saldos recalcula grados), se auditan como cualquier escritura. Rutas exactas, cortas
+     * y largas: una ruta parecida o con otro verbo se audita.
+     */
+    private static final Set<String> CONSULTAS_POST = Set.of(
+            "/balance/mayor/consulta",
+            "/balance/sumasysaldos/consulta",
+            "/movimientoConsulta/libroDiario",
+            "/api/tesoreria/core/balance/mayor/consulta",
+            "/api/tesoreria/core/balance/sumasysaldos/consulta",
+            "/api/tesoreria/core/movimientoConsulta/libroDiario");
     private static final String HEADER_REQUEST_ID = "X-Request-Id";
     private static final String HEADER_USER_ID = "X-User-Id";
     private static final String HEADER_USER_ID_LEGACY = "X-Usuario-Id";
@@ -93,6 +106,12 @@ public class AuditRequestFilter extends OncePerRequestFilter {
         // Sin esto, una escritura por GET no dejaba ni el actor ni la correlación.
         boolean mutating = MUTATING.contains(request.getMethod().toUpperCase(Locale.ROOT));
         if (!mutating && changes == 0) {
+            return;
+        }
+        // Excepción: consultas por POST que no cambiaron filas. Sólo se puede saber si los eventos de cambio están
+        // activos, porque el listener cuenta filas sólo en ese caso; si no, se auditan como cualquier POST.
+        if (properties.isChangeEvents() && changes == 0 && "POST".equalsIgnoreCase(request.getMethod())
+                && CONSULTAS_POST.contains(path(request))) {
             return;
         }
 

@@ -21,6 +21,11 @@ app:
     manifest-sync:
       enabled: ${APP_ROLES_MANIFEST_SYNC_ENABLED:true}
       dry-run: ${APP_ROLES_MANIFEST_SYNC_DRY_RUN:false}
+  contabilidad:
+    consulta:
+      # Topes de las consultas de movimientos por rango (Libro Diario). Se cambian por variable de entorno y reinicio.
+      max-lineas: ${TESORERIA_CONTABILIDAD_CONSULTA_MAX_LINEAS:100000}
+      max-dias: ${TESORERIA_CONTABILIDAD_CONSULTA_MAX_DIAS:400}
   # Topics de los que este servicio es dueño (KafkaTopicsConfiguration). El réplication factor es
   # ambiental: 1 con el broker único actual, 3 en la fase de cluster. KafkaAdmin nunca reasigna el
   # RF de un topic existente.
