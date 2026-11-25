@@ -8,6 +8,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.entity.CuentaMovimientoEntity;
@@ -29,6 +30,15 @@ public interface JpaCuentaMovimientoRepository extends JpaRepository<CuentaMovim
 	 */
 	List<MovimientoImporteProjection> findAllByFechaContableBetweenAndApertura(OffsetDateTime desde,
 																			   OffsetDateTime hasta, Byte apertura);
+
+	/**
+	 * Líneas de un rango semiabierto [desde, hasta), con proyección cerrada: una sola consulta, sin las relaciones de
+	 * la entidad. {@code limit} acota las filas leídas.
+	 */
+	List<LineaMovimientoProjection> findAllByFechaContableGreaterThanEqualAndFechaContableLessThan(OffsetDateTime desde,
+																								  OffsetDateTime hasta, Sort sort, Limit limit);
+
+	long countByFechaContableGreaterThanEqualAndFechaContableLessThan(OffsetDateTime desde, OffsetDateTime hasta);
 
 	List<CuentaMovimientoEntity> findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(
 			OffsetDateTime fechaContable, Integer ordenContable, Integer item, Sort sort);

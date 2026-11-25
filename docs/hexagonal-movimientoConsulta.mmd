@@ -1,0 +1,70 @@
+---
+title: Arquitectura Hexagonal - MovimientoConsulta (v12.12.0)
+---
+flowchart TD
+    subgraph Dominio ["Dominio (Domain)"]
+        LD[LibroDiario<br/>asientos y totales del rango]
+        AD[AsientoDiario<br/>fecha, orden, líneas y totales]
+        LN[LineaDiario<br/>línea con nombres resueltos]
+        RC[RangoContable<br/>día de calendario recibido]
+        UCP[ConsultarLibroDiarioUseCase<br/>Puerto de Entrada]
+    end
+
+    subgraph Aplicacion ["Aplicación (Application)"]
+        Svc[MovimientoConsultaService<br/>Servicio de Aplicación]
+        UC1[ConsultarLibroDiarioUseCaseImpl]
+        TOP[TopeMovimientos<br/>max-lineas y max-dias]
+        EX[MovimientoConsultaException<br/>FECHAS_REQUERIDAS, FECHA_FUERA_DE_RANGO, CUERPO_INVALIDO,<br/>DESDE_POSTERIOR, RANGO_DEMASIADO_LARGO, DEMASIADOS_MOVIMIENTOS]
+    end
+
+    subgraph Otros ["Servicios de otros slices"]
+        CMS[CuentaMovimientoService<br/>contable/cuentaMovimiento]
+        CS[CuentaService<br/>contable/cuenta]
+        COS[ComprobanteService<br/>comprobante]
+        PS[ProveedorService<br/>compras/proveedor]
+    end
+
+    subgraph Infraestructura ["Infraestructura (Infrastructure)"]
+        CC[MovimientoConsultaController<br/>POST /movimientoConsulta/libroDiario]
+        EH[MovimientoConsultaExceptionHandler<br/>400 y 409, también cuerpo ilegible]
+        DM[MovimientoConsultaDtoMapper]
+        Req[RangoFechasRequest<br/>desde y hasta sin pasar a UTC]
+        Resp[LibroDiarioResponse<br/>AsientoDiarioResponse, LineaDiarioResponse]
+        Err[MovimientoConsultaErrorResponse<br/>status, error, codigo, message]
+    end
+
+    CC -->|usa| Svc
+    CC -->|recibe| Req
+    CC -->|envía| Resp
+    CC -->|usa| DM
+    EH -->|envía| Err
+    EH -->|traduce| EX
+
+    Svc -->|ejecuta| UCP
+    UC1 -->|implementa| UCP
+    UC1 -->|usa| RC
+    UC1 -->|usa| TOP
+    UC1 -->|lanza| EX
+    UC1 -->|cuenta y lee hasta tope + 1| CMS
+    UC1 -->|nombres de cuenta| CS
+    UC1 -->|descripción de comprobante| COS
+    UC1 -->|razón social por id| PS
+    UC1 -->|produce| LD
+    LD -->|contiene| AD
+    AD -->|contiene| LN
+
+    DM -->|convierte| LD
+    DM -->|convierte| Resp
+
+    style LD fill:#e1f5fe
+    style AD fill:#e1f5fe
+    style LN fill:#e1f5fe
+    style RC fill:#e1f5fe
+    style UCP fill:#f3e5f5
+    style Svc fill:#fff3e0
+    style UC1 fill:#fff3e0
+    style TOP fill:#fff3e0
+    style EX fill:#fff3e0
+    style CC fill:#e8f5e8
+    style EH fill:#e8f5e8
+    style DM fill:#e8f5e8

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.exception.CuentaMovimientoException;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.LineaMovimiento;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.SumaCuenta;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.ports.in.*;
 import um.tesoreria.core.model.view.CuentaMovimientoAsiento;
@@ -30,6 +31,8 @@ public class CuentaMovimientoService {
     private final FindAllByAsientoUseCase findAllByAsientoUseCase;
     private final FindAllByNumeroCuentaAndFechaContableBetweenAndAperturaUseCase findAllByNumeroCuentaAndFechaContableBetweenAndAperturaUseCase;
     private final SumarPorCuentaUseCase sumarPorCuentaUseCase;
+    private final FindLineasByFechaContableUseCase findLineasByFechaContableUseCase;
+    private final CountByFechaContableUseCase countByFechaContableUseCase;
     private final FindLastByFechaUseCase findLastByFechaUseCase;
     private final DeleteByCuentaMovimientoIdUseCase deleteByCuentaMovimientoIdUseCase;
     private final DeleteAllByCuentaMovimientoIdInUseCase deleteAllByCuentaMovimientoIdInUseCase;
@@ -64,6 +67,15 @@ public class CuentaMovimientoService {
 
     public List<SumaCuenta> sumarPorCuenta(OffsetDateTime desde, OffsetDateTime hasta, Byte apertura) {
         return sumarPorCuentaUseCase.sumarPorCuenta(desde, hasta, apertura);
+    }
+
+    /** Líneas de todas las cuentas con {@code desde <= fechaContable < hasta}, sin relaciones, como mucho {@code limite}. */
+    public List<LineaMovimiento> findLineasByFechaContable(OffsetDateTime desde, OffsetDateTime hasta, int limite) {
+        return findLineasByFechaContableUseCase.findLineasByFechaContable(desde, hasta, limite);
+    }
+
+    public long countByFechaContable(OffsetDateTime desde, OffsetDateTime hasta) {
+        return countByFechaContableUseCase.countByFechaContable(desde, hasta);
     }
 
     public CuentaMovimiento findLastByFecha(OffsetDateTime fechaContable) {
