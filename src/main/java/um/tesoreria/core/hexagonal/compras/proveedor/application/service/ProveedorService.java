@@ -3,9 +3,11 @@ package um.tesoreria.core.hexagonal.compras.proveedor.application.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorNombre;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorSearch;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.in.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import um.tesoreria.core.model.PaginatedResponse;
@@ -23,6 +25,7 @@ public class ProveedorService {
     private final UpdateProveedorUseCase updateProveedorUseCase;
     private final DeleteProveedorUseCase deleteProveedorUseCase;
     private final GetPaginatedProveedoresUseCase getPaginatedProveedoresUseCase;
+    private final GetNombresByProveedorIdsUseCase getNombresByProveedorIdsUseCase;
 
 
     public Proveedor create(Proveedor proveedor) {
@@ -47,6 +50,11 @@ public class ProveedorService {
 
     public List<Proveedor> getAll() {
         return getAllProveedoresUseCase.getAllProveedores();
+    }
+
+    /** Razón social de los proveedores pedidos, en una sola consulta y sin cargar su cuenta. */
+    public List<ProveedorNombre> getNombres(Collection<Integer> proveedorIds) {
+        return getNombresByProveedorIdsUseCase.getNombresByProveedorIds(proveedorIds);
     }
 
     public List<ProveedorSearch> search(List<String> conditions) {

@@ -11,13 +11,29 @@
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
 ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-Hibernate-6DB33F?logo=spring&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)
-[![Versión](https://img.shields.io/badge/versión-12.11.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.13.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.11.0**
+**Versión actual (SemVer): 12.13.0**
+
+## Novedades 12.13.0 (verificado en código)
+
+- **feat(client/haberes)**: las llamadas Feign a `haberes-core-service` pueden autenticarse con un token de servicio. `HaberesServiceTokenFeignConfig` lee `HABERES_SERVICE_TOKEN` y agrega `Authorization: Bearer <token>` a `CargoTipoClient` y `CursoClient`; si la variable no está definida o está en blanco no envía la cabecera, y tampoco pisa un `Authorization` ya presente. La clase no lleva `@Configuration`, así que la configuración se aplica sólo a los clientes que la declaran y no se propaga al resto de los clientes Feign de Tesorería.
+- Sin endpoints, DTOs, permisos, DDL ni dependencias nuevas. Los datos de `CursoHaberes` y `CargoTipo` que completa `CursoCargoContratadoDtoMapper` no cambian; con `HABERES_SERVICE_TOKEN` vacío el comportamiento es el anterior.
+
+> Basado en `git diff HEAD` (staged, 2026-11-25): 3 archivos, +33/−2 antes de esta documentación —`HaberesServiceTokenFeignConfig` nuevo y la anotación `@FeignClient` de `CargoTipoClient`/`CursoClient`—. Capacidad de configuración aditiva (cabecera saliente opcional) ⇒ **minor** (`12.12.0` → `12.13.0`). Sin compilación ni tests por indicación del usuario: las pruebas fueron realizadas previamente por el usuario.
+
+## Novedades 12.12.0 (verificado en código)
+
+- **feat(contable/movimientoConsulta)**: Libro Diario en JSON (#545). `POST /api/tesoreria/core/movimientoConsulta/libroDiario` (también `/movimientoConsulta/libroDiario`) con `{desde, hasta}` devuelve los asientos del rango ordenados por fecha y orden, cada uno con sus líneas (cuenta, nombre de cuenta, comprobante, proveedor, concepto, debe o haber) y sus totales, y los totales del rango. Toma el día de calendario de cada fecha tal como llega, con su offset y cualquier hora. Rechazos: `400 FECHAS_REQUERIDAS`, `400 FECHA_FUERA_DE_RANGO`, `400 CUERPO_INVALIDO`, `409 DESDE_POSTERIOR`, `409 RANGO_DEMASIADO_LARGO` cuando el rango supera `app.contabilidad.consulta.max-dias` (400 días por defecto) y `409 DEMASIADOS_MOVIMIENTOS` cuando supera `app.contabilidad.consulta.max-lineas` (100.000 por defecto). La lectura trae como mucho `tope + 1` líneas, en la misma transacción de solo lectura que el conteo.
+- **feat(contable/cuentaMovimiento)**: lectura de todas las cuentas en un rango con proyección cerrada (`LineaMovimientoProjection`) y conteo previo; una sola consulta, sin cargar las seis relaciones de la entidad.
+- **fix(audit)**: las consultas por POST (`/balance/mayor/consulta`, `/balance/sumasysaldos/consulta`, `/movimientoConsulta/libroDiario`) no dejan evento `REQUEST` en `audit_outbox` cuando no cambian filas; si cambian alguna, se auditan con su usuario. Los topes del Libro Diario quedan declarados en `bootstrap.yml` (`TESORERIA_CONTABILIDAD_CONSULTA_MAX_LINEAS`, `TESORERIA_CONTABILIDAD_CONSULTA_MAX_DIAS`).
+- **feat(compras/proveedor)**: razón social por id en una consulta (`ProveedorNombreProjection`), sin cargar la cuenta del proveedor.
+
+> Basado en `git diff` contra `develop` (`1cd832f5`): slice nuevo `hexagonal/contable/movimientoConsulta`, casos de uso `FindLineasByFechaContableUseCase`/`CountByFechaContableUseCase` en `contable/cuentaMovimiento` y `GetNombresByProveedorIdsUseCase` en `compras/proveedor`, con sus pruebas. Endpoint JSON nuevo (aditivo) ⇒ **minor** (`12.11.0` → `12.12.0`). Sin DDL, dependencias ni `@Query` nuevos.
 
 ## Novedades 12.11.0 (verificado en código)
 
@@ -2017,7 +2033,10 @@ SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/tesoreria
 SPRING_DATASOURCE_USERNAME=root
 SPRING_DATASOURCE_PASSWORD=root
 MERCADO_PAGO_ACCESS_TOKEN=your_access_token
+HABERES_SERVICE_TOKEN=your_haberes_service_token
 ```
+
+`HABERES_SERVICE_TOKEN` (12.13.0) es opcional: si queda vacío, `CargoTipoClient` y `CursoClient` llaman a `haberes-core-service` sin `Authorization`, como antes.
 
 Auditoría transversal (11.5.0): requiere `sql/001_audit_outbox.sql` en la base; sin esa tabla usar `TESORERIA_AUDIT_MODE=LOG` (o `OFF`). Lista completa: [guía de auditoría](docs/auditoria.md).
 ```properties

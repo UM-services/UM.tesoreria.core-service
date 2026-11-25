@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import um.tesoreria.core.hexagonal.contratos.cursoCargoContratado.domain.model.CargoTipo;
 
-@FeignClient(name = "haberes-core-service", contextId = "cargoTipoClient", path = "/api/haberes/core/cargotipo")
+@FeignClient(name = "haberes-core-service", contextId = "cargoTipoClient", path = "/api/haberes/core/cargotipo", configuration = HaberesServiceTokenFeignConfig.class)
 public interface CargoTipoClient {
 
     @GetMapping("/{cargoTipoId}")

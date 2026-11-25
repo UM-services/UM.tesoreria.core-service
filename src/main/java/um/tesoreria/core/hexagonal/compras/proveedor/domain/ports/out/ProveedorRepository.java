@@ -1,8 +1,10 @@
 package um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out;
 
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorNombre;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorSearch;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +19,7 @@ public interface ProveedorRepository {
     boolean existsOtroConCuit(String cuit, Integer excluirProveedorId);
     Optional<Proveedor> findLast();
     List<Proveedor> findAll();
+    List<ProveedorNombre> findNombresByProveedorIdIn(Collection<Integer> proveedorIds);
     um.tesoreria.core.model.PaginatedResponse<Proveedor> findAllPaginated(int page, int size);
     List<ProveedorSearch> findAllByStrings(List<String> conditions);
     Optional<Proveedor> update(Integer proveedorId, Proveedor proveedor);
