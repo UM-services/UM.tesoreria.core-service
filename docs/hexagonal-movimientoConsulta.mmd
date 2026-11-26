@@ -28,7 +28,7 @@ flowchart TD
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        CC[MovimientoConsultaController<br/>POST /movimientoConsulta/libroDiario<br/>GET /movimientoConsulta/asiento/{fecha}/{orden}]
+        CC["MovimientoConsultaController<br/>POST /movimientoConsulta/libroDiario<br/>GET /movimientoConsulta/asiento/{fecha}/{orden}"]
         EH[MovimientoConsultaExceptionHandler<br/>400, 404 y 409, también cuerpo o parámetro ilegible]
         DM[MovimientoConsultaDtoMapper]
         Req[RangoFechasRequest<br/>desde y hasta sin pasar a UTC]
