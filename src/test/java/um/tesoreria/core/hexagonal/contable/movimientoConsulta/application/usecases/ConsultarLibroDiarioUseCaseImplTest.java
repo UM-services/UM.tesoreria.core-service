@@ -64,7 +64,7 @@ class ConsultarLibroDiarioUseCaseImplTest {
                 Cuenta.builder().numeroCuenta(new BigDecimal("11101010001")).nombre("Caja").build(),
                 Cuenta.builder().numeroCuenta(new BigDecimal("21101010001.00")).nombre("Proveedores").build()));
         lenient().when(proveedorService.getNombres(anyCollection())).thenReturn(List.of(
-                new ProveedorNombre(7, "Proveedor Siete")));
+                new ProveedorNombre(7, "Proveedor Siete", "30-70000007-1")));
     }
 
     static LineaMovimiento linea(long id, OffsetDateTime fecha, int orden, int item, String cuenta, int debita,

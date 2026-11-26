@@ -74,7 +74,7 @@ public class JpaProveedorRepositoryAdapter implements ProveedorRepository {
     @Override
     public List<ProveedorNombre> findNombresByProveedorIdIn(Collection<Integer> proveedorIds) {
         return jpaProveedorRepository.findAllByProveedorIdIn(proveedorIds).stream()
-                .map(p -> new ProveedorNombre(p.getProveedorId(), p.getRazonSocial()))
+                .map(p -> new ProveedorNombre(p.getProveedorId(), p.getRazonSocial(), p.getCuit()))
                 .toList();
     }
 

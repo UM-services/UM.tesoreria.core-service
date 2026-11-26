@@ -13,6 +13,7 @@ import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.servi
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.AsientoDiarioResponse;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.AsientosNoCuadradosResponse;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.LibroDiarioResponse;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.MovimientosContablesResponse;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.RangoFechasRequest;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.mapper.MovimientoConsultaDtoMapper;
 
@@ -33,6 +34,16 @@ public class MovimientoConsultaController {
                 ? service.consultarLibroDiario(null, null)
                 : service.consultarLibroDiario(request.desde(), request.hasta());
         return ResponseEntity.ok(mapper.toResponse(libro));
+    }
+
+    /** Movimientos Contables: las líneas del rango sin agrupar, con el CUIT del proveedor. */
+    @PostMapping("/movimientos")
+    public ResponseEntity<MovimientosContablesResponse> movimientos(
+            @RequestBody(required = false) RangoFechasRequest request) {
+        var movimientos = request == null
+                ? service.consultarMovimientos(null, null)
+                : service.consultarMovimientos(request.desde(), request.hasta());
+        return ResponseEntity.ok(mapper.toResponse(movimientos));
     }
 
     /** "Diferencia": asientos del rango cuyo debe difiere del haber, con sus líneas y la diferencia exacta. */

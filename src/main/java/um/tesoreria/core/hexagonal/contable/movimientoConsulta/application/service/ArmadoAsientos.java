@@ -11,6 +11,7 @@ import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.LineaMovimiento;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientoDiario;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LineaDiario;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LineaMovimientoContable;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -51,6 +52,19 @@ public class ArmadoAsientos {
         return cerrar(lineas.stream().map(linea -> armarLinea(linea, nombres)).toList());
     }
 
+    /** Cada línea por separado, en el orden en que llegan, con nombres y CUIT del proveedor. */
+    public List<LineaMovimientoContable> movimientos(List<LineaMovimiento> lineas) {
+        Nombres nombres = nombres(lineas);
+        return lineas.stream().map(linea -> {
+            LineaDiario diario = armarLinea(linea, nombres);
+            ProveedorNombre proveedor = nombres.proveedor(linea.proveedorId());
+            return new LineaMovimientoContable(diario.fechaContable(), diario.ordenContable(), diario.item(),
+                    diario.numeroCuenta(), diario.nombreCuenta(), diario.comprobante(),
+                    proveedor == null ? null : proveedor.proveedorId(), diario.proveedor(),
+                    proveedor == null ? null : proveedor.cuit(), diario.concepto(), diario.debe(), diario.haber());
+        }).toList();
+    }
+
     private Nombres nombres(List<LineaMovimiento> lineas) {
         if (lineas.isEmpty()) {
             return new Nombres(Map.of(), Map.of(), Map.of());
@@ -75,9 +89,9 @@ public class ArmadoAsientos {
                 .map(LineaMovimiento::proveedorId)
                 .filter(id -> id != null && id != 0)
                 .collect(Collectors.toSet());
-        Map<Integer, String> proveedores = new HashMap<>();
+        Map<Integer, ProveedorNombre> proveedores = new HashMap<>();
         for (ProveedorNombre proveedor : proveedorService.getNombres(proveedorIds)) {
-            proveedores.putIfAbsent(proveedor.proveedorId(), proveedor.razonSocial());
+            proveedores.putIfAbsent(proveedor.proveedorId(), proveedor);
         }
         return new Nombres(cuentas, comprobantes, proveedores);
     }
@@ -94,7 +108,7 @@ public class ArmadoAsientos {
                 linea.numeroCuenta(),
                 nombreCuenta,
                 linea.comprobanteId() == null ? null : nombres.comprobantes().get(linea.comprobanteId()),
-                linea.proveedorId() == null ? null : nombres.proveedores().get(linea.proveedorId()),
+                nombres.razonSocial(linea.proveedorId()),
                 linea.concepto(),
                 debita ? importe : null,
                 debita ? null : importe);
@@ -116,6 +130,15 @@ public class ArmadoAsientos {
     }
 
     private record Nombres(Map<BigDecimal, String> cuentas, Map<Integer, String> comprobantes,
-                           Map<Integer, String> proveedores) {
+                           Map<Integer, ProveedorNombre> proveedores) {
+
+        ProveedorNombre proveedor(Integer proveedorId) {
+            return proveedorId == null ? null : proveedores.get(proveedorId);
+        }
+
+        String razonSocial(Integer proveedorId) {
+            ProveedorNombre proveedor = proveedor(proveedorId);
+            return proveedor == null ? null : proveedor.razonSocial();
+        }
     }
 }
