@@ -3,32 +3,20 @@ package um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.usec
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import um.tesoreria.core.hexagonal.compras.proveedor.application.service.ProveedorService;
-import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorNombre;
-import um.tesoreria.core.hexagonal.comprobante.application.service.ComprobanteService;
-import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
-import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
-import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.LineaMovimiento;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.exception.MovimientoConsultaException;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.exception.MovimientoConsultaException.Codigo;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.service.ArmadoAsientos;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.service.TopeMovimientos;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientoDiario;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LibroDiario;
-import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LineaDiario;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.RangoContable;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.ports.in.ConsultarLibroDiarioUseCase;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Libro Diario: todas las líneas de {@code movcon} de un rango de días, agrupadas por asiento (fecha y orden).
@@ -46,9 +34,7 @@ import java.util.stream.Collectors;
 public class ConsultarLibroDiarioUseCaseImpl implements ConsultarLibroDiarioUseCase {
 
     private final CuentaMovimientoService cuentaMovimientoService;
-    private final CuentaService cuentaService;
-    private final ComprobanteService comprobanteService;
-    private final ProveedorService proveedorService;
+    private final ArmadoAsientos armadoAsientos;
     private final TopeMovimientos topeMovimientos;
 
     @Override
@@ -83,16 +69,7 @@ public class ConsultarLibroDiarioUseCaseImpl implements ConsultarLibroDiarioUseC
         if (lineas.size() > maximo) {
             throw demasiados("más de " + maximo, maximo);
         }
-        Nombres nombres = nombres(lineas);
-
-        // Las líneas llegan ordenadas por fecha y orden: el mapa ordenado conserva ese orden de asientos.
-        List<AsientoDiario> asientos = lineas.stream()
-                .map(linea -> armarLinea(linea, nombres))
-                .collect(Collectors.groupingBy(l -> List.of(l.fechaContable(), l.ordenContable()),
-                        LinkedHashMap::new, Collectors.toList()))
-                .values().stream()
-                .map(ConsultarLibroDiarioUseCaseImpl::cerrar)
-                .toList();
+        List<AsientoDiario> asientos = armadoAsientos.asientos(lineas);
         BigDecimal totalDebe = asientos.stream().map(AsientoDiario::totalDebe).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal totalHaber = asientos.stream().map(AsientoDiario::totalHaber).reduce(BigDecimal.ZERO, BigDecimal::add);
         return new LibroDiario(desde, hasta, asientos, totalDebe, totalHaber);
@@ -101,74 +78,5 @@ public class ConsultarLibroDiarioUseCaseImpl implements ConsultarLibroDiarioUseC
     private static MovimientoConsultaException demasiados(String cantidad, int maximo) {
         return new MovimientoConsultaException(Codigo.DEMASIADOS_MOVIMIENTOS,
                 "El rango tiene " + cantidad + " movimientos y el máximo es " + maximo + ": acorte el rango");
-    }
-
-    private Nombres nombres(List<LineaMovimiento> lineas) {
-        if (lineas.isEmpty()) {
-            return new Nombres(Map.of(), Map.of(), Map.of());
-        }
-        List<BigDecimal> numeros = lineas.stream()
-                .map(LineaMovimiento::numeroCuenta)
-                .filter(Objects::nonNull)
-                .map(BigDecimal::stripTrailingZeros)
-                .distinct()
-                .toList();
-        Map<BigDecimal, String> cuentas = new HashMap<>();
-        for (Cuenta cuenta : cuentaService.findAllByNumeroCuentaIn(numeros)) {
-            cuentas.putIfAbsent(cuenta.getNumeroCuenta().stripTrailingZeros(), cuenta.getNombre());
-        }
-
-        Map<Integer, String> comprobantes = new HashMap<>();
-        for (Comprobante comprobante : comprobanteService.findAll()) {
-            comprobantes.putIfAbsent(comprobante.getComprobanteId(), comprobante.getDescripcion());
-        }
-
-        Set<Integer> proveedorIds = lineas.stream()
-                .map(LineaMovimiento::proveedorId)
-                .filter(id -> id != null && id != 0)
-                .collect(Collectors.toSet());
-        Map<Integer, String> proveedores = new HashMap<>();
-        for (ProveedorNombre proveedor : proveedorService.getNombres(proveedorIds)) {
-            proveedores.putIfAbsent(proveedor.proveedorId(), proveedor.razonSocial());
-        }
-        return new Nombres(cuentas, comprobantes, proveedores);
-    }
-
-    private static LineaDiario armarLinea(LineaMovimiento linea, Nombres nombres) {
-        BigDecimal importe = linea.importe() == null ? BigDecimal.ZERO : linea.importe();
-        boolean debita = linea.debita() != null && linea.debita() == 1;
-        String nombreCuenta = linea.numeroCuenta() == null ? null
-                : nombres.cuentas().get(linea.numeroCuenta().stripTrailingZeros());
-        return new LineaDiario(
-                linea.fechaContable(),
-                linea.ordenContable(),
-                linea.item(),
-                linea.numeroCuenta(),
-                nombreCuenta,
-                linea.comprobanteId() == null ? null : nombres.comprobantes().get(linea.comprobanteId()),
-                linea.proveedorId() == null ? null : nombres.proveedores().get(linea.proveedorId()),
-                linea.concepto(),
-                debita ? importe : null,
-                debita ? null : importe);
-    }
-
-
-    private static AsientoDiario cerrar(List<LineaDiario> lineas) {
-        BigDecimal debe = BigDecimal.ZERO;
-        BigDecimal haber = BigDecimal.ZERO;
-        for (LineaDiario linea : lineas) {
-            debe = sumar(debe, linea.debe());
-            haber = sumar(haber, linea.haber());
-        }
-        LineaDiario primera = lineas.getFirst();
-        return new AsientoDiario(primera.fechaContable(), primera.ordenContable(), List.copyOf(lineas), debe, haber);
-    }
-
-    private static BigDecimal sumar(BigDecimal total, BigDecimal importe) {
-        return importe == null ? total : total.add(importe);
-    }
-
-    private record Nombres(Map<BigDecimal, String> cuentas, Map<Integer, String> comprobantes,
-                           Map<Integer, String> proveedores) {
     }
 }

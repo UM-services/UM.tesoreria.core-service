@@ -18,6 +18,7 @@ public interface CuentaMovimientoRepository {
     List<CuentaMovimiento> findAllByNumeroCuentaAndFechaContableBetweenAndApertura(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta, Byte apertura);
     List<LineaMovimiento> findLineasByFechaContable(OffsetDateTime desde, OffsetDateTime hasta, int limite);
     long countByFechaContable(OffsetDateTime desde, OffsetDateTime hasta);
+    List<LineaMovimiento> findLineasByAsiento(OffsetDateTime desde, OffsetDateTime hasta, Integer ordenContable);
     List<SumaCuenta> sumarPorCuenta(OffsetDateTime desde, OffsetDateTime hasta, Byte apertura);
     Optional<CuentaMovimiento> findTopByFechaContableOrderByOrdenContableDesc(OffsetDateTime fechaContable);
     boolean existsByFechaContableBetween(OffsetDateTime desde, OffsetDateTime hasta);

@@ -15,6 +15,7 @@ import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.LineaMovimiento;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.exception.MovimientoConsultaException;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.exception.MovimientoConsultaException.Codigo;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.service.ArmadoAsientos;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.service.TopeMovimientos;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientoDiario;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LibroDiario;
@@ -53,8 +54,8 @@ class ConsultarLibroDiarioUseCaseImplTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new ConsultarLibroDiarioUseCaseImpl(cuentaMovimientoService, cuentaService, comprobanteService,
-                proveedorService, new TopeMovimientos(10, 400));
+        useCase = new ConsultarLibroDiarioUseCaseImpl(cuentaMovimientoService,
+                new ArmadoAsientos(cuentaService, comprobanteService, proveedorService), new TopeMovimientos(10, 400));
         lenient().when(comprobanteService.findAll()).thenReturn(List.of(
                 Comprobante.builder().comprobanteId(3).descripcion("Factura B").build()));
         lenient().when(cuentaService.findAllByNumeroCuentaIn(anyList())).thenReturn(List.of(
