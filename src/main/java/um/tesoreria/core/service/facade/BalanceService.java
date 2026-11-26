@@ -3,8 +3,9 @@
  */
 package um.tesoreria.core.service.facade;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
@@ -24,7 +25,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
@@ -42,6 +42,8 @@ import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.*;
+import um.tesoreria.core.service.facade.mayor.MayorConsultaException;
+import um.tesoreria.core.service.facade.mayor.MayorConsultaException.Codigo;
 import um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosFila;
 import um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosService;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +57,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class BalanceService {
 
-	private final Environment env;
 	private final CuentaService cuentaService;
 	private final ContabilidadService contabilidadService;
 	private final CuentaMovimientoService cuentaMovimientoService;
@@ -67,14 +68,10 @@ public class BalanceService {
 	private final ProveedorPagoService proveedorPagoService;
 	private final SumasSaldosService sumasSaldosService;
 
-	public String makeSumasSaldos(OffsetDateTime desde, OffsetDateTime hasta) {
+	public byte[] makeSumasSaldos(OffsetDateTime desde, OffsetDateTime hasta) {
 		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
 		if (ejercicio == null)
-			return "Error: SIN Ejercicio";
-
-		String path = env.getProperty("path.files");
-
-		String filename = path + "sumas_y_saldos.xlsx";
+			throw new MayorConsultaException(Codigo.FUERA_DE_EJERCICIO, "Desde y hasta deben pertenecer al mismo ejercicio");
 
 		Workbook book = new XSSFWorkbook();
 		CellStyle style_normal = book.createCellStyle();
@@ -116,33 +113,18 @@ public class BalanceService {
 		for (int column = 0; column < sheet.getRow(2).getPhysicalNumberOfCells(); column++)
 			sheet.autoSizeColumn(column);
 
-		try {
-			File file = new File(filename);
-			FileOutputStream output = new FileOutputStream(file);
-			book.write(output);
-			output.flush();
-			output.close();
-			log.debug(file.getAbsolutePath());
-			book.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
-		return filename;
+		return toBytes(book);
 	}
 
-	public String makeMayor(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta) {
+	public byte[] makeMayor(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta) {
 		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
 		if (ejercicio == null)
-			return "Error: SIN Ejercicio";
+			throw new MayorConsultaException(Codigo.FUERA_DE_EJERCICIO, "Desde y hasta deben pertenecer al mismo ejercicio");
 
 		Cuenta cuenta = cuentaService.findByNumeroCuenta(numeroCuenta)
 				.orElse(null);
 		Map<Integer, Comprobante> comprobantes = comprobanteService.findAll().stream()
 				.collect(Collectors.toMap(Comprobante::getComprobanteId, Function.identity(), (comprobante, replacement) -> comprobante));
-
-		String path = env.getProperty("path.files");
-
-		String filename = path + "mayor.xlsx";
 
 		Workbook book = new XSSFWorkbook();
 		CellStyle style_normal = book.createCellStyle();
@@ -273,18 +255,16 @@ public class BalanceService {
 		for (int column = 0; column < sheet.getRow(4).getPhysicalNumberOfCells(); column++)
 			sheet.autoSizeColumn(column);
 
-		try {
-			File file = new File(filename);
-			FileOutputStream output = new FileOutputStream(file);
+		return toBytes(book);
+	}
+
+	private byte[] toBytes(Workbook book) {
+		try (book; ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 			book.write(output);
-			output.flush();
-			output.close();
-			log.debug(file.getAbsolutePath());
-			book.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
+			return output.toByteArray();
+		} catch (IOException e) {
+			throw new UncheckedIOException("No se pudo generar el Excel", e);
 		}
-		return filename;
 	}
 
 	private void setCellLong(Row row, int column, Long value, CellStyle style) {
