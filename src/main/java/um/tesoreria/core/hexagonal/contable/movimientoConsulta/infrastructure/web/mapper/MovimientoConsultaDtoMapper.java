@@ -2,9 +2,13 @@ package um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.w
 
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientoDiario;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientoNoCuadrado;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientosNoCuadrados;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LibroDiario;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LineaDiario;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.AsientoDiarioResponse;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.AsientoNoCuadradoResponse;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.AsientosNoCuadradosResponse;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.LibroDiarioResponse;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.LineaDiarioResponse;
 
@@ -21,6 +25,17 @@ public class MovimientoConsultaDtoMapper {
         return new AsientoDiarioResponse(asiento.fechaContable(), asiento.ordenContable(),
                 asiento.lineas().stream().map(this::toResponse).toList(),
                 asiento.totalDebe(), asiento.totalHaber());
+    }
+
+    public AsientosNoCuadradosResponse toResponse(AsientosNoCuadrados noCuadrados) {
+        return new AsientosNoCuadradosResponse(noCuadrados.desde(), noCuadrados.hasta(),
+                noCuadrados.asientos().stream().map(this::toResponse).toList());
+    }
+
+    public AsientoNoCuadradoResponse toResponse(AsientoNoCuadrado asiento) {
+        return new AsientoNoCuadradoResponse(asiento.fechaContable(), asiento.ordenContable(),
+                asiento.lineas().stream().map(this::toResponse).toList(),
+                asiento.totalDebe(), asiento.totalHaber(), asiento.diferencia());
     }
 
     public LineaDiarioResponse toResponse(LineaDiario linea) {

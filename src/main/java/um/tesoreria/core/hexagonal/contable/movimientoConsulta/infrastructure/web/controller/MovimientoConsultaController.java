@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.service.MovimientoConsultaService;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.AsientoDiarioResponse;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.AsientosNoCuadradosResponse;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.LibroDiarioResponse;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.dto.RangoFechasRequest;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.mapper.MovimientoConsultaDtoMapper;
@@ -32,6 +33,16 @@ public class MovimientoConsultaController {
                 ? service.consultarLibroDiario(null, null)
                 : service.consultarLibroDiario(request.desde(), request.hasta());
         return ResponseEntity.ok(mapper.toResponse(libro));
+    }
+
+    /** "Diferencia": asientos del rango cuyo debe difiere del haber, con sus líneas y la diferencia exacta. */
+    @PostMapping("/noCuadrados")
+    public ResponseEntity<AsientosNoCuadradosResponse> noCuadrados(
+            @RequestBody(required = false) RangoFechasRequest request) {
+        var noCuadrados = request == null
+                ? service.consultarNoCuadrados(null, null)
+                : service.consultarNoCuadrados(request.desde(), request.hasta());
+        return ResponseEntity.ok(mapper.toResponse(noCuadrados));
     }
 
     /** Un asiento con sus líneas; {@code fecha} con hora y offset, se toma su día de calendario. */
