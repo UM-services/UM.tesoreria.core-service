@@ -65,7 +65,9 @@ public class JpaCuentaRepositoryAdapter implements CuentaRepository {
     @Transactional
     public int recalcularGrados() {
         int actualizadas = 0;
-        for (CuentaEntity entity : jpaRepository.findAll()) {
+        // Orden numérico: es el mismo en que el alta, la edición y la baja toman sus bloqueos, y el flush bloquea
+        // todas las filas hasta el commit. Sin orden, dos recálculos o un alta concurrente pueden interbloquear.
+        for (CuentaEntity entity : jpaRepository.findAll(Sort.by("numeroCuenta").ascending())) {
             final CuentaJerarquia.Grados grados;
             try {
                 grados = CuentaJerarquia.grados(entity.getNumeroCuenta());

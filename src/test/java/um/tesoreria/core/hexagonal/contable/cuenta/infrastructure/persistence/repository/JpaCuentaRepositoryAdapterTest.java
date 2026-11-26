@@ -6,6 +6,7 @@ import java.util.Optional;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Sort;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +21,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class JpaCuentaRepositoryAdapterTest {
+
+    static final Sort ORG = Sort.by("numeroCuenta").ascending();
     @Mock JpaCuentaRepository jpa;
     @Mock CuentaMovimientoReferenciaRepository movimientos;
     @Mock CuentaSearchService search;
@@ -62,7 +65,7 @@ class JpaCuentaRepositoryAdapterTest {
     void recalculoModificaSoloGradosYNoUsaSave() {
         CuentaEntity entity = CuentaEntity.builder().numeroCuenta(new BigDecimal("11010100000"))
                 .nombre("Conservar").visible((byte) 1).geograficaId(2).build();
-        when(jpa.findAll()).thenReturn(List.of(entity));
+        when(jpa.findAll(ORG)).thenReturn(List.of(entity));
         adapter.recalcularGrados();
         assertThat(entity.getGrado()).isEqualTo(4);
         assertThat(entity.getGrado3()).isEqualByComparingTo("11010000000");
@@ -81,7 +84,7 @@ class JpaCuentaRepositoryAdapterTest {
                 .grado3(new BigDecimal("11010000000")).grado4(new BigDecimal("11010100000")).build();
         CuentaEntity desactualizada = CuentaEntity.builder().numeroCuenta(new BigDecimal("11010100001")).grado(4).build();
         CuentaEntity legada = CuentaEntity.builder().numeroCuenta(new BigDecimal("123")).grado(5).build();
-        when(jpa.findAll()).thenReturn(List.of(consistente, desactualizada, legada));
+        when(jpa.findAll(ORG)).thenReturn(List.of(consistente, desactualizada, legada));
         CuentaEntity sucia = CuentaEntity.builder().numeroCuenta(BigDecimal.ONE).nombre("Caja\r\n").build();
         when(jpa.findAllByNombreContainingOrderByNumeroCuenta("\r\n")).thenReturn(List.of(sucia));
 
