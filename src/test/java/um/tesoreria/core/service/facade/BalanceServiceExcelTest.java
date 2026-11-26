@@ -20,6 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.apache.poi.ss.usermodel.CellType;
@@ -83,6 +84,31 @@ class BalanceServiceExcelTest {
 
     // protects=un rango que cruza ejercicios en el Excel del mayor se rechaza con FUERA_DE_EJERCICIO (409); fails_when=se devuelve un nombre de archivo de error o se consultan saldos; no_claim=no prueba cuándo un rango cruza ejercicios
     @Test
+    void rangoInvertidoSeRechazaComoEnElJson() {
+        OffsetDateTime desde = fecha(2026, 3, 31);
+        OffsetDateTime hasta = fecha(2026, 3, 1);
+
+        assertThatThrownBy(() -> service.makeSumasSaldos(desde, hasta))
+                .isInstanceOfSatisfying(MayorConsultaException.class,
+                        e -> assertThat(e.getCodigo()).isEqualTo(Codigo.DESDE_POSTERIOR));
+        assertThatThrownBy(() -> service.makeMayor(BigDecimal.ONE, desde, hasta))
+                .isInstanceOfSatisfying(MayorConsultaException.class,
+                        e -> assertThat(e.getCodigo()).isEqualTo(Codigo.DESDE_POSTERIOR));
+        verify(contabilidad, never()).verifyEjercicio(any(), any());
+    }
+
+    @Test
+    void cuentaInexistenteSeRechazaComoEnElJson() {
+        OffsetDateTime desde = fecha(2026, 3, 1);
+        OffsetDateTime hasta = fecha(2026, 3, 31);
+        when(contabilidad.verifyEjercicio(desde, hasta)).thenReturn(ejercicio);
+
+        assertThatThrownBy(() -> service.makeMayor(BigDecimal.valueOf(99999999999L), desde, hasta))
+                .isInstanceOfSatisfying(MayorConsultaException.class,
+                        e -> assertThat(e.getCodigo()).isEqualTo(Codigo.CUENTA_INEXISTENTE));
+    }
+
+    @Test
     void mayorFueraDeEjercicioSeRechaza() {
         OffsetDateTime desde = fecha(2025, 12, 1);
         OffsetDateTime hasta = fecha(2026, 2, 1);
@@ -94,7 +120,7 @@ class BalanceServiceExcelTest {
         verify(contabilidad, never()).saldoInicial(any(), any(), any());
     }
 
-    // protects=C6: pedidos simultáneos de sumas y saldos con rangos distintos devuelven cada uno el mismo libro que el pedido solo; fails_when=los pedidos comparten un archivo y uno recibe el libro de otro, vacío o corrupto; no_claim=no compara bytes crudos (el xlsx lleva fecha de creación) sino hojas y celdas
+    // protects=C6: dos pedidos simultáneos no comparten estado y cada uno recibe su propio libro; fails_when=vuelve el archivo fijo compartido y un pedido recibe el libro de otro; no_claim=no reproduce el defecto anterior por sí solo (compara el estado de después contra sí mismo) ni compara bytes crudos, porque el xlsx lleva fecha de creación
     @Test
     void sumasSaldosSimultaneosDevuelvenCadaUnoSuLibro() throws Exception {
         for (int rango = 0; rango < RANGOS; rango++) {
@@ -113,7 +139,7 @@ class BalanceServiceExcelTest {
         verificarSimultaneos(rango -> service.makeSumasSaldos(fecha(2026, rango + 1, 1), fecha(2026, rango + 1, 28)));
     }
 
-    // protects=C6 en el mayor: pedidos simultáneos de cuentas y rangos distintos devuelven cada uno el mismo libro que el pedido solo; fails_when=los pedidos comparten un archivo; no_claim=no prueba el armado de líneas de movimientos (sin movimientos en el mock)
+    // protects=C6 en el mayor: dos pedidos simultáneos no comparten estado y cada uno recibe su propio libro; fails_when=vuelve el archivo fijo compartido; no_claim=no reproduce el defecto anterior por sí solo ni prueba el armado de líneas de movimientos (sin movimientos en el mock)
     @Test
     void mayoresSimultaneosDevuelvenCadaUnoSuLibro() throws Exception {
         for (int rango = 0; rango < RANGOS; rango++) {
@@ -153,7 +179,8 @@ class BalanceServiceExcelTest {
             }
             largada.countDown();
             for (int i = 0; i < total; i++) {
-                assertThat(leer(respuestas.get(i).get())).as("pedido %d", i).isEqualTo(solos.get(i % RANGOS));
+                assertThat(leer(respuestas.get(i).get(60, TimeUnit.SECONDS))).as("pedido %d", i)
+                        .isEqualTo(solos.get(i % RANGOS));
             }
         } finally {
             pool.shutdownNow();

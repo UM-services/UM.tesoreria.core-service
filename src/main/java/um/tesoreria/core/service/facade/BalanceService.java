@@ -69,9 +69,7 @@ public class BalanceService {
 	private final SumasSaldosService sumasSaldosService;
 
 	public byte[] makeSumasSaldos(OffsetDateTime desde, OffsetDateTime hasta) {
-		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
-		if (ejercicio == null)
-			throw new MayorConsultaException(Codigo.FUERA_DE_EJERCICIO, "Desde y hasta deben pertenecer al mismo ejercicio");
+		Ejercicio ejercicio = ejercicioDe(desde, hasta);
 
 		Workbook book = new XSSFWorkbook();
 		CellStyle style_normal = book.createCellStyle();
@@ -117,12 +115,10 @@ public class BalanceService {
 	}
 
 	public byte[] makeMayor(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta) {
-		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
-		if (ejercicio == null)
-			throw new MayorConsultaException(Codigo.FUERA_DE_EJERCICIO, "Desde y hasta deben pertenecer al mismo ejercicio");
-
+		Ejercicio ejercicio = ejercicioDe(desde, hasta);
 		Cuenta cuenta = cuentaService.findByNumeroCuenta(numeroCuenta)
-				.orElse(null);
+				.orElseThrow(() -> new MayorConsultaException(Codigo.CUENTA_INEXISTENTE,
+						"No existe la cuenta " + numeroCuenta.toPlainString()));
 		Map<Integer, Comprobante> comprobantes = comprobanteService.findAll().stream()
 				.collect(Collectors.toMap(Comprobante::getComprobanteId, Function.identity(), (comprobante, replacement) -> comprobante));
 
@@ -256,6 +252,16 @@ public class BalanceService {
 			sheet.autoSizeColumn(column);
 
 		return toBytes(book);
+	}
+
+	/** Ejercicio del rango, con las mismas reglas que el JSON: desde no puede ser posterior a hasta. */
+	private Ejercicio ejercicioDe(OffsetDateTime desde, OffsetDateTime hasta) {
+		if (desde.isAfter(hasta))
+			throw new MayorConsultaException(Codigo.DESDE_POSTERIOR, "La fecha desde no puede ser posterior a hasta");
+		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
+		if (ejercicio == null)
+			throw new MayorConsultaException(Codigo.FUERA_DE_EJERCICIO, "Desde y hasta deben pertenecer al mismo ejercicio");
+		return ejercicio;
 	}
 
 	private byte[] toBytes(Workbook book) {
