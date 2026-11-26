@@ -29,6 +29,7 @@ flowchart TD
         UC11[SumarPorCuentaUseCase]
         UC12[FindLineasByFechaContableUseCase]
         UC13[CountByFechaContableUseCase]
+        UC14[FindLineasByAsientoUseCase]
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
@@ -40,7 +41,7 @@ flowchart TD
         Resp[CuentaMovimientoResponse<br/>DTO Salida]
         ENT[CuentaMovimientoEntity<br/>Entidad JPA]
         PR[MovimientoImporteProjection<br/>cuenta, sentido e importe]
-        PL[LineaMovimientoProjection<br/>columnas de movcon, rango semiabierto]
+        PL[LineaMovimientoProjection<br/>columnas de movcon, rango semiabierto o asiento]
     end
 
     subgraph Externo ["Externo (External)"]
@@ -67,6 +68,7 @@ flowchart TD
     Svc -->|ejecuta| UC11
     Svc -->|ejecuta| UC12
     Svc -->|ejecuta| UC13
+    Svc -->|ejecuta| UC14
     UC11 -->|produce| SC
     UC12 -->|produce| LM
 

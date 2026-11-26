@@ -33,6 +33,7 @@ public class CuentaMovimientoService {
     private final SumarPorCuentaUseCase sumarPorCuentaUseCase;
     private final FindLineasByFechaContableUseCase findLineasByFechaContableUseCase;
     private final CountByFechaContableUseCase countByFechaContableUseCase;
+    private final FindLineasByAsientoUseCase findLineasByAsientoUseCase;
     private final FindLastByFechaUseCase findLastByFechaUseCase;
     private final DeleteByCuentaMovimientoIdUseCase deleteByCuentaMovimientoIdUseCase;
     private final DeleteAllByCuentaMovimientoIdInUseCase deleteAllByCuentaMovimientoIdInUseCase;
@@ -76,6 +77,11 @@ public class CuentaMovimientoService {
 
     public long countByFechaContable(OffsetDateTime desde, OffsetDateTime hasta) {
         return countByFechaContableUseCase.countByFechaContable(desde, hasta);
+    }
+
+    /** Líneas de un asiento con {@code desde <= fechaContable < hasta}, sin relaciones, ordenadas por ítem. */
+    public List<LineaMovimiento> findLineasByAsiento(OffsetDateTime desde, OffsetDateTime hasta, Integer ordenContable) {
+        return findLineasByAsientoUseCase.findLineasByAsiento(desde, hasta, ordenContable);
     }
 
     public CuentaMovimiento findLastByFecha(OffsetDateTime fechaContable) {

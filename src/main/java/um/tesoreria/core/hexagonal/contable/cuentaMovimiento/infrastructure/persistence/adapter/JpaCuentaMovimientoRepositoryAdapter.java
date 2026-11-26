@@ -10,6 +10,7 @@ import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.SumaCu
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.ports.out.CuentaMovimientoRepository;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.mapper.CuentaMovimientoMapper;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.repository.JpaCuentaMovimientoRepository;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.infrastructure.persistence.repository.LineaMovimientoProjection;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -22,6 +23,10 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class JpaCuentaMovimientoRepositoryAdapter implements CuentaMovimientoRepository {
+
+    /** Orden estable de las líneas: hay grupos con la misma fecha, orden e ítem, y el id desempata. */
+    private static final Sort ORDEN_LINEAS = Sort.by("fechaContable", "ordenContable", "item", "cuentaMovimientoId")
+            .ascending();
 
     private final JpaCuentaMovimientoRepository jpaCuentaMovimientoRepository;
     private final CuentaMovimientoMapper cuentaMovimientoMapper;
@@ -89,13 +94,23 @@ public class JpaCuentaMovimientoRepositoryAdapter implements CuentaMovimientoRep
 
     @Override
     public List<LineaMovimiento> findLineasByFechaContable(OffsetDateTime desde, OffsetDateTime hasta, int limite) {
-        Sort orden = Sort.by("fechaContable", "ordenContable", "item", "cuentaMovimientoId").ascending();
         return jpaCuentaMovimientoRepository
-                .findAllByFechaContableGreaterThanEqualAndFechaContableLessThan(desde, hasta, orden, Limit.of(limite)).stream()
-                .map(l -> new LineaMovimiento(l.getCuentaMovimientoId(), l.getFechaContable(), l.getOrdenContable(),
-                        l.getItem(), l.getNumeroCuenta(), l.getDebita(), l.getImporte(), l.getConcepto(),
-                        l.getComprobanteId(), l.getProveedorId(), l.getApertura()))
-                .collect(Collectors.toList());
+                .findAllByFechaContableGreaterThanEqualAndFechaContableLessThan(desde, hasta, ORDEN_LINEAS, Limit.of(limite))
+                .stream().map(JpaCuentaMovimientoRepositoryAdapter::toLinea).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LineaMovimiento> findLineasByAsiento(OffsetDateTime desde, OffsetDateTime hasta, Integer ordenContable) {
+        return jpaCuentaMovimientoRepository
+                .findAllByFechaContableGreaterThanEqualAndFechaContableLessThanAndOrdenContable(desde, hasta,
+                        ordenContable, ORDEN_LINEAS)
+                .stream().map(JpaCuentaMovimientoRepositoryAdapter::toLinea).collect(Collectors.toList());
+    }
+
+    private static LineaMovimiento toLinea(LineaMovimientoProjection l) {
+        return new LineaMovimiento(l.getCuentaMovimientoId(), l.getFechaContable(), l.getOrdenContable(),
+                l.getItem(), l.getNumeroCuenta(), l.getDebita(), l.getImporte(), l.getConcepto(),
+                l.getComprobanteId(), l.getProveedorId(), l.getApertura());
     }
 
     @Override

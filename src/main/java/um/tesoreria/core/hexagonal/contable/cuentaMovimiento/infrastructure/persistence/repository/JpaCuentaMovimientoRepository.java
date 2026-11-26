@@ -40,6 +40,10 @@ public interface JpaCuentaMovimientoRepository extends JpaRepository<CuentaMovim
 
 	long countByFechaContableGreaterThanEqualAndFechaContableLessThan(OffsetDateTime desde, OffsetDateTime hasta);
 
+	/** Líneas de un asiento: orden contable dentro de un rango semiabierto [desde, hasta), con la misma proyección. */
+	List<LineaMovimientoProjection> findAllByFechaContableGreaterThanEqualAndFechaContableLessThanAndOrdenContable(
+			OffsetDateTime desde, OffsetDateTime hasta, Integer ordenContable, Sort sort);
+
 	List<CuentaMovimientoEntity> findAllByFechaContableAndOrdenContableAndItemGreaterThanEqual(
 			OffsetDateTime fechaContable, Integer ordenContable, Integer item, Sort sort);
 

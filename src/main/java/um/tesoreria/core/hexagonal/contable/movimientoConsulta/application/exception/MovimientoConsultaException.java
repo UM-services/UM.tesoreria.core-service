@@ -10,9 +10,12 @@ public class MovimientoConsultaException extends RuntimeException {
         FECHAS_REQUERIDAS,
         FECHA_FUERA_DE_RANGO,
         CUERPO_INVALIDO,
+        PARAMETRO_INVALIDO,
         DESDE_POSTERIOR,
         RANGO_DEMASIADO_LARGO,
-        DEMASIADOS_MOVIMIENTOS
+        DEMASIADOS_MOVIMIENTOS,
+        ORDEN_INVALIDO,
+        ASIENTO_INEXISTENTE
     }
 
     private final Codigo codigo;
