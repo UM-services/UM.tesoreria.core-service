@@ -48,9 +48,8 @@ public class SumasSaldosService {
 
     /** Una fila por cuenta de grado 5, en orden de número de cuenta; también las que no tienen movimientos. */
     public List<SumasSaldosFila> filas(Ejercicio ejercicio, OffsetDateTime desde, OffsetDateTime hasta) {
-        contabilidadService.recalculateGrados();
         Map<BigDecimal, SaldosCuenta> saldos = contabilidadService.saldosPorCuenta(ejercicio, desde, hasta);
-        List<Cuenta> cuentas = cuentaService.findAllGrado5();
+        List<Cuenta> cuentas = cuentaService.findAllImputables();
         return cuentas.stream()
                 .map(cuenta -> SumasSaldosFila.de(cuenta,
                         saldos.getOrDefault(ContabilidadService.claveCuenta(cuenta.getNumeroCuenta()),

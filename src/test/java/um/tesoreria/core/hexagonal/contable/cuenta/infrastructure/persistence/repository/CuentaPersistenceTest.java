@@ -230,9 +230,10 @@ public class CuentaPersistenceTest {
         jdbc.update("UPDATE plancta SET pla_nombre='Acreedora' WHERE pla_cuenta=11010100002");
         jdbc.update("UPDATE plancta SET pla_nombre='Sin movimientos' WHERE pla_cuenta=11010100003");
         var cuentas = new um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService(
-                crear, editar, borrar, null, null, null, null, recalcular, null, repository);
+                crear, editar, borrar, null, null, null, null, recalcular, null,
+                new GetCuentasImputablesUseCaseImpl(repository), null, repository);
         var contabilidad = spy(new um.tesoreria.core.service.facade.ContabilidadService(
-                null, null, cuentas, null, null, null, null, null, null));
+                null, null, null, null, null, null, null, null));
         var desde = java.time.OffsetDateTime.parse("2026-01-01T00:00:00Z");
         var hasta = java.time.OffsetDateTime.parse("2026-01-31T00:00:00Z");
         var ejercicio = mock(um.tesoreria.core.kotlin.model.Ejercicio.class);
@@ -261,6 +262,9 @@ public class CuentaPersistenceTest {
         assertThat(leerBalance(balance.makeSumasSaldos(desde, hasta))).isEqualTo(primera);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM gestion_escritura_historial", Integer.class)).isEqualTo(eventos);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM plancta", Integer.class)).isEqualTo(7);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM plancta WHERE pla_grado<>0", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT pla_nombre FROM plancta WHERE pla_cuenta=11010100001", String.class))
+                .isEqualTo("Deudora\r\n");
     }
 
     private static java.util.List<java.util.List<Object>> leerBalance(String archivo) throws Exception {

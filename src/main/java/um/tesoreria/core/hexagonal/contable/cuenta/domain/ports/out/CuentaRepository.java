@@ -11,14 +11,14 @@ public interface CuentaRepository {
     Optional<Cuenta> findWithLockByNumeroCuenta(BigDecimal numeroCuenta);
     boolean existenMovimientos(BigDecimal desde, BigDecimal hasta);
     boolean existenHijas(BigDecimal desde, BigDecimal hasta);
-    void recalcularGrados();
-    void limpiarNombres();
+    int recalcularGrados();
+    int limpiarNombres();
     List<Cuenta> findAllByGeograficaIdAndGrado(Integer geograficaId, Integer grado);
     Optional<Cuenta> findById(BigDecimal numeroCuenta);
     Optional<Cuenta> findByCuentaContableId(Long cuentaContableId);
     List<Cuenta> findAll();
     List<Cuenta> findAllByNumeroCuentaIn(List<BigDecimal> cuentas);
-    List<Cuenta> findAllGrado5();
+    List<Cuenta> findAllConNumeroPositivo();
     List<Cuenta> findAllByCierreResultado();
     List<Cuenta> findAllByCierreActivoPasivo();
     List<CuentaSearch> findByStrings(List<String> conditions, Boolean visible);

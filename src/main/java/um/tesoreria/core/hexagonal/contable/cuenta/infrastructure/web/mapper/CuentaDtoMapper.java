@@ -2,9 +2,11 @@ package um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.mapper;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.CuentaSearch;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.RecalculoGrados;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaRequest;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaResponse;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaSearchResponse;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.RecalculoGradosResponse;
 
 @Component
 public class CuentaDtoMapper {
@@ -59,5 +61,9 @@ public class CuentaDtoMapper {
         response.setVisible(domain.getVisible());
         response.setSearch(domain.getSearch());
         return response;
+    }
+    public RecalculoGradosResponse toResponse(RecalculoGrados domain) {
+        if (domain == null) return null;
+        return new RecalculoGradosResponse(domain.gradosActualizados(), domain.nombresLimpiados());
     }
 }

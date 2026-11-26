@@ -72,4 +72,23 @@ class JpaCuentaRepositoryAdapterTest {
         verify(jpa, never()).save(any());
         verify(jpa).flush();
     }
+
+    // protects=el resumen cuenta sólo las cuentas cuyos grados cambian (sin importar la escala) y las de nombre con \r\n; fails_when=cuenta todas las filas o una diferencia de escala como cambio; no_claim=no prueba el UPDATE emitido
+    @Test
+    void recalculoYLimpiezaDevuelvenCuantasCuentasCambian() {
+        CuentaEntity consistente = CuentaEntity.builder().numeroCuenta(new BigDecimal("11010100000")).grado(4)
+                .grado1(new BigDecimal("10000000000.00")).grado2(new BigDecimal("11000000000"))
+                .grado3(new BigDecimal("11010000000")).grado4(new BigDecimal("11010100000")).build();
+        CuentaEntity desactualizada = CuentaEntity.builder().numeroCuenta(new BigDecimal("11010100001")).grado(4).build();
+        CuentaEntity legada = CuentaEntity.builder().numeroCuenta(new BigDecimal("123")).grado(5).build();
+        when(jpa.findAll()).thenReturn(List.of(consistente, desactualizada, legada));
+        CuentaEntity sucia = CuentaEntity.builder().numeroCuenta(BigDecimal.ONE).nombre("Caja\r\n").build();
+        when(jpa.findAllByNombreContainingOrderByNumeroCuenta("\r\n")).thenReturn(List.of(sucia));
+
+        assertThat(adapter.recalcularGrados()).isEqualTo(1);
+        assertThat(adapter.limpiarNombres()).isEqualTo(1);
+        assertThat(desactualizada.getGrado()).isEqualTo(5);
+        assertThat(legada.getGrado()).isEqualTo(5);
+        assertThat(sucia.getNombre()).isEqualTo("Caja");
+    }
 }

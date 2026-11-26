@@ -17,6 +17,7 @@ import um.tesoreria.core.service.view.CuentaSearchService;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,8 @@ public class JpaCuentaRepositoryAdapter implements CuentaRepository {
 
     @Override
     @Transactional
-    public void recalcularGrados() {
+    public int recalcularGrados() {
+        int actualizadas = 0;
         for (CuentaEntity entity : jpaRepository.findAll()) {
             final CuentaJerarquia.Grados grados;
             try {
@@ -70,6 +72,11 @@ public class JpaCuentaRepositoryAdapter implements CuentaRepository {
             } catch (IllegalArgumentException ex) {
                 // Un número legado fuera de la estructura conserva sus grados: no debe cortar el balance.
                 continue;
+            }
+            if (!Objects.equals(entity.getGrado(), grados.grado()) || distinto(entity.getGrado1(), grados.grado1())
+                    || distinto(entity.getGrado2(), grados.grado2()) || distinto(entity.getGrado3(), grados.grado3())
+                    || distinto(entity.getGrado4(), grados.grado4())) {
+                actualizadas++;
             }
             entity.setGrado(grados.grado());
             entity.setGrado1(grados.grado1());
@@ -79,17 +86,24 @@ public class JpaCuentaRepositoryAdapter implements CuentaRepository {
         }
         // Dirty checking sobre entidades gestionadas: no merge ni INSERT de filas borradas.
         jpaRepository.flush();
+        return actualizadas;
+    }
+
+    private static boolean distinto(BigDecimal actual, BigDecimal calculado) {
+        return actual == null || actual.compareTo(calculado) != 0;
     }
 
     @Override
     @Transactional
-    public void limpiarNombres() {
+    public int limpiarNombres() {
         // Leer el nombre vigente con bloqueo y conservarlo hasta el flush/commit.
         // El orden numérico coincide con el de los bloqueos de alta/edición/baja.
-        for (CuentaEntity entity : jpaRepository.findAllByNombreContainingOrderByNumeroCuenta("\r\n")) {
+        List<CuentaEntity> conSaltos = jpaRepository.findAllByNombreContainingOrderByNumeroCuenta("\r\n");
+        for (CuentaEntity entity : conSaltos) {
             entity.setNombre(entity.getNombre().replace("\r\n", ""));
         }
         jpaRepository.flush();
+        return conSaltos.size();
     }
 
     @Override
@@ -113,8 +127,8 @@ public class JpaCuentaRepositoryAdapter implements CuentaRepository {
     }
 
     @Override
-    public List<Cuenta> findAllGrado5() {
-        return jpaRepository.findAllByGradoAndNumeroCuentaGreaterThan(5, BigDecimal.ZERO, Sort.by("numeroCuenta").ascending())
+    public List<Cuenta> findAllConNumeroPositivo() {
+        return jpaRepository.findAllByNumeroCuentaGreaterThan(BigDecimal.ZERO, Sort.by("numeroCuenta").ascending())
                 .stream().map(mapper::toDomain).collect(Collectors.toList());
     }
 
