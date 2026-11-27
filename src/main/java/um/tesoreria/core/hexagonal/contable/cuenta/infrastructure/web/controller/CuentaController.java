@@ -105,7 +105,7 @@ public class CuentaController {
     }
 
     @PostMapping("/recalcularGrados")
-    @RequierePermiso("contabilidad.recalcularGrados")
+    @RequierePermiso("contable.recalcular_grados")
     public ResponseEntity<RecalculoGradosResponse> recalcularGrados() {
         return ResponseEntity.ok(mapper.toResponse(service.recalcularGradosYNombres()));
     }

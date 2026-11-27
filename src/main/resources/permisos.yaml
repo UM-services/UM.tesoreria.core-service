@@ -360,10 +360,10 @@ permisos:
     descripcion: "Generar el asiento de cierre de resultado o activo-pasivo"
     activo: true
 
-  # --- Contabilidad: plan de cuentas ---
+  # --- Contable: plan de cuentas ---
   - aplicacion: TESORERIA
-    clave: contabilidad.recalcularGrados
-    modulo: contabilidad
+    clave: contable.recalcular_grados
+    modulo: contable
     descripcion: "Recalcular los grados del plan de cuentas y limpiar saltos de línea en los nombres"
     activo: true
 

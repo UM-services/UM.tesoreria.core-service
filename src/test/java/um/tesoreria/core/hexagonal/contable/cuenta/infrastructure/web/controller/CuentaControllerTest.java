@@ -84,7 +84,7 @@ class CuentaControllerTest {
     void recalcularGradosExigePermiso() throws NoSuchMethodException {
         RequierePermiso permiso = CuentaController.class.getMethod("recalcularGrados").getAnnotation(RequierePermiso.class);
         assertThat(permiso).isNotNull();
-        assertThat(permiso.value()).isEqualTo("contabilidad.recalcularGrados");
+        assertThat(permiso.value()).isEqualTo("contable.recalcular_grados");
     }
 
     @Test
