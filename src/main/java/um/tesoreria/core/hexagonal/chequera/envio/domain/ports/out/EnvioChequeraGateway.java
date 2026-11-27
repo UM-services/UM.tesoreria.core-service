@@ -27,7 +27,7 @@ public interface EnvioChequeraGateway {
 
     /** Publica el envío de la chequera (bulk + refresco de códigos de barras). Devuelve la respuesta. */
     String enviarChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-                          Integer alternativaId, boolean codigoBarras);
+                          Integer alternativaId, boolean codigoBarras, Long jobId);
 
     /** Publica la notificación de deuda. Devuelve la respuesta. */
     String notificarDeuda(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId);

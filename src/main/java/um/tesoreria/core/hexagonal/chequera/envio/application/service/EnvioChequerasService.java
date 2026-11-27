@@ -66,6 +66,11 @@ public class EnvioChequerasService {
             return ResultadoEnvio.de(EnvioTareaEstado.SIN_CORREOS, "SIN_CORREOS",
                     "Sin correo válido en el domicilio: no se envía (verificar con «Capturar correos»)");
         }
+        if (alta.enviado()) {
+            // El ledger es la autoridad final; el flag de la vista se usa como corte temprano.
+            return ResultadoEnvio.de(EnvioTareaEstado.OMITIDA, "YA_ENVIADA",
+                    "La chequera ya fue enviada");
+        }
 
         var deuda = gateway.deuda(alta.personaId(), alta.documentoId());
         if (RetencionPolicy.retener(deuda, job.getLectivoId(), job.getUmbralCuotasDeuda())) {
@@ -85,7 +90,7 @@ public class EnvioChequerasService {
 
         gateway.marcarRetenida(alta.facultadId(), alta.tipoChequeraId(), alta.chequeraSerieId(), false);
         String respuesta = gateway.enviarChequera(alta.facultadId(), alta.tipoChequeraId(),
-                alta.chequeraSerieId(), alta.alternativaId(), job.isCodigoBarras());
+                alta.chequeraSerieId(), alta.alternativaId(), job.isCodigoBarras(), job.getJobId());
         return ResultadoEnvio.builder()
                 .estado(EnvioTareaEstado.ENCOLADA)
                 .codigo("ENCOLADA")

@@ -69,6 +69,15 @@ public class EnvioJobService {
 
     public void registrarTarea(Long jobId, EnvioJobTarea tarea, ResultadoEnvio resultado) {
         transaction.executeWithoutResult(status -> {
+            var actual = repository.findTareaById(tarea.getTareaId());
+            if (actual.isPresent()
+                    && actual.get().getEstado() == EnvioTareaEstado.ENVIADA
+                    && resultado.getEstado() == EnvioTareaEstado.ENCOLADA) {
+                // El sender confirmó antes de que el worker registrara el ENCOLADA: no pisar.
+                log.debug("Envío masivo: tarea {} ya confirmada por el sender; se conserva ENVIADA",
+                        tarea.getTareaId());
+                return;
+            }
             tarea.setEstado(resultado.getEstado());
             tarea.setCodigo(recortar(resultado.getCodigo(), 60));
             tarea.setMensaje(recortar(resultado.getMensaje(), 500));
@@ -97,6 +106,12 @@ public class EnvioJobService {
     /** Acuse del sender: cierra la tarea ENCOLADA de esa chequera (ENVIADA o ERROR_SMTP). */
     public boolean registrarAcuse(Long chequeraId, boolean enviado, String error) {
         return repository.registrarAcuse(chequeraId, enviado, error).isPresent();
+    }
+
+    /** Acuse de una solicitud concreta (job + chequera), con el estado de la tarea. */
+    public boolean registrarAcuse(Long jobId, Long chequeraId, EnvioTareaEstado estado,
+                                  boolean enviado, String mensaje) {
+        return repository.registrarAcuse(jobId, chequeraId, estado, enviado, mensaje).isPresent();
     }
 
     public void marcarCancelado(Long jobId) {
