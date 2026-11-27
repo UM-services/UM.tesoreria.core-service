@@ -24,4 +24,7 @@ public interface JpaEnvioJobTareaRepository extends JpaRepository<EnvioJobTareaE
     /** Acuse del sender: la tarea ENCOLADA más reciente de esa chequera. */
     Optional<EnvioJobTareaEntity> findFirstByChequeraIdAndEstadoOrderByTareaIdDesc(Long chequeraId,
                                                                                   EnvioTareaEstado estado);
+
+    /** Acuse de una solicitud: la tarea de ese job para esa chequera. */
+    Optional<EnvioJobTareaEntity> findFirstByJobIdAndChequeraIdOrderByTareaIdDesc(Long jobId, Long chequeraId);
 }
