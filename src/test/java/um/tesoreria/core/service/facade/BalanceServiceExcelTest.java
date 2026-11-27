@@ -31,6 +31,9 @@ import org.junit.jupiter.api.Test;
 import um.tesoreria.core.exception.ValorMovimientoException;
 import um.tesoreria.core.hexagonal.comprobante.application.service.ComprobanteService;
 import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
+import um.tesoreria.core.hexagonal.comprobante.infrastructure.persistence.entity.ComprobanteEntity;
+import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.infrastructure.persistence.entity.ProveedorMovimientoEntity;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
@@ -194,6 +197,42 @@ class BalanceServiceExcelTest {
 
         assertThat(fila).contains("2=Factura B", "4=Concepto de prueba")
                 .noneMatch(celda -> celda.toString().startsWith("5=") || celda.toString().startsWith("6="));
+    }
+
+    // protects=una orden de pago sin comprobante deja vacía la descripción y conserva prefijo, número y beneficiario, como el JSON; fails_when=el Excel del mayor corta con un 500; no_claim=no prueba cómo Hibernate carga la relación
+    @Test
+    void mayorConOrdenDePagoSinComprobanteConservaElRestoDeLaOrden() throws Exception {
+        ProveedorPago pago = new ProveedorPago();
+        pago.setOrdenPago(ProveedorMovimientoEntity.builder().prefijo(14).numeroComprobante(126L).nombreBeneficiario("Beneficiario SA").build());
+        List<Object> fila = filaDelMovimiento(movimiento().proveedorMovimientoId(55L).build(), List.of(pago));
+
+        assertThat(fila).contains("5= / 14 / 126", "6=Beneficiario SA");
+    }
+
+    // protects=una fila con proveedor y orden de pago completos llena Proveedor, Orden Pago / Pago y Beneficiario; fails_when=las guardas de nulos vacían también las filas con datos; no_claim=no prueba la búsqueda del pago contra la base
+    @Test
+    void mayorConDatosCompletosLlenaProveedorYOrdenDePago() throws Exception {
+        ProveedorMovimientoEntity orden = ProveedorMovimientoEntity.builder().prefijo(14).numeroComprobante(126L)
+                .nombreBeneficiario("Beneficiario SA").build();
+        orden.setComprobante(ComprobanteEntity.builder().descripcion("Orden de Pago").build());
+        ProveedorPago pago = new ProveedorPago();
+        pago.setOrdenPago(orden);
+        CuentaMovimiento movimiento = movimiento().proveedorId(8).proveedor(Proveedor.builder().razonSocial("Emergencia SRL").build())
+                .proveedorMovimientoId(55L).build();
+
+        assertThat(filaDelMovimiento(movimiento, List.of(pago)))
+                .contains("2=Factura B", "3=Emergencia SRL", "5=Orden de Pago / 14 / 126", "6=Beneficiario SA");
+    }
+
+    // protects=un movimiento sin factura no busca pagos, como el JSON; fails_when=se busca con id nulo y se adjunta una orden de pago ajena; no_claim=no prueba la consulta derivada de Spring Data
+    @Test
+    void mayorSinFacturaNoBuscaPagos() throws Exception {
+        ProveedorPago ajeno = new ProveedorPago();
+        ajeno.setOrdenPago(ProveedorMovimientoEntity.builder().prefijo(1).numeroComprobante(2L).nombreBeneficiario("Ajeno").build());
+        List<Object> fila = filaDelMovimiento(movimiento().build(), List.of(ajeno));
+
+        assertThat(fila).noneMatch(celda -> celda.toString().startsWith("5=") || celda.toString().startsWith("6="));
+        verify(pagos, never()).findAllByFactura(any());
     }
 
     private static CuentaMovimiento.CuentaMovimientoBuilder movimiento() {

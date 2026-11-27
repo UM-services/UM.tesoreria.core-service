@@ -207,10 +207,12 @@ public class BalanceService {
 			this.setCellString(row, columnaConcepto, cuentaMovimiento.getConcepto(), style_normal);
 
 			// busqueda de la OP
-			ProveedorPago proveedorPago = proveedorPagoService.findAllByFactura(cuentaMovimiento.getProveedorMovimientoId()).stream().findFirst().orElse(null);
+			ProveedorPago proveedorPago = cuentaMovimiento.getProveedorMovimientoId() == null ? null
+					: proveedorPagoService.findAllByFactura(cuentaMovimiento.getProveedorMovimientoId()).stream().findFirst().orElse(null);
 			ProveedorMovimientoEntity proveedorMovimientoOP = proveedorPago == null ? null : proveedorPago.getOrdenPago();
 			if (proveedorMovimientoOP != null) {
-				String ordenPago = Objects.requireNonNull(proveedorMovimientoOP.getComprobante()).getDescripcion() + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
+				String descripcionOP = proveedorMovimientoOP.getComprobante() == null ? "" : proveedorMovimientoOP.getComprobante().getDescripcion();
+				String ordenPago = descripcionOP + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
 				this.setCellString(row, columnaOrdenPago, ordenPago, style_normal);
 				this.setCellString(row, columnaBeneficiario, proveedorMovimientoOP.getNombreBeneficiario(), style_normal);
 			}
