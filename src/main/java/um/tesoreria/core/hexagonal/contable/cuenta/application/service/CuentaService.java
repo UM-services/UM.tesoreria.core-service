@@ -46,12 +46,22 @@ public class CuentaService {
         return getCuentasImputablesUseCase.getCuentasImputables();
     }
 
+    /** Cuentas imputables del grupo de resultados (30.000.000.000 a 49.999.999.999), en orden de número. */
     public List<Cuenta> findAllByCierreResultado() {
-        return repositoryPort.findAllByCierreResultado();
+        return imputablesEntre(new BigDecimal(30000000000L), new BigDecimal(49999999999L));
     }
 
+    /** Cuentas imputables de activo y pasivo (10.000.000.000 a 29.999.999.999), en orden de número. */
     public List<Cuenta> findAllByCierreActivoPasivo() {
-        return repositoryPort.findAllByCierreActivoPasivo();
+        return imputablesEntre(new BigDecimal(10000000000L), new BigDecimal(29999999999L));
+    }
+
+    // El cierre y el balance tienen que ver el mismo grado 5: sale del número, no de la columna guardada.
+    private List<Cuenta> imputablesEntre(BigDecimal desde, BigDecimal hasta) {
+        return getCuentasImputablesUseCase.getCuentasImputables().stream()
+                .filter(cuenta -> cuenta.getNumeroCuenta().compareTo(desde) >= 0
+                        && cuenta.getNumeroCuenta().compareTo(hasta) <= 0)
+                .toList();
     }
 
     public List<CuentaSearch> findByStrings(List<String> conditions, Boolean visible) {

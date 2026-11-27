@@ -35,7 +35,6 @@ public interface JpaCuentaRepository extends JpaRepository<CuentaEntity, BigDeci
 
 	List<CuentaEntity> findAllByNumeroCuentaIn(List<BigDecimal> cuentas);
 
-	List<CuentaEntity> findAllByGradoAndNumeroCuentaBetween(Integer grado, BigDecimal desde, BigDecimal hasta);
 
 	Optional<CuentaEntity> findByNumeroCuenta(BigDecimal numeroCuenta);
 

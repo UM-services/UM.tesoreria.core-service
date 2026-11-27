@@ -135,18 +135,6 @@ public class JpaCuentaRepositoryAdapter implements CuentaRepository {
     }
 
     @Override
-    public List<Cuenta> findAllByCierreResultado() {
-        return jpaRepository.findAllByGradoAndNumeroCuentaBetween(5, new BigDecimal(30000000000L), new BigDecimal(49999999999L))
-                .stream().map(mapper::toDomain).collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Cuenta> findAllByCierreActivoPasivo() {
-        return jpaRepository.findAllByGradoAndNumeroCuentaBetween(5, new BigDecimal(10000000000L), new BigDecimal(29999999999L))
-                .stream().map(mapper::toDomain).collect(Collectors.toList());
-    }
-
-    @Override
     public List<CuentaSearch> findByStrings(List<String> conditions, Boolean visible) {
         return searchService.findAllByStrings(conditions, visible).stream().map(mapper::toSearchDomain).collect(Collectors.toList());
     }
