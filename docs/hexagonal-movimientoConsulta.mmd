@@ -8,13 +8,16 @@ flowchart TD
         LN[LineaDiario<br/>línea con nombres resueltos]
         RC[RangoContable<br/>día de calendario recibido]
         UCP[ConsultarLibroDiarioUseCase<br/>Puerto de Entrada]
+        UCA[ConsultarAsientoUseCase<br/>Puerto de Entrada]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
         Svc[MovimientoConsultaService<br/>Servicio de Aplicación]
         UC1[ConsultarLibroDiarioUseCaseImpl]
+        UC2[ConsultarAsientoUseCaseImpl<br/>líneas de movcon por fecha y orden]
+        ARM[ArmadoAsientos<br/>nombres resueltos, agrupar y sumar]
         TOP[TopeMovimientos<br/>max-lineas y max-dias]
-        EX[MovimientoConsultaException<br/>FECHAS_REQUERIDAS, FECHA_FUERA_DE_RANGO, CUERPO_INVALIDO,<br/>DESDE_POSTERIOR, RANGO_DEMASIADO_LARGO, DEMASIADOS_MOVIMIENTOS]
+        EX[MovimientoConsultaException<br/>FECHAS_REQUERIDAS, FECHA_FUERA_DE_RANGO, CUERPO_INVALIDO, PARAMETRO_INVALIDO,<br/>DESDE_POSTERIOR, RANGO_DEMASIADO_LARGO, DEMASIADOS_MOVIMIENTOS,<br/>ORDEN_INVALIDO, ASIENTO_INEXISTENTE]
     end
 
     subgraph Otros ["Servicios de otros slices"]
@@ -25,8 +28,8 @@ flowchart TD
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        CC[MovimientoConsultaController<br/>POST /movimientoConsulta/libroDiario]
-        EH[MovimientoConsultaExceptionHandler<br/>400 y 409, también cuerpo ilegible]
+        CC[MovimientoConsultaController<br/>POST /movimientoConsulta/libroDiario<br/>GET /movimientoConsulta/asiento/{fecha}/{orden}]
+        EH[MovimientoConsultaExceptionHandler<br/>400, 404 y 409, también cuerpo o parámetro ilegible]
         DM[MovimientoConsultaDtoMapper]
         Req[RangoFechasRequest<br/>desde y hasta sin pasar a UTC]
         Resp[LibroDiarioResponse<br/>AsientoDiarioResponse, LineaDiarioResponse]
@@ -46,10 +49,18 @@ flowchart TD
     UC1 -->|usa| TOP
     UC1 -->|lanza| EX
     UC1 -->|cuenta y lee hasta tope + 1| CMS
-    UC1 -->|nombres de cuenta| CS
-    UC1 -->|descripción de comprobante| COS
-    UC1 -->|razón social por id| PS
+    UC1 -->|arma asientos| ARM
     UC1 -->|produce| LD
+    Svc -->|ejecuta| UCA
+    UC2 -->|implementa| UCA
+    UC2 -->|usa| RC
+    UC2 -->|lanza| EX
+    UC2 -->|líneas del asiento| CMS
+    UC2 -->|arma el asiento| ARM
+    UC2 -->|produce| AD
+    ARM -->|nombres de cuenta| CS
+    ARM -->|descripción de comprobante| COS
+    ARM -->|razón social por id| PS
     LD -->|contiene| AD
     AD -->|contiene| LN
 
@@ -61,6 +72,9 @@ flowchart TD
     style LN fill:#e1f5fe
     style RC fill:#e1f5fe
     style UCP fill:#f3e5f5
+    style UCA fill:#f3e5f5
+    style UC2 fill:#fff3e0
+    style ARM fill:#fff3e0
     style Svc fill:#fff3e0
     style UC1 fill:#fff3e0
     style TOP fill:#fff3e0

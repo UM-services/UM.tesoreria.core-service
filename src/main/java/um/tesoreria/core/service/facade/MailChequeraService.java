@@ -20,6 +20,8 @@ import um.tesoreria.core.exception.CarreraChequeraException;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
+import um.tesoreria.core.hexagonal.chequera.envio.application.service.EnvioSolicitudService;
+import um.tesoreria.core.hexagonal.chequera.envio.domain.model.EnvioSolicitudEstado;
 import um.tesoreria.core.hexagonal.personas.domicilio.application.exception.DomicilioException;
 import um.tesoreria.core.exception.SpoterDataException;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
@@ -45,6 +47,8 @@ import lombok.extern.slf4j.Slf4j;
 public class MailChequeraService {
 
     static final String MENSAJE_ENVIO = "Solicitud de envío en proceso";
+    static final String MENSAJE_YA_ENVIADA = "Chequera ya enviada";
+    static final String MENSAJE_EN_CURSO = "Envío de chequera en curso";
     static final String MENSAJE_SIN_CORREOS = "ERROR: Sin correos para ENVIAR";
     private static final String REPLY_TO = "no-reply@um.edu.ar";
 
@@ -60,6 +64,7 @@ public class MailChequeraService {
     private final ChequeraService chequeraService;
     private final SpoterService spoterService;
     private final CorreoEventPublisher correoEventPublisher;
+    private final EnvioSolicitudService envioSolicitudService;
 
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
             Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras) {
@@ -75,8 +80,31 @@ public class MailChequeraService {
     public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
             Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras,
             Boolean bulk, Boolean actualizarCodigosBarras) {
+        return sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, copiaInformes,
+                incluyeMatricula, codigoBarras, bulk, actualizarCodigosBarras, null);
+    }
+
+    /**
+     * Crea (o recupera) la solicitud idempotente antes de publicar. Si la chequera ya se envió o
+     * hay un envío en curso, no publica: el evento sería un no-op.
+     */
+    public String sendChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId,
+            Boolean copiaInformes, Boolean incluyeMatricula, Boolean codigoBarras,
+            Boolean bulk, Boolean actualizarCodigosBarras, Long jobId) {
         log.debug("\n\nProcessing MailChequeraService.sendChequera\n\n");
+        var serie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
+        var creacion = envioSolicitudService.crear(serie, jobId,
+                jobId == null ? "MANUAL" : "JOB");
+        if (!creacion.publicar()) {
+            log.debug("Envío chequera: solicitud {} no se publica (estado {})",
+                    creacion.solicitud().getSolicitudId(), creacion.solicitud().getEstado());
+            return creacion.solicitud().getEstado() == EnvioSolicitudEstado.ENVIADO
+                    ? MENSAJE_YA_ENVIADA : MENSAJE_EN_CURSO;
+        }
         var event = SendChequeraEvent.builder()
+                .solicitudId(creacion.solicitud().getSolicitudId().toString())
+                .chequeraId(serie.getChequeraId())
+                .jobId(jobId)
                 .facultadId(facultadId)
                 .tipoChequeraId(tipoChequeraId)
                 .chequeraSerieId(chequeraSerieId)

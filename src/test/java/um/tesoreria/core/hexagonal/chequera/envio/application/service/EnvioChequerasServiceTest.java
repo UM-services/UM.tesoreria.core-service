@@ -54,9 +54,13 @@ class EnvioChequerasServiceTest {
     }
 
     private static ChequeraEnvioAlta alta(boolean personalValido, boolean institucionalValido) {
+        return alta(personalValido, institucionalValido, false);
+    }
+
+    private static ChequeraEnvioAlta alta(boolean personalValido, boolean institucionalValido, boolean enviado) {
         return new ChequeraEnvioAlta(342038L, 2, 520, 446L, 1, new BigDecimal("1001"), 1, 37, 1,
                 "ABALLAY MURUA", "Luna Martina", "Matrícula y Arancel", "Ciclo Completo",
-                "aballayluna@gmail.com", "", personalValido, institucionalValido, false, false);
+                "aballayluna@gmail.com", "", personalValido, institucionalValido, enviado, false);
     }
 
     private static DeudaEnvio deuda(int lectivoId, int cuotas) {
@@ -86,14 +90,14 @@ class EnvioChequerasServiceTest {
         assertThat(resultado.getRetenida()).isTrue();
         verify(gateway).marcarRetenida(2, 520, 446L, true);
         verify(gateway).notificarDeuda(2, 520, 446L);
-        verify(gateway, never()).enviarChequera(anyInt(), anyInt(), anyLong(), anyInt(), anyBoolean());
+        verify(gateway, never()).enviarChequera(anyInt(), anyInt(), anyLong(), anyInt(), anyBoolean(), anyLong());
     }
 
     @Test
     void enviaConBulkYCodigosDeBarrasCuandoNoRetiene() {
         when(reader.findByChequeraId(342038L)).thenReturn(Optional.of(alta(true, true)));
         when(gateway.deuda(any(), anyInt())).thenReturn(deuda(37, 3));
-        when(gateway.enviarChequera(2, 520, 446L, 1, true)).thenReturn(RESPUESTA_ENVIO);
+        when(gateway.enviarChequera(2, 520, 446L, 1, true, 1L)).thenReturn(RESPUESTA_ENVIO);
 
         var resultado = service.ejecutar(tarea(), job());
 
@@ -101,8 +105,19 @@ class EnvioChequerasServiceTest {
         assertThat(resultado.getRetenida()).isFalse();
         assertThat(resultado.getDetalle()).contains("342038").contains("2/520/446").contains("Retenida: No");
         verify(gateway).marcarRetenida(2, 520, 446L, false);
-        verify(gateway).enviarChequera(2, 520, 446L, 1, true);
+        verify(gateway).enviarChequera(2, 520, 446L, 1, true, 1L);
         verify(gateway, never()).notificarDeuda(anyInt(), anyInt(), anyLong());
+    }
+
+    @Test
+    void omiteSinPublicarCuandoLaChequeraYaFueEnviada() {
+        when(reader.findByChequeraId(342038L)).thenReturn(Optional.of(alta(true, true, true)));
+
+        var resultado = service.ejecutar(tarea(), job());
+
+        assertThat(resultado.getEstado()).isEqualTo(EnvioTareaEstado.OMITIDA);
+        assertThat(resultado.getCodigo()).isEqualTo("YA_ENVIADA");
+        verify(gateway, never()).enviarChequera(anyInt(), anyInt(), anyLong(), anyInt(), anyBoolean(), anyLong());
     }
 
     @Test

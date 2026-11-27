@@ -2,6 +2,31 @@
 
 Todos los cambios notables en este proyecto serán documentados en este archivo.
 
+## [12.14.0] - 2026-11-26
+
+### Added
+
+- **feat(chequera/envio)**: ledger idempotente del envío de chequeras sobre la tabla nueva `chequera_envio_solicitud` (`docs/sql/V436__chequera_envio_solicitud.sql`). Hay **una solicitud por chequera** (`UNIQUE chequera_id`, y `dedupe_key = CHEQUERA:{chequeraId}` única) con estado `PENDIENTE`, `ENVIANDO`, `ENVIADO`, `FALLIDO`, `OMITIDA`, `SIN_CORREOS`, `SIN_CUOTAS` o `RETENIDA`, más `intentos`, `lock_hasta`, `enviado_at` y `ultimo_error`. Así una reentrega de Kafka, un doble clic o un job repetido no vuelven a mandar el correo ([EnvioSolicitud.java], [EnvioSolicitudEstado.java], [EnvioSolicitudEntity.java], [JpaEnvioSolicitudRepository.java], [JpaEnvioSolicitudRepositoryAdapter.java])
+- Caso de uso `EnvioSolicitudUseCase` con `crear`, `reclamar`, `marcarEnviado`, `marcarFallido`, `marcarOmitida` y `consultar`, implementado por `EnvioSolicitudService`. El reclamo es atómico con lock pesimista (`findWithLockBySolicitudId`); con `ENVIADO`, `ENVIANDO` con lock vigente o intentos agotados el sender no envía (`puedeEnviar = false` con motivo `YA_ENVIADA`, `EN_CURSO` o `MAX_INTENTOS`). Límites por configuración con default en código: `tesoreria.chequeras-envio.solicitud.max-intentos` (3) y `tesoreria.chequeras-envio.solicitud.lock-seconds` (120) ([EnvioSolicitudService.java], [EnvioSolicitudClaim.java], [EnvioSolicitudCreacion.java])
+- `marcarEnviado` cierra en la misma transacción: estado `ENVIADO` + `enviado_at`, `ChequeraSerieService.markSent`, el `ChequeraMessageCheck` y, si la solicitud vino de un job, el acuse de su tarea. `marcarOmitida` acepta sólo los estados terminales sin envío y los traduce a la tarea del job (`SIN_CUOTAS → ERROR_SMTP`, `SIN_CORREOS → SIN_CORREOS`, `RETENIDA → RETENIDA`, resto `OMITIDA`) ([EnvioSolicitudService.java])
+- Endpoints internos del ledger en `EnvioSolicitudController`: `POST /api/tesoreria/core/envio/chequera/solicitud` (alta idempotente), `POST .../{solicitudId}/claim`, `POST .../{solicitudId}/sent`, `POST .../{solicitudId}/failed` (body opcional `{error}`), `POST .../{solicitudId}/omitida` (body `{estado, mensaje}`) y `GET .../{solicitudId}`, con las rutas cortas equivalentes. Sin `@RequierePermiso`: los consume `tesoreria-sender` por red interna, igual que `chequeraSerie/mark/sent`. Errores de negocio con `{codigo, mensaje}`: `ENVIO_SOLICITUD_INEXISTENTE` y `ENVIO_ESTADO_INVALIDO` (`422` por el `EnvioExceptionHandler` del slice) ([EnvioSolicitudController.java], [EnvioSolicitudDtoMapper.java], [EnvioSolicitudRequest.java], [EnvioSolicitudResponse.java])
+- Tests: `EnvioSolicitudServiceTest` (alta idempotente, reclamo, cierre y omisión), `EnvioSolicitudRepositoryTest` (H2: mapeo y unicidad por chequera) y `MailChequeraServiceEnvioTest` (evento con solicitud y no publicación cuando ya está enviada o en curso) ([EnvioSolicitudServiceTest.java], [EnvioSolicitudRepositoryTest.java], [MailChequeraServiceEnvioTest.java])
+
+### Changed
+
+- `SendChequeraEvent` suma tres campos aditivos: `solicitudId` (UUID del ledger, viaja al sender), `chequeraId` (clave de `chequera_serie`, garantía de negocio) y `jobId` (job masivo que originó el envío, si aplica). Un evento sin `solicitudId` (legacy) sigue siendo válido: el sender crea o recupera la solicitud por su cuenta ([SendChequeraEvent.java])
+- `MailChequeraService.sendChequera` crea (o recupera) la solicitud antes de publicar y no publica si la chequera ya se envió o hay un envío en curso: devuelve `Chequera ya enviada` o `Envío de chequera en curso` en lugar de `Solicitud de envío en proceso`. Las sobrecargas anteriores delegan con `jobId = null` y `origen = MANUAL` ([MailChequeraService.java])
+- `EnvioChequerasService` corta temprano las filas con `enviado = 1` en la vista del padrón: la tarea queda `OMITIDA` con código `YA_ENVIADA`, sin consultar deuda ni publicar (el ledger sigue siendo la autoridad final) ([EnvioChequerasService.java], [EnvioChequeraGateway.java], [EnvioChequeraGatewayAdapter.java])
+- **fix(chequera/envio)**: el acuse deja de pisar una tarea ya `ENVIADA`. `registrarTarea` no reemplaza `ENVIADA` por `ENCOLADA` cuando el sender confirmó antes de que el worker registrara el encolado, y el acuse por solicitud (`registrarAcuse(jobId, chequeraId, estado, enviado, mensaje)`) ignora un acuse tardío de error sobre una tarea `ENVIADA`; los contadores del job se recalculan en cada acuse ([EnvioJobService.java], [JpaEnvioJobRepositoryAdapter.java], [JpaEnvioJobTareaRepository.java], [EnvioJobRepository.java])
+
+### Notes
+
+- **DDL externo** (`ddl-auto: none`): ejecutar `docs/sql/V436__chequera_envio_solicitud.sql` (idempotente, `CREATE TABLE IF NOT EXISTS`) antes de desplegar. Sin dependencias nuevas, sin `@Query` ni `@RequestParam` nuevos.
+- El evento de Kafka sólo suma campos y las rutas existentes no cambian; los endpoints nuevos son internos del sender. Capacidad pública aditiva ⇒ incremento **minor** (`12.13.0` → `12.14.0`).
+- Verificación sin compilación ni tests por indicación del usuario: las pruebas fueron realizadas previamente por el usuario.
+
+> Based on `git diff HEAD` (staged, 2026-11-26): 32 archivos, +1316/−13 antes de esta documentación —`chequera_envio_solicitud` (DDL `V436`), los archivos nuevos del ledger en el slice `chequera/envio` (modelo, puertos, servicio, entidad, mapper, repositorio, adaptador, controller y DTOs), `SendChequeraEvent`, `MailChequeraService`, `EnvioChequerasService`, `EnvioJobService`, los adaptadores/repositorios del job y 4 suites de prueba—.
+
 ## [12.13.0] - 2026-11-25
 
 ### Added

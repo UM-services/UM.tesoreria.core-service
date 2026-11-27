@@ -125,6 +125,59 @@ class MovimientoConsultaControllerTest {
         org.mockito.Mockito.verifyNoInteractions(service);
     }
 
+    AsientoDiario asiento() {
+        return libro().asientos().getFirst();
+    }
+
+    @Test
+    void asientoPorRutaLargaConservaElOffset() {
+        when(service.consultarAsiento(any(), any())).thenReturn(asiento());
+
+        mockMvc.get().uri("/api/tesoreria/core/movimientoConsulta/asiento/2025-03-01T00:00:00-03:00/1")
+                .assertThat().hasStatusOk().bodyJson()
+                .hasPathSatisfying("$.ordenContable", v -> v.assertThat().isEqualTo(1))
+                .hasPathSatisfying("$.lineas[0].nombreCuenta", v -> v.assertThat().isEqualTo("Caja"))
+                .hasPathSatisfying("$.lineas[0].proveedor", v -> v.assertThat().isEqualTo("Proveedor Siete"))
+                .hasPathSatisfying("$.totalDebe", v -> v.assertThat().isEqualTo(100.00));
+        verify(service).consultarAsiento(org.mockito.ArgumentMatchers.argThat(f -> f.toLocalDate().toString()
+                .equals("2025-03-01") && f.getOffset().getTotalSeconds() == -3 * 3600), org.mockito.ArgumentMatchers.eq(1));
+    }
+
+    @Test
+    void asientoPorRutaCortaConZ() {
+        when(service.consultarAsiento(any(), any())).thenReturn(asiento());
+
+        mockMvc.get().uri("/movimientoConsulta/asiento/2025-03-01T00:00:00Z/1")
+                .assertThat().hasStatusOk();
+        verify(service).consultarAsiento(OffsetDateTime.parse("2025-03-01T00:00:00Z"), 1);
+    }
+
+    @Test
+    void asientoInexistenteEs404YOrdenInvalidoEs409() {
+        when(service.consultarAsiento(any(), any()))
+                .thenThrow(new MovimientoConsultaException(Codigo.ASIENTO_INEXISTENTE, "x"))
+                .thenThrow(new MovimientoConsultaException(Codigo.ORDEN_INVALIDO, "y"));
+
+        mockMvc.get().uri("/api/tesoreria/core/movimientoConsulta/asiento/2025-03-01T00:00:00Z/9")
+                .assertThat().hasStatus(404).bodyJson()
+                .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("ASIENTO_INEXISTENTE"))
+                .hasPathSatisfying("$.error", v -> v.assertThat().isEqualTo("Not Found"));
+        mockMvc.get().uri("/api/tesoreria/core/movimientoConsulta/asiento/2025-03-01T00:00:00Z/0")
+                .assertThat().hasStatus(409).bodyJson()
+                .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("ORDEN_INVALIDO"));
+    }
+
+    @Test
+    void asientoConFechaSinHoraUOrdenNoNumericoEs400() {
+        mockMvc.get().uri("/api/tesoreria/core/movimientoConsulta/asiento/2025-03-01/1")
+                .assertThat().hasStatus(400).bodyJson()
+                .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("PARAMETRO_INVALIDO"));
+        mockMvc.get().uri("/api/tesoreria/core/movimientoConsulta/asiento/2025-03-01T00:00:00Z/abc")
+                .assertThat().hasStatus(400).bodyJson()
+                .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("PARAMETRO_INVALIDO"));
+        org.mockito.Mockito.verifyNoInteractions(service);
+    }
+
     @Test
     void fechaFueraDeRangoEs400YRangoLargoEs409() {
         when(service.consultarLibroDiario(any(), any()))
