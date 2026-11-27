@@ -195,20 +195,21 @@ public class BalanceService {
 					format.format(Objects.requireNonNull(cuentaMovimiento.getFechaContable()).withOffsetSameInstant(ZoneOffset.UTC)), style_normal);
 			this.setCellInteger(row, columnaAsiento, cuentaMovimiento.getOrdenContable(), style_normal);
 			Comprobante comprobante = comprobantes.get(cuentaMovimiento.getComprobanteId());
-			this.setCellString(row, columnaComprobante, comprobante.getDescripcion(), style_normal);
+			if (comprobante != null)
+				this.setCellString(row, columnaComprobante, comprobante.getDescripcion(), style_normal);
 
 			// proveedor de la operacion
-			if (cuentaMovimiento.getProveedorId() != null && cuentaMovimiento.getProveedorId() != 0) {
-				this.setCellString(row, columnaProveedor, Objects.requireNonNull(cuentaMovimiento.getProveedor()).getRazonSocial(), style_normal);
+			if (cuentaMovimiento.getProveedorId() != null && cuentaMovimiento.getProveedorId() != 0
+					&& cuentaMovimiento.getProveedor() != null) {
+				this.setCellString(row, columnaProveedor, cuentaMovimiento.getProveedor().getRazonSocial(), style_normal);
 			}
 
 			this.setCellString(row, columnaConcepto, cuentaMovimiento.getConcepto(), style_normal);
 
 			// busqueda de la OP
 			ProveedorPago proveedorPago = proveedorPagoService.findAllByFactura(cuentaMovimiento.getProveedorMovimientoId()).stream().findFirst().orElse(null);
-			if (proveedorPago != null) {
-				ProveedorMovimientoEntity proveedorMovimientoOP = proveedorPago.getOrdenPago();
-				assert proveedorMovimientoOP != null;
+			ProveedorMovimientoEntity proveedorMovimientoOP = proveedorPago == null ? null : proveedorPago.getOrdenPago();
+			if (proveedorMovimientoOP != null) {
 				String ordenPago = Objects.requireNonNull(proveedorMovimientoOP.getComprobante()).getDescripcion() + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
 				this.setCellString(row, columnaOrdenPago, ordenPago, style_normal);
 				this.setCellString(row, columnaBeneficiario, proveedorMovimientoOP.getNombreBeneficiario(), style_normal);

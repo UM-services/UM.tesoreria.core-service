@@ -28,12 +28,16 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import um.tesoreria.core.exception.ValorMovimientoException;
 import um.tesoreria.core.hexagonal.comprobante.application.service.ComprobanteService;
+import um.tesoreria.core.hexagonal.comprobante.domain.model.Comprobante;
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.service.ProveedorMovimientoService;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
+import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.kotlin.model.Ejercicio;
+import um.tesoreria.core.kotlin.model.ProveedorPago;
 import um.tesoreria.core.service.ProveedorPagoService;
 import um.tesoreria.core.service.ProveedorValorService;
 import um.tesoreria.core.service.ValorMovimientoService;
@@ -52,6 +56,10 @@ class BalanceServiceExcelTest {
     private CuentaService cuentas;
     private ContabilidadService contabilidad;
     private SumasSaldosService sumasSaldos;
+    private CuentaMovimientoService movimientos;
+    private ComprobanteService comprobantes;
+    private ValorMovimientoService valorMovimientos;
+    private ProveedorPagoService pagos;
     private BalanceService service;
     private Ejercicio ejercicio;
 
@@ -60,9 +68,13 @@ class BalanceServiceExcelTest {
         cuentas = mock(CuentaService.class);
         contabilidad = mock(ContabilidadService.class);
         sumasSaldos = mock(SumasSaldosService.class);
-        service = new BalanceService(cuentas, contabilidad, mock(CuentaMovimientoService.class),
-                mock(ComprobanteService.class), mock(ValorMovimientoService.class), mock(ProveedorValorService.class),
-                mock(ProveedorMovimientoService.class), mock(ValorService.class), mock(ProveedorPagoService.class),
+        movimientos = mock(CuentaMovimientoService.class);
+        comprobantes = mock(ComprobanteService.class);
+        valorMovimientos = mock(ValorMovimientoService.class);
+        pagos = mock(ProveedorPagoService.class);
+        service = new BalanceService(cuentas, contabilidad, movimientos,
+                comprobantes, valorMovimientos, mock(ProveedorValorService.class),
+                mock(ProveedorMovimientoService.class), mock(ValorService.class), pagos,
                 sumasSaldos);
         ejercicio = new Ejercicio();
     }
@@ -155,6 +167,56 @@ class BalanceServiceExcelTest {
 
         verificarSimultaneos(rango -> service.makeMayor(BigDecimal.valueOf(10101010000L + rango),
                 fecha(2026, rango + 1, 1), fecha(2026, rango + 1, 28)));
+    }
+
+    // protects=un movimiento cuyo comprobante no existe deja la celda Comprobante vacía y el resto de la fila; fails_when=el Excel del mayor corta con un 500; no_claim=no prueba qué comprobantes existen en la base
+    @Test
+    void mayorConComprobanteInexistenteDejaLaCeldaVacia() throws Exception {
+        List<Object> fila = filaDelMovimiento(movimiento().comprobanteId(999).build(), List.of());
+
+        assertThat(fila).contains("4=Concepto de prueba", "7=150.0").noneMatch(celda -> celda.toString().startsWith("2="));
+    }
+
+    // protects=un proveedorId sin proveedor en la tabla deja la celda Proveedor vacía; fails_when=el Excel del mayor corta con un 500; no_claim=no prueba cómo se carga el proveedor del movimiento
+    @Test
+    void mayorConProveedorInexistenteDejaLaCeldaVacia() throws Exception {
+        List<Object> fila = filaDelMovimiento(movimiento().proveedorId(8).proveedor(null).build(), List.of());
+
+        assertThat(fila).contains("2=Factura B", "4=Concepto de prueba").noneMatch(celda -> celda.toString().startsWith("3="));
+    }
+
+    // protects=un pago sin orden de pago deja vacías Orden Pago / Pago y Beneficiario; fails_when=el Excel del mayor corta con un 500; no_claim=no prueba la búsqueda del pago por factura
+    @Test
+    void mayorConPagoSinOrdenDePagoDejaLasCeldasVacias() throws Exception {
+        ProveedorPago pago = new ProveedorPago();
+        pago.setOrdenPago(null);
+        List<Object> fila = filaDelMovimiento(movimiento().proveedorMovimientoId(55L).build(), List.of(pago));
+
+        assertThat(fila).contains("2=Factura B", "4=Concepto de prueba")
+                .noneMatch(celda -> celda.toString().startsWith("5=") || celda.toString().startsWith("6="));
+    }
+
+    private static CuentaMovimiento.CuentaMovimientoBuilder movimiento() {
+        return CuentaMovimiento.builder().fechaContable(fecha(2026, 3, 2)).ordenContable(7).comprobanteId(1)
+                .concepto("Concepto de prueba").importe(BigDecimal.valueOf(150)).debita((byte) 1);
+    }
+
+    private List<Object> filaDelMovimiento(CuentaMovimiento movimiento, List<ProveedorPago> pagosDeLaFactura) throws Exception {
+        BigDecimal numeroCuenta = BigDecimal.valueOf(20101090099L);
+        OffsetDateTime desde = fecha(2026, 3, 1);
+        OffsetDateTime hasta = fecha(2026, 3, 31);
+        when(contabilidad.verifyEjercicio(desde, hasta)).thenReturn(ejercicio);
+        when(cuentas.findByNumeroCuenta(numeroCuenta))
+                .thenReturn(Optional.of(Cuenta.builder().numeroCuenta(numeroCuenta).nombre("Obligaciones").build()));
+        when(contabilidad.saldoInicial(numeroCuenta, ejercicio, desde)).thenReturn(List.of(BigDecimal.ZERO, BigDecimal.ZERO));
+        when(comprobantes.findAll()).thenReturn(List.of(Comprobante.builder().comprobanteId(1).descripcion("Factura B").build()));
+        when(movimientos.findAllByNumeroCuentaAndFechaContableBetweenAndApertura(numeroCuenta, desde, hasta, (byte) 0))
+                .thenReturn(List.of(movimiento));
+        when(pagos.findAllByFactura(any())).thenReturn(pagosDeLaFactura);
+        when(valorMovimientos.findFirstByContable(any(), any())).thenThrow(new ValorMovimientoException(fecha(2026, 3, 2), 7));
+
+        List<List<Object>> filas = leer(service.makeMayor(numeroCuenta, desde, hasta));
+        return filas.stream().filter(f -> f.contains("4=Concepto de prueba")).findFirst().orElseThrow();
     }
 
     private static void verificarSimultaneos(Function<Integer, byte[]> pedido) throws Exception {
