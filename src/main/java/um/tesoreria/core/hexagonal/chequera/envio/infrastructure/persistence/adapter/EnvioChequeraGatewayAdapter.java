@@ -70,9 +70,9 @@ public class EnvioChequeraGatewayAdapter implements EnvioChequeraGateway {
 
     @Override
     public String enviarChequera(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-                                 Integer alternativaId, boolean codigoBarras) {
+                                 Integer alternativaId, boolean codigoBarras, Long jobId) {
         return mailChequeraService.sendChequera(facultadId, tipoChequeraId, chequeraSerieId, alternativaId,
-                false, false, codigoBarras, true, true);
+                false, false, codigoBarras, true, true, jobId);
     }
 
     @Override

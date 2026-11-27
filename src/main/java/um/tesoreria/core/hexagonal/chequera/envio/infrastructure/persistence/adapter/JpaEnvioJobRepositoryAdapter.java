@@ -93,6 +93,11 @@ public class JpaEnvioJobRepositoryAdapter implements EnvioJobRepository {
     }
 
     @Override
+    public Optional<EnvioJobTarea> findTareaById(Long tareaId) {
+        return tareaRepository.findById(tareaId).map(mapper::toDomain);
+    }
+
+    @Override
     public List<EnvioJobTarea> findPendingTareasByJobId(Long jobId) {
         return tareaRepository.findAllByJobIdAndEstadoOrderByTareaIdAsc(jobId, EnvioTareaEstado.PENDIENTE)
                 .stream().map(mapper::toDomain).toList();
@@ -127,15 +132,42 @@ public class JpaEnvioJobRepositoryAdapter implements EnvioJobRepository {
             log.debug("Envío masivo: acuse para chequera {} sin tarea ENCOLADA (envío individual)", chequeraId);
             return Optional.empty();
         }
+        return Optional.of(actualizarAcuse(encontrada.get(),
+                enviado ? EnvioTareaEstado.ENVIADA : EnvioTareaEstado.ERROR_SMTP, enviado, error));
+    }
+
+    @Override
+    @Transactional
+    public Optional<EnvioJobTarea> registrarAcuse(Long jobId, Long chequeraId, EnvioTareaEstado estado,
+                                                  boolean enviado, String mensaje) {
+        Optional<EnvioJobTareaEntity> encontrada = tareaRepository
+                .findFirstByJobIdAndChequeraIdOrderByTareaIdDesc(jobId, chequeraId);
+        if (encontrada.isEmpty()) {
+            log.debug("Envío masivo: acuse para job {} chequera {} sin tarea", jobId, chequeraId);
+            return Optional.empty();
+        }
         EnvioJobTareaEntity tarea = encontrada.get();
-        tarea.setEstado(enviado ? EnvioTareaEstado.ENVIADA : EnvioTareaEstado.ERROR_SMTP);
+        if (tarea.getEstado() == EnvioTareaEstado.ENVIADA) {
+            // Un acuse tardío de error no puede degradar una tarea ya enviada.
+            return Optional.of(mapper.toDomain(tarea));
+        }
+        return Optional.of(actualizarAcuse(tarea, estado, enviado, mensaje));
+    }
+
+    private EnvioJobTarea actualizarAcuse(EnvioJobTareaEntity tarea, EnvioTareaEstado estado,
+                                          boolean enviado, String mensaje) {
+        tarea.setEstado(estado);
         tarea.setEnviado(enviado);
-        tarea.setCodigo(enviado ? "ENVIADA" : "ERROR_SMTP");
-        tarea.setMensaje(recortar(error, 500));
+        tarea.setCodigo(estado.name());
+        tarea.setMensaje(recortar(mensaje, 500));
         tarea.setFinalizado(OffsetDateTime.now(ZoneOffset.UTC));
         tareaRepository.save(tarea);
+        actualizarContadores(tarea.getJobId());
+        return mapper.toDomain(tarea);
+    }
 
-        jobRepository.findById(tarea.getJobId()).ifPresent(job -> {
+    private void actualizarContadores(Long jobId) {
+        jobRepository.findById(jobId).ifPresent(job -> {
             job.setTareasOk((int) tareaRepository.countByJobIdAndEstadoIn(job.getJobId(), OK));
             job.setTareasOmitidas((int) tareaRepository.countByJobIdAndEstadoIn(job.getJobId(), OMITIDAS));
             job.setTareasError((int) tareaRepository.countByJobIdAndEstadoIn(job.getJobId(), ERRORES));
@@ -143,7 +175,6 @@ public class JpaEnvioJobRepositoryAdapter implements EnvioJobRepository {
                     job.getJobId(), EnvioTareaEstado.PENDIENTE));
             jobRepository.save(job);
         });
-        return Optional.of(mapper.toDomain(tarea));
     }
 
     @Override

@@ -11,13 +11,22 @@
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
 ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-Hibernate-6DB33F?logo=spring&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)
-[![Versión](https://img.shields.io/badge/versión-12.13.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-12.14.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.13.0**
+**Versión actual (SemVer): 12.14.0**
+
+## Novedades 12.14.0 (verificado en código)
+
+- **feat(chequera/envio)**: ledger idempotente del envío de chequeras en la tabla nueva `chequera_envio_solicitud` (`docs/sql/V436__chequera_envio_solicitud.sql`). Hay una sola solicitud por chequera (`UNIQUE chequera_id`, `dedupe_key = CHEQUERA:{chequeraId}`) con estado `PENDIENTE`, `ENVIANDO`, `ENVIADO`, `FALLIDO`, `OMITIDA`, `SIN_CORREOS`, `SIN_CUOTAS` o `RETENIDA`, `intentos`, `lock_hasta`, `enviado_at` y `ultimo_error`: una reentrega de Kafka, un doble clic o un job repetido no vuelven a mandar el correo. El reclamo es atómico con lock pesimista y se limita por `tesoreria.chequeras-envio.solicitud.max-intentos` (3) y `...lock-seconds` (120), ambos con default en código.
+- **Endpoints internos del ledger**: `POST /api/tesoreria/core/envio/chequera/solicitud` (alta idempotente), `POST .../{solicitudId}/claim`, `POST .../{solicitudId}/sent`, `POST .../{solicitudId}/failed`, `POST .../{solicitudId}/omitida` y `GET .../{solicitudId}`, con las rutas cortas equivalentes. Sin `@RequierePermiso`: los consume `tesoreria-sender` por red interna. `marcarEnviado` cierra en una transacción el estado, `chequera_serie.enviado`, el `ChequeraMessageCheck` y el acuse de la tarea del job.
+- **Evento `send-chequera`**: `SendChequeraEvent` suma `solicitudId`, `chequeraId` y `jobId` (aditivo; un evento sin `solicitudId` sigue siendo válido y el sender crea o recupera la solicitud). `MailChequeraService.sendChequera` crea la solicitud antes de publicar y no publica si la chequera ya se envió (`Chequera ya enviada`) o hay un envío en curso (`Envío de chequera en curso`).
+- **fix(chequera/envio)**: las filas con `enviado = 1` del padrón se cortan como `OMITIDA/YA_ENVIADA`, y el acuse ya no degrada una tarea `ENVIADA` (ni `registrarTarea` la pisa con `ENCOLADA` ni un acuse tardío de error la cambia); los contadores del job se recalculan en cada acuse.
+
+> Basado en `git diff HEAD` (staged, 2026-11-26): 32 archivos, +1316/−13 antes de esta documentación —DDL `V436`, los archivos nuevos del ledger en el slice `chequera/envio` (modelo, puertos, servicio, entidad, mapper, repositorio, adaptador, controller y DTOs), `SendChequeraEvent`, `MailChequeraService`, `EnvioChequerasService`, `EnvioJobService` y 4 suites de prueba—. DDL externo obligatorio antes del despliegue; sin dependencias, `@Query` ni `@RequestParam` nuevos ⇒ **minor** (`12.13.0` → `12.14.0`). Sin compilación ni tests por indicación del usuario: las pruebas fueron realizadas previamente por el usuario.
 
 ## Novedades 12.13.0 (verificado en código)
 

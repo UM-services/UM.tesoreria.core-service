@@ -53,8 +53,13 @@ class LineasPorRangoAdapterTest {
 
     void movimiento(int orden, int item, String cuenta, byte debita, String importe, String concepto,
                     int comprobanteId, int proveedorId, byte apertura) {
+        movimiento(orden, item, cuenta, debita, importe, concepto, comprobanteId, proveedorId, apertura, DIA);
+    }
+
+    void movimiento(int orden, int item, String cuenta, byte debita, String importe, String concepto,
+                    int comprobanteId, int proveedorId, byte apertura, OffsetDateTime fecha) {
         movimientos.saveAndFlush(CuentaMovimientoEntity.builder()
-                .fechaContable(DIA).ordenContable(orden).item(item).numeroCuenta(new BigDecimal(cuenta))
+                .fechaContable(fecha).ordenContable(orden).item(item).numeroCuenta(new BigDecimal(cuenta))
                 .debita(debita).importe(new BigDecimal(importe)).concepto(concepto)
                 .comprobanteId(comprobanteId).proveedorId(proveedorId).apertura(apertura).build());
     }
@@ -78,6 +83,16 @@ class LineasPorRangoAdapterTest {
         assertThat(lineas.get(1).apertura()).isEqualTo((byte) 1);
         assertThat(lineas.get(1).comprobanteId()).isEqualTo(32);
         assertThat(lineas.get(1).proveedorId()).isEqualTo(72);
+    }
+
+    @Test
+    void lineasDeUnAsientoSoloDeEseOrdenYEnOrdenDeItem() {
+        movimiento(1, 3, "11101010002", (byte) 1, "5.00", "otro dia", 34, 74, (byte) 0, DIA.plusDays(1));
+
+        assertThat(adapter.findLineasByAsiento(DIA, DIA.plusDays(1), 1))
+                .extracting(LineaMovimiento::ordenContable, LineaMovimiento::item, LineaMovimiento::concepto)
+                .containsExactly(tuple(1, 1, "debe"), tuple(1, 2, "haber"));
+        assertThat(adapter.findLineasByAsiento(DIA, DIA.plusDays(1), 3)).isEmpty();
     }
 
     @Test

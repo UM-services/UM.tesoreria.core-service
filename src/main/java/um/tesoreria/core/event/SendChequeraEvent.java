@@ -12,6 +12,15 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SendChequeraEvent implements Serializable {
+    /**
+     * Identificador de la solicitud idempotente creada por core. El sender la reclama antes de
+     * enviar; si viene nulo (evento legacy) el sender crea/recupera una solicitud por su cuenta.
+     */
+    private String solicitudId;
+    /** Clave de {@code chequera_serie}; única para el ledger. */
+    private Long chequeraId;
+    /** Job de envío masivo que originó la solicitud, si aplica. */
+    private Long jobId;
     private Integer facultadId;
     private Integer tipoChequeraId;
     private Long chequeraSerieId;
