@@ -60,7 +60,8 @@ public class ArmadoAsientos {
             ProveedorNombre proveedor = nombres.proveedor(linea.proveedorId());
             return new LineaMovimientoContable(diario.fechaContable(), diario.ordenContable(), diario.item(),
                     diario.numeroCuenta(), diario.nombreCuenta(), diario.comprobante(),
-                    proveedor == null ? null : proveedor.proveedorId(), diario.proveedor(),
+                    linea.proveedorId() == null || linea.proveedorId() == 0 ? null : linea.proveedorId(),
+                    diario.proveedor(),
                     proveedor == null ? null : proveedor.cuit(), diario.concepto(), diario.debe(), diario.haber());
         }).toList();
     }

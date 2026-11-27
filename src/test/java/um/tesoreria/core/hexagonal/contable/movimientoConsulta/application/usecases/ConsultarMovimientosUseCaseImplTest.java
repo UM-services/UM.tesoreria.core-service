@@ -97,7 +97,10 @@ class ConsultarMovimientosUseCaseImplTest {
         LineaMovimientoContable sinProveedor = movimientos.lineas().get(1);
         assertThat(sinProveedor.proveedorId()).isNull();
         assertThat(sinProveedor.cuitProveedor()).isNull();
-        assertThat(movimientos.lineas().get(2).proveedor()).as("proveedor inexistente").isNull();
+        LineaMovimientoContable inexistente = movimientos.lineas().get(2);
+        assertThat(inexistente.proveedorId()).as("el id de la línea se conserva aunque falte el maestro").isEqualTo(8);
+        assertThat(inexistente.proveedor()).isNull();
+        assertThat(inexistente.cuitProveedor()).isNull();
         assertThat(movimientos.totalDebe()).isEqualByComparingTo("100.00");
         assertThat(movimientos.totalHaber()).isEqualByComparingTo("100.00");
         verify(proveedorService).getNombres(Set.of(7, 8));

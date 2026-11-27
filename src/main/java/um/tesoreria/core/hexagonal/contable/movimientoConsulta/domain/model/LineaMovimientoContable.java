@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
 /**
  * Una línea de Movimientos Contables: la línea del Libro Diario más el id y el CUIT del proveedor
  * ({@code rptmovcon} con el subreporte {@code sProveedor}). Sólo viene el lado del movimiento: {@code debe} o
- * {@code haber}; el otro es {@code null}.
+ * {@code haber}; el otro es {@code null}. {@code cuitProveedor} es {@code null} cuando el proveedor no tiene CUIT.
  */
 public record LineaMovimientoContable(
         OffsetDateTime fechaContable,
