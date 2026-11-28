@@ -15,6 +15,8 @@ import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.Asie
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientosNoCuadrados;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LibroDiario;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LineaDiario;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LineaMovimientoContable;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.MovimientosContables;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.MovimientoConsultaExceptionHandler;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.mapper.MovimientoConsultaDtoMapper;
 
@@ -178,6 +180,36 @@ class MovimientoConsultaControllerTest {
                 .assertThat().hasStatus(400).bodyJson()
                 .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("PARAMETRO_INVALIDO"));
         org.mockito.Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void movimientosPorRutaLargaYCorta() {
+        var linea = new LineaMovimientoContable(DIA, 1, 1, new BigDecimal("11101010001"), "Caja", "Factura B", 7,
+                "Proveedor Siete", "30-70000007-1", "concepto", new BigDecimal("100.00"), null);
+        when(service.consultarMovimientos(any(), any())).thenReturn(new MovimientosContables(DIA, DIA, List.of(linea),
+                new BigDecimal("100.00"), BigDecimal.ZERO));
+
+        mockMvc.post().uri("/api/tesoreria/core/movimientoConsulta/movimientos")
+                .contentType(MediaType.APPLICATION_JSON).content(CUERPO)
+                .assertThat().hasStatusOk().bodyJson()
+                .hasPathSatisfying("$.lineas[0].cuitProveedor", v -> v.assertThat().isEqualTo("30-70000007-1"))
+                .hasPathSatisfying("$.lineas[0].proveedorId", v -> v.assertThat().isEqualTo(7))
+                .hasPathSatisfying("$.lineas[0].nombreCuenta", v -> v.assertThat().isEqualTo("Caja"))
+                .hasPathSatisfying("$.totalDebe", v -> v.assertThat().isEqualTo(100.00));
+        mockMvc.post().uri("/movimientoConsulta/movimientos")
+                .contentType(MediaType.APPLICATION_JSON).content(CUERPO)
+                .assertThat().hasStatusOk();
+    }
+
+    @Test
+    void movimientosSinCuerpoEs400() {
+        org.mockito.Mockito.doThrow(new MovimientoConsultaException(Codigo.FECHAS_REQUERIDAS, "x"))
+                .when(service).consultarMovimientos(isNull(), isNull());
+
+        mockMvc.post().uri("/api/tesoreria/core/movimientoConsulta/movimientos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .assertThat().hasStatus(400).bodyJson()
+                .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("FECHAS_REQUERIDAS"));
     }
 
     @Test

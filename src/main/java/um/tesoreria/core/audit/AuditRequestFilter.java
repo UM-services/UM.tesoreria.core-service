@@ -41,10 +41,12 @@ public class AuditRequestFilter extends OncePerRequestFilter {
             "/balance/mayor/consulta",
             "/balance/sumasysaldos/consulta",
             "/movimientoConsulta/libroDiario",
+            "/movimientoConsulta/movimientos",
             "/movimientoConsulta/noCuadrados",
             "/api/tesoreria/core/balance/mayor/consulta",
             "/api/tesoreria/core/balance/sumasysaldos/consulta",
             "/api/tesoreria/core/movimientoConsulta/libroDiario",
+            "/api/tesoreria/core/movimientoConsulta/movimientos",
             "/api/tesoreria/core/movimientoConsulta/noCuadrados");
     private static final String HEADER_REQUEST_ID = "X-Request-Id";
     private static final String HEADER_USER_ID = "X-User-Id";

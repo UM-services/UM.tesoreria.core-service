@@ -10,6 +10,9 @@ flowchart TD
         UCP[ConsultarLibroDiarioUseCase<br/>Puerto de Entrada]
         UCA[ConsultarAsientoUseCase<br/>Puerto de Entrada]
         UCN[ConsultarNoCuadradosUseCase<br/>Puerto de Entrada]
+        UCM[ConsultarMovimientosUseCase<br/>Puerto de Entrada]
+        MC[MovimientosContables<br/>líneas sueltas y totales del rango]
+        LMC[LineaMovimientoContable<br/>línea con proveedor y CUIT]
         ANC[AsientoNoCuadrado<br/>totales y diferencia debe - haber]
         ANS[AsientosNoCuadrados<br/>asientos no cuadrados del rango]
     end
@@ -19,6 +22,7 @@ flowchart TD
         UC1[ConsultarLibroDiarioUseCaseImpl]
         UC2[ConsultarAsientoUseCaseImpl<br/>líneas de movcon por fecha y orden]
         UC3[ConsultarNoCuadradosUseCaseImpl<br/>Diferencia]
+        UC4[ConsultarMovimientosUseCaseImpl<br/>Movimientos Contables]
         LEC[LecturaRango<br/>validar fechas, topes y leer el rango]
         ARM[ArmadoAsientos<br/>nombres resueltos, agrupar y sumar]
         TOP[TopeMovimientos<br/>max-lineas y max-dias]
@@ -33,11 +37,11 @@ flowchart TD
     end
 
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        CC["MovimientoConsultaController<br/>POST /movimientoConsulta/libroDiario<br/>POST /movimientoConsulta/noCuadrados<br/>GET /movimientoConsulta/asiento/{fecha}/{orden}"]
+        CC["MovimientoConsultaController<br/>POST /movimientoConsulta/libroDiario<br/>POST /movimientoConsulta/movimientos<br/>POST /movimientoConsulta/noCuadrados<br/>GET /movimientoConsulta/asiento/{fecha}/{orden}"]
         EH[MovimientoConsultaExceptionHandler<br/>400, 404 y 409, también cuerpo o parámetro ilegible]
         DM[MovimientoConsultaDtoMapper]
         Req[RangoFechasRequest<br/>desde y hasta sin pasar a UTC]
-        Resp[LibroDiarioResponse<br/>AsientoDiarioResponse, LineaDiarioResponse<br/>AsientosNoCuadradosResponse, AsientoNoCuadradoResponse]
+        Resp[LibroDiarioResponse<br/>AsientoDiarioResponse, LineaDiarioResponse<br/>AsientosNoCuadradosResponse, AsientoNoCuadradoResponse<br/>MovimientosContablesResponse, LineaMovimientoContableResponse]
         Err[MovimientoConsultaErrorResponse<br/>status, error, codigo, message]
     end
 
@@ -62,6 +66,12 @@ flowchart TD
     UC3 -->|arma asientos| ARM
     UC3 -->|produce| ANS
     ANS -->|contiene| ANC
+    Svc -->|ejecuta| UCM
+    UC4 -->|implementa| UCM
+    UC4 -->|lee el rango| LEC
+    UC4 -->|arma líneas| ARM
+    UC4 -->|produce| MC
+    MC -->|contiene| LMC
     UC1 -->|produce| LD
     Svc -->|ejecuta| UCA
     UC2 -->|implementa| UCA
@@ -72,7 +82,7 @@ flowchart TD
     UC2 -->|produce| AD
     ARM -->|nombres de cuenta| CS
     ARM -->|descripción de comprobante| COS
-    ARM -->|razón social por id| PS
+    ARM -->|razón social y CUIT por id| PS
     LD -->|contiene| AD
     AD -->|contiene| LN
 
@@ -92,6 +102,10 @@ flowchart TD
     style LEC fill:#fff3e0
     style ANC fill:#e1f5fe
     style ANS fill:#e1f5fe
+    style UCM fill:#f3e5f5
+    style UC4 fill:#fff3e0
+    style MC fill:#e1f5fe
+    style LMC fill:#e1f5fe
     style Svc fill:#fff3e0
     style UC1 fill:#fff3e0
     style TOP fill:#fff3e0
