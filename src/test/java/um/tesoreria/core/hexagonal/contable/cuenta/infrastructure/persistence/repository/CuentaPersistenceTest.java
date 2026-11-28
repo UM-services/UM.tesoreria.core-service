@@ -221,7 +221,7 @@ public class CuentaPersistenceTest {
     }
 
     @Test
-    void sumasSaldosConservaSalidaTrasRecalcularGrados(@org.junit.jupiter.api.io.TempDir java.nio.file.Path directorio) throws Exception {
+    void sumasSaldosConservaSalidaTrasRecalcularGrados() throws Exception {
         for (String numero : java.util.List.of("10000000000", "11000000000", "11010000000", "11010100000",
                 "11010100001", "11010100002", "11010100003")) {
             crear.createCuenta(cuenta(numero));
@@ -246,7 +246,6 @@ public class CuentaPersistenceTest {
                         BigDecimal.ZERO, new BigDecimal("80"), new BigDecimal("10"), new BigDecimal("40"))))
                 .when(contabilidad).saldosPorCuenta(ejercicio, desde, hasta);
         var balance = new um.tesoreria.core.service.facade.BalanceService(
-                new org.springframework.mock.env.MockEnvironment().withProperty("path.files", directorio + java.io.File.separator),
                 cuentas, contabilidad, null, null, null, null, null, null, null,
                 new um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosService(contabilidad, cuentas));
         int eventos = jdbc.queryForObject("SELECT COUNT(*) FROM gestion_escritura_historial", Integer.class);
@@ -267,8 +266,8 @@ public class CuentaPersistenceTest {
                 .isEqualTo("Deudora\r\n");
     }
 
-    private static java.util.List<java.util.List<Object>> leerBalance(String archivo) throws Exception {
-        try (var entrada = java.nio.file.Files.newInputStream(java.nio.file.Path.of(archivo));
+    private static java.util.List<java.util.List<Object>> leerBalance(byte[] archivo) throws Exception {
+        try (var entrada = new java.io.ByteArrayInputStream(archivo);
              var book = new org.apache.poi.xssf.usermodel.XSSFWorkbook(entrada)) {
             assertThat(book.getNumberOfSheets()).isEqualTo(1);
             var sheet = book.getSheet("Balance");
