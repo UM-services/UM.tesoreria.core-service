@@ -37,7 +37,6 @@ public class ChequeraSerieService {
     private final GetChequeraSerieSpecialQueriesUseCase getChequeraSerieSpecialQueriesUseCase;
     private final SetPayPerTicUseCase setPayPerTicUseCase;
     private final MarkSentUseCase markSentUseCase;
-    private final MarcarRetenidaUseCase marcarRetenidaUseCase;
     private final UpdateChequeraSerieUseCase updateChequeraSerieUseCase;
     private final DeleteChequeraSerieUseCase deleteChequeraSerieUseCase;
     private final GetResumenLectivoUseCase getResumenLectivoUseCase;
@@ -213,13 +212,6 @@ public class ChequeraSerieService {
     public ChequeraSerie markSent(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId) {
         log.debug("Processing ChequeraSerieService.markSent");
         return markSentUseCase.markSent(facultadId, tipoChequeraId, chequeraSerieId);
-    }
-
-    /** Escritura puntual de {@code retenida} (envío masivo: notificación de deuda). */
-    public ChequeraSerie marcarRetenida(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId,
-                                        boolean retenida) {
-        log.debug("Processing ChequeraSerieService.marcarRetenida");
-        return marcarRetenidaUseCase.marcar(facultadId, tipoChequeraId, chequeraSerieId, retenida);
     }
 
     public ChequeraSerie add(ChequeraSerie chequeraSerie) {

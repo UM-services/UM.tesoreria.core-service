@@ -23,10 +23,10 @@ public class FindAllByChequeraAlternativaConImporteUseCaseImpl implements FindAl
     public List<ChequeraCuota> findAllByChequeraAlternativaConImporte(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId) {
         ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
 
-        List<ChequeraCuota> todasCuotas = repository.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
-        todasCuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
-        repository.saveAll(todasCuotas);
-
-        return repository.findAllByChequeraAlternativaConImporte(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
+        // El chequeraId se completa en memoria para la respuesta; persistirlo es tarea del job
+        // de backfill (no de una lectura).
+        var cuotas = repository.findAllByChequeraAlternativaConImporte(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
+        cuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
+        return cuotas;
     }
 }

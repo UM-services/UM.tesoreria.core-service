@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.chequera.arancelTipo.infrastructure.persistence.entity.ArancelTipoEntity;
-import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.model.ChequeraEnvioAlta;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.ports.out.ChequeraEnvioAltaReader;
 import um.tesoreria.core.hexagonal.chequera.envio.infrastructure.persistence.entity.ChequeraEnvioAltaEntity;
@@ -23,16 +22,13 @@ import um.tesoreria.core.service.facade.ToolService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
  * Padrón de envío masivo: una consulta Criteria sobre la vista {@code vw_chequera_alta} con los
  * joins de persona (obligatorio), tipo de chequera (obligatorio), domicilio y tipo de arancel
- * (opcionales), igual que el SQL anterior, más una lectura en bloque de {@code chequera_serie}
- * para el flag {@code retenida} (la vista no lo trae).
+ * (opcionales), igual que el SQL anterior.
  *
  * <p>{@code emailPersonalValido}/{@code emailInstitucionalValido} se resuelven con la misma
  * validación del resto del sistema ({@link ToolService#mailValidate}).</p>
@@ -114,21 +110,19 @@ public class JpaChequeraEnvioAltaReaderAdapter implements ChequeraEnvioAltaReade
     }
 
     private List<ChequeraEnvioAlta> altas(List<Tuple> filas) {
-        Map<Long, Boolean> retenidas = retenidas(filas);
         List<ChequeraEnvioAlta> altas = new ArrayList<>(filas.size());
         for (Tuple fila : filas) {
-            altas.add(alta(fila, retenidas));
+            altas.add(alta(fila));
         }
         return altas;
     }
 
-    private ChequeraEnvioAlta alta(Tuple fila, Map<Long, Boolean> retenidas) {
+    private ChequeraEnvioAlta alta(Tuple fila) {
         String emailPersonal = fila.get("emailPersonal", String.class);
         String emailInstitucional = fila.get("emailInstitucional", String.class);
-        Long chequeraId = fila.get("chequeraId", Long.class);
         Byte enviado = fila.get("enviado", Byte.class);
         return new ChequeraEnvioAlta(
-                chequeraId,
+                fila.get("chequeraId", Long.class),
                 fila.get("facultadId", Integer.class),
                 fila.get("tipoChequeraId", Integer.class),
                 fila.get("chequeraSerieId", Long.class),
@@ -145,30 +139,7 @@ public class JpaChequeraEnvioAltaReaderAdapter implements ChequeraEnvioAltaReade
                 emailInstitucional,
                 esValido(emailPersonal),
                 esValido(emailInstitucional),
-                enviado != null && enviado != 0,
-                Boolean.TRUE.equals(retenidas.get(chequeraId)));
-    }
-
-    /** {@code retenida} vive en {@code chequera_serie}, no en la vista: lectura en bloque por claves. */
-    private Map<Long, Boolean> retenidas(List<Tuple> filas) {
-        List<Long> claves = filas.stream()
-                .map(fila -> fila.get("chequeraId", Long.class))
-                .toList();
-        Map<Long, Boolean> retenidas = new LinkedHashMap<>();
-        if (claves.isEmpty()) {
-            return retenidas;
-        }
-        // Proyección de tupla sobre la entidad: no se hidratan las series ni sus asociaciones EAGER.
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Tuple> query = builder.createTupleQuery();
-        Root<ChequeraSerieEntity> serie = query.from(ChequeraSerieEntity.class);
-        query.multiselect(serie.get("chequeraId").alias("chequeraId"), serie.get("retenida").alias("retenida"))
-                .where(serie.get("chequeraId").in(claves));
-        for (Tuple fila : entityManager.createQuery(query).getResultList()) {
-            Byte retenida = fila.get("retenida", Byte.class);
-            retenidas.put(fila.get("chequeraId", Long.class), retenida != null && retenida != 0);
-        }
-        return retenidas;
+                enviado != null && enviado != 0);
     }
 
     private boolean esValido(String email) {

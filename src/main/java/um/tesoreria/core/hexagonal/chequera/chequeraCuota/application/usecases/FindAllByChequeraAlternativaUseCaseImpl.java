@@ -28,11 +28,10 @@ public class FindAllByChequeraAlternativaUseCaseImpl implements FindAllByChequer
         log.debug("\n\nProcessing FindAllByChequeraAlternativaUseCaseImpl.findAllByChequeraAlternativa\n\n");
         ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
 
-        List<ChequeraCuota> todasCuotas = repository.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
-        todasCuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
-        repository.saveAll(todasCuotas);
-
+        // El chequeraId se completa en memoria para la respuesta; persistirlo es tarea del job
+        // de backfill (no de una lectura).
         var cuotas = repository.findAllByChequeraAlternativa(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
+        cuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
         log.debug("\n\nFindAllByChequeraAlternativaUseCaseImpl.findAllByChequeraAlternativa.cuotas -> {}\n\n", Jsonifier.builder(cuotas).build());
         return cuotas;
     }

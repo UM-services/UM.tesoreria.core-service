@@ -127,7 +127,9 @@ tesoreria:
     change-events: ${TESORERIA_AUDIT_CHANGE_EVENTS:true}
     url: ${TESORERIA_AUDIT_URL:http://localhost:8211}
     api-key: ${TESORERIA_AUDIT_API_KEY:}
-    batch-size: ${TESORERIA_AUDIT_BATCH_SIZE:200}
+    # Lotes más chicos: menos filas por transacción en el servicio de auditoría y menos
+    # ventana de locks. El sender reclama el outbox con este límite.
+    batch-size: ${TESORERIA_AUDIT_BATCH_SIZE:50}
     sender-delay-ms: ${TESORERIA_AUDIT_SENDER_DELAY_MS:2000}
     sender-initial-delay-ms: ${TESORERIA_AUDIT_SENDER_INITIAL_DELAY_MS:5000}
     max-attempts: ${TESORERIA_AUDIT_MAX_ATTEMPTS:10}
@@ -145,12 +147,31 @@ tesoreria:
     mask-fields: ${TESORERIA_AUDIT_MASK_FIELDS:password,token,cbu,documento,tarjeta}
     # Entidades técnicas que no se auditan: el estado de los jobs del asiento de ingreso cambia
     # muchas veces por minuto y no es un dato de negocio.
-    excluded-entities: ${TESORERIA_AUDIT_EXCLUDED_ENTITIES:AsientoIngresoJobEntity,AsientoIngresoJobTareaEntity}
+    # ChequeraImpresion*: snapshots de impresión (1 cabecera + N detalles por chequera). Son datos
+    # derivados/transitorios y generan ~100k eventos CHANGE por día durante la campaña.
+    excluded-entities: ${TESORERIA_AUDIT_EXCLUDED_ENTITIES:AsientoIngresoJobEntity,AsientoIngresoJobTareaEntity,ChequeraImpresionCabecera,ChequeraImpresionDetalle}
     # RESUMEN de operaciones masivas (generación de cuotas y asientos de ingreso). false = auditar fila por fila.
     bulk-enabled: ${TESORERIA_AUDIT_BULK_ENABLED:true}
     # Desde esta cantidad de filas una generación se resume (SUMMARY). Debajo, fila por fila.
     bulk-min-rows: ${TESORERIA_AUDIT_BULK_MIN_ROWS:20}
     summary-entities: ${TESORERIA_AUDIT_SUMMARY_ENTITIES:ChequeraCuotaEntity,ChequeraSerieEntity,ChequeraTotalEntity,CuentaMovimientoEntity,AsientoEntity,ChequeraPagoAsiento}
+  mercadopago:
+    # true = el GET de deuda sigue creando la preferencia (compatibilidad con el portal actual).
+    # false = la deuda es sólo lectura; el cliente pide la preferencia con
+    # POST /api/tesoreria/core/mercadopago/preference/{chequeraCuotaId}.
+    preference-on-deuda: ${TESORERIA_MERCADOPAGO_PREFERENCE_ON_DEUDA:true}
+  chequera:
+    impresion:
+      # Snapshots de impresión que se conservan por chequera. 0 = sin límite.
+      max-history: ${TESORERIA_CHEQUERA_IMPRESION_MAX_HISTORY:10}
+  chequera-cuota:
+    backfill:
+      # Corrección de chequeraId nulo fuera del camino de lectura (job periódico).
+      enabled: ${TESORERIA_CHEQUERA_CUOTA_BACKFILL_ENABLED:true}
+      delay-ms: ${TESORERIA_CHEQUERA_CUOTA_BACKFILL_DELAY_MS:600000}
+      initial-delay-ms: ${TESORERIA_CHEQUERA_CUOTA_BACKFILL_INITIAL_DELAY_MS:60000}
+      page-size: ${TESORERIA_CHEQUERA_CUOTA_BACKFILL_PAGE_SIZE:500}
+      max-pages: ${TESORERIA_CHEQUERA_CUOTA_BACKFILL_MAX_PAGES:20}
   asiento-ingreso:
     masivo:
       # Tope de días de un job masivo (días × tipos de pago). Se puede subir sin deploy.

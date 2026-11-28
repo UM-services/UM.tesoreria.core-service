@@ -32,7 +32,6 @@ public class ChequeraEnvioAltaDtoMapper {
                 .emailPersonalValido(domain.emailPersonalValido())
                 .emailInstitucionalValido(domain.emailInstitucionalValido())
                 .enviado(domain.enviado())
-                .retenida(domain.retenida())
                 .build();
     }
 

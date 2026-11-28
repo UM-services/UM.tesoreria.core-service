@@ -22,10 +22,10 @@ public class FindAllDebidasByProductoUseCaseImpl implements FindAllDebidasByProd
     public List<ChequeraCuota> findAllDebidasByProducto(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, Integer productoId, OffsetDateTime referencia) {
         ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
 
-        List<ChequeraCuota> todasCuotas = repository.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
-        todasCuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
-        repository.saveAll(todasCuotas);
-
-        return repository.findAllDebidasByProducto(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, productoId, referencia);
+        // El chequeraId se completa en memoria para la respuesta; persistirlo es tarea del job
+        // de backfill (no de una lectura).
+        var cuotas = repository.findAllDebidasByProducto(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, productoId, referencia);
+        cuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
+        return cuotas;
     }
 }

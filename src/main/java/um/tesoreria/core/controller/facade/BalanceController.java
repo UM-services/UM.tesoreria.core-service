@@ -4,13 +4,10 @@
 package um.tesoreria.core.controller.facade;
 
 import lombok.RequiredArgsConstructor;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -49,17 +46,8 @@ public class BalanceController {
 	@GetMapping("/sumasysaldos/{desde}/{hasta}")
 	public ResponseEntity<Resource> makeSumasSaldos2(
 			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime desde,
-			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) throws FileNotFoundException {
-		String filename = service.makeSumasSaldos(desde, hasta);
-		File file = new File(filename);
-		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sumas_y_saldos.xlsx");
-		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-		headers.add("Pragma", "no-cache");
-		headers.add("Expires", "0");
-		return ResponseEntity.ok().headers(headers).contentLength(file.length())
-				.contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+			@PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) {
+		return excel(service.makeSumasSaldos(desde, hasta), "sumas_y_saldos.xlsx");
 	}
 
 	/** Sumas y saldos en JSON (una fila por cuenta imputable y totales), para mostrar en pantalla. */
@@ -77,17 +65,18 @@ public class BalanceController {
 	@GetMapping("/mayor/{numeroCuenta}/{desde}/{hasta}")
 	public ResponseEntity<Resource> makeMayor(@PathVariable BigDecimal numeroCuenta,
 											  @PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime desde,
-											  @PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) throws FileNotFoundException {
-		String filename = service.makeMayor(numeroCuenta, desde, hasta);
-		File file = new File(filename);
-		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+											  @PathVariable @DateTimeFormat(iso = ISO.DATE_TIME) OffsetDateTime hasta) {
+		return excel(service.makeMayor(numeroCuenta, desde, hasta), "mayor.xlsx");
+	}
+
+	private ResponseEntity<Resource> excel(byte[] contenido, String nombre) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=mayor.xlsx");
+		headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + nombre);
 		headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
 		headers.add("Pragma", "no-cache");
 		headers.add("Expires", "0");
-		return ResponseEntity.ok().headers(headers).contentLength(file.length())
-				.contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+		return ResponseEntity.ok().headers(headers).contentLength(contenido.length)
+				.contentType(MediaType.APPLICATION_OCTET_STREAM).body(new ByteArrayResource(contenido));
 	}
 
 }

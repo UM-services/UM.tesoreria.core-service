@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -240,6 +241,8 @@ class BorradorEmisionServiceTest {
                 .thenReturn(TipoChequera.builder().tipoChequeraId(2).nombre("Cuota").build());
         when(chequeraSerieService.findAllByPersonaLectivo(any(), any(), any())).thenReturn(List.of(serie));
         when(borradorRepository.findAbiertoBySerie(5, 2, 10L)).thenReturn(java.util.Optional.of(abierto));
+        when(borradorRepository.findById(55L)).thenReturn(java.util.Optional.of(abierto));
+        when(borradorRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(lectivoAlternativaService.findAllByFacultadLectivoTipo(any(), any(), any())).thenReturn(List.of());
         when(arancelTipoService.findAllHabilitados()).thenReturn(List.of());
         when(lectivoCuotaService.findAllByFacultadLectivoTipo(any(), any(), any())).thenReturn(List.of());
@@ -251,7 +254,8 @@ class BorradorEmisionServiceTest {
                 .build(), "tester");
 
         assertEquals(55L, resultado.getBorradorId());
-        verify(borradorRepository, never()).save(any());
+        // Retomar un borrador abierto completa sus cuotas faltantes (y persiste el resultado).
+        verify(borradorRepository).save(any());
     }
 
     @Test
@@ -269,6 +273,8 @@ class BorradorEmisionServiceTest {
         when(chequeraSerieService.findAllByPersonaLectivo(any(), any(), any())).thenReturn(List.of());
         when(borradorRepository.findAbiertoByNueva(new BigDecimal("49024730"), 1, 38, 5, 2))
                 .thenReturn(java.util.Optional.of(abierto));
+        when(borradorRepository.findById(77L)).thenReturn(java.util.Optional.of(abierto));
+        when(borradorRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(lectivoAlternativaService.findAllByFacultadLectivoTipo(any(), any(), any())).thenReturn(List.of());
         when(arancelTipoService.findAllHabilitados()).thenReturn(List.of());
         when(lectivoCuotaService.findAllByFacultadLectivoTipo(any(), any(), any())).thenReturn(List.of());
@@ -279,7 +285,7 @@ class BorradorEmisionServiceTest {
                 .build(), "tester");
 
         assertEquals(77L, resultado.getBorradorId());
-        verify(borradorRepository, never()).save(any());
+        verify(borradorRepository).save(any());
     }
 
     @Test
@@ -345,6 +351,7 @@ class BorradorEmisionServiceTest {
         when(chequeraSerieService.findAllByPersonaLectivo(any(), any(), any())).thenReturn(List.of(serie));
         when(bajaService.findDatosByUnique(5, 2, 10L)).thenReturn(java.util.Optional.empty());
         when(borradorRepository.findAbiertoBySerie(5, 2, 10L)).thenReturn(java.util.Optional.of(abierto));
+        when(borradorRepository.findById(55L)).thenReturn(java.util.Optional.of(abierto));
         when(borradorFactory.construirDesdeBorrador(any(), any())).thenReturn(List.of(reparada));
         when(borradorRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(lectivoAlternativaService.findAllByFacultadLectivoTipo(any(), any(), any())).thenReturn(List.of());
@@ -360,6 +367,6 @@ class BorradorEmisionServiceTest {
 
         assertEquals(9, resultado.getArancelTipoId());
         assertEquals(9, resultado.getCuotas().get(0).getArancelTipoId());
-        verify(borradorRepository).save(any());
+        verify(borradorRepository, atLeastOnce()).save(any());
     }
 }

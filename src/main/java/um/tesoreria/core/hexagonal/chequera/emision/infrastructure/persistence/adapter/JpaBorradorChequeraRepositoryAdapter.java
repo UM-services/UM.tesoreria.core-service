@@ -9,6 +9,7 @@ import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorChequer
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorCuota;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorSede;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.EstadoBorrador;
+import um.tesoreria.core.hexagonal.chequera.emision.domain.model.PaginaBorradores;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.out.BorradorChequeraRepository;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.service.ReglasEmision;
 import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.persistence.entity.BorradorChequeraEntity;
@@ -123,6 +124,51 @@ public class JpaBorradorChequeraRepositoryAdapter implements BorradorChequeraRep
             return List.of();
         }
         return repository.findAllByLectivoIdAndFacultadIdAndEstadoOrderByBorradorIdAsc(lectivoId, facultadId, estado)
+                .stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaginaBorradores findAllByLectivoIdAndFacultadIdAndTipoChequeraIdInAndEstado(Integer lectivoId,
+                                                                                       Integer facultadId,
+                                                                                       List<Integer> tipoChequeraIds,
+                                                                                       EstadoBorrador estado,
+                                                                                       int page,
+                                                                                       int size) {
+        if (lectivoId == null || facultadId == null || estado == null || tipoChequeraIds == null
+                || tipoChequeraIds.isEmpty()) {
+            return new PaginaBorradores(List.of(), 0);
+        }
+        var pagina = repository.findAllByLectivoIdAndFacultadIdAndTipoChequeraIdInAndEstado(lectivoId, facultadId,
+                tipoChequeraIds, estado,
+                org.springframework.data.domain.PageRequest.of(page, size,
+                        org.springframework.data.domain.Sort.by("borradorId").descending()));
+        return new PaginaBorradores(pagina.getContent().stream().map(mapper::toDomain).toList(),
+                pagina.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countByLectivoIdAndFacultadIdAndTipoChequeraIdInAndEstado(Integer lectivoId, Integer facultadId,
+                                                                         List<Integer> tipoChequeraIds,
+                                                                         EstadoBorrador estado) {
+        if (lectivoId == null || facultadId == null || estado == null || tipoChequeraIds == null
+                || tipoChequeraIds.isEmpty()) {
+            return 0;
+        }
+        return repository.countByLectivoIdAndFacultadIdAndTipoChequeraIdInAndEstado(lectivoId, facultadId,
+                tipoChequeraIds, estado);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BorradorChequera> findAllByFacultadIdAndChequeraSerieIdInAndEstado(Integer facultadId,
+                                                                                  List<Long> chequeraSerieIds,
+                                                                                  EstadoBorrador estado) {
+        if (facultadId == null || estado == null || chequeraSerieIds == null || chequeraSerieIds.isEmpty()) {
+            return List.of();
+        }
+        return repository.findAllByFacultadIdAndChequeraSerieIdInAndEstado(facultadId, chequeraSerieIds, estado)
                 .stream().map(mapper::toDomain).toList();
     }
 

@@ -16,6 +16,7 @@ import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.LineaM
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.exception.MovimientoConsultaException;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.exception.MovimientoConsultaException.Codigo;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.service.ArmadoAsientos;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.service.LecturaRango;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.service.TopeMovimientos;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientoDiario;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LibroDiario;
@@ -54,15 +55,16 @@ class ConsultarLibroDiarioUseCaseImplTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new ConsultarLibroDiarioUseCaseImpl(cuentaMovimientoService,
-                new ArmadoAsientos(cuentaService, comprobanteService, proveedorService), new TopeMovimientos(10, 400));
+        useCase = new ConsultarLibroDiarioUseCaseImpl(
+                new LecturaRango(cuentaMovimientoService, new TopeMovimientos(10, 400)),
+                new ArmadoAsientos(cuentaService, comprobanteService, proveedorService));
         lenient().when(comprobanteService.findAll()).thenReturn(List.of(
                 Comprobante.builder().comprobanteId(3).descripcion("Factura B").build()));
         lenient().when(cuentaService.findAllByNumeroCuentaIn(anyList())).thenReturn(List.of(
                 Cuenta.builder().numeroCuenta(new BigDecimal("11101010001")).nombre("Caja").build(),
                 Cuenta.builder().numeroCuenta(new BigDecimal("21101010001.00")).nombre("Proveedores").build()));
         lenient().when(proveedorService.getNombres(anyCollection())).thenReturn(List.of(
-                new ProveedorNombre(7, "Proveedor Siete")));
+                new ProveedorNombre(7, "Proveedor Siete", "30-70000007-1")));
     }
 
     static LineaMovimiento linea(long id, OffsetDateTime fecha, int orden, int item, String cuenta, int debita,

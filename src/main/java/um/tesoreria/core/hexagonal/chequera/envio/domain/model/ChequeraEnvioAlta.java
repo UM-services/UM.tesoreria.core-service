@@ -5,8 +5,7 @@ import java.math.BigDecimal;
 /**
  * Fila del padrón de envío masivo de chequeras (ex {@code frmCheqMail}).
  *
- * <p>Es una serie «alta» de la vista {@code vw_chequera_alta} (la misma que usaba el legacy)
- * enriquecida con el estado de retención, que vive en {@code chequera_serie} y no en la vista.</p>
+ * <p>Es una serie «alta» de la vista {@code vw_chequera_alta} (la misma que usaba el legacy).</p>
  *
  * <p>{@code emailPersonalValido}/{@code emailInstitucionalValido} los resuelve el adaptador con la
  * misma validación que usa el resto del sistema ({@code ToolService.mailValidate}); el dominio sólo
@@ -30,8 +29,7 @@ public record ChequeraEnvioAlta(
         String emailInstitucional,
         boolean emailPersonalValido,
         boolean emailInstitucionalValido,
-        boolean enviado,
-        boolean retenida) {
+        boolean enviado) {
 
     /** «Apellido, Nombre», igual que {@code apellidonombre} del legacy y {@code PersonaEntity}. */
     public String apellidoNombre() {

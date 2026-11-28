@@ -3,8 +3,9 @@
  */
 package um.tesoreria.core.service.facade;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.OffsetDateTime;
@@ -24,7 +25,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import um.tesoreria.core.hexagonal.compras.proveedorMovimiento.application.exception.ProveedorMovimientoException;
@@ -42,6 +42,8 @@ import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.kotlin.model.*;
 import um.tesoreria.core.service.*;
+import um.tesoreria.core.service.facade.mayor.MayorConsultaException;
+import um.tesoreria.core.service.facade.mayor.MayorConsultaException.Codigo;
 import um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosFila;
 import um.tesoreria.core.service.facade.sumasysaldos.SumasSaldosService;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +57,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class BalanceService {
 
-	private final Environment env;
 	private final CuentaService cuentaService;
 	private final ContabilidadService contabilidadService;
 	private final CuentaMovimientoService cuentaMovimientoService;
@@ -67,14 +68,8 @@ public class BalanceService {
 	private final ProveedorPagoService proveedorPagoService;
 	private final SumasSaldosService sumasSaldosService;
 
-	public String makeSumasSaldos(OffsetDateTime desde, OffsetDateTime hasta) {
-		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
-		if (ejercicio == null)
-			return "Error: SIN Ejercicio";
-
-		String path = env.getProperty("path.files");
-
-		String filename = path + "sumas_y_saldos.xlsx";
+	public byte[] makeSumasSaldos(OffsetDateTime desde, OffsetDateTime hasta) {
+		Ejercicio ejercicio = ejercicioDe(desde, hasta);
 
 		Workbook book = new XSSFWorkbook();
 		CellStyle style_normal = book.createCellStyle();
@@ -116,33 +111,16 @@ public class BalanceService {
 		for (int column = 0; column < sheet.getRow(2).getPhysicalNumberOfCells(); column++)
 			sheet.autoSizeColumn(column);
 
-		try {
-			File file = new File(filename);
-			FileOutputStream output = new FileOutputStream(file);
-			book.write(output);
-			output.flush();
-			output.close();
-			log.debug(file.getAbsolutePath());
-			book.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
-		}
-		return filename;
+		return toBytes(book);
 	}
 
-	public String makeMayor(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta) {
-		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
-		if (ejercicio == null)
-			return "Error: SIN Ejercicio";
-
+	public byte[] makeMayor(BigDecimal numeroCuenta, OffsetDateTime desde, OffsetDateTime hasta) {
+		Ejercicio ejercicio = ejercicioDe(desde, hasta);
 		Cuenta cuenta = cuentaService.findByNumeroCuenta(numeroCuenta)
-				.orElse(null);
+				.orElseThrow(() -> new MayorConsultaException(Codigo.CUENTA_INEXISTENTE,
+						"No existe la cuenta " + numeroCuenta.toPlainString()));
 		Map<Integer, Comprobante> comprobantes = comprobanteService.findAll().stream()
 				.collect(Collectors.toMap(Comprobante::getComprobanteId, Function.identity(), (comprobante, replacement) -> comprobante));
-
-		String path = env.getProperty("path.files");
-
-		String filename = path + "mayor.xlsx";
 
 		Workbook book = new XSSFWorkbook();
 		CellStyle style_normal = book.createCellStyle();
@@ -217,21 +195,24 @@ public class BalanceService {
 					format.format(Objects.requireNonNull(cuentaMovimiento.getFechaContable()).withOffsetSameInstant(ZoneOffset.UTC)), style_normal);
 			this.setCellInteger(row, columnaAsiento, cuentaMovimiento.getOrdenContable(), style_normal);
 			Comprobante comprobante = comprobantes.get(cuentaMovimiento.getComprobanteId());
-			this.setCellString(row, columnaComprobante, comprobante.getDescripcion(), style_normal);
+			if (comprobante != null)
+				this.setCellString(row, columnaComprobante, comprobante.getDescripcion(), style_normal);
 
 			// proveedor de la operacion
-			if (cuentaMovimiento.getProveedorId() != null && cuentaMovimiento.getProveedorId() != 0) {
-				this.setCellString(row, columnaProveedor, Objects.requireNonNull(cuentaMovimiento.getProveedor()).getRazonSocial(), style_normal);
+			if (cuentaMovimiento.getProveedorId() != null && cuentaMovimiento.getProveedorId() != 0
+					&& cuentaMovimiento.getProveedor() != null) {
+				this.setCellString(row, columnaProveedor, cuentaMovimiento.getProveedor().getRazonSocial(), style_normal);
 			}
 
 			this.setCellString(row, columnaConcepto, cuentaMovimiento.getConcepto(), style_normal);
 
 			// busqueda de la OP
-			ProveedorPago proveedorPago = proveedorPagoService.findAllByFactura(cuentaMovimiento.getProveedorMovimientoId()).stream().findFirst().orElse(null);
-			if (proveedorPago != null) {
-				ProveedorMovimientoEntity proveedorMovimientoOP = proveedorPago.getOrdenPago();
-				assert proveedorMovimientoOP != null;
-				String ordenPago = Objects.requireNonNull(proveedorMovimientoOP.getComprobante()).getDescripcion() + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
+			ProveedorPago proveedorPago = cuentaMovimiento.getProveedorMovimientoId() == null ? null
+					: proveedorPagoService.findAllByFactura(cuentaMovimiento.getProveedorMovimientoId()).stream().findFirst().orElse(null);
+			ProveedorMovimientoEntity proveedorMovimientoOP = proveedorPago == null ? null : proveedorPago.getOrdenPago();
+			if (proveedorMovimientoOP != null) {
+				String descripcionOP = proveedorMovimientoOP.getComprobante() == null ? "" : proveedorMovimientoOP.getComprobante().getDescripcion();
+				String ordenPago = descripcionOP + " / " + proveedorMovimientoOP.getPrefijo() + " / " + proveedorMovimientoOP.getNumeroComprobante();
 				this.setCellString(row, columnaOrdenPago, ordenPago, style_normal);
 				this.setCellString(row, columnaBeneficiario, proveedorMovimientoOP.getNombreBeneficiario(), style_normal);
 			}
@@ -273,18 +254,26 @@ public class BalanceService {
 		for (int column = 0; column < sheet.getRow(4).getPhysicalNumberOfCells(); column++)
 			sheet.autoSizeColumn(column);
 
-		try {
-			File file = new File(filename);
-			FileOutputStream output = new FileOutputStream(file);
+		return toBytes(book);
+	}
+
+	/** Ejercicio del rango, con las mismas reglas que el JSON: desde no puede ser posterior a hasta. */
+	private Ejercicio ejercicioDe(OffsetDateTime desde, OffsetDateTime hasta) {
+		if (desde.isAfter(hasta))
+			throw new MayorConsultaException(Codigo.DESDE_POSTERIOR, "La fecha desde no puede ser posterior a hasta");
+		Ejercicio ejercicio = contabilidadService.verifyEjercicio(desde, hasta);
+		if (ejercicio == null)
+			throw new MayorConsultaException(Codigo.FUERA_DE_EJERCICIO, "Desde y hasta deben pertenecer al mismo ejercicio");
+		return ejercicio;
+	}
+
+	private byte[] toBytes(Workbook book) {
+		try (book; ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 			book.write(output);
-			output.flush();
-			output.close();
-			log.debug(file.getAbsolutePath());
-			book.close();
-		} catch (Exception e) {
-			log.debug(e.getMessage());
+			return output.toByteArray();
+		} catch (IOException e) {
+			throw new UncheckedIOException("No se pudo generar el Excel", e);
 		}
-		return filename;
 	}
 
 	private void setCellLong(Row row, int column, Long value, CellStyle style) {

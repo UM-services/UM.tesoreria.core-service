@@ -20,7 +20,6 @@ public class EnvioJob {
     private Integer geograficaId;
     private boolean soloNoEnviadas;
     private boolean codigoBarras;
-    private int umbralCuotasDeuda;
     private EnvioJobEstado estado;
     private int totalTareas;
     private int tareasOk;

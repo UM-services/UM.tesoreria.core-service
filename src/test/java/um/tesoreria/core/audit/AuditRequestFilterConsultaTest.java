@@ -33,7 +33,11 @@ class AuditRequestFilterConsultaTest {
             "POST,/balance/mayor/consulta",
             "POST,/api/tesoreria/core/balance/sumasysaldos/consulta",
             "POST,/movimientoConsulta/libroDiario",
-            "POST,/api/tesoreria/core/movimientoConsulta/libroDiario"})
+            "POST,/movimientoConsulta/movimientos",
+            "POST,/movimientoConsulta/noCuadrados",
+            "POST,/api/tesoreria/core/movimientoConsulta/libroDiario",
+            "POST,/api/tesoreria/core/movimientoConsulta/movimientos",
+            "POST,/api/tesoreria/core/movimientoConsulta/noCuadrados"})
     void consultaSinCambiosNoDejaEventoRequest(String method, String path) throws Exception {
         ejecutar(method, path, (req, res) -> { });
 

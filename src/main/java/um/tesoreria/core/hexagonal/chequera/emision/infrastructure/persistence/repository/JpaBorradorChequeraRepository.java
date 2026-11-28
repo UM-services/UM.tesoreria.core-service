@@ -1,5 +1,7 @@
 package um.tesoreria.core.hexagonal.chequera.emision.infrastructure.persistence.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.EstadoBorrador;
@@ -7,6 +9,7 @@ import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.persistence.e
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +19,16 @@ public interface JpaBorradorChequeraRepository extends JpaRepository<BorradorChe
     Optional<BorradorChequeraEntity> findByClaveIdempotencia(String claveIdempotencia);
 
     List<BorradorChequeraEntity> findAllByUsuarioIdAndEstadoOrderByBorradorIdDesc(String usuarioId, EstadoBorrador estado);
+
+    Page<BorradorChequeraEntity> findAllByLectivoIdAndFacultadIdAndTipoChequeraIdInAndEstado(
+            Integer lectivoId, Integer facultadId, Collection<Integer> tipoChequeraIds, EstadoBorrador estado,
+            Pageable pageable);
+
+    long countByLectivoIdAndFacultadIdAndTipoChequeraIdInAndEstado(
+            Integer lectivoId, Integer facultadId, Collection<Integer> tipoChequeraIds, EstadoBorrador estado);
+
+    List<BorradorChequeraEntity> findAllByFacultadIdAndChequeraSerieIdInAndEstado(
+            Integer facultadId, Collection<Long> chequeraSerieIds, EstadoBorrador estado);
 
     List<BorradorChequeraEntity> findAllByLectivoIdAndFacultadIdAndEstadoOrderByBorradorIdAsc(Integer lectivoId,
                                                                                               Integer facultadId,

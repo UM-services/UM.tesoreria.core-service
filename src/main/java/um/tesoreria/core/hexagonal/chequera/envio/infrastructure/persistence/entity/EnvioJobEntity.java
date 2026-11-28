@@ -54,6 +54,11 @@ public class EnvioJobEntity extends Auditable {
     @Column(name = "codigo_barras", nullable = false)
     private boolean codigoBarras;
 
+    /**
+     * Columna legada del envío con retención por deuda. La política se retiró: no se lee ni se
+     * escribe desde el dominio y los jobs nuevos conservan el valor histórico por defecto. Se
+     * mantiene mapeada para no exigir DDL sobre una tabla existente.
+     */
     @Builder.Default
     @Column(name = "umbral_cuotas_deuda", nullable = false)
     private int umbralCuotasDeuda = 3;
