@@ -7,7 +7,7 @@ flowchart TD
         PS[ProveedorSearch<br/>Modelo de Búsqueda]
         PR[ProveedorRepository<br/>Puerto de Salida]
         C[Cuenta<br/>Modelo de Cuenta]
-        PN[ProveedorNombre<br/>id y razón social]
+        PN[ProveedorNombre<br/>id, razón social y CUIT]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
@@ -34,7 +34,7 @@ flowchart TD
         Resp2[ProveedorSearchResponse<br/>DTO Búsqueda<br/>+fechaAuditoria, +usuarioAuditoria, +Cuenta, +numeroCuenta]
         Resp3[PaginatedResponse<br/>DTO Paginación]
         ENT[ProveedorEntity<br/>Entidad JPA]
-        PNP[ProveedorNombreProjection<br/>id y razón social, sin la cuenta]
+        PNP[ProveedorNombreProjection<br/>id, razón social y CUIT, sin la cuenta]
     end
 
     subgraph Externo ["Externo (External)"]

@@ -49,7 +49,7 @@ class LineasPorRangoPersistenceTest {
         // El esquema de prueba crea claves foráneas por las relaciones de la entidad; acá sólo importan las columnas.
         jdbc.execute("SET REFERENTIAL_INTEGRITY FALSE");
         jdbc.update("DELETE FROM movcon");
-        proveedorId = proveedores.saveAndFlush(ProveedorEntity.builder().razonSocial("Proveedor Uno").build())
+        proveedorId = proveedores.saveAndFlush(ProveedorEntity.builder().razonSocial("Proveedor Uno").cuit("30-71111111-1").build())
                 .getProveedorId();
         movimiento("2025-02-28T23:59:59Z", 9, 1);
         movimiento("2025-03-02T00:00:00Z", 1, 2);
@@ -128,6 +128,7 @@ class LineasPorRangoPersistenceTest {
         List<ProveedorNombreProjection> nombres = proveedores.findAllByProveedorIdIn(List.of(proveedorId, -1));
 
         assertThat(nombres).extracting(ProveedorNombreProjection::getRazonSocial).containsExactly("Proveedor Uno");
+        assertThat(nombres).extracting(ProveedorNombreProjection::getCuit).containsExactly("30-71111111-1");
         assertThat(statistics.getPrepareStatementCount()).as("sin cargar la cuenta").isEqualTo(1);
     }
 }

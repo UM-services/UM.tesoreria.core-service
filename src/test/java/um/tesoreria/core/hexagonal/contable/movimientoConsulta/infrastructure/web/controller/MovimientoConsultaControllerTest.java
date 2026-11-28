@@ -11,8 +11,12 @@ import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.excep
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.exception.MovimientoConsultaException.Codigo;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.application.service.MovimientoConsultaService;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientoDiario;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientoNoCuadrado;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.AsientosNoCuadrados;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LibroDiario;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LineaDiario;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.LineaMovimientoContable;
+import um.tesoreria.core.hexagonal.contable.movimientoConsulta.domain.model.MovimientosContables;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.MovimientoConsultaExceptionHandler;
 import um.tesoreria.core.hexagonal.contable.movimientoConsulta.infrastructure.web.mapper.MovimientoConsultaDtoMapper;
 
@@ -176,6 +180,76 @@ class MovimientoConsultaControllerTest {
                 .assertThat().hasStatus(400).bodyJson()
                 .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("PARAMETRO_INVALIDO"));
         org.mockito.Mockito.verifyNoInteractions(service);
+    }
+
+    @Test
+    void movimientosPorRutaLargaYCorta() {
+        var linea = new LineaMovimientoContable(DIA, 1, 1, new BigDecimal("11101010001"), "Caja", "Factura B", 7,
+                "Proveedor Siete", "30-70000007-1", "concepto", new BigDecimal("100.00"), null);
+        when(service.consultarMovimientos(any(), any())).thenReturn(new MovimientosContables(DIA, DIA, List.of(linea),
+                new BigDecimal("100.00"), BigDecimal.ZERO));
+
+        mockMvc.post().uri("/api/tesoreria/core/movimientoConsulta/movimientos")
+                .contentType(MediaType.APPLICATION_JSON).content(CUERPO)
+                .assertThat().hasStatusOk().bodyJson()
+                .hasPathSatisfying("$.lineas[0].cuitProveedor", v -> v.assertThat().isEqualTo("30-70000007-1"))
+                .hasPathSatisfying("$.lineas[0].proveedorId", v -> v.assertThat().isEqualTo(7))
+                .hasPathSatisfying("$.lineas[0].nombreCuenta", v -> v.assertThat().isEqualTo("Caja"))
+                .hasPathSatisfying("$.totalDebe", v -> v.assertThat().isEqualTo(100.00));
+        mockMvc.post().uri("/movimientoConsulta/movimientos")
+                .contentType(MediaType.APPLICATION_JSON).content(CUERPO)
+                .assertThat().hasStatusOk();
+    }
+
+    @Test
+    void movimientosSinCuerpoEs400() {
+        org.mockito.Mockito.doThrow(new MovimientoConsultaException(Codigo.FECHAS_REQUERIDAS, "x"))
+                .when(service).consultarMovimientos(isNull(), isNull());
+
+        mockMvc.post().uri("/api/tesoreria/core/movimientoConsulta/movimientos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .assertThat().hasStatus(400).bodyJson()
+                .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("FECHAS_REQUERIDAS"));
+    }
+
+    @Test
+    void noCuadradosPorRutaLargaYCorta() {
+        LineaDiario linea = new LineaDiario(DIA, 2, 1, new BigDecimal("11101010001"), "Caja", null, null,
+                "concepto", new BigDecimal("50.01"), null);
+        var asiento = new AsientoNoCuadrado(DIA, 2, List.of(linea), new BigDecimal("50.01"),
+                new BigDecimal("50.00"), new BigDecimal("0.01"));
+        when(service.consultarNoCuadrados(any(), any())).thenReturn(new AsientosNoCuadrados(DIA, DIA, List.of(asiento)));
+
+        mockMvc.post().uri("/api/tesoreria/core/movimientoConsulta/noCuadrados")
+                .contentType(MediaType.APPLICATION_JSON).content(CUERPO)
+                .assertThat().hasStatusOk().bodyJson()
+                .hasPathSatisfying("$.asientos[0].ordenContable", v -> v.assertThat().isEqualTo(2))
+                .hasPathSatisfying("$.asientos[0].diferencia", v -> v.assertThat().isEqualTo(0.01))
+                .hasPathSatisfying("$.asientos[0].totalHaber", v -> v.assertThat().isEqualTo(50.00))
+                .hasPathSatisfying("$.asientos[0].lineas[0].nombreCuenta", v -> v.assertThat().isEqualTo("Caja"));
+        mockMvc.post().uri("/movimientoConsulta/noCuadrados")
+                .contentType(MediaType.APPLICATION_JSON).content(CUERPO)
+                .assertThat().hasStatusOk();
+        verify(service, org.mockito.Mockito.times(2)).consultarNoCuadrados(
+                OffsetDateTime.parse("2025-03-01T00:00:00-03:00"), OffsetDateTime.parse("2025-03-01T00:00:00-03:00"));
+    }
+
+    @Test
+    void noCuadradosSinCuerpoEs400YTopeEs409() {
+        org.mockito.Mockito.doThrow(new MovimientoConsultaException(Codigo.FECHAS_REQUERIDAS, "x"))
+                .when(service).consultarNoCuadrados(isNull(), isNull());
+        org.mockito.Mockito.doThrow(new MovimientoConsultaException(Codigo.DEMASIADOS_MOVIMIENTOS, "y"))
+                .when(service).consultarNoCuadrados(org.mockito.ArgumentMatchers.notNull(),
+                        org.mockito.ArgumentMatchers.notNull());
+
+        mockMvc.post().uri("/api/tesoreria/core/movimientoConsulta/noCuadrados")
+                .contentType(MediaType.APPLICATION_JSON)
+                .assertThat().hasStatus(400).bodyJson()
+                .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("FECHAS_REQUERIDAS"));
+        mockMvc.post().uri("/api/tesoreria/core/movimientoConsulta/noCuadrados")
+                .contentType(MediaType.APPLICATION_JSON).content(CUERPO)
+                .assertThat().hasStatus(409).bodyJson()
+                .hasPathSatisfying("$.codigo", v -> v.assertThat().isEqualTo("DEMASIADOS_MOVIMIENTOS"));
     }
 
     @Test

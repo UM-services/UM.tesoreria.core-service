@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import um.tesoreria.core.hexagonal.compras.proveedor.application.exception.ProveedorConflictoException;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.Proveedor;
+import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorCuit;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorNombre;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.model.ProveedorSearch;
 import um.tesoreria.core.hexagonal.compras.proveedor.domain.ports.out.ProveedorRepository;
@@ -74,7 +75,8 @@ public class JpaProveedorRepositoryAdapter implements ProveedorRepository {
     @Override
     public List<ProveedorNombre> findNombresByProveedorIdIn(Collection<Integer> proveedorIds) {
         return jpaProveedorRepository.findAllByProveedorIdIn(proveedorIds).stream()
-                .map(p -> new ProveedorNombre(p.getProveedorId(), p.getRazonSocial()))
+                .map(p -> new ProveedorNombre(p.getProveedorId(), p.getRazonSocial(),
+                        ProveedorCuit.sinDato(p.getCuit()) ? null : ProveedorCuit.clave(p.getCuit())))
                 .toList();
     }
 
