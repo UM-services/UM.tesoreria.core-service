@@ -6,7 +6,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import um.tesoreria.core.exception.PersonaSuspendidoException;
 import um.tesoreria.core.hexagonal.chequera.baja.application.service.BajaService;
 import um.tesoreria.core.hexagonal.chequera.baja.infrastructure.persistence.entity.BajaEntity;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
@@ -25,9 +24,7 @@ import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.out.BorradorChe
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.domain.model.LectivoCuota;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.persistence.entity.PersonaEntity;
-import um.tesoreria.core.model.PersonaSuspendido;
 import um.tesoreria.core.model.view.ChequeraIncompleta;
-import um.tesoreria.core.service.PersonaSuspendidoService;
 import um.tesoreria.core.service.facade.ChequeraService;
 import um.tesoreria.core.service.view.ChequeraIncompletaService;
 
@@ -55,8 +52,6 @@ class CompletarChequerasIncompletasServiceTest {
     private ChequeraSerieService chequeraSerieService;
     @Mock
     private ChequeraCuotaService chequeraCuotaService;
-    @Mock
-    private PersonaSuspendidoService personaSuspendidoService;
     @Mock
     private LectivoCuotaService lectivoCuotaService;
     @Mock
@@ -102,22 +97,8 @@ class CompletarChequerasIncompletasServiceTest {
     }
 
     @Test
-    void omiteSuspendidosSinTocarElBorrador() {
-        when(chequeraSerieService.findByChequeraId(100L)).thenReturn(serie());
-        when(personaSuspendidoService.findByUnique(any(), any())).thenReturn(new PersonaSuspendido());
-
-        ResultadoIncompleta resultado = service.prepararBorrador(tarea(100L), "tester");
-
-        assertEquals(IncompletasTareaEstado.OMITIDA, resultado.getEstado());
-        assertEquals("SUSPENDIDO", resultado.getCodigo());
-        verify(borradorEmisionService, never()).crearBorrador(any(), any());
-    }
-
-    @Test
     void omiteSeriesTotalmentePagadas() {
         when(chequeraSerieService.findByChequeraId(100L)).thenReturn(serie());
-        when(personaSuspendidoService.findByUnique(any(), any()))
-                .thenThrow(new PersonaSuspendidoException(new BigDecimal("49024730"), 1));
         when(bajaService.findDatosByUnique(5, 2, 10L)).thenReturn(Optional.empty());
         when(chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(5, 2, 10L, 1))
                 .thenReturn(List.of(ChequeraCuota.builder().pagado((byte) 1).build()));
@@ -131,8 +112,6 @@ class CompletarChequerasIncompletasServiceTest {
     @Test
     void omiteSeriesSinDisenoDeCuotas() {
         when(chequeraSerieService.findByChequeraId(100L)).thenReturn(serie());
-        when(personaSuspendidoService.findByUnique(any(), any()))
-                .thenThrow(new PersonaSuspendidoException(new BigDecimal("49024730"), 1));
         when(bajaService.findDatosByUnique(5, 2, 10L)).thenReturn(Optional.empty());
         when(chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(5, 2, 10L, 1))
                 .thenReturn(List.of());
@@ -145,8 +124,6 @@ class CompletarChequerasIncompletasServiceTest {
     void creaElBorradorConLosDatosDeLaSerie() {
         ChequeraSerie serie = serie();
         when(chequeraSerieService.findByChequeraId(100L)).thenReturn(serie);
-        when(personaSuspendidoService.findByUnique(any(), any()))
-                .thenThrow(new PersonaSuspendidoException(new BigDecimal("49024730"), 1));
         when(bajaService.findDatosByUnique(5, 2, 10L)).thenReturn(Optional.empty());
         when(chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(5, 2, 10L, 1))
                 .thenReturn(List.of());
@@ -175,8 +152,6 @@ class CompletarChequerasIncompletasServiceTest {
     @Test
     void reutilizaElBorradorAbiertoYLoCompleta() {
         when(chequeraSerieService.findByChequeraId(100L)).thenReturn(serie());
-        when(personaSuspendidoService.findByUnique(any(), any()))
-                .thenThrow(new PersonaSuspendidoException(new BigDecimal("49024730"), 1));
         when(bajaService.findDatosByUnique(5, 2, 10L)).thenReturn(Optional.empty());
         when(chequeraCuotaService.findAllByFacultadIdAndTipoChequeraIdAndChequeraSerieIdAndAlternativaId(5, 2, 10L, 1))
                 .thenReturn(List.of());
