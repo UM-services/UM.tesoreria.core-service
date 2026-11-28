@@ -17,9 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
- * Contraste del padrón de envío migrado a Criteria contra el SQL anterior (vista + joins + el flag
- * {@code retenida} de {@code chequera_serie}) usado como oráculo: mismos registros, mismos campos y
- * mismo orden.
+ * Contraste del padrón de envío migrado a Criteria contra el SQL anterior (vista + joins) usado
+ * como oráculo: mismos registros, mismos campos y mismo orden.
  */
 @SpringBootTest
 @ActiveProfiles("it")
@@ -31,7 +30,7 @@ class ChequeraEnvioAltasIT {
             SELECT v.clave AS chequera_id, v.ChS_Fac_ID AS facultad_id, v.ChS_TCh_ID AS tipo_chequera_id,
                    v.ChS_ID AS chequera_serie_id, v.ChS_Alt_ID AS alternativa_id, v.ChS_Per_ID AS persona_id,
                    v.ChS_Doc_ID AS documento_id, v.ChS_Lec_ID AS lectivo_id, v.ChS_Geo_ID AS geografica_id,
-                   v.enviado AS enviado, cs.retenida AS retenida,
+                   v.enviado AS enviado,
                    p.Per_Apellido AS apellido, p.Per_Nombre AS nombre, t.tch_nombre AS tipo_chequera,
                    a.art_descripcion AS arancel_tipo, d.Dom_e_mail AS email_personal,
                    d.mail_institucional AS email_institucional
@@ -39,9 +38,6 @@ class ChequeraEnvioAltasIT {
               JOIN persona p ON p.per_id = v.ChS_Per_ID AND p.per_doc_id = v.ChS_Doc_ID
               JOIN tipo_chequera t ON t.tch_id = v.ChS_TCh_ID
               LEFT JOIN arancel_tipo a ON a.art_id = v.ChS_ArT_ID
-              JOIN chequera_serie cs ON cs.ChS_Fac_ID = v.ChS_Fac_ID
-                                    AND cs.ChS_TCh_ID = v.ChS_TCh_ID
-                                    AND cs.ChS_ID = v.ChS_ID
               LEFT JOIN domicilio d ON d.dom_per_id = v.ChS_Per_ID AND d.dom_doc_id = v.ChS_Doc_ID
              WHERE v.ChS_Lec_ID = ? AND v.ChS_Fac_ID = ? AND v.ChS_Geo_ID = ?
              ORDER BY p.Per_Apellido, p.Per_Nombre, v.ChS_ID
@@ -88,7 +84,6 @@ class ChequeraEnvioAltasIT {
             assertThat(alta.emailPersonal()).isEqualTo(fila.get("email_personal"));
             assertThat(alta.emailInstitucional()).isEqualTo(fila.get("email_institucional"));
             assertThat(alta.enviado()).isEqualTo(booleano(fila.get("enviado")));
-            assertThat(alta.retenida()).isEqualTo(booleano(fila.get("retenida")));
         }
         // Mismo orden: la primera fila del SQL es la primera del padrón.
         assertThat(obtenido.getFirst().chequeraId())
