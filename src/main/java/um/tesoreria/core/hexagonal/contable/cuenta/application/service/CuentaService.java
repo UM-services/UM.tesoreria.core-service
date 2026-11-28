@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.CuentaSearch;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.RecalculoGrados;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.in.*;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.ports.out.CuentaRepository;
 
@@ -23,6 +24,8 @@ public class CuentaService {
     private final GetCuentaByCuentaContableIdUseCase getCuentaByCuentaContableIdUseCase;
     private final SearchCuentasUseCase searchCuentasUseCase;
     private final RecalculaGradosUseCase recalculaGradosUseCase;
+    private final RecalcularGradosYNombresUseCase recalcularGradosYNombresUseCase;
+    private final GetCuentasImputablesUseCase getCuentasImputablesUseCase;
     private final SaveAllCuentasUseCase saveAllCuentasUseCase;
 
     private final CuentaRepository repositoryPort;
@@ -35,24 +38,30 @@ public class CuentaService {
         return repositoryPort.findAllByGeograficaIdAndGrado(geograficaId, grado);
     }
 
-    public void limpiarNombres() {
-        repositoryPort.limpiarNombres();
-    }
-
     public List<Cuenta> findAllByNumeroCuentaIn(List<BigDecimal> cuentas) {
         return repositoryPort.findAllByNumeroCuentaIn(cuentas);
     }
 
-    public List<Cuenta> findAllGrado5() {
-        return repositoryPort.findAllGrado5();
+    public List<Cuenta> findAllImputables() {
+        return getCuentasImputablesUseCase.getCuentasImputables();
     }
 
+    /** Cuentas imputables del grupo de resultados (30.000.000.000 a 49.999.999.999), en orden de número. */
     public List<Cuenta> findAllByCierreResultado() {
-        return repositoryPort.findAllByCierreResultado();
+        return imputablesEntre(new BigDecimal(30000000000L), new BigDecimal(49999999999L));
     }
 
+    /** Cuentas imputables de activo y pasivo (10.000.000.000 a 29.999.999.999), en orden de número. */
     public List<Cuenta> findAllByCierreActivoPasivo() {
-        return repositoryPort.findAllByCierreActivoPasivo();
+        return imputablesEntre(new BigDecimal(10000000000L), new BigDecimal(29999999999L));
+    }
+
+    // El cierre y el balance tienen que ver el mismo grado 5: sale del número, no de la columna guardada.
+    private List<Cuenta> imputablesEntre(BigDecimal desde, BigDecimal hasta) {
+        return getCuentasImputablesUseCase.getCuentasImputables().stream()
+                .filter(cuenta -> cuenta.getNumeroCuenta().compareTo(desde) >= 0
+                        && cuenta.getNumeroCuenta().compareTo(hasta) <= 0)
+                .toList();
     }
 
     public List<CuentaSearch> findByStrings(List<String> conditions, Boolean visible) {
@@ -81,6 +90,10 @@ public class CuentaService {
 
     public String recalculaGrados() {
         return recalculaGradosUseCase.recalculaGrados();
+    }
+
+    public RecalculoGrados recalcularGradosYNombres() {
+        return recalcularGradosYNombresUseCase.recalcularGradosYNombres();
     }
 
     public List<Cuenta> saveAll(List<Cuenta> cuentas) {

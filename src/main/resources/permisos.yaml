@@ -373,6 +373,13 @@ permisos:
     descripcion: "Generar el asiento de cierre de resultado o activo-pasivo"
     activo: true
 
+  # --- Contable: plan de cuentas ---
+  - aplicacion: TESORERIA
+    clave: contable.recalcular_grados
+    modulo: contable
+    descripcion: "Recalcular los grados del plan de cuentas y limpiar saltos de línea en los nombres"
+    activo: true
+
   # --- Pagos: facturas de compras ---
   - aplicacion: TESORERIA
     clave: pagos.factura.crear

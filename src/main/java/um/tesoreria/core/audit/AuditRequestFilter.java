@@ -34,8 +34,8 @@ public class AuditRequestFilter extends OncePerRequestFilter {
 
     /**
      * Consultas que usan POST sólo para mandar el filtro en el cuerpo. Si no cambian filas no dejan evento REQUEST;
-     * si cambian alguna (Sumas y Saldos recalcula grados), se auditan como cualquier escritura. Rutas exactas, cortas
-     * y largas: una ruta parecida o con otro verbo se audita.
+     * si cambian alguna, se auditan como cualquier escritura. Rutas exactas, cortas y largas: una ruta parecida o con
+     * otro verbo se audita.
      */
     private static final Set<String> CONSULTAS_POST = Set.of(
             "/balance/mayor/consulta",

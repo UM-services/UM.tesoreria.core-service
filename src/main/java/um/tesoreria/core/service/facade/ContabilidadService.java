@@ -19,8 +19,6 @@ import org.springframework.stereotype.Service;
 import um.tesoreria.core.hexagonal.contable.asiento.application.service.AsientoService;
 import um.tesoreria.core.hexagonal.contable.asiento.domain.ports.in.ReservarOrdenContableUseCase;
 import um.tesoreria.core.hexagonal.contable.asiento.infrastructure.persistence.entity.AsientoEntity;
-import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
-import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.application.service.CuentaMovimientoService;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.CuentaMovimiento;
 import um.tesoreria.core.hexagonal.contable.cuentaMovimiento.domain.model.SumaCuenta;
@@ -49,7 +47,6 @@ public class ContabilidadService {
 
     private final AsientoService asientoService;
     private final ReservarOrdenContableUseCase reservarOrdenContable;
-    private final CuentaService cuentaService;
     private final EjercicioService ejercicioService;
     private final CuentaMovimientoService cuentaMovimientoService;
     private final ComprobanteService comprobanteService;
@@ -64,11 +61,6 @@ public class ContabilidadService {
 
     public static Boolean isSaldoAcreedor(BigDecimal cuenta) {
         return !isSaldoDeudor(cuenta);
-    }
-
-    public void recalculateGrados() {
-        cuentaService.recalculaGrados();
-        cuentaService.limpiarNombres();
     }
 
     public Ejercicio verifyEjercicio(OffsetDateTime desde, OffsetDateTime hasta) {
