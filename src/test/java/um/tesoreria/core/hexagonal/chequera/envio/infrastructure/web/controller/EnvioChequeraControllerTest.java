@@ -40,22 +40,22 @@ class EnvioChequeraControllerTest {
     @MockitoBean
     private EnvioMasivoUseCase useCase;
 
-    private static ChequeraEnvioAlta fila(boolean enviado, boolean retenida) {
+    private static ChequeraEnvioAlta fila(boolean enviado) {
         return new ChequeraEnvioAlta(342038L, 2, 520, 446L, 1, new BigDecimal("1001"), 1, 37, 1,
                 "ABALLAY MURUA", "Luna Martina", "Matrícula y Arancel", "Ciclo Completo",
-                "aballayluna@gmail.com", "l.aballay@alumno.um.edu.ar", true, true, enviado, retenida);
+                "aballayluna@gmail.com", "l.aballay@alumno.um.edu.ar", true, true, enviado);
     }
 
     private static EnvioJob job() {
         return EnvioJob.builder()
                 .jobId(9L).operacion(EnvioOperacion.MAILING).lectivoId(37).facultadId(2).geograficaId(1)
-                .estado(EnvioJobEstado.PENDIENTE).totalTareas(3).tareasPendientes(3).umbralCuotasDeuda(3)
+                .estado(EnvioJobEstado.PENDIENTE).totalTareas(3).tareasPendientes(3)
                 .build();
     }
 
     @Test
     void devuelveElPadronConLosCamposQueUsaLaPantalla() {
-        when(service.altas(37, 2, 1)).thenReturn(List.of(fila(true, false)));
+        when(service.altas(37, 2, 1)).thenReturn(List.of(fila(true)));
 
         mockMvc.get().uri("/api/tesoreria/core/envio/chequera/altas/37/2/1")
                 .assertThat().hasStatusOk()
@@ -69,12 +69,12 @@ class EnvioChequeraControllerTest {
 
     @Test
     void exponeElAliasCortoDelModulo() {
-        when(service.altas(37, 2, 1)).thenReturn(List.of(fila(false, true)));
+        when(service.altas(37, 2, 1)).thenReturn(List.of(fila(false)));
 
         mockMvc.get().uri("/envio/chequera/altas/37/2/1")
                 .assertThat().hasStatusOk()
                 .bodyJson()
-                .extractingPath("$[0].retenida").isEqualTo(true);
+                .extractingPath("$[0].enviado").isEqualTo(false);
     }
 
     @Test
@@ -95,7 +95,7 @@ class EnvioChequeraControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {"operacion":"MAILING","lectivoId":37,"facultadId":2,"geograficaId":1,
-                         "soloNoEnviadas":true,"codigoBarras":false,"umbralCuotasDeuda":3}
+                         "soloNoEnviadas":true,"codigoBarras":false}
                         """)
                 .assertThat().hasStatus(202)
                 .bodyJson().extractingPath("$.jobId").isEqualTo(9);

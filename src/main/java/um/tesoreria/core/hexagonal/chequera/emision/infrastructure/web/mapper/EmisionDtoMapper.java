@@ -110,6 +110,7 @@ public class EmisionDtoMapper {
                 .chequeraId(borrador.getChequeraId())
                 .chequeraSerieIdEmitida(borrador.getChequeraSerieIdEmitida())
                 .auditoriaId(borrador.getAuditoriaId())
+                .usuarioId(borrador.getUsuarioId())
                 .version(borrador.getVersion())
                 .createdAt(borrador.getCreatedAt())
                 .updatedAt(borrador.getUpdatedAt())

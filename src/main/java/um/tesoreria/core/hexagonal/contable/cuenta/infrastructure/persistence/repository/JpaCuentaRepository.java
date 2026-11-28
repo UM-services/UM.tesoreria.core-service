@@ -31,11 +31,10 @@ public interface JpaCuentaRepository extends JpaRepository<CuentaEntity, BigDeci
 
     List<CuentaEntity> findAllByGeograficaIdAndGradoOrderByNumeroCuenta(Integer geograficaId, Integer grado);
 
-	List<CuentaEntity> findAllByGradoAndNumeroCuentaGreaterThan(Integer grado, BigDecimal numeroCuenta, Sort sort);
+	List<CuentaEntity> findAllByNumeroCuentaGreaterThan(BigDecimal numeroCuenta, Sort sort);
 
 	List<CuentaEntity> findAllByNumeroCuentaIn(List<BigDecimal> cuentas);
 
-	List<CuentaEntity> findAllByGradoAndNumeroCuentaBetween(Integer grado, BigDecimal desde, BigDecimal hasta);
 
 	Optional<CuentaEntity> findByNumeroCuenta(BigDecimal numeroCuenta);
 

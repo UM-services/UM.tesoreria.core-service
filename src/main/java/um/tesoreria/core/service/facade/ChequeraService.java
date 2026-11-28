@@ -73,6 +73,7 @@ public class ChequeraService {
     private final ChequeraSerieControlService chequeraSerieControlService;
     private final ChequeraImpresionCabeceraService chequeraImpresionCabeceraService;
     private final ChequeraImpresionDetalleService chequeraImpresionDetalleService;
+    private final ChequeraImpresionProperties chequeraImpresionProperties;
     private final DebitoService debitoService;
     private final ModelMapper modelMapper;
     private final FacultadService facultadService;
@@ -188,7 +189,6 @@ public class ChequeraService {
                 serie.getPersonaId(), serie.getDocumentoId(), serie.getLectivoId(), serie.getGeograficaId(),
                 serie.getArancelTipoId(), serie.getAlternativaId(), serie.getUsuarioId(), serie.getVersion(),
                 serie.getHpum(), serie.getBecaPorcentaje(), serie.getBecaResolucion(), serie.getBecaFecha(), serie.getBecaUserId());
-        cabecera = chequeraImpresionCabeceraService.add(cabecera);
         Map<Integer, ChequeraTotal> totales = chequeraTotalService
                 .findAllByChequera(serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId())
                 .stream().collect(Collectors.toMap(ChequeraTotal::getProductoId, total -> total));
@@ -202,14 +202,52 @@ public class ChequeraService {
                         serie.getTipoChequeraId(), serie.getChequeraSerieId(), serie.getAlternativaId())) {
             ChequeraTotal total = totales.get(cuota.getProductoId());
             ChequeraAlternativa alternativa = alternativas.get(cuota.getProductoId());
-            detalles.add(new ChequeraImpresionDetalle(null, cabecera.getChequeraImpresionCabeceraId(),
+            detalles.add(new ChequeraImpresionDetalle(null, null,
                     cuota.getFacultadId(), cuota.getTipoChequeraId(), cuota.getChequeraSerieId(), cuota.getProductoId(),
                     cuota.getAlternativaId(), cuota.getCuotaId(), alternativa.getTitulo(), total.getTotal(),
                     alternativa.getCuotas(), cuota.getMes(), cuota.getAnho(), cuota.getArancelTipoId(),
                     cuota.getVencimiento1(), cuota.getImporte1(), cuota.getVencimiento2(), cuota.getImporte2(),
                     cuota.getVencimiento3(), cuota.getImporte3(), serie.getUsuarioId(), serie.getVersion()));
         }
-        detalles = chequeraImpresionDetalleService.saveAll(detalles);
+
+        // Un reprint con el mismo contenido no debe crear otra cabecera + N detalles.
+        var ultimo = chequeraImpresionCabeceraService.findLastByUnique(serie.getFacultadId(),
+                serie.getTipoChequeraId(), serie.getChequeraSerieId());
+        if (ultimo.isPresent()) {
+            var ultimosDetalles = chequeraImpresionDetalleService.findAllByCabeceraId(
+                    ultimo.get().getChequeraImpresionCabeceraId());
+            if (ChequeraImpresionSnapshotComparator.sameSnapshot(ultimo.get(), ultimosDetalles, cabecera, detalles)) {
+                chequeraImpresionCabeceraService.touch(ultimo.get(), Tool.hourAbsoluteArgentina());
+                return;
+            }
+        }
+
+        cabecera = chequeraImpresionCabeceraService.add(cabecera);
+        Long cabeceraId = cabecera.getChequeraImpresionCabeceraId();
+        detalles.forEach(detalle -> detalle.setChequeraImpresionCabeceraId(cabeceraId));
+        chequeraImpresionDetalleService.saveAll(detalles);
+        purgeOldSnapshots(serie);
+    }
+
+    /**
+     * Conserva como máximo {@code tesoreria.chequera.impresion.max-history} snapshots por
+     * chequera. El sistema sólo lee el último; los anteriores se vuelven peso muerto.
+     */
+    private void purgeOldSnapshots(ChequeraSerie serie) {
+        int maxHistory = chequeraImpresionProperties.getMaxHistory();
+        if (maxHistory <= 0) {
+            return;
+        }
+        List<ChequeraImpresionCabecera> snapshots = chequeraImpresionCabeceraService.findAllByChequera(
+                serie.getFacultadId(), serie.getTipoChequeraId(), serie.getChequeraSerieId());
+        if (snapshots.size() <= maxHistory) {
+            return;
+        }
+        List<Long> obsoletos = snapshots.subList(maxHistory, snapshots.size()).stream()
+                .map(ChequeraImpresionCabecera::getChequeraImpresionCabeceraId)
+                .toList();
+        chequeraImpresionDetalleService.deleteAllByCabeceraIds(obsoletos);
+        chequeraImpresionCabeceraService.deleteAllByIds(obsoletos);
     }
 
     public PreuniversitarioData findLastPreData(Integer facultadId, BigDecimal personaId, Integer documentoId) {

@@ -57,14 +57,13 @@ class EnvioMasivoFacadeTest {
                 .operacion(EnvioOperacion.MAILING)
                 .lectivoId(37).facultadId(2).geograficaId(1)
                 .soloNoEnviadas(soloNoEnviadas)
-                .umbralCuotasDeuda(3)
                 .build();
     }
 
     private static ChequeraEnvioAlta alta(long chequeraId, boolean enviado) {
         return new ChequeraEnvioAlta(chequeraId, 2, 520, 446L, 1, new BigDecimal("1001"), 1, 37, 1,
                 "ABALLAY MURUA", "Luna Martina", "Matrícula y Arancel", "Ciclo Completo",
-                "a@b.com", null, true, false, enviado, false);
+                "a@b.com", null, true, false, enviado);
     }
 
     @Test

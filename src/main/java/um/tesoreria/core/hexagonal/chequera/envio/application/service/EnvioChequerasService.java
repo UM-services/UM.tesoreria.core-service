@@ -7,7 +7,6 @@ import um.tesoreria.core.hexagonal.chequera.envio.domain.model.ChequeraEnvioAlta
 import um.tesoreria.core.hexagonal.chequera.envio.domain.model.EnvioJob;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.model.EnvioJobTarea;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.model.EnvioTareaEstado;
-import um.tesoreria.core.hexagonal.chequera.envio.domain.model.RetencionPolicy;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.model.ResultadoEnvio;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.ports.out.ChequeraEnvioAltaReader;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.ports.out.EnvioChequeraGateway;
@@ -55,6 +54,10 @@ public class EnvioChequerasService {
         }
     }
 
+    /**
+     * Mailing de una serie. Ya no hay retención por deuda: la chequera se envía siempre que tenga
+     * correo válido y no haya sido enviada. La deuda de la persona no interviene en la decisión.
+     */
     private ResultadoEnvio enviar(EnvioJobTarea tarea, EnvioJob job) {
         ChequeraEnvioAlta alta = reader.findByChequeraId(tarea.getChequeraId()).orElse(null);
         if (alta == null) {
@@ -72,41 +75,23 @@ public class EnvioChequerasService {
                     "La chequera ya fue enviada");
         }
 
-        var deuda = gateway.deuda(alta.personaId(), alta.documentoId());
-        if (RetencionPolicy.retener(deuda, job.getLectivoId(), job.getUmbralCuotasDeuda())) {
-            Integer cuotas = RetencionPolicy.cuotasDelLectivo(deuda, job.getLectivoId());
-            gateway.marcarRetenida(alta.facultadId(), alta.tipoChequeraId(), alta.chequeraSerieId(), true);
-            String respuesta = gateway.notificarDeuda(alta.facultadId(), alta.tipoChequeraId(),
-                    alta.chequeraSerieId());
-            return ResultadoEnvio.builder()
-                    .estado(EnvioTareaEstado.RETENIDA)
-                    .codigo("RETENIDA")
-                    .mensaje("Retenida: " + cuotas + " cuotas impagas del lectivo " + job.getLectivoId())
-                    .detalle(detalle(alta, respuesta, true))
-                    .retenida(true)
-                    .enviado(false)
-                    .build();
-        }
-
-        gateway.marcarRetenida(alta.facultadId(), alta.tipoChequeraId(), alta.chequeraSerieId(), false);
         String respuesta = gateway.enviarChequera(alta.facultadId(), alta.tipoChequeraId(),
                 alta.chequeraSerieId(), alta.alternativaId(), job.isCodigoBarras(), job.getJobId());
         return ResultadoEnvio.builder()
                 .estado(EnvioTareaEstado.ENCOLADA)
                 .codigo("ENCOLADA")
                 .mensaje(respuesta)
-                .detalle(detalle(alta, respuesta, false))
+                .detalle(detalle(alta, respuesta))
                 .retenida(false)
                 .enviado(false)
                 .build();
     }
 
     /** Línea de log del legacy: {@code chequeraId - fac/tch/serie - persona.doc - apellido - respuesta}. */
-    private String detalle(ChequeraEnvioAlta alta, String respuesta, boolean retenida) {
+    private String detalle(ChequeraEnvioAlta alta, String respuesta) {
         return alta.chequeraId() + " - " + alta.numero()
                 + " - " + alta.personaId() + "." + alta.documentoId()
                 + " - " + alta.apellidoNombre()
-                + " - " + respuesta
-                + " - Retenida: " + (retenida ? "Sí" : "No");
+                + " - " + respuesta;
     }
 }

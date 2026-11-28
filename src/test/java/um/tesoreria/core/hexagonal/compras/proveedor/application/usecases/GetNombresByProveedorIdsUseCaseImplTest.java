@@ -30,9 +30,9 @@ class GetNombresByProveedorIdsUseCaseImplTest {
 
     @Test
     void conIdsDelegaEnElRepositorio() {
-        when(repository.findNombresByProveedorIdIn(Set.of(7))).thenReturn(List.of(new ProveedorNombre(7, "Siete")));
+        when(repository.findNombresByProveedorIdIn(Set.of(7))).thenReturn(List.of(new ProveedorNombre(7, "Siete", "20-12345678-9")));
 
         assertThat(new GetNombresByProveedorIdsUseCaseImpl(repository).getNombresByProveedorIds(Set.of(7)))
-                .containsExactly(new ProveedorNombre(7, "Siete"));
+                .containsExactly(new ProveedorNombre(7, "Siete", "20-12345678-9"));
     }
 }

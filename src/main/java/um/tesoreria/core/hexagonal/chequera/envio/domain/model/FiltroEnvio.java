@@ -21,6 +21,4 @@ public class FiltroEnvio {
     private boolean soloNoEnviadas;
     private List<Long> chequeraIds;
     private boolean codigoBarras;
-    @Builder.Default
-    private int umbralCuotasDeuda = 3;
 }

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -46,7 +47,7 @@ class SumasSaldosServiceTest {
         service = new SumasSaldosService(contabilidad, cuentas);
         ejercicio = new Ejercicio();
         when(contabilidad.verifyEjercicio(DESDE, HASTA)).thenReturn(ejercicio);
-        when(cuentas.findAllGrado5()).thenReturn(List.of(cuenta(CAJA, "Caja"), cuenta(PROVEEDORES, "Proveedores"),
+        when(cuentas.findAllImputables()).thenReturn(List.of(cuenta(CAJA, "Caja"), cuenta(PROVEEDORES, "Proveedores"),
                 cuenta(SIN_MOVIMIENTOS, "Sin movimientos")));
         when(contabilidad.saldosPorCuenta(ejercicio, DESDE, HASTA)).thenReturn(Map.of(
                 ContabilidadService.claveCuenta(CAJA),
@@ -72,6 +73,17 @@ class SumasSaldosServiceTest {
         assertThat(vacia.inicialDebitos()).isEqualByComparingTo("0");
         assertThat(vacia.saldoDeudor()).isEqualByComparingTo("0");
         assertThat(vacia.saldoAcreedor()).isEqualByComparingTo("0");
+    }
+
+    // protects=la consulta no escribe en plancta: no recalcula grados ni limpia nombres; fails_when=vuelve a llamar al recálculo en cada pedido; no_claim=no prueba el SQL emitido
+    @Test
+    void consultarNoRecalculaGradosNiLimpiaNombres() {
+        service.consultar(new SumasSaldosRequest(DESDE, HASTA));
+
+        verify(cuentas).findAllImputables();
+        verify(cuentas, never()).recalculaGrados();
+        verify(cuentas, never()).recalcularGradosYNombres();
+        verifyNoMoreInteractions(cuentas);
     }
 
     // protects=los totales suman cada columna sobre todas las filas; fails_when=un total omite una cuenta o mezcla columnas; no_claim=no prueba que el balance cuadre (depende de los datos)

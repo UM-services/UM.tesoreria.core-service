@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import um.tesoreria.core.configuration.security.RequierePermiso;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.exception.CuentaConflictoException;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaErrorResponse;
@@ -17,6 +18,7 @@ import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaRequest;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaResponse;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.CuentaSearchResponse;
+import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.dto.RecalculoGradosResponse;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.mapper.CuentaDtoMapper;
 
 @RestController
@@ -100,6 +102,12 @@ public class CuentaController {
     @GetMapping("/recalculagrados")
     public ResponseEntity<String> recalculaGrados() {
         return ResponseEntity.ok(service.recalculaGrados());
+    }
+
+    @PostMapping("/recalcularGrados")
+    @RequierePermiso("contable.recalcular_grados")
+    public ResponseEntity<RecalculoGradosResponse> recalcularGrados() {
+        return ResponseEntity.ok(mapper.toResponse(service.recalcularGradosYNombres()));
     }
 
 }

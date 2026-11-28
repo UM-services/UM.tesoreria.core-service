@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo EnvioChequeras (v12.14.0)
+title: Arquitectura Hexagonal - Módulo EnvioChequeras (v13.0.0)
 ---
 
 classDiagram
@@ -8,8 +8,8 @@ classDiagram
     %% Envío masivo de chequeras por facultad y sede (ex formulario de Escritorio "Envío de
     %% Chequeras por Sede"). Un job por operación (CAPTURAR_CORREOS, EXTENDER_DEBITOS, MAILING)
     %% sobre el padrón de altas de un lectivo + facultad + sede. Por fila: si el domicilio no
-    %% tiene ningún correo válido se omite; si la persona tiene más de N cuotas impagas del
-    %% lectivo se marca retenida y se envía una notificación de deuda en lugar de la chequera.
+    %% tiene ningún correo válido se omite; si ya fue enviada se corta como YA_ENVIADA; en
+    %% cualquier otro caso se envía la chequera (la deuda de la persona no interviene).
     %% El envío real lo confirma tesoreria-sender por notificacion-resultado (CHEQUERA/id).
 
     namespace domain {
@@ -33,7 +33,6 @@ classDiagram
             +boolean emailPersonalValido
             +boolean emailInstitucionalValido
             +boolean enviado
-            +boolean retenida
             +apellidoNombre() String
             +numero() String
             +hayCorreoValido() boolean
@@ -47,7 +46,6 @@ classDiagram
             +Integer geograficaId
             +boolean soloNoEnviadas
             +boolean codigoBarras
-            +int umbralCuotasDeuda
             +EnvioJobEstado estado
             +int totalTareas
             +int tareasOk
@@ -78,7 +76,6 @@ classDiagram
             +boolean soloNoEnviadas
             +List~Long~ chequeraIds
             +boolean codigoBarras
-            +int umbralCuotasDeuda
         }
 
         class ResultadoEnvio {
@@ -88,18 +85,6 @@ classDiagram
             +String detalle
             +Boolean retenida
             +Boolean enviado
-        }
-
-        class DeudaEnvio {
-            +BigDecimal personaId
-            +Integer documentoId
-            +List~DeudaChequeraEnvio~ deudas
-        }
-
-        class RetencionPolicy {
-            << utility >>
-            +retener(DeudaEnvio, Integer, int) boolean
-            +cuotasDelLectivo(DeudaEnvio, Integer) Integer
         }
 
         class EnvioOperacion {
@@ -200,10 +185,7 @@ classDiagram
             << interface >>
             +capturarCorreos(BigDecimal, Integer) Integer
             +extenderDebito(Integer, Integer, Long) void
-            +deuda(BigDecimal, Integer) DeudaEnvio
-            +marcarRetenida(Integer, Integer, Long, boolean) void
             +enviarChequera(Integer, Integer, Long, Integer, boolean, Long) String
-            +notificarDeuda(Integer, Integer, Long) String
         }
 
         class EnvioJobRepository {
@@ -301,8 +283,6 @@ classDiagram
 
         class EnvioChequeraGatewayAdapter {
             +enviarChequera(Integer, Integer, Long, Integer, boolean, Long) String
-            +notificarDeuda(Integer, Integer, Long) String
-            +marcarRetenida(Integer, Integer, Long, boolean) void
         }
 
         class EnvioJobWorker {
@@ -360,7 +340,6 @@ classDiagram
     EnvioJobService --> EnvioJobRepository
     EnvioChequerasService --> ChequeraEnvioAltaReader
     EnvioChequerasService --> EnvioChequeraGateway
-    EnvioChequerasService --> RetencionPolicy
 
     JpaChequeraEnvioAltaReaderAdapter ..|> ChequeraEnvioAltaReader
     JpaEnvioJobRepositoryAdapter ..|> EnvioJobRepository
@@ -386,9 +365,8 @@ classDiagram
     EnvioMasivoUseCase ..> FiltroEnvio
     EnvioMasivoUseCase ..> EnvioJob
     ResultadoEnvio --> EnvioTareaEstado
-    RetencionPolicy ..> DeudaEnvio
 
-    note for EnvioChequeraGatewayAdapter "Anticorrupción: compone DomicilioService, PersonaService, ChequeraSerieService y los facades legacy de chequeras y correo. retenida se escribe con un caso de uso de una sola columna (no el PUT completo)."
-    note for EnvioChequerasService "Orden por fila: ya enviada (OMITIDA/YA_ENVIADA, corta temprano), correo válido (si no, OMITIDA/SIN_CORREOS sin publicar), retención por deuda (RETENIDA + notificación) y envío (ENCOLADA, acuse por notificacion-resultado)."
+    note for EnvioChequeraGatewayAdapter "Anticorrupción: compone DomicilioService y los facades legacy de chequeras y correo."
+    note for EnvioChequerasService "Orden por fila: ya enviada (OMITIDA/YA_ENVIADA, corta temprano), correo válido (si no, OMITIDA/SIN_CORREOS sin publicar) y envío (ENCOLADA, acuse por notificacion-resultado). La deuda no cambia la decisión. V438 limpia una vez chequera_serie.retenida; la columna se conserva para report-service."
     note for EnvioSolicitudService "Ledger idempotente: una solicitud por chequera (UNIQUE chequera_id y dedupe_key) sobre chequera_envio_solicitud (V436). El reclamo usa lock pesimista; ENVIADO, lock vigente o intentos agotados devuelven puedeEnviar=false. marcarEnviado cierra en una transacción el estado, chequera_serie.enviado, ChequeraMessageCheck y el acuse del job."
-    note for JpaChequeraEnvioAltaReaderAdapter "Criteria con proyección de tupla sobre vw_chequera_alta + joins a persona, domicilio, tipo_chequera y arancel_tipo; retenida se lee en bloque de chequera_serie (sin hidratar la serie)."
+    note for JpaChequeraEnvioAltaReaderAdapter "Criteria con proyección de tupla sobre vw_chequera_alta + joins a persona, domicilio, tipo_chequera y arancel_tipo."

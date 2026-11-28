@@ -11,13 +11,23 @@
 [![Docker](https://img.shields.io/badge/Docker-blue.svg)](https://www.docker.com/)
 ![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-Hibernate-6DB33F?logo=spring&logoColor=white)
 ![Prometheus](https://img.shields.io/badge/Prometheus-metrics-E6522C?logo=prometheus&logoColor=white)
-[![Versión](https://img.shields.io/badge/versión-12.14.0-blue.svg)]()
+[![Versión](https://img.shields.io/badge/versión-13.0.0-blue.svg)]()
 
 ## Descripción
 
 Servicio core para la gestión de tesorería, implementado con Spring Boot 4.1.2.
 
-**Versión actual (SemVer): 12.14.0**
+**Versión actual (SemVer): 13.0.0**
+
+## Novedades 13.0.0 (verificado en código)
+
+- **feat(chequera/emision)**: **generación masiva de borradores** sobre el padrón de altas de una facultad y sede y **emisión previa al envío**, en dos etapas asíncronas. `POST /api/tesoreria/core/emision/chequera/generacion/preview` muestra el padrón; `POST .../borradores` (`202`) crea o reutiliza un borrador por serie sin escribir en `chequera_*`; `POST .../job/{jobId}/emision` (`202`) emite esos borradores y `POST .../emision` (`202`) emite directamente los borradores abiertos del filtro para la pantalla de envío; se suman `GET .../job/{jobId}`, `POST .../job/{jobId}/cancelar` y `GET .../job/pendientes`. El job persiste en `chequera_generacion_job`/`_tarea` (`docs/sql/V437__chequera_generacion_job.sql`) con heartbeat, reencolado, retención y worker de un hilo. Permisos nuevos: `chequeras.generacion.borradores` y `chequeras.generacion.emision`; forzar deuda exige `chequeras.emision.forzar` y motivo. Omite series de baja, pagadas o sin diseño de cuotas.
+- **feat(chequera/emision)**: pantalla «Borradores abiertos» con `POST .../borradores/listado` (paginado liviano sin cuotas, permiso `chequeras.emision.individual`) y `GET .../borradores/count/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}` (permiso `chequeras.envio.consultar`). `BorradorResponse` suma `usuarioId`.
+- **feat(mercadopago)**: `POST /api/tesoreria/core/mercadopago/preference/{chequeraCuotaId}` crea (o devuelve) el contexto y pide la preferencia a Mercado Pago sólo si falta o cambió. `CuotaLockRegistry` serializa el trabajo por cuota. `TESORERIA_MERCADOPAGO_PREFERENCE_ON_DEUDA` (`true` por defecto) mantiene que el GET de deuda cree la preferencia; con `false`, la deuda es sólo lectura y el cliente pide la preferencia por el `POST`.
+- **breaking(chequera/envio)**: **se retira la retención por deuda**. El `MAILING` envía siempre la chequera si la serie no fue enviada y tiene correo válido; desaparecen `RetencionPolicy`, `DeudaEnvio`, `MarcarRetenidaUseCase` y los métodos `deuda`/`marcarRetenida`/`notificarDeuda` del gateway. El padrón y el job dejan de exponer `retenida` y `umbralCuotasDeuda`. `docs/sql/V438__limpiar_retenidas.sql` limpia una vez `chequera_serie.retenida = 1`; la columna se conserva porque la lee `report-service`.
+- **fix(chequera/chequeraCuota)**: las lecturas ya no escriben `chequeraId`; un job de backfill corrige las cuotas nulas en páginas. **fix(chequera)**: un reprint con el mismo contenido actualiza la fecha del último snapshot en lugar de duplicar cabecera y detalles, y se conservan como máximo `TESORERIA_CHEQUERA_IMPRESION_MAX_HISTORY` (10) snapshots por chequera. **fix(audit)**: `BigDecimal` y `OffsetDateTime` se comparan por valor/instante, se excluyen los snapshots de impresión y el lote baja a 50 filas.
+
+> Basado en `git diff HEAD` (staged, 2026-11-28): 111 archivos, +4267/−570 antes de esta documentación —generación masiva en `chequera/emision` (DDL `V437`, job, worker, endpoints y permisos), retiro de la retención por deuda en `chequera/envio` (DDL `V438`), backfill de `chequera/chequeraCuota`, snapshots de impresión, preferencia explícita de Mercado Pago, ajustes de auditoría, `bootstrap.yml`, `permisos.yaml` y los diagramas de emisión y envío—. DDL externo obligatorio antes del despliegue; sin dependencias, `@Query` ni `@RequestParam` nuevos. El retiro de campos de DTOs públicos y del comportamiento de retención hace el cambio incompatible con los consumidores actuales ⇒ **major** (`12.14.0` → `13.0.0`). Sin compilación ni tests por indicación del usuario: las pruebas fueron realizadas previamente por el usuario.
 
 ## Novedades 12.14.0 (verificado en código)
 
@@ -2053,6 +2063,19 @@ TESORERIA_AUDIT_MODE=SEND
 TESORERIA_AUDIT_URL=http://auditoria:8211
 TESORERIA_AUDIT_API_KEY=your_api_key
 ```
+
+Nuevas variables (13.0.0):
+```properties
+TESORERIA_MERCADOPAGO_PREFERENCE_ON_DEUDA=true
+TESORERIA_CHEQUERA_IMPRESION_MAX_HISTORY=10
+TESORERIA_CHEQUERA_CUOTA_BACKFILL_ENABLED=true
+TESORERIA_CHEQUERA_CUOTA_BACKFILL_DELAY_MS=600000
+TESORERIA_CHEQUERA_CUOTA_BACKFILL_INITIAL_DELAY_MS=60000
+TESORERIA_CHEQUERA_CUOTA_BACKFILL_PAGE_SIZE=500
+TESORERIA_CHEQUERA_CUOTA_BACKFILL_MAX_PAGES=20
+```
+
+El job de generación masiva de chequeras se ajusta por propiedades con default en código (no requieren variable de entorno): `tesoreria.chequeras-generacion.job.delay-ms` (5000), `stale-minutes` (15), `recovery-delay-ms` (300000), `retention-days` (30) y `throttle-ms` (0).
 
 ## Desarrollo
 Para contribuir al proyecto:

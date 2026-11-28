@@ -87,6 +87,14 @@ public final class ReglasEmision {
     public static final String INCOMPLETAS_SIN_BORRADORES = "INCOMPLETAS_SIN_BORRADORES";
     public static final String INCOMPLETAS_SIN_TAREAS = "INCOMPLETAS_SIN_TAREAS";
 
+    // Generación masiva de borradores y emisión previa al envío
+    public static final String GENERACION_FILTRO_INCOMPLETO = "GENERACION_FILTRO_INCOMPLETO";
+    public static final String GENERACION_JOB_INEXISTENTE = "GENERACION_JOB_INEXISTENTE";
+    public static final String GENERACION_JOB_ACTIVO = "GENERACION_JOB_ACTIVO";
+    public static final String GENERACION_JOB_NO_CANCELABLE = "GENERACION_JOB_NO_CANCELABLE";
+    public static final String GENERACION_SIN_BORRADORES = "GENERACION_SIN_BORRADORES";
+    public static final String GENERACION_SIN_TAREAS = "GENERACION_SIN_TAREAS";
+
     private static final BigDecimal CIEN = BigDecimal.valueOf(100);
 
     /**

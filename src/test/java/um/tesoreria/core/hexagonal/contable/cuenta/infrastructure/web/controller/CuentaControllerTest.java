@@ -13,10 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import um.tesoreria.core.configuration.security.RequierePermiso;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.exception.CuentaConflictoException;
 import um.tesoreria.core.hexagonal.contable.cuenta.application.service.CuentaService;
 import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.Cuenta;
+import um.tesoreria.core.hexagonal.contable.cuenta.domain.model.RecalculoGrados;
 import um.tesoreria.core.hexagonal.contable.cuenta.infrastructure.web.mapper.CuentaDtoMapper;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -66,6 +69,22 @@ class CuentaControllerTest {
         mvc.get().uri("/cuenta/sede/2/grado/4").assertThat().hasStatus(HttpStatus.OK)
                 .bodyJson().extractingPath("$[0].geograficaId").isEqualTo(2);
         verify(service).findAllByGeograficaIdAndGrado(2, 4);
+    }
+
+    @Test
+    void recalcularGradosDevuelveElResumen() {
+        when(service.recalcularGradosYNombres()).thenReturn(new RecalculoGrados(3, 1));
+        var respuesta = mvc.post().uri("/api/tesoreria/core/cuenta/recalcularGrados").assertThat().hasStatus(HttpStatus.OK);
+        respuesta.bodyJson().extractingPath("$.gradosActualizados").isEqualTo(3);
+        respuesta.bodyJson().extractingPath("$.nombresLimpiados").isEqualTo(1);
+        verify(service).recalcularGradosYNombres();
+    }
+
+    @Test
+    void recalcularGradosExigePermiso() throws NoSuchMethodException {
+        RequierePermiso permiso = CuentaController.class.getMethod("recalcularGrados").getAnnotation(RequierePermiso.class);
+        assertThat(permiso).isNotNull();
+        assertThat(permiso.value()).isEqualTo("contable.recalcular_grados");
     }
 
     @Test

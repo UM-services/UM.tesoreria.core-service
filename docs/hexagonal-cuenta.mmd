@@ -7,16 +7,19 @@ flowchart TD
         CJ["CuentaJerarquia<br/>Validación, padre, ancestros, grados y rango"]
         CR["CuentaRepository<br/>Puerto de salida"]
         CH["CuentaHistorialPort<br/>Puerto de salida"]
-        IP["Puertos de entrada<br/>Alta, edición, baja, consulta y recálculo"]
+        RG["RecalculoGrados<br/>Resumen: grados actualizados y nombres limpiados"]
+        IP["Puertos de entrada<br/>Alta, edición, baja, consulta, imputables y recálculo"]
     end
     subgraph Aplicacion ["Aplicación (Application)"]
         CS["CuentaService"]
         UC["Casos de uso<br/>TransactionOperations para escrituras"]
+        GCI["GetCuentasImputablesUseCaseImpl<br/>Grado 5 en memoria desde el número, sin escribir"]
+        RGN["RecalcularGradosYNombresUseCaseImpl<br/>Recálculo y limpieza en una transacción"]
         EX["CuentaConflictoException"]
     end
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
-        CC["CuentaController<br/>Alias corto y largo; 409 con JSON"]
-        DTO["CuentaRequest / CuentaResponse<br/>CuentaErrorResponse"]
+        CC["CuentaController<br/>Alias corto y largo; 409 con JSON<br/>POST /recalcularGrados con RequierePermiso"]
+        DTO["CuentaRequest / CuentaResponse<br/>CuentaErrorResponse / RecalculoGradosResponse"]
         JPA["JpaCuentaRepositoryAdapter<br/>persist para alta; entidades gestionadas para cambios"]
         ENT["CuentaEntity<br/>DynamicUpdate"]
         JR["JpaCuentaRepository<br/>Métodos derivados y PESSIMISTIC_WRITE"]
@@ -27,7 +30,8 @@ flowchart TD
     end
     subgraph Externo ["Externo (External)"]
         HIST["RegistrarEscrituraHistorialUseCase<br/>Puerto público de historial 404"]
-        LEG["ContabilidadService<br/>Balance: delega recálculo y limpieza de nombres"]
+        LEG["SumasSaldosService<br/>Sumas y Saldos: sólo lectura de cuentas imputables"]
+        PERM["RequierePermiso<br/>contable.recalcular_grados"]
     end
     CC --> DTO
     CC --> CS
@@ -38,6 +42,13 @@ flowchart TD
     UC --> CR
     UC --> CH
     UC --> EX
+    GCI -. implementa .-> IP
+    GCI --> CJ
+    GCI --> CR
+    RGN -. implementa .-> IP
+    RGN --> CR
+    RGN --> RG
+    CC --> PERM
     JPA -. implementa .-> CR
     JPA --> JR
     JR --> ENT

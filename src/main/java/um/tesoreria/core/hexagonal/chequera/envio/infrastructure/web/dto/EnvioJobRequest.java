@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * Filtros de un job masivo. Sin query params: la operación y los filtros viajan en el body para que
- * «sólo no enviadas», la selección opcional y el umbral tengan un contrato explícito.
+ * «sólo no enviadas» y la selección opcional tengan un contrato explícito.
  */
 @Data
 @Builder
@@ -27,6 +27,4 @@ public class EnvioJobRequest {
     private List<Long> chequeraIds;
     @Builder.Default
     private boolean codigoBarras = false;
-    @Builder.Default
-    private int umbralCuotasDeuda = 3;
 }

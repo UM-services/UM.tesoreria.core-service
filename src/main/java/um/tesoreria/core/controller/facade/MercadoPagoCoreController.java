@@ -45,6 +45,15 @@ public class MercadoPagoCoreController {
         }
     }
 
+    @PostMapping("/preference/{chequeraCuotaId}")
+    public ResponseEntity<UMPreferenceMPDto> makePreference(@PathVariable Long chequeraCuotaId) {
+        try {
+            return ResponseEntity.ok(service.makePreference(chequeraCuotaId));
+        } catch (MercadoPagoContextException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
     @PutMapping("/updateContext/{mercadoPagoContextId}")
     public ResponseEntity<MercadoPagoContext> updateContext(@RequestBody MercadoPagoContext mercadoPagoContext, @PathVariable Long mercadoPagoContextId) {
         return ResponseEntity.ok(service.updateContext(mercadoPagoContext, mercadoPagoContextId));
