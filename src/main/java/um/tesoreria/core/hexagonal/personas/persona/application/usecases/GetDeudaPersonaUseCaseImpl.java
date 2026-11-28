@@ -9,21 +9,18 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.ports.in.Calcul
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.application.service.ChequeraSerieService;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.infrastructure.persistence.entity.ChequeraSerieEntity;
-import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.MercadoPagoContext;
 import um.tesoreria.core.hexagonal.personas.persona.domain.ports.in.GetDeudaPersonaUseCase;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.DeudaChequeraDto;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.DeudaPersonaDto;
 import um.tesoreria.core.hexagonal.personas.persona.infrastructure.web.dto.VencimientoDto;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
-import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoProperties;
 import um.tesoreria.core.service.facade.MercadoPagoCoreService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
@@ -34,8 +31,7 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
     private final ChequeraSerieService chequeraSerieService;
     private final CalculateDeudaUseCase calculateDeudaUseCase;
     private final ChequeraCuotaService chequeraCuotaService;
-    private final MercadoPagoContextService mercadoPagoContextService;
-    private final PreferenceClient preferenceClient;
+    private final MercadoPagoProperties mercadoPagoProperties;
     private final MercadoPagoCoreService mercadoPagoCoreService;
 
     @Override
@@ -90,52 +86,13 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
                     facultadId, tipoChequeraId, serieIds));
         }
 
-        // 3. Batch "Self-Healing": Update chequeraId if null
-        List<ChequeraCuota> cuotasToUpdate = new ArrayList<>();
-        // Create a lookup map for series: key = "fac-tipo-serie"
-        Map<String, ChequeraSerie> seriesMap = series.stream()
-                .collect(Collectors.toMap(
-                        s -> s.getFacultadId() + "-" + s.getTipoChequeraId() + "-" + s.getChequeraSerieId(),
-                        Function.identity(),
-                        (existing, replacement) -> existing
-                ));
+        // 3. Agrupar por clave de negocio (facultad-tipo-serie). No se toca chequeraId:
+        //    la corrección de nulos vive en el job de backfill, no en este GET.
+        Map<String, List<ChequeraCuota>> cuotasBySerie = allCuotas.stream()
+                .collect(Collectors.groupingBy(c -> c.getFacultadId() + "-" + c.getTipoChequeraId()
+                        + "-" + c.getChequeraSerieId()));
 
-        for (ChequeraCuota cuota : allCuotas) {
-            String key = cuota.getFacultadId() + "-" + cuota.getTipoChequeraId() + "-" + cuota.getChequeraSerieId();
-            ChequeraSerie serie = seriesMap.get(key);
-            
-            if (serie != null) {
-                // Ensure relationship is set in memory for processing
-//                cuota.setChequeraSerie(serie);
-                
-                // If persistent ID is missing, fix it
-                if (cuota.getChequeraId() == null) {
-                    cuota.setChequeraId(serie.getChequeraId());
-                    cuotasToUpdate.add(cuota);
-                }
-            }
-        }
-
-        if (!cuotasToUpdate.isEmpty()) {
-            log.info("Fixing {} cuotas with missing chequeraId", cuotasToUpdate.size());
-            chequeraCuotaService.saveAll(cuotasToUpdate);
-        }
-
-        // 4. Group cuotas by chequeraId for processing
-        Map<Long, List<ChequeraCuota>> cuotasByChequeraId = allCuotas.stream()
-                .filter(c -> c.getChequeraId() != null)
-                .collect(Collectors.groupingBy(ChequeraCuota::getChequeraId));
-
-        // 5. Fetch MercadoPago contexts
-        List<Long> allCuotaIds = allCuotas.stream()
-                .map(ChequeraCuota::getChequeraCuotaId)
-                .collect(Collectors.toList());
-
-        Map<Long, MercadoPagoContext> contextsByCuotaId = mercadoPagoContextService.findAllByChequeraCuotaIds(allCuotaIds)
-                .stream()
-                .collect(Collectors.toMap(MercadoPagoContext::getChequeraCuotaId, Function.identity(), (a, b) -> a));
-
-        // 6. Process debts
+        // 4. Process debts
         for (ChequeraSerie chequera : series) {
             DeudaChequeraDto deuda = calculateDeudaUseCase.calculateDeudaExtended(chequera);
             if (deuda.getCuotas() > 0) {
@@ -144,7 +101,9 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
                 deudaTotal = deudaTotal.add(deuda.getDeuda()).setScale(2, RoundingMode.HALF_UP);
             }
 
-            List<ChequeraCuota> currentCuotas = cuotasByChequeraId.getOrDefault(chequera.getChequeraId(), List.of());
+            String serieKey = chequera.getFacultadId() + "-" + chequera.getTipoChequeraId()
+                    + "-" + chequera.getChequeraSerieId();
+            List<ChequeraCuota> currentCuotas = cuotasBySerie.getOrDefault(serieKey, List.of());
 
             List<ChequeraCuota> filteredCuotas = currentCuotas.stream()
                     .filter(c -> Objects.equals(c.getAlternativaId(), chequera.getAlternativaId()))
@@ -157,29 +116,15 @@ public class GetDeudaPersonaUseCaseImpl implements GetDeudaPersonaUseCase {
                 if (chequeraCuota.getPagado() == 0 && chequeraCuota.getBaja() == 0 && chequeraCuota.getCompensada() == 0
                         && chequeraCuota.getImporte1().compareTo(BigDecimal.ZERO) != 0) {
 
-                    MercadoPagoContext existingContext = contextsByCuotaId.get(chequeraCuota.getChequeraCuotaId());
-                    var umPreferenceMPDto = mercadoPagoCoreService.makeContextCuota(chequeraCuota, existingContext);
+                    // Con preference-on-deuda=true se mantiene la compatibilidad: el GET crea
+                    // (o reutiliza) la preferencia. Con false, la deuda es sólo lectura y el
+                    // cliente pide la preferencia por POST /preference/{chequeraCuotaId}.
+                    var umPreferenceMPDto = mercadoPagoProperties.isPreferenceOnDeuda()
+                            ? mercadoPagoCoreService.makePreference(chequeraCuota.getChequeraCuotaId())
+                            : mercadoPagoCoreService.makeContextCuota(chequeraCuota.getChequeraCuotaId());
 
                     if (umPreferenceMPDto != null) {
                         var context = umPreferenceMPDto.getMercadoPagoContext();
-                        boolean needsUpdate = context.getPreferenceId() == null || context.getChanged() == 1;
-
-                        if (needsUpdate) {
-                            log.debug("Creando preferencia");
-                            var mercadoPagoContextDto = preferenceClient.createPreference(umPreferenceMPDto);
-                            // Update context with returned data
-                            try {
-                                context.setPreferenceId(mercadoPagoContextDto.getPreferenceId());
-                                context.setInitPoint(mercadoPagoContextDto.getInitPoint());
-                                context.setPreference(mercadoPagoContextDto.getPreference());
-                                context.setLastVencimientoUpdated(OffsetDateTime.now(java.time.ZoneOffset.UTC));
-                                context.setChanged((byte) 0);
-                                mercadoPagoContextService.update(context, context.getMercadoPagoContextId());
-                                contextsByCuotaId.put(chequeraCuota.getChequeraCuotaId(), context);
-                            } catch (Exception e) {
-                                log.error("Error updating context after preference creation", e);
-                            }
-                        }
 
                         // Formatear la fecha de vencimiento
                         String fechaVencimientoFormatted = context.getFechaVencimiento()
