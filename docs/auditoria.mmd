@@ -1,5 +1,5 @@
 ---
-title: Auditoría transversal - tesoreria-core (v11.5.0)
+title: Auditoría transversal - tesoreria-core (v13.0.0)
 ---
 flowchart TD
 
@@ -12,7 +12,7 @@ flowchart TD
     subgraph Captura["Captura"]
         L["AuditEntityListener<br/>POST_INSERT / POST_UPDATE / POST_DELETE"]
         FL["AuditFlushListener<br/>corre después del flush"]
-        D["AuditDiffBuilder<br/>diff escalar + enmascarado + truncado"]
+        D["AuditDiffBuilder<br/>diff escalar (BigDecimal por valor,<br/>OffsetDateTime por instante) + enmascarado + truncado"]
         BS["AuditBulkService / AuditBulkScope<br/>SUMMARY por entidad y operación"]
         MC["AuditManualChange<br/>change"]
         G["AuditCoverageGuard (test)<br/>allowlist de escrituras fuera de JPA"]

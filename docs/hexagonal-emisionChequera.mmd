@@ -1,24 +1,28 @@
 ---
-title: Arquitectura Hexagonal - Módulo EmisionChequera (v12.11.0)
+title: Arquitectura Hexagonal - Módulo EmisionChequera (v13.0.0)
 ---
 flowchart TD
     subgraph Dominio ["Dominio (Domain)"]
         M["BorradorChequera<br/>BorradorCuota<br/>BorradorImpresion<br/>BorradorSede<br/>EstadoBorrador<br/>ContextoEmision<br/>SolicitudEmision<br/>ResultadoEmision"]
         MI["IncompletasJob<br/>IncompletasJobTarea<br/>IncompletasJobDetalle<br/>IncompletasEtapa<br/>IncompletasJobEstado<br/>IncompletasTareaEstado<br/>FiltroIncompletas<br/>ResultadoIncompleta"]
+        MG["GeneracionJob<br/>GeneracionJobTarea<br/>GeneracionJobDetalle<br/>GeneracionEtapa<br/>GeneracionJobEstado<br/>GeneracionTareaEstado<br/>FiltroGeneracion<br/>GeneracionPadronItem<br/>PaginaBorradores<br/>ResultadoGeneracionFila"]
         DS["ReglasEmision<br/>CodigoI2of5<br/>(dominio puro)"]
-        IN["EmisionChequeraUseCase<br/>IncompletasChequerasUseCase<br/>ObtenerBorradorImpresionUseCase<br/>ResumenBorradoresLectivoUseCase<br/>ListarBorradoresSedeUseCase<br/>(Puertos de Entrada)"]
-        OUT["BorradorChequeraRepository<br/>IncompletasJobRepository<br/>NumeradorChequeraPort<br/>(Puertos de Salida)"]
+        IN["EmisionChequeraUseCase<br/>IncompletasChequerasUseCase<br/>GeneracionBorradoresUseCase<br/>ObtenerBorradorImpresionUseCase<br/>ResumenBorradoresLectivoUseCase<br/>ListarBorradoresSedeUseCase<br/>(Puertos de Entrada)"]
+        OUT["BorradorChequeraRepository<br/>IncompletasJobRepository<br/>GeneracionJobRepository<br/>NumeradorChequeraPort<br/>(Puertos de Salida)"]
     end
 
     subgraph Aplicacion ["Aplicación (Application)"]
         Facade["EmisionChequeraFacade<br/>(implementa el puerto)"]
         FacadeInc["IncompletasChequerasFacade<br/>alta, emisión, consulta y cancelación del job"]
+        FacadeGen["GeneracionBorradoresFacade<br/>padrón de altas, borradores, emisión<br/>desde el job o directa (envío)"]
         Borrador["BorradorEmisionService<br/>contexto, borrador, cuotas, política<br/>hereda y repara el arancel de la serie"]
         Emision["EmisionChequeraService<br/>emisión transaccional<br/>valida arancel (SIN_ARANCEL_TIPO)"]
         Completar["CompletarChequerasIncompletasService<br/>padrón, prepararBorrador, emitir"]
+        GenService["GeneracionBorradoresService<br/>padrón de altas, prepararBorrador, emitir"]
         JobSvc["IncompletasJobService<br/>reclamar, registrar tarea, cerrar"]
+        GenJobSvc["GeneracionJobService<br/>reclamar, registrar tarea, cerrar"]
         Impresion["ObtenerBorradorImpresionUseCaseImpl<br/>snapshot para el sender"]
-        Consulta["BorradorConsultaService<br/>resumen por facultad y sede<br/>sede derivada del tipo de chequera"]
+        Consulta["BorradorConsultaService<br/>resumen y listado paginado por sede<br/>sede derivada del tipo de chequera"]
         Factory["BorradorFactory<br/>paridad con el legacy"]
         Exc["EmisionException<br/>codigo + mensaje"]
     end
@@ -26,20 +30,28 @@ flowchart TD
     subgraph Infraestructura ["Infraestructura (Infrastructure)"]
         Ctrl["EmisionChequeraController<br/>/api/tesoreria/core/emision/chequera<br/>alias /api/tesoreria/core/emisionChequera"]
         CtrlInc["IncompletasChequeraController<br/>/api/tesoreria/core/emision/chequera/incompletas<br/>borradores, emision, job, cancelar, pendientes"]
-        CtrlCons["BorradorConsultaController<br/>/api/tesoreria/core/emision/chequera/borradores<br/>resumen por lectivo y listado por sede"]
+        CtrlGen["GeneracionBorradoresController<br/>/api/tesoreria/core/emision/chequera/generacion<br/>preview, borradores, emision, job, cancelar, pendientes"]
+        CtrlCons["BorradorConsultaController<br/>/api/tesoreria/core/emision/chequera/borradores<br/>resumen, listado liviano y count"]
         Handler["EmisionExceptionHandler<br/>404 / 409 / 422 con codigo"]
         DTO["CrearBorradorRequest<br/>ActualizarBorradorRequest<br/>CompletarBorradorRequest<br/>EmitirBorradorRequest<br/>BorradorResponse<br/>BorradorImpresion<br/>FacultadSedeBorradorResponse<br/>IncompletasJobRequest<br/>IncompletasEmisionRequest<br/>IncompletasJobResponse<br/>IncompletasJobDetalleResponse"]
-        DtoMap["EmisionDtoMapper<br/>IncompletasDtoMapper"]
+        DTOGen["GeneracionFiltroRequest<br/>GeneracionEmisionRequest<br/>GeneracionPadronResponse<br/>GeneracionJobResponse<br/>GeneracionJobDetalleResponse"]
+        DtoMap["EmisionDtoMapper<br/>IncompletasDtoMapper<br/>GeneracionDtoMapper"]
         Adp["JpaBorradorChequeraRepositoryAdapter"]
         AdpInc["JpaIncompletasJobRepositoryAdapter"]
+        AdpGen["JpaGeneracionJobRepositoryAdapter"]
         Num["JpaNumeradorChequeraAdapter"]
-        Repo["JpaBorradorChequeraRepository<br/>derived queries<br/>incluye consultas por lectivo, facultad y estado"]
+        Repo["JpaBorradorChequeraRepository<br/>derived queries<br/>incluye consultas por lectivo, facultad, sede y página"]
         RepoInc["JpaIncompletasJobRepository<br/>JpaIncompletasJobTareaRepository"]
+        RepoGen["JpaGeneracionJobRepository<br/>JpaGeneracionJobTareaRepository"]
         Ent["BorradorChequeraEntity<br/>BorradorCuotaEntity<br/>IncompletasJobEntity<br/>IncompletasJobTareaEntity"]
+        EntGen["GeneracionJobEntity<br/>GeneracionJobTareaEntity"]
         Tabla["chequera_borrador<br/>chequera_borrador_cuota<br/>V423 · V426/V427 (renombre) · V429 (duplicados)"]
         TablaInc["chequera_incompleta_job<br/>chequera_incompleta_job_tarea<br/>V428 (nuevas)"]
+        TablaGen["chequera_generacion_job<br/>chequera_generacion_job_tarea<br/>V437 (nuevas)"]
         Worker["IncompletasJobWorker<br/>@Scheduled, heartbeat, reencolado, retención"]
+        WorkerGen["GeneracionJobWorker<br/>@Scheduled, heartbeat, reencolado, retención"]
         Exec["chequerasIncompletasJobExecutor<br/>1 hilo, cola 1"]
+        ExecGen["chequerasGeneracionJobExecutor<br/>1 hilo, cola 1"]
         Job["BorradorRetentionJob<br/>cron 03:30, retención 30 días"]
     end
 
@@ -56,15 +68,27 @@ flowchart TD
     CtrlInc --> FacadeInc
     CtrlInc --> DtoMap
     CtrlInc --> Handler
+    CtrlGen --> FacadeGen
+    CtrlGen --> DtoMap
+    CtrlGen --> Handler
     CtrlCons --> Consulta
     CtrlCons --> DtoMap
     DtoMap --> DTO
+    DtoMap --> DTOGen
     Facade --> IN
     Facade --> Borrador
     Facade --> Emision
     FacadeInc --> IN
     FacadeInc --> Completar
     FacadeInc --> JobSvc
+    FacadeGen --> IN
+    FacadeGen --> GenService
+    FacadeGen --> GenJobSvc
+    FacadeGen --> OUT
+    GenService --> Borrador
+    GenService --> Emision
+    GenService --> Legacy
+    GenJobSvc --> OUT
     Impresion --> Borrador
     Consulta --> Borrador
     Consulta --> OUT
@@ -81,16 +105,23 @@ flowchart TD
     JobSvc --> OUT
     Adp --> OUT
     AdpInc --> OUT
+    AdpGen --> OUT
     Num --> OUT
     Adp --> Repo
     AdpInc --> RepoInc
+    AdpGen --> RepoGen
     Repo --> Ent
     RepoInc --> Ent
+    RepoGen --> EntGen
     Ent --> Tabla
     Ent --> TablaInc
+    EntGen --> TablaGen
     Worker --> JobSvc
     Worker --> Completar
     Worker --> Exec
+    WorkerGen --> GenJobSvc
+    WorkerGen --> GenService
+    WorkerGen --> ExecGen
     Job --> OUT
     Borrador --> Slices
     Borrador --> Arancel
@@ -101,35 +132,47 @@ flowchart TD
 
     style M fill:#e1f5fe
     style MI fill:#e1f5fe
+    style MG fill:#e1f5fe
     style DS fill:#e1f5fe
     style IN fill:#f3e5f5
     style OUT fill:#f3e5f5
     style Facade fill:#e8f5e8
     style FacadeInc fill:#e8f5e8
+    style FacadeGen fill:#e8f5e8
     style Borrador fill:#e8f5e8
     style Emision fill:#e8f5e8
     style Completar fill:#e8f5e8
+    style GenService fill:#e8f5e8
     style JobSvc fill:#e8f5e8
+    style GenJobSvc fill:#e8f5e8
     style Impresion fill:#e8f5e8
     style Consulta fill:#e8f5e8
     style Factory fill:#e8f5e8
     style Exc fill:#e8f5e8
     style Ctrl fill:#fff3e0
     style CtrlInc fill:#fff3e0
+    style CtrlGen fill:#fff3e0
     style CtrlCons fill:#fff3e0
     style Handler fill:#fff3e0
     style DTO fill:#fff3e0
+    style DTOGen fill:#fff3e0
     style DtoMap fill:#fff3e0
     style Adp fill:#fff3e0
     style AdpInc fill:#fff3e0
+    style AdpGen fill:#fff3e0
     style Num fill:#fff3e0
     style Repo fill:#fff3e0
     style RepoInc fill:#fff3e0
+    style RepoGen fill:#fff3e0
     style Ent fill:#fff3e0
+    style EntGen fill:#fff3e0
     style Tabla fill:#fff3e0
     style TablaInc fill:#fff3e0
+    style TablaGen fill:#fff3e0
     style Worker fill:#fff3e0
+    style WorkerGen fill:#fff3e0
     style Exec fill:#fff3e0
+    style ExecGen fill:#fff3e0
     style Job fill:#fff3e0
     style Slices fill:#f5f5f5
     style Legacy fill:#f5f5f5

@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo MercadoPagoContext (v10.0.0)
+title: Arquitectura Hexagonal - Módulo MercadoPagoContext (v13.0.0)
 ---
 
 classDiagram
@@ -112,6 +112,14 @@ classDiagram
             +processPaymentEvent(PaymentProcessedEvent) void
             +saveAll(List~MercadoPagoContext~) List~MercadoPagoContext~
             +update(MercadoPagoContext, Long) MercadoPagoContext
+        }
+
+        class CuotaLockRegistry {
+            +withLock(Long, Supplier~T~) T
+        }
+
+        class MercadoPagoProperties {
+            +boolean preferenceOnDeuda
         }
 
         class VencimientoMercadoPagoResolver {
@@ -320,6 +328,8 @@ classDiagram
 
     MercadoPagoCoreService --> MercadoPagoContextService : uses
     MercadoPagoCoreService --> VencimientoMercadoPagoResolver : uses
+    MercadoPagoCoreService ..> CuotaLockRegistry : serializa por cuota
+    MercadoPagoCoreService ..> MercadoPagoProperties : lee preference-on-deuda
     MercadoPagoCoreController --> MercadoPagoCoreService : calls
     PaymentEventListener --> MercadoPagoContextService : calls
 
@@ -378,6 +388,8 @@ classDiagram
         +findRenovaciones(OffsetDateTime, int, boolean, OffsetDateTime, Long, int) List~UMPreferenceMPDto~
         +sanitizeActiveContexts(boolean) List~SanitizacionContexto~
         +updatePreferencia(PreferenciaPatch, Long) MercadoPagoContext
+        +makeContextCuota(Long) UMPreferenceMPDto
+        +makePreference(Long) UMPreferenceMPDto
     }
 
     class MercadoPagoCoreController {
@@ -385,6 +397,8 @@ classDiagram
         +findRenovaciones(RenovacionesCandidatosRequest) ResponseEntity~List~UMPreferenceMPDto~~
         +sanitizeActiveContexts(SanitizacionContextosRequest) ResponseEntity~List~SanitizacionContexto~~
         +updatePreferencia(PreferenciaContextPatchDto, Long) ResponseEntity~Void~
+        +makeContext(Long) ResponseEntity~UMPreferenceMPDto~
+        +makePreference(Long) ResponseEntity~UMPreferenceMPDto~
     }
 
     class PaymentEventListener {

@@ -1,5 +1,5 @@
 ---
-title: Arquitectura Hexagonal - Módulo ChequeraCuota (v3.38.0)
+title: Arquitectura Hexagonal - Módulo ChequeraCuota (v13.0.0)
 ---
 
 classDiagram
@@ -171,6 +171,9 @@ classDiagram
             }
 
             class JpaChequeraCuotaRepositoryAdapter
+            class ChequeraCuotaChequeraIdBackfillJob {
+                +run() void
+            }
             class ChequeraCuotaMapper {
                 -FacultadMapper facultadMapper
                 -TipoChequeraMapper tipoChequeraMapper
@@ -309,6 +312,7 @@ classDiagram
     JpaChequeraCuotaRepositoryAdapter ..|> ChequeraCuotaRepository : implements
     JpaChequeraCuotaRepositoryAdapter --> JpaChequeraCuotaRepository : uses
     JpaChequeraCuotaRepositoryAdapter --> ChequeraCuotaMapper : uses
+    ChequeraCuotaChequeraIdBackfillJob --> JpaChequeraCuotaRepository : corrige chequeraId nulo por página
 
     ChequeraCuotaMapper --> ChequeraCuota : maps
     ChequeraCuotaMapper --> ChequeraCuotaEntity : maps
