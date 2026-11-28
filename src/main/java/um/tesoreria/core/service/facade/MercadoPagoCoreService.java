@@ -13,8 +13,10 @@ import um.tesoreria.core.hexagonal.chequera.chequeraCuota.infrastructure.persist
 import um.tesoreria.core.hexagonal.umhub.reservaVacante.domain.model.ReservaVacante;
 import um.tesoreria.core.model.dto.UMPreferenceMPDto;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
+import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.CuotaLockRegistry;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.MercadoPagoContextService;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.application.service.VencimientoMercadoPagoResolver;
+import um.tesoreria.core.client.tesoreria.mercadopago.PreferenceClient;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.RenovacionMercadoPago;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.SanitizacionContexto;
 import um.tesoreria.core.hexagonal.mercadoPagoContext.domain.model.VencimientoMercadoPago;
@@ -34,6 +36,8 @@ public class MercadoPagoCoreService {
     private final ChequeraCuotaService chequeraCuotaService;
     private final MercadoPagoContextService mercadoPagoContextService;
     private final VencimientoMercadoPagoResolver vencimientoMercadoPagoResolver;
+    private final PreferenceClient preferenceClient;
+    private final CuotaLockRegistry cuotaLockRegistry;
 
     @Transactional
     public List<UMPreferenceMPDto> findRenovaciones(OffsetDateTime hoy, int lookbackDias, boolean reintentos,
@@ -67,22 +71,52 @@ public class MercadoPagoCoreService {
 
     @Transactional
     public UMPreferenceMPDto makeContextCuota(Long chequeraCuotaId) {
+        return cuotaLockRegistry.withLock(chequeraCuotaId, () -> doMakeContextCuota(chequeraCuotaId));
+    }
+
+    private UMPreferenceMPDto doMakeContextCuota(Long chequeraCuotaId) {
         log.debug("\n\nProcessing MercadoPagoCoreService.makeContext\n\n");
 
         var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
         ChequeraCuota chequeraCuota = getChequeraCuota(chequeraCuotaId);
-        if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
+        return buildContext(chequeraCuota, today);
+    }
 
-        var vencimiento = determineVencimientoMP(chequeraCuota, today);
-        log.debug("\n\nVencimiento -> Fecha: {}, Importe: {}\n\n", vencimiento.fechaVencimiento().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE), vencimiento.importe());
-        if (vencimiento.importe().compareTo(BigDecimal.ZERO) == 0) return null;
-        if (vencimiento.fechaVencimiento().isBefore(today)) return null;
+    /**
+     * Crea (o devuelve) el contexto y, si corresponde, crea la preferencia en Mercado Pago.
+     *
+     * <p>Es el punto de entrada explícito para que un cliente que consulta la deuda no
+     * necesite que el GET tenga efectos: primero consulta y, al decidir pagar, pide la
+     * preferencia acá. Es idempotente: si el contexto ya tiene preferencia y no está
+     * marcado como cambiado, la devuelve sin llamar a Mercado Pago.</p>
+     *
+     * <p>Sin {@code @Transactional} a propósito: la llamada HTTP a Mercado Pago no debe
+     * retener una conexión de base de datos.</p>
+     */
+    public UMPreferenceMPDto makePreference(Long chequeraCuotaId) {
+        return cuotaLockRegistry.withLock(chequeraCuotaId, () -> doMakePreference(chequeraCuotaId));
+    }
 
-        MercadoPagoContext mercadoPagoContext = findExistingContext(chequeraCuotaId);
-        log.debug("\n\nIntentando crear MercadoPagoContext -> {}\n\n", mercadoPagoContext);
-        mercadoPagoContext = createOrUpdateContext(mercadoPagoContext, chequeraCuotaId, vencimiento);
-        var response = buildResponse(mercadoPagoContext, chequeraCuota);
-        log.debug("\n\nUMPreferenceMPDto -> {}\n\n", response.jsonify());
+    private UMPreferenceMPDto doMakePreference(Long chequeraCuotaId) {
+        var response = doMakeContextCuota(chequeraCuotaId);
+        if (response == null || response.getMercadoPagoContext() == null) {
+            return response;
+        }
+
+        var context = response.getMercadoPagoContext();
+        boolean needsPreference = context.getPreferenceId() == null || context.getChanged() == 1;
+        if (!needsPreference) {
+            return response;
+        }
+
+        var preference = preferenceClient.createPreference(response);
+        if (preference != null) {
+            context.setPreferenceId(preference.getPreferenceId());
+            context.setInitPoint(preference.getInitPoint());
+            context.setPreference(preference.getPreference());
+            context.setLastVencimientoUpdated(OffsetDateTime.now(ZoneOffset.UTC));
+            context.setChanged((byte) 0);
+        }
         return response;
     }
 
@@ -92,18 +126,16 @@ public class MercadoPagoCoreService {
         var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
         List<ChequeraCuota> pendientes = chequeraCuotaService.findAllPendientes(facultadId, tipoChequeraId, chequeraSerieId, alternativaId);
         List<UMPreferenceMPDto> result = new java.util.ArrayList<>();
-        
+
         for (var chequeraCuota : pendientes) {
-            if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) continue;
-
-            var vencimiento = determineVencimientoMP(chequeraCuota, today);
-            if (vencimiento.importe().compareTo(BigDecimal.ZERO) == 0) continue;
-            if (vencimiento.fechaVencimiento().isBefore(today)) continue;
-
-            MercadoPagoContext mercadoPagoContext = findExistingContext(chequeraCuota.getChequeraCuotaId());
-            mercadoPagoContext = createOrUpdateContext(mercadoPagoContext, chequeraCuota.getChequeraCuotaId(), vencimiento);
-            var response = buildResponse(mercadoPagoContext, chequeraCuota);
-            result.add(response);
+            if (chequeraCuota == null) {
+                continue;
+            }
+            var response = cuotaLockRegistry.withLock(chequeraCuota.getChequeraCuotaId(),
+                    () -> buildContext(chequeraCuota, today));
+            if (response != null) {
+                result.add(response);
+            }
         }
         return result;
     }
@@ -114,17 +146,20 @@ public class MercadoPagoCoreService {
         return mercadoPagoContextService.saveAll(contexts);
     }
 
-    @Transactional
-    public UMPreferenceMPDto makeContextCuota(ChequeraCuota chequeraCuota, MercadoPagoContext existingContext) {
-        var today = LocalDate.now().atStartOfDay().atOffset(ZoneOffset.UTC);
+    private UMPreferenceMPDto buildContext(ChequeraCuota chequeraCuota, OffsetDateTime today) {
         if (chequeraCuota == null || !isCuotaAvailable(chequeraCuota)) return null;
 
         var vencimiento = determineVencimientoMP(chequeraCuota, today);
+        log.debug("\n\nVencimiento -> Fecha: {}, Importe: {}\n\n", vencimiento.fechaVencimiento().toLocalDate().format(DateTimeFormatter.ISO_LOCAL_DATE), vencimiento.importe());
         if (vencimiento.importe().compareTo(BigDecimal.ZERO) == 0) return null;
         if (vencimiento.fechaVencimiento().isBefore(today)) return null;
 
-        var mercadoPagoContext = createOrUpdateContext(existingContext, chequeraCuota.getChequeraCuotaId(), vencimiento);
-        return buildResponse(mercadoPagoContext, chequeraCuota);
+        MercadoPagoContext mercadoPagoContext = findExistingContext(chequeraCuota.getChequeraCuotaId());
+        log.debug("\n\nIntentando crear MercadoPagoContext -> {}\n\n", mercadoPagoContext);
+        mercadoPagoContext = createOrUpdateContext(mercadoPagoContext, chequeraCuota.getChequeraCuotaId(), vencimiento);
+        var response = buildResponse(mercadoPagoContext, chequeraCuota);
+        log.debug("\n\nUMPreferenceMPDto -> {}\n\n", response.jsonify());
+        return response;
     }
 
     private boolean isCuotaAvailable(ChequeraCuota chequeraCuota) {

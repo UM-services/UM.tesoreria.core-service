@@ -13,7 +13,6 @@ public record EnvioJobResponse(
         Integer geograficaId,
         boolean soloNoEnviadas,
         boolean codigoBarras,
-        int umbralCuotasDeuda,
         String estado,
         int totalTareas,
         int tareasOk,

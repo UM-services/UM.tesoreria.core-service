@@ -139,8 +139,9 @@ public class BorradorEmisionService {
         }
 
         // Un solo borrador por chequera: si ya hay uno abierto para esta serie (o, cuando la
-        // chequera todavía no existe, para la misma persona/lectivo/facultad/tipo), se retoma en
-        // lugar de crear un duplicado. No se recalculan sus cuotas para no perder ediciones.
+        // chequera todavía no existe, para la misma persona/lectivo/facultad/tipo), se retoma y se
+        // completan las cuotas faltantes. Las cuotas editadas a mano, pagadas, de baja o
+        // compensadas se preservan.
         Optional<BorradorChequera> abierto = serie != null
                 ? borradorRepository.findAbiertoBySerie(serie.getFacultadId(), serie.getTipoChequeraId(),
                         serie.getChequeraSerieId())
@@ -150,7 +151,7 @@ public class BorradorEmisionService {
             log.debug("Borrador abierto reutilizado para {}/{}/{}: {}", data.getFacultadId(),
                     data.getTipoChequeraId(), serie == null ? "nueva" : serie.getChequeraSerieId(),
                     abierto.get().getBorradorId());
-            return enriquecer(heredarArancelDeLaSerie(abierto.get(), serie));
+            return completarAlReutilizar(heredarArancelDeLaSerie(abierto.get(), serie), data.getFuente());
         }
 
         Domicilio domicilio = domicilio(data.getPersonaId(), data.getDocumentoId());
@@ -281,6 +282,23 @@ public class BorradorEmisionService {
         }
         borrador.setEstado(EstadoBorrador.DESCARTADO);
         borradorRepository.save(borrador);
+    }
+
+    /**
+     * Al retomar un borrador abierto se completan las cuotas faltantes: el diseño y la plantilla
+     * agregan las que no existen y refrescan las que no fueron editadas a mano, sin tocar pagadas,
+     * de baja, compensadas ni manuales. Así una chequera incompleta no queda con cuotas sin precio
+     * por reutilizar un borrador viejo.
+     */
+    private BorradorChequera completarAlReutilizar(BorradorChequera borrador, FuenteCompletado fuente) {
+        try {
+            return completarBorrador(borrador.getBorradorId(),
+                    fuente == null ? FuenteCompletado.DISENO : fuente);
+        } catch (RuntimeException e) {
+            log.warn("No se pudieron completar las cuotas faltantes del borrador {}: {}",
+                    borrador.getBorradorId(), e.getMessage());
+            return enriquecer(borrador);
+        }
     }
 
     @Transactional

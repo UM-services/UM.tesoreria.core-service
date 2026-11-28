@@ -24,10 +24,10 @@ public class FindAllDebidasUseCaseImpl implements FindAllDebidasUseCase {
     public List<ChequeraCuota> findAllDebidas(Integer facultadId, Integer tipoChequeraId, Long chequeraSerieId, Integer alternativaId, OffsetDateTime referencia) {
         ChequeraSerie chequeraSerie = chequeraSerieService.findByUnique(facultadId, tipoChequeraId, chequeraSerieId);
 
-        List<ChequeraCuota> todasCuotas = repository.findAllByChequera(facultadId, tipoChequeraId, chequeraSerieId);
-        todasCuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
-        repository.saveAll(todasCuotas);
-
-        return repository.findAllDebidas(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, referencia);
+        // El chequeraId se completa en memoria para la respuesta; persistirlo es tarea del job
+        // de backfill (no de una lectura).
+        var cuotas = repository.findAllDebidas(facultadId, tipoChequeraId, chequeraSerieId, alternativaId, referencia);
+        cuotas.forEach(cuota -> cuota.setChequeraId(chequeraSerie.getChequeraId()));
+        return cuotas;
     }
 }

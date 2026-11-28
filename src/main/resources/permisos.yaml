@@ -141,6 +141,19 @@ permisos:
     descripcion: "Ejecutar operaciones masivas: capturar correos, extender débitos y enviar chequeras"
     activo: true
 
+  # --- Chequeras: generación masiva de borradores (previa al envío) ---
+  - aplicacion: TESORERIA
+    clave: chequeras.generacion.borradores
+    modulo: chequeras
+    descripcion: "Generar borradores masivos desde el padrón de chequeras de una facultad y sede y consultar el avance"
+    activo: true
+
+  - aplicacion: TESORERIA
+    clave: chequeras.generacion.emision
+    modulo: chequeras
+    descripcion: "Emitir masivamente los borradores abiertos de una facultad y sede"
+    activo: true
+
   # --- Compras: proceso de pedido ---
   - aplicacion: TESORERIA
     clave: compras.iniciar_pedido

@@ -30,10 +30,12 @@ public class EmisionExceptionHandler {
             case ReglasEmision.BORRADOR_DESACTUALIZADO, ReglasEmision.CONFLICTO_NUMERACION,
                  ReglasEmision.CLAVE_IDEMPOTENCIA_USADA, ReglasEmision.BORRADOR_NO_ABIERTO,
                  ReglasEmision.CHEQUERA_DE_BAJA, ReglasEmision.INCOMPLETAS_JOB_ACTIVO,
-                 ReglasEmision.INCOMPLETAS_JOB_NO_CANCELABLE -> HttpStatus.CONFLICT;
+                 ReglasEmision.INCOMPLETAS_JOB_NO_CANCELABLE, ReglasEmision.GENERACION_JOB_ACTIVO,
+                 ReglasEmision.GENERACION_JOB_NO_CANCELABLE -> HttpStatus.CONFLICT;
             case ReglasEmision.SIN_PERMISO_IMPRESION, ReglasEmision.SIN_PERMISO_MODIFICACION,
                  ReglasEmision.SIN_PERMISO_OVERRIDE -> HttpStatus.FORBIDDEN;
-            case ReglasEmision.INCOMPLETAS_JOB_INEXISTENTE -> HttpStatus.NOT_FOUND;
+            case ReglasEmision.INCOMPLETAS_JOB_INEXISTENTE, ReglasEmision.GENERACION_JOB_INEXISTENTE ->
+                    HttpStatus.NOT_FOUND;
             default -> HttpStatus.UNPROCESSABLE_ENTITY;
         };
     }

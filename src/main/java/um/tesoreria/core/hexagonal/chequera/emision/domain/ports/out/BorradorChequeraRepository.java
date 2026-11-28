@@ -3,6 +3,7 @@ package um.tesoreria.core.hexagonal.chequera.emision.domain.ports.out;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorChequera;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.BorradorSede;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.model.EstadoBorrador;
+import um.tesoreria.core.hexagonal.chequera.emision.domain.model.PaginaBorradores;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -17,6 +18,31 @@ public interface BorradorChequeraRepository {
     Optional<BorradorChequera> findByClaveIdempotencia(String claveIdempotencia);
 
     List<BorradorChequera> findAllByUsuarioIdAndEstado(String usuarioId, EstadoBorrador estado);
+
+    /**
+     * Página de borradores de un lectivo/facultad limitada a los tipos de chequera de una sede.
+     */
+    PaginaBorradores findAllByLectivoIdAndFacultadIdAndTipoChequeraIdInAndEstado(Integer lectivoId,
+                                                                                Integer facultadId,
+                                                                                List<Integer> tipoChequeraIds,
+                                                                                EstadoBorrador estado,
+                                                                                int page,
+                                                                                int size);
+
+    /**
+     * Cantidad de borradores de un lectivo/facultad limitada a los tipos de chequera de una sede.
+     */
+    long countByLectivoIdAndFacultadIdAndTipoChequeraIdInAndEstado(Integer lectivoId,
+                                                                   Integer facultadId,
+                                                                   List<Integer> tipoChequeraIds,
+                                                                   EstadoBorrador estado);
+
+    /**
+     * Borradores abiertos de una facultad para un conjunto de series (vista previa de generación).
+     */
+    List<BorradorChequera> findAllByFacultadIdAndChequeraSerieIdInAndEstado(Integer facultadId,
+                                                                           List<Long> chequeraSerieIds,
+                                                                           EstadoBorrador estado);
 
     /**
      * Borradores de una facultad y lectivo en un estado (consulta de exportación por sede).

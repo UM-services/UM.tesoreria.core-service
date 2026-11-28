@@ -28,7 +28,6 @@ public class EnvioJobDtoMapper {
                 .soloNoEnviadas(request.isSoloNoEnviadas())
                 .chequeraIds(request.getChequeraIds())
                 .codigoBarras(request.isCodigoBarras())
-                .umbralCuotasDeuda(request.getUmbralCuotasDeuda())
                 .build();
     }
 
@@ -44,7 +43,6 @@ public class EnvioJobDtoMapper {
                 .geograficaId(job.getGeograficaId())
                 .soloNoEnviadas(job.isSoloNoEnviadas())
                 .codigoBarras(job.isCodigoBarras())
-                .umbralCuotasDeuda(job.getUmbralCuotasDeuda())
                 .estado(job.getEstado() == null ? null : job.getEstado().name())
                 .totalTareas(job.getTotalTareas())
                 .tareasOk(job.getTareasOk())

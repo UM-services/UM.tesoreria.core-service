@@ -174,6 +174,23 @@ class EmisionChequeraServiceTest {
         assertEquals(2, serie.getTipoImpresionId());
     }
 
+    /**
+     * Regresión del pedido «siempre se generan las cuotas faltantes»: emitir una serie existente
+     * (reparación o reemisión) no consulta la deuda, así que no puede bloquearse por
+     * {@code DEUDA_EXCEDIDA}.
+     */
+    @Test
+    void emitirUnaSerieExistenteNoConsultaLaDeuda() {
+        ChequeraSerie serie = serieConBeca();
+        BorradorChequera borrador = borradorAbierto();
+        prepararStubs(serie, borrador);
+
+        service.emitir(1L, SolicitudEmision.builder().forzarNueva(false).build(), null);
+
+        verify(personaService, never()).deudaByPersona(any(), any());
+        verify(setupService, never()).findLastOrFail();
+    }
+
     @Test
     void noEscribeUnIdNumericoEnUsuarioIdPorqueLaColumnaEsUnLoginConFk() {
         ChequeraSerie serie = serieConBeca();

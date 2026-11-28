@@ -32,5 +32,4 @@ public class ChequeraEnvioAltaResponse {
     private Boolean emailPersonalValido;
     private Boolean emailInstitucionalValido;
     private Boolean enviado;
-    private Boolean retenida;
 }

@@ -33,7 +33,7 @@ public class AuditProperties {
 
     private String apiKey = "";
 
-    private int batchSize = 200;
+    private int batchSize = 50;
 
     private long senderDelayMs = 2000;
 

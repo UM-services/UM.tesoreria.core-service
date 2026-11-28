@@ -48,6 +48,7 @@ public class BorradorResponse {
     private Long chequeraId;
     private Long chequeraSerieIdEmitida;
     private String auditoriaId;
+    private String usuarioId;
     private Integer version;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;

@@ -4,10 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import um.tesoreria.core.configuration.security.RequierePermiso;
+import um.tesoreria.core.hexagonal.chequera.emision.application.service.BorradorConsultaService;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.in.ListarBorradoresSedeUseCase;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.in.ResumenBorradoresLectivoUseCase;
+import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.web.dto.BorradorListadoRequest;
+import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.web.dto.BorradorListadoResponse;
 import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.web.dto.BorradorResponse;
 import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.web.dto.FacultadSedeBorradorResponse;
 import um.tesoreria.core.hexagonal.chequera.emision.infrastructure.web.mapper.EmisionDtoMapper;
@@ -28,7 +34,30 @@ public class BorradorConsultaController {
 
     private final ResumenBorradoresLectivoUseCase resumenBorradoresLectivoUseCase;
     private final ListarBorradoresSedeUseCase listarBorradoresSedeUseCase;
+    private final BorradorConsultaService borradorConsultaService;
     private final EmisionDtoMapper mapper;
+
+    /**
+     * Listado liviano paginado de borradores abiertos («Borradores abiertos»). No trae cuotas: la
+     * pantalla lista cientos de borradores.
+     */
+    @PostMapping("/listado")
+    @RequierePermiso("chequeras.emision.individual")
+    public ResponseEntity<BorradorListadoResponse> listado(@RequestBody BorradorListadoRequest request) {
+        return ResponseEntity.ok(borradorConsultaService.listar(request));
+    }
+
+    /**
+     * Cantidad de borradores abiertos de una facultad y sede. La usa la pantalla de envío masivo
+     * para mostrar cuántas chequeras se pueden generar antes de capturar correos o enviar.
+     */
+    @GetMapping("/count/facultad/{facultadId}/lectivo/{lectivoId}/geografica/{geograficaId}")
+    @RequierePermiso("chequeras.envio.consultar")
+    public ResponseEntity<Long> contar(@PathVariable Integer facultadId,
+                                       @PathVariable Integer lectivoId,
+                                       @PathVariable Integer geograficaId) {
+        return ResponseEntity.ok(borradorConsultaService.contar(facultadId, lectivoId, geograficaId));
+    }
 
     @GetMapping("/resumen/lectivo/{lectivoId}")
     public ResponseEntity<List<FacultadSedeBorradorResponse>> resumenLectivo(

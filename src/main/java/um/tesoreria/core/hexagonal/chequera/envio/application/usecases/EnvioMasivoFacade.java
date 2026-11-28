@@ -86,7 +86,6 @@ public class EnvioMasivoFacade implements EnvioMasivoUseCase {
                 .geograficaId(filtro.getGeograficaId())
                 .soloNoEnviadas(filtro.isSoloNoEnviadas())
                 .codigoBarras(filtro.isCodigoBarras())
-                .umbralCuotasDeuda(filtro.getUmbralCuotasDeuda())
                 .estado(EnvioJobEstado.PENDIENTE)
                 .totalTareas(tareas.size())
                 .tareasPendientes(tareas.size())
@@ -159,9 +158,6 @@ public class EnvioMasivoFacade implements EnvioMasivoUseCase {
         }
         if (filtro.getLectivoId() == null || filtro.getFacultadId() == null || filtro.getGeograficaId() == null) {
             throw new EnvioException("ENVIO_FILTRO_INCOMPLETO", "Lectivo, unidad académica y sede son obligatorios");
-        }
-        if (filtro.getUmbralCuotasDeuda() < 1) {
-            throw new EnvioException("ENVIO_UMBRAL_INVALIDO", "El umbral de cuotas debe ser mayor o igual a 1");
         }
     }
 

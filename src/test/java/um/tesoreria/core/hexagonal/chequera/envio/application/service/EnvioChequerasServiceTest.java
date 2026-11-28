@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.model.ChequeraEnvioAlta;
-import um.tesoreria.core.hexagonal.chequera.envio.domain.model.DeudaEnvio;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.model.EnvioJob;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.model.EnvioJobTarea;
 import um.tesoreria.core.hexagonal.chequera.envio.domain.model.EnvioOperacion;
@@ -15,7 +14,6 @@ import um.tesoreria.core.hexagonal.chequera.envio.domain.ports.out.ChequeraEnvio
 import um.tesoreria.core.hexagonal.chequera.envio.domain.ports.out.EnvioChequeraGateway;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +41,7 @@ class EnvioChequerasServiceTest {
     private static EnvioJob job() {
         return EnvioJob.builder()
                 .jobId(1L).operacion(EnvioOperacion.MAILING).lectivoId(37).facultadId(2).geograficaId(1)
-                .codigoBarras(true).umbralCuotasDeuda(3).build();
+                .codigoBarras(true).build();
     }
 
     private static EnvioJobTarea tarea() {
@@ -60,12 +58,7 @@ class EnvioChequerasServiceTest {
     private static ChequeraEnvioAlta alta(boolean personalValido, boolean institucionalValido, boolean enviado) {
         return new ChequeraEnvioAlta(342038L, 2, 520, 446L, 1, new BigDecimal("1001"), 1, 37, 1,
                 "ABALLAY MURUA", "Luna Martina", "Matrícula y Arancel", "Ciclo Completo",
-                "aballayluna@gmail.com", "", personalValido, institucionalValido, enviado, false);
-    }
-
-    private static DeudaEnvio deuda(int lectivoId, int cuotas) {
-        return DeudaEnvio.builder().deudas(List.of(DeudaEnvio.DeudaChequeraEnvio.builder()
-                .lectivoId(lectivoId).cuotas(cuotas).build())).build();
+                "aballayluna@gmail.com", "", personalValido, institucionalValido, enviado);
     }
 
     @Test
@@ -79,34 +72,27 @@ class EnvioChequerasServiceTest {
     }
 
     @Test
-    void retieneYNotificaCuandoSuperaElUmbral() {
+    void enviaLaChequeraAunqueLaPersonaTengaCuotasImpagas() {
         when(reader.findByChequeraId(342038L)).thenReturn(Optional.of(alta(true, false)));
-        when(gateway.deuda(any(), anyInt())).thenReturn(deuda(37, 4));
-        when(gateway.notificarDeuda(2, 520, 446L)).thenReturn(RESPUESTA_ENVIO);
-
-        var resultado = service.ejecutar(tarea(), job());
-
-        assertThat(resultado.getEstado()).isEqualTo(EnvioTareaEstado.RETENIDA);
-        assertThat(resultado.getRetenida()).isTrue();
-        verify(gateway).marcarRetenida(2, 520, 446L, true);
-        verify(gateway).notificarDeuda(2, 520, 446L);
-        verify(gateway, never()).enviarChequera(anyInt(), anyInt(), anyLong(), anyInt(), anyBoolean(), anyLong());
-    }
-
-    @Test
-    void enviaConBulkYCodigosDeBarrasCuandoNoRetiene() {
-        when(reader.findByChequeraId(342038L)).thenReturn(Optional.of(alta(true, true)));
-        when(gateway.deuda(any(), anyInt())).thenReturn(deuda(37, 3));
         when(gateway.enviarChequera(2, 520, 446L, 1, true, 1L)).thenReturn(RESPUESTA_ENVIO);
 
         var resultado = service.ejecutar(tarea(), job());
 
         assertThat(resultado.getEstado()).isEqualTo(EnvioTareaEstado.ENCOLADA);
         assertThat(resultado.getRetenida()).isFalse();
-        assertThat(resultado.getDetalle()).contains("342038").contains("2/520/446").contains("Retenida: No");
-        verify(gateway).marcarRetenida(2, 520, 446L, false);
         verify(gateway).enviarChequera(2, 520, 446L, 1, true, 1L);
-        verify(gateway, never()).notificarDeuda(anyInt(), anyInt(), anyLong());
+    }
+
+    @Test
+    void enviaConBulkYCodigosDeBarras() {
+        when(reader.findByChequeraId(342038L)).thenReturn(Optional.of(alta(true, true)));
+        when(gateway.enviarChequera(2, 520, 446L, 1, true, 1L)).thenReturn(RESPUESTA_ENVIO);
+
+        var resultado = service.ejecutar(tarea(), job());
+
+        assertThat(resultado.getEstado()).isEqualTo(EnvioTareaEstado.ENCOLADA);
+        assertThat(resultado.getDetalle()).contains("342038").contains("2/520/446");
+        verify(gateway).enviarChequera(2, 520, 446L, 1, true, 1L);
     }
 
     @Test
@@ -135,7 +121,7 @@ class EnvioChequerasServiceTest {
     void capturarCorreosRegistraElResultado() {
         when(gateway.capturarCorreos(any(), anyInt())).thenReturn(2);
         var job = EnvioJob.builder().jobId(1L).operacion(EnvioOperacion.CAPTURAR_CORREOS)
-                .lectivoId(37).facultadId(2).geograficaId(1).umbralCuotasDeuda(3).build();
+                .lectivoId(37).facultadId(2).geograficaId(1).build();
 
         var resultado = service.ejecutar(tarea(), job);
 
@@ -146,7 +132,7 @@ class EnvioChequerasServiceTest {
     @Test
     void extenderDebitosRegistraElResultado() {
         var job = EnvioJob.builder().jobId(1L).operacion(EnvioOperacion.EXTENDER_DEBITOS)
-                .lectivoId(37).facultadId(2).geograficaId(1).umbralCuotasDeuda(3).build();
+                .lectivoId(37).facultadId(2).geograficaId(1).build();
 
         var resultado = service.ejecutar(tarea(), job);
 

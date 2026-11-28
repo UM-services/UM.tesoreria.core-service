@@ -8,6 +8,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.sql.Blob;
 import java.sql.Clob;
+import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,7 +64,7 @@ public class AuditDiffBuilder {
             Object oldValue = beforeState != null && index < beforeState.length ? beforeState[index] : null;
             Object newValue = afterState != null && index < afterState.length ? afterState[index] : null;
 
-            if (operation == Operation.UPDATE && Objects.deepEquals(oldValue, newValue)) {
+            if (operation == Operation.UPDATE && sameValue(oldValue, newValue)) {
                 continue;
             }
             if (operation != Operation.DELETE && newValue == null) {
@@ -152,6 +153,32 @@ public class AuditDiffBuilder {
     private String simpleName(String entityName) {
         int index = entityName.lastIndexOf('.');
         return index < 0 ? entityName : entityName.substring(index + 1);
+    }
+
+    /**
+     * Compara valores como los entrega Hibernate. {@link java.math.BigDecimal#equals} es
+     * sensible a la escala ({@code 0} vs {@code 0.00}), lo que generaba {@code changedFields}
+     * falsos positivos en importes. Los {@link OffsetDateTime} se comparan por instante para
+     * no marcar cambios por el offset.
+     */
+    static boolean sameValue(Object oldValue, Object newValue) {
+        if (oldValue == newValue) {
+            return true;
+        }
+        if (oldValue == null || newValue == null) {
+            return false;
+        }
+        if (oldValue instanceof java.math.BigDecimal oldDecimal
+                && newValue instanceof java.math.BigDecimal newDecimal) {
+            return oldDecimal.compareTo(newDecimal) == 0;
+        }
+        if (oldValue instanceof OffsetDateTime oldInstant && newValue instanceof OffsetDateTime newInstant) {
+            return oldInstant.toInstant().equals(newInstant.toInstant());
+        }
+        if (oldValue instanceof byte[] oldBytes && newValue instanceof byte[] newBytes) {
+            return java.util.Arrays.equals(oldBytes, newBytes);
+        }
+        return Objects.deepEquals(oldValue, newValue);
     }
 
     private Object normalize(Object value) {

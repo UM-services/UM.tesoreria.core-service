@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import um.tesoreria.core.exception.PersonaSuspendidoException;
 import um.tesoreria.core.hexagonal.chequera.baja.application.service.BajaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
@@ -24,9 +23,7 @@ import um.tesoreria.core.hexagonal.chequera.emision.domain.model.SolicitudEmisio
 import um.tesoreria.core.hexagonal.chequera.emision.domain.ports.out.BorradorChequeraRepository;
 import um.tesoreria.core.hexagonal.chequera.emision.domain.service.ReglasEmision;
 import um.tesoreria.core.hexagonal.chequera.lectivoCuota.application.service.LectivoCuotaService;
-import um.tesoreria.core.model.PersonaSuspendido;
 import um.tesoreria.core.model.view.ChequeraIncompleta;
-import um.tesoreria.core.service.PersonaSuspendidoService;
 import um.tesoreria.core.service.facade.ChequeraService;
 import um.tesoreria.core.service.view.ChequeraIncompletaService;
 
@@ -53,7 +50,6 @@ public class CompletarChequerasIncompletasService {
     private final BajaService bajaService;
     private final ChequeraSerieService chequeraSerieService;
     private final ChequeraCuotaService chequeraCuotaService;
-    private final PersonaSuspendidoService personaSuspendidoService;
     private final LectivoCuotaService lectivoCuotaService;
     private final BorradorEmisionService borradorEmisionService;
     private final BorradorChequeraRepository borradorRepository;
@@ -91,6 +87,10 @@ public class CompletarChequerasIncompletasService {
     /**
      * Etapa A para una serie: deja un borrador abierto con las cuotas completas, preservando la
      * beca y el hpum de la serie. Nunca escribe en {@code chequera_*}.
+     *
+     * <p>La reparación no mira el estado de la persona: una chequera incompleta se completa siempre
+     * que no esté de baja, totalmente paga o sin diseño de cuotas. La suspensión por deuda no es un
+     * motivo para dejar cuotas sin generar.</p>
      */
     public ResultadoIncompleta prepararBorrador(IncompletasJobTarea tarea, String usuarioLogin) {
         ChequeraSerie serie;
@@ -100,10 +100,6 @@ public class CompletarChequerasIncompletasService {
             return ResultadoIncompleta.error("NO_ENCONTRADA", "No existe la chequera " + tarea.getChequeraId());
         }
 
-        if (estaSuspendido(serie)) {
-            return ResultadoIncompleta.omitida("SUSPENDIDO",
-                    "La persona está suspendida: el legacy tampoco generaba su chequera");
-        }
         if (bajaService.findDatosByUnique(serie.getFacultadId(), serie.getTipoChequeraId(),
                 serie.getChequeraSerieId()).isPresent()) {
             return ResultadoIncompleta.omitida("BAJA", "La chequera está dada de baja");
@@ -221,16 +217,6 @@ public class CompletarChequerasIncompletasService {
             // El legacy tampoco evaluaba el resultado de extendDebito.
             log.warn("Incompletas: no se pudo extender el débito de {}/{}/{}: {}",
                     tarea.getFacultadId(), tarea.getTipoChequeraId(), tarea.getChequeraSerieId(), e.getMessage());
-        }
-    }
-
-    private boolean estaSuspendido(ChequeraSerie serie) {
-        try {
-            PersonaSuspendido suspendido = personaSuspendidoService.findByUnique(serie.getPersonaId(),
-                    serie.getDocumentoId());
-            return suspendido != null;
-        } catch (PersonaSuspendidoException e) {
-            return false;
         }
     }
 

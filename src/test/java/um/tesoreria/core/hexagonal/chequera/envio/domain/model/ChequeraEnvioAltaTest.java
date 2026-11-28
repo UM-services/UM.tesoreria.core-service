@@ -12,7 +12,7 @@ class ChequeraEnvioAltaTest {
                                           String emailInstitucional, boolean institucionalValido) {
         return new ChequeraEnvioAlta(342038L, 2, 520, 446L, 1, new BigDecimal("1001"), 1, 37, 1,
                 "ABALLAY MURUA", "Luna Martina", "Matrícula y Arancel", "Ciclo Completo",
-                emailPersonal, emailInstitucional, personalValido, institucionalValido, true, false);
+                emailPersonal, emailInstitucional, personalValido, institucionalValido, true);
     }
 
     @Test
@@ -28,7 +28,7 @@ class ChequeraEnvioAltaTest {
     @Test
     void apellidoNombreSinDatosNoRompe() {
         ChequeraEnvioAlta sinPersona = new ChequeraEnvioAlta(1L, 2, 520, 446L, 1, new BigDecimal("1"), 1, 37, 1,
-                null, null, null, null, null, null, false, false, false, false);
+                null, null, null, null, null, null, false, false, false);
         assertThat(sinPersona.apellidoNombre()).isEmpty();
     }
 
