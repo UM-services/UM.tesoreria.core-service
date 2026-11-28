@@ -158,6 +158,7 @@ const diagrams = [
   { id: 'hexagonal-trazaContable', file: 'hexagonal-trazaContable.mmd', title: 'Arquitectura Hexagonal - Traza Contable' },
   { id: 'hexagonal-track', file: 'hexagonal-track.mmd', title: 'Arquitectura Hexagonal - Track' },
   { id: 'hexagonal-guaraniBeneficio', file: 'hexagonal-guaraniBeneficio.mmd', title: 'Arquitectura Hexagonal - GuaraniBeneficio' },
+  { id: 'hexagonal-beneficioCuota', file: 'hexagonal-beneficioCuota.mmd', title: 'Beneficio por Requisitos de Ingreso en Cuotas' },
   { id: 'hexagonal-tesoreriaEstado', file: 'hexagonal-tesoreriaEstado.mmd', title: 'Arquitectura Hexagonal - TesoreriaEstado' },
   { id: 'hexagonal-guaraniUbicacion', file: 'hexagonal-guaraniUbicacion.mmd', title: 'Arquitectura Hexagonal - GuaraniUbicacion' },
   { id: 'hexagonal-guaraniPropuestaTipoChequera', file: 'hexagonal-guaraniPropuestaTipoChequera.mmd', title: 'Arquitectura Hexagonal - GuaraniPropuestaTipoChequera' },

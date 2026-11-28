@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import um.tesoreria.core.exception.ChequeraSerieControlException;
+import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.factory.ChequeraCuotaFactory;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.application.service.ChequeraCuotaService;
 import um.tesoreria.core.hexagonal.chequera.chequeraCuota.domain.model.ChequeraCuota;
 import um.tesoreria.core.hexagonal.chequera.chequeraSerie.domain.model.ChequeraSerie;
@@ -31,7 +32,6 @@ import um.tesoreria.core.util.Jsonifier;
 import um.tesoreria.core.util.Tool;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -52,6 +52,7 @@ public class SpoterService {
     private final LectivoAlternativaService lectivoAlternativaService;
     private final ChequeraAlternativaService chequeraAlternativaService;
     private final LectivoCuotaService lectivoCuotaService;
+    private final ChequeraCuotaFactory chequeraCuotaFactory;
     private final ChequeraCuotaService chequeraCuotaService;
 
     @Transactional
@@ -180,28 +181,14 @@ public class SpoterService {
         // Generar Cuotas
         List<ChequeraCuota> chequeraCuotas = new ArrayList<>();
         int offset = 0;
+        var ahora = Tool.hourAbsoluteArgentina();
         for (LectivoCuota lectivoCuota : lectivoCuotaService.findAllByTipo(chequeraSerie.getFacultadId(),
                 chequeraSerie.getLectivoId(), chequeraSerie.getTipoChequeraId(), chequeraSerie.getAlternativaId())) {
-            OffsetDateTime vencimiento1 = lectivoCuota.getVencimiento1();
-            OffsetDateTime vencimiento2 = lectivoCuota.getVencimiento2();
-            OffsetDateTime vencimiento3 = lectivoCuota.getVencimiento3();
-            if (OffsetDateTime.now().isAfter(vencimiento1)) {
-                vencimiento1 = Tool.dateAbsoluteArgentina().plusDays(7 + 30L * offset);
-                vencimiento2 = Tool.dateAbsoluteArgentina().plusDays(20 + 30L * offset);
-                vencimiento3 = Tool.dateAbsoluteArgentina().plusDays(40 + 30L * offset);
+            ChequeraCuota chequeraCuota = chequeraCuotaFactory.crear(chequeraSerie, lectivoCuota, offset, ahora);
+            if (ChequeraCuotaFactory.vencio(lectivoCuota, ahora)) {
                 offset++;
             }
-            ChequeraCuota chequeraCuota = new ChequeraCuota(null, chequeraSerie.getChequeraId(), chequeraSerie.getFacultadId(),
-                    chequeraSerie.getTipoChequeraId(), chequeraSerie.getChequeraSerieId(), lectivoCuota.getProductoId(),
-                    lectivoCuota.getAlternativaId(), lectivoCuota.getCuotaId(), lectivoCuota.getMes(),
-                    lectivoCuota.getAnho(), chequeraSerie.getArancelTipoId(), vencimiento1, lectivoCuota.getImporte1(),
-                    lectivoCuota.getImporte1(), vencimiento2, lectivoCuota.getImporte2(), lectivoCuota.getImporte2(),
-                    vencimiento3, lectivoCuota.getImporte3(), lectivoCuota.getImporte3(), "", "", (byte) 0, (byte) 0,
-                    (byte) 0, (byte) 0, 0, null, null, null, null);
             log.debug("mail_chequera_service.make_chequera_spoter.chequera_cuota -> -> {}", chequeraCuota.jsonify());
-            log.debug("mail_chequera_service.make_chequera_spoter - calling calculate_codigo_barras");
-            chequeraCuota.setCodigoBarras(chequeraCuotaService.calculateCodigoBarras(chequeraCuota));
-            log.debug("mail_chequera_service.make_chequera_spoter - after calculate_codigo_barras");
             chequeraCuotas.add(chequeraCuota);
         }
         chequeraCuotas = chequeraCuotaService.saveAll(chequeraCuotas);

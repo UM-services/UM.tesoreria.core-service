@@ -1,6 +1,7 @@
 package um.tesoreria.core.hexagonal.guarani.guaraniBeneficio.infrastructure.web.controller;
 
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,16 +52,20 @@ public class GuaraniBeneficioController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<GuaraniBeneficioResponse> add(@RequestBody GuaraniBeneficioRequest request) {
-        GuaraniBeneficio domain = guaraniBeneficioDtoMapper.toDomain(request);
-        GuaraniBeneficio created = guaraniBeneficioService.create(domain);
-        return ResponseEntity.ok(guaraniBeneficioDtoMapper.toResponse(created));
+    public ResponseEntity<GuaraniBeneficioResponse> add(@Valid @RequestBody GuaraniBeneficioRequest request) {
+        try {
+            GuaraniBeneficio domain = guaraniBeneficioDtoMapper.toDomain(request);
+            GuaraniBeneficio created = guaraniBeneficioService.create(domain);
+            return ResponseEntity.ok(guaraniBeneficioDtoMapper.toResponse(created));
+        } catch (GuaraniBeneficioException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
     }
 
     @PutMapping("/requisito/{requisito}")
     public ResponseEntity<GuaraniBeneficioResponse> updateByRequisito(
             @PathVariable Integer requisito,
-            @RequestBody GuaraniBeneficioRequest request) {
+            @Valid @RequestBody GuaraniBeneficioRequest request) {
         GuaraniBeneficio domain = guaraniBeneficioDtoMapper.toDomain(request);
         GuaraniBeneficio updated = guaraniBeneficioService.updateByRequisito(requisito, domain);
         return ResponseEntity.ok(guaraniBeneficioDtoMapper.toResponse(updated));
